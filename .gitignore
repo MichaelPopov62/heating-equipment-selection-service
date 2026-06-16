@@ -1,0 +1,27 @@
+#.gitignore
+
+node_modules/
+
+.env
+
+# Локальная копия каталога для seed / CATALOG_SOURCE=file (в репозитории — test_data.json.example)
+backend/test_data.json
+
+# Артефакт Windows: перенаправление вывода в nul иногда создаёт файл с этим именем
+nul
+backend/nul
+
+.DS_Store
+.idea/
+
+# Специфично для Cursor AI (служебные индексы и кэш редактора)
+.cursor/
+
+# Локальные логи и кэш npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+# Локальные переменные окружения Vercel (если будешь линковать проект через CLI)
+.vercel/

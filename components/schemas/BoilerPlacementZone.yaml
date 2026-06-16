@@ -1,0 +1,5 @@
+type: string
+enum: [kitchen, living_zone, boiler_room]
+description: >-
+  Зона установки котла (только для objectType house). kitchen / living_zone — настенные;
+  boiler_room — допускается напольный при объёме котельной ≥ 7,5 м³ и высоте ≥ 2,2 м.

@@ -1,0 +1,48 @@
+type: object
+additionalProperties: true
+description: Расчёт теплоотдачи водяного ТП по одной комнате (warmFloorCalc и вспомогательные модули).
+properties:
+  roomId: { type: string }
+  roomName: { type: string }
+  basePresetId: { type: string }
+  finishMaterialId: { type: string }
+  ufhCircuitPresetId:
+    $ref: ./UfhCircuitPresetId.yaml
+  pipeSpacingMm: { type: integer }
+  pipeEmbedmentResistanceM2KW: { type: number }
+  finishCoveringResistanceM2KW: { type: number }
+  circuitSupplyC: { type: number }
+  circuitReturnC: { type: number }
+  circuitMeanC: { type: number }
+  heatFluxUpWm2: { type: number }
+  heatFluxDownWm2: { type: number }
+  maxAllowableHeatFluxUpWm2: { type: number }
+  heatFluxUpWatts: { type: number }
+  heatFluxDownWatts: { type: number }
+  roomHeatLossWatts:
+    type: number
+    description: Теплопотери комнаты из heatLoss.byRoom (для проверки покрытия нагрузки ТП).
+  heatFluxCoverageRatio:
+    type: number
+    description: heatFluxUpWatts / roomHeatLossWatts; < 1 — предупреждение (особенно на 40/30).
+  surfaceTempC: { type: number }
+  maxSurfaceTemperatureCelsius:
+    type: number
+    description: Применённый лимит поверхности (min пресета Mongo и паспорта финиша).
+  comfortMaxSurfaceTemperatureCelsius: { type: number }
+  finishMaxSurfaceTemperatureCelsius:
+    type: number
+    description: Паспортный лимит финиша до учёта пресета режима ТП.
+  presetMaxSurfaceTemperatureCelsius:
+    type: number
+    description: Лимит из underfloor_heating_presets.technical.maxSurfaceTemperatureC.
+  heatFluxUpLimitedBySurface:
+    type: boolean
+    description: q↑ снижен до maxAllowableHeatFluxUpWm2 из-за лимита температуры поверхности.
+  bottomBoundary:
+    type: string
+    enum: [heated, unheated]
+  warnings:
+    type: array
+    items:
+      type: string

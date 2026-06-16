@@ -1,0 +1,165 @@
+/* Назначение: Стили аккордеона помещения.
+   Описание: Раскрываемая карточка комнаты и поля ограждающих конструкций. */
+@import '../../styles/custom-media.css';
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-2);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.accHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.accHeader:hover {
+  background: color-mix(in srgb, var(--surface-1) 70%, transparent);
+}
+
+.accHeader:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 18%, transparent);
+}
+
+.accHeaderLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.accHeaderRight {
+  font: 600 12px/1.2 var(--sans);
+  color: var(--text-m);
+}
+
+.accPanel {
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.cardTitle {
+  font: 700 14px/1.2 var(--sans);
+  color: var(--text-h);
+}
+
+.cardMeta {
+  font: 500 12px/1.2 var(--sans);
+  color: var(--text-m);
+}
+
+.formGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.label {
+  font: 600 12px/1.2 var(--sans);
+  color: var(--text-h);
+}
+
+.control {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--surface-1);
+  color: var(--text);
+  font: 500 13px/1.2 var(--sans);
+}
+
+.fieldRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 100%;
+  min-width: 100%;
+}
+
+.fieldGroupTitle {
+  font: 700 13px/1.2 var(--sans);
+  color: var(--text-h);
+}
+
+.fullWidth {
+  flex: 1 1 100%;
+  min-width: 100%;
+}
+
+.hint {
+  composes: hint from '../../styles/formElements.module.css';
+}
+
+.checkboxRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font: 500 13px/1.3 var(--sans);
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* Карточка отдельного окна (разные типы — отдельные строки, не count) */
+.windowCard {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-1);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.windowCardTitle {
+  font: 700 13px/1.2 var(--sans);
+  color: var(--text-h);
+  margin: 0;
+}
+
+.windowCountHint {
+  composes: hint;
+  margin: 0;
+  color: var(--text-m);
+}
+
+@media (--tablet) {
+  .card {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 320px;
+  }
+
+  .field {
+    flex: 1 1 calc(50% - 5px);
+    min-width: 220px;
+  }
+}

@@ -1,0 +1,69 @@
+type: object
+description: >-
+  Підбір радіаторів під лінію «Економ» або «Ефективний» (report.matching.radiators.lineEconomy /
+  lineEfficient). Узгоджено з proposalEconomy / proposalEfficient котла: фіксований пресет графіка
+  (traditional_dt50_75_65 або condensing_dt30_55_45).
+required:
+  - tier
+  - boilerModel
+  - chosen
+  - byRoom
+  - warnings
+  - totalSections
+properties:
+  tier:
+    type: string
+    enum: [economy, efficient]
+  boilerModel:
+    type: string
+    nullable: true
+    description: Модель котла з відповідної proposal*-лінії.
+  chosen:
+    type: object
+    nullable: true
+    allOf:
+      - $ref: RadiatorsChosenSummary.yaml
+  byRoom:
+    type: array
+    items:
+      $ref: RadiatorsByRoomItem.yaml
+  warnings:
+    type: array
+    items: { type: string }
+  totalSections:
+    type: integer
+    nullable: true
+    description: Сума sections по byRoom; null — немає числових даних.
+  unavailableReason:
+    type: string
+    description: >-
+      Якщо proposalEconomy / proposalEfficient відсутня в каталозі — текст, чому лінія недоступна
+      (UI показує замість таблиці).
+  inputs:
+    type: object
+    description: Параметри розрахунку для цієї лінії.
+    properties:
+      supplyC: { type: number }
+      returnC: { type: number }
+      insideC: { type: number }
+      baseDeltaT:
+        type: integer
+        enum: [50, 70]
+      targetDeltaT: { type: number }
+      ventilationReserveFactor:
+        type: number
+        description: Множитель kVent (1.3 natural / 1.1 recuperation).
+      radiatorSizingAlignedWithCondensing: { type: boolean }
+      heatingDistribution:
+        type: string
+        enum: [individual, central]
+      radiatorConnection:
+        type: string
+        enum: [side, bottom]
+      thermalRegimePreset:
+        type: string
+        description: Застосований пресет графіка (traditional_dt50_75_65 / condensing_dt30_55_45).
+  radiatorSelectionNotes:
+    type: array
+    items: { type: string }
+    description: Пояснення щодо сімейства радіаторів, панельних моделей, конденсаційного графіка.

@@ -1,0 +1,38 @@
+type: object
+description: >
+  Бойлер косвенного нагрева (БКН): позиция каталога после validateCatalog.
+  Обязательны model, price, type (один из трёх номенклатурных классов: настенный, напольный, storage_indirect — не смешивать), объект specs с volumeLiters.
+additionalProperties: true
+required:
+  - model
+  - price
+  - type
+  - specs
+properties:
+  model:
+    type: string
+  brand:
+    type: string
+  article:
+    type: string
+  type:
+    type: string
+    enum:
+      - indirect_wall
+      - indirect_floor
+      - storage_indirect
+    description: >
+      Три допустимых значения классификации БКН в каталоге (разные номенклатурные типы):
+      indirect_wall — настенное исполнение; indirect_floor — напольное исполнение;
+      storage_indirect — отдельный номенклатурный класс бойлеров косвенного нагрева (не подменять настенным/напольным).
+      Пробелы и дефисы в сыром JSON нормализуются в подчёркивания; поле обязательно в validateCatalog.
+  price:
+    type: number
+    minimum: 1
+    description: Розничная цена за единицу (валюта — metadata каталога, обычно UAH).
+  specs:
+    $ref: ./IndirectWaterHeaterSpecs.yaml
+  dimensions:
+    type: object
+    additionalProperties: true
+    description: Габариты (мм, кг и т.д.) — без жёсткой схемы в MVP.

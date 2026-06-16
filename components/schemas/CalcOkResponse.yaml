@@ -1,0 +1,9 @@
+type: object
+additionalProperties: false
+required: [ok, report]
+properties:
+  ok:
+    type: boolean
+    enum: [true]
+  report:
+    $ref: CalcReport.yaml

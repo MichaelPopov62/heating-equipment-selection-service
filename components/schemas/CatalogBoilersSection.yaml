@@ -1,0 +1,13 @@
+type: object
+description: Котлы после validateCatalog — два списка по числу контуров.
+additionalProperties: false
+required: [doubleCircuit, singleCircuit]
+properties:
+  doubleCircuit:
+    type: array
+    items:
+      $ref: BoilerCatalogItem.yaml
+  singleCircuit:
+    type: array
+    items:
+      $ref: BoilerCatalogItem.yaml

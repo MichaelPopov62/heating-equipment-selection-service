@@ -1,0 +1,19 @@
+type: object
+description: Водонагреватель в каталоге — модель накопительного электробойлера и варианты по объёму с ценами.
+required: [model, variants]
+properties:
+  model: { type: string }
+  type:
+    type: string
+    enum: [electric_storage]
+    description: Тип водонагревателя в каталоге MVP; при отсутствии в JSON сервер задаёт значение при валидации.
+    default: electric_storage
+  variants:
+    type: array
+    minItems: 1
+    items: { $ref: WaterHeaterVariant.yaml }
+  heatingElementType: { type: string }
+  powerDetails: { type: string }
+  features:
+    type: array
+    items: { type: string }

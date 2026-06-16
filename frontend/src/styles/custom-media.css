@@ -1,0 +1,5 @@
+/* Назначение: Кастомные media-query брейкпоинты.
+   Описание: Переменные --narrow, --tablet, --desktop для mobile-first адаптива UI. */
+@custom-media --narrow (min-width: 317px);
+@custom-media --tablet (min-width: 768px);
+@custom-media --desktop (min-width: 1200px);

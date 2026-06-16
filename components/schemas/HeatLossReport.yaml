@@ -1,0 +1,38 @@
+type: object
+description: Блок calculations.heatLoss в отчёте POST /api/v1/calc.
+additionalProperties: true
+properties:
+  insideC: { type: number }
+  outsideC: { type: number }
+  deltaT: { type: number }
+  envelopeWatts:
+    type: number
+    description: Сумма потерь через ограждения, Вт.
+  totalWatts:
+    type: number
+    description: Σ по комнатам (envelopeWatts × kVent), Вт — котёл и гидравлика.
+  ventilation:
+    type: object
+    additionalProperties: true
+    description: MVP — method kVentPerRoom; watts=0; kVent 1.3 или 1.1.
+  rooms:
+    type: array
+    items:
+      type: object
+      additionalProperties: true
+      properties:
+        id: { type: string }
+        name: { type: string }
+        envelopeWatts:
+          type: number
+          description: Ограждения комнаты без kVent, Вт.
+        ventilationReserveFactor:
+          type: number
+          description: kVent (1.3 или 1.1) — единый на объект.
+        designWatts:
+          type: number
+          description: envelopeWatts × ventilationReserveFactor, Вт.
+        elements:
+          type: array
+          items:
+            $ref: HeatLossElementReport.yaml

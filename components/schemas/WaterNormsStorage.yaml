@@ -1,0 +1,51 @@
+type: object
+description: >
+  Блок storage документа water_norms (накопительный сценарий ГВС для дома).
+  Все поля обязательны при загрузке справочника; значения задаются в backend/data/water_norms.json
+  или в MongoDB, а не в коде validateWaterNorms.js.
+required:
+  - litersPerResident
+  - bathMinTankLiters
+  - tropicalShowerVolumeFactor
+  - indirectHeatTimeMinutes
+  - boilerDhwPowerMinKw
+  - volumeSubstitutionFactor
+  - typicalTankSizes
+properties:
+  litersPerResident:
+    type: number
+    minimum: 0.01
+    description: Норма объёма бака на одного жильца, л (MVP seed — 45).
+    example: 45
+  bathMinTankLiters:
+    type: number
+    minimum: 0.01
+    description: Минимальный объём бака при наличии ванны, л (MVP seed — 135).
+    example: 135
+  tropicalShowerVolumeFactor:
+    type: number
+    minimum: 0.01
+    description: Множитель объёма при tropicalShower (MVP — 1.3).
+    example: 1.3
+  indirectHeatTimeMinutes:
+    type: number
+    minimum: 0.01
+    description: Время нагрева бака для расчёта hotWaterPowerKw, мин (MVP — 30).
+    example: 30
+  boilerDhwPowerMinKw:
+    type: number
+    minimum: 0.01
+    description: Нижняя отсечка мощности котла по ГВС, кВт (MVP — 24).
+    example: 24
+  volumeSubstitutionFactor:
+    type: number
+    minimum: 0.01
+    description: Коэффициент подстановки объёма (MVP — 1.5).
+    example: 1.5
+  typicalTankSizes:
+    type: array
+    minItems: 1
+    items:
+      type: integer
+      minimum: 1
+    description: Типовые объёмы баков для подбора, л.

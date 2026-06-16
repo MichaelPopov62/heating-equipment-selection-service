@@ -1,0 +1,15 @@
+{
+  "version": 1.1,
+  "atDirectives": [
+    {
+      "name": "@custom-media",
+      "description": "Определение именованного медиа-выражения (PostCSS, postcss-custom-media).",
+      "references": [
+        {
+          "name": "postcss-custom-media",
+          "url": "https://github.com/csstools/postcss-plugins/tree/main/plugins/postcss-custom-media"
+        }
+      ]
+    }
+  ]
+}

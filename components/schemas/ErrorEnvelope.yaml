@@ -1,0 +1,22 @@
+type: object
+additionalProperties: false
+properties:
+  ok: { type: boolean, enum: [false] }
+  error:
+    type: object
+    additionalProperties: true
+    properties:
+      message: { type: string }
+      code: { type: string }
+      statusCode: { type: integer }
+      details:
+        description: Optional validation details
+        oneOf:
+          - type: array
+            items:
+              type: object
+              additionalProperties: true
+          - type: object
+            additionalProperties: true
+    required: [message, code, statusCode]
+required: [ok, error]

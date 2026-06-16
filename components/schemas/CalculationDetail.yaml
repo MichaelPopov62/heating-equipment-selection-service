@@ -1,0 +1,9 @@
+allOf:
+  - $ref: CalculationListItem.yaml
+  - type: object
+    required: [calcInput, report]
+    properties:
+      calcInput:
+        $ref: CalcInput.yaml
+      report:
+        $ref: CalcReport.yaml

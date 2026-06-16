@@ -1,0 +1,215 @@
+type: object
+additionalProperties: false
+required: [building]
+properties:
+  location:
+    type: object
+    additionalProperties: false
+    properties:
+      address: { type: string, minLength: 1 }
+      lat: { type: number }
+      lon: { type: number }
+  temps:
+    type: object
+    deprecated: true
+    description: >
+      Устаревшее расположение температур. Используйте building.temps.
+      Поле оставлено для обратной совместимости.
+    additionalProperties: false
+    required: [insideC]
+    properties:
+      insideC: { type: number, minimum: 5, maximum: 35 }
+      outsideC: { type: number, minimum: -60, maximum: 40 }
+  building:
+    type: object
+    additionalProperties: false
+    required: [rooms, envelopeElements]
+    properties:
+      temps:
+        type: object
+        additionalProperties: false
+        required: [insideC]
+        properties:
+          insideC: { type: number, minimum: 5, maximum: 35 }
+          outsideC: { type: number, minimum: -60, maximum: 40 }
+      rooms:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          additionalProperties: false
+          required: [id, name, type, floor, topBoundary, bottomBoundary, areaM2, heightM]
+          properties:
+            id: { type: string, minLength: 1 }
+            name: { type: string, minLength: 1 }
+            type:
+              type: string
+              description: >
+                Канонический тип помещения. Перед валидацией сервер нормализует пробелы, легаси
+                (living, bathroom, tech, жилое) и неизвестные значения заменяет на «помещение».
+                Тип «котельная» — для расчёта объёма котельной при objectMeta.boilerPlacementZone=boiler_room.
+              enum:
+                - прихожая
+                - гостиная
+                - коридор
+                - спальня
+                - кухня
+                - санузел
+                - тех
+                - котельная
+                - помещение
+            floor:
+              type: integer
+              minimum: 1
+              maximum: 3
+              description: Этаж комнаты (1..3)
+            topBoundary:
+              type: string
+              enum: [heated, unheated, roof]
+              description: >
+                Тип верхней границы комнаты:
+                heated — сверху тёплое помещение (потолок не считаем);
+                unheated — сверху холодная зона/чердак (считаем потолок);
+                roof — мансарда (считаем кровлю/скаты).
+            bottomBoundary:
+              type: string
+              enum: [heated, unheated]
+              description: >
+                Нижняя граница: heated — снизу тёплое (пол не считаем);
+                unheated — снизу холод/подвал (считаем пол).
+            areaM2: { type: number, minimum: 0.01, description: "Площадь, м² (строго > 0)" }
+            heightM: { type: number, minimum: 0.01, description: "Высота, м (строго > 0)" }
+            roomExteriorLayout:
+              $ref: RoomExteriorLayout.yaml
+              description: >
+                Положение относительно наружного контура. Влияет на heatLossFactor (угловая комната)
+                и ΔT стены в корidor. Если не задан — выводится из envelopeElements.
+            underfloorHeating:
+              $ref: RoomUnderfloorHeating.yaml
+              description: >
+                Сборка ТП для комнаты (не для heatloss). Только при heatingSystem.waterUnderfloorHeating.
+                Не подставлять в envelopeElements[kind=floor].
+      objectMeta:
+        $ref: BuildingObjectMeta.yaml
+      envelopeElements:
+        type: array
+        minItems: 1
+        items:
+          $ref: EnvelopeElementInput.yaml
+      ventilation:
+        type: object
+        additionalProperties: false
+        properties:
+          flowM3PerHour: { type: number, minimum: 0 }
+          airChangesPerHour: { type: number, minimum: 0 }
+  heatingSystem:
+    type: object
+    additionalProperties: false
+    properties:
+      supplyC: { type: number, minimum: 30, maximum: 95 }
+      returnC: { type: number, minimum: 20, maximum: 90 }
+      insideC: { type: number, minimum: 5, maximum: 35 }
+      radiatorReferenceDeltaT: { type: number, enum: [50, 70] }
+      boilerCombustionType:
+        type: string
+        enum: [turbo, atmospheric]
+        description: Фильтр каталога по камере (turbo — коакс, atmospheric — естественная тяга).
+      radiatorConnection:
+        type: string
+        enum: [side, bottom]
+        description: Схема подводки радиатору (учёт серий K / VK / VKP в приоритете каталога).
+      hotWaterBoilerPowerMatchingScheme:
+        type: string
+        enum:
+          - maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw
+          - heatingLoadWithReserveOnlySeparateElectricStorageWaterHeater
+          - singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw
+          - combiBoilerWithBufferElectricStorage
+          - singleCircuitBoilerWithBufferElectricStorage
+        description: >
+          Связка котла и горячей воды для расчёта требуемой мощности котла.
+          По умолчанию на сервере — maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw
+          (двухконтурный котёл, приоритет горячей воды: не ниже большего из отопления с запасом и расчёта горячей воды).
+          Значение heatingLoadWithReserveOnlySeparateElectricStorageWaterHeater — одноконтурный котёл
+          и отдельный накопительный электрический водонагреватель: котёл только по отоплению с запасом.
+          combiBoilerWithBufferElectricStorage — двухконтурный котёл (max отопления и пика ГВС) и буферный
+          электробойлер меньшего объёма (норма combiBufferElectricStorage в water_norms).
+          Если для квартиры указано singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw (одноконтурный + БКН),
+          вход нормализуется без ошибки до maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw;
+          поясняющее сообщение — в warnings отчёта (`matching.boiler.warnings`).
+          Для объекта типа «дом» схема singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw — одноконтурный котёл
+          и БКН (сумма отопления с запасом и мощности нагрева бака).
+      waterUnderfloorHeating:
+        type: boolean
+        description: Водяной тёплый пол в проекте (подсказки в подборе излучателей и контура).
+      ufhPresetId:
+        type: string
+        enum:
+          - ufh_only
+          - ufh_mixed_radiators
+          - ufh_direct_tile
+          - ufh_direct_laminate
+        description: >
+          Режим тёплого пола из справочника underfloor_heating_presets (Mongo/file).
+          UI-подписи — GET /api/v1/presets/underfloor-heating/modes. При задании включает waterUnderfloorHeating.
+      heatingEmittersMode:
+        type: string
+        enum: [radiators, mixed, ufh_only]
+        description: >
+          Режим излучателей: radiators — только радиаторы; mixed — радиаторы + ТП;
+          ufh_only — только тёплый пол (радиаторы не подбираются). По умолчанию выводится из ufhPresetId.
+      underfloorDistributionPreset:
+        $ref: ./UfhDistributionPreset.yaml
+        description: >
+          Схема подключения ТП при смешанной системе. По умолчанию auto. Реализация нормализации — roadmap.
+      thermalRegimePreset:
+        type: string
+        enum:
+          - traditional_high_dt70_95_85
+          - traditional_dt50_75_65
+          - condensing_dt30_55_45
+        description: >
+          Пресет **радиаторного** графика подачи/обратки и базы каталога радиатора.
+          Рабочие значения для массового рынка: 75/65 (традиционный котёл), 55/45 (конденсационный).
+          traditional_high_dt70_95_85 (95/85) — устаревший, только обратная совместимость API.
+          Контур ТП (45/35 или 40/30) задаётся отдельно по finishMaterialId — см. UfhCircuitPresetId.
+          Без поля — для квартиры дефолт 55/45, для дома 75/65.
+  hotWater:
+    type: object
+    additionalProperties: false
+    properties:
+      residents: { type: integer, minimum: 0 }
+      coldWaterDesignSeason:
+        type: string
+        enum: [winter, summer]
+        description: >
+          Сезон расчётной температуры холодной воды — winter +5 °C, summer +15 °C.
+          По умолчанию на сервере winter.
+      hotWaterC:
+        type: number
+        minimum: 55
+        maximum: 60
+        description: Температура горячей воды, °C
+      tropicalShower:
+        type: boolean
+        description: >
+          Усиленный («тропический») душ: для дома увеличивает рекомендуемый объём накопительного бака на 30 %.
+      fixtures:
+        type: object
+        additionalProperties: false
+        properties:
+          shower: { type: integer, minimum: 0, maximum: 30 }
+          bath: { type: integer, minimum: 0, maximum: 30 }
+          sink: { type: integer, minimum: 0, maximum: 30 }
+          toilet: { type: integer, minimum: 0, maximum: 30 }
+          kitchenSink: { type: integer, minimum: 0, maximum: 30 }
+          dishwasher: { type: integer, minimum: 0, maximum: 30 }
+          laundrySink: { type: integer, minimum: 0, maximum: 30 }
+          washingMachine: { type: integer, minimum: 0, maximum: 30 }
+          bidet: { type: integer, minimum: 0, maximum: 30 }
+  hydraulics:
+    type: object
+    additionalProperties: false
+    properties:
+      mainLineLengthM: { type: number, minimum: 0 }
+      deltaTSystemK: { type: number, minimum: 1 }

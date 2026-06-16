@@ -1,0 +1,47 @@
+type: object
+additionalProperties: false
+required: [roomId, construction, areaM2]
+properties:
+  kind:
+    type: string
+    description: >
+      Тип элемента ограждения. Если не задан, может быть выведен из presetId.
+      Для kind=wall|window задавайте orientation для поправки β (СНiП / СП 60.13330).
+      Для kind=wall presetId — несущий слой (kind=wall в справочнике); итоговый U берётся из
+      building.objectMeta.externalWalls, а не только из presetId элемента.
+    enum: [wall, window, ceiling, floor, roof]
+  roomId: { type: string, minLength: 1 }
+  name: { type: string }
+  construction:
+    type: string
+    minLength: 1
+    description: >
+      Для kind=wall — «наружная стена» (фасад) или «стена в неотапливаемый коридор»
+      (внутреннее помещение без фасадных угловых стен). Для остальных kind — как раньше.
+  material: { type: string }
+  presetId: { type: string }
+  uValue: { type: number, minimum: 0 }
+  thicknessMm: { type: number, minimum: 50, maximum: 2000 }
+  areaM2: { type: number, minimum: 0.01, description: "Площадь, м² (строго > 0)" }
+  count:
+    type: integer
+    minimum: 1
+    maximum: 50
+    description: Количество одинаковых элементов (например, одинаковых окон). Если задано, площадь считается как areaM2 × count.
+  orientation:
+    type: string
+    description: >
+      Ориентация наружной стены или окна по сторонам света (kind=wall|window).
+      Поправка β по СНiП 2.04.05-91 / СП 60.13330: N/NE/E +10%, NW/W/SE +5%, S/SW 0%.
+      Для угловых комнат каждая наружная стена — отдельный элемент с своей ориентацией.
+    enum: [N, NE, E, SE, S, SW, W, NW]
+  openingWidthMm:
+    type: number
+    minimum: 200
+    maximum: 6000
+    description: Ширина оконного проёма, мм (используется для проверки радиатора >= 70% ширины окна).
+  openingHeightMm:
+    type: number
+    minimum: 200
+    maximum: 4000
+    description: Высота оконного проёма, мм (опционально; может использоваться для автоподсчёта площади).

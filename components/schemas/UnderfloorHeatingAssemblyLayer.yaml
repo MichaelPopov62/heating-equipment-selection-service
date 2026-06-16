@@ -1,0 +1,19 @@
+type: object
+additionalProperties: false
+required: [name, thicknessM, thermalConductivityWmK, isHeatingLayer]
+properties:
+  name: { type: string, minLength: 1 }
+  thicknessM:
+    type: number
+    minimum: 0
+    description: Толщина слоя, м
+  thermalConductivityWmK:
+    type: number
+    minimum: 0
+    exclusiveMinimum: true
+    description: Теплопроводность λ, Вт/(м·К)
+  isHeatingLayer:
+    type: boolean
+    description: true — слой со штробой/трубами ТП (плоскость нагрева)
+  optional: { type: boolean }
+  note: { type: string }

@@ -1,0 +1,8 @@
+type: string
+description: >
+  Схема распределения при смешанной системе (радиаторы + ТП), если isMixingNodeRequired = true.
+  Значение auto — сервер выбирает по масштабу объекта (appliances.underfloor_heating).
+enum:
+  - auto
+  - collector_mixing_valve
+  - hydraulic_separator

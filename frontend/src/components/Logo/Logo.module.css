@@ -1,0 +1,9 @@
+/* Назначение: Стили логотипа.
+   Описание: Минимальные стили контейнера и цвета акцента иконки. */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+

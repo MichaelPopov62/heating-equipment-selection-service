@@ -1,0 +1,9 @@
+type: object
+additionalProperties: false
+required: [ok, bases]
+properties:
+  ok: { type: boolean }
+  bases:
+    type: array
+    items:
+      $ref: UnderfloorHeatingBasePreset.yaml

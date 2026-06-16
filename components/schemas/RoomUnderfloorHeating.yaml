@@ -1,0 +1,23 @@
+type: object
+additionalProperties: false
+required: [enabled, basePresetId, finishMaterialId]
+properties:
+  enabled:
+    type: boolean
+    description: Тёплый пол включён в этой комнате (при heatingSystem.waterUnderfloorHeating)
+  basePresetId:
+    type: string
+    minLength: 1
+    description: id базы из GET /api/v1/presets/underfloor-heating/bases
+  finishMaterialId:
+    type: string
+    minLength: 1
+    description: id финиша из GET /api/v1/presets/flooring-finishes
+  pipeSpacingMm:
+    type: integer
+    enum: [100, 150, 200]
+    default: 150
+    description: Шаг укладки трубы, мм; влияет на R_embed в R↑
+  presetId:
+    type: string
+    description: Устаревшее монолитное поле; мигрируется на сервере в basePresetId + finishMaterialId

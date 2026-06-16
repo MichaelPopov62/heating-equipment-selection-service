@@ -1,0 +1,49 @@
+type: object
+description: Элемент ограждения в расчёте теплопотерь (calculations.heatLoss.rooms[].elements[]).
+additionalProperties: true
+properties:
+  name: { type: string, nullable: true }
+  construction:
+    type: string
+    nullable: true
+    description: >
+      «наружная стена», «стена в неотапливаемый коридор» и др. — из входного envelopeElements;
+      U для kind=wall не зависит от подписи construction.
+  material: { type: string, nullable: true }
+  areaM2: { type: number }
+  uValue:
+    type: number
+    description: >
+      Коэффициент теплопередачи U, Вт/(м²·К). Для kind=wall — из objectMeta.externalWalls
+      (многослойный расчёт wallAssembly.js), если не задан явно uValue во входе.
+  deltaT: { type: number }
+  baseQWatts:
+    type: number
+    description: Потери без поправки β, Вт (U·S·ΔT).
+  heatLossFactor?:
+    type: number
+    description: >
+      Итоговый множитель к baseQWatts (β ориентации × ~1.08 угловой комнаты при layout=corner).
+  cornerRoomFactor:
+    type: number
+    nullable: true
+    description: Множитель угловой комнаты (1 или ~1.08).
+  adjacentTempC:
+    type: number
+    nullable: true
+    description: Температура среды за ограждением для ΔT (коридор ~15 °C для internal).
+  qWatts:
+    type: number
+    description: Итоговые потери элемента, Вт.
+  roomId: { type: string }
+  roomName: { type: string }
+  kind:
+    type: string
+    enum: [wall, window, ceiling, floor, roof]
+  count: { type: integer, nullable: true }
+  orientation:
+    type: string
+    enum: [N, NE, E, SE, S, SW, W, NW]
+    nullable: true
+  openingWidthMm: { type: number, nullable: true }
+  openingHeightMm: { type: number, nullable: true }

@@ -1,0 +1,70 @@
+[
+  {
+    "kind": "ufhPreset",
+    "presetId": "ufh_only",
+    "isActive": true,
+    "meta": { "schemaVersion": 1 },
+    "technical": {
+      "hasMixingNode": false,
+      "requiresCondensingBoiler": true,
+      "maxSupplyTemperatureC": 40,
+      "maxSurfaceTemperatureC": 29
+    },
+    "ui": {
+      "title": "Отопление только теплым полом",
+      "badge": "Современный дом",
+      "description": "Без радиаторов — котёл работает на низкотемпературный контур пола. Экономия на радиаторах и трубах, равномерный комфорт."
+    }
+  },
+  {
+    "kind": "ufhPreset",
+    "presetId": "ufh_mixed_radiators",
+    "isActive": true,
+    "meta": { "schemaVersion": 1 },
+    "technical": {
+      "hasMixingNode": true,
+      "requiresCondensingBoiler": false,
+      "maxSupplyTemperatureC": 45,
+      "maxSurfaceTemperatureC": 29
+    },
+    "ui": {
+      "title": "Тёплый пол + радиаторы",
+      "badge": "Смешанная система",
+      "description": "ТП в выбранных комнатах (контур 45/35 или 40/30 по финишу), остальные и дополнительная мощность — радиаторы. Нагрузка на радиатор уменьшается на отдачу пола без двойного учёта."
+    }
+  },
+  {
+    "kind": "ufhPreset",
+    "presetId": "ufh_direct_tile",
+    "isActive": true,
+    "meta": { "schemaVersion": 1 },
+    "technical": {
+      "hasMixingNode": false,
+      "requiresCondensingBoiler": false,
+      "maxSupplyTemperatureC": 45,
+      "maxSurfaceTemperatureC": 29
+    },
+    "ui": {
+      "title": "Прямой теплый пол под плитку / керамогранит",
+      "badge": "45/35 °C",
+      "description": "Плитка отлично проводит тепло. Система подключается напрямую к низкотемпературному котлу без промежуточных насосов. Максимальный комфорт для ног."
+    }
+  },
+  {
+    "kind": "ufhPreset",
+    "presetId": "ufh_direct_laminate",
+    "isActive": true,
+    "meta": { "schemaVersion": 1 },
+    "technical": {
+      "hasMixingNode": false,
+      "requiresCondensingBoiler": false,
+      "maxSupplyTemperatureC": 40,
+      "maxSurfaceTemperatureC": 27
+    },
+    "ui": {
+      "title": "Прямой теплый пол под ламинат / паркет",
+      "badge": "40/30 °C",
+      "description": "Щадящий режим для древесины и ламината: ниже температура поверхности пола, прямое подключение к котлу без смесительного узла."
+    }
+  }
+]

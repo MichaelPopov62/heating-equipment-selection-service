@@ -1,0 +1,77 @@
+type: object
+additionalProperties: false
+description: Метаданные отчёта расчёта (report.meta).
+required:
+  - schemaVersion
+  - generatedAt
+  - catalogSource
+properties:
+  schemaVersion:
+    type: integer
+    minimum: 1
+    description: Версия схемы отчёта.
+  generatedAt:
+    type: string
+    format: date-time
+    description: Время генерации отчёта (ISO 8601).
+  catalogSource:
+    type: string
+    enum: [file, mongo]
+    description: Источник номенклатуры products (каталог оборудования).
+  waterNormsSource:
+    type: string
+    enum: [file, mongo]
+    description: >
+      Источник норм ГВС: коллекция MongoDB water_norms или файл backend/data/water_norms.json
+      (режимы WATER_NORMS_SOURCE file|mongo|auto).
+  waterNormsSchemaVersion:
+    type: integer
+    minimum: 1
+    description: schemaVersion активного документа water_norms, использованного в расчёте.
+  appliancesSource:
+    type: string
+    enum: [file, mongo]
+    description: >
+      Источник правил подбора по типам техники: коллекция appliances или backend/data/appliances.json
+      (APPLIANCES_SOURCE).
+  recommendationsSource:
+    type: string
+    enum: [file, mongo]
+    description: Источник справочника recommendations (RECOMMENDATIONS_SOURCE).
+  ufhPresetsSource:
+    type: string
+    enum: [file, mongo]
+    description: Источник пресетов режимов ТП (UFH_PRESETS_SOURCE).
+  ufhPresetsSchemaVersion:
+    type: integer
+    minimum: 1
+    description: schemaVersion справочника underfloor_heating_presets.
+  referenceBundleLoadedAt:
+    type: string
+    format: date-time
+    description: >
+      Время загрузки согласованного снимка справочников (configCache: catalog + water_norms + appliances
+      + recommendations), использованного в этом расчёте (ISO 8601).
+  appliancesSchemaVersions:
+    type: object
+    additionalProperties: false
+    description: schemaVersion по applianceKind из загруженного набора appliances.
+    properties:
+      indirect_water_heater:
+        type: integer
+        minimum: 1
+      boiler:
+        type: integer
+        minimum: 1
+      electric_storage:
+        type: integer
+        minimum: 1
+      radiator:
+        type: integer
+        minimum: 1
+  automationHints:
+    type: array
+    description: Подсказки автоматизации схемы котёл/ГВС для UI (не меняют расчёт сами по себе).
+    items:
+      type: object
+      additionalProperties: true

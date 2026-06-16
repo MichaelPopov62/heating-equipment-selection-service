@@ -1,0 +1,340 @@
+/* Назначение: Стили шапки приложения.
+   Описание: Бренд, поля ввода, выпадающее меню и адаптивное поведение header. */
+@import '../../styles/custom-media.css';
+
+/* Mobile-first: 316 → --narrow → --tablet — см. src/styles/custom-media.css */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(1200px 400px at 20% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 60%),
+    radial-gradient(900px 300px at 90% 10%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 55%),
+    var(--surface);
+}
+
+.brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.logoSlot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+}
+
+.logoMark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 65%, #fff));
+  box-shadow: var(--shadow);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.titles {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+  text-align: center;
+  width: 100%;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text);
+  opacity: 0.9;
+  max-width: none;
+  text-align: center;
+  width: 100%;
+}
+
+.statusOk,
+.statusErr {
+  flex: 1 1 100%;
+  text-align: center;
+  width: 100%;
+}
+
+.projectId {
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+}
+
+.statusOk {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--accent) 70%, var(--text-h));
+}
+
+.statusErr {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #c44;
+}
+
+/* ≤316px: поле на всю ширину, кнопки сеткой 2×2 без наложения */
+.controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  align-items: stretch;
+}
+
+.clientInput {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-h);
+  padding: 8px 10px;
+  font: 600 12px/1 var(--sans);
+}
+
+.clientInput::placeholder {
+  color: var(--text);
+  opacity: 0.55;
+  font-weight: 500;
+}
+
+.clientInput:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+.controls > button,
+.controls > .menu {
+  min-width: 0;
+  width: 100%;
+}
+
+.menu {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.menu > button {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.menuPanel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 40;
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.menuPanel button {
+  text-align: left;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--surface-2);
+  color: var(--text-h);
+  font: inherit;
+  cursor: pointer;
+}
+
+.primaryButton,
+.secondaryButton {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  border-radius: 10px;
+  padding: 8px 6px;
+  font: 600 12px/1.15 var(--sans);
+  letter-spacing: 0.2px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.menuTriggerActive {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: color-mix(in srgb, var(--accent-bg) 35%, var(--surface-2));
+}
+
+.menuTriggerActivePrimary {
+  filter: brightness(1.06);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.primaryButton {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 86%, #fff), var(--accent));
+  color: white;
+}
+
+.primaryButton:active,
+.secondaryButton:active {
+  transform: translateY(1px);
+}
+
+@media (hover: hover) {
+  .secondaryButton:hover,
+  .secondaryButton:focus-visible {
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+    background: color-mix(in srgb, var(--accent-bg) 35%, var(--surface-2));
+  }
+
+  .primaryButton:hover,
+  .primaryButton:focus-visible {
+    filter: brightness(1.06);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+
+  .menuPanel button:hover {
+    background: color-mix(in srgb, var(--accent-bg) 40%, var(--surface-2));
+  }
+}
+
+/* Шире узкого mobile (≥317px) */
+@media (--narrow) {
+  .title {
+    font-size: 18px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .statusOk,
+  .statusErr {
+    flex: none;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .clientInput {
+    flex: 1 1 100%;
+    padding: 10px 12px;
+    font: 600 13px/1 var(--sans);
+  }
+
+  .controls > button,
+  .controls > .menu {
+    flex: 1 1 calc(50% - 4px);
+    width: auto;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    padding: 10px 12px;
+    font: 600 13px/1 var(--sans);
+  }
+}
+
+/* Планшет и шире (≥768px) */
+@media (--tablet) {
+  .header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 20px;
+  }
+
+  .brand {
+    align-items: center;
+    width: auto;
+  }
+
+  .titles {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .title,
+  .subtitle,
+  .statusOk,
+  .statusErr {
+    text-align: left;
+    width: auto;
+  }
+
+  .subtitle {
+    max-width: 52ch;
+  }
+
+  .controls {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+  }
+
+  .clientInput {
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 160px;
+  }
+
+  .controls > button,
+  .controls > .menu {
+    flex: 0 0 auto;
+  }
+
+  .menu > button,
+  .primaryButton,
+  .secondaryButton {
+    width: auto;
+    text-align: left;
+  }
+
+  .menuPanel {
+    left: auto;
+    right: 0;
+    width: auto;
+    min-width: 220px;
+    white-space: nowrap;
+  }
+}

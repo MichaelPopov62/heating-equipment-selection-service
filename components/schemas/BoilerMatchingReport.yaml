@@ -1,0 +1,115 @@
+type: object
+description: >-
+  Результат подбора котла (report.matching.boiler). Совместимо с boiler-types.d.ts и pickBoiler.
+  Для квартиры или схемы maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw подбирается только один котёл (без каскада);
+  при недостатке max номинала к requiredKw добавляются предупреждения (для max-комби — про жёсткий пик проточной ГВС).
+  Рекомендации cascade_hint в recommendations только если каскад по правилам подбора разрешён.
+properties:
+  heatLossKw:
+    type: number
+    description: Теплопотери на отопление без запаса, кВт (из heatLoss.totalWatts / 1000).
+  reserveFactor:
+    type: number
+    description: Коэффициент запаса на отопительную часть основной линии (по умолчанию 1.15).
+  hotWaterPowerKw:
+    type: number
+    description: >-
+      Расчётная мощность на ГВС для отчёта, кВт (после pickIndirectWaterHeater/applyIndirectTankToHotWaterReport при БКН).
+      Для котла при схеме heatingLoadWithReserveOnlySeparateElectricStorageWaterHeater к requiredKw не добавляется.
+  heatingLoadKw:
+    type: number
+    description: >-
+      Отопительная нагрузка с коэффициентом запаса (кВт), без добавления мощности горячей воды к котлу при отдельном электробойлере.
+  hotWaterBoilerPowerMatchingScheme:
+    type: string
+    description: >-
+      Применённая схема учёта горячей воды после normalize входа (для квартиры при запросе БКН здесь может быть уже maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw — см. warnings).
+      maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw — max(отопление×запас, ГВС), без суммирования (типично двухконтурный котёл).
+      heatingLoadWithReserveOnlySeparateElectricStorageWaterHeater — котёл только по отоплению×запас; ГВС — отдельный электронакопитель.
+      singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw — одноконтурный котёл + БКН: сумма отопления с запасом и мощности нагрева бака.
+    enum:
+      - maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw
+      - heatingLoadWithReserveOnlySeparateElectricStorageWaterHeater
+      - singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw
+  requiredKw:
+    type: number
+    description: >-
+      Расчётная требуемая мощность котла для основной линии подбора по схеме hotWaterBoilerPowerMatchingScheme.
+      Для схемы singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw может быть не ниже каталожного
+      specs.minSourcePowerKw выбранного БКН (передаётся после pickIndirectWaterHeater в матчинге).
+  condensingHeatingReserveFactor:
+    type: number
+    description: >-
+      Коэффициент запаса на отопление для поля heatingLoadKwCondensing и альтернативной связки «1К + БКН» (конденсация).
+  heatingLoadKwCondensing:
+    type: number
+    description: >-
+      Отопительная нагрузка × condensingHeatingReserveFactor; участвует в requiredKwForCondensingLine и в расчёте proposalEfficient
+      для схемы «1К + БКН» (сумма с hotWaterPowerKw). Для heatingLoadWithReserveOnlySeparateElectricStorageWaterHeater ветка proposalEfficient
+      опирается на heatingLoadKw (отопление×запас), а не на это поле.
+  requiredKwForCondensingLine:
+    type: number
+    description: >-
+      То же семейство формулы requiredKw для схемы пользователя, но отопительная часть считается с heatingLoadKwCondensing.
+      При singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw возможна нижняя граница по minSourcePowerKw БКН.
+  selected:
+    type: object
+    nullable: true
+    description: >-
+      Позиция каталога для основной линии; одиночный котёл или единственная модель при запрете каскада (квартира / max-комби).
+      Включает нормализованные поля каталога, в т.ч. опциональный mountingType (wall — настенный, floor — напольный).
+    allOf:
+      - $ref: BoilerCatalogItem.yaml
+  warnings:
+    type: array
+    description: >-
+      Предупреждения подбора котла (фильтры каталога, камера сгорания, контуры, недостаток номинала к requiredKw,
+      нормализация входа для квартиры + БКН и др.).
+    items: { type: string }
+  recommendations:
+    type: array
+    description: >-
+      Рекомендации по формулам ГВС, конденсации, водоразбору.
+      Подсказки про каскад не добавляются для квартиры и для схемы max-комби в основной линии подбора.
+    items:
+      type: object
+      properties:
+        type: { type: string }
+        message: { type: string }
+        suggestedSplitKw:
+          type: array
+          items: { type: number }
+  proposal:
+    type: object
+    nullable: true
+    description: >-
+      Готовый блок для карточки «Рекомендуемое решение» в UI (общий минимально подходящий по каталогу).
+      Поле powerRequirementBreakdown — расшифровка пиковой requiredKw для строк «из них на отопление / ГВС».
+    allOf:
+      - $ref: BoilerEquipmentProposal.yaml
+  proposalEconomy:
+    type: object
+    nullable: true
+    description: >-
+      Альтернативный «Эконом»: традиционный (не конденсационный) котёл после фильтра по контурам, как основная линия;
+      при режиме одного котла (квартира или max-комби) каскад не используется.
+      proposalEconomy.requiredKw совпадает с корневым requiredKw отчёта (формула пользователя по hotWaterBoilerPowerMatchingScheme),
+      чтобы сравнивать номинал котла с системной потребностью; nominalReservePercent для одиночного котла по-прежнему от heatingLoadKw (см. BoilerEquipmentProposal).
+    allOf:
+      - $ref: BoilerEquipmentProposal.yaml
+  proposalEfficient:
+    type: object
+    nullable: true
+    description: >-
+      Альтернатива «Эффективный»: конденсационный одноконтурный котёл, пул после фильтра камеры.
+      Для singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw — порог как «1К + БКН»: heatingLoadKwCondensing + hotWaterPowerKw,
+      возможно не ниже minSourcePowerKw БКН. Для heatingLoadWithReserveOnlySeparateElectricStorageWaterHeater — тот же порог отопления×запас,
+      что у корневого requiredKw (ГВС на электробойлер, сумма с ГВС не применяется).
+      cascade_hint_condensing добавляется только если не действует режим одного котла без каскада (квартира или max-комби в основной линии).
+    allOf:
+      - $ref: BoilerEquipmentProposal.yaml
+  combustionTypeFilterApplied:
+    type: string
+    nullable: true
+    description: Учитывался фильтр по типу сгорания при подборе; null, если фильтр снят из‑за пустого каталога после фильтра камеры.
+    enum: [turbo, atmospheric]

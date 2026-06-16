@@ -1,0 +1,13 @@
+type: object
+additionalProperties: false
+properties:
+  ok: { type: boolean }
+  catalog:
+    $ref: NormalizedCatalogPayload.yaml
+  catalogSource:
+    type: string
+    enum: [file, mongo]
+    description: >
+      Источник номенклатуры products в текущем снимке reference bundle (configCache);
+      тот же bundle, что для POST /api/v1/calc (файл или MongoDB).
+required: [ok, catalog, catalogSource]

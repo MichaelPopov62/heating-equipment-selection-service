@@ -1,0 +1,66 @@
+type: object
+additionalProperties: true
+description: Полный отчёт POST /api/v1/calc (тело поля report).
+required:
+  - meta
+  - input
+  - calculations
+  - matching
+  - warnings
+properties:
+  meta:
+    $ref: CalcReportMeta.yaml
+  input:
+    type: object
+    additionalProperties: true
+    description: Анкета после нормализации на сервере.
+  climate:
+    type: object
+    nullable: true
+    additionalProperties: true
+  temps:
+    type: object
+    additionalProperties: true
+    properties:
+      insideC: { type: number }
+      outsideC: { type: number }
+  calculations:
+    type: object
+    additionalProperties: true
+    properties:
+      heatLoss:
+        $ref: HeatLossReport.yaml
+      hotWater:
+        $ref: HotWaterReport.yaml
+      hydraulics:
+        type: object
+        additionalProperties: true
+      underfloorHeating:
+        nullable: true
+        $ref: UnderfloorHeatingReport.yaml
+  matching:
+    type: object
+    additionalProperties: true
+    properties:
+      boiler:
+        $ref: BoilerMatchingReport.yaml
+      radiators:
+        $ref: RadiatorsMatchingReport.yaml
+      waterHeater:
+        type: object
+        nullable: true
+        additionalProperties: true
+        description: Подбор электронакопителя (report.matching.waterHeater); см. WaterHeaterMatchingReport в shared-types.d.ts.
+      indirectWaterHeater:
+        type: object
+        nullable: true
+        additionalProperties: true
+  recommendations:
+    type: array
+    description: Структурированные сообщения из коллекции recommendations (по code).
+    items:
+      $ref: ResolvedRecommendation.yaml
+  warnings:
+    type: array
+    items:
+      type: string

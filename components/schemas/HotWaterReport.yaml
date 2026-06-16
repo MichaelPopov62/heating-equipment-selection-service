@@ -1,0 +1,62 @@
+type: object
+additionalProperties: true
+description: >
+  Блок calculations.hotWater — расчёт ГВС. Числовые нормы (л/с на точку, сеансовые объёмы, β, пороги бака)
+  задаются справочником water_norms; в отчёте фиксируется normsSchemaVersion.
+properties:
+  objectType:
+    type: string
+    enum: [house, apartment]
+  residents:
+    type: integer
+    minimum: 0
+  fixtures:
+    type: object
+    additionalProperties: true
+  tropicalShower:
+    type: boolean
+  coldWaterDesignSeason:
+    type: string
+    enum: [winter, summer]
+  dhwSupplyScenario:
+    type: string
+    enum: [flowThrough, storage]
+    description: >
+      flowThrough — квартира (мощность от пика расхода); storage — дом (объём бака и нагрев за время из норм).
+  designColdWaterC:
+    type: number
+    description: Фактическая расчётная температура ХВ (+5 зима / +15 лето из water_norms).
+  hotWaterC:
+    type: number
+  deltaTK:
+    type: number
+  sumFlowLpsRaw:
+    type: number
+  simultaneityFactor:
+    type: number
+  peakFlowLps:
+    type: number
+  peakThermalPowerKw:
+    type: number
+  hotWaterPowerKw:
+    type: number
+  recommendedTankLiters:
+    type: integer
+  normsSchemaVersion:
+    type: integer
+    minimum: 1
+    description: Версия справочника water_norms, применённая в этом расчёте.
+  simultaneityBaseNorm:
+    type: number
+  storageTankLitersPerPersonBasis:
+    type: number
+  storageHeatTimeMinutes:
+    type: number
+  storageIndirectHeatPowerKw:
+    type: number
+  sessionDemandLitersMixed:
+    type: number
+  dhwEquivalentTankLitersFromSession:
+    type: number
+  dhwTankLitersCombinedRaw:
+    type: number

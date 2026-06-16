@@ -1,0 +1,54 @@
+type: object
+additionalProperties: true
+description: >
+  Расчёт водяного тёплого пола; null, если waterUnderfloorHeating выключен.
+  Поля ufhCircuitPresetId, mixingNode, roomHeatLossWatts — план roadmap (фазы 1–8), см. Plan.md.
+properties:
+  enabled:
+    type: boolean
+  circuitSupplyC:
+    type: number
+    description: Устаревающее сводное поле; по комнатам — rooms[].circuitSupplyC.
+  circuitReturnC:
+    type: number
+  circuitMeanC:
+    type: number
+  circuitSource:
+    type: string
+    enum: [heatingSystem, mixed_default, finish_preset, ufh_mode_preset]
+    description: >
+      mixed_default — legacy (supply > 50); finish_preset — температура из пресета финиша;
+      ufh_mode_preset — график и лимиты из underfloor_heating_presets.
+  isMixingNodeRequired:
+    type: boolean
+    description: true, если boilerSupplyC > floorCircuitSupplyC.
+  mixingNode:
+    $ref: ./UfhMixingNodeSpec.yaml
+  distributionPreset:
+    $ref: ./UfhDistributionPreset.yaml
+  rooms:
+    type: array
+    items:
+      $ref: ./UnderfloorHeatingRoomReport.yaml
+  totalHeatFluxUpWatts:
+    type: number
+  totalHeatFluxDownWatts:
+    type: number
+  underfloorHydraulics:
+    type: object
+    additionalProperties: true
+    description: >
+      Отдельный расход контура ТП (Δt = 10 K). Планируется в ufhHydraulicsCircuit.js (фаза 5–6).
+    properties:
+      deltaTK: { type: number }
+      flowRateM3PerHour: { type: number }
+      massFlowKgPerSec: { type: number }
+  warnings:
+    type: array
+    items:
+      type: string
+  resolvedRecommendations:
+    type: array
+    items:
+      type: object
+      additionalProperties: true

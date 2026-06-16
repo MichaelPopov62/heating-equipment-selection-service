@@ -1,0 +1,9 @@
+type: object
+additionalProperties: false
+required: [ok, finishes]
+properties:
+  ok: { type: boolean }
+  finishes:
+    type: array
+    items:
+      $ref: FlooringFinishMaterial.yaml

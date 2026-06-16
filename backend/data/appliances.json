@@ -1,0 +1,88 @@
+[
+  {
+    "applianceKind": "indirect_water_heater",
+    "schemaVersion": 1,
+    "isActive": true,
+    "label": "БКН — согласование с котлом",
+    "coupling": {
+      "heatTimeSoftHintMinutes": 48,
+      "heatTimeParasiticHintMinutes": 95,
+      "boilerBelowMinSourceToleranceKw": 0.49,
+      "coilWeakerThanBoilerToleranceKw": 0.5,
+      "effectivePowerUsesMinOfCoilAndBoiler": true
+    },
+    "selection": {
+      "sortByVolumeAsc": true,
+      "pickFirstGteRequired": true
+    }
+  },
+  {
+    "applianceKind": "boiler",
+    "schemaVersion": 1,
+    "isActive": true,
+    "label": "Котёл — монтаж и подбор",
+    "mounting": {
+      "boilerRoomType": "котельная",
+      "minBoilerRoomVolumeM3": 7.5,
+      "minBoilerRoomHeightM": 2.2,
+      "maxApartmentNominalKw": 30
+    },
+    "matching": {
+      "heatingReserveFactor": 1.15,
+      "condensingHeatingReserveFactor": 1.05,
+      "cascadeHintMinKw": 30,
+      "nominalReservePercentCap": 150
+    },
+    "hints": {
+      "comfortHotWaterHeatPartKwMax": 20,
+      "comfortHotWaterDhwKwMax": 15,
+      "comfortHotWaterTypicalBoilerKw": 24,
+      "apartmentCombiSerialBuffer": {
+        "enabled": true,
+        "bufferTankLitersMin": 30,
+        "bufferTankLitersMax": 50,
+        "peakThermalPowerKwMin": 18,
+        "minThermalFixtures": 2
+      }
+    },
+    "apartmentClassification": {
+      "largeAreaM2Min": 50,
+      "largeHeatingLoadKwMin": 15,
+      "minBathroomsForLargeApartment": 2,
+      "singleCircuitOversizeRatio": 3
+    }
+  },
+  {
+    "applianceKind": "electric_storage",
+    "schemaVersion": 1,
+    "isActive": true,
+    "label": "Электронакопитель — резерв правил",
+    "matching": {}
+  },
+  {
+    "applianceKind": "radiator",
+    "schemaVersion": 1,
+    "isActive": true,
+    "label": "Радиаторы — резерв правил",
+    "panelLengthRangeMm": {
+      "min": 400,
+      "max": 3000
+    }
+  },
+  {
+    "applianceKind": "underfloor_heating",
+    "schemaVersion": 1,
+    "isActive": true,
+    "label": "Тёплый пол — смеситель и распределение",
+    "distribution": {
+      "autoHydraulicSeparatorMinBoilerKw": 50,
+      "autoHydraulicSeparatorMinRoomsCount": 7
+    },
+    "mixingNode": {
+      "deltaTK": 10,
+      "valvePressureDropBar": 0.17,
+      "headMetersMinCollector": 3,
+      "headMetersMinHydraulicSeparator": 5
+    }
+  }
+]

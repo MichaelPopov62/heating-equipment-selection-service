@@ -1,0 +1,38 @@
+{
+  "name": "heating-equipment-selection-service",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "server": "node src/index.js",
+    "start": "node src/index.js",
+    "lint": "eslint \"{src,scripts}/**/*.js\"",
+    "lint:fix": "eslint \"{src,scripts}/**/*.js\" --fix",
+    "verify:calc-schema": "node scripts/verifyCalcInputSchema.js",
+    "verify:seed-catalog": "node scripts/verifySeedCatalog.js",
+    "verify:pipe-catalog": "node scripts/verifyPipeCatalogValidation.js",
+    "verify:ufh-presets": "node scripts/verifyUfhPresets.js",
+    "verify:mixed-radiator-ufh": "node scripts/verifyMixedRadiatorUfh.js",
+    "seed": "node scripts/seed.js"
+  },
+  "keywords": [],
+  "author": "Michael Popov <romantikzizni@gmail.com>",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^25.6.0",
+    "eslint": "^10.2.1",
+    "globals": "^17.5.0",
+    "nodemon": "^3.1.14"
+  },
+  "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^15.3.5",
+    "ajv": "^8.18.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.1.0",
+    "mongoose": "^9.5.0"
+  }
+}

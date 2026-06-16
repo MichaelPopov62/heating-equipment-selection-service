@@ -1,0 +1,6 @@
+type: object
+additionalProperties: false
+properties:
+  ok: { type: boolean }
+  status: { type: string }
+required: [ok, status]

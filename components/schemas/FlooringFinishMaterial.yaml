@@ -1,0 +1,21 @@
+type: object
+additionalProperties: false
+required:
+  - id
+  - name
+  - thicknessM
+  - thermalConductivityWmK
+  - maxSurfaceTemperatureCelsius
+properties:
+  id: { type: string, minLength: 1 }
+  name: { type: string, minLength: 1 }
+  thicknessM: { type: number, minimum: 0, exclusiveMinimum: true }
+  thermalConductivityWmK: { type: number, minimum: 0, exclusiveMinimum: true }
+  maxSurfaceTemperatureCelsius: { type: number }
+  comfortMaxSurfaceTemperatureCelsius: { type: number }
+  defaultUfhCircuitPresetId:
+    $ref: ./UfhCircuitPresetId.yaml
+    description: >
+      Пресет температуры контура ТП для этого финиша (roadmap: фаза 3).
+      ceramic_tile → ufh_dt10_45_35; ламинат/LVT → ufh_dt10_40_30.
+  notes: { type: string }

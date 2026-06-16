@@ -1,0 +1,36 @@
+type: object
+description: Котёл в каталоге (JSON или MongoDB после нормализации).
+required: [model, powerKw, price, circuitsCount, type]
+properties:
+  model: { type: string }
+  powerKw:
+    type: object
+    properties:
+      min: { type: number }
+      max: { type: number }
+  fuel: { type: string }
+  efficiencyPercent: { type: number }
+  isDoubleCircuit: { type: boolean }
+  circuitsCount:
+    type: integer
+    minimum: 1
+    maximum: 3
+    description: Количество контуров (1 — только отопление встроенным контуром; 2 — отопление + ГВС в одном корпусе).
+  type:
+    type: string
+    description: Тип / класс котла (например condensing, traditional); при отдаче API строка приводится к нижнему регистру.
+  gasConsumptionM3PerHour: { type: number }
+  price:
+    type: number
+    minimum: 1
+    description: Ориентировочная цена за единицу (валюта — поле currency каталога); обязательна для каждой позиции.
+  mountingType:
+    allOf:
+      - $ref: BoilerMountingType.yaml
+    description: >-
+      Опционально в JSON каталога; после нормализации — wall (настенный) или floor (напольный).
+      Можно задать явно или через теги wall-mounted / floor-standing.
+  connectionDiameters:
+    type: array
+    items: { type: string }
+    description: Диаметры/типы присоединений для подбора арматуры.

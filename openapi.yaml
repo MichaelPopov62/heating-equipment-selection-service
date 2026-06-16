@@ -1,0 +1,719 @@
+openapi: 3.0.3
+info:
+  title: Heating equipment selection service
+  version: "1.0.0"
+  license:
+    name: ISC
+    url: https://opensource.org/license/isc-license-txt/
+servers:
+  - url: /
+
+# Явно фиксируем, что для v1 авторизация не требуется.
+security: []
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthOkResponse"
+        "400":
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/catalog:
+    get:
+      summary: Get equipment catalog
+      operationId: getCatalog
+      responses:
+        "200":
+          description: >
+            Каталог из согласованного reference bundle (`configCache`, TTL `REFERENCE_CACHE_TTL_MS`):
+            тот же снимок, что для `POST /api/v1/calc`. Источник номенклатуры — `file` или MongoDB
+            `products` (`CATALOG_SOURCE`). После `validateCatalog` ключи верхнего уровня:
+            boilers `{ doubleCircuit, singleCircuit }`, radiators, waterHeaters (накопительные электрические, `type` electric_storage по умолчанию; варианты с объёмом, ценой, опционально heatingTimeMinutes),
+            pipes (PipeCatalogItem: id, brand, material, diameter, wallThickness, price, model),
+            indirectWaterHeaters (БКН, если заданы в источнике). Порядок элементов в массивах — как у источника;
+            сортировка для подбора выполняется отдельно в matching (indices на сервере), не в этом ответе.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogGetResponse"
+        "400":
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/presets/envelope:
+    get:
+      summary: Get envelope presets
+      operationId: getEnvelopePresets
+      responses:
+        "200":
+          description: Presets
+          x-notes: >
+            Справочник: kind=wall (несущий слой без утеплителя), kind=insulation (отдельно:
+            СФТК — insul_sftk_pps16f, вентфасад — insul_minwool_*), window, ceiling, floor, roof.
+            U наружной стены для расчёта собирается из building.objectMeta.externalWalls
+            (многослойная формула wallAssembly.js), а не из комбинированных wall_pps_* (удалены).
+            Для kind=wall с uModel — пересчёт U по толщине несущего слоя; утеплитель — по
+            insulationPresetId + insulationThicknessMm. EnvelopePreset.description — подсказки UI.
+            uValue=0 — «потери не считаем» (внутри тёплого контура).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresetsEnvelopeOkResponse"
+        "400":
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/presets/underfloor-heating:
+    get:
+      summary: Get underfloor heating bases and flooring finishes (bundle)
+      operationId: getUnderfloorHeatingPresetsBundle
+      responses:
+        "200":
+          description: Базы ТП + финишные покрытия для композиции room.underfloorHeating
+          x-notes: >
+            bases (usage=underfloor_heating_base) — плита, XPS, стяжка; finishes — керамика, винил,
+            ламинат с maxSurfaceTemperatureCelsius. Не смешивать с GET /api/v1/presets/envelope.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresetsUnderfloorHeatingOkResponse"
+        "400":
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/presets/underfloor-heating/modes:
+    get:
+      summary: Get underfloor heating mode presets (human-readable UI cards)
+      operationId: getUnderfloorHeatingModePresets
+      responses:
+        "200":
+          description: Режимы ТП из underfloor_heating_presets (presetId + ui)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [ok, schemaVersion, source, presets]
+                properties:
+                  ok:
+                    type: boolean
+                    enum: [true]
+                  schemaVersion:
+                    type: integer
+                    minimum: 1
+                  source:
+                    type: string
+                    enum: [file, mongo]
+                  presets:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [presetId, ui]
+                      properties:
+                        presetId:
+                          type: string
+                          enum: [ufh_only, ufh_mixed_radiators, ufh_direct_tile, ufh_direct_laminate]
+                        ui:
+                          type: object
+                          additionalProperties: false
+                          required: [title, badge, description]
+                          properties:
+                            title: { type: string }
+                            badge: { type: string }
+                            description: { type: string }
+        "400":
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/presets/underfloor-heating/bases:
+    get:
+      summary: Get underfloor heating base constructions only
+      operationId: getUnderfloorHeatingBases
+      responses:
+        "200":
+          description: Базовые конструкции ТП без финишного покрытия
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresetsUnderfloorHeatingBasesOkResponse"
+        "400":
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/presets/flooring-finishes:
+    get:
+      summary: Get flooring finish materials for UFH
+      operationId: getFlooringFinishes
+      responses:
+        "200":
+          description: Финишные покрытия (керамика, винил, ламинат) с Rλ,B и лимитом Tповерх
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresetsFlooringFinishesOkResponse"
+        "400":
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/calc:
+    post:
+      summary: Calculate report and match equipment
+      operationId: calculateReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalcInput"
+            examples:
+              minimal:
+                summary: Голая стена без утеплителя
+                value:
+                  building:
+                    temps: { insideC: 20, outsideC: -5 }
+                    objectMeta:
+                      objectType: house
+                      floors: 1
+                      roomsCount: 1
+                      externalWalls:
+                        presetId: wall_gas_concrete_d500
+                        thicknessMm: 375
+                        facadeSystem: none
+                    rooms:
+                      - { id: "r1", name: "Гостиная", type: "гостиная", floor: 1, topBoundary: "heated", bottomBoundary: "unheated", areaM2: 10, heightM: 2.7 }
+                    envelopeElements:
+                      - { kind: wall, roomId: "r1", name: "Стена №1", construction: "наружная стена", presetId: wall_gas_concrete_d500, areaM2: 12, orientation: N }
+              houseSftkWall:
+                summary: Газобетон + СФТК (ППС 16Ф 100 мм), угловая комната — две стены
+                description: >
+                  U наружной стены считается по слоям (wallAssembly.js): R = Rsi+Rse + dст/λст + dут/λут.
+                  Допустим только insul_sftk_pps16f при facadeSystem=sftk.
+                value:
+                  building:
+                    temps: { insideC: 20, outsideC: -5 }
+                    objectMeta:
+                      objectType: house
+                      floors: 1
+                      roomsCount: 1
+                      externalWalls:
+                        presetId: wall_gas_concrete_d500
+                        thicknessMm: 450
+                        facadeSystem: sftk
+                        insulationPresetId: insul_sftk_pps16f
+                        insulationThicknessMm: 100
+                    rooms:
+                      - { id: "r1", name: "Гостиная", type: "гостиная", floor: 1, topBoundary: "heated", bottomBoundary: "unheated", areaM2: 18, heightM: 2.7 }
+                    envelopeElements:
+                      - { kind: wall, roomId: "r1", name: "Стена №1", construction: "наружная стена", presetId: wall_gas_concrete_d500, areaM2: 14, orientation: N }
+                      - { kind: wall, roomId: "r1", name: "Стена №2", construction: "наружная стена", presetId: wall_gas_concrete_d500, areaM2: 10, orientation: W }
+                      - { kind: window, roomId: "r1", name: "Окно 1", construction: "окно", presetId: window_pvc_double_chamber_3_glass, areaM2: 2.1, orientation: N, openingWidthMm: 1500, openingHeightMm: 1400, count: 1 }
+              internalCorridorWall:
+                summary: Внутреннее помещение — стена в неотапливаемый коридор (дом или квартира)
+                description: >
+                  Без фасадных угловых стен: roomExteriorLayout=internal, ΔT к коридору ~15 °C,
+                  U из objectMeta.externalWalls; основной эффект — ΔT к коридору ~15 °C.
+                value:
+                  building:
+                    temps: { insideC: 20, outsideC: -22 }
+                    objectMeta:
+                      objectType: apartment
+                      floors: 1
+                      roomsCount: 1
+                      externalWalls:
+                        presetId: wall_gas_concrete_d500
+                        thicknessMm: 375
+                        facadeSystem: none
+                    rooms:
+                      - { id: "r1", name: "Прихожая", type: "прихожая", floor: 1, topBoundary: "heated", bottomBoundary: "heated", areaM2: 8, heightM: 2.7, roomExteriorLayout: internal }
+                    envelopeElements:
+                      - { kind: wall, roomId: "r1", name: "Стена в коридор", construction: "стена в неотапливаемый коридор", presetId: wall_gas_concrete_d500, areaM2: 9, orientation: N }
+                      - { kind: floor, roomId: "r1", name: "Пол", construction: "пол", presetId: floor_slab_rough_screed_eps_finish_screed_porcelain, areaM2: 8 }
+      responses:
+        "200":
+          description: >
+            Отчёт расчёта и подбора (CalcOkResponse). Справочники catalog, water_norms, appliances и
+            recommendations — согласованный bundle (configCache, TTL REFERENCE_CACHE_TTL_MS, см. ReferenceDataSources).
+            В report.meta: catalogSource, waterNormsSource, waterNormsSchemaVersion, appliancesSource,
+            appliancesSchemaVersions, recommendationsSource, referenceBundleLoadedAt.
+            В report: recommendations[] (коды REC_*, WARN_*), matching.boiler.resolvedRecommendations;
+            технические подсказки котла — matching.boiler.recommendations (не из Mongo).
+            В calculations.hotWater — normsSchemaVersion.
+            Теплопотери: U наружных стен из objectMeta.externalWalls (wallAssembly.js);
+            поправка β по orientation для kind=wall|window (heatLossFactor в элементах отчёта).
+            Cross-validation фасада: EXTERNAL_WALLS_* (СФТК — только ППС 16Ф; вентфасад — minwool).
+            Подбор котла: для квартиры или max-комби один котёл без каскада; cascade_hint — при requiredKw
+            выше порога из appliances.boiler.matching.cascadeHintMinKw.
+            nominalReservePercent для одиночного котла — от powerKw.min и отопительной базы.
+            matching.radiators: основная линия по графику анкеты; lineEconomy и lineEfficient всегда в ответе
+            (секции по комнатам под proposalEconomy / proposalEfficient или unavailableReason).
+            Запас на инфильтрацию только для радиаторов — infiltrationReserveFactor 1.1; правило ≥70 % ширины окна (openingWidthMm).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalcOkResponse"
+        "400":
+          description: >
+            Validation / input error. Причина — поле error.message; для интеграции — error.code.
+
+            Основные значения code: VALIDATION_ERROR (AJV после нормализации), HOT_WATER_LEGACY_FIELD
+            (передано удалённое поле ГВС), HEATING_SYSTEM_INVALID (returnC должна быть ниже supplyC),
+            HOT_WATER_TEMPS_INVALID.
+            EXTERNAL_WALLS_* — несогласованный facadeSystem/insulationPresetId, устаревший wall_pps_*,
+            insul_* в presetId стены и т.п. (см. externalWallsValidate.js).
+
+            Нормализация входа: квартира + схема БКН без 400 — схема подменяется на двухконтурную по умолчанию,
+            текст уходит в предупреждения подбора котла (`matching.boiler.warnings` и корень `warnings`).
+
+            При VALIDATION_ERROR в error.details — массив элементов AJV (instancePath, message, keyword).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/projects:
+    get:
+      summary: List client projects
+      operationId: listProjects
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+        - name: skip
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: search
+          in: query
+          description: Поиск по clientName (регистронезависимый подстрочный)
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectsListResponse"
+        "400":
+          description: Некорректные query-параметры
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB недоступна (MONGODB_UNAVAILABLE)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    post:
+      summary: Create project
+      operationId: createProject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectCreateBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectCreateResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB недоступна
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/projects/{id}:
+    get:
+      summary: Get project by id
+      operationId: getProject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: includeLastCalculation
+          in: query
+          schema: { type: string, enum: ["1", "true"] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectGetResponse"
+        "404":
+          description: PROJECT_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB недоступна
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    put:
+      summary: Update project (clientName, label, survey)
+      operationId: updateProject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdateBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectGetResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: PROJECT_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB недоступна
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    delete:
+      summary: Delete project and its calculations
+      operationId: deleteProject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDeleteResponse"
+        "400":
+          description: Некорректный id проекта
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: PROJECT_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB недоступна
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/projects/{id}/calc:
+    post:
+      summary: Calculate and save result for project
+      operationId: calculateProject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectCalcBody"
+      responses:
+        "200":
+          description: Report + saved calculation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectCalcResponse"
+        "400":
+          description: Validation / calc input error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: PROJECT_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB недоступна
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/projects/{id}/calculations:
+    get:
+      summary: List saved calculations for project
+      operationId: listProjectCalculations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: skip
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalculationsListResponse"
+        "404":
+          description: PROJECT_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB недоступна
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/projects/{projectId}/calculations/{calcId}:
+    get:
+      summary: Get saved calculation with full report
+      operationId: getProjectCalculation
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: calcId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalculationGetResponse"
+        "404":
+          description: CALCULATION_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB недоступна
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+components:
+  schemas:
+    CalcInput:
+      $ref: ./components/schemas/CalcInput.yaml
+    ErrorEnvelope:
+      $ref: ./components/schemas/ErrorEnvelope.yaml
+    EnvelopePresetKind:
+      $ref: ./components/schemas/EnvelopePresetKind.yaml
+    UModel:
+      $ref: ./components/schemas/UModel.yaml
+    EnvelopePreset:
+      $ref: ./components/schemas/EnvelopePreset.yaml
+    BuildingObjectMeta:
+      $ref: ./components/schemas/BuildingObjectMeta.yaml
+    EnvelopeElementInput:
+      $ref: ./components/schemas/EnvelopeElementInput.yaml
+    BoilerMountingType:
+      $ref: ./components/schemas/BoilerMountingType.yaml
+    BoilerCatalogItem:
+      $ref: ./components/schemas/BoilerCatalogItem.yaml
+    CatalogBoilersSection:
+      $ref: ./components/schemas/CatalogBoilersSection.yaml
+    NormalizedCatalogPayload:
+      $ref: ./components/schemas/NormalizedCatalogPayload.yaml
+    RadiatorPriceBasis:
+      $ref: ./components/schemas/RadiatorPriceBasis.yaml
+    RadiatorCatalogItem:
+      $ref: ./components/schemas/RadiatorCatalogItem.yaml
+    WaterHeaterVariant:
+      $ref: ./components/schemas/WaterHeaterVariant.yaml
+    WaterHeaterCatalogItem:
+      $ref: ./components/schemas/WaterHeaterCatalogItem.yaml
+    IndirectWaterHeaterSpecs:
+      $ref: ./components/schemas/IndirectWaterHeaterSpecs.yaml
+    IndirectWaterHeaterCatalogItem:
+      $ref: ./components/schemas/IndirectWaterHeaterCatalogItem.yaml
+    PipeCatalogItem:
+      $ref: ./components/schemas/PipeCatalogItem.yaml
+    BoilerEquipmentProposal:
+      $ref: ./components/schemas/BoilerEquipmentProposal.yaml
+    BoilerMatchingReport:
+      $ref: ./components/schemas/BoilerMatchingReport.yaml
+    RadiatorsByRoomItem:
+      $ref: ./components/schemas/RadiatorsByRoomItem.yaml
+    RadiatorsChosenSummary:
+      $ref: ./components/schemas/RadiatorsChosenSummary.yaml
+    RadiatorsProposalLineReport:
+      $ref: ./components/schemas/RadiatorsProposalLineReport.yaml
+    RadiatorsMatchingReport:
+      $ref: ./components/schemas/RadiatorsMatchingReport.yaml
+    CalcOkResponse:
+      $ref: ./components/schemas/CalcOkResponse.yaml
+    CalcReport:
+      $ref: ./components/schemas/CalcReport.yaml
+    CalcReportMeta:
+      $ref: ./components/schemas/CalcReportMeta.yaml
+    HotWaterReport:
+      $ref: ./components/schemas/HotWaterReport.yaml
+    HeatLossElementReport:
+      $ref: ./components/schemas/HeatLossElementReport.yaml
+    HeatLossReport:
+      $ref: ./components/schemas/HeatLossReport.yaml
+    ReferenceDataSources:
+      $ref: ./components/schemas/ReferenceDataSources.yaml
+    HealthOkResponse:
+      $ref: ./components/schemas/HealthOkResponse.yaml
+    CatalogGetResponse:
+      $ref: ./components/schemas/CatalogGetResponse.yaml
+    PresetsEnvelopeOkResponse:
+      $ref: ./components/schemas/PresetsEnvelopeOkResponse.yaml
+    PresetsUnderfloorHeatingOkResponse:
+      $ref: ./components/schemas/PresetsUnderfloorHeatingOkResponse.yaml
+    PresetsUnderfloorHeatingBasesOkResponse:
+      $ref: ./components/schemas/PresetsUnderfloorHeatingBasesOkResponse.yaml
+    PresetsFlooringFinishesOkResponse:
+      $ref: ./components/schemas/PresetsFlooringFinishesOkResponse.yaml
+    UnderfloorHeatingAssemblyLayer:
+      $ref: ./components/schemas/UnderfloorHeatingAssemblyLayer.yaml
+    UnderfloorHeatingBasePreset:
+      $ref: ./components/schemas/UnderfloorHeatingBasePreset.yaml
+    FlooringFinishMaterial:
+      $ref: ./components/schemas/FlooringFinishMaterial.yaml
+    UnderfloorHeatingAssemblyConstraints:
+      $ref: ./components/schemas/UnderfloorHeatingAssemblyConstraints.yaml
+    UnderfloorHeatingAssemblyPreset:
+      $ref: ./components/schemas/UnderfloorHeatingBasePreset.yaml
+    RoomUnderfloorHeating:
+      $ref: ./components/schemas/RoomUnderfloorHeating.yaml
+    UfhCircuitPresetId:
+      $ref: ./components/schemas/UfhCircuitPresetId.yaml
+    UfhDistributionPreset:
+      $ref: ./components/schemas/UfhDistributionPreset.yaml
+    UfhMixingNodeSpec:
+      $ref: ./components/schemas/UfhMixingNodeSpec.yaml
+    UnderfloorHeatingRoomReport:
+      $ref: ./components/schemas/UnderfloorHeatingRoomReport.yaml
+    UnderfloorHeatingReport:
+      $ref: ./components/schemas/UnderfloorHeatingReport.yaml
+    CalculationSummary:
+      $ref: ./components/schemas/CalculationSummary.yaml
+    ProjectCreateBody:
+      $ref: ./components/schemas/ProjectCreateBody.yaml
+    ProjectUpdateBody:
+      $ref: ./components/schemas/ProjectUpdateBody.yaml
+    ProjectListItem:
+      $ref: ./components/schemas/ProjectListItem.yaml
+    ProjectDetail:
+      $ref: ./components/schemas/ProjectDetail.yaml
+    CalculationListItem:
+      $ref: ./components/schemas/CalculationListItem.yaml
+    CalculationDetail:
+      $ref: ./components/schemas/CalculationDetail.yaml
+    ProjectsListResponse:
+      $ref: ./components/schemas/ProjectsListResponse.yaml
+    ProjectCreateResponse:
+      $ref: ./components/schemas/ProjectCreateResponse.yaml
+    ProjectGetResponse:
+      $ref: ./components/schemas/ProjectGetResponse.yaml
+    ProjectDeleteResponse:
+      $ref: ./components/schemas/ProjectDeleteResponse.yaml
+    ProjectCalcBody:
+      $ref: ./components/schemas/ProjectCalcBody.yaml
+    ProjectCalcResponse:
+      $ref: ./components/schemas/ProjectCalcResponse.yaml
+    CalculationsListResponse:
+      $ref: ./components/schemas/CalculationsListResponse.yaml
+    CalculationGetResponse:
+      $ref: ./components/schemas/CalculationGetResponse.yaml

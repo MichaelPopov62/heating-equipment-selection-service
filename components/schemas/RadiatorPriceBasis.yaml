@@ -1,0 +1,5 @@
+type: string
+enum: [section, panel]
+description: >
+  section — цена за одну секцию секционного радиатора;
+  panel — цена за панель целиком в указанном типоразмере.

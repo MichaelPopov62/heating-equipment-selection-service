@@ -1,0 +1,14 @@
+type: object
+description: KPI сохранённого расчёта (без полного report).
+properties:
+  heatLossKw: { type: number }
+  hotWaterPowerKw: { type: number }
+  boilerRequiredKw: { type: number }
+  boilerModel: { type: string }
+  insideTempC: { type: number }
+  outsideTempC: { type: number }
+  objectType:
+    type: string
+    enum: [house, apartment]
+  warningsCount: { type: integer, minimum: 0 }
+  generatedAt: { type: string, format: date-time }

@@ -1,0 +1,28 @@
+type: object
+additionalProperties: false
+required: [id, kind, construction, material]
+properties:
+  id: { type: string, minLength: 1 }
+  kind:
+    $ref: EnvelopePresetKind.yaml
+    description: >
+      wall — несущий слой (без утеплителя); insulation — утеплитель (отдельно от wall);
+      window, ceiling, floor, roof — как раньше.
+  construction: { type: string, minLength: 1 }
+  material: { type: string, minLength: 1 }
+  description:
+    type: string
+    description: Короткое описание/подсказка для UI (опционально)
+  thicknessOptionsMm:
+    type: array
+    description: Список типовых толщин (мм), если применимо
+    items: { type: integer, minimum: 1 }
+  uValue:
+    type: number
+    minimum: 0
+    description: Фиксированный коэффициент теплопередачи U (Вт/(м²·К))
+  uModel:
+    $ref: UModel.yaml
+oneOf:
+  - required: [uValue]
+  - required: [uModel]

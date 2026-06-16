@@ -1,0 +1,13 @@
+type: object
+additionalProperties: false
+required: [ok, bases, finishes]
+properties:
+  ok: { type: boolean }
+  bases:
+    type: array
+    items:
+      $ref: UnderfloorHeatingBasePreset.yaml
+  finishes:
+    type: array
+    items:
+      $ref: FlooringFinishMaterial.yaml

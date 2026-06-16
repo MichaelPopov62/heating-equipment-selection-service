@@ -1,0 +1,287 @@
+/* Назначение: Стили layout главного приложения.
+   Описание: Шаги навигации, колонки контента, кнопки расчёта и адаптивная сетка App. */
+@import './styles/custom-media.css';
+
+/* Mobile-first: 316 → --narrow → --tablet → --desktop — см. src/styles/custom-media.css */
+
+.appContainer {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layoutBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px;
+  flex: 1;
+}
+
+.navigationSteps {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 10px;
+}
+
+.stepList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1 1 auto;
+}
+
+.stepList > li {
+  display: flex;
+  flex: 1 1 calc(50% - 3px);
+  min-width: 0;
+}
+
+.stepButton {
+  flex: 1;
+  width: 100%;
+  text-align: left;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-h);
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  font: 600 12px/1.2 var(--sans);
+}
+
+.stepButton:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+
+.stepButton[aria-current='step'] {
+  background: color-mix(in srgb, var(--accent-bg) 70%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+
+.mainColumn {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.globalMeta,
+.workArea {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 10px;
+}
+
+.workArea {
+  margin-top: 16px;
+  min-height: 420px;
+}
+
+.tempRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.tempField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 140px;
+  min-width: 120px;
+  font: 500 13px/1.2 var(--sans);
+  color: var(--text-h);
+}
+
+.tempField input {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: 500 13px/1.2 var(--sans);
+}
+
+.roomsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.roomCard {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-2);
+  padding: 12px;
+  min-height: 120px;
+}
+
+.calculationResults {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.hintInline {
+  font: 500 11px/1.35 var(--sans);
+  color: var(--text-m);
+}
+
+.calcApiBar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed color-mix(in srgb, var(--border) 85%, var(--accent) 15%);
+  background: color-mix(in srgb, var(--surface-2) 92%, var(--accent-bg) 8%);
+}
+
+.calcApiBarWarn {
+  margin: 0;
+  font: 500 12px/1.45 var(--sans);
+  color: var(--text-m);
+}
+
+.calcButton {
+  align-self: flex-start;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 16px;
+  background: var(--surface-1);
+  color: var(--text-h);
+  font: 600 13px/1.2 var(--sans);
+  cursor: pointer;
+}
+
+.calcButton:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent-bg) 55%, var(--surface-1));
+}
+
+.calcButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Шире узкого mobile (≥317px) */
+@media (--narrow) {
+  .layoutBody {
+    padding: 12px;
+  }
+
+  .navigationSteps,
+  .globalMeta,
+  .workArea {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .stepButton {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
+/* Планшет и шире (≥768px) */
+@media (--tablet) {
+  .layoutBody {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .globalMeta,
+  .workArea {
+    padding: 14px;
+  }
+}
+
+/* Desktop (≥1200px) */
+@media (--desktop) {
+  .navigationSteps {
+    flex: 0 0 240px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    min-width: 200px;
+  }
+
+  .stepList {
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+
+  .stepList > li {
+    flex: none;
+    width: 100%;
+  }
+
+  .stepButton {
+    flex: none;
+    width: 100%;
+  }
+
+  .mainColumn {
+    flex: 1 1 360px;
+    width: auto;
+  }
+
+  .calculationResults {
+    flex: 0 0 320px;
+    width: auto;
+    min-width: 260px;
+    align-self: flex-start;
+  }
+}
+
+/* Шаг «Котёл»: выбор сценария горячая вода ↔ котёл */
+.boilerHotWaterSchemeBlock {
+  composes: block from './styles/formElements.module.css';
+}
+
+.boilerHotWaterSchemeLabel {
+  composes: label from './styles/formElements.module.css';
+}
+
+.boilerHotWaterSchemeSelect {
+  composes: select from './styles/formElements.module.css';
+}
+
+.inlineCode {
+  composes: inlineCode from './styles/formElements.module.css';
+}
+
+.thermalRegimeBlockedMsg {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--warn, #c90) 45%, var(--border));
+  background: color-mix(in srgb, var(--warn, #c90) 12%, var(--surface));
+  font: 500 13px/1.4 var(--sans);
+  color: var(--text-h);
+}
+

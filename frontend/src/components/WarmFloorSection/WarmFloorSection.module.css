@@ -1,0 +1,40 @@
+/* Назначение: Стили секции тёплого пола.
+   Описание: Оформление блока WarmFloorSection с переиспользованием formElements. */
+@import '../../styles/custom-media.css';
+
+.root {
+  composes: block from '../../styles/formElements.module.css';
+}
+
+.title {
+  composes: label from '../../styles/formElements.module.css';
+}
+
+.hint {
+  composes: hint from '../../styles/formElements.module.css';
+}
+
+.inlineCode {
+  composes: inlineCode from '../../styles/formElements.module.css';
+}
+
+.checkboxRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.fieldBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fieldLabel {
+  composes: label from '../../styles/formElements.module.css';
+}
+
+.select {
+  composes: control from '../../styles/formElements.module.css';
+}

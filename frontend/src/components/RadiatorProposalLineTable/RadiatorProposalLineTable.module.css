@@ -1,0 +1,35 @@
+/* Назначение: Стили таблицы радиаторов.
+   Описание: Табличная вёрстка линии подбора и сообщения о недоступности. */
+.wrap {
+  margin-top: 12px;
+}
+
+.caption {
+  margin: 0 0 8px;
+  font: 600 12px/1.35 var(--sans);
+  color: var(--text-h);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font: 13px/1.35 var(--sans);
+}
+
+.table th,
+.table td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.table th {
+  background: color-mix(in srgb, var(--surface) 85%, var(--accent-bg));
+  font-weight: 600;
+}
+
+.unavailable {
+  margin: 8px 0 0;
+  font: 13px/1.4 var(--sans);
+  color: var(--text-m);
+}

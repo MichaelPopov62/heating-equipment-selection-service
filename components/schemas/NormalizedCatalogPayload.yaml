@@ -1,0 +1,25 @@
+type: object
+additionalProperties: true
+description: >
+  Нормализованный каталог после validateCatalog (ключи совпадают с NormalizedCatalog в backend).
+  Схема труб — PipeCatalogItem (обязательные id, brand, material, diameter, wallThickness, price, model);
+  БКН — IndirectWaterHeaterCatalogItem.
+properties:
+  boilers:
+    $ref: CatalogBoilersSection.yaml
+  radiators:
+    type: array
+    items:
+      $ref: RadiatorCatalogItem.yaml
+  waterHeaters:
+    type: array
+    items:
+      $ref: WaterHeaterCatalogItem.yaml
+  pipes:
+    type: array
+    items:
+      $ref: PipeCatalogItem.yaml
+  indirectWaterHeaters:
+    type: array
+    items:
+      $ref: IndirectWaterHeaterCatalogItem.yaml

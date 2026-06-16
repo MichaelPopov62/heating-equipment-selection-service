@@ -1,0 +1,11 @@
+description: >
+  Тело POST /api/v1/projects/{id}/calc: либо полный CalcInput (building обязателен),
+  либо объект с полями calcInput (CalcInput) и опционально survey (черновик для сохранения в проект).
+allOf:
+  - $ref: CalcInput.yaml
+  - type: object
+    properties:
+      calcInput:
+        $ref: CalcInput.yaml
+      survey:
+        type: object

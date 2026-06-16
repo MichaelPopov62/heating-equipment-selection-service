@@ -1,0 +1,70 @@
+/* Назначение: Стили формы метаданных объекта.
+   Описание: Сетка полей, селекты и контролы шага «Объект». */
+@import '../../styles/custom-media.css';
+
+.formGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.label {
+  font: 600 12px/1.2 var(--sans);
+  color: var(--text-h);
+}
+
+.control {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: 500 13px/1.2 var(--sans);
+}
+
+button.control {
+  cursor: pointer;
+  text-align: left;
+}
+
+button.control:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: color-mix(in srgb, var(--accent-bg) 70%, var(--surface-2));
+}
+
+.hint {
+  composes: hint from '../../styles/formElements.module.css';
+}
+
+.fullWidth {
+  flex: 1 1 100%;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font: 500 13px/1.35 var(--sans);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.checkboxRow input {
+  margin-top: 2px;
+}
+
+@media (--tablet) {
+  .field {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 200px;
+  }
+}

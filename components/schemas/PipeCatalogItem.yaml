@@ -1,0 +1,43 @@
+type: object
+description: >
+  Труба в каталоге после validateCatalog. Поле model обязательно: из JSON или синтез
+  (id, brand, material, Ødiameter, ×wallThickness) — см. pipeCatalogHelpers.js / validateCatalog.js.
+additionalProperties: true
+required:
+  - model
+  - id
+  - brand
+  - material
+  - diameter
+  - wallThickness
+  - price
+properties:
+  model:
+    type: string
+    description: >
+      Подпись позиции для UI и MongoDB (baseProductSchema). Если в исходном JSON нет model,
+      подставляется при нормализации, например «p-01 Rehau PEX-a Ø16 ×2.2».
+  id:
+    type: string
+    description: Идентификатор строки каталога (в Mongo дублируется в pipeId при seed); уникален в массиве pipes.
+  brand:
+    type: string
+  material:
+    type: string
+  diameter:
+    type: number
+    minimum: 1
+    maximum: 1000
+    description: Наружный или условный диаметр, мм.
+  wallThickness:
+    type: number
+    minimum: 0.1
+    maximum: 100
+    description: Толщина стенки, мм.
+  price:
+    type: number
+    minimum: 1
+    description: Цена за единицу (валюта — currency каталога, обычно UAH).
+  category:
+    type: string
+    description: Раздел каталога (например «Отопление/Водоснабжение»); опционально в JSON.

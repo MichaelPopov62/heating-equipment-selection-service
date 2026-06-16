@@ -1,0 +1,26 @@
+type: object
+description: Радиатор в каталоге после нормализации (типовая секция / панель).
+required: [model, outputWatts, price, priceBasis]
+properties:
+  model: { type: string }
+  outputWatts:
+    type: object
+    required: [deltaT50, deltaT70]
+    properties:
+      deltaT50: { type: number }
+      deltaT70: { type: number }
+  material: { type: string }
+  volumeLiters: { type: number }
+  dimensions:
+    type: object
+    properties:
+      height: { type: number }
+      width: { type: number }
+      depth: { type: number }
+      interaxle: { type: number }
+  sectionWidthMm: { type: number }
+  price:
+    type: number
+    minimum: 1
+    description: Зависит от priceBasis — за секцию или за панель целиком (валюта — currency каталога).
+  priceBasis: { $ref: RadiatorPriceBasis.yaml }

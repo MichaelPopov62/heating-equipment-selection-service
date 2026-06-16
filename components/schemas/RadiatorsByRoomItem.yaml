@@ -1,0 +1,57 @@
+type: object
+description: Підбір радіатора по одному приміщенню (report.matching.radiators.byRoom[]).
+required:
+  - roomId
+  - roomName
+  - heatLossWatts
+  - radiatorDesignWatts
+  - radiatorModel
+  - outputPerSectionWatts
+  - sections
+properties:
+  roomId: { type: string }
+  roomName: { type: string }
+  heatLossWatts:
+    type: number
+    description: Тепловтрати контуру приміщення без запасу на інфільтрацію, Вт.
+  radiatorDesignWatts:
+    type: number
+    description: >
+      Нагрузка на подбор радиатора, Вт: designWatts комнаты (envelopeWatts × kVent);
+      в смешанном режиме с ТП — остаток после вычета heatFluxUpWatts (0, если ТП покрывает нагрузку).
+  radiatorModel: { type: string }
+  outputPerSectionWatts:
+    type: number
+    description: Перерахована потужність секції під фактичний графік, Вт.
+  sections:
+    type: integer
+    nullable: true
+    description: Рекомендована кількість секцій; null — неможливо порахувати.
+  sectionsThermalMin:
+    type: integer
+    nullable: true
+    description: Мінімум секцій лише за тепловою навантаженням (до правила ширини вікна).
+  windowOpeningWidthMm:
+    type: number
+    nullable: true
+    description: Максимальна ширина вікна в приміщенні з анкети (openingWidthMm), мм.
+  radiatorWidthMm:
+    type: number
+    nullable: true
+    description: Розрахункова ширина приладу (sections × sectionWidthMm), мм.
+  widthCoverageRatio:
+    type: number
+    nullable: true
+    description: Відношення radiatorWidthMm / windowOpeningWidthMm.
+  widthOk:
+    type: boolean
+    nullable: true
+    description: true, якщо widthCoverageRatio ≥ 0.7.
+  warnings:
+    type: array
+    items: { type: string }
+    description: Попередження по приміщенню (наприклад, <70 % ширини вікна).
+  sizingNotes:
+    type: array
+    items: { type: string }
+    description: Пояснення коригування числа секцій (правило вікна, досбор).

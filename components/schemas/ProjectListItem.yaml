@@ -1,0 +1,9 @@
+type: object
+required: [id, clientName, createdAt, updatedAt]
+properties:
+  id: { type: string }
+  clientName: { type: string }
+  label: { type: string }
+  createdAt: { type: string, format: date-time }
+  updatedAt: { type: string, format: date-time }
+  calculationsCount: { type: integer, minimum: 0 }

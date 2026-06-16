@@ -1,0 +1,152 @@
+{
+  "building": {
+    "temps": {
+      "insideC": 20,
+      "outsideC": -5
+    },
+    "objectMeta": {
+      "objectType": "apartment",
+      "floors": 1,
+      "roomsCount": 3,
+      "externalWalls": {
+        "presetId": "wall_gas_concrete_d500",
+        "thicknessMm": 450,
+        "facadeSystem": "sftk",
+        "insulationPresetId": "insul_sftk_pps16f",
+        "insulationThicknessMm": 100
+      },
+      "roofPresetId": "roof_concrete_insulated_flat"
+    },
+    "rooms": [
+      {
+        "id": "r1",
+        "name": "Комната 1",
+        "type": "спальня",
+        "floor": 1,
+        "topBoundary": "heated",
+        "areaM2": 20,
+        "heightM": 2.7
+      },
+      {
+        "id": "r2",
+        "name": "Комната 2",
+        "type": "кухня",
+        "floor": 1,
+        "topBoundary": "heated",
+        "areaM2": 11.9,
+        "heightM": 2.7
+      },
+      {
+        "id": "r3",
+        "name": "Комната 3",
+        "type": "санузел",
+        "floor": 1,
+        "topBoundary": "heated",
+        "areaM2": 8,
+        "heightM": 2.7
+      }
+    ],
+    "envelopeElements": [
+      {
+        "kind": "wall",
+        "roomId": "r1",
+        "name": "Стена №1",
+        "construction": "наружная стена",
+        "presetId": "wall_gas_concrete_d500",
+        "areaM2": 2,
+        "orientation": "N"
+      },
+      {
+        "kind": "floor",
+        "roomId": "r1",
+        "construction": "пол",
+        "presetId": "floor_slab_rough_screed_eps_finish_screed_porcelain",
+        "areaM2": 20,
+        "name": "Пол"
+      },
+      {
+        "kind": "window",
+        "roomId": "r1",
+        "construction": "окно",
+        "presetId": "window_pvc_double_chamber_3_glass",
+        "areaM2": 1.4412,
+        "count": 1,
+        "orientation": "N",
+        "openingWidthMm": 1200,
+        "openingHeightMm": 1201,
+        "name": "Окно win-r1-1"
+      },
+      {
+        "kind": "wall",
+        "roomId": "r2",
+        "name": "Стена №1",
+        "construction": "наружная стена",
+        "presetId": "wall_gas_concrete_d500",
+        "areaM2": 1,
+        "orientation": "E"
+      },
+      {
+        "kind": "floor",
+        "roomId": "r2",
+        "construction": "пол",
+        "presetId": "floor_slab_rough_screed_eps_finish_screed_porcelain",
+        "areaM2": 11.9,
+        "name": "Пол"
+      },
+      {
+        "kind": "window",
+        "roomId": "r2",
+        "construction": "окно",
+        "presetId": "window_pvc_double_chamber_3_glass",
+        "areaM2": 1.4388,
+        "count": 1,
+        "orientation": "E",
+        "openingWidthMm": 1200,
+        "openingHeightMm": 1199,
+        "name": "Окно win-r2-1"
+      },
+      {
+        "kind": "wall",
+        "roomId": "r3",
+        "name": "Стена №1",
+        "construction": "наружная стена",
+        "presetId": "wall_gas_concrete_d500",
+        "areaM2": 1,
+        "orientation": "SW"
+      },
+      {
+        "kind": "floor",
+        "roomId": "r3",
+        "construction": "пол",
+        "presetId": "floor_slab_rough_screed_eps_finish_screed_porcelain",
+        "areaM2": 8,
+        "name": "Пол"
+      }
+    ]
+  },
+  "heatingSystem": {
+    "hotWaterBoilerPowerMatchingScheme": "heatingLoadWithReserveOnlySeparateElectricStorageWaterHeater",
+    "thermalRegimePreset": "condensing_dt30_55_45",
+    "insideC": 20,
+    "supplyC": 55,
+    "returnC": 45,
+    "radiatorReferenceDeltaT": 50
+  },
+  "hotWater": {
+    "residents": 1,
+    "coldWaterDesignSeason": "winter",
+    "hotWaterC": 60,
+    "tropicalShower": false,
+    "fixtures": {
+      "shower": 1,
+      "bath": 0,
+      "sink": 1,
+      "toilet": 1,
+      "kitchenSink": 1,
+      "dishwasher": 1,
+      "laundrySink": 0,
+      "washingMachine": 1,
+      "bidet": 1
+    }
+  }
+}

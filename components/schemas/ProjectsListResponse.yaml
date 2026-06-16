@@ -1,0 +1,11 @@
+type: object
+required: [ok, projects, total, limit, skip]
+properties:
+  ok: { type: boolean, enum: [true] }
+  projects:
+    type: array
+    items:
+      $ref: ProjectListItem.yaml
+  total: { type: integer, minimum: 0 }
+  limit: { type: integer, minimum: 0 }
+  skip: { type: integer, minimum: 0 }

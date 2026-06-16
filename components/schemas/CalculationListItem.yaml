@@ -1,0 +1,8 @@
+type: object
+required: [id, projectId, summary, createdAt]
+properties:
+  id: { type: string }
+  projectId: { type: string }
+  summary:
+    $ref: CalculationSummary.yaml
+  createdAt: { type: string, format: date-time }

@@ -1,0 +1,39 @@
+type: object
+additionalProperties: false
+description: >
+  Ориентиры для закупки оборудования узла смешения ТП (насос + трёхходовой клапан).
+  Заполняется в отчёте, если isMixingNodeRequired = true. Номенклатура из products не подбирается.
+required:
+  - isMixingNodeRequired
+properties:
+  isMixingNodeRequired:
+    type: boolean
+    description: >
+      true, если t_boiler_supply > t_floor_supply (температура источника выше требуемой для контура пола).
+  boilerSupplyC:
+    type: number
+    description: Подача радиаторного/котлового контура из heatingSystem.supplyC после нормализации.
+  floorCircuitSupplyC:
+    type: number
+    description: Расчётная подача в контур ТП (45 или 40 °C по пресету финиша).
+  deltaTK:
+    type: number
+    description: Δt контура ТП для расчёта расхода (всегда 10 K для пресетов 45/35 и 40/30).
+  powerKw:
+    type: number
+    description: Суммарная полезная мощность ТП вверх, кВт (totalHeatFluxUpWatts / 1000).
+  flowRateM3PerHour:
+    type: number
+    description: "Расчётный расход: Q = P_kW × 0.86 / (Δt × ρ), ρ ≈ 1."
+  headMetersMin:
+    type: number
+    description: "Минимальный напор насоса контура ТП, м.в.ст. (ориентир 3–4 или 5–6 м)."
+  valveKvsMin:
+    type: number
+    description: "Минимальная пропускная способность клапана Kvs, м³/ч (Δp ≈ 0,15–0,2 бар)."
+  distributionPreset:
+    $ref: ./UfhDistributionPreset.yaml
+  notes:
+    type: array
+    items:
+      type: string

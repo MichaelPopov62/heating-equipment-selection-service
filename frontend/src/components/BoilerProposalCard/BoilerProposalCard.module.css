@@ -1,0 +1,160 @@
+/* Назначение: Стили карточки котла.
+   Описание: Оформление proposal-карточки и блока разбивки мощности. */
+.card {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: color-mix(in srgb, var(--accent-bg) 22%, var(--surface-2));
+}
+
+.title {
+  margin: 0 0 6px;
+  font: 700 13px/1.25 var(--sans);
+  color: var(--text-h);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.catalogSource {
+  margin: 0 0 8px;
+  font: 500 11px/1.35 var(--sans);
+  color: var(--text-m);
+}
+
+.powerBlock {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  font: 500 13px/1.45 var(--sans);
+  color: var(--text);
+}
+
+.powerPeak {
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.powerPeak strong {
+  font-weight: 700;
+}
+
+.powerSub {
+  margin: 0;
+  padding-left: 0.15rem;
+  color: var(--text-m);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.powerSub strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.solutionLine {
+  margin: 0 0 8px;
+  font: 600 14px/1.35 var(--sans);
+  color: var(--text);
+}
+
+.solutionLine strong {
+  font-weight: 700;
+}
+
+.heatingReserveLine {
+  margin: 0 0 12px;
+  font: 500 13px/1.4 var(--sans);
+  color: var(--text-m);
+}
+
+.modHint {
+  font-weight: 500;
+  color: color-mix(in srgb, var(--text-m) 92%, var(--text));
+}
+
+.dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px 12px;
+  font: 500 13px/1.4 var(--sans);
+}
+
+.dl dt {
+  margin: 0;
+  color: var(--text-m);
+  font-weight: 600;
+}
+
+.dl dd {
+  margin: 0 0 8px;
+  color: var(--text);
+}
+
+.companionPair {
+  display: contents;
+}
+
+.block {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed color-mix(in srgb, var(--border) 75%, transparent);
+}
+
+.blockTitle {
+  font: 700 12px/1.2 var(--sans);
+  color: var(--text-m);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--text);
+  font: 500 13px/1.45 var(--sans);
+}
+
+.list li {
+  margin-bottom: 4px;
+}
+
+.notes {
+  margin-top: 10px;
+}
+
+.note {
+  margin: 0 0 6px;
+  font: 500 12px/1.45 var(--sans);
+  color: color-mix(in srgb, var(--text) 88%, #c9a227);
+}
+
+.note:last-child {
+  margin-bottom: 0;
+}
+
+.bundleTotalLabel {
+  margin-top: 4px;
+  color: var(--text-h);
+}
+
+.bundleTotalValue {
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.bundleBreakdown {
+  margin: 6px 0 0;
+  padding-left: 1.1rem;
+  font: 500 12px/1.4 var(--sans);
+  font-weight: 500;
+  color: var(--text-m);
+}
+
+.bundleBreakdown li {
+  margin-bottom: 2px;
+}

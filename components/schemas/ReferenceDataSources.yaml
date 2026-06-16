@@ -1,0 +1,90 @@
+type: object
+additionalProperties: false
+description: >
+  Описание справочников расчёта (не отдельные HTTP-эндпоинты MVP). Загрузка и TTL-кэш —
+  backend/src/reference/configCache.js: при старте прогрев, затем согласованный bundle
+  (products + water_norms + appliances + recommendations) в памяти; обновление по REFERENCE_CACHE_TTL_MS (по умолчанию 1 ч).
+  GET /api/v1/catalog и POST /api/v1/calc используют один снимок. Числовые нормы только в seed/Mongo;
+  validateWaterNorms.js и validateAppliances.js без fallback ?? в коде.
+properties:
+  referenceCache:
+    type: object
+    description: Единый TTL-кэш согласованных справочников.
+    properties:
+      module:
+        type: string
+        example: backend/src/reference/configCache.js
+      envTtl:
+        type: string
+        example: REFERENCE_CACHE_TTL_MS
+      defaultTtlMs:
+        type: integer
+        example: 3600000
+  catalog:
+    type: object
+    description: Номенклатура products (входит в reference bundle).
+    properties:
+      fileSeed:
+        type: string
+        example: backend/test_data.json
+      loader:
+        type: string
+        example: backend/src/catalog/loadCatalog.js
+      env:
+        type: string
+        example: CATALOG_SOURCE
+  water_norms:
+    type: object
+    description: Нормы водоразбора и объёма ГВС (коллекция MongoDB water_norms).
+    properties:
+      fileSeed:
+        type: string
+        example: backend/data/water_norms.json
+      loader:
+        type: string
+        example: backend/src/dhw/loadWaterNorms.js
+      validator:
+        type: string
+        example: backend/src/dhw/validateWaterNorms.js
+      env:
+        type: string
+        example: WATER_NORMS_SOURCE
+      storageSchema:
+        $ref: ./WaterNormsStorage.yaml
+  appliances:
+    type: object
+    description: >
+      Правила подбора и согласования по категориям техники (не номенклатура products):
+      indirect_water_heater, boiler, electric_storage, radiator.
+    properties:
+      fileSeed:
+        type: string
+        example: backend/data/appliances.json
+      loader:
+        type: string
+        example: backend/src/dhw/loadAppliances.js
+      validator:
+        type: string
+        example: backend/src/dhw/validateAppliances.js
+      env:
+        type: string
+        example: APPLIANCES_SOURCE
+  recommendations:
+    type: object
+    description: >
+      Тексты рекомендаций и предупреждений по code (WARN_*, REC_*); коллекция MongoDB recommendations.
+    properties:
+      fileSeed:
+        type: string
+        example: backend/data/recommendations.json
+      loader:
+        type: string
+        example: backend/src/recommendations/loadRecommendations.js
+      validator:
+        type: string
+        example: backend/src/recommendations/validateRecommendations.js
+      env:
+        type: string
+        example: RECOMMENDATIONS_SOURCE
+      resolvedSchema:
+        $ref: ./ResolvedRecommendation.yaml

@@ -1,0 +1,11 @@
+allOf:
+  - $ref: ProjectListItem.yaml
+  - type: object
+    properties:
+      survey:
+        type: object
+        description: Черновик анкеты (произвольный JSON).
+      lastCalcInput:
+        $ref: CalcInput.yaml
+      lastCalculation:
+        $ref: CalculationListItem.yaml

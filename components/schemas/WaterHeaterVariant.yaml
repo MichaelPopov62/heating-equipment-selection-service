@@ -1,0 +1,21 @@
+type: object
+description: >
+  Типоразмер бойлера: объём (`volumeLiters`), цена и опционально паспортные данные по ТЭН и времени нагрева.
+required: [volumeLiters, price]
+properties:
+  volumeLiters:
+    type: number
+    minimum: 1
+    maximum: 1000
+    description: Номинальный объём бака, л.
+  price:
+    type: number
+    minimum: 1
+  powerKw:
+    type: number
+    description: Номинальная мощность ТЭН для данного литража, кВт (опционально).
+  heatingTimeMinutes:
+    type: number
+    minimum: 1
+    maximum: 10080
+    description: Штатное время полного нагрева воды в баке по паспорту, мин (опционально).

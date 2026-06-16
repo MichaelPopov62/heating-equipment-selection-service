@@ -1,0 +1,92 @@
+type: object
+additionalProperties: false
+required: [objectType, floors, roomsCount, externalWalls]
+properties:
+  objectType:
+    type: string
+    enum: [house, apartment]
+  apartmentStackPosition:
+    type: string
+    enum: [first_floor, middle_floor, last_floor]
+    description: >
+      Положение квартиры в стояке МКД (только objectType=apartment): first_floor — над подвалом;
+      middle_floor — между соседями; last_floor — под чердаком/кровлей. Задаёт bottomBoundary/topBoundary
+      по комнатам при нормализации на сервере.
+  floors:
+    type: integer
+    enum: [1, 2, 3]
+  roomsCount:
+    type: integer
+    minimum: 1
+    maximum: 50
+    description: Количество помещений по плану (1…50)
+  roofPresetId:
+    type: string
+    minLength: 0
+    description: presetId кровли. Если не задан — потери по кровле не считаем.
+  heatingDistribution:
+    type: string
+    enum: [individual, central]
+    description: >
+      individual — индивидуальный котёл; central — общий контур высокого давления
+      (в подборе радиаторов ориентир на биметалл Mirado и т.п.).
+  boilerPlacementZone:
+    $ref: BoilerPlacementZone.yaml
+  boilerRoomAreaM2:
+    type: number
+    minimum: 0.01
+    description: >-
+      Площадь котельной, м² — запасной ввод, если в building.rooms нет комнаты type=котельная.
+      Обязательна в паре с ceilingHeightM при проверке объёма, если котельной в rooms нет.
+  ceilingHeightM:
+    type: number
+    minimum: 2
+    maximum: 6
+    description: Высота потолка котельной, м (пара с boilerRoomAreaM2).
+  indirectDhwSpaceAvailable:
+    type: boolean
+    description: >-
+      Квартира: есть техпомещение или ниша под бойлер косвенного нагрева (для больших квартир и схемы 1К + БКН).
+  ventilationReserveMode:
+    type: string
+    enum: [natural, recuperation]
+    description: >-
+      Учёт вентиляции в теплопотерях по комнатам (MVP): natural — kVent 1.3 (естественная вентиляция);
+      recuperation — kVent 1.1 (ПВУ с рекуператором). totalWatts = Σ(envelopeWatts × kVent).
+      Поля building.ventilation.flowM3PerHour / airChangesPerHour в MVP не принимаются.
+  externalWalls:
+    type: object
+    description: >
+      Параметры наружных стен **на весь объект** (один набор). U для всех envelopeElements kind=wall
+      вычисляется из этих полей (backend: wallAssembly.js → resolveExternalWallUValue).
+      Формула: R = Rsi+Rse + dст/λст + dут/λут; U = 1/R (d в метрах).
+    additionalProperties: false
+    required: [presetId]
+    properties:
+      presetId:
+        type: string
+        minLength: 1
+        description: >
+          presetId **несущего слоя** (EnvelopePreset kind=wall), без утеплителя.
+          Не используйте kind=insulation и устаревшие wall_pps_*.
+      thicknessMm:
+        type: number
+        minimum: 50
+        maximum: 2000
+        description: Толщина несущего слоя, мм (обязательна для расчёта U при uModel и при утеплённом фасаде).
+      facadeSystem:
+        type: string
+        enum: [none, sftk, ventilated]
+        description: >
+          none — без утеплителя; sftk — СФТК («мокрый фасад», только ППС 16Ф / insul_sftk_pps16f);
+          ventilated — открытый/вентилируемый фасад (только минеральная вата insul_minwool_*).
+          ППС-25/35 «в чистом виде» не допускаются (СП 50.13330).
+      insulationPresetId:
+        type: string
+        minLength: 1
+        description: presetId утеплителя (kind=insulation), обязателен при facadeSystem=sftk|ventilated.
+      insulationThicknessMm:
+        type: number
+        minimum: 30
+        maximum: 300
+        description: Толщина утеплителя, мм (обязательна при sftk/ventilated).

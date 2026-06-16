@@ -1,0 +1,37 @@
+type: object
+description: Технические характеристики БКН; после валидации числовые поля приводятся к finite number.
+additionalProperties: true
+required:
+  - volumeLiters
+properties:
+  volumeLiters:
+    type: number
+    minimum: 1
+    description: Объём бака, л (каноническое поле после нормализации).
+  powerKw:
+    type: number
+    minimum: 0
+    description: Номинальная тепловая мощность теплообменника (змеевика), кВт.
+  minSourcePowerKw:
+    type: number
+    minimum: 0.1
+    maximum: 500
+    description: >
+      Минимальная рекомендуемая мощность источника (котёл / контур нагрева), кВт;
+      задаётся в каталоге опционально, нормализуется validateCatalog при наличии.
+  surfaceAreaM2:
+    type: number
+    minimum: 0
+    description: Площадь поверхности теплообменника, м².
+  maxTempC:
+    type: number
+    minimum: 0
+    description: Максимальная температура нагрева, °C.
+  heatingTimeMinutes:
+    type: number
+    minimum: 0
+    description: Штатное время нагрева (по паспорту), мин.
+  standingLossKwh24h:
+    type: number
+    minimum: 0
+    description: Потери при ожидании за 24 ч, кВт·ч (паспорт).

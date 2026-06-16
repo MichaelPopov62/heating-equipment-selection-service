@@ -1,0 +1,28 @@
+type: object
+description: Обрана модель радіатора для лінії підбору (report.matching.radiators.chosen).
+required:
+  - model
+  - baseOutputWatts
+  - baseDeltaT
+  - adjustedOutputWatts
+  - targetDeltaT
+properties:
+  model: { type: string }
+  material: { type: string }
+  volumeLitersPerSection: { type: number }
+  baseOutputWatts:
+    type: number
+    description: Паспортна потужність секції при baseDeltaT, Вт.
+  baseDeltaT:
+    type: integer
+    enum: [50, 70]
+    description: База паспорта секції з каталогу (ΔT50 або ΔT70).
+  adjustedOutputWatts:
+    type: number
+    description: Потужність секції після перерахунку на targetDeltaT, Вт.
+  targetDeltaT:
+    type: number
+    description: Середній температурний напір за EN442 для графіка supply/return/inside, K.
+  sectionWidthMm:
+    type: number
+    description: Ширина секції з каталогу (sectionWidthMm або dimensions.width), мм.

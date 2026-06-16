@@ -1,0 +1,57 @@
+type: object
+description: >-
+  Результат підбору радіаторів (report.matching.radiators). Основна лінія — графік з анкети;
+  lineEconomy / lineEfficient — секції під картки proposalEconomy / proposalEfficient котла
+  (pickRadiatorsWithProposalLines у matching/radiators.js).
+required:
+  - chosen
+  - byRoom
+  - warnings
+properties:
+  chosen:
+    type: object
+    nullable: true
+    allOf:
+      - $ref: RadiatorsChosenSummary.yaml
+  byRoom:
+    type: array
+    items:
+      $ref: RadiatorsByRoomItem.yaml
+  warnings:
+    type: array
+    items: { type: string }
+  lineEconomy:
+    $ref: RadiatorsProposalLineReport.yaml
+    description: >-
+      Лінія «Економ» (графік 75/65 °C). Завжди повертається pickRadiatorsWithProposalLines:
+      підбір під proposalEconomy або unavailableReason.
+  lineEfficient:
+    $ref: RadiatorsProposalLineReport.yaml
+    description: >-
+      Лінія «Ефективний» (графік 55/45 °C). Завжди повертається pickRadiatorsWithProposalLines:
+      підбір під proposalEfficient або unavailableReason.
+  inputs:
+    type: object
+    description: Параметри основної лінії підбору.
+    properties:
+      supplyC: { type: number }
+      returnC: { type: number }
+      insideC: { type: number }
+      baseDeltaT:
+        type: integer
+        enum: [50, 70]
+      targetDeltaT: { type: number }
+      ventilationReserveFactor:
+        type: number
+        description: Множитель kVent (1.3 natural / 1.1 recuperation) — запас вентиляции по комнатам.
+      radiatorSizingAlignedWithCondensing: { type: boolean }
+      heatingDistribution:
+        type: string
+        enum: [individual, central]
+      radiatorConnection:
+        type: string
+        enum: [side, bottom]
+      thermalRegimePreset: { type: string }
+  radiatorSelectionNotes:
+    type: array
+    items: { type: string }

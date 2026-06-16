@@ -1,0 +1,20 @@
+type: object
+additionalProperties: false
+required: [lambdaWmK, surfaceR]
+properties:
+  lambdaWmK:
+    type: number
+    minimum: 0.01
+    description: Теплопроводность λ (Вт/(м·К))
+  surfaceR:
+    type: number
+    minimum: 0
+    description: >
+      Поверхностные сопротивления (Rsi+Rse), м²·К/Вт (для стен по умолчанию 0.158).
+      Однослойный пересчёт: U = 1 / (surfaceR + extraR + d/λ), d = thicknessMm/1000.
+      Многослойная наружная стена (objectMeta.externalWalls): R = surfaceR + dст/λст + dут/λут;
+      U = 1/R — см. wallAssembly.js.
+  extraR:
+    type: number
+    minimum: 0
+    description: Дополнительное сопротивление прочих слоёв, м²·К/Вт

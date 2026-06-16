@@ -1,0 +1,64 @@
+.root {
+  margin-top: 12px;
+}
+
+.hint {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.error {
+  margin: 0 0 10px;
+  color: #b45309;
+  font-size: 0.88rem;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  border-color: var(--accent-border);
+}
+
+.cardSelected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-border);
+}
+
+.cardTitle {
+  font-weight: 600;
+  color: var(--text-h);
+  line-height: 1.3;
+}
+
+.cardBadge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cardDesc {
+  font-size: 0.86rem;
+  color: var(--text);
+  line-height: 1.4;
+}

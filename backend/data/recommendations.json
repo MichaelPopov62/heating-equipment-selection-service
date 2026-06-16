@@ -1,0 +1,128 @@
+[
+  {
+    "code": "REC_BOILER_OPTIMAL",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "automationHints",
+    "equipmentType": "boiler",
+    "title": "Оптимальна потужність котла",
+    "text": "Потужність котла підібрана оптимально. Вона покриває пікові тепловтрати з запасом і розрахункову потребу в ГВС за обраною схемою."
+  },
+  {
+    "code": "WARN_BOILER_UNDERPOWERED",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "boiler",
+    "title": "Недостатня потужність котла",
+    "text": "Увага! Максимальна потужність вибраного котла ({{boilerMaxKw}} кВт) нижча за розрахункову потребу ({{requiredKw}} кВт); у каталозі немає потужнішої моделі після фільтрів."
+  },
+  {
+    "code": "REC_APT_SINGLE_TO_COMBI_OPTIMIZATION",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "boiler",
+    "title": "Технологическая оптимизация подбора",
+    "text": "Для вашей квартиры расчётная отопительная нагрузка составляет всего {{heatingLoadKw}} кВт, а минимальный одноконтурный (1К) котёл в каталоге — от {{smallestSingleMaxKw}} кВт. При схеме «1К + электробойлер» котёл подобран только на отопление; ГВС обеспечивает отдельный накопитель. Это создаёт запас по номиналу котла — учитывайте модуляцию и риск тактования. Альтернатива: двухконтурный котёл (кнопка «Применить схему») — встроенная ГВС без отдельного электробойлера."
+  },
+  {
+    "code": "WARN_APT_ELECTRIC_TO_COMBI_NO_SINGLE",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "boiler",
+    "title": "Схема переведена на двухконтурный котёл",
+    "text": "Подобрана двухконтурная модель: в каталоге нет подходящих настенных одноконтурных котлов для квартиры. Схема переведена на проточную ГВС через котёл; электробойлер исключён для экономии."
+  },
+  {
+    "code": "REC_APT_COMBI_SERIAL_BUFFER",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "automationHints",
+    "equipmentType": "boiler",
+    "title": "Последовательный буфер ГВС (лайфхак)",
+    "text": "Инженерный лайфхак (последовательное подключение): если вы выбрали двухконтурный котёл max-combi, но хотите комфорт ближе к системе с накопителем, можно установить небольшой электрический бойлер ({{bufferMinLiters}}–{{bufferMaxLiters}} л) последовательно после котла. Подайте вход бойлера от выхода ГВС котла — котёл обеспечит основной нагрев газом, а бойлер выступит температурным буфером и сгладит перепады при одновременном открытии нескольких кранов. Выбирайте модель, допускающую подачу предварительно нагретой воды, и согласуйте схему с монтажником (обратные клапаны, защита от перегрева). Это опциональное улучшение монтажа, не входящее в автоматический подбор оборудования."
+  },
+  {
+    "code": "WARN_DHW_TIME_LONG",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "water_heater",
+    "title": "Тривалий час нагріву БКН",
+    "text": "Розрахунковий час повного відновлення запасу гарячої води (~{{heatTimeMinutes}} хв) перевищує {{thresholdMinutes}} хв — тривале відключення повної віддачі на опалення; розгляньте потужніший котел/БКН або менший об'єм бака."
+  },
+  {
+    "code": "WARN_FLOOR_OVERHEATING_MATERIAL",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "underfloor_heating",
+    "title": "Риск повреждения финишного покрытия",
+    "text": "Комната «{{roomName}}»: при режиме теплоносителя {{circuitSupplyC}}/{{circuitReturnC}} °C (шаг укладки {{pipeSpacingMm}} мм) температура поверхности пола достигнет {{surfaceTempC}} °C. Для «{{finishName}}» максимум {{maxTempC}} °C (q↑≈{{heatFluxUpWm2}} Вт/м², допустимо ≈{{maxAllowableHeatFluxUpWm2}} Вт/м²). Материал может деформироваться, образовать щели или выделять вредные вещества."
+  },
+  {
+    "code": "WARN_FLOOR_OVERHEATING_COMFORT",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "underfloor_heating",
+    "title": "Превышена нормативная температура пола",
+    "text": "Комната «{{roomName}}»: расчётная температура плитки {{surfaceTempC}} °C при шаге укладки {{pipeSpacingMm}} мм и контуре {{circuitSupplyC}}/{{circuitReturnC}} °C. В зонах постоянного пребывания рекомендуется не выше {{maxTempC}} °C — возможен дискомфорт и отёки ног."
+  },
+  {
+    "code": "REC_UFH_ACTION_INCREASE_SPACING",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "automationHints",
+    "equipmentType": "underfloor_heating",
+    "title": "Увеличьте шаг укладки трубы",
+    "text": "Комната «{{roomName}}»: увеличьте шаг укладки с {{pipeSpacingMm}} до {{suggestedPipeSpacingMm}} мм в анкете — это снизит q↑ и температуру поверхности без смены покрытия."
+  },
+  {
+    "code": "REC_UFH_ACTION_CHANGE_FINISH",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "automationHints",
+    "equipmentType": "underfloor_heating",
+    "title": "Смените финишное покрытие",
+    "text": "Комната «{{roomName}}»: для снижения Tповерх рассмотрите клеевой кварцвинил или керамическую плитку (меньшее Rλ,B финиша), либо увеличьте шаг укладки."
+  },
+  {
+    "code": "WARN_UFH_MIXING_NODE_REQUIRED",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "underfloor_heating",
+    "title": "Требуется смесительный узел ТП",
+    "text": "Подача котла {{boilerSupplyC}} °C выше температуры контура пола {{floorCircuitSupplyC}} °C — установите насосно-смесительный узел (ориентир расхода {{flowRateM3PerHour}} м³/ч, напор от {{headMetersMin}} м, Kvs клапана от {{valveKvsMin}} м³/ч)."
+  },
+  {
+    "code": "REC_UFH_HYDRAULIC_SEPARATOR_AUTO",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "automationHints",
+    "equipmentType": "underfloor_heating",
+    "title": "Гидрострелка для крупного объекта",
+    "text": "При расчётной мощности котла {{requiredBoilerKw}} кВт (порог авто {{minBoilerKw}} кВт) рекомендуется схема «гидравлическая стрелка + зональные контуры» вместо НСУ на коллекторе."
+  },
+  {
+    "code": "WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "underfloor_heating",
+    "title": "Ограничение температуры покрытия",
+    "text": "Комната «{{roomName}}»: пресет режима ТП ограничил максимальную температуру поверхности до {{presetMaxTempC}} °C (паспорт «{{finishName}}»: {{finishMaxTempC}} °C)."
+  },
+  {
+    "code": "WARN_UFH_ONLY_TRADITIONAL_BOILER",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "boiler",
+    "title": "Только ТП и высокотемпературный котёл",
+    "text": "Режим «только тёплый пол» рассчитан на низкотемпературный контур (40/30 °C). При графике {{supplyC}}/{{returnC}} °C ({{thermalRegimeLabel}}) или неконденсационном котле «{{boilerModel}}» возможны тактование и снижение КПД — выберите конденсационный котёл и график 55/45 или 40/30."
+  }
+]

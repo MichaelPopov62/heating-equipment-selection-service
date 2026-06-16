@@ -1,0 +1,197 @@
+/* Назначение: Стили списка помещений.
+   Описание: Кнопки управления комнатами, сводка стен и layout блока RoomsForm. */
+@import '../../styles/custom-media.css';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.smallButton,
+.primaryButton {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--surface-1);
+  color: var(--text);
+  font: 600 13px/1.2 var(--sans);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    transform 60ms ease;
+}
+
+.smallButton:hover:not(:disabled),
+.primaryButton:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: color-mix(in srgb, var(--border) 60%, var(--text-m) 40%);
+}
+
+.smallButton:active:not(:disabled),
+.primaryButton:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+
+.smallButton:focus-visible,
+.primaryButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 18%, transparent);
+}
+
+.smallButton:disabled,
+.primaryButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.title {
+  margin: 0;
+  font: 700 16px/1.2 var(--sans);
+  color: var(--text-h);
+}
+
+.subtitle {
+  margin-top: 6px;
+  font: 500 12px/1.35 var(--sans);
+  color: var(--text-m);
+}
+
+.emptyState {
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  padding: 14px 12px;
+  background: var(--surface-2);
+  color: var(--text-m);
+  font: 500 13px/1.35 var(--sans);
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-2);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.accHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.accHeader:hover {
+  background: color-mix(in srgb, var(--surface-1) 70%, transparent);
+}
+
+.accHeader:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 18%, transparent);
+}
+
+.accHeaderLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.accHeaderRight {
+  font: 600 12px/1.2 var(--sans);
+  color: var(--text-m);
+}
+
+.accPanel {
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.cardTitle {
+  font: 700 14px/1.2 var(--sans);
+  color: var(--text-h);
+}
+
+.cardMeta {
+  font: 500 12px/1.2 var(--sans);
+  color: var(--text-m);
+}
+
+.formGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.label {
+  font: 600 12px/1.2 var(--sans);
+  color: var(--text-h);
+}
+
+.control {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--surface-1);
+  color: var(--text);
+  font: 500 13px/1.2 var(--sans);
+}
+
+.hint {
+  composes: hint from '../../styles/formElements.module.css';
+}
+
+@media (--tablet) {
+  .card {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 320px;
+  }
+
+  .field {
+    flex: 1 1 calc(50% - 5px);
+    min-width: 220px;
+  }
+}
+

@@ -1,0 +1,11 @@
+type: object
+additionalProperties: false
+required: [maxSurfaceTemperatureCelsius, maxCoveringResistanceM2KW]
+properties:
+  maxSurfaceTemperatureCelsius:
+    type: number
+    description: Макс. температура поверхности финишного покрытия, °C (ПВХ/кварцвинил — 27)
+  maxCoveringResistanceM2KW:
+    type: number
+    description: Предельное Rλ,B над контуром (ориентир EN 1264-3 — 0,15 м²·K/Вт)
+  notes: { type: string }

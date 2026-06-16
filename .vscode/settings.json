@@ -1,0 +1,12 @@
+{
+  "eslint.validate": ["javascript", "javascriptreact"],
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "css.customData": [".vscode/css-custom-data.json"],
+  "scss.customData": [".vscode/css-custom-data.json"],
+  "less.customData": [".vscode/css-custom-data.json"],
+  "css.lint.unknownProperties": "ignore"
+}
+

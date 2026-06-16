@@ -1,0 +1,6 @@
+type: object
+required: [ok, project]
+properties:
+  ok: { type: boolean, enum: [true] }
+  project:
+    $ref: ProjectDetail.yaml

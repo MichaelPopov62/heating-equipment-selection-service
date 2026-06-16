@@ -1,0 +1,11 @@
+type: object
+required: [ok, calculations, total, limit, skip]
+properties:
+  ok: { type: boolean, enum: [true] }
+  calculations:
+    type: array
+    items:
+      $ref: CalculationListItem.yaml
+  total: { type: integer, minimum: 0 }
+  limit: { type: integer, minimum: 0 }
+  skip: { type: integer, minimum: 0 }

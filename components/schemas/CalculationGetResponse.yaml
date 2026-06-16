@@ -1,0 +1,6 @@
+type: object
+required: [ok, calculation]
+properties:
+  ok: { type: boolean, enum: [true] }
+  calculation:
+    $ref: CalculationDetail.yaml

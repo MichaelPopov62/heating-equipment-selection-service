@@ -1,0 +1,1905 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-04-21",
+  "currency": "UAH",
+  "products": {
+    "boilers": {
+      "doubleCircuit": [
+        {
+          "model": "Vaillant ecoTEC pro VUW 246/5-3",
+          "powerKw": {
+            "max": 24,
+            "min": 6.2
+          },
+          "fuel": "Газ",
+          "efficiencyPercent": 107,
+          "isDoubleCircuit": true,
+          "gasConsumptionM3PerHour": 2.4,
+          "price": 48500,
+          "mountingType": "wall",
+          "connectionDiameters": ["3/4 дюйма (отопление)", "1/2 дюйма (ГВС)"],
+          "circuitsCount": 2,
+          "type": "condensing"
+        },
+        {
+          "model": "Viessmann Vitodens 050-W",
+          "powerKw": {
+            "max": 25,
+            "min": 3.2
+          },
+          "fuel": "Газ",
+          "efficiencyPercent": 108,
+          "isDoubleCircuit": true,
+          "gasConsumptionM3PerHour": 2.4,
+          "price": 52000,
+          "circuitsCount": 2,
+          "type": "condensing"
+        },
+        {
+          "model": "Baxi ECO Home 24 F",
+          "powerKw": {
+            "max": 24,
+            "min": 9.3
+          },
+          "fuel": "Газ",
+          "efficiencyPercent": 92.9,
+          "isDoubleCircuit": true,
+          "gasConsumptionM3PerHour": 2.73,
+          "price": 35000,
+          "circuitsCount": 2,
+          "type": "traditional"
+        },
+        {
+          "brand": "Baxi",
+          "model": "Eco5 Blue 24",
+          "priceSegment": "budget",
+          "type": "Gas Traditional",
+          "combustionType": "turbo",
+          "circuitsCount": 2,
+          "specs": {
+            "power": {
+              "min_kw": 9.3,
+              "max_heating_kw": 24,
+              "max_dhw_kw": 24
+            },
+            "efficiency": {
+              "nominal_80_60": 93
+            },
+            "modulation_ratio": "1:3",
+            "gas_consumption": {
+              "max_m3_h": 2.73,
+              "min_m3_h": 1.12
+            },
+            "dhw": {
+              "delta_t_25_l_min": 13.7,
+              "min_flow_l_min": 2
+            },
+            "dimensions": {
+              "height": 730,
+              "width": 400,
+              "depth": 298,
+              "weight_kg": 30
+            }
+          },
+          "positioning": "Надежный классический котел для квартир и небольших домов.",
+          "tags": [
+            "wall-mounted",
+            "double-circuit",
+            "traditional",
+            "budget-friendly"
+          ],
+          "price": 29900,
+          "isDoubleCircuit": true
+        },
+        {
+          "brand": "Baxi",
+          "model": "Duo-Tec Compact 24 E",
+          "priceSegment": "optimal",
+          "combustionType": "turbo",
+          "type": "condensing",
+          "power": {
+            "min_kw": 3.7,
+            "max_heating_kw": 20.6,
+            "max_dhw_kw": 24.7
+          },
+          "efficiencyPercent": {
+            "nominal_80_60": 97.7,
+            "condensing_50_30": 107.6,
+            "seasonal": 91
+          },
+          "modulation": "1:7",
+          "gas_consumption_max_m3_h": 2.61,
+          "specs": {
+            "expansion_tank_l": 7,
+            "protection_class": "IPX5D"
+          },
+          "price": 34800,
+          "circuitsCount": 2,
+          "isDoubleCircuit": true
+        },
+        {
+          "brand": "Baxi",
+          "model": "Duo-Tec Compact 28 E",
+          "priceSegment": "optimal",
+          "combustionType": "turbo",
+          "type": "Gas Condensing",
+          "circuitsCount": 2,
+          "specs": {
+            "power": {
+              "min_kw": 3.8,
+              "max_heating_kw": 24.7,
+              "max_dhw_kw": 28.9
+            },
+            "efficiency": {
+              "nominal_80_60": 97.7,
+              "condensing_50_30": 107.6
+            },
+            "modulation_ratio": "1:7",
+            "gas_consumption": {
+              "max_m3_h": 3.06,
+              "min_m3_h": 0.41
+            },
+            "dhw": {
+              "delta_t_25_l_min": 16.1,
+              "min_flow_l_min": 2
+            },
+            "dimensions": {
+              "height": 700,
+              "width": 400,
+              "depth": 299,
+              "weight_kg": 34
+            }
+          },
+          "tags": ["wall-mounted", "double-circuit", "condensing"],
+          "price": 39200,
+          "isDoubleCircuit": true
+        },
+        {
+          "brand": "Baxi",
+          "model": "Luna Classic 24 INT-A",
+          "priceSegment": "optimal",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "specs": {
+            "power": {
+              "min_kw": 4.8,
+              "max_heating_kw": 20,
+              "max_dhw_kw": 24
+            },
+            "efficiency": {
+              "nominal_80_60": 98,
+              "condensing_50_30": 108.8
+            },
+            "modulation_ratio": "1:5",
+            "gas_consumption": {
+              "max_m3_h": 2.61,
+              "min_m3_h": 0.52
+            },
+            "dhw": {
+              "delta_t_25_l_min": 13.8,
+              "min_flow_l_min": 2
+            },
+            "dimensions": {
+              "height": 700,
+              "width": 395,
+              "depth": 285,
+              "weight_kg": 28.5
+            }
+          },
+          "tags": ["wall-mounted", "double-circuit", "condensing", "compact"],
+          "price": 37200,
+          "circuitsCount": 2,
+          "isDoubleCircuit": true
+        },
+        {
+          "brand": "Baxi",
+          "model": "Luna Duo-Tec E 24",
+          "priceSegment": "premium",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "circuitsCount": 2,
+          "specs": {
+            "power": {
+              "min_kw": 3.4,
+              "max_heating_kw": 20.6,
+              "max_dhw_kw": 24.7
+            },
+            "efficiency": {
+              "nominal_80_60": 97.7,
+              "condensing_50_30": 107.6
+            },
+            "modulation_ratio": "1:7",
+            "gas_consumption": {
+              "max_m3_h": 2.61,
+              "min_m3_h": 0.37
+            },
+            "dhw": {
+              "delta_t_25_l_min": 13.8,
+              "min_flow_l_min": 2
+            },
+            "dimensions": {
+              "height": 763,
+              "width": 450,
+              "depth": 345,
+              "weight_kg": 34
+            }
+          },
+          "tags": [
+            "wall-mounted",
+            "double-circuit",
+            "condensing",
+            "high-performance"
+          ],
+          "price": 48500,
+          "isDoubleCircuit": true
+        },
+        {
+          "brand": "Baxi",
+          "model": "Luna Duo-Tec E 33",
+          "priceSegment": "premium",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "circuitsCount": 2,
+          "specs": {
+            "power": {
+              "min_kw": 4.7,
+              "max_heating_kw": 28,
+              "max_dhw_kw": 33
+            },
+            "efficiency": {
+              "nominal_80_60": 97.7,
+              "condensing_50_30": 107.6
+            },
+            "modulation_ratio": "1:7",
+            "gas_consumption": {
+              "max_m3_h": 3.49,
+              "min_m3_h": 0.51
+            },
+            "dhw": {
+              "delta_t_25_l_min": 18.9,
+              "min_flow_l_min": 2
+            },
+            "dimensions": {
+              "height": 763,
+              "width": 450,
+              "depth": 345,
+              "weight_kg": 37.5
+            }
+          },
+          "tags": [
+            "wall-mounted",
+            "double-circuit",
+            "condensing",
+            "high-performance",
+            "high-power"
+          ],
+          "price": 56500,
+          "isDoubleCircuit": true
+        },
+        {
+          "brand": "Baxi",
+          "model": "Luna Duo-Tec E 40",
+          "priceSegment": "premium",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "circuitsCount": 2,
+          "specs": {
+            "power": {
+              "min_kw": 5.7,
+              "max_heating_kw": 32,
+              "max_dhw_kw": 40
+            },
+            "efficiency": {
+              "nominal_80_60": 97.7,
+              "condensing_50_30": 107.6
+            },
+            "modulation_ratio": "1:7",
+            "gas_consumption": {
+              "max_m3_h": 4.23,
+              "min_m3_h": 0.62
+            },
+            "dhw": {
+              "delta_t_25_l_min": 22.9,
+              "min_flow_l_min": 2
+            },
+            "dimensions": {
+              "height": 763,
+              "width": 450,
+              "depth": 345,
+              "weight_kg": 39.5
+            }
+          },
+          "tags": [
+            "wall-mounted",
+            "double-circuit",
+            "condensing",
+            "ultra-power",
+            "high-performance"
+          ],
+          "price": 62500,
+          "isDoubleCircuit": true
+        },
+        {
+          "brand": "Baxi",
+          "model": "Luna Duo-Tec E 28",
+          "priceSegment": "premium",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "circuitsCount": 2,
+          "specs": {
+            "power": {
+              "min_kw": 3.8,
+              "max_heating_kw": 24.7,
+              "max_dhw_kw": 28.9
+            },
+            "efficiency": {
+              "nominal_80_60": 97.7,
+              "condensing_50_30": 107.6
+            },
+            "modulation_ratio": "1:7",
+            "gas_consumption": {
+              "max_m3_h": 3.06,
+              "min_m3_h": 0.41
+            },
+            "dhw": {
+              "delta_t_25_l_min": 16.1,
+              "min_flow_l_min": 2
+            },
+            "dimensions": {
+              "height": 763,
+              "width": 450,
+              "depth": 345,
+              "weight_kg": 34.5
+            }
+          },
+          "tags": [
+            "wall-mounted",
+            "double-circuit",
+            "condensing",
+            "high-performance"
+          ],
+          "price": 51800,
+          "isDoubleCircuit": true
+        },
+        {
+          "brand": "Baxi",
+          "model": "Luna Platinum 24+ GA",
+          "priceSegment": "premium",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "circuitsCount": 2,
+          "specs": {
+            "power": {
+              "min_kw": 2.4,
+              "max_heating_kw": 16,
+              "max_dhw_kw": 24
+            },
+            "efficiency": {
+              "nominal_80_60": 98.1,
+              "condensing_50_30": 107.6
+            },
+            "modulation_ratio": "1:10",
+            "gas_consumption": {
+              "max_m3_h": 2.61,
+              "min_m3_h": 0.26
+            },
+            "dhw": {
+              "delta_t_25_l_min": 13.8,
+              "min_flow_l_min": 2
+            },
+            "dimensions": {
+              "height": 763,
+              "width": 450,
+              "depth": 345,
+              "weight_kg": 34.5
+            }
+          },
+          "tags": [
+            "wall-mounted",
+            "double-circuit",
+            "condensing",
+            "premium",
+            "ultra-modulation"
+          ],
+          "price": 68500,
+          "isDoubleCircuit": true
+        },
+        {
+          "brand": "Nova Florida",
+          "model": "Orion Condensing KC 12",
+          "priceSegment": "medium",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "mountingType": "wall",
+          "circuitsCount": 2,
+          "specs": {
+            "power": {
+              "min_kw": 2.2,
+              "max_heating_kw": 12.0,
+              "max_dhw_kw": 24.0
+            },
+            "efficiency": {
+              "nominal_80_60": 98.2,
+              "condensing_50_30": 106.4
+            },
+            "modulation_ratio": "1:5",
+            "gas_consumption": {
+              "max_m3_h": 2.54,
+              "min_m3_h": 0.23
+            },
+            "dhw": {
+              "delta_t_25_l_min": 11.4,
+              "external_boiler_connection": false
+            },
+            "dimensions": {
+              "height": 700,
+              "width": 400,
+              "depth": 250,
+              "weight_kg": 30.0
+            }
+          },
+          "tags": [
+            "wall-mounted",
+            "double-circuit",
+            "condensing",
+            "medium",
+            "fast-dhw"
+          ],
+          "price": 83710,
+          "isDoubleCircuit": true
+        }
+      ],
+      "singleCircuit": [
+        {
+          "model": "Vaillant ecoTEC plus VU 246/5-5",
+          "powerKw": {
+            "max": 24,
+            "min": 3.8
+          },
+          "fuel": "Газ",
+          "efficiencyPercent": 108,
+          "isDoubleCircuit": false,
+          "gasConsumptionM3PerHour": 2.4,
+          "price": 55200,
+          "circuitsCount": 1,
+          "type": "condensing"
+        },
+        {
+          "model": "Protherm Panther 25 KTO",
+          "powerKw": {
+            "max": 25,
+            "min": 6.1
+          },
+          "fuel": "Газ",
+          "efficiencyPercent": 106,
+          "isDoubleCircuit": false,
+          "gasConsumptionM3PerHour": 2.6,
+          "price": 38200,
+          "circuitsCount": 1,
+          "type": "condensing"
+        },
+        {
+          "model": "Baxi Luna Alux 1.24",
+          "powerKw": {
+            "max": 24,
+            "min": 5.9
+          },
+          "fuel": "Газ",
+          "efficiencyPercent": 107.5,
+          "isDoubleCircuit": false,
+          "gasConsumptionM3PerHour": 2.5,
+          "price": 36200,
+          "circuitsCount": 1,
+          "type": "condensing"
+        },
+        {
+          "brand": "Baxi",
+          "model": "Duo-Tec Compact 1.24 E",
+          "priceSegment": "optimal",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "circuitsCount": 1,
+          "specs": {
+            "power": {
+              "min_kw": 3.4,
+              "max_heating_kw": 24.7,
+              "max_dhw_kw": 24.7
+            },
+            "efficiency": {
+              "nominal_80_60": 97.7,
+              "condensing_50_30": 107.6
+            },
+            "modulation_ratio": "1:7",
+            "gas_consumption": {
+              "max_m3_h": 2.61,
+              "min_m3_h": 0.37
+            },
+            "dhw": {
+              "delta_t_25_l_min": null,
+              "external_boiler_connection": true
+            },
+            "dimensions": {
+              "height": 700,
+              "width": 400,
+              "depth": 299,
+              "weight_kg": 30
+            }
+          },
+          "tags": ["wall-mounted", "single-circuit", "condensing", "compact"],
+          "price": 42800,
+          "isDoubleCircuit": false
+        },
+        {
+          "brand": "Baxi",
+          "model": "Luna Duo-Tec E 1.28",
+          "priceSegment": "premium",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "circuitsCount": 1,
+          "specs": {
+            "power": {
+              "min_kw": 3.8,
+              "max_heating_kw": 28.9,
+              "max_dhw_kw": 28.9
+            },
+            "efficiency": {
+              "nominal_80_60": 97.7,
+              "condensing_50_30": 107.6
+            },
+            "modulation_ratio": "1:7",
+            "gas_consumption": {
+              "max_m3_h": 3.06,
+              "min_m3_h": 0.41
+            },
+            "dhw": {
+              "delta_t_25_l_min": null,
+              "external_boiler_connection": true
+            },
+            "dimensions": {
+              "height": 763,
+              "width": 450,
+              "depth": 345,
+              "weight_kg": 30
+            }
+          },
+          "tags": [
+            "wall-mounted",
+            "single-circuit",
+            "condensing",
+            "high-performance"
+          ],
+          "price": 47200,
+          "isDoubleCircuit": false
+        },
+        {
+          "brand": "Baxi",
+          "model": "Luna Platinum 1.24+ GA",
+          "priceSegment": "premium",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "circuitsCount": 1,
+          "specs": {
+            "power": {
+              "min_kw": 2.4,
+              "max_heating_kw": 24,
+              "max_dhw_kw": 24
+            },
+            "efficiency": {
+              "nominal_80_60": 98.1,
+              "condensing_50_30": 107.6
+            },
+            "modulation_ratio": "1:10",
+            "gas_consumption": {
+              "max_m3_h": 2.61,
+              "min_m3_h": 0.26
+            },
+            "dhw": {
+              "delta_t_25_l_min": null,
+              "external_boiler_connection": true
+            },
+            "dimensions": {
+              "height": 763,
+              "width": 450,
+              "depth": 345,
+              "weight_kg": 30
+            }
+          },
+          "tags": [
+            "wall-mounted",
+            "single-circuit",
+            "condensing",
+            "premium",
+            "ultra-modulation"
+          ],
+          "price": 65800,
+          "isDoubleCircuit": false
+        },
+        {
+          "brand": "Baxi",
+          "model": "Luna Platinum 1.32+ GA",
+          "priceSegment": "premium",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "circuitsCount": 1,
+          "specs": {
+            "power": {
+              "min_kw": 3.2,
+              "max_heating_kw": 32,
+              "max_dhw_kw": 32
+            },
+            "efficiency": {
+              "nominal_80_60": 98.1,
+              "condensing_50_30": 107.6
+            },
+            "modulation_ratio": "1:10",
+            "gas_consumption": {
+              "max_m3_h": 3.48,
+              "min_m3_h": 0.35
+            },
+            "dhw": {
+              "delta_t_25_l_min": null,
+              "external_boiler_connection": true
+            },
+            "dimensions": {
+              "height": 763,
+              "width": 450,
+              "depth": 345,
+              "weight_kg": 34.5
+            }
+          },
+          "tags": [
+            "wall-mounted",
+            "single-circuit",
+            "condensing",
+            "premium",
+            "high-power",
+            "ultra-modulation"
+          ],
+          "price": 71800,
+          "isDoubleCircuit": false
+        },
+        {
+          "brand": "Nova Florida",
+          "model": "Delfis Condensing KRB 12",
+          "priceSegment": "medium",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "mountingType": "wall",
+          "circuitsCount": 1,
+          "specs": {
+            "power": {
+              "min_kw": 2.2,
+              "max_heating_kw": 12.0,
+              "max_dhw_kw": 12.0
+            },
+            "efficiency": {
+              "nominal_80_60": 98.2,
+              "condensing_50_30": 106.4
+            },
+            "modulation_ratio": "1:5",
+            "gas_consumption": {
+              "max_m3_h": 1.25,
+              "min_m3_h": 0.23
+            },
+            "dhw": {
+              "delta_t_25_l_min": null,
+              "external_boiler_connection": true
+            },
+            "dimensions": {
+              "height": 700,
+              "width": 400,
+              "depth": 250,
+              "weight_kg": 28.5
+            }
+          },
+          "tags": [
+            "wall-mounted",
+            "single-circuit",
+            "condensing",
+            "medium",
+            "compact"
+          ],
+          "price": 66579,
+          "isDoubleCircuit": false
+        },
+        {
+          "brand": "Vaillant",
+          "model": "ecoTec Plus VU 10CS/1-5 (N-INT2)",
+          "priceSegment": "premium",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "mountingType": "wall",
+          "circuitsCount": 1,
+          "specs": {
+            "power": {
+              "min_kw": 2.7,
+              "max_heating_kw": 10.9,
+              "max_dhw_kw": 14.0
+            },
+            "efficiency": {
+              "nominal_80_60": 98.0,
+              "condensing_50_30": 108.0
+            },
+            "modulation_ratio": "1:5",
+            "gas_consumption": {
+              "max_m3_h": 1.14,
+              "min_m3_h": 0.28
+            },
+            "dhw": {
+              "delta_t_25_l_min": null,
+              "external_boiler_connection": true
+            },
+            "dimensions": {
+              "height": 720,
+              "width": 440,
+              "depth": 348,
+              "weight_kg": 34.0
+            }
+          },
+          "tags": [
+            "wall-mounted",
+            "single-circuit",
+            "condensing",
+            "premium",
+            "ioniDetect"
+          ],
+          "price": 91054,
+          "isDoubleCircuit": false
+        },
+        {
+          "brand": "Attack",
+          "model": "EKO 12",
+          "priceSegment": "medium",
+          "type": "Gas Condensing",
+          "combustionType": "turbo",
+          "mountingType": "floor",
+          "circuitsCount": 1,
+          "specs": {
+            "power": {
+              "min_kw": 3.0,
+              "max_heating_kw": 12.0,
+              "max_dhw_kw": 12.0
+            },
+            "efficiency": {
+              "nominal_80_60": 97.5,
+              "condensing_50_30": 103.0
+            },
+            "modulation_ratio": "1:4",
+            "gas_consumption": {
+              "max_m3_h": 1.27,
+              "min_m3_h": 0.32
+            },
+            "dhw": {
+              "delta_t_25_l_min": null,
+              "external_boiler_connection": true
+            },
+            "dimensions": {
+              "height": 845,
+              "width": 450,
+              "depth": 530,
+              "weight_kg": 46.0
+            }
+          },
+          "tags": ["floor-standing", "single-circuit", "condensing", "medium"],
+          "price": 35880,
+          "isDoubleCircuit": false
+        },
+        {
+          "brand": "Aton",
+          "model": "Atmo 12E",
+          "priceSegment": "economy",
+          "type": "Gas Atmospheric",
+          "combustionType": "chimney",
+          "mountingType": "floor",
+          "circuitsCount": 1,
+          "specs": {
+            "power": {
+              "min_kw": 12.0,
+              "max_heating_kw": 12.0,
+              "max_dhw_kw": null
+            },
+            "efficiency": {
+              "nominal_80_60": 90.0,
+              "condensing_50_30": null
+            },
+            "modulation_ratio": "none",
+            "gas_consumption": {
+              "max_m3_h": 1.39,
+              "min_m3_h": 1.39
+            },
+            "dhw": {
+              "delta_t_25_l_min": null,
+              "external_boiler_connection": false
+            },
+            "dimensions": {
+              "height": 746,
+              "width": 324,
+              "depth": 530,
+              "weight_kg": 45.0
+            }
+          },
+          "tags": [
+            "floor-standing",
+            "single-circuit",
+            "atmospheric",
+            "economy",
+            "non-electric"
+          ],
+          "price": 18770,
+          "isDoubleCircuit": false
+        }
+      ]
+    },
+    "radiators": [
+      {
+        "model": "Global Vox R 500",
+        "outputWatts": {
+          "deltaT70": 193,
+          "deltaT50": 125
+        },
+        "material": "Алюминий",
+        "volumeLiters": 0.46,
+        "dimensions": {
+          "height": 590,
+          "width": 80,
+          "depth": 95,
+          "interaxle": 500
+        },
+        "price": 890,
+        "priceBasis": "section"
+      },
+      {
+        "model": "Fondital Exclusivo B3",
+        "outputWatts": {
+          "deltaT70": 178,
+          "deltaT50": 115
+        },
+        "material": "Алюминий",
+        "volumeLiters": 0.25,
+        "dimensions": {
+          "height": 557,
+          "width": 80,
+          "depth": 100,
+          "interaxle": 500
+        },
+        "price": 760,
+        "priceBasis": "section"
+      },
+      {
+        "model": "Mirado 500/96",
+        "outputWatts": {
+          "deltaT70": 205,
+          "deltaT50": 132
+        },
+        "material": "Биметалл",
+        "volumeLiters": 0.2,
+        "dimensions": {
+          "height": 560,
+          "width": 80,
+          "depth": 96,
+          "interaxle": 500
+        },
+        "price": 940,
+        "priceBasis": "section"
+      },
+      {
+        "brand": "Fondital",
+        "model": "Exclusivo 350/100 B4",
+        "type": "Aluminum",
+        "construction": "sectional",
+        "priceSegment": "standard",
+        "specs": {
+          "dimensions": {
+            "center_distance_mm": 350,
+            "height_mm": 407,
+            "depth_mm": 100,
+            "width_section_mm": 80
+          },
+          "pressure": {
+            "operating_bar": 16,
+            "testing_bar": 24
+          },
+          "thermal_output_section": {
+            "dt_30_w": 50.1,
+            "dt_50_w": 97.8,
+            "dt_70_w": 153
+          },
+          "volume_l_section": 0.2,
+          "weight_kg_section": 1.02
+        },
+        "tags": ["high-efficiency", "made-in-italy", "low-inertia"],
+        "description": "Литой алюминиевый радиатор с высокой теплоотдачей и антикоррозийным покрытием.",
+        "price": 590,
+        "priceBasis": "section"
+      },
+      {
+        "brand": "Fondital",
+        "model": "Blitz Super B4 500/100",
+        "type": "Aluminum",
+        "construction": "sectional",
+        "priceSegment": "standard",
+        "specs": {
+          "dimensions": {
+            "center_distance_mm": 500,
+            "height_mm": 557,
+            "depth_mm": 97,
+            "width_section_mm": 80
+          },
+          "pressure": {
+            "operating_bar": 16,
+            "testing_bar": 24
+          },
+          "thermal_output_section": {
+            "dt_30_w": 64.2,
+            "dt_50_w": 124.9,
+            "dt_70_w": 191
+          },
+          "volume_l_section": 0.27,
+          "weight_kg_section": 1.31
+        },
+        "package_calculation": {
+          "sections_count": 8,
+          "total_width_mm": 640,
+          "total_output_dt_50_w": 999.2
+        },
+        "tags": [
+          "high-pressure-cast",
+          "reinforced-structure",
+          "universal-connection"
+        ],
+        "description": "Высокопрочный алюминиевый радиатор, разработанный специально для обеспечения максимальной теплоотдачи при минимальных габаритах.",
+        "price": 720,
+        "priceBasis": "section"
+      },
+      {
+        "brand": "Fondital",
+        "model": "Aleternum B4 500/100",
+        "type": "Aluminum (Premium)",
+        "construction": "sectional",
+        "priceSegment": "premium",
+        "specs": {
+          "dimensions": {
+            "center_distance_mm": 500,
+            "height_mm": 557,
+            "depth_mm": 97,
+            "width_section_mm": 80
+          },
+          "pressure": {
+            "operating_bar": 16,
+            "testing_bar": 24
+          },
+          "thermal_output_section": {
+            "dt_30_w": 65.1,
+            "dt_50_w": 126.5,
+            "dt_70_w": 194
+          },
+          "volume_l_section": 0.26,
+          "weight_kg_section": 1.35
+        },
+        "package_calculation": {
+          "sections_count": 10,
+          "total_width_mm": 800,
+          "total_output_dt_50_w": 1265
+        },
+        "tags": [
+          "anti-corrosion",
+          "aletermum-coating",
+          "extended-warranty",
+          "high-efficiency"
+        ],
+        "description": "Инновационный радиатор с полной внутренней защитой от коррозии. Подходит для систем с нестабильным качеством теплоносителя.",
+        "price": 1020,
+        "priceBasis": "section"
+      },
+      {
+        "brand": "Korado",
+        "model": "Radik Klasik 22-K 500x1000",
+        "article": "22050100-50-0010",
+        "type": "Steel Panel",
+        "construction": "monolith (Type 22)",
+        "priceSegment": "standard",
+        "specs": {
+          "dimensions": {
+            "height_mm": 500,
+            "length_mm": 1000,
+            "depth_mm": 100
+          },
+          "connection": {
+            "type": "side",
+            "thread": "4 x G1/2 inside"
+          },
+          "pressure": {
+            "operating_bar": 10,
+            "testing_bar": 13
+          },
+          "thermal_output_full": {
+            "dt_30_w": 673,
+            "dt_50_w": 1315,
+            "dt_70_w": 2085
+          },
+          "volume_l_total": 5.8,
+          "weight_kg_total": 26.2
+        },
+        "tags": ["european-standard", "side-connection", "high-reliability"],
+        "description": "Стальной панельный радиатор с боковым подключением. Оптимален для систем с принудительной циркуляцией.",
+        "price": 4350,
+        "priceBasis": "panel"
+      },
+      {
+        "brand": "Korad",
+        "model": "22VKP 500x1000",
+        "article": "V00225010009016011",
+        "type": "Steel Panel",
+        "construction": "monolith (Type 22)",
+        "priceSegment": "standard",
+        "specs": {
+          "dimensions": {
+            "height_mm": 500,
+            "length_mm": 1000,
+            "depth_mm": 100
+          },
+          "connection": {
+            "type": "bottom",
+            "position": "right",
+            "thread": "2 x G1/2 inside (bottom)"
+          },
+          "pressure": {
+            "operating_bar": 10,
+            "testing_bar": 13
+          },
+          "thermal_output_full": {
+            "dt_30_w": 650,
+            "dt_50_w": 1270,
+            "dt_70_w": 2010
+          },
+          "volume_l_total": 5.4,
+          "weight_kg_total": 24.8
+        },
+        "tags": ["bottom-connection", "built-in-valve", "modern-look"],
+        "description": "Стальной панельный радиатор с нижним подключением и встроенным термоклапаном. Идеален для скрытой разводки труб.",
+        "price": 4580,
+        "priceBasis": "panel"
+      },
+      {
+        "brand": "Korad",
+        "model": "22K 500x3000",
+        "type": "Steel Panel",
+        "construction": "monolith (Type 22)",
+        "priceSegment": "standard",
+        "specs": {
+          "dimensions": {
+            "height_mm": 500,
+            "length_mm": 3000,
+            "depth_mm": 100
+          },
+          "connection": {
+            "type": "side",
+            "thread": "4 x G1/2 inside"
+          },
+          "pressure": {
+            "operating_bar": 10,
+            "testing_bar": 13
+          },
+          "thermal_output_full": {
+            "dt_30_w": 1968,
+            "dt_50_w": 3846,
+            "dt_70_w": 6084
+          },
+          "volume_l_total": 16.2,
+          "weight_kg_total": 74.4
+        },
+        "tags": ["side-connection", "high-length", "maximum-area"],
+        "description": "Длинный стальной панельный радиатор с боковым подключением. Идеально подходит для больших помещений с панорамными или низкими окнами.",
+        "price": 15322,
+        "priceBasis": "panel"
+      },
+      {
+        "brand": "Korad",
+        "model": "33K 600x1800",
+        "type": "Steel Panel",
+        "construction": "monolith (Type 33)",
+        "priceSegment": "standard",
+        "specs": {
+          "dimensions": {
+            "height_mm": 600,
+            "length_mm": 1800,
+            "depth_mm": 160
+          },
+          "connection": {
+            "type": "side",
+            "thread": "4 x G1/2 inside"
+          },
+          "pressure": {
+            "operating_bar": 10,
+            "testing_bar": 13
+          },
+          "thermal_output_full": {
+            "dt_30_w": 1920,
+            "dt_50_w": 3784,
+            "dt_70_w": 6012
+          },
+          "volume_l_total": 14.5,
+          "weight_kg_total": 68.2
+        },
+        "tags": ["side-connection", "triple-panel", "high-density-power"],
+        "description": "Сверхмощный трехпанельный радиатор (Тип 33) повышенной глубины. Выдает максимальный тепловой поток при относительно небольшой длине.",
+        "price": 15239,
+        "priceBasis": "panel"
+      },
+      {
+        "brand": "Korad",
+        "model": "22VKP 600x2300",
+        "article": "V00226023009016011",
+        "type": "Steel Panel",
+        "construction": "monolith (Type 22)",
+        "priceSegment": "standard",
+        "specs": {
+          "dimensions": {
+            "height_mm": 600,
+            "length_mm": 2300,
+            "depth_mm": 100
+          },
+          "connection": {
+            "type": "bottom",
+            "position": "right",
+            "thread": "2 x G1/2 inside (bottom)"
+          },
+          "pressure": {
+            "operating_bar": 10,
+            "testing_bar": 13
+          },
+          "thermal_output_full": {
+            "dt_30_w": 1612,
+            "dt_50_w": 3154,
+            "dt_70_w": 4980
+          },
+          "volume_l_total": 13.3,
+          "weight_kg_total": 61.6
+        },
+        "tags": ["bottom-connection", "built-in-valve", "modern-look"],
+        "description": "Стальной панельный радиатор увеличенной высоты с нижним подключением. Прекрасно интегрируется в современные интерьеры со скрытой разводкой.",
+        "price": 14921,
+        "priceBasis": "panel"
+      },
+      {
+        "brand": "Korad",
+        "model": "33K 500x2000",
+        "type": "Steel Panel",
+        "construction": "monolith (Type 33)",
+        "priceSegment": "standard",
+        "specs": {
+          "dimensions": {
+            "height_mm": 500,
+            "length_mm": 2000,
+            "depth_mm": 160
+          },
+          "connection": {
+            "type": "side",
+            "thread": "4 x G1/2 inside"
+          },
+          "pressure": {
+            "operating_bar": 10,
+            "testing_bar": 13
+          },
+          "thermal_output_full": {
+            "dt_30_w": 1860,
+            "dt_50_w": 3662,
+            "dt_70_w": 5824
+          },
+          "volume_l_total": 14.8,
+          "weight_kg_total": 65.4
+        },
+        "tags": ["side-connection", "triple-panel", "low-profile-heavy"],
+        "description": "Трехпанельный радиатор стандартной высоты 500 мм. Оптимальное решение для эффективного съема низкотемпературного тепла от конденсационных котлов.",
+        "price": 14692,
+        "priceBasis": "panel"
+      },
+      {
+        "brand": "Korad",
+        "model": "22K 600x2600",
+        "type": "Steel Panel",
+        "construction": "monolith (Type 22)",
+        "priceSegment": "standard",
+        "specs": {
+          "dimensions": {
+            "height_mm": 600,
+            "length_mm": 2600,
+            "depth_mm": 100
+          },
+          "connection": {
+            "type": "side",
+            "thread": "4 x G1/2 inside"
+          },
+          "pressure": {
+            "operating_bar": 10,
+            "testing_bar": 13
+          },
+          "thermal_output_full": {
+            "dt_30_w": 1822,
+            "dt_50_w": 3565,
+            "dt_70_w": 5630
+          },
+          "volume_l_total": 15.1,
+          "weight_kg_total": 69.7
+        },
+        "tags": ["side-connection", "high-length", "classic-dimension"],
+        "description": "Панельный радиатор высотой 600 мм с боковым подключением. Традиционная геометрия в сочетании с внушительной тепловой мощностью.",
+        "price": 14561,
+        "priceBasis": "panel"
+      }
+    ],
+    "waterHeaters": [
+      {
+        "model": "Atlantic Steatite Elite",
+        "type": "electric_storage",
+        "heatingElementType": "Сухой (стеатит)",
+        "features": ["Лучший для жесткой воды"],
+        "variants": [
+          {
+            "volumeLiters": 80,
+            "price": 8199,
+            "powerKw": 2.1,
+            "heatingTimeMinutes": 165
+          },
+          { "volumeLiters": 100, "price": 9499, "powerKw": 2.1 }
+        ]
+      },
+      {
+        "model": "Ariston Velis EVO",
+        "type": "electric_storage",
+        "heatingElementType": "Мокрый",
+        "features": ["Плоский дизайн", "Два бака"],
+        "variants": [
+          { "volumeLiters": 50, "price": 13100, "powerKw": 1.5 },
+          { "volumeLiters": 80, "price": 17888, "powerKw": 1.5 }
+        ]
+      },
+      {
+        "model": "Tesy Anticalc",
+        "type": "electric_storage",
+        "heatingElementType": "Сухой",
+        "powerDetails": "2×1.2 кВт",
+        "features": [],
+        "variants": [{ "volumeLiters": 80, "price": 6490, "powerKw": 2.4 }]
+      },
+      {
+        "model": "Gorenje GBFU 100 SIMB6",
+        "type": "electric_storage",
+        "heatingElementType": "Сухой",
+        "features": ["Узкий корпус"],
+        "variants": [{ "volumeLiters": 100, "price": 8790, "powerKw": 2 }]
+      },
+      {
+        "model": "Atlantic O'Pro 300",
+        "type": "electric_storage",
+        "heatingElementType": "Мокрый",
+        "features": ["Дом с несколькими точками водоразбора"],
+        "variants": [{ "volumeLiters": 300, "price": 22490, "powerKw": 2.4 }]
+      }
+    ],
+    "pipes": [
+      {
+        "id": "p-01",
+        "brand": "Rehau",
+        "material": "PEX-a",
+        "diameter": 16,
+        "wallThickness": 2.2,
+        "price": 120,
+        "category": "Отопление/Водоснабжение"
+      },
+      {
+        "id": "p-02",
+        "brand": "Valtec",
+        "material": "Металлопластик",
+        "armuvannya": "алюміній",
+        "operating temperature at 10 bar pressure": "0÷95 °C ",
+        "operating temperature at 25 bar pressure": "0÷25 °C",
+        "diameter": 16,
+        "wallThickness": 2,
+        "price": 75.9,
+        "category": "Отопление/Водоснабжение"
+      },
+      {
+        "id": "p-03",
+        "brand": "Valtec",
+        "material": "Металлопластик",
+        "armuvannya": "алюміній",
+        "operating temperature at 10 bar pressure": "0÷95 °C ",
+        "operating temperature at 25 bar pressure": "0÷25 °C",
+        "diameter": 20,
+        "wallThickness": 2,
+        "price": 101.98,
+        "category": "Отопление/Водоснабжение"
+      },
+      {
+        "id": "p-04",
+        "brand": "Valtec",
+        "material": "Металлопластик",
+        "armuvannya": "алюміній",
+        "operating temperature at 10 bar pressure": "0÷95 °C ",
+        "operating temperature at 25 bar pressure": "0÷25 °C",
+        "diameter": 26,
+        "wallThickness": 3,
+        "price": 215.61,
+        "category": "Отопление/Водоснабжение"
+      },
+      {
+        "id": "p-05",
+        "brand": "Valtec",
+        "material": "Металлопластик",
+        "armuvannya": "алюміній",
+        "operating temperature at 10 bar pressure": "0÷95 °C ",
+        "operating temperature at 25 bar pressure": "0÷25 °C",
+        "diameter": 32,
+        "wallThickness": 3,
+        "price": 303.62,
+        "category": "Отопление/Водоснабжение"
+      },
+      {
+        "id": "p-06",
+        "brand": "Valtec",
+        "material": "PE-XA EVOH",
+        "maximum working pressure (at 90°C)": "1 MPa (10 bar)",
+        "operating temperature": "20-95 °C",
+        "diameter": 16,
+        "wallThickness": 2.2,
+        "price": 72.06,
+        "category": "Отопление/Водоснабжение/теплі поли"
+      },
+      {
+        "id": "p-07",
+        "brand": "Valtec",
+        "material": "PE-XA EVOH",
+        "operating temperature": "20-95 °C",
+        "maximum working pressure (at 90°C)": "1 MPa (10 bar)",
+        "diameter": 20,
+        "wallThickness": 2.8,
+        "price": 107.63,
+        "category": "Отопление/Водоснабжение/теплі поли"
+      },
+      {
+        "id": "p-08",
+        "brand": "Valtec",
+        "material": "PE-XA EVOH",
+        "maximum working pressure (at 90°C)": "1 MPa (10 bar)",
+        "operating temperature": "20-95 °C",
+        "diameter": 25,
+        "wallThickness": 3.5,
+        "price": 167.42,
+        "category": "Отопление/Водоснабжение/теплі поли"
+      },
+      {
+        "id": "p-09",
+        "brand": "Valtec",
+        "material": "PE-XA EVOH",
+        "maximum working pressure (at 90°C)": "1 MPa (10 bar)",
+        "operating temperature": "20-95 °C",
+        "diameter": 32,
+        "wallThickness": 4.4,
+        "price": 276.18,
+        "category": "Отопление/Водоснабжение/теплі поли"
+      },
+      {
+        "id": "p-10",
+        "brand": "Valtec",
+        "material": " PP-R 100",
+        "working pressure-сold water supply": "2 MPa (20 bar)",
+        "working pressure-hot water supply(70ºС)": "0.8 MPa (8 bar)",
+        "working pressure-hot water supply(60ºС)": "1.2 MPa (12 bar)",
+        "diameter": 20,
+        "wallThickness": 3.4,
+        "price": 66.83,
+        "category": " холодное и горячее водоснабжение"
+      },
+      {
+        "id": "p-11",
+        "brand": "Valtec",
+        "material": " PP-R 100",
+        "working pressure-сold water supply": "2 MPa (20 bar)",
+        "working pressure-hot water supply(70ºС)": "0.8 MPa (8 bar)",
+        "working pressure-hot water supply(60ºС)": "1.2 MPa (12 bar)",
+        "diameter": 25,
+        "wallThickness": 4.2,
+        "price": 105.08,
+        "category": " холодное и горячее водоснабжение"
+      },
+      {
+        "id": "p-12",
+        "brand": "Valtec",
+        "material": "PP-R 100",
+        "working pressure-сold water supply": "2 MPa (20 bar)",
+        "working pressure-hot water supply(70ºС)": "0.8 MPa (8 bar)",
+        "working pressure-hot water supply(60ºС)": "1.2 MPa (12 bar)",
+        "diameter": 32,
+        "wallThickness": 5.4,
+        "price": 170.52,
+        "category": " холодное и горячее водоснабжение"
+      },
+      {
+        "id": "p-13",
+        "brand": "Valtec",
+        "material": "PP-R 100",
+        "working pressure-сold water supply": "2 MPa (20 bar)",
+        "working pressure-hot water supply(70ºС)": "0.8 MPa (8 bar)",
+        "working pressure-hot water supply(60ºС)": "1.2 MPa (12 bar)",
+        "diameter": 40,
+        "wallThickness": 6.7,
+        "price": 291.73,
+        "category": " холодное и горячее водоснабжение"
+      },
+      {
+        "id": "p-14",
+        "brand": "Valtec",
+        "material": "PP-R 100",
+        "working pressure-сold water supply": "2 MPa (20 bar)",
+        "working pressure-hot water supply(70ºС)": "0.8 MPa (8 bar)",
+        "working pressure-hot water supply(60ºС)": "1.2 MPa (12 bar)",
+        "diameter": 50,
+        "wallThickness": 8.3,
+        "price": 452.27,
+        "category": " холодное и горячее водоснабжение"
+      },
+      {
+        "id": "p-15",
+        "brand": "Valtec",
+        "material": "PP-R 100",
+        "working pressure-сold water supply": "2 MPa (20 bar)",
+        "working pressure-hot water supply(70ºС)": "0.8 MPa (8 bar)",
+        "working pressure-hot water supply(60ºС)": "1.2 MPa (12 bar)",
+        "diameter": 63,
+        "wallThickness": 10.5,
+        "price": 512.34,
+        "category": " холодное и горячее водоснабжение"
+      },
+      {
+        "id": "p-16",
+        "brand": "Valtec",
+        "material": "PP-R 100.fb",
+        "working pressure-сold water supply": "2 MPa (20 bar)",
+        "working pressure-hot water supply(70ºС)": "1 MPa (10 bar)",
+        "working pressure-hot water supply(60ºС)": "1.3 MPa (13 bar)",
+        "high-temperature underfloor heating (70ºС)": "1 MPa(10 bar",
+        "High-temperature radiator heating (95ºС)": "0.6 MPa(6bar)",
+        "diameter": 20,
+        "wallThickness": 3.4,
+        "price": 68.67,
+        "category": "питного та господарсько-питного холодного водопостачання, гарячого водопостачання, водяного низькотемпературного опалення, а також технологічних трубопроводів, що транспортують рідини та гази, неагресивні до матеріалів труби"
+      },
+      {
+        "id": "p-17",
+        "brand": "Valtec",
+        "material": "PP-R 100.fb",
+        "working pressure-сold water supply": "2 MPa (20 bar)",
+        "working pressure-hot water supply(70ºС)": "1 MPa (10 bar)",
+        "working pressure-hot water supply(60ºС)": "1.3 MPa (13 bar)",
+        "high-temperature underfloor heating (70ºС)": "1 MPa(10 bar",
+        "High-temperature radiator heating (95ºС)": "0.6 MPa(6bar)",
+        "diameter": 25,
+        "wallThickness": 4.2,
+        "price": 107.38,
+        "category": "питного та господарсько-питного холодного водопостачання, гарячого водопостачання, водяного низькотемпературного опалення, а також технологічних трубопроводів, що транспортують рідини та гази, неагресивні до матеріалів труби"
+      },
+      {
+        "id": "p-18",
+        "brand": "Valtec",
+        "material": "PP-R 100.fb",
+        "working pressure-сold water supply": "2 MPa (20 bar)",
+        "working pressure-hot water supply(70ºС)": "1 MPa (10 bar)",
+        "working pressure-hot water supply(60ºС)": "1.3 MPa (13 bar)",
+        "high-temperature underfloor heating (70ºС)": "1 MPa(10 bar",
+        "High-temperature radiator heating (95ºС)": "0.6 MPa(6bar)",
+        "diameter": 32,
+        "wallThickness": 5.4,
+        "price": 178.36,
+        "category": "питного та господарсько-питного холодного водопостачання, гарячого водопостачання, водяного низькотемпературного опалення, а також технологічних трубопроводів, що транспортують рідини та гази, неагресивні до матеріалів труби"
+      },
+      {
+        "id": "p-19",
+        "brand": "Valtec",
+        "material": "PP-R 100.fb",
+        "working pressure-сold water supply": "2 MPa (20 bar)",
+        "working pressure-hot water supply(70ºС)": "1 MPa (10 bar)",
+        "working pressure-hot water supply(60ºС)": "1.3 MPa (13 bar)",
+        "high-temperature underfloor heating (70ºС)": "1 MPa(10 bar",
+        "High-temperature radiator heating (95ºС)": "0.6 MPa(6bar)",
+        "diameter": 40,
+        "wallThickness": 6.7,
+        "price": 315.7,
+        "category": "питного та господарсько-питного холодного водопостачання, гарячого водопостачання, водяного низькотемпературного опалення, а також технологічних трубопроводів, що транспортують рідини та гази, неагресивні до матеріалів труби"
+      },
+      {
+        "id": "p-20",
+        "brand": "Valtec",
+        "material": "PP-R 100.fb",
+        "working pressure-сold water supply": "2 MPa (20 bar)",
+        "working pressure-hot water supply(70ºС)": "1 MPa (10 bar)",
+        "working pressure-hot water supply(60ºС)": "1.3 MPa (13 bar)",
+        "high-temperature underfloor heating (70ºС)": "1 MPa(10 bar",
+        "High-temperature radiator heating (95ºС)": "0.6 MPa(6bar)",
+        "diameter": 50,
+        "wallThickness": 8.3,
+        "price": 476.56,
+        "category": "питного та господарсько-питного холодного водопостачання, гарячого водопостачання, водяного низькотемпературного опалення, а також технологічних трубопроводів, що транспортують рідини та гази, неагресивні до матеріалів труби"
+      },
+      {
+        "id": "p-21",
+        "brand": "Valtec",
+        "material": "PP-R 100.fb",
+        "working pressure-сold water supply": "2 MPa (20 bar)",
+        "working pressure-hot water supply(70ºС)": "1 MPa (10 bar)",
+        "working pressure-hot water supply(60ºС)": "1.3 MPa (13 bar)",
+        "high-temperature underfloor heating (70ºС)": "1 MPa(10 bar",
+        "High-temperature radiator heating (95ºС)": "0.6 MPa(6bar)",
+        "diameter": 63,
+        "wallThickness": 10.5,
+        "price": 751.28,
+        "category": "питного та господарсько-питного холодного водопостачання, гарячого водопостачання, водяного низькотемпературного опалення, а також технологічних трубопроводів, що транспортують рідини та гази, неагресивні до матеріалів труби"
+      },
+      {
+        "id": "p-22",
+        "brand": "Valtec",
+        "material": "PP-ALUX",
+        "working pressure-сold water supply": "2.5 MPa (25 bar)",
+        "working pressure-hot water supply(70ºС)": "1.1 MPa (11 bar)",
+        "working pressure-hot water supply(60ºС)": "1.4 MPa (14 bar)",
+        "high-temperature underfloor heating (70ºС)": "1.3 MPa(13 bar",
+        "High-temperature radiator heating (95ºС)": "0.9 MPa(9bar)",
+        "diameter": 20,
+        "wallThickness": 3.4,
+        "price": 99.09,
+        "category": "питного та господарсько-питного холодного водопостачання, гарячого водопостачання, водяного високотемпературного опалення, а також технологічних трубопроводів, що транспортують рідини та гази, неагресивні до матеріалів труби"
+      },
+      {
+        "id": "p-23",
+        "brand": "Valtec",
+        "material": "PP-ALUX",
+        "working pressure-сold water supply": "2.5 MPa (25 bar)",
+        "working pressure-hot water supply(70ºС)": "1.1 MPa (11 bar)",
+        "working pressure-hot water supply(60ºС)": "1.4 MPa (14 bar)",
+        "high-temperature underfloor heating (70ºС)": "1.3 MPa(13 bar",
+        "High-temperature radiator heating (95ºС)": "0.9 MPa(9bar)",
+        "diameter": 25,
+        "wallThickness": 4.2,
+        "price": 148.86,
+        "category": "питного та господарсько-питного холодного водопостачання, гарячого водопостачання, водяного високотемпературного опалення, а також технологічних трубопроводів, що транспортують рідини та гази, неагресивні до матеріалів труби"
+      },
+      {
+        "id": "p-24",
+        "brand": "Valtec",
+        "material": "PP-ALUX",
+        "working pressure-сold water supply": "2.5 MPa (25 bar)",
+        "working pressure-hot water supply(70ºС)": "1.1 MPa (11 bar)",
+        "working pressure-hot water supply(60ºС)": "1.4 MPa (14 bar)",
+        "high-temperature underfloor heating (70ºС)": "1.3 MPa(13 bar",
+        "High-temperature radiator heating (95ºС)": "0.9 MPa(9bar)",
+        "diameter": 32,
+        "wallThickness": 5.4,
+        "price": 237.16,
+        "category": "питного та господарсько-питного холодного водопостачання, гарячого водопостачання, водяного високотемпературного опалення, а також технологічних трубопроводів, що транспортують рідини та гази, неагресивні до матеріалів труби"
+      },
+      {
+        "id": "p-25",
+        "brand": "Valtec",
+        "material": "PP-ALUX",
+        "working pressure-сold water supply": "2.5 MPa (25 bar)",
+        "working pressure-hot water supply(70ºС)": "1.1 MPa (11 bar)",
+        "working pressure-hot water supply(60ºС)": "1.4 MPa (14 bar)",
+        "high-temperature underfloor heating (70ºС)": "1.3 MPa(13 bar",
+        "High-temperature radiator heating (95ºС)": "0.9 MPa(9bar)",
+        "diameter": 40,
+        "wallThickness": 6.7,
+        "price": 436.46,
+        "category": "питного та господарсько-питного холодного водопостачання, гарячого водопостачання, водяного низькотемпературного опалення, а також технологічних трубопроводів, що транспортують рідини та гази, неагресивні до матеріалів труби"
+      },
+      {
+        "id": "p-26",
+        "brand": "Valtec",
+        "material": "PP-ALUX",
+        "working pressure-сold water supply": "2.5 MPa (25 bar)",
+        "working pressure-hot water supply(70ºС)": "1.1 MPa (11 bar)",
+        "working pressure-hot water supply(60ºС)": "1.4 MPa (14 bar)",
+        "high-temperature underfloor heating (70ºС)": "1.3 MPa(13 bar",
+        "High-temperature radiator heating (95ºС)": "0.9 MPa(9bar)",
+        "diameter": 50,
+        "wallThickness": 8.3,
+        "price": 614.81,
+        "category": "питного та господарсько-питного холодного водопостачання, гарячого водопостачання, водяного низькотемпературного опалення, а також технологічних трубопроводів, що транспортують рідини та гази, неагресивні до матеріалів труби"
+      },
+      {
+        "id": "p-27",
+        "brand": "Valtec",
+        "material": "PP-ALUX",
+        "working pressure-сold water supply": "2.5 MPa (25 bar)",
+        "working pressure-hot water supply(70ºС)": "1.1 MPa (11 bar)",
+        "working pressure-hot water supply(60ºС)": "1.4 MPa (14 bar)",
+        "high-temperature underfloor heating (70ºС)": "1.3 MPa(13 bar",
+        "High-temperature radiator heating (95ºС)": "0.9 MPa(9bar)",
+        "diameter": 63,
+        "wallThickness": 10.5,
+        "price": 1014.26,
+        "category": "питного та господарсько-питного холодного водопостачання, гарячого водопостачання, водяного низькотемпературного опалення, а також технологічних трубопроводів, що транспортують рідини та гази, неагресивні до матеріалів труби"
+      },
+      {
+        "id": "p-28",
+        "brand": "Valtec",
+        "material": "PE-XA EVOH-PEX-B",
+        "working pressure-(20ºС)": "1.8 MPa (18 bar)",
+        "working pressure-hot water supply(70ºС)": "1.1 MPa (11 bar)",
+        "working pressure-hot water supply(60ºС)": "1.4 MPa (14 bar)",
+        "high-temperature (80ºС)": "1.0 MPa(10 bar)",
+        "High-temperature radiator heating (90ºС)": "0.8 MPa(8bar)",
+        "diameter": 16,
+        "wallThickness": 2,
+        "price": 55.65,
+        "category": "системах холодного, гарячого водопостачання, включаючи питне,теплі поли"
+      },
+      {
+        "id": "p-29",
+        "brand": "Valtec",
+        "material": "PE-XA EVOH-PEX-B",
+        "working pressure-(20ºС)": "1.8 MPa (18 bar)",
+        "working pressure-hot water supply(70ºС)": "1.1 MPa (11 bar)",
+        "working pressure-hot water supply(60ºС)": "1.4 MPa (14 bar)",
+        "high-temperature (80ºС)": "1.0 MPa(10 bar)",
+        "High-temperature radiator heating (90ºС)": "0.8 MPa(8bar)",
+        "diameter": 20,
+        "wallThickness": 2,
+        "price": 55.65,
+        "category": "системах холодного, гарячого водопостачання, включаючи питне,теплі поли"
+      },
+      {
+        "id": "p-30",
+        "brand": "Valtec",
+        "material": "PE- RT",
+        "operating temperature": "80 °C",
+        "Maximum working pressure(70 °С)": "0.6 MPa(6 bar)",
+        "diameter": 16,
+        "wallThickness": 2,
+        "price": 44.5,
+        "category": " поверхневого опалення системи тепла підлога, системах опалення з температурою до 80 °С."
+      }
+    ]
+  },
+
+  "indirectWaterHeaters": [
+    {
+      "kind": "indirectWaterHeater",
+      "catalogKey": "indirectWaterHeater-0",
+      "brand": "Baxi",
+      "model": "Premier Plus 100",
+      "article": "94110001",
+      "price": 21697,
+      "type": "indirect_wall",
+      "specs": {
+        "volumeLiters": 100,
+        "powerKw": 30.0,
+        "surfaceAreaM2": 0.79,
+        "maxTempC": 65,
+        "heatingTimeMinutes": 15,
+        "standingLossKwh24h": 1.1,
+        "minSourcePowerKw": 24
+      },
+      "dimensions": { "height": 800, "diameter": 552, "weight": 31 }
+    },
+    {
+      "kind": "indirectWaterHeater",
+      "catalogKey": "indirectWaterHeater-1",
+      "brand": "Ariston",
+      "model": "BCH CD1 120",
+      "article": "3060751",
+      "price": 41237,
+      "type": "indirect_wall",
+      "specs": {
+        "volumeLiters": 120,
+        "powerKw": 25.0,
+        "surfaceAreaM2": 0.7,
+        "maxTempC": 90,
+        "heatingTimeMinutes": 21,
+        "standingLossKwh24h": 1.25,
+        "minSourcePowerKw": 24
+      },
+      "dimensions": { "height": 924, "diameter": 560, "weight": 45 }
+    },
+    {
+      "kind": "indirectWaterHeater",
+      "catalogKey": "indirectWaterHeater-2",
+      "brand": "Ariston",
+      "model": "BCH CD1 160",
+      "article": "3060752",
+      "price": 45407,
+      "type": "indirect_wall",
+      "specs": {
+        "volumeLiters": 160,
+        "powerKw": 25.0,
+        "surfaceAreaM2": 0.7,
+        "maxTempC": 90,
+        "heatingTimeMinutes": 29,
+        "standingLossKwh24h": 1.48,
+        "minSourcePowerKw": 24
+      },
+      "dimensions": { "height": 1174, "diameter": 560, "weight": 53 }
+    },
+    {
+      "kind": "indirectWaterHeater",
+      "catalogKey": "indirectWaterHeater-3",
+      "brand": "Ariston",
+      "model": "BCH CD1 200",
+      "article": "3060753",
+      "price": 51084,
+      "type": "indirect_wall",
+      "specs": {
+        "volumeLiters": 200,
+        "powerKw": 31.0,
+        "surfaceAreaM2": 0.85,
+        "maxTempC": 90,
+        "heatingTimeMinutes": 32,
+        "standingLossKwh24h": 1.75,
+        "minSourcePowerKw": 28
+      },
+      "dimensions": { "height": 1424, "diameter": 560, "weight": 62 }
+    },
+    {
+      "kind": "indirectWaterHeater",
+      "catalogKey": "indirectWaterHeater-1",
+      "brand": "Ariston",
+      "model": "BCH CD1 120 ARI - EU",
+      "article": "3070491",
+      "price": 37445,
+      "type": "indirect_floor",
+      "specs": {
+        "volumeLiters": 120,
+        "powerKw": 25.0,
+        "surfaceAreaM2": 0.7,
+        "maxTempC": 90,
+        "heatingTimeMinutes": 21,
+        "standingLossKwh24h": 1.3,
+        "minSourcePowerKw": 20
+      },
+      "dimensions": { "height": 924, "diameter": 560, "weight": 45 }
+    },
+    {
+      "kind": "indirectWaterHeater",
+      "catalogKey": "indirectWaterHeater-2",
+      "brand": "Tesy",
+      "model": "EV 7/5 S2 200 60",
+      "article": "301391",
+      "price": 41199,
+      "type": "indirect_floor",
+      "specs": {
+        "volumeLiters": 200,
+        "powerKw": 32.0,
+        "surfaceAreaM2": 0.96,
+        "maxTempC": 95,
+        "heatingTimeMinutes": 38,
+        "standingLossKwh24h": 1.6,
+        "minSourcePowerKw": 26
+      },
+      "dimensions": { "height": 1200, "diameter": 600, "weight": 70 }
+    },
+    {
+      "kind": "indirectWaterHeater",
+      "catalogKey": "indirectWaterHeater-3",
+      "brand": "Protherm",
+      "model": "FE 120/6 BM",
+      "article": "0010015963",
+      "price": 31391,
+      "type": "indirect_floor",
+      "specs": {
+        "volumeLiters": 117,
+        "powerKw": 25.0,
+        "surfaceAreaM2": 0.7,
+        "maxTempC": 85,
+        "heatingTimeMinutes": 20,
+        "standingLossKwh24h": 1.15,
+        "minSourcePowerKw": 20
+      },
+      "dimensions": { "height": 820, "diameter": 590, "weight": 68 }
+    },
+    {
+      "kind": "indirectWaterHeater",
+      "catalogKey": "indirectWaterHeater-4",
+      "brand": "Vaillant",
+      "model": "uniStor VIH R 200",
+      "article": "0010015951",
+      "price": 56372,
+      "type": "indirect_floor",
+      "specs": {
+        "volumeLiters": 200,
+        "powerKw": 34.0,
+        "surfaceAreaM2": 1.0,
+        "maxTempC": 85,
+        "heatingTimeMinutes": 30,
+        "standingLossKwh24h": 1.41,
+        "minSourcePowerKw": 28
+      },
+      "dimensions": { "height": 1206, "diameter": 590, "weight": 97 }
+    },
+    {
+      "kind": "indirectWaterHeater",
+      "catalogKey": "indirectWaterHeater-5",
+      "brand": "Cordivari",
+      "model": "Bolly 1 ST FB WB 300",
+      "price": 58597,
+      "type": "indirect_floor",
+      "specs": {
+        "volumeLiters": 300,
+        "powerKw": 43,
+        "minSourcePowerKw": 35,
+        "heatingTimeMinutes": 42,
+        "surfaceAreaM2": 1.5,
+        "maxTempC": 90
+      },
+      "dimensions": { "height": 1486, "diameter": 650, "weight": 83 }
+    },
+    {
+      "kind": "indirectWaterHeater",
+      "catalogKey": "indirectWaterHeater-6",
+      "brand": "Bosch",
+      "model": "W 200-5 EP1 B",
+      "price": 55299,
+      "type": "indirect_floor",
+      "specs": {
+        "volumeLiters": 200,
+        "powerKw": 31.5,
+        "minSourcePowerKw": 25,
+        "heatingTimeMinutes": 39,
+        "surfaceAreaM2": 0.9,
+        "maxTempC": 95
+      },
+      "dimensions": { "height": 1530, "diameter": 550, "weight": 84 }
+    },
+    {
+      "kind": "indirectWaterHeater",
+      "catalogKey": "indirectWaterHeater-7",
+      "brand": "Drazice",
+      "model": "OKH 100 NTR/HV",
+      "article": "140870601",
+      "price": 35360,
+      "type": "indirect_floor",
+      "specs": {
+        "volumeLiters": 95,
+        "powerKw": 24.0,
+        "surfaceAreaM2": 1.08,
+        "maxTempC": 80,
+        "heatingTimeMinutes": 14,
+        "standingLossKwh24h": 0.9,
+        "minSourcePowerKw": 20
+      },
+      "dimensions": { "height": 887, "width": 520, "depth": 520, "weight": 56 }
+    },
+    {
+      "kind": "indirectWaterHeater",
+      "catalogKey": "indirectWaterHeater-8",
+      "brand": "Drazice",
+      "model": "OKH 125 NTR/HV",
+      "price": 38948,
+      "type": "indirect_floor",
+      "specs": {
+        "volumeLiters": 115,
+        "powerKw": 24,
+        "minSourcePowerKw": 20,
+        "heatingTimeMinutes": 17,
+        "surfaceAreaM2": 1.08,
+        "maxTempC": 80
+      },
+      "dimensions": { "height": 1052, "width": 520, "depth": 520, "weight": 64 }
+    },
+    {
+      "kind": "indirectWaterHeater",
+      "catalogKey": "indirectWaterHeater-9",
+      "brand": "Drazice",
+      "model": "OKC 200 NTR/BP",
+      "price": 51064,
+      "type": "indirect_floor",
+      "specs": {
+        "volumeLiters": 200,
+        "powerKw": 32,
+        "minSourcePowerKw": 26,
+        "heatingTimeMinutes": 28,
+        "surfaceAreaM2": 1.45,
+        "maxTempC": 80
+      },
+      "dimensions": { "height": 1287, "diameter": 584, "weight": 93 }
+    }
+  ]
+}

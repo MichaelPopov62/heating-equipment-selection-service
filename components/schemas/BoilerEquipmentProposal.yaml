@@ -1,0 +1,102 @@
+type: object
+description: Готовый блок для UI «Рекомендуемое решение» по котлу.
+required:
+  [
+    kind,
+    headline,
+    model,
+    unitsCount,
+    unitMaxPowerKw,
+    totalNominalKw,
+    requiredKw,
+    powerRequirementBreakdown,
+    nominalReservePercent,
+    advantages,
+    notes,
+  ]
+properties:
+  kind:
+    type: string
+    enum: [single, cascade]
+  headline: { type: string }
+  model: { type: string }
+  unitsCount: { type: integer, minimum: 1 }
+  unitMaxPowerKw: { type: number }
+  totalNominalKw: { type: number }
+  requiredKw:
+    type: number
+    description: >-
+      Расчётная требуемая (пиковая) мощность котла по данной линии подбора, кВт;
+      для сравнения с суммарным номиналом в карточке.
+  powerRequirementBreakdown:
+    type: object
+    description: >-
+      Составляющие для блока «Необходимая мощность / из них на отопление / из них на ГВС».
+      Сумма heatingLoadKw и hotWaterPowerKw может не совпадать с requiredKw при формуле max(отопление, ГВС),
+      при подборе только по отоплению или при нижней границе по minSourcePowerKw БКН.
+    required: [heatingLoadKw, hotWaterPowerKw]
+    properties:
+      heatingLoadKw:
+        type: number
+        description: >-
+          Отопление с коэффициентом запаса для линии карточки (основная и Эконом — как matching.boiler.heatingLoadKw;
+          Эффективный — heatingLoadKwCondensing).
+      hotWaterPowerKw:
+        type: number
+        description: Расчётная тепловая мощность ГВС из отчёта (matching.boiler.hotWaterPowerKw).
+  nominalReservePercent:
+    type: number
+    description: >-
+      Для одиночного котла (kind single): процент от минимальной паспортной мощности (powerKw.min, иначе max)
+      относительно отопительной базы с запасом (основная линия и Эконом — heatingLoadKw в BoilerMatchingReport;
+      Эффективный — heatingLoadKwCondensing), округление round, верхняя граница 150 %.
+      Для каскада (kind cascade): превышение суммарного номинала над requiredKw в процентах (прежняя семантика).
+  tier:
+    type: string
+    enum: [economy, efficient]
+    description: Линия рекомендации (эконом / эффективный конденсационный вариант).
+  estimatedTotalPrice:
+    type: number
+    description: Сумма за все единицы, если задана price в каталоге.
+  equipmentBundleTotalPrice:
+    type: number
+    description: >-
+      Ориентировочная сумма связки: котёл (estimatedTotalPrice) + электробойлер и/или БКН,
+      если подобраны и есть price в каталоге.
+  equipmentBundlePriceBreakdown:
+    type: object
+    description: Разбивка equipmentBundleTotalPrice по позициям (котёл, электробойлер, БКН).
+    properties:
+      boilerPrice: { type: number }
+      waterHeaterPrice: { type: number }
+      indirectWaterHeaterPrice: { type: number }
+  equipmentBundleCompanions:
+    type: array
+    description: >-
+      Электробойлер и/или БКН в связке с котлом (модель, объём, цена) для карточки варианта в UI.
+    items:
+      type: object
+      required: [role, model]
+      properties:
+        role:
+          type: string
+          enum: [water_heater, indirect_water_heater]
+        model: { type: string }
+        brand: { type: string }
+        volumeLiters: { type: number }
+        price: { type: number }
+  mountingType:
+    allOf:
+      - $ref: BoilerMountingType.yaml
+    description: >-
+      Способ установки подобранного котла из каталога (настенный / напольный), если задано в позиции каталога.
+      Пробрасывается из matching.boiler.selected в карточку рекомендации для UI.
+  connectionDiameters:
+    type: array
+    items: { type: string }
+  advantages:
+    type: array
+    items: { type: string }
+  notes:
+    type: array
+    items: { type: string }

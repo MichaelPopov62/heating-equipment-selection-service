@@ -1,0 +1,24 @@
+type: object
+additionalProperties: false
+description: Сообщение из справочника recommendations (коллекция MongoDB recommendations).
+required:
+  - code
+  - category
+  - equipmentType
+  - title
+  - text
+properties:
+  code:
+    type: string
+    example: WARN_BOILER_UNDERPOWERED
+  category:
+    type: string
+    enum: [warnings, automationHints]
+  equipmentType:
+    type: string
+    example: boiler
+  title:
+    type: string
+  text:
+    type: string
+    description: Текст после подстановки плейсхолдеров {{key}} из шаблона в БД.

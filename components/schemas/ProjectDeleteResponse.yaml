@@ -1,0 +1,6 @@
+type: object
+required: [ok, deleted, calculationsRemoved]
+properties:
+  ok: { type: boolean, enum: [true] }
+  deleted: { type: boolean, enum: [true] }
+  calculationsRemoved: { type: integer, minimum: 0 }
