@@ -22,6 +22,7 @@ import {
 import { resolveBoilerCircuitFilterMode } from '../utils/boilerMatchingByType.js';
 import { enrichBoilerMatchingProposals } from './enrichProposalBundlePrice.js';
 import { alignHeatingGraphForCondensingBoiler } from '../logic/heatingThermalRegimes.js';
+import { assertCalcRuntimeContext } from '../reference/assertCalcRuntimeContext.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -36,9 +37,9 @@ import { logger } from '../utils/logger.js';
  * @param {import('../types/shared-types').HeatLossReport} args.heatLoss
  * @param {import('../types/shared-types').HotWaterReport} args.hotWater
  * @param {import('../types/shared-types').HeatingSystemInput} args.heatingSystem
- * @param {import('../catalog/types').NormalizedCatalog} args.catalog
  * @param {import('../types/shared-types').BuildingInput | undefined} args.building
  * @param {import('../types/shared-types').UnderfloorHeatingReport | null} [args.underfloorHeating]
+ * @param {import('../types/shared-types').CalcRuntimeContext} args.ctx
  * @returns {{
  *   matching: import('../types/shared-types').MatchingReport,
  *   hotWaterForCalculations: import('../types/shared-types').HotWaterReport,
@@ -84,10 +85,12 @@ export function matchEquipment({
   heatLoss,
   hotWater,
   heatingSystem,
-  catalog,
   building,
   underfloorHeating = null,
+  ctx,
 } = {}) {
+  assertCalcRuntimeContext(ctx);
+  const { catalog, waterNorms } = ctx;
   const heatingLoad = resolveBoilerHeatingLoadWatts(
     heatingSystem,
     heatLoss,
@@ -133,6 +136,7 @@ export function matchEquipment({
     hotWaterResolved = applyIndirectTankToHotWaterReport(
       hotWaterResolved,
       indirectWaterHeater.selected,
+      waterNorms,
     );
   }
 
@@ -147,7 +151,6 @@ export function matchEquipment({
     heatLossWatts: heatingLoad.boilerHeatingLoadWatts,
     hotWaterPowerKw: hwForBoiler?.hotWaterPowerKw ?? 0,
     peakThermalPowerKw: hwForBoiler?.peakThermalPowerKw ?? 0,
-    catalog,
     boilerCombustionType: heatingSystem?.boilerCombustionType,
     hotWaterFixtures: hwForBoiler?.fixtures,
     hotWaterBoilerPowerMatchingScheme: scheme,
@@ -157,6 +160,7 @@ export function matchEquipment({
     objectType,
     building,
     heatingSystem,
+    ctx,
   });
 
   const normWarn =
@@ -190,7 +194,12 @@ export function matchEquipment({
     }
   }
 
-  attachIndirectBoilerCoupling(indirectWaterHeater, boiler, hwForBoiler);
+  attachIndirectBoilerCoupling(
+    indirectWaterHeater,
+    boiler,
+    hwForBoiler,
+    ctx,
+  );
   appendIndirectPriorityRoomWarnings(indirectWaterHeater, heatLoss);
 
   if (

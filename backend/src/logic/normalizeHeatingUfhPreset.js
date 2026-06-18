@@ -1,24 +1,27 @@
 /**
  * Назначение: нормализация heatingSystem.ufhPresetId и heatingEmittersMode.
- * Описание: Lookup пресета из кэша; derive supply/return для режима «только ТП»; warnings без мутации графика радиаторов.
+ * Описание: Lookup пресета из переданного bundle; derive supply/return для режима «только ТП»; warnings без мутации графика радиаторов.
  */
 import { UFH_PRESET_ONLY, ufhModePresetIsMixedRadiators } from '../../../shared/ufhModePresetIds.js';
 import { thermalRegimeRecommendationHint } from '../../../shared/heatingThermalRegimeRecommendations.js';
-import { getUfhPresets } from '../ufh/ufhPresetsCache.js';
 import { isHeatingThermalRegimePresetId } from './heatingThermalRegimes.js';
 
 /**
  * @param {import('../types/shared-types').CalcRequestBody} body
+ * @param {import('../ufh/types').UnderfloorHeatingPresetsBundle} ufhPresets
  */
-export function normalizeHeatingUfhPreset(body) {
+export function normalizeHeatingUfhPreset(body, ufhPresets) {
   const hs = body.heatingSystem;
   if (!hs || typeof hs !== 'object') return;
 
   const presetId = typeof hs.ufhPresetId === 'string' ? hs.ufhPresetId.trim() : '';
   if (!presetId) return;
 
-  const bundle = getUfhPresets();
-  const preset = bundle.byPresetId[presetId];
+  if (!ufhPresets?.byPresetId) {
+    throw new Error('Архитектурная ошибка: ufhPresets обязательны для нормализации ТП.');
+  }
+
+  const preset = ufhPresets.byPresetId[presetId];
   if (!preset) {
     const err = new Error(`Неизвестный ufhPresetId "${presetId}".`);
     err.statusCode = 400;

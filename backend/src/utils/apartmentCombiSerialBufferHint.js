@@ -3,7 +3,6 @@
  * Описание: Пороги из appliances.boiler.hints.apartmentCombiSerialBuffer; текст рекомендации — из коллекции recommendations.
  */
 
-import { getAppliances } from '../dhw/referenceCache.js';
 import { resolveRecommendation } from '../recommendations/recommendationResolver.js';
 import {
   SCHEME_BOILER_COMBI_BUFFER_ELECTRIC,
@@ -11,9 +10,15 @@ import {
   SCHEME_BOILER_MAX_COMBI,
 } from '../../../shared/heatingMatchingSchemes.js';
 
-/** @returns {import('../dhw/types').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']} */
-function serialBufferConfig() {
-  return getAppliances().byKind.boiler.hints.apartmentCombiSerialBuffer;
+/**
+ * @param {import('../dhw/types').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer'] | undefined} [serialBufferConfig]
+ * @returns {import('../dhw/types').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']}
+ */
+function resolveSerialBufferConfig(serialBufferConfig) {
+  if (serialBufferConfig) return serialBufferConfig;
+  throw new Error(
+    'apartmentCombiSerialBufferHint: serialBufferConfig обязателен (передайте appliances.byKind.boiler.hints.apartmentCombiSerialBuffer из CalcRuntimeContext).',
+  );
 }
 
 /**
@@ -37,6 +42,7 @@ function thermalFixtureCount(fixtures) {
  * @param {'flowThrough' | 'storage' | undefined} p.dhwSupplyScenario
  * @param {import('../types/shared-types').HotWaterFixturesInput | undefined} [p.fixtures]
  * @param {number} [p.peakThermalPowerKw]
+ * @param {import('../dhw/types').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']} [p.serialBufferConfig]
  */
 export function isApartmentCombiSerialBufferEligible({
   objectType,
@@ -45,8 +51,9 @@ export function isApartmentCombiSerialBufferEligible({
   dhwSupplyScenario,
   fixtures,
   peakThermalPowerKw,
+  serialBufferConfig,
 }) {
-  const cfg = serialBufferConfig();
+  const cfg = resolveSerialBufferConfig(serialBufferConfig);
   if (!cfg?.enabled) return false;
   if (objectType !== 'apartment') return false;
   if (requestedScheme !== SCHEME_BOILER_MAX_COMBI) return false;
@@ -60,9 +67,9 @@ export function isApartmentCombiSerialBufferEligible({
   );
 }
 
-/** @returns {Record<string, string | number>} */
-export function apartmentCombiSerialBufferTemplateVars() {
-  const cfg = serialBufferConfig();
+/** @param {import('../dhw/types').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']} [serialBufferConfig] */
+export function apartmentCombiSerialBufferTemplateVars(serialBufferConfig) {
+  const cfg = resolveSerialBufferConfig(serialBufferConfig);
   return {
     bufferMinLiters: cfg.bufferTankLitersMin,
     bufferMaxLiters: cfg.bufferTankLitersMax,
@@ -71,11 +78,17 @@ export function apartmentCombiSerialBufferTemplateVars() {
 
 /**
  * @returns {import('../types/boiler-types').BoilerMatchingRecommendation | null}
+ * @param {import('../dhw/types').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']} serialBufferConfig
+ * @param {import('../recommendations/types').RecommendationsBundle} recommendations
  */
-export function buildApartmentCombiSerialBufferRecommendation() {
+export function buildApartmentCombiSerialBufferRecommendation(
+  serialBufferConfig,
+  recommendations,
+) {
   const resolved = resolveRecommendation(
+    recommendations,
     'REC_APT_COMBI_SERIAL_BUFFER',
-    apartmentCombiSerialBufferTemplateVars(),
+    apartmentCombiSerialBufferTemplateVars(serialBufferConfig),
   );
   if (!resolved) return null;
   return {
@@ -93,12 +106,16 @@ export function buildApartmentCombiSerialBufferRecommendation() {
  * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} p.requestedScheme
  * @param {import('../types/boiler-types').BoilerCircuitFallbackReport | null | undefined} [p.circuitFallback]
  * @param {import('../types/shared-types').HotWaterReport | undefined} p.hotWaterReport
+ * @param {import('../dhw/types').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']} [p.serialBufferConfig]
+ * @param {import('../recommendations/types').RecommendationsBundle} p.recommendations
  */
 export function appendApartmentCombiSerialBufferAutomationHint(hints, {
   objectType,
   requestedScheme,
   circuitFallback,
   hotWaterReport,
+  serialBufferConfig,
+  recommendations,
 }) {
   if (
     !isApartmentCombiSerialBufferEligible({
@@ -108,12 +125,16 @@ export function appendApartmentCombiSerialBufferAutomationHint(hints, {
       dhwSupplyScenario: hotWaterReport?.dhwSupplyScenario,
       fixtures: hotWaterReport?.fixtures,
       peakThermalPowerKw: hotWaterReport?.peakThermalPowerKw,
+      serialBufferConfig,
     })
   ) {
     return;
   }
 
-  const rec = buildApartmentCombiSerialBufferRecommendation();
+  const rec = buildApartmentCombiSerialBufferRecommendation(
+    serialBufferConfig,
+    recommendations,
+  );
   if (!rec) return;
 
   hints.push({
@@ -132,12 +153,14 @@ export function appendApartmentCombiSerialBufferAutomationHint(hints, {
  * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} p.requestedScheme
  * @param {import('../types/boiler-types').BoilerCircuitFallbackReport | null | undefined} [p.circuitFallback]
  * @param {import('../recommendations/types').ResolvedRecommendation[]} [p.resolvedRecommendations]
+ * @param {import('../recommendations/types').RecommendationsBundle} p.recommendations
  */
 export function appendApartmentSingleOversizeCombiHint(hints, {
   objectType,
   requestedScheme,
   circuitFallback,
   resolvedRecommendations,
+  recommendations,
 }) {
   if (objectType !== 'apartment') return;
   if (requestedScheme !== SCHEME_BOILER_ELECTRIC_SEPARATE) return;
@@ -147,7 +170,7 @@ export function appendApartmentSingleOversizeCombiHint(hints, {
   );
   if (!hasRec) return;
 
-  const rec = resolveRecommendation('REC_APT_SINGLE_TO_COMBI_OPTIMIZATION');
+  const rec = resolveRecommendation(recommendations, 'REC_APT_SINGLE_TO_COMBI_OPTIMIZATION');
   hints.push({
     type: 'apartment_single_oversized_suggest_combi',
     message:

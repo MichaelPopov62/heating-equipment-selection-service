@@ -16,6 +16,7 @@ import { calculateHydraulics } from '../logic/hydraulics.js';
 import { resolveUfhDistributionWithAppliances } from '../logic/ufhDistributionResolve.js';
 import { computeUfhMixingNodeSpec } from '../logic/ufhMixingNodeHydraulics.js';
 import { matchEquipment } from '../matching/public.js';
+import { assertCalcRuntimeContext } from '../reference/assertCalcRuntimeContext.js';
 import { logger } from '../utils/logger.js';
 import { buildMatchingAutomationHints } from './automationHints.js';
 import { recommendedApartmentElectricTankLiters, recommendedCombiBufferTankLiters, recommendedSingleCircuitBufferTankLiters } from '../utils/apartmentMatching.js';
@@ -34,33 +35,25 @@ import {
 /**
  * @param {object} args
  * @param {import('../types/shared-types').CalcRequestBody} args.input
- * @param {import('../catalog/types').NormalizedCatalog} args.catalog
- * @param {'file' | 'mongo'} [args.catalogSource]
- * @param {import('../dhw/types').NormalizedWaterNorms} args.waterNorms
- * @param {'file' | 'mongo'} [args.waterNormsSource]
- * @param {import('../dhw/types').AppliancesBundle} args.appliances
- * @param {'file' | 'mongo'} [args.appliancesSource]
- * @param {number} [args.referenceBundleLoadedAt] — Date.now() снимка configCache
- * @param {'file' | 'mongo'} [args.recommendationsSource]
- * @param {'file' | 'mongo'} [args.ufhPresetsSource]
- * @param {number} [args.ufhPresetsSchemaVersion]
+ * @param {import('../types/shared-types').CalcRuntimeContext} args.ctx
  * @returns {Promise<import('../types/shared-types').CalcReport>}
  */
-export async function buildReport({
-  input,
-  catalog,
-  catalogSource = 'file',
-  waterNorms,
-  waterNormsSource = 'file',
-  appliances,
-  appliancesSource = 'file',
-  referenceBundleLoadedAt,
-  recommendationsSource = 'file',
-  ufhPresetsSource = 'file',
-  ufhPresetsSchemaVersion = 1,
-}) {
-  void appliancesSource;
-  void recommendationsSource;
+export async function buildReport({ input, ctx }) {
+  assertCalcRuntimeContext(ctx);
+  const {
+    waterNorms,
+    appliances,
+    recommendations,
+    ufhPresets,
+    sources,
+  } = ctx;
+  const catalogSource = sources.catalog;
+  const waterNormsSource = sources.waterNorms;
+  const appliancesSource = sources.appliances;
+  const recommendationsSource = sources.recommendations;
+  const ufhPresetsSource = sources.ufhPresets;
+  const referenceBundleLoadedAt = sources.loadedAt;
+  const ufhPresetsSchemaVersion = ufhPresets.schemaVersion;
   const warnings = [];
   logger.info('report.build.start', null);
 
@@ -111,9 +104,10 @@ export async function buildReport({
     building: input.building,
     heatingSystem: input.heatingSystem,
     heatLoss,
+    ufhPresets,
   });
   if (underfloorHeating?.rooms?.length) {
-    applyUnderfloorHeatingRecommendations(underfloorHeating);
+    applyUnderfloorHeatingRecommendations(underfloorHeating, recommendations);
     logger.info('report.underfloorHeating.done', null, {
       rooms: underfloorHeating.rooms.length,
       totalHeatFluxUpWatts: underfloorHeating.totalHeatFluxUpWatts,
@@ -210,6 +204,7 @@ export async function buildReport({
     activeScheme,
     building: input.building,
     heatingLoadKw: heatingBaseKw * heatingReserveFactor,
+    apartmentClassification: appliances.byKind.boiler.apartmentClassification,
   });
 
   // 4) Гидравлика (черновая)
@@ -250,9 +245,9 @@ export async function buildReport({
     heatLoss,
     hotWater: hotWaterInitial,
     heatingSystem: input.heatingSystem ?? {},
-    catalog,
     building: input.building,
     underfloorHeating,
+    ctx,
   });
 
   const hotWater = hotWaterForCalculations ?? hotWaterInitial;
@@ -269,6 +264,8 @@ export async function buildReport({
     requestedScheme: activeScheme,
     circuitFallback: matching.boiler?.circuitFallback ?? null,
     hotWaterReport: hotWater,
+    serialBufferConfig: appliances.byKind.boiler.hints.apartmentCombiSerialBuffer,
+    recommendations,
   });
 
   appendApartmentSingleOversizeCombiHint(automationHints, {
@@ -276,6 +273,7 @@ export async function buildReport({
     requestedScheme: activeScheme,
     circuitFallback: matching.boiler?.circuitFallback ?? null,
     resolvedRecommendations: matching.boiler?.resolvedRecommendations ?? [],
+    recommendations,
   });
 
   const reqBoilerKw = matching.boiler?.requiredKw;
@@ -329,12 +327,16 @@ export async function buildReport({
     underfloorHeating.mixingNode.boilerSupplyC = input.heatingSystem?.supplyC;
     underfloorHeating.mixingNode.floorCircuitSupplyC = primaryRoom?.circuitSupplyC;
 
-    applyUnderfloorMixingDistributionRecommendations(underfloorHeating, {
-      requestedPreset,
-      resolvedPreset,
-      minBoilerKw,
-      requiredBoilerKw: reqBoilerKw,
-    });
+    applyUnderfloorMixingDistributionRecommendations(
+      underfloorHeating,
+      {
+        requestedPreset,
+        resolvedPreset,
+        minBoilerKw,
+        requiredBoilerKw: reqBoilerKw,
+      },
+      recommendations,
+    );
   }
 
   logger.info('report.matching.done', null, {

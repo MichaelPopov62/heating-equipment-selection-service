@@ -54,6 +54,17 @@ export interface HealthOkResponse {
   status: 'up';
 }
 
+/** Ответ POST /api/v1/system/invalidate-reference-cache */
+export interface InvalidateReferenceCacheOkResponse {
+  ok: true;
+  referenceBundleLoadedAt: number;
+  catalogSource: 'file' | 'mongo';
+  waterNormsSource: 'file' | 'mongo';
+  appliancesSource: 'file' | 'mongo';
+  recommendationsSource: 'file' | 'mongo';
+  ufhPresetsSource: 'file' | 'mongo';
+}
+
 export interface EnvelopePresetsResponse {
   ok: true;
   presets: EnvelopePreset[];
@@ -142,6 +153,29 @@ export interface CatalogResponse {
   catalog: NormalizedCatalog;
   /** Откуда загружен каталог при старте API: файл или MongoDB. */
   catalogSource: 'file' | 'mongo';
+}
+
+/** Источники снимка справочников в одном расчёте (meta / ctx.sources). */
+export interface CalcRuntimeContextSources {
+  catalog: 'file' | 'mongo';
+  waterNorms: 'file' | 'mongo';
+  appliances: 'file' | 'mongo';
+  recommendations: 'file' | 'mongo';
+  ufhPresets: 'file' | 'mongo';
+  loadedAt: number;
+}
+
+/**
+ * Снимок справочников для одного calc без I/O.
+ * Создаётся через toCalcRuntimeContext(getReferenceBundle()) на composition root.
+ */
+export interface CalcRuntimeContext {
+  catalog: NormalizedCatalog;
+  waterNorms: import('../dhw/types').NormalizedWaterNorms;
+  appliances: import('../dhw/types').AppliancesBundle;
+  recommendations: import('../recommendations/types').RecommendationsBundle;
+  ufhPresets: import('../ufh/types').UnderfloorHeatingPresetsBundle;
+  sources: CalcRuntimeContextSources;
 }
 
 export interface LocationInput {

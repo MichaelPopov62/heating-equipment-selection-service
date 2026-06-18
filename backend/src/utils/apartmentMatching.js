@@ -3,12 +3,17 @@
  * Описание: Пороговые значения из appliances.boiler.apartmentClassification; площадь, санузлы, схемы ГВС.
  */
 
-import { getAppliances } from '../dhw/referenceCache.js';
 import { resolveObjectType } from './boilerMountingConstraints.js';
 
-/** @returns {import('../dhw/types').BoilerApplianceRules['apartmentClassification']} */
-function apartmentClassification() {
-  return getAppliances().byKind.boiler.apartmentClassification;
+/**
+ * @param {import('../dhw/types').BoilerApplianceRules['apartmentClassification'] | undefined} classification
+ * @returns {import('../dhw/types').BoilerApplianceRules['apartmentClassification']}
+ */
+function resolveApartmentClassification(classification) {
+  if (classification) return classification;
+  throw new Error(
+    'apartmentMatching: apartmentClassification обязателен (передайте appliances.byKind.boiler.apartmentClassification из CalcRuntimeContext).',
+  );
 }
 
 /**
@@ -50,11 +55,12 @@ export function countApartmentBathrooms(building, fixtures) {
  * «Большая квартира» по данным анкеты (до расчёта теплопотерь).
  * @param {import('../types/shared-types').BuildingInput | undefined} building
  * @param {import('../types/shared-types').HotWaterFixturesInput | undefined} [fixtures]
+ * @param {import('../dhw/types').BoilerApplianceRules['apartmentClassification']} apartmentClassification
  */
-export function isLargeApartmentByInput(building, fixtures = undefined) {
+export function isLargeApartmentByInput(building, fixtures = undefined, apartmentClassification) {
   const objectMeta = building?.objectMeta;
   if (resolveObjectType(objectMeta) !== 'apartment') return false;
-  const rules = apartmentClassification();
+  const rules = resolveApartmentClassification(apartmentClassification);
   const area = sumRoomsAreaM2(building);
   const bathrooms = countApartmentBathrooms(building, fixtures);
   return (
@@ -68,12 +74,18 @@ export function isLargeApartmentByInput(building, fixtures = undefined) {
  * @param {import('../types/shared-types').BuildingInput | undefined} building
  * @param {number} heatingLoadKw отопление × запас
  * @param {import('../types/shared-types').HotWaterFixturesInput | undefined} [fixtures]
+ * @param {import('../dhw/types').BoilerApplianceRules['apartmentClassification']} apartmentClassification
  */
-export function isLargeApartment(building, heatingLoadKw, fixtures = undefined) {
-  if (isLargeApartmentByInput(building, fixtures)) return true;
+export function isLargeApartment(
+  building,
+  heatingLoadKw,
+  fixtures = undefined,
+  apartmentClassification,
+) {
+  if (isLargeApartmentByInput(building, fixtures, apartmentClassification)) return true;
   const objectMeta = building?.objectMeta;
   if (resolveObjectType(objectMeta) !== 'apartment') return false;
-  const rules = apartmentClassification();
+  const rules = resolveApartmentClassification(apartmentClassification);
   return Number(heatingLoadKw) > rules.largeHeatingLoadKwMin;
 }
 

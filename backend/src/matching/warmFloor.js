@@ -78,11 +78,12 @@ function recommendationVarsForRoom(room) {
  * @param {import('../types/shared-types').UnderfloorHeatingRoomReport} room
  * @param {string[]} warnings
  * @param {import('../recommendations/types').ResolvedRecommendation[]} resolvedList
+ * @param {import('../recommendations/types').RecommendationsBundle} recommendations
  * @param {string} code
  * @param {Record<string, string | number | undefined>} vars
  */
-function pushUfhRecommendation(room, warnings, resolvedList, code, vars) {
-  const resolved = pushRecommendation(warnings, resolvedList, code, vars);
+function pushUfhRecommendation(room, warnings, resolvedList, recommendations, code, vars) {
+  const resolved = pushRecommendation(warnings, resolvedList, recommendations, code, vars);
   if (resolved?.category === 'warnings' && resolved.text) {
     room.warnings = [...(room.warnings ?? []), resolved.text];
   }
@@ -92,9 +93,10 @@ function pushUfhRecommendation(room, warnings, resolvedList, code, vars) {
  * Структурированные WARN/REC по перегреву поверхности; дополняет report на месте.
  *
  * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} report
+ * @param {import('../recommendations/types').RecommendationsBundle} recommendations
  * @returns {{ warnings: string[], resolvedRecommendations: import('../recommendations/types').ResolvedRecommendation[] }}
  */
-export function applyUnderfloorHeatingRecommendations(report) {
+export function applyUnderfloorHeatingRecommendations(report, recommendations) {
   /** @type {string[]} */
   const warnings = [];
   /** @type {import('../recommendations/types').ResolvedRecommendation[]} */
@@ -120,6 +122,7 @@ export function applyUnderfloorHeatingRecommendations(report) {
         room,
         warnings,
         resolvedRecommendations,
+        recommendations,
         'WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE',
         {
           roomName: room.roomName,
@@ -149,6 +152,7 @@ export function applyUnderfloorHeatingRecommendations(report) {
         room,
         warnings,
         resolvedRecommendations,
+        recommendations,
         'WARN_FLOOR_OVERHEATING_MATERIAL',
         vars,
       );
@@ -159,6 +163,7 @@ export function applyUnderfloorHeatingRecommendations(report) {
         pushRecommendation(
           warnings,
           resolvedRecommendations,
+          recommendations,
           'REC_UFH_ACTION_INCREASE_SPACING',
           vars,
         );
@@ -170,6 +175,7 @@ export function applyUnderfloorHeatingRecommendations(report) {
         pushRecommendation(
           warnings,
           resolvedRecommendations,
+          recommendations,
           'REC_UFH_ACTION_CHANGE_FINISH',
           vars,
         );
@@ -179,6 +185,7 @@ export function applyUnderfloorHeatingRecommendations(report) {
         room,
         warnings,
         resolvedRecommendations,
+        recommendations,
         'WARN_FLOOR_OVERHEATING_COMFORT',
         {
           ...vars,
@@ -192,6 +199,7 @@ export function applyUnderfloorHeatingRecommendations(report) {
         pushRecommendation(
           warnings,
           resolvedRecommendations,
+          recommendations,
           'REC_UFH_ACTION_INCREASE_SPACING',
           vars,
         );
@@ -221,8 +229,13 @@ export function applyUnderfloorHeatingRecommendations(report) {
  * @param {Exclude<import('../types/shared-types').UfhDistributionPreset, 'auto'>} ctx.resolvedPreset
  * @param {number} ctx.minBoilerKw
  * @param {number | undefined} ctx.requiredBoilerKw
+ * @param {import('../recommendations/types').RecommendationsBundle} recommendations
  */
-export function applyUnderfloorMixingDistributionRecommendations(report, ctx) {
+export function applyUnderfloorMixingDistributionRecommendations(
+  report,
+  ctx,
+  recommendations,
+) {
   if (!report?.isMixingNodeRequired) return;
 
   /** @type {string[]} */
@@ -245,6 +258,7 @@ export function applyUnderfloorMixingDistributionRecommendations(report, ctx) {
   pushRecommendation(
     warnings,
     resolvedRecommendations,
+    recommendations,
     'WARN_UFH_MIXING_NODE_REQUIRED',
     vars,
   );
@@ -258,6 +272,7 @@ export function applyUnderfloorMixingDistributionRecommendations(report, ctx) {
     pushRecommendation(
       warnings,
       resolvedRecommendations,
+      recommendations,
       'REC_UFH_HYDRAULIC_SEPARATOR_AUTO',
       vars,
     );

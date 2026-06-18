@@ -24,6 +24,7 @@ import {
 import { applyMongoFriendlyDnsIfSrvInCandidates } from '../src/utils/mongoDnsPreferPublic.js';
 import { getMongoConnectionConfigs } from '../src/utils/mongoConnectionConfig.js';
 import { seedReferenceDataCollections } from './seedReferenceData.js';
+import { tryInvalidateReferenceCacheRemote } from './utils/invalidateReferenceCacheRemote.js';
 
 const __dirnameSeed = path.dirname(fileURLToPath(import.meta.url));
 loadEnv({ path: path.join(__dirnameSeed, '..', '.env') });
@@ -407,6 +408,8 @@ async function main() {
         2,
       ),
     );
+
+    await tryInvalidateReferenceCacheRemote();
   } finally {
     await mongoose.disconnect();
   }

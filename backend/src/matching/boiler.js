@@ -19,8 +19,8 @@ import {
   matchesCombustionTypePreference,
   requiredKwFromHeatingAndDhw,
 } from '../utils/boilerMatchingByType.js';
-import { getAppliances } from '../dhw/referenceCache.js';
 import { pushRecommendation } from '../recommendations/recommendationResolver.js';
+import { assertCalcRuntimeContext } from '../reference/assertCalcRuntimeContext.js';
 import {
   SCHEME_BOILER_ELECTRIC_SEPARATE,
   SCHEME_BOILER_MAX_COMBI,
@@ -151,6 +151,7 @@ function efficientProposalHeadlineSuffix(
  * @param {boolean} [extra.forceSingleUnit] без каскада
  * @param {number} [extra.heatingLoadKwForReserve] база для nominalReservePercent по отоплению
  * @param {import('../types/boiler-types').BoilerEquipmentProposalPowerBreakdown} extra.powerRequirementBreakdown
+ * @param {import('../dhw/types').BoilerApplianceRules} extra.boilerRules
  * @returns {import('../types/boiler-types').BoilerEquipmentProposal | null}
  */
 function pickSingleOrCascadeProposal(
@@ -163,6 +164,7 @@ function pickSingleOrCascadeProposal(
   const forceSingleUnit = extra.forceSingleUnit === true;
   const heatingLoadKwForReserve = extra.heatingLoadKwForReserve;
   const powerRequirementBreakdown = extra.powerRequirementBreakdown;
+  const boilerRules = extra.boilerRules;
   const req = Math.max(0, Number(requiredKw) || 0);
   if (!boilers.length || req <= 0) return null;
   const selectedSingle =
@@ -180,6 +182,7 @@ function pickSingleOrCascadeProposal(
         tierHeadlineSuffix,
         heatingLoadKwForReserve,
         powerRequirementBreakdown,
+        boilerRules,
       },
     );
   }
@@ -187,20 +190,14 @@ function pickSingleOrCascadeProposal(
     const strongest = pickStrongestBoilerFromPool(boilers);
     if (!strongest) return null;
     const maxPw = Number(strongest.powerKw?.max ?? 0);
-    return buildProposalObject(
-      strongest,
-      'single',
-      1,
-      maxPw,
-      req,
-      {
-        tier,
-        condensingDrainNote: isCondensingBoiler(strongest),
-        tierHeadlineSuffix,
-        heatingLoadKwForReserve,
-        powerRequirementBreakdown,
-      },
-    );
+    return buildProposalObject(strongest, 'single', 1, maxPw, req, {
+      tier,
+      condensingDrainNote: isCondensingBoiler(strongest),
+      tierHeadlineSuffix,
+      heatingLoadKwForReserve,
+      powerRequirementBreakdown,
+      boilerRules,
+    });
   }
   const cascade = pickBestCascade(boilers, req);
   if (!cascade) return null;
@@ -215,6 +212,7 @@ function pickSingleOrCascadeProposal(
       condensingDrainNote: isCondensingBoiler(cascade.boiler),
       tierHeadlineSuffix,
       powerRequirementBreakdown,
+      boilerRules,
     },
   );
 }
@@ -227,6 +225,7 @@ function pickSingleOrCascadeProposal(
  * @param {number} reserveFactor
  * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} hotWaterBoilerPowerMatchingScheme
  * @param {'flowThrough' | 'storage' | undefined} dhwSupplyScenario
+ * @param {import('../dhw/types').BoilerApplianceRules} boilerRules
  * @returns {import('../types/boiler-types').BoilerMatchingRecommendation[]}
  */
 function buildHotWaterScenarioRecommendations(
@@ -236,6 +235,7 @@ function buildHotWaterScenarioRecommendations(
   reserveFactor,
   hotWaterBoilerPowerMatchingScheme,
   dhwSupplyScenario,
+  boilerRules,
 ) {
   /** @type {import('../types/boiler-types').BoilerMatchingRecommendation[]} */
   const out = [];
@@ -287,7 +287,7 @@ function buildHotWaterScenarioRecommendations(
     }
   }
 
-  const hintRules = getAppliances().byKind.boiler.hints;
+  const hintRules = boilerRules.hints;
   if (
     !electricWaterHeaterScheme &&
     !storageScenario &&
@@ -301,8 +301,7 @@ function buildHotWaterScenarioRecommendations(
     const typicalKw = hintRules.comfortHotWaterTypicalBoilerKw;
     out.push({
       type: 'comfort_hot_water_typical_twenty_four_kilowatt_hint_combination_boiler',
-      message:
-        `При двух санузлах с умеренным водоразбором и небольшой тепловой нагрузке на отопление часто выбирают котлы около ${typicalKw} кВт для комфорта горячей воды — сверьте с расчётной требуемой мощностью котла и паспортом.`,
+      message: `При двух санузлах с умеренным водоразбором и небольшой тепловой нагрузке на отопление часто выбирают котлы около ${typicalKw} кВт для комфорта горячей воды — сверьте с расчётной требуемой мощностью котла и паспортом.`,
     });
   }
 
@@ -321,6 +320,7 @@ function buildHotWaterScenarioRecommendations(
  * @param {string} [opts.tierHeadlineSuffix]
  * @param {number} [opts.heatingLoadKwForReserve] база процента запаса для одиночного котла: отопление×запас (или конденсационная база), сравнение с powerKw.min
  * @param {import('../types/boiler-types').BoilerEquipmentProposalPowerBreakdown} opts.powerRequirementBreakdown составляющие для UI («из них на отопление / ГВС»)
+ * @param {import('../dhw/types').BoilerApplianceRules} [opts.boilerRules]
  * @returns {import('../types/boiler-types').BoilerEquipmentProposal}
  */
 function buildProposalObject(
@@ -335,16 +335,13 @@ function buildProposalObject(
   const heatingBasis = opts.heatingLoadKwForReserve;
   /** @type {number} */
   let nominalReservePercent = 0;
-  if (
-    kind === 'single' &&
-    heatingBasis != null &&
-    Number(heatingBasis) > 0
-  ) {
+  if (kind === 'single' && heatingBasis != null && Number(heatingBasis) > 0) {
     const boilerMin = Number(boiler.powerKw?.min ?? boiler.powerKw?.max ?? 0);
     const hl = Number(heatingBasis);
+    const cap = opts.boilerRules.matching.nominalReservePercentCap;
     nominalReservePercent = Math.min(
       Math.round(((boilerMin - hl) / hl) * 100),
-      getAppliances().byKind.boiler.matching.nominalReservePercentCap,
+      cap,
     );
   } else if (req > 0) {
     nominalReservePercent = Number(
@@ -431,7 +428,6 @@ function buildProposalObject(
  * @param {number} [args.hotWaterPowerKw]
  * @param {number} [args.peakThermalPowerKw] пик проточной ГВС, кВт — для max-combi при storage-сценарии (1К + электробойлер)
  * @param {number} [args.reserveFactor]
- * @param {import('../catalog/types').NormalizedCatalog} args.catalog
  * @param {import('../types/boiler-types').BoilerCombustionType} [args.boilerCombustionType]
  * @param {import('../types/shared-types').HotWaterFixturesInput} [args.hotWaterFixtures]
  * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} [args.hotWaterBoilerPowerMatchingScheme]
@@ -440,14 +436,14 @@ function buildProposalObject(
  * @param {import('../catalog/types').IndirectWaterHeaterCatalogItemNormalized | null} [args.selectedWaterHeater] выбранный БКН (для схемы «1К + БКН» — учёт specs.minSourcePowerKw при подборе и в альтернативной линии «Эффективный»)
  * @param {'apartment' | 'house'} [args.objectType] квартира или двухконтурная схема — без каскада (один котёл)
  * @param {import('../types/shared-types').BuildingInput} [args.building] анкета (objectMeta, rooms) — фильтр монтажа
+ * @param {import('../types/shared-types').CalcRuntimeContext} args.ctx
  * @returns {import('../types/boiler-types').BoilerMatchingReport}
  */
 export function pickBoiler({
   heatLossWatts,
   hotWaterPowerKw = 0,
   peakThermalPowerKw = 0,
-  reserveFactor = getAppliances().byKind.boiler.matching.heatingReserveFactor,
-  catalog,
+  reserveFactor: reserveFactorArg,
   boilerCombustionType = undefined,
   hotWaterFixtures = undefined,
   hotWaterBoilerPowerMatchingScheme = undefined,
@@ -457,7 +453,13 @@ export function pickBoiler({
   objectType = 'house',
   building = undefined,
   heatingSystem = undefined,
+  ctx,
 } = {}) {
+  assertCalcRuntimeContext(ctx);
+  const { catalog, appliances, recommendations: recommendationsBundle } = ctx;
+  const boilerRules = appliances.byKind.boiler;
+  const reserveFactor =
+    reserveFactorArg ?? boilerRules.matching.heatingReserveFactor;
   const objectMeta = building?.objectMeta;
   const resolvedObjectType = objectMeta
     ? resolveObjectType(objectMeta)
@@ -466,7 +468,10 @@ export function pickBoiler({
       : 'house';
   const heatLossKw = (Number(heatLossWatts) || 0) / 1000;
   const heatingLoadKw = heatLossKw * reserveFactor;
-  const heatingLoadKwCondensing = heatingLoadKwForCondensingLine(heatLossKw);
+  const heatingLoadKwCondensing = heatingLoadKwForCondensingLine(
+    heatLossKw,
+    boilerRules,
+  );
   const hwKw = Number(hotWaterPowerKw) || 0;
   const peakHwKw = Number(peakThermalPowerKw) || 0;
   /** @type {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} */
@@ -487,7 +492,9 @@ export function pickBoiler({
   const hwKwForBoilerFormulaEarly =
     scheme === SCHEME_BOILER_MAX_COMBI ||
     scheme === SCHEME_BOILER_COMBI_BUFFER_ELECTRIC
-      ? (peakHwKw > 0 ? peakHwKw : hwKw)
+      ? peakHwKw > 0
+        ? peakHwKw
+        : hwKw
       : hwKw;
 
   let requiredKw = requiredKwFromHeatingAndDhw(
@@ -502,10 +509,7 @@ export function pickBoiler({
   );
 
   const minSourceKwBkn = indirectMinSourcePowerKw(selectedWaterHeater);
-  if (
-    scheme === SCHEME_BOILER_SINGLE_INDIRECT_SUM &&
-    minSourceKwBkn != null
-  ) {
+  if (scheme === SCHEME_BOILER_SINGLE_INDIRECT_SUM && minSourceKwBkn != null) {
     requiredKw = Math.max(requiredKw, minSourceKwBkn);
     requiredKwCondensing = Math.max(requiredKwCondensing, minSourceKwBkn);
   }
@@ -568,16 +572,18 @@ export function pickBoiler({
     boilersFiltered,
     objectMeta,
     building,
+    boilerRules.mounting,
   );
   boilersAfterCombustion = filterBoilersByMountingConstraints(
     boilersAfterCombustion,
     objectMeta,
     building,
+    boilerRules.mounting,
   );
   if (countBeforeMounting > 0 && boilersFiltered.length === 0) {
     warnings.push(
       resolvedObjectType === 'apartment'
-        ? `Нет котлов в каталоге, подходящих для квартиры (настенные, номинал до ${getAppliances().byKind.boiler.mounting.maxApartmentNominalKw} кВт; напольные модели исключены).`
+        ? `Нет котлов в каталоге, подходящих для квартиры (настенные, номинал до ${boilerRules.mounting.maxApartmentNominalKw} кВт; напольные модели исключены).`
         : 'Нет котлов, подходящих по типу монтажа и зоне установки (напольные — только при boilerPlacementZone=boiler_room и достаточном объёме котельной).',
     );
   }
@@ -595,7 +601,7 @@ export function pickBoiler({
     scheme === SCHEME_BOILER_ELECTRIC_SEPARATE &&
     resolvedObjectType === 'apartment'
   ) {
-    const aptRules = getAppliances().byKind.boiler.apartmentClassification;
+    const aptRules = boilerRules.apartmentClassification;
     const smallestSingleMax = smallestSingleCircuitMaxKw(singlePoolPreview);
     /** @type {'no_single_in_catalog' | null} */
     let fallbackReason = null;
@@ -608,10 +614,16 @@ export function pickBoiler({
       smallestSingleMax != null &&
       smallestSingleMax / heatingLoadKw >= aptRules.singleCircuitOversizeRatio
     ) {
-      pushRecommendation(warnings, resolvedRecommendations, 'REC_APT_SINGLE_TO_COMBI_OPTIMIZATION', {
-        heatingLoadKw: Number(heatingLoadKw.toFixed(1)),
-        smallestSingleMaxKw: Number((smallestSingleMax ?? 0).toFixed(1)),
-      });
+      pushRecommendation(
+        warnings,
+        resolvedRecommendations,
+        recommendationsBundle,
+        'REC_APT_SINGLE_TO_COMBI_OPTIMIZATION',
+        {
+          heatingLoadKw: Number(heatingLoadKw.toFixed(1)),
+          smallestSingleMaxKw: Number((smallestSingleMax ?? 0).toFixed(1)),
+        },
+      );
       warnings.push(
         `Минимальный одноконтурный котёл в каталоге (${Number(smallestSingleMax.toFixed(1))} кВт) существенно выше расчётной отопительной нагрузки (${Number(heatingLoadKw.toFixed(1))} кВт). Сохранена схема «1К + электробойлер»: котёл — только отопление, ГВС — накопитель. Для перехода на двухконтурный котёл см. рекомендацию REC_APT_SINGLE_TO_COMBI_OPTIMIZATION.`,
       );
@@ -643,6 +655,7 @@ export function pickBoiler({
       pushRecommendation(
         warnings,
         resolvedRecommendations,
+        recommendationsBundle,
         'WARN_APT_ELECTRIC_TO_COMBI_NO_SINGLE',
       );
     }
@@ -679,7 +692,9 @@ export function pickBoiler({
   const hwKwForBoilerFormula =
     effectiveScheme === SCHEME_BOILER_MAX_COMBI ||
     effectiveScheme === SCHEME_BOILER_COMBI_BUFFER_ELECTRIC
-      ? (peakHwKw > 0 ? peakHwKw : hwKw)
+      ? peakHwKw > 0
+        ? peakHwKw
+        : hwKw
       : hwKw;
   /** В карточках proposal — 0 для «1К + электро», иначе значение для формулы котла. */
   const hwKwForBreakdown =
@@ -739,6 +754,7 @@ export function pickBoiler({
       reserveFactor,
       effectiveScheme,
       dhwSupplyScenario,
+      boilerRules,
     ),
   );
 
@@ -750,16 +766,23 @@ export function pickBoiler({
       dhwSupplyScenario,
       fixtures: hotWaterFixtures,
       peakThermalPowerKw: peakHwKw > 0 ? peakHwKw : hwKw,
+      serialBufferConfig: boilerRules.hints.apartmentCombiSerialBuffer,
     })
   ) {
-    const serialRec = buildApartmentCombiSerialBufferRecommendation();
+    const serialRec = buildApartmentCombiSerialBufferRecommendation(
+      boilerRules.hints.apartmentCombiSerialBuffer,
+      recommendationsBundle,
+    );
     if (serialRec) {
       recommendations.push(serialRec);
       pushRecommendation(
         warnings,
         resolvedRecommendations,
+        recommendationsBundle,
         'REC_APT_COMBI_SERIAL_BUFFER',
-        apartmentCombiSerialBufferTemplateVars(),
+        apartmentCombiSerialBufferTemplateVars(
+          boilerRules.hints.apartmentCombiSerialBuffer,
+        ),
       );
     }
   }
@@ -792,6 +815,7 @@ export function pickBoiler({
           heatingLoadKw,
           hwKwForBreakdown,
         ),
+        boilerRules,
       },
     );
   } else if (selectedSingle) {
@@ -808,6 +832,7 @@ export function pickBoiler({
           heatingLoadKw,
           hwKwForBreakdown,
         ),
+        boilerRules,
       },
     );
   } else if (forceSingleBoiler) {
@@ -828,6 +853,7 @@ export function pickBoiler({
             heatingLoadKw,
             hwKwForBreakdown,
           ),
+          boilerRules,
         },
       );
       if (maxPw < requiredKw) {
@@ -842,10 +868,16 @@ export function pickBoiler({
           );
         } else {
           boilerUnderpoweredFromCatalog = true;
-          pushRecommendation(warnings, resolvedRecommendations, 'WARN_BOILER_UNDERPOWERED', {
-            boilerMaxKw: pk,
-            requiredKw: rq,
-          });
+          pushRecommendation(
+            warnings,
+            resolvedRecommendations,
+            recommendationsBundle,
+            'WARN_BOILER_UNDERPOWERED',
+            {
+              boilerMaxKw: pk,
+              requiredKw: rq,
+            },
+          );
         }
       }
     }
@@ -865,6 +897,7 @@ export function pickBoiler({
             heatingLoadKw,
             hwKwForBreakdown,
           ),
+          boilerRules,
         },
       );
     } else {
@@ -898,7 +931,10 @@ export function pickBoiler({
 
   if (efficientCandidates.length > 0) {
     recommendations.push(
-      ...buildCondensingBoilerMatchingRecommendations(reserveFactor),
+      ...buildCondensingBoilerMatchingRecommendations(
+        reserveFactor,
+        boilerRules,
+      ),
     );
   }
 
@@ -925,12 +961,14 @@ export function pickBoiler({
           heatingLoadKw,
           hwKwForBreakdown,
         ),
+        boilerRules,
       },
     );
 
     // Схема с отдельным электробойлером: котёл только под отопление×запас (как proposal/requiredKw),
     // без суммы с ГВС и без порога minSourcePowerKw БКН — иначе ложно раздувает конденсационную ветку.
-    const electricSeparate = effectiveScheme === SCHEME_BOILER_ELECTRIC_SEPARATE;
+    const electricSeparate =
+      effectiveScheme === SCHEME_BOILER_ELECTRIC_SEPARATE;
     const efficientHeatingBaseKw = electricSeparate
       ? heatingLoadKw
       : heatingLoadKwCondensing;
@@ -979,6 +1017,7 @@ export function pickBoiler({
           efficientHeatingBaseKw,
           hwKwForBreakdown,
         ),
+        boilerRules,
       },
     );
   }
@@ -1004,8 +1043,13 @@ export function pickBoiler({
     }
   }
 
-  const tradCascade = buildTraditionalCascadeHint(requiredKw);
-  if (proposal && proposal.kind === 'single' && tradCascade && !forceSingleBoiler) {
+  const tradCascade = buildTraditionalCascadeHint(requiredKw, boilerRules);
+  if (
+    proposal &&
+    proposal.kind === 'single' &&
+    tradCascade &&
+    !forceSingleBoiler
+  ) {
     recommendations.push(tradCascade);
   }
 
@@ -1016,15 +1060,20 @@ export function pickBoiler({
         ? Number(proposal.totalNominalKw ?? 0) >= requiredKw
         : selMax >= requiredKw;
     if (covers) {
-      pushRecommendation(warnings, resolvedRecommendations, 'REC_BOILER_OPTIMAL');
+      pushRecommendation(
+        warnings,
+        resolvedRecommendations,
+        recommendationsBundle,
+        'REC_BOILER_OPTIMAL',
+      );
     }
   }
 
   if (proposalEfficient?.kind === 'single' && !forceSingleBoiler) {
     const condHint =
       reqEfficientLine > 0
-        ? buildCondensingCascadeHint(reqEfficientLine)
-        : buildCondensingCascadeHint(requiredKwCondensing);
+        ? buildCondensingCascadeHint(reqEfficientLine, boilerRules)
+        : buildCondensingCascadeHint(requiredKwCondensing, boilerRules);
     if (condHint) recommendations.push(condHint);
   }
 
@@ -1036,10 +1085,7 @@ export function pickBoiler({
       totalNominalKw: proposal.totalNominalKw,
     });
   }
-  if (
-    proposalEfficient &&
-    selectedWaterHeater?.type === 'indirect_floor'
-  ) {
+  if (proposalEfficient && selectedWaterHeater?.type === 'indirect_floor') {
     proposalEfficient.notes.push(
       'Для выбранного напольного БКН нужно дополнительное напольное пространство рядом с котлом.',
     );
@@ -1071,6 +1117,7 @@ export function pickBoiler({
       pushRecommendation(
         warnings,
         resolvedRecommendations,
+        recommendationsBundle,
         'WARN_UFH_ONLY_TRADITIONAL_BOILER',
         {
           supplyC: hs.supplyC,
@@ -1094,7 +1141,7 @@ export function pickBoiler({
     ...(circuitFallback ? { circuitFallback } : {}),
     requiredKw: Number(requiredKw.toFixed(2)),
     condensingHeatingReserveFactor:
-      getAppliances().byKind.boiler.matching.condensingHeatingReserveFactor,
+      boilerRules.matching.condensingHeatingReserveFactor,
     heatingLoadKwCondensing: Number(heatingLoadKwCondensing.toFixed(2)),
     requiredKwForCondensingLine: Number(requiredKwCondensing.toFixed(2)),
     selected,

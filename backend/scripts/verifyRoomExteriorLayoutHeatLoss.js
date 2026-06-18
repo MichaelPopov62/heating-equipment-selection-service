@@ -33,7 +33,6 @@ const baseRoom = {
 
 const temps = { insideC: 20, outsideC: -22 };
 const area = 10;
-const uFacade = 0.35;
 
 function wallEl(roomId, construction, orientation = 'N') {
   return {

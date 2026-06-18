@@ -7,7 +7,6 @@ import { resolveUnderfloorHeatingComposition } from '../data/warmFloorAssemblyPr
 import { DEFAULT_PIPE_SPACING_MM } from './ufhPipeEmbedment.js';
 import { resolveUfhCircuitForFinish } from './ufhCircuitResolve.js';
 import { isMixingNodeRequiredForProject } from './ufhMixingNode.js';
-import { getUfhPresets } from '../ufh/ufhPresetsCache.js';
 import { resolveUfhDistributionPreset } from '../../../shared/ufhDistributionPresets.js';
 import {
   UFH_PRESET_MIXED_RADIATORS,
@@ -28,10 +27,15 @@ import { round } from '../utils/math.js';
  * @param {import('../types/shared-types').BuildingInput | undefined | null} args.building
  * @param {import('../types/shared-types').HeatingSystemInput | undefined | null} args.heatingSystem
  * @param {import('../types/shared-types').HeatLossReport | undefined | null} [args.heatLoss]
+ * @param {import('../ufh/types').UnderfloorHeatingPresetsBundle} args.ufhPresets
  * @returns {import('../types/shared-types').UnderfloorHeatingReport | null}
  */
 export function calculateUnderfloorHeating(args) {
-  const { temps, building, heatingSystem, heatLoss } = args;
+  const { temps, building, heatingSystem, heatLoss, ufhPresets } = args;
+
+  if (!ufhPresets?.byPresetId) {
+    throw new Error('Расчёт ТП: ufhPresets обязательны.');
+  }
 
   if (!heatingSystem?.waterUnderfloorHeating && !heatingSystem?.ufhPresetId) {
     return null;
@@ -44,11 +48,7 @@ export function calculateUnderfloorHeating(args) {
   /** @type {import('../ufh/types').NormalizedUfhModePreset | null} */
   let modePreset = null;
   if (ufhPresetId) {
-    try {
-      modePreset = getUfhPresets().byPresetId[ufhPresetId] ?? null;
-    } catch {
-      modePreset = null;
-    }
+    modePreset = ufhPresets.byPresetId[ufhPresetId] ?? null;
   }
 
   const rooms = building?.rooms ?? [];
@@ -86,7 +86,7 @@ export function calculateUnderfloorHeating(args) {
       && typeof heatingSystem.supplyC === 'number'
       && typeof heatingSystem.returnC === 'number'
     ) {
-      // Fallback: график 40/30 из normalizeHeatingUfhPreset, если кэш пресета недоступен
+      // Fallback: график из normalizeHeatingUfhPreset (ufh_only), если modePreset не переопределяет контур
       circuitResolved = {
         preset: {
           id: 'ufh_dt10_40_30',

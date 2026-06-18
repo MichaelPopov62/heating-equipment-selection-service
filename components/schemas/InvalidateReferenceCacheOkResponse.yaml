@@ -1,0 +1,32 @@
+type: object
+additionalProperties: false
+required:
+  - ok
+  - referenceBundleLoadedAt
+  - catalogSource
+  - waterNormsSource
+  - appliancesSource
+  - recommendationsSource
+  - ufhPresetsSource
+properties:
+  ok:
+    type: boolean
+    enum: [true]
+  referenceBundleLoadedAt:
+    type: integer
+    description: Timestamp (ms) успешной перезагрузки bundle после invalidate
+  catalogSource:
+    type: string
+    enum: [file, mongo]
+  waterNormsSource:
+    type: string
+    enum: [file, mongo]
+  appliancesSource:
+    type: string
+    enum: [file, mongo]
+  recommendationsSource:
+    type: string
+    enum: [file, mongo]
+  ufhPresetsSource:
+    type: string
+    enum: [file, mongo]

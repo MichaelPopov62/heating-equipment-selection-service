@@ -8,11 +8,15 @@ import {
   SCHEME_BOILER_SINGLE_BUFFER_ELECTRIC,
   SCHEME_BOILER_SINGLE_INDIRECT_SUM,
 } from '../../../shared/heatingMatchingSchemes.js';
-import { getAppliances } from '../dhw/referenceCache.js';
-
-/** @returns {import('../dhw/types').BoilerApplianceRules} */
-function boilerApplianceRules() {
-  return getAppliances().byKind.boiler;
+/**
+ * @param {import('../dhw/types').BoilerApplianceRules | undefined} boilerRules
+ * @returns {import('../dhw/types').BoilerApplianceRules}
+ */
+function resolveBoilerRules(boilerRules) {
+  if (boilerRules) return boilerRules;
+  throw new Error(
+    'boilerMatchingByType: boilerRules обязательны (передайте appliances.byKind.boiler из CalcRuntimeContext).',
+  );
 }
 
 /**
@@ -79,9 +83,10 @@ export function resolveBoilerCircuitFilterMode({ scheme, dhwSupplyScenario }) {
 /**
  * Отопительная нагрузка с запасом для линии «Эффективный» (конденсация).
  * @param {number} heatLossKw
+ * @param {import('../dhw/types').BoilerApplianceRules} boilerRules
  */
-export function heatingLoadKwForCondensingLine(heatLossKw) {
-  return Number(heatLossKw) * boilerApplianceRules().matching.condensingHeatingReserveFactor;
+export function heatingLoadKwForCondensingLine(heatLossKw, boilerRules) {
+  return Number(heatLossKw) * resolveBoilerRules(boilerRules).matching.condensingHeatingReserveFactor;
 }
 
 /**
@@ -139,11 +144,14 @@ export function matchesCombustionTypePreference(preferred, boiler) {
 /**
  * Рекомендации по эксплуатации конденсационной линии (график, без избыточного номинала).
  * @param {number} reserveFactorTraditional множитель запаса на линии «Эконом» (например 1.15)
+ * @param {import('../dhw/types').BoilerApplianceRules} boilerRules
  * @returns {import('../types/boiler-types').BoilerMatchingRecommendation[]}
  */
 export function buildCondensingBoilerMatchingRecommendations(
   reserveFactorTraditional,
+  boilerRules,
 ) {
+  const rules = resolveBoilerRules(boilerRules);
   return [
     {
       type: 'condensing_low_temp_graph',
@@ -152,7 +160,7 @@ export function buildCondensingBoilerMatchingRecommendations(
     },
     {
       type: 'condensing_avoid_oversizing',
-      message: `Линия подбора «Эффективный» (конденсационные аппараты): отопительная нагрузка считается с запасом ×${boilerApplianceRules().matching.condensingHeatingReserveFactor} вместо ×${reserveFactorTraditional} — избыточный номинал повышает тактование и ухудшает эффективность и ресурс теплообменника.`,
+      message: `Линия подбора «Эффективный» (конденсационные аппараты): отопительная нагрузка считается с запасом ×${rules.matching.condensingHeatingReserveFactor} вместо ×${reserveFactorTraditional} — избыточный номинал повышает тактование и ухудшает эффективность и ресурс теплообменника.`,
     },
   ];
 }
@@ -160,11 +168,12 @@ export function buildCondensingBoilerMatchingRecommendations(
 /**
  * Подсказка про каскад для традиционной линии (общий подбор / эконом), если одна машина и мощность > 30 кВт.
  * @param {number} requiredKw
+ * @param {import('../dhw/types').BoilerApplianceRules} boilerRules
  * @returns {import('../types/boiler-types').BoilerMatchingRecommendation | null}
  */
-export function buildTraditionalCascadeHint(requiredKw) {
+export function buildTraditionalCascadeHint(requiredKw, boilerRules) {
   const req = Number(requiredKw);
-  const minKw = boilerApplianceRules().matching.cascadeHintMinKw;
+  const minKw = resolveBoilerRules(boilerRules).matching.cascadeHintMinKw;
   if (!(req > minKw)) return null;
   return {
     type: 'cascade_hint',
@@ -177,11 +186,12 @@ export function buildTraditionalCascadeHint(requiredKw) {
 /**
  * Подсказка про каскад для конденсационной линии подбора.
  * @param {number} requiredKwCondensing
+ * @param {import('../dhw/types').BoilerApplianceRules} boilerRules
  * @returns {import('../types/boiler-types').BoilerMatchingRecommendation | null}
  */
-export function buildCondensingCascadeHint(requiredKwCondensing) {
+export function buildCondensingCascadeHint(requiredKwCondensing, boilerRules) {
   const req = Number(requiredKwCondensing);
-  const minKw = boilerApplianceRules().matching.cascadeHintMinKw;
+  const minKw = resolveBoilerRules(boilerRules).matching.cascadeHintMinKw;
   if (!(req > minKw)) return null;
   return {
     type: 'cascade_hint_condensing',

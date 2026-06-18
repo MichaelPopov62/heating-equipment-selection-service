@@ -5,13 +5,14 @@
 
 import express from 'express';
 import { buildReport } from '../report/public.js';
-import { getReferenceBundle } from '../reference/public.js';
+import { getReferenceBundle, toCalcRuntimeContext } from '../reference/public.js';
 import { FLOORING_FINISH_MATERIALS } from '../data/flooringFinishMaterials.js';
 import { UNDERFLOOR_HEATING_BASE_PRESETS } from '../data/warmFloorAssemblyPresets.js';
 import { ENVELOPE_PRESETS } from '../logic/envelopePresets.js';
 import { validateAndNormalizeInput } from './validate.js';
 import { logger } from '../utils/logger.js';
 import { createProjectsRouter } from './projectsRoutes.js';
+import { createSystemRouter } from './systemRoutes.js';
 
 /**
  * @returns {Promise<import('express').Router>}
@@ -24,6 +25,8 @@ export async function createRoutes() {
    * @param {import('express').Response<import('../types/shared-types').HealthOkResponse>} res
    */
   router.get('/health', (req, res) => res.status(200).json({ ok: true, status: 'up' }));
+
+  router.use(createSystemRouter());
 
   /**
    * @param {import('express').Request} req
@@ -131,20 +134,9 @@ export async function createRoutes() {
     try {
       logger.debug('calc.request.start', { requestId });
       const bundle = await getReferenceBundle();
-      const input = validateAndNormalizeInput(req.body);
-      const report = await buildReport({
-        input,
-        catalog: bundle.catalog,
-        catalogSource: bundle.catalogSource,
-        waterNorms: bundle.waterNorms,
-        waterNormsSource: bundle.waterNormsSource,
-        appliances: bundle.appliances,
-        appliancesSource: bundle.appliancesSource,
-        referenceBundleLoadedAt: bundle.loadedAt,
-        recommendationsSource: bundle.recommendationsSource,
-        ufhPresetsSource: bundle.ufhPresetsSource,
-        ufhPresetsSchemaVersion: bundle.ufhPresets.schemaVersion,
-      });
+      const ctx = toCalcRuntimeContext(bundle);
+      const input = validateAndNormalizeInput(req.body, ctx);
+      const report = await buildReport({ input, ctx });
       logger.debug('calc.request.done', { requestId }, { warnings: report?.warnings?.length ?? 0 });
       res.status(200).json({ ok: true, report });
     } catch (err) {

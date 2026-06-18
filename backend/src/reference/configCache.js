@@ -1,16 +1,14 @@
 /**
  * Назначение: TTL-кэш справочного bundle.
  * Описание: согласованная загрузка catalog, water_norms, appliances и recommendations с прогревом
- * при старте API; обновление по REFERENCE_CACHE_TTL_MS, при сбое — stale-while-revalidate.
+ * при старте API; обновление по REFERENCE_CACHE_TTL_MS; on-demand invalidate с generation guard.
  */
 import { loadCatalog } from '../catalog/public.js';
 import { loadWaterNorms } from '../dhw/loadWaterNorms.js';
 import { loadAppliances } from '../dhw/loadAppliances.js';
 import { loadRecommendations } from '../recommendations/loadRecommendations.js';
 import { loadUnderfloorHeatingPresets } from '../ufh/loadUnderfloorHeatingPresets.js';
-import { setRecommendationsCache } from '../recommendations/recommendationResolver.js';
-import { setAppliancesCache, setWaterNormsCache } from '../dhw/referenceCache.js';
-import { setUfhPresetsCache } from '../ufh/ufhPresetsCache.js';
+import { deepFreeze } from './deepFreeze.js';
 import { logger } from '../utils/logger.js';
 
 const DEFAULT_TTL_MS = 60 * 60 * 1000;
@@ -36,6 +34,9 @@ let cachedBundle = null;
 /** @type {Promise<ReferenceBundle> | null} */
 let refreshInFlight = null;
 
+/** Монотонный epoch: invalidate увеличивает; refresh пишет в кэш только при совпадении epoch. */
+let cacheGeneration = 0;
+
 /**
  * @returns {number}
  */
@@ -43,16 +44,6 @@ function resolveTtlMs() {
   const raw = Number(process.env.REFERENCE_CACHE_TTL_MS);
   if (Number.isFinite(raw) && raw > 0) return Math.trunc(raw);
   return DEFAULT_TTL_MS;
-}
-
-/**
- * @param {ReferenceBundle} bundle
- */
-function publishToReferenceSyncCache(bundle) {
-  setWaterNormsCache(bundle.waterNorms, bundle.waterNormsSource);
-  setAppliancesCache(bundle.appliances, bundle.appliancesSource);
-  setRecommendationsCache(bundle.recommendations);
-  setUfhPresetsCache(bundle.ufhPresets, bundle.ufhPresetsSource);
 }
 
 /**
@@ -88,7 +79,7 @@ async function loadReferenceBundleFresh() {
     loadedAt: Date.now(),
   };
 
-  publishToReferenceSyncCache(bundle);
+  deepFreeze(bundle);
   logger.info('referenceCache.loaded', null, {
     catalogSource,
     waterNormsSource,
@@ -99,9 +90,31 @@ async function loadReferenceBundleFresh() {
     ufhPresetsSource,
     ufhPresetsSchemaVersion: ufhPresets.schemaVersion,
     loadedAt: new Date(bundle.loadedAt).toISOString(),
+    generation: cacheGeneration,
   });
 
   return bundle;
+}
+
+/**
+ * Сброс in-memory снимка (on-demand). Orphan refresh не отменяется, но не перезапишет кэш
+ * благодаря cacheGeneration.
+ */
+export function invalidateReferenceCache() {
+  cacheGeneration += 1;
+  cachedBundle = null;
+  refreshInFlight = null;
+  logger.info('referenceCache.invalidated', null, { generation: cacheGeneration });
+}
+
+/**
+ * Invalidate + eager reload — для webhook после seed/правки справочников в Mongo.
+ *
+ * @returns {Promise<ReferenceBundle>}
+ */
+export async function invalidateAndWarmReferenceCache() {
+  invalidateReferenceCache();
+  return warmupReferenceCache();
 }
 
 /**
@@ -111,9 +124,19 @@ async function loadReferenceBundleFresh() {
 async function refreshReferenceCache(opts = {}) {
   if (refreshInFlight) return refreshInFlight;
 
-  refreshInFlight = (async () => {
+  const genAtStart = cacheGeneration;
+
+  const flight = (async () => {
     try {
       const next = await loadReferenceBundleFresh();
+      if (genAtStart !== cacheGeneration) {
+        logger.info('referenceCache.refresh.discarded_stale', null, {
+          genAtStart,
+          currentGeneration: cacheGeneration,
+        });
+        if (cachedBundle) return cachedBundle;
+        return refreshReferenceCache();
+      }
       cachedBundle = next;
       return next;
     } catch (err) {
@@ -127,12 +150,15 @@ async function refreshReferenceCache(opts = {}) {
       }
       throw err;
     } finally {
-      refreshInFlight = null;
+      if (refreshInFlight === flight) {
+        refreshInFlight = null;
+      }
     }
   })();
 
+  refreshInFlight = flight;
   void opts;
-  return refreshInFlight;
+  return flight;
 }
 
 /**

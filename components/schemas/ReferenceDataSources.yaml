@@ -3,7 +3,9 @@ additionalProperties: false
 description: >
   Описание справочников расчёта (не отдельные HTTP-эндпоинты MVP). Загрузка и TTL-кэш —
   backend/src/reference/configCache.js: при старте прогрев, затем согласованный bundle
-  (products + water_norms + appliances + recommendations) в памяти; обновление по REFERENCE_CACHE_TTL_MS (по умолчанию 1 ч).
+  (products + water_norms + appliances + recommendations + underfloor_heating_presets) в памяти;
+  bundle при загрузке — deepFreeze; calc использует CalcRuntimeContext (см. docs/calc-runtime-context.md).
+  Обновление по REFERENCE_CACHE_TTL_MS (по умолчанию 1 ч).
   GET /api/v1/catalog и POST /api/v1/calc используют один снимок. Числовые нормы только в seed/Mongo;
   validateWaterNorms.js и validateAppliances.js без fallback ?? в коде.
 properties:
@@ -88,3 +90,30 @@ properties:
         example: RECOMMENDATIONS_SOURCE
       resolvedSchema:
         $ref: ./ResolvedRecommendation.yaml
+  underfloor_heating_presets:
+    type: object
+    description: >
+      Режимы водяного ТП (ufh_only, ufh_direct_tile, …); коллекция MongoDB underfloor_heating_presets.
+      В calc передаётся через CalcRuntimeContext.ufhPresets (docs/calc-runtime-context.md).
+    properties:
+      fileSeed:
+        type: string
+        example: backend/data/underfloor_heating_presets.json
+      loader:
+        type: string
+        example: backend/src/ufh/loadUnderfloorHeatingPresets.js
+      env:
+        type: string
+        example: UFH_PRESETS_SOURCE
+  calcRuntimeContext:
+    type: object
+    description: >
+      Снимок справочников для одного расчёта: toCalcRuntimeContext(getReferenceBundle()).
+      validateAndNormalizeInput(body, ctx) и buildReport({ input, ctx }).
+    properties:
+      module:
+        type: string
+        example: backend/src/reference/toCalcRuntimeContext.js
+      doc:
+        type: string
+        example: docs/calc-runtime-context.md

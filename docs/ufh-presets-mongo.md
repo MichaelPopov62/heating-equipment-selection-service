@@ -11,7 +11,7 @@
 | Коллекция MongoDB | `underfloor_heating_presets` |
 | Файл dev/seed | `backend/data/underfloor_heating_presets.json` |
 | Переменная | `UFH_PRESETS_SOURCE` (`file` \| `mongo` \| `auto`) |
-| Runtime | `loadUnderfloorHeatingPresets.js` → `configCache.js` → `ufhPresetsCache.js` |
+| Runtime | `loadUnderfloorHeatingPresets.js` → `configCache.js` → **`CalcRuntimeContext.ufhPresets`** → `normalizeHeatingUfhPreset` / `calculateUnderfloorHeating` (см. [`calc-runtime-context.md`](calc-runtime-context.md)) |
 | Seed | `backend/scripts/seedReferenceData.js` |
 
 Валидация: `validateUnderfloorHeatingPresets.js` — derive `supplyC` / `returnC` (Δt = **10 K**):

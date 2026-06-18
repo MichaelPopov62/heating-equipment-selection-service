@@ -3,7 +3,7 @@
  * Запуск: node scripts/verifyMixedRadiatorUfh.js (из backend/)
  */
 
-import { warmupReferenceCache, getReferenceBundle } from '../src/reference/configCache.js';
+import { warmupReferenceCache, getReferenceBundle, toCalcRuntimeContext } from '../src/reference/public.js';
 import { validateAndNormalizeInput } from '../src/api/validate.js';
 import { buildReport } from '../src/report/buildReport.js';
 import {
@@ -12,7 +12,7 @@ import {
 } from '../src/matching/internal/resolveMixedRadiatorRoomLoad.js';
 
 await warmupReferenceCache();
-const bundle = await getReferenceBundle();
+const ctx = toCalcRuntimeContext(await getReferenceBundle());
 
 const body = {
   building: {
@@ -116,17 +116,8 @@ const body = {
   },
 };
 
-const input = validateAndNormalizeInput(body);
-const report = await buildReport({
-  input,
-  catalog: bundle.catalog,
-  waterNorms: bundle.waterNorms,
-  appliances: bundle.appliances,
-  catalogSource: 'file',
-  waterNormsSource: 'file',
-  appliancesSource: 'file',
-  recommendationsSource: 'file',
-});
+const input = validateAndNormalizeInput(body, ctx);
+const report = await buildReport({ input, ctx });
 
 const r2hl = report.calculations.heatLoss.rooms.find((r) => r.id === 'r2');
 const r2ufh = report.calculations.underfloorHeating?.rooms?.find((r) => r.roomId === 'r2');

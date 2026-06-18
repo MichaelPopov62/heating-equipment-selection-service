@@ -1,6 +1,7 @@
 /**
  * Назначение: публичный API домена reference.
- * Описание: barrel-модуль runtime — экспортирует getReferenceBundle и warmupReferenceCache
- * для согласованного набора catalog + water_norms + appliances + recommendations.
+ * Описание: barrel-модуль runtime — bundle, CalcRuntimeContext и прогрев кэша справочников.
  */
-export { getReferenceBundle, warmupReferenceCache } from './configCache.js';
+export { getReferenceBundle, warmupReferenceCache, invalidateReferenceCache, invalidateAndWarmReferenceCache } from './configCache.js';
+export { toCalcRuntimeContext } from './toCalcRuntimeContext.js';
+export { assertCalcRuntimeContext } from './assertCalcRuntimeContext.js';

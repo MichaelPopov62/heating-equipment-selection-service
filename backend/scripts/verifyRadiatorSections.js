@@ -1,9 +1,13 @@
 /**
  * Назначение: dev-скрипт проверки расчёта секций радиаторов.
- * Описание: Прогоняет подбор после автопереключения графика 75/65 → 55/45; запуск из backend/: node scripts/verifyRadiatorSections.js.
+ * Описание: Контракт v3 (docs/heating-schemes-thermal-regime.md):
+ * 1) primary/auto — по выбранному графику анкеты (75/65 → 3 сек), без мутации input;
+ * 2) 55/45 (6 сек) — только при явном condensing_dt30_55_45 в input / lineEfficient;
+ * 3) condensing-котёл + традиционный график → warning в отчёте (plain text, без кода REC_*).
+ * Запуск: cd backend && npm run verify:radiator-sections
  */
 
-import { warmupReferenceCache, getReferenceBundle } from '../src/reference/configCache.js';
+import { warmupReferenceCache, getReferenceBundle, toCalcRuntimeContext } from '../src/reference/public.js';
 import { validateAndNormalizeInput } from '../src/api/validate.js';
 import { matchEquipment } from '../src/matching/index.js';
 import { pickRadiators } from './utils/radiatorHelpers.js';
@@ -13,6 +17,10 @@ import { resolveKVent } from '../src/logic/ventilationReserve.js';
 import { buildReport } from '../src/report/buildReport.js';
 import { HEATING_THERMAL_REGIME_PRESET_ENUM } from '../src/logic/heatingThermalRegimes.js';
 import { adjustOutputWatts } from '../src/matching/radiatorSizingHelpers.js';
+
+/** Ожидаемые секции для фикстуры r1 при file-каталоге (75/65 и 55/45). */
+const FIXTURE_SECTIONS_TRADITIONAL = 3;
+const FIXTURE_SECTIONS_CONDENSING = 6;
 
 function deltaTmeanK({ supplyC, returnC, insideC }) {
   return (supplyC + returnC) / 2 - insideC;
@@ -44,6 +52,13 @@ function expectedSections(
     kVent,
     qRad,
   };
+}
+
+/** @param {boolean} ok @param {string} label */
+function logCheck(ok, label, detail = '') {
+  const suffix = detail ? ` ${detail}` : '';
+  console.log(ok ? 'OK' : 'FAIL', '—', label + suffix);
+  return ok;
 }
 
 /** Минимально валидное тело запроса для проверок. */
@@ -115,7 +130,7 @@ function assertThrowsValidationCode(fn, expectedCode, label) {
 }
 
 /** @returns {boolean} */
-function runValidationChecks() {
+function runValidationChecks(ctx) {
   console.log('=== Валидация thermalRegimePreset ===');
 
   let ok = true;
@@ -126,6 +141,7 @@ function runValidationChecks() {
         minimalCalcBody({
           heatingSystem: { thermalRegimePreset: 'invalid_preset_xyz' },
         }),
+        ctx,
       ),
     'неверный thermalRegimePreset отклоняется',
   ) && ok;
@@ -133,6 +149,7 @@ function runValidationChecks() {
   for (const preset of HEATING_THERMAL_REGIME_PRESET_ENUM) {
     const body = validateAndNormalizeInput(
       minimalCalcBody({ heatingSystem: { thermalRegimePreset: preset } }),
+      ctx,
     );
     const hs = body.heatingSystem;
     const presetOk =
@@ -153,12 +170,12 @@ function runValidationChecks() {
             ...baseVent.building,
             ventilation: { flowM3PerHour: 120 },
           },
-        }),
+        }, ctx),
       'VENTILATION_LEGACY_FIELD',
       'building.ventilation.flowM3PerHour отклоняется в MVP',
     ) && ok;
 
-  const withNatural = validateAndNormalizeInput(minimalCalcBody());
+  const withNatural = validateAndNormalizeInput(minimalCalcBody(), ctx);
   const modeOk =
     withNatural.building?.objectMeta?.ventilationReserveMode === 'natural';
   console.log(modeOk ? 'OK' : 'FAIL', '— дефолт ventilationReserveMode natural');
@@ -179,6 +196,7 @@ function runValidationChecks() {
       },
       heatingSystem: {},
     }),
+    ctx,
   );
   const aptPreset = aptDefault.heatingSystem?.thermalRegimePreset;
   const aptOk = aptPreset === 'condensing_dt30_55_45';
@@ -200,6 +218,7 @@ function runValidationChecks() {
       },
       heatingSystem: {},
     }),
+    ctx,
   );
   const housePreset = houseDefault.heatingSystem?.thermalRegimePreset;
   const houseOk = housePreset === 'traditional_dt50_75_65';
@@ -209,99 +228,204 @@ function runValidationChecks() {
   return ok;
 }
 
-/** @returns {Promise<boolean>} */
-async function runReportInputChecks(bundle) {
-  console.log('\n=== buildReport: echo input после автографика ===');
-
-  const input = validateAndNormalizeInput(minimalCalcBody());
-  const report = await buildReport({
-    input,
-    catalog: bundle.catalog,
-    waterNorms: bundle.waterNorms,
-    appliances: bundle.appliances,
-    ufhPresetsSource: bundle.ufhPresetsSource,
-    ufhPresetsSchemaVersion: bundle.ufhPresets.schemaVersion,
-  });
-
-  const metaUfhOk =
-    typeof report.meta?.ufhPresetsSchemaVersion === 'number'
-    && report.meta.ufhPresetsSchemaVersion >= 1;
-  console.log(
-    metaUfhOk ? 'OK' : 'FAIL',
-    '— meta.ufhPresetsSchemaVersion:',
-    report.meta?.ufhPresetsSchemaVersion,
+/**
+ * @param {import('../src/types/shared-types').BoilerMatchingReport | undefined} boiler
+ * @returns {boolean}
+ */
+function isCondensingBoilerSelected(boiler) {
+  const selected = boiler?.selected;
+  if (!selected) return false;
+  return (
+    String(selected.type ?? '').includes('condens') ||
+    (selected.tags ?? []).some((t) => String(t).toLowerCase().includes('condens'))
   );
-
-  const hs = report.input?.heatingSystem;
-  const hsRecord = /** @type {Record<string, unknown> | undefined} */ (hs);
-  const noInternalFlag = hsRecord?._thermalRegimeAutoAdjusted === undefined;
-  const graphOk =
-    hs?.thermalRegimePreset === 'condensing_dt30_55_45' &&
-    hs?.supplyC === 55 &&
-    hs?.returnC === 45;
-  const condensingSelected =
-    String(report.matching?.boiler?.selected?.type ?? '').includes('condens') ||
-    (report.matching?.boiler?.selected?.tags ?? []).some((t) =>
-      String(t).toLowerCase().includes('condens'),
-    );
-
-  console.log(
-    noInternalFlag ? 'OK' : 'FAIL',
-    '— _thermalRegimeAutoAdjusted не в report.input',
-  );
-  console.log(
-    graphOk ? 'OK' : 'FAIL',
-    '— report.input график 55/45:',
-    hs?.thermalRegimePreset,
-    hs?.supplyC,
-    hs?.returnC,
-  );
-  console.log(
-    condensingSelected ? 'OK' : 'WARN',
-    '— selected condensing:',
-    report.matching?.boiler?.selected?.model,
-  );
-
-  return noInternalFlag && graphOk && condensingSelected && metaUfhOk;
 }
 
-const baseBody = minimalCalcBody();
+/**
+ * Текстовый warning alignHeatingGraphForCondensingBoiler (отдельного WARN_* code в справочнике нет).
+ * @param {string[] | undefined} warnings
+ * @returns {boolean}
+ */
+function hasCondensingHighGraphWarning(warnings) {
+  return (warnings ?? []).some(
+    (w) =>
+      /конденсацион/i.test(w) &&
+      (/высокотемператур/i.test(w) || /traditional_dt50_75_65/i.test(w)),
+  );
+}
+
+/**
+ * @param {import('../src/types/shared-types').CalcReport} report
+ * @returns {boolean}
+ */
+function reportHasCondensingHighGraphMismatchWarning(report) {
+  if (hasCondensingHighGraphWarning(report.matching?.boiler?.warnings)) return true;
+  if (hasCondensingHighGraphWarning(report.warnings)) return true;
+  return false;
+}
+
+/**
+ * П.1 + П.3: traditional_dt50_75_65 в input → primary 3 сек; warning в report.
+ *
+ * @param {import('../src/types/shared-types').CalcRuntimeContext} ctx
+ * @returns {Promise<boolean>}
+ */
+async function runTraditionalGraphAutoChecks(ctx) {
+  console.log('\n=== [1][3] Auto/traditional: primary 75/65 + warning при condensing-котле ===');
+
+  const input = validateAndNormalizeInput(minimalCalcBody(), ctx);
+  const report = await buildReport({ input, ctx });
+
+  let ok = true;
+
+  ok = logCheck(
+    report.input?.heatingSystem?.thermalRegimePreset === 'traditional_dt50_75_65'
+      && report.input?.heatingSystem?.supplyC === 75
+      && report.input?.heatingSystem?.returnC === 65,
+    'report.input: график анкеты 75/65 не мутируется',
+  ) && ok;
+
+  ok = logCheck(
+    isCondensingBoilerSelected(report.matching?.boiler),
+    'подобран condensing-котёл',
+    report.matching?.boiler?.selected?.model ?? '—',
+  ) && ok;
+
+  const secPrimary = report.matching?.radiators?.byRoom?.[0]?.sections;
+  ok = logCheck(
+    secPrimary === FIXTURE_SECTIONS_TRADITIONAL,
+    `matchEquipment/buildReport (auto): ${FIXTURE_SECTIONS_TRADITIONAL} секции по 75/65`,
+    `получено ${secPrimary ?? '—'}`,
+  ) && ok;
+
+  ok = logCheck(
+    report.matching?.radiators?.inputs?.thermalRegimePreset === 'traditional_dt50_75_65'
+      && report.matching?.radiators?.inputs?.supplyC === 75,
+    'primary radiators.inputs = 75/65',
+  ) && ok;
+
+  ok = logCheck(
+    reportHasCondensingHighGraphMismatchWarning(report),
+    'report.warnings / boiler.warnings: condensing + высокий график (plain text, v3)',
+  ) && ok;
+
+  ok = logCheck(
+    Boolean(report.matching?.radiators?.lineEfficient?.byRoom?.length),
+    'lineEfficient присутствует как альтернатива 55/45',
+  ) && ok;
+
+  return ok;
+}
+
+/**
+ * П.2: явный condensing_dt30_55_45 в input → primary 6 сек (изолированный кейс).
+ *
+ * @param {import('../src/types/shared-types').CalcRuntimeContext} ctx
+ * @returns {Promise<boolean>}
+ */
+async function runExplicitCondensingInputChecks(ctx) {
+  console.log('\n=== [2] Explicit input: condensing_dt30_55_45 → primary 55/45 ===');
+
+  const input = validateAndNormalizeInput(
+    minimalCalcBody({
+      heatingSystem: {
+        thermalRegimePreset: 'condensing_dt30_55_45',
+        hotWaterBoilerPowerMatchingScheme:
+          'heatingLoadWithReserveOnlySeparateElectricStorageWaterHeater',
+      },
+    }),
+    ctx,
+  );
+
+  let ok = true;
+
+  ok = logCheck(
+    input.heatingSystem?.thermalRegimePreset === 'condensing_dt30_55_45'
+      && input.heatingSystem?.supplyC === 55
+      && input.heatingSystem?.returnC === 45,
+    'validate: пресет condensing_dt30_55_45 → 55/45',
+  ) && ok;
+
+  const report = await buildReport({ input, ctx });
+  const secReport = report.matching?.radiators?.byRoom?.[0]?.sections;
+
+  ok = logCheck(
+    secReport === FIXTURE_SECTIONS_CONDENSING,
+    `buildReport primary: ${FIXTURE_SECTIONS_CONDENSING} секций по 55/45`,
+    `получено ${secReport ?? '—'}`,
+  ) && ok;
+
+  ok = logCheck(
+    report.matching?.radiators?.inputs?.thermalRegimePreset === 'condensing_dt30_55_45'
+      && report.matching?.radiators?.inputs?.supplyC === 55,
+    'primary radiators.inputs = 55/45',
+  ) && ok;
+
+  ok = logCheck(
+    !reportHasCondensingHighGraphMismatchWarning(report),
+    'нет warning про высокий график при явном 55/45',
+  ) && ok;
+
+  // Изолированный matchEquipment на том же input
+  const heatLoss = calculateHeatLossForBuilding({
+    temps: { insideC: input.temps?.insideC ?? 20, outsideC: input.temps?.outsideC ?? -5 },
+    building: input.building,
+  });
+  const hotWater = calculateHotWaterDemand(input, ctx.waterNorms);
+  const hsForMatch = structuredClone(input.heatingSystem);
+  const { matching } = matchEquipment({
+    heatLoss,
+    hotWater,
+    heatingSystem: hsForMatch,
+    building: input.building,
+    ctx,
+  });
+  const secMatch = matching.radiators.byRoom?.[0]?.sections;
+
+  ok = logCheck(
+    secMatch === FIXTURE_SECTIONS_CONDENSING,
+    `matchEquipment (explicit 55/45 input): ${FIXTURE_SECTIONS_CONDENSING} секций`,
+    `получено ${secMatch ?? '—'}`,
+  ) && ok;
+
+  return ok;
+}
 
 await warmupReferenceCache();
-const bundle = await getReferenceBundle();
-const { catalog, waterNorms } = bundle;
+const ctx = toCalcRuntimeContext(await getReferenceBundle());
+const { catalog, waterNorms } = ctx;
 
-const validationOk = runValidationChecks();
-const reportInputOk = await runReportInputChecks(bundle);
+const validationOk = runValidationChecks(ctx);
+const traditionalAutoOk = await runTraditionalGraphAutoChecks(ctx);
+const explicitCondensingOk = await runExplicitCondensingInputChecks(ctx);
 
-const highBody = validateAndNormalizeInput(structuredClone(baseBody));
+// Детальная сверка формул и lineEfficient vs explicit pick (traditional сценарий)
+console.log('\n=== Формулы и lineEfficient (traditional input, v3) ===');
+
+const highBody = validateAndNormalizeInput(minimalCalcBody(), ctx);
 const heatLoss = calculateHeatLossForBuilding({
   temps: { insideC: highBody.temps?.insideC ?? 20, outsideC: highBody.temps?.outsideC ?? -5 },
   building: highBody.building,
 });
 const hotWater = calculateHotWaterDemand(highBody, waterNorms);
 
-// Полный пайплайн matching (с автопереключением графика)
 const hsForMatch = structuredClone(highBody.heatingSystem);
 const { matching } = matchEquipment({
   heatLoss,
   hotWater,
   heatingSystem: hsForMatch,
-  catalog,
   building: highBody.building,
+  ctx,
 });
 
-// Ручной расчёт без автопереключения (75/65)
-const hsHigh = structuredClone(highBody.heatingSystem);
 const radiatorsHigh = pickRadiators({
   roomsHeatLoss: heatLoss,
-  heatingSystem: hsHigh,
+  heatingSystem: structuredClone(highBody.heatingSystem),
   catalog,
   building: highBody.building,
   boilerMatching: matching.boiler,
 });
 
-// Явный 55/45 (как после автопереключения)
 const hsLow = structuredClone(highBody.heatingSystem);
 hsLow.thermalRegimePreset = 'condensing_dt30_55_45';
 hsLow.supplyC = 55;
@@ -312,92 +436,51 @@ const radiatorsLowExplicit = pickRadiators({
   heatingSystem: hsLow,
   catalog,
   building: highBody.building,
-  boilerMatching: matching.boiler,
+  boilerMatching: null,
+  radiatorLineTier: 'efficient',
 });
 
 const roomQ = heatLoss.rooms[0].envelopeWatts;
-const chosen = matching.radiators.chosen;
-const baseWatts = chosen?.baseOutputWatts ?? 0;
-const passportBaseDeltaT = /** @type {50 | 70} */ (chosen?.baseDeltaT ?? 50);
-
+const baseWatts = matching.radiators.chosen?.baseOutputWatts ?? 0;
+const passportBaseDeltaT = /** @type {50 | 70} */ (matching.radiators.chosen?.baseDeltaT ?? 50);
 const ventMode = highBody.building?.objectMeta?.ventilationReserveMode ?? 'natural';
-const expHigh = expectedSections(
-  roomQ,
-  ventMode,
-  baseWatts,
-  passportBaseDeltaT,
-  75,
-  65,
-);
-const expLow = expectedSections(
-  roomQ,
-  ventMode,
-  baseWatts,
-  passportBaseDeltaT,
-  55,
-  45,
-);
 
-const secHigh = radiatorsHigh.byRoom[0]?.sections;
+const expHigh = expectedSections(roomQ, ventMode, baseWatts, passportBaseDeltaT, 75, 65);
+const expLow = expectedSections(roomQ, ventMode, baseWatts, passportBaseDeltaT, 55, 45);
+
 const secMatch = matching.radiators.byRoom[0]?.sections;
+const secHigh = radiatorsHigh.byRoom[0]?.sections;
 const secLowExplicit = radiatorsLowExplicit.byRoom[0]?.sections;
+const secLineEfficient = matching.radiators.lineEfficient?.byRoom?.[0]?.sections;
 
-const outHigh = radiatorsHigh.byRoom[0]?.outputPerSectionWatts;
-const outMatch = matching.radiators.byRoom[0]?.outputPerSectionWatts;
-const outLow = radiatorsLowExplicit.byRoom[0]?.outputPerSectionWatts;
-
-console.log('=== Котёл ===');
-console.log('selected:', matching.boiler.selected?.model, matching.boiler.selected?.type);
-console.log('proposalEfficient:', matching.boiler.proposalEfficient?.selected?.model ?? null);
-
-console.log('\n=== График в matching ===');
 console.log(
-  'heatingSystem after match:',
-  hsForMatch.thermalRegimePreset,
-  hsForMatch.supplyC,
-  hsForMatch.returnC,
+  'auto primary:', secMatch,
+  '| manual 75/65:', secHigh,
+  '| explicit 55/45 pick:', secLowExplicit,
+  '| lineEfficient:', secLineEfficient,
 );
-console.log('report radiators inputs:', matching.radiators.inputs);
-
-console.log('\n=== Секции по комнате r1 ===');
-console.log('Q envelope W:', roomQ);
-console.log('radiator:', chosen?.model, 'passport ΔT50 W:', baseWatts);
-console.log('');
-console.log('75/65 manual pickRadiators:', secHigh, 'W/сек:', outHigh);
-console.log('55/45 explicit pickRadiators:', secLowExplicit, 'W/сек:', outLow);
-console.log('matchEquipment (auto):', secMatch, 'W/сек:', outMatch);
-console.log('');
-console.log('formula 75/65 expected:', expHigh.sections, 'W/сек:', Math.round(expHigh.adjustedWatts));
-console.log('formula 55/45 expected:', expLow.sections, 'W/сек:', Math.round(expLow.adjustedWatts));
-
-const ratio = secHigh && secMatch ? (secMatch / secHigh).toFixed(2) : '—';
-console.log('\nОтношение секций (auto / high):', ratio);
-
-const okMatchLow = secMatch === secLowExplicit && outMatch === outLow;
-const okFormulaHigh =
-  secHigh === expHigh.sections &&
-  outHigh === Math.max(1, Math.round(expHigh.adjustedWatts));
-const okFormulaLow =
-  secMatch === expLow.sections &&
-  outMatch === Math.max(1, Math.round(expLow.adjustedWatts));
-const noHighGraphWarning = !(matching.radiators.warnings ?? []).some((w) =>
-  w.includes('55/45'),
-);
-
-console.log('\n=== Проверки секций ===');
-console.log(okFormulaHigh ? 'OK' : 'FAIL', '— формула 75/65');
-console.log(okFormulaLow ? 'OK' : 'FAIL', '— формула 55/45 после auto');
-console.log(okMatchLow ? 'OK' : 'FAIL', '— auto === явный 55/45');
-console.log(noHighGraphWarning ? 'OK' : 'FAIL', '— нет warning про высокий график при condensing');
 console.log(
-  hsForMatch.thermalRegimePreset === 'condensing_dt30_55_45' ? 'OK' : 'FAIL',
-  '— график переключён на condensing_dt30_55_45',
+  'formula 75/65:', expHigh.sections,
+  '| formula 55/45:', expLow.sections,
 );
 
-const expectedTotal = roomQ * expHigh.kVent;
-const totalWattsOk = Math.abs(heatLoss.totalWatts - expectedTotal) < 0.5;
-const designRoomOk =
-  Math.abs((heatLoss.rooms[0]?.designWatts ?? 0) - expectedTotal) < 0.5;
+let formulaOk = true;
+formulaOk = logCheck(
+  secMatch === FIXTURE_SECTIONS_TRADITIONAL && secMatch === expHigh.sections,
+  'auto primary = 3 сек = формула 75/65',
+) && formulaOk;
+formulaOk = logCheck(
+  secLowExplicit === FIXTURE_SECTIONS_CONDENSING && secLowExplicit === expLow.sections,
+  'explicit pick = 6 сек = формула 55/45',
+) && formulaOk;
+formulaOk = logCheck(
+  secLineEfficient === secLowExplicit,
+  'lineEfficient === explicit pick 55/45',
+) && formulaOk;
+formulaOk = logCheck(
+  secMatch === secHigh,
+  'auto primary === manual pickRadiators 75/65',
+) && formulaOk;
 
 const baseForRecup = minimalCalcBody();
 const recuperBody = validateAndNormalizeInput({
@@ -409,27 +492,19 @@ const recuperBody = validateAndNormalizeInput({
       ventilationReserveMode: 'recuperation',
     },
   },
-});
+}, ctx);
 const heatRecup = calculateHeatLossForBuilding({
   temps: { insideC: 20, outsideC: -5 },
   building: recuperBody.building,
 });
 const kVentRecupOk = heatRecup.rooms[0]?.ventilationReserveFactor === 1.1;
+formulaOk = logCheck(kVentRecupOk, 'recuperation kVent 1.1') && formulaOk;
 
-console.log(totalWattsOk ? 'OK' : 'FAIL', '— totalWatts = envelope × kVent');
-console.log(designRoomOk ? 'OK' : 'FAIL', '— designWatts по комнате');
-console.log(kVentRecupOk ? 'OK' : 'FAIL', '— recuperation kVent 1.1');
+const allOk =
+  validationOk &&
+  traditionalAutoOk &&
+  explicitCondensingOk &&
+  formulaOk;
 
-const sectionsOk =
-  okFormulaHigh &&
-  okFormulaLow &&
-  okMatchLow &&
-  noHighGraphWarning &&
-  hsForMatch.thermalRegimePreset === 'condensing_dt30_55_45' &&
-  totalWattsOk &&
-  designRoomOk &&
-  kVentRecupOk;
-
-const allOk = validationOk && reportInputOk && sectionsOk;
 console.log('\n=== Итог ===', allOk ? 'ALL OK' : 'FAILED');
 process.exit(allOk ? 0 : 1);

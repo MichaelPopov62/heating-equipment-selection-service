@@ -1,27 +1,8 @@
 /**
  * Назначение: разрешение текстов рекомендаций.
- * Описание: подстановка шаблонов по code из кэша recommendations; pushRecommendation добавляет
- * структурированные REC_*или WARN_* сообщения в отчёт matching.
+ * Описание: подстановка шаблонов по code из переданного RecommendationsBundle; pushRecommendation
+ * добавляет структурированные REC_* / WARN_* в отчёт matching. Без глобального кэша — bundle из ctx.
  */
-/** @type {import('./types').RecommendationsBundle | null} */
-let cachedRecommendations = null;
-
-/**
- * @param {import('./types').RecommendationsBundle} bundle
- */
-export function setRecommendationsCache(bundle) {
-  cachedRecommendations = bundle;
-}
-
-/** @returns {import('./types').RecommendationsBundle} */
-function getRecommendationsCache() {
-  if (!cachedRecommendations) {
-    throw new Error(
-      'Справочник recommendations не загружен. Вызовите warmupReferenceCache() / getReferenceBundle().',
-    );
-  }
-  return cachedRecommendations;
-}
 
 /**
  * Подстановка {{key}} в шаблон.
@@ -36,12 +17,18 @@ function formatRecommendationText(template, vars = {}) {
 }
 
 /**
+ * @param {import('./types').RecommendationsBundle} recommendations
  * @param {string} code
  * @param {Record<string, string | number | undefined>} [vars]
  * @returns {import('./types').ResolvedRecommendation | null}
  */
-export function resolveRecommendation(code, vars = {}) {
-  const rec = getRecommendationsCache().byCode[code];
+export function resolveRecommendation(recommendations, code, vars = {}) {
+  if (!recommendations?.byCode) {
+    throw new Error(
+      'resolveRecommendation: recommendations обязательны (передайте ctx.recommendations из CalcRuntimeContext).',
+    );
+  }
+  const rec = recommendations.byCode[code];
   if (!rec) return null;
   const text = formatRecommendationText(rec.text, vars);
   return {
@@ -57,12 +44,19 @@ export function resolveRecommendation(code, vars = {}) {
  * Добавить рекомендацию в warnings (текст) и в структурированный список.
  * @param {string[]} warnings
  * @param {import('./types').ResolvedRecommendation[]} resolvedList
+ * @param {import('./types').RecommendationsBundle} recommendations
  * @param {string} code
  * @param {Record<string, string | number | undefined>} [vars]
  * @returns {import('./types').ResolvedRecommendation | null}
  */
-export function pushRecommendation(warnings, resolvedList, code, vars = {}) {
-  const resolved = resolveRecommendation(code, vars);
+export function pushRecommendation(
+  warnings,
+  resolvedList,
+  recommendations,
+  code,
+  vars = {},
+) {
+  const resolved = resolveRecommendation(recommendations, code, vars);
   if (!resolved) {
     warnings.push(`[${code}] Текст рекомендации не найден в справочнике.`);
     return null;

@@ -24,9 +24,9 @@ import {
   appendThermalRegimeSchemeWarnings,
 } from '../logic/normalizeHeatingUfhPreset.js';
 import { normalizeUnderfloorDistributionPreset } from '../logic/normalizeUnderfloorDistribution.js';
+import { assertCalcRuntimeContext } from '../reference/assertCalcRuntimeContext.js';
 import { logger } from '../utils/logger.js';
 import { sanitizeTrimAngleBrackets } from '../utils/sanitizeString.js';
-import { getAppliances } from '../dhw/referenceCache.js';
 import {
   getBoilerRoomType,
   isBoilerRoomVolumeCompliant,
@@ -202,9 +202,11 @@ logger.info('validate.schema', null, {
 
 /**
  * @param {unknown} input
+ * @param {import('../types/shared-types').CalcRuntimeContext} ctx
  * @returns {import('../types/shared-types').CalcRequestBody}
  */
-export function validateAndNormalizeInput(input) {
+export function validateAndNormalizeInput(input, ctx) {
+  assertCalcRuntimeContext(ctx);
   const clone = structuredClone(input ?? {});
   rejectLegacyHotWaterFields(clone);
   normalizeRoomTypesBeforeValidate(clone.building);
@@ -247,7 +249,7 @@ export function validateAndNormalizeInput(input) {
 
   // График отопления и база ΔT каталога радиатора по пресету (или 75/65 по умолчанию).
   normalizeHeatingSystemThermalRegime(clone);
-  normalizeHeatingUfhPreset(clone);
+  normalizeHeatingUfhPreset(clone, ctx.ufhPresets);
   appendThermalRegimeSchemeWarnings(clone);
   normalizeUnderfloorDistributionPreset(clone);
 
@@ -302,9 +304,9 @@ export function validateAndNormalizeInput(input) {
     }
   }
 
-  assertBoilerDhwSchemeCompatibility(clone);
+  assertBoilerDhwSchemeCompatibility(clone, ctx.appliances);
 
-  assertBoilerPlacementAndBoilerRoom(clone);
+  assertBoilerPlacementAndBoilerRoom(clone, ctx.appliances);
 
   assertExternalWalls(clone.building);
 
@@ -555,8 +557,9 @@ function assertVentilationLegacyFieldsDisabled(clone) {
  * Cross-validation: зона установки котла и объём котельной (дом).
  *
  * @param {unknown} clone
+ * @param {import('../dhw/types').AppliancesBundle} appliances
  */
-function assertBoilerPlacementAndBoilerRoom(clone) {
+function assertBoilerPlacementAndBoilerRoom(clone, appliances) {
   if (!clone || typeof clone !== 'object') return;
   const building = /** @type {import('../types/shared-types').BuildingInput | undefined} */ (
     /** @type {{ building?: import('../types/shared-types').BuildingInput }} */ (clone).building
@@ -615,15 +618,17 @@ function assertBoilerPlacementAndBoilerRoom(clone) {
     throw err;
   }
 
+  const mounting = appliances.byKind.boiler.mounting;
+
   const metrics = resolveBoilerRoomMetrics(
     building,
     /** @type {import('../types/shared-types').BuildingObjectMeta} */ (om),
+    mounting,
   );
 
-  if (!isBoilerRoomVolumeCompliant(metrics)) {
-    const m = getAppliances().byKind.boiler.mounting;
+  if (!isBoilerRoomVolumeCompliant(metrics, mounting)) {
     const err = new Error(
-      `Для напольного котла в выделенной котельной нужен объём не менее ${m.minBoilerRoomVolumeM3} м³ и высота не менее ${m.minBoilerRoomHeightM} м (комната type=${getBoilerRoomType()} в rooms или boilerRoomAreaM2×ceilingHeightM).`,
+      `Для напольного котла в выделенной котельной нужен объём не менее ${mounting.minBoilerRoomVolumeM3} м³ и высота не менее ${mounting.minBoilerRoomHeightM} м (комната type=${getBoilerRoomType(mounting)} в rooms или boilerRoomAreaM2×ceilingHeightM).`,
     );
     err.statusCode = 400;
     err.code = 'BOILER_ROOM_VOLUME_INVALID';
@@ -635,8 +640,9 @@ function assertBoilerPlacementAndBoilerRoom(clone) {
  * Нормализация связки котёл/ГВС и тип объекта после AJV (без 400 там, где достаточно авто-поправки).
  *
  * @param {unknown} clone — нормализованное тело запроса calc
+ * @param {import('../dhw/types').AppliancesBundle} appliances
  */
-function assertBoilerDhwSchemeCompatibility(clone) {
+function assertBoilerDhwSchemeCompatibility(clone, appliances) {
   if (!clone || typeof clone !== 'object') return;
   const ot = /** @type {{ building?: { objectMeta?: { objectType?: string } } }} */ (
     clone
@@ -664,7 +670,11 @@ function assertBoilerDhwSchemeCompatibility(clone) {
     const fixtures = /** @type {{ hotWater?: { fixtures?: import('../types/shared-types').HotWaterFixturesInput } }} */ (
       clone
     ).hotWater?.fixtures;
-    const isLarge = isLargeApartmentByInput(building, fixtures);
+    const isLarge = isLargeApartmentByInput(
+      building,
+      fixtures,
+      appliances.byKind.boiler.apartmentClassification,
+    );
     const hasSpace =
       building?.objectMeta?.indirectDhwSpaceAvailable === true;
 

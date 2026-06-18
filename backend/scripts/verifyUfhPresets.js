@@ -9,7 +9,8 @@ import { fileURLToPath } from 'node:url';
 import { validateAndNormalizeUnderfloorHeatingPresets } from '../src/ufh/validateUnderfloorHeatingPresets.js';
 import { computeUfhRoomHeatFlux } from '../src/logic/ufhRoomHeatFlux.js';
 import { applyUnderfloorHeatingRecommendations } from '../src/matching/warmFloor.js';
-import { warmupReferenceCache } from '../src/reference/configCache.js';
+import { warmupReferenceCache, getReferenceBundle } from '../src/reference/public.js';
+import { toCalcRuntimeContext } from '../src/reference/toCalcRuntimeContext.js';
 import { getFlooringFinishMaterialById } from '../src/data/flooringFinishMaterials.js';
 import { getUnderfloorHeatingBasePresetById } from '../src/data/warmFloorAssemblyPresets.js';
 import {
@@ -131,6 +132,7 @@ for (const id of UFH_MODE_PRESET_IDS) {
 
 console.log('\n=== maxSurface: min(пресет, финиш) в computeUfhRoomHeatFlux ===');
 await warmupReferenceCache();
+const calcCtx = toCalcRuntimeContext(await getReferenceBundle());
 const base = getUnderfloorHeatingBasePresetById('ufh_base_interstory_screed_65');
 const tile = getFlooringFinishMaterialById('ceramic_tile');
 const laminate = getFlooringFinishMaterialById('laminate_click');
@@ -184,7 +186,7 @@ if (base && tile && laminate) {
     }],
     warnings: [],
   };
-  applyUnderfloorHeatingRecommendations(tileReport);
+  applyUnderfloorHeatingRecommendations(tileReport, calcCtx.recommendations);
   const hasOverrideRec = (tileReport.resolvedRecommendations ?? []).some(
     (r) => r.code === 'WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE',
   );

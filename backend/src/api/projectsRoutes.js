@@ -6,7 +6,7 @@
 import express from 'express';
 import { Project, Calculation } from '../models/public.js';
 import { buildReport } from '../report/public.js';
-import { getReferenceBundle } from '../reference/public.js';
+import { getReferenceBundle, toCalcRuntimeContext } from '../reference/public.js';
 import { validateAndNormalizeInput } from './validate.js';
 import { extractCalculationSummary } from '../projects/extractCalculationSummary.js';
 import {
@@ -296,20 +296,9 @@ export function createProjectsRouter() {
       logger.debug('project.calc.start', { requestId }, { projectId: String(oid) });
 
       const bundle = await getReferenceBundle();
-      const input = validateAndNormalizeInput(calcPayload);
-      const report = await buildReport({
-        input,
-        catalog: bundle.catalog,
-        catalogSource: bundle.catalogSource,
-        waterNorms: bundle.waterNorms,
-        waterNormsSource: bundle.waterNormsSource,
-        appliances: bundle.appliances,
-        appliancesSource: bundle.appliancesSource,
-        referenceBundleLoadedAt: bundle.loadedAt,
-        recommendationsSource: bundle.recommendationsSource,
-        ufhPresetsSource: bundle.ufhPresetsSource,
-        ufhPresetsSchemaVersion: bundle.ufhPresets.schemaVersion,
-      });
+      const ctx = toCalcRuntimeContext(bundle);
+      const input = validateAndNormalizeInput(calcPayload, ctx);
+      const report = await buildReport({ input, ctx });
 
       const summary = extractCalculationSummary(report);
       const calcDoc = await Calculation.create({

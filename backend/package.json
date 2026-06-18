@@ -13,7 +13,9 @@
     "verify:seed-catalog": "node scripts/verifySeedCatalog.js",
     "verify:pipe-catalog": "node scripts/verifyPipeCatalogValidation.js",
     "verify:ufh-presets": "node scripts/verifyUfhPresets.js",
+    "verify:radiator-sections": "node scripts/verifyRadiatorSections.js",
     "verify:mixed-radiator-ufh": "node scripts/verifyMixedRadiatorUfh.js",
+    "verify:reference-cache-invalidate": "node scripts/verifyReferenceCacheInvalidate.js",
     "seed": "node scripts/seed.js"
   },
   "keywords": [],

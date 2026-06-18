@@ -20,6 +20,7 @@ import {
  * @param {string | undefined} args.activeScheme
  * @param {import('../types/shared-types').BuildingInput | undefined} [args.building]
  * @param {number | undefined} [args.heatingLoadKw]
+ * @param {import('../dhw/types').BoilerApplianceRules['apartmentClassification']} [args.apartmentClassification]
  * @returns {import('../types/shared-types').MatchingAutomationHint[]}
  */
 export function buildMatchingAutomationHints({
@@ -28,6 +29,7 @@ export function buildMatchingAutomationHints({
   activeScheme,
   building,
   heatingLoadKw,
+  apartmentClassification,
 } = {}) {
   /** @type {import('../types/shared-types').MatchingAutomationHint[]} */
   const hints = [];
@@ -62,8 +64,8 @@ export function buildMatchingAutomationHints({
   if (objectType === 'apartment') {
     const large =
       heatingLoadKw != null
-        ? isLargeApartment(building, heatingLoadKw, fx)
-        : isLargeApartmentByInput(building, fx);
+        ? isLargeApartment(building, heatingLoadKw, fx, apartmentClassification)
+        : isLargeApartmentByInput(building, fx, apartmentClassification);
 
     if (!large && scheme === SCHEME_BOILER_SINGLE_INDIRECT_SUM) {
       hints.push({

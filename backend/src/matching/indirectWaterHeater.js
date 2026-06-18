@@ -4,8 +4,6 @@
  * бака, уточнение requiredKw котла и предупреждения по мощности змеевика и времени нагрева.
  */
 import { tankFullHeatTimeMinutes, tankVolumeHeatPowerKw } from '../dhw/waterCalc.js';
-import { getAppliances } from '../dhw/referenceCache.js';
-import { getWaterNorms } from '../dhw/referenceCache.js';
 import { pushRecommendation } from '../recommendations/recommendationResolver.js';
 import { logger } from '../utils/logger.js';
 import {
@@ -19,15 +17,19 @@ import {
  *
  * @param {import('../types/shared-types').HotWaterReport | undefined} hotWater
  * @param {import('../catalog/types').IndirectWaterHeaterCatalogItemNormalized | null} indirectItem
+ * @param {import('../dhw/types').NormalizedWaterNorms} waterNorms
  * @returns {import('../types/shared-types').HotWaterReport | undefined}
  */
-export function applyIndirectTankToHotWaterReport(hotWater, indirectItem) {
+export function applyIndirectTankToHotWaterReport(hotWater, indirectItem, waterNorms) {
   if (!hotWater || hotWater.dhwSupplyScenario !== 'storage') return hotWater;
   if (!indirectItem) return hotWater;
+  if (!waterNorms) {
+    throw new Error('applyIndirectTankToHotWaterReport: waterNorms обязательны.');
+  }
   const vol = indirectTankVolumeLiters(indirectItem);
   if (vol <= 0) return hotWater;
 
-  const norms = getWaterNorms();
+  const norms = waterNorms;
   const deltaTK = Number(hotWater.deltaTK) || 0;
   const minutes = hotWater.storageHeatTimeMinutes ?? norms.storage.indirectHeatTimeMinutes;
   const storageIndirectHeatPowerKw = Number(
@@ -174,14 +176,24 @@ export function pickIndirectWaterHeater({
  * @param {import('../types/shared-types').IndirectWaterHeaterMatchingReport | undefined} indirectReport
  * @param {import('../types/boiler-types').BoilerMatchingReport | undefined} boilerReport
  * @param {import('../types/shared-types').HotWaterReport | undefined} hotWater
+ * @param {import('../types/shared-types').CalcRuntimeContext} ctx
  */
-export function attachIndirectBoilerCoupling(indirectReport, boilerReport, hotWater) {
+export function attachIndirectBoilerCoupling(
+  indirectReport,
+  boilerReport,
+  hotWater,
+  ctx,
+) {
   if (!indirectReport?.selected || !hotWater || hotWater.dhwSupplyScenario !== 'storage') {
     return;
   }
+  const { waterNorms, appliances, recommendations } = ctx;
+  if (!waterNorms || !appliances) {
+    throw new Error('attachIndirectBoilerCoupling: ctx.waterNorms и ctx.appliances обязательны.');
+  }
 
-  const norms = getWaterNorms();
-  const rules = getAppliances().byKind.indirect_water_heater.coupling;
+  const norms = waterNorms;
+  const rules = appliances.byKind.indirect_water_heater.coupling;
 
   const vol = indirectTankVolumeLiters(
     /** @type {import('../catalog/types').IndirectWaterHeaterCatalogItemNormalized} */ (
@@ -244,6 +256,7 @@ export function attachIndirectBoilerCoupling(indirectReport, boilerReport, hotWa
       pushRecommendation(
         indirectReport.warnings,
         indirectReport.resolvedRecommendations,
+        recommendations,
         'WARN_DHW_TIME_LONG',
         {
           heatTimeMinutes: Math.round(tMin),

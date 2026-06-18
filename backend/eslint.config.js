@@ -85,4 +85,22 @@ export default defineConfig([
       ],
     },
   },
+  {
+    // Calc-пайплайн: справочники только через CalcRuntimeContext, без legacy sync-кэшей.
+    files: ['src/logic/**', 'src/api/validate.js', 'src/utils/**', 'src/matching/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/dhw/referenceCache.js', '**/ufh/ufhPresetsCache.js'],
+              message:
+                'Legacy sync-кэш удалён — передайте срезы из CalcRuntimeContext (ctx.recommendations, ctx.appliances, …).',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);

@@ -281,7 +281,7 @@ flowchart TB
 | Контур | Пресет | Когда |
 |--------|--------|-------|
 | **Радиаторы, традиционный котёл** | **75/65** °C (`traditional_dt50_75_65`) | Дом, квартира 1К — базовый |
-| **Радиаторы, конденсационный** | **55/45** °C (`condensing_dt30_55_45`) | Квартира 2К; автопереключение после подбора condensing |
+| **Радиаторы, конденсационный** | **55/45** °C (`condensing_dt30_55_45`) | Квартира 2К (рекомендация); primary — по выбранному графику анкеты; **lineEfficient** — 55/45; warning при condensing + 75/65 |
 | **Тёплый пол** | **45/35** или **40/30** °C | Отдельно от котла; по **финишу** комнаты |
 | **95/85** | `traditional_high_dt70_95_85` | **Устаревший** — только обратная совместимость API |
 | **Тепловой насос** | — | **Не в scope** |
@@ -379,9 +379,9 @@ isMixingNodeRequired = heatingSystem.supplyC > ufhCircuit.supplyC
 
 ### POST /api/v1/calc
 
-**Порядок в `routes.js`:** `getReferenceBundle()` → `validateAndNormalizeInput()` → `buildReport()`.
+**Порядок в `routes.js`:** `getReferenceBundle()` → `toCalcRuntimeContext(bundle)` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })`.
 
-**В bundle calc:** `catalog`, `waterNorms`, `appliances`, `recommendations` (runtime-кэш для matching).
+**В bundle calc:** `catalog`, `waterNorms`, `appliances`, `recommendations`, `ufhPresets`. Контекст расчёта — **`CalcRuntimeContext`** (`docs/calc-runtime-context.md`); bundle при загрузке — `deepFreeze`. **On-demand invalidate:** `POST /api/v1/system/invalidate-reference-cache` (после seed / правки Mongo; `SYSTEM_INTERNAL_TOKEN`, generation guard в `configCache.js`).
 
 **Вне calc-потока (загрузка UI / справочники):**
 
@@ -400,20 +400,19 @@ flowchart TD
   Client --> Calc["POST /api/v1/calc"]
 
   Calc --> Bundle["getReferenceBundle()"]
-  Calc --> Validate["validateAndNormalizeInput()<br/>AJV + normalizeUnderfloorHeating"]
+  Calc --> Ctx["toCalcRuntimeContext(bundle)"]
+  Ctx --> Validate["validateAndNormalizeInput(body, ctx)"]
 
-  subgraph refs ["Справочники bundle"]
+  subgraph refs ["Справочники bundle (deepFreeze)"]
     Bundle --> Catalog[products]
     Bundle --> Norms[water_norms]
     Bundle --> AppRules[appliances]
     Bundle --> Recs[recommendations]
-    Bundle --> SyncCache["publishToReferenceSyncCache"]
-    SyncCache --> AppCache[(appliances cache)]
-    SyncCache --> RecCache[(recommendations cache)]
+    Bundle --> UfhPresets[ufhPresets]
   end
 
-  Validate -->|input| Build["buildReport()"]
-  Bundle -->|catalog · waterNorms · appliances| Build
+  Validate -->|input| Build["buildReport({ input, ctx })"]
+  Ctx --> Build
 
   subgraph pipeline ["buildReport — порядок этапов"]
     Build --> Climate{"location и нет outsideC?"}
@@ -433,13 +432,11 @@ flowchart TD
     Hints --> Hyd["calculateHydraulics"]
     HeatLoss --> Hyd
 
-    Hyd --> Match["matchEquipment"]
+    Hyd --> Match["matchEquipment({ …, ctx })"]
     HeatLoss --> Match
     Ufh --> Match
     Dhw --> Match
-    Catalog --> Match
-    AppCache --> Match
-    RecCache --> Match
+    Ctx --> Match
 
     Match --> DhwFinal[hotWater в отчёте]
     Match -->|requiredKw > 50| Hyd
@@ -493,9 +490,9 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  M0[matchEquipment] --> M1[pickIndirectWaterHeater]
+  M0["matchEquipment({ …, ctx })"] --> M1[pickIndirectWaterHeater]
   M1 --> M2[applyIndirectTankToHotWaterReport]
-  M2 --> M3[pickBoiler]
+  M2 --> M3["pickBoiler({ …, ctx })"]
   M3 --> M4["pickRadiatorsWithProposalLines<br/>+ buildWarmFloorMatchingNotes"]
   M4 --> M5[pickWaterHeater]
   M5 --> M6[enrichBoilerMatchingProposals]
