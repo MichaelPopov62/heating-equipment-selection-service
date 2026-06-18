@@ -1,7 +1,8 @@
 /**
  * Назначение: заполнение MongoDB каталогом оборудования и справочниками.
  * Описание: [1/3] pre-validation JSON, [2/3] запись products через discriminators,
- * [3/3] post-seed smoke через loadCatalog(CATALOG_SOURCE=mongo). См. .cursorrules SSOT policy.
+ * [3/3] post-seed smoke через loadCatalog(CATALOG_SOURCE=mongo).
+ * SSOT policy.
  */
 import { config as loadEnv } from 'dotenv';
 import mongoose from 'mongoose';

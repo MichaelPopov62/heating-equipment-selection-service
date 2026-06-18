@@ -5,7 +5,7 @@ REST API и фронтенд для подбора теплового обору
 | Документ | Назначение |
 |----------|------------|
 | [`openapi.yaml`](openapi.yaml) | Контракт REST API |
-| [`.cursorrules`](.cursorrules) | Правила backend/frontend, бизнес-логика, env, модули |
+| | Правила backend/frontend, бизнес-логика, env, модули |
 | [`Plan.md`](Plan.md) | Статус MVP, схема потока данных |
 | [`docs/room-exterior-layout.md`](docs/room-exterior-layout.md) | Положение помещения: угловое / фасад / внутреннее (стена в коридор) |
 

@@ -1,6 +1,6 @@
 # План проекта
 
-Полные правила backend и детали модулей — в [`.cursorrules`](.cursorrules). HTTP-контракт — [`openapi.yaml`](openapi.yaml).
+Полные правила backend и детали модулей — в. HTTP-контракт — [`openapi.yaml`](openapi.yaml).
 
 ## Статус MVP (backend)
 
@@ -87,7 +87,7 @@
 
 ## Тёплый пол: пресеты покрытий и разделение расчётов
 
-**Статус:** фазы 0–8 — **выполнено**  
+**Статус:** фазы 0–8 — **выполнено**
 **Цель:** расчёт Вт/м² ТП по **композиции** «базовый конструктив + финишное покрытие» (керамика, клеевой/замковый винил, ламинат), лимит Tповерх из материала (27 °C или до 35 °C для керамики), без смешения с теплопотерями через `floorPresetId`.
 
 ### Проблема
@@ -184,7 +184,7 @@ flowchart TB
 | R.3 | Селектор в `RoomAccordionItem` + динамические поля стен | ✅ |
 | R.4 | `buildCalcRequestPayload` — internal → `construction` коридорной стены | ✅ |
 | R.5 | Миграция черновика (`externalWall2 > 0` → corner) | ✅ |
-| R.6 | Документация: `docs/room-exterior-layout.md`, OpenAPI example, `.cursorrules` | ✅ |
+| R.6 | Документация: `docs/room-exterior-layout.md`, OpenAPI example, | ✅ |
 | R.7 | Backend: ΔT коридора, U перегородки, corner ×1.08, validate wall count | ✅ |
 | R.8 | `verifyRoomExteriorLayoutHeatLoss.js` | ✅ |
 
@@ -323,9 +323,9 @@ isMixingNodeRequired = heatingSystem.supplyC > ufhCircuit.supplyC
 
 ### Формулы узла смешения (`UfhMixingNodeSpec`)
 
-- **Расход:** `Q_m³/ч = P_kW × 0.86 / (Δt × ρ)`, Δt = 10, ρ ≈ 1  
-- **Напор H:** ориентир 3–4 м (малый объект) или 5–6 м (крупный)  
-- **Kvs клапана:** `Kvs = Q / Δp`, Δp ≈ 0,15–0,2 бар  
+- **Расход:** `Q_m³/ч = P_kW × 0.86 / (Δt × ρ)`, Δt = 10, ρ ≈ 1
+- **Напор H:** ориентир 3–4 м (малый объект) или 5–6 м (крупный)
+- **Kvs клапана:** `Kvs = Q / Δp`, Δp ≈ 0,15–0,2 бар
 
 Номенклатура насосов/клапанов из `products` **не подбирается** — только технические требования в отчёте.
 
@@ -351,7 +351,7 @@ isMixingNodeRequired = heatingSystem.supplyC > ufhCircuit.supplyC
 
 | Фаза | Содержание | Статус |
 |------|------------|--------|
-| **0** | `Plan.md`, `.cursorrules`, OpenAPI-черновик, чеклист тестов | ✅ выполнено |
+| **0** | `Plan.md`, OpenAPI-черновик, чеклист тестов | ✅ выполнено |
 | **1** | UX окон: подсказки «Добавить окно» vs `count` | ✅ выполнено |
 | **2** | 75/65 / 55/45; 95/85 deprecated в UI | ✅ выполнено |
 | **3** | Пресеты ТП, смеситель, покрытие теплопотерь | ✅ выполнено |
@@ -507,7 +507,7 @@ flowchart LR
 
 ## Тестирование
 
-См. **Test Quickstart** в `.cursorrules` (`LOG_LEVEL=debug`, curl calc/400/404).
+См. **Test Quickstart** в  (`LOG_LEVEL=debug`, curl calc/400/404).
 
 **Пресеты ТП:**
 
