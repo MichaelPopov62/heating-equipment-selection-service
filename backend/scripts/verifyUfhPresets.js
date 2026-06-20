@@ -20,6 +20,7 @@ import {
   UFH_PRESET_MIXED_RADIATORS,
   UFH_PRESET_ONLY,
 } from '../../shared/ufhModePresetIds.js';
+import { collectUfhModeCircuitAlignmentIssues } from '../src/logic/ufhModeFinishCompatibility.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_FILE = path.join(__dirname, '..', 'data', 'underfloor_heating_presets.json');
@@ -128,6 +129,15 @@ for (const id of UFH_MODE_PRESET_IDS) {
       `${id}: ui.title непустой`,
     ),
   );
+}
+
+console.log('\n=== согласованность mode preset ↔ shared/ufhCircuitPresets ===');
+const circuitAlignmentIssues = collectUfhModeCircuitAlignmentIssues(bundle);
+for (const issue of circuitAlignmentIssues) {
+  tally(logCheck(false, issue));
+}
+if (circuitAlignmentIssues.length === 0) {
+  tally(logCheck(true, 'ufh_direct_tile / ufh_direct_laminate ↔ ufh_dt10_45_35 / ufh_dt10_40_30'));
 }
 
 console.log('\n=== maxSurface: min(пресет, финиш) в computeUfhRoomHeatFlux ===');

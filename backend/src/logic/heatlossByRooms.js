@@ -3,7 +3,7 @@
  * Описание: Собирает envelopeElements с U из пресетов, objectMeta.externalWalls и ориентационных поправок; учитывает границы комнат и запас на вентиляцию (kVent). Экспортирует calculateHeatLossForBuilding(); вызывается из report/buildReport.js.
  */
 
-import { calculateHeatLoss } from '../calculator.js';
+import { calculateHeatLoss } from './envelopeHeatLoss.js';
 import { getEnvelopePresetById } from './envelopePresets.js';
 import {
   INTERNAL_CORRIDOR_DESIGN_TEMP_C,

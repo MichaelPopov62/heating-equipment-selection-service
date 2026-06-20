@@ -5,16 +5,16 @@
 import * as fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validateAndNormalizeCatalog } from '../src/catalog/validateCatalog.js';
-import { validateAndNormalizeWaterNorms } from '../src/dhw/validateWaterNorms.js';
-import { validateAndNormalizeAppliancesBundle } from '../src/dhw/validateAppliances.js';
-import { validateAndNormalizeRecommendationsBundle } from '../src/recommendations/validateRecommendations.js';
-import { validateAndNormalizeUnderfloorHeatingPresets } from '../src/ufh/validateUnderfloorHeatingPresets.js';
-import { toCalcRuntimeContext } from '../src/reference/toCalcRuntimeContext.js';
+import { validateAndNormalizeCatalog } from '../../src/catalog/validateCatalog.js';
+import { validateAndNormalizeWaterNorms } from '../../src/dhw/validateWaterNorms.js';
+import { validateAndNormalizeAppliancesBundle } from '../../src/dhw/validateAppliances.js';
+import { validateAndNormalizeRecommendationsBundle } from '../../src/recommendations/validateRecommendations.js';
+import { validateAndNormalizeUnderfloorHeatingPresets } from '../../src/ufh/validateUnderfloorHeatingPresets.js';
+import { toCalcRuntimeContext } from '../../src/reference/toCalcRuntimeContext.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = path.join(__dirname, '..', 'data');
-const catalogExample = path.join(__dirname, '..', 'test_data.json.example');
+const dataDir = path.join(__dirname, '..', '..', 'data');
+const catalogExample = path.join(__dirname, '..', '..', 'test_data.json.example');
 
 /**
  * @param {string} filePath
@@ -28,7 +28,7 @@ async function readJsonFile(filePath) {
 /**
  * Загружает согласованный CalcRuntimeContext из файлов backend/data и test_data.json.example.
  *
- * @returns {Promise<import('../src/types/shared-types').CalcRuntimeContext>}
+ * @returns {Promise<import('../../src/types/shared-types').CalcRuntimeContext>}
  */
 export async function loadCalcRuntimeContextFromFiles() {
   const [

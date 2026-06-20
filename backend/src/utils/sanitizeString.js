@@ -1,6 +1,7 @@
 /**
  * Назначение: базовая санитизация строк входа API и каталога.
- * Описание: Trim и удаление угловых скобок (< >); единое поведение для validate.js и validateCatalog.js.
+ * Описание: Trim и удаление угловых скобок (< >); единое поведение для validate.js,
+ * validateCatalog.js и projects/validateProjectBody.js.
  */
 
 /**

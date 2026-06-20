@@ -1,6 +1,16 @@
 description: >
-  Тело POST /api/v1/projects/{id}/calc: либо полный CalcInput (building обязателен),
-  либо объект с полями calcInput (CalcInput) и опционально survey (черновик для сохранения в проект).
+  Тело POST /api/v1/projects/{id}/calc.
+
+  Приоритет выбора входа для расчёта (см. docs/projects-api.md):
+  1) поле calcInput (CalcInput);
+  2) корневой CalcInput (building обязателен) — поля survey и calcInput отбрасываются;
+  3) project.lastCalcInput, если в теле нет calcInput и корневого building
+     (пустое тело {}, только survey, и т.п.).
+
+  Опционально survey — черновик анкеты для сохранения в проект (не подставляется в расчёт).
+
+  Лимиты размера: survey и calcInput — до 512 KB JSON; сохраняемый документ calculations —
+  до ~14 MB BSON (см. docs/projects-api.md).
 allOf:
   - $ref: CalcInput.yaml
   - type: object
@@ -9,3 +19,4 @@ allOf:
         $ref: CalcInput.yaml
       survey:
         type: object
+        description: Черновик анкеты UI; сохраняется в project.survey, не используется как CalcInput.

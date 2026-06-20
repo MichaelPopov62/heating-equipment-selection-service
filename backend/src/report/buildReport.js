@@ -1,6 +1,6 @@
 /**
  * Назначение: сборка финального JSON-отчёта расчёта.
- * Описание: Оркестрирует пайплайн: климат, теплопотери, ГВС, гидравлика, подбор оборудования (matching/public.js) и рекомендации. Формирует meta, input, calculations, matching и warnings. Экспортирует buildReport(); вызывается из routes.js и projectsRoutes.js.
+ * Описание: Оркестрирует пайплайн: климат, теплопотери, ГВС, гидравлика, подбор оборудования (matching/public.js) и рекомендации. Формирует meta, input, calculations, matching и warnings. Экспортирует buildReport(); вызывается из api/runCalculation.js.
  */
 
 import { getDesignOutsideTempC } from '../climate/index.js';

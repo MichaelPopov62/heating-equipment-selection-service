@@ -85,7 +85,7 @@ function radiatorCompositeRank(r, baseDeltaT, heatingDistribution, connection) {
 }
 
 /**
- * Сортування радіаторів для підбору.
+ * Сортування радіаторів для підбору (не через catalog/matchingSortPools — лише inline у pickRadiators).
  * @param {import('../catalog/types').RadiatorCatalogItemNormalized[]} radiators
  * @param {50 | 70} baseDeltaT
  * @param {'individual' | 'central'} heatingDistribution

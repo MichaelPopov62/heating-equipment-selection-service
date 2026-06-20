@@ -1,17 +1,13 @@
 /**
  * Назначение: валидация и нормализация каталога.
- * Описание: проверка числовых полей, mountingType, типов оборудования и санитизация строк перед
- * использованием в формулах подбора; защита от NaN и физически некорректных значений.
+ * Описание: проверка числовых полей, mountingType (boilerCatalogHelpers), типов оборудования
+ * и санитизация строк перед использованием в формулах подбора; защита от NaN и физически
+ * некорректных значений.
  */
+import { isPlainObject } from '../utils/isPlainObject.js';
 import { sanitizeTrimAngleBrackets } from '../utils/sanitizeString.js';
+import { applyBoilerMountingType } from './boilerCatalogHelpers.js';
 import { derivePipeModelLabel } from './pipeCatalogHelpers.js';
-
-/** Прежнее имя функции: trim + убираем символы < > (см. sanitizeString). */
-const toSafeString = sanitizeTrimAngleBrackets;
-
-function isPlainObject(x) {
-  return x != null && typeof x === 'object' && !Array.isArray(x);
-}
 
 function toFiniteNumber(x, { field, min = -Infinity, max = Infinity } = {}) {
   const n = Number(x);
@@ -22,64 +18,6 @@ function toFiniteNumber(x, { field, min = -Infinity, max = Infinity } = {}) {
     throw new Error(`Каталог: поле ${field} вне диапазона (${min}..${max}).`);
   }
   return n;
-}
-
-/** Допустимые значения mountingType в каталоге (настенный / напольный). */
-const BOILER_MOUNTING_WALL = 'wall';
-const BOILER_MOUNTING_FLOOR = 'floor';
-
-/**
- * Разбирает строку mountingType или тег (wall, floor, wall-mounted, floor-standing, настенный, напольный).
- * @param {unknown} raw
- * @returns {'wall' | 'floor' | null}
- */
-function parseBoilerMountingTypeToken(raw) {
-  const s = toSafeString(raw).toLowerCase().replace(/_/g, '-');
-  if (!s) return null;
-  if (s === 'wall' || s === 'wall-mounted' || s === 'настенный') return BOILER_MOUNTING_WALL;
-  if (s === 'floor' || s === 'floor-standing' || s === 'напольный') return BOILER_MOUNTING_FLOOR;
-  return null;
-}
-
-/**
- * @param {Record<string, unknown>} item
- * @returns {'wall' | 'floor' | null}
- */
-function inferBoilerMountingTypeFromTags(item) {
-  if (!Array.isArray(item.tags)) return null;
-  for (const tag of item.tags) {
-    const mt = parseBoilerMountingTypeToken(tag);
-    if (mt) return mt;
-  }
-  return null;
-}
-
-/**
- * Нормализует mountingType: явное поле или теги wall-mounted / floor-standing.
- * @param {Record<string, unknown>} item
- * @param {string} ctx
- */
-function applyBoilerMountingType(item, ctx) {
-  const explicit =
-    item.mountingType != null && toSafeString(item.mountingType) !== '';
-  const fromField = explicit ? parseBoilerMountingTypeToken(item.mountingType) : null;
-  const fromTags = inferBoilerMountingTypeFromTags(item);
-
-  if (fromField && fromTags && fromField !== fromTags) {
-    throw new Error(
-      `Каталог: mountingType="${fromField}" не совпадает с тегом (${fromTags}) (${ctx}).`,
-    );
-  }
-
-  const resolved = fromField ?? fromTags;
-  if (resolved) {
-    item.mountingType = resolved;
-    return;
-  }
-
-  if (explicit) {
-    throw new Error(`Каталог: mountingType должен быть "wall" или "floor" (${ctx}).`);
-  }
 }
 
 /**
@@ -106,7 +44,7 @@ function normalizeBoilerFromExtendedFormats(item) {
     }
   }
 
-  if (!toSafeString(item.fuel)) item.fuel = 'Газ';
+  if (!sanitizeTrimAngleBrackets(item.fuel)) item.fuel = 'Газ';
 
   if (item.efficiencyPercent != null && typeof item.efficiencyPercent === 'object') {
     const o = /** @type {Record<string, unknown>} */ (item.efficiencyPercent);
@@ -128,7 +66,7 @@ function normalizeBoilerFromExtendedFormats(item) {
 
   // Количество контуров из тегов (если не задано числом) — до синхронизации с isDoubleCircuit.
   if (item.circuitsCount == null && Array.isArray(item.tags)) {
-    const tagSet = new Set(item.tags.map((t) => toSafeString(t).toLowerCase()));
+    const tagSet = new Set(item.tags.map((t) => sanitizeTrimAngleBrackets(t).toLowerCase()));
     if (tagSet.has('double-circuit')) item.circuitsCount = 2;
     else if (tagSet.has('single-circuit')) item.circuitsCount = 1;
   }
@@ -138,7 +76,7 @@ function normalizeBoilerFromExtendedFormats(item) {
     if (cc === 2) item.isDoubleCircuit = true;
     else if (cc === 1) item.isDoubleCircuit = false;
     else {
-      const m = toSafeString(item.model).toLowerCase();
+      const m = sanitizeTrimAngleBrackets(item.model).toLowerCase();
       if (/\bduo\b|duo-tec|двух|double-circuit/.test(m)) item.isDoubleCircuit = true;
       else item.isDoubleCircuit = false;
     }
@@ -155,11 +93,6 @@ function normalizeBoilerFromExtendedFormats(item) {
     }
     if (g != null && Number.isFinite(Number(g))) item.gasConsumptionM3PerHour = Number(g);
   }
-
-  // Монтаж: wall | floor — из поля или тегов (без ошибки, финальная проверка в validateBoiler).
-  const mt =
-    parseBoilerMountingTypeToken(item.mountingType) ?? inferBoilerMountingTypeFromTags(item);
-  if (mt) item.mountingType = mt;
 }
 
 /** Панельный радиатор — теплоотдача целиком по изделию (specs.thermal_output_full). */
@@ -174,9 +107,9 @@ function radiatorLooksLikePanelRecord(item) {
  */
 function inferRadiatorPriceBasis(item) {
   if (radiatorLooksLikePanelRecord(item)) return 'panel';
-  const t = toSafeString(item.type).toLowerCase();
+  const t = sanitizeTrimAngleBrackets(item.type).toLowerCase();
   if (t.includes('steel panel') || /\bpanel\b/.test(t)) return 'panel';
-  const c = toSafeString(item.construction).toLowerCase();
+  const c = sanitizeTrimAngleBrackets(item.construction).toLowerCase();
   if (c.includes('monolith')) return 'panel';
   return 'section';
 }
@@ -205,7 +138,7 @@ function normalizeRadiatorFromExtendedFormats(item) {
     if (v != null && Number.isFinite(Number(v))) item.volumeLiters = Number(v);
   }
 
-  if (!toSafeString(item.material)) item.material = 'разное';
+  if (!sanitizeTrimAngleBrackets(item.material)) item.material = 'разное';
 
   if (item.dimensions == null && isPlainObject(item.specs) && isPlainObject(item.specs.dimensions)) {
     const specs = /** @type {Record<string, unknown>} */ (item.specs);
@@ -237,7 +170,7 @@ function normalizeRadiatorFromExtendedFormats(item) {
 function validateBoiler(item, ctx, expectedCircuitsCount) {
   if (!isPlainObject(item)) throw new Error(`Каталог: котёл должен быть объектом (${ctx}).`);
 
-  item.model = toSafeString(item.model);
+  item.model = sanitizeTrimAngleBrackets(item.model);
   if (!item.model) throw new Error(`Каталог: model обязателен (${ctx}).`);
 
   normalizeBoilerFromExtendedFormats(item);
@@ -288,7 +221,7 @@ function validateBoiler(item, ctx, expectedCircuitsCount) {
     throw new Error(`Каталог: powerKw.min > powerKw.max (${ctx}).`);
   }
 
-  item.fuel = toSafeString(item.fuel);
+  item.fuel = sanitizeTrimAngleBrackets(item.fuel);
   if (item.fuel && !['Газ', 'Электричество', 'Твердое топливо', 'Твердотопливный'].includes(item.fuel)) {
     // Мягкая проверка enum: можно расширять список по мере появления.
     // Не бросаем ошибку, если fuel пустой/неизвестный — но фиксируем очевидный мусор в model/power.
@@ -328,17 +261,17 @@ function validateBoiler(item, ctx, expectedCircuitsCount) {
       throw new Error(`Каталог: connectionDiameters должен быть массивом строк (${ctx}).`);
     }
     item.connectionDiameters = item.connectionDiameters
-      .map((x) => toSafeString(x))
+      .map((x) => sanitizeTrimAngleBrackets(x))
       .filter(Boolean);
   }
 
   if (item.combustionType != null) {
-    const c = toSafeString(item.combustionType).toLowerCase();
+    const c = sanitizeTrimAngleBrackets(item.combustionType).toLowerCase();
     if (c === 'turbo' || c === 'atmospheric') item.combustionType = c;
     else delete item.combustionType;
   }
 
-  item.type = toSafeString(item.type).toLowerCase();
+  item.type = sanitizeTrimAngleBrackets(item.type).toLowerCase();
   if (!item.type) {
     throw new Error(`Каталог: type обязателен (непустая строка) (${ctx}).`);
   }
@@ -347,18 +280,18 @@ function validateBoiler(item, ctx, expectedCircuitsCount) {
     if (!Array.isArray(item.tags)) {
       throw new Error(`Каталог: tags должен быть массивом строк (${ctx}).`);
     }
-    item.tags = item.tags.map((x) => toSafeString(x)).filter(Boolean);
+    item.tags = item.tags.map((x) => sanitizeTrimAngleBrackets(x)).filter(Boolean);
   }
 
   if (item.priceSegment != null) {
-    item.priceSegment = toSafeString(item.priceSegment).toLowerCase();
+    item.priceSegment = sanitizeTrimAngleBrackets(item.priceSegment).toLowerCase();
   }
 }
 
 function validateRadiator(item, idx) {
   if (!isPlainObject(item)) throw new Error(`Каталог: радиатор должен быть объектом (radiators[${idx}]).`);
 
-  item.model = toSafeString(item.model);
+  item.model = sanitizeTrimAngleBrackets(item.model);
   if (!item.model) throw new Error(`Каталог: model обязателен (radiators[${idx}]).`);
 
   normalizeRadiatorFromExtendedFormats(item);
@@ -379,7 +312,7 @@ function validateRadiator(item, idx) {
     max: outputDt70Max,
   });
 
-  item.material = toSafeString(item.material);
+  item.material = sanitizeTrimAngleBrackets(item.material);
   if (item.volumeLiters != null) {
     item.volumeLiters = toFiniteNumber(item.volumeLiters, {
       field: `volumeLiters (radiators[${idx}])`,
@@ -436,7 +369,7 @@ function validateRadiator(item, idx) {
     max: 1_000_000_000,
   });
 
-  let priceBasis = toSafeString(item.priceBasis).toLowerCase();
+  let priceBasis = sanitizeTrimAngleBrackets(item.priceBasis).toLowerCase();
   if (priceBasis !== 'section' && priceBasis !== 'panel') {
     priceBasis = inferRadiatorPriceBasis(item);
   }
@@ -462,10 +395,10 @@ function validateWaterHeater(item, idx) {
     throw new Error(`Каталог: водонагреватель должен быть объектом (waterHeaters[${idx}]).`);
   }
 
-  item.model = toSafeString(item.model);
+  item.model = sanitizeTrimAngleBrackets(item.model);
   if (!item.model) throw new Error(`Каталог: model обязателен (waterHeaters[${idx}]).`);
 
-  const typeRaw = item.type != null ? toSafeString(item.type).trim().toLowerCase() : '';
+  const typeRaw = item.type != null ? sanitizeTrimAngleBrackets(item.type).trim().toLowerCase() : '';
   if (!typeRaw) {
     item.type = 'electric_storage';
   } else if (typeRaw !== 'electric_storage') {
@@ -532,18 +465,18 @@ function validateWaterHeater(item, idx) {
   delete item.powerKw;
 
   if (item.heatingElementType != null) {
-    item.heatingElementType = toSafeString(item.heatingElementType);
+    item.heatingElementType = sanitizeTrimAngleBrackets(item.heatingElementType);
   }
 
   if (item.powerDetails != null) {
-    item.powerDetails = toSafeString(item.powerDetails);
+    item.powerDetails = sanitizeTrimAngleBrackets(item.powerDetails);
   }
 
   if (item.features != null) {
     if (!Array.isArray(item.features)) {
       throw new Error(`Каталог: features должен быть массивом строк (waterHeaters[${idx}]).`);
     }
-    item.features = item.features.map((x) => toSafeString(x)).filter(Boolean);
+    item.features = item.features.map((x) => sanitizeTrimAngleBrackets(x)).filter(Boolean);
   }
 }
 
@@ -558,7 +491,7 @@ function validatePipe(item, idx, seenIds) {
     throw new Error(`Каталог: pipe[${idx}] должен быть объектом.`);
   }
 
-  item.id = toSafeString(item.id);
+  item.id = sanitizeTrimAngleBrackets(item.id);
   if (!item.id) {
     throw new Error(`Каталог: id обязателен (${ctx}).`);
   }
@@ -567,18 +500,18 @@ function validatePipe(item, idx, seenIds) {
   }
   seenIds.add(item.id);
 
-  item.brand = toSafeString(item.brand);
+  item.brand = sanitizeTrimAngleBrackets(item.brand);
   if (!item.brand) {
     throw new Error(`Каталог: brand обязателен (${ctx}).`);
   }
 
-  item.material = toSafeString(item.material);
+  item.material = sanitizeTrimAngleBrackets(item.material);
   if (!item.material) {
     throw new Error(`Каталог: material обязателен (${ctx}).`);
   }
 
   if (item.category != null) {
-    item.category = toSafeString(item.category);
+    item.category = sanitizeTrimAngleBrackets(item.category);
   }
 
   item.diameter = toFiniteNumber(item.diameter, {
@@ -599,7 +532,7 @@ function validatePipe(item, idx, seenIds) {
     max: 1_000_000_000,
   });
 
-  let model = toSafeString(item.model);
+  let model = sanitizeTrimAngleBrackets(item.model);
   if (!model) {
     model = derivePipeModelLabel(item, idx);
   }
@@ -642,7 +575,7 @@ function isAllowedIndirectWaterHeaterType(normalized) {
  * @param {number} idx
  */
 function normalizeIndirectWaterHeaterType(raw, idx) {
-  const s = toSafeString(raw).trim().toLowerCase();
+  const s = sanitizeTrimAngleBrackets(raw).trim().toLowerCase();
   // «indirect wall», «indirect-wall», лишние пробелы
   const collapsed = s.replace(/[\s-]+/g, '_');
   if (!collapsed) {
@@ -667,13 +600,13 @@ function validateIndirectWaterHeater(item, idx) {
     throw new Error(`Каталог: indirectWaterHeaters[${idx}] должен быть объектом.`);
   }
 
-  item.model = toSafeString(item.model);
+  item.model = sanitizeTrimAngleBrackets(item.model);
   if (!item.model) {
     throw new Error(`Каталог: model обязателен (indirectWaterHeaters[${idx}]).`);
   }
 
-  if (item.brand != null) item.brand = toSafeString(item.brand);
-  if (item.article != null) item.article = toSafeString(item.article);
+  if (item.brand != null) item.brand = sanitizeTrimAngleBrackets(item.brand);
+  if (item.article != null) item.article = sanitizeTrimAngleBrackets(item.article);
 
   item.type = normalizeIndirectWaterHeaterType(item.type, idx);
 

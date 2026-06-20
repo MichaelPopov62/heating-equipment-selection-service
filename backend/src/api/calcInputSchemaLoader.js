@@ -27,7 +27,7 @@ function adaptBundledSchemaForAjv(schema) {
   const building = schema.properties?.building;
   const roomItems = building?.properties?.rooms?.items;
   if (roomItems?.properties?.type) {
-    // До AJV тип комнаты нормализуется в validate.js; enum — CANONICAL_ROOM_TYPES.
+    // До AJV тип комнаты: compat synonym/legacy, strict reject неизвестных (validate.js).
     roomItems.properties.type = {
       type: 'string',
       enum: [...CANONICAL_ROOM_TYPES],

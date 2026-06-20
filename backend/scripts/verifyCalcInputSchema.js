@@ -59,7 +59,7 @@ if (process.exitCode === 1) {
   process.exit(process.exitCode);
 }
 
-const ajv = new Ajv({ allErrors: true, coerceTypes: true, removeAdditional: true });
+const ajv = new Ajv({ allErrors: true, coerceTypes: false, removeAdditional: true });
 const schema = await loadCalcInputSchemaForAjv();
 const validate = ajv.compile(schema);
 

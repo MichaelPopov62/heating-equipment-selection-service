@@ -3,7 +3,7 @@
  * Описание: выбор модели и варианта объёма из каталога по recommendedTankLiters; при нехватке
  * номенклатуры — максимально доступный вариант с предупреждением.
  */
-import { buildCatalogIndices } from '../catalog/indices.js';
+import { buildMatchingSortPools } from '../catalog/matchingSortPools.js';
 import { waterHeaterMaxVolumeLiters } from '../catalog/comparators.js';
 import { logger } from '../utils/logger.js';
 
@@ -29,8 +29,8 @@ function pickBestVariantForNeed(heater, need) {
  * @returns {import('../types/shared-types').WaterHeaterMatchingReport}
  */
 export function pickWaterHeater({ hotWater, catalog } = {}) {
-  const indices = buildCatalogIndices(catalog);
-  const heaters = indices.waterHeatersSortedByMinVolume ?? [];
+  const sortPools = buildMatchingSortPools(catalog);
+  const heaters = sortPools.waterHeatersSortedByMinVolume ?? [];
   if (!heaters.length) {
     logger.warn('matching.waterHeater.emptyCatalog', null);
     return {

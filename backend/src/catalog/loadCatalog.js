@@ -81,33 +81,20 @@ function mongoDocToPlain(doc) {
 }
 
 /**
- * Труба из Mongo → строка каталога (без kind, catalogKey, …).
- * Поддержка legacy: вложенное поле data, если в корне нет id.
+ * Труба из Mongo → строка каталога (без kind, catalogKey, pipeId).
  * @param {Record<string, unknown>} doc
  */
 function pipeMongoDocToCatalogRow(doc) {
   const plain = mongoDocToPlain(doc);
-  const rec = /** @type {Record<string, unknown>} */ (plain);
-
+  const { kind: _k, pipeId: _p, ...rest } = plain;
+  void _k;
+  void _p;
   /** @type {Record<string, unknown>} */
-  let row;
-  if (rec.data && typeof rec.data === 'object' && rec.id == null) {
-    row = { .../** @type {Record<string, unknown>} */ (rec.data) };
-  } else {
-    const { kind: _k, data: _d, pipeId: _p, ...rest } = rec;
-    void _k;
-    void _d;
-    void _p;
-    row = { ...rest };
-  }
-
-  const catalogId = resolvePipeCatalogId(
-    rec.data && typeof rec.data === 'object' ? { ...rec, ...row } : rec,
-  );
+  const row = { ...rest };
+  const catalogId = resolvePipeCatalogId(plain);
   if (catalogId) {
     row.id = catalogId;
   }
-
   return row;
 }
 
@@ -116,9 +103,8 @@ function pipeMongoDocToCatalogRow(doc) {
  */
 function mongoDocToCatalogProductDoc(doc) {
   const plain = mongoDocToPlain(doc);
-  const { kind: _k, data: _pipeData, ...rest } = plain;
+  const { kind: _k, ...rest } = plain;
   void _k;
-  void _pipeData;
   return rest;
 }
 

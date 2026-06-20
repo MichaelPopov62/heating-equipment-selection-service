@@ -12,6 +12,8 @@ const { Schema } = mongoose;
  */
 const projectSchema = new Schema(
   {
+    /** Владелец проекта (JWT sub). Обязателен для новых записей. */
+    ownerId: { type: String, required: true, trim: true, index: true },
     clientName: { type: String, required: true, trim: true, maxlength: 200 },
     /** Краткая подпись объекта (опционально). */
     label: { type: String, required: false, trim: true, maxlength: 200 },
@@ -32,6 +34,7 @@ const projectSchema = new Schema(
 
 projectSchema.index({ updatedAt: -1 });
 projectSchema.index({ clientName: 1 });
+projectSchema.index({ ownerId: 1, updatedAt: -1 });
 
 export const Project =
   mongoose.models.Project ?? mongoose.model('Project', projectSchema);

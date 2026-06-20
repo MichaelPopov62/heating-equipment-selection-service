@@ -109,11 +109,11 @@ properties:
     type: object
     description: >
       Снимок справочников для одного расчёта: toCalcRuntimeContext(getReferenceBundle()).
-      validateAndNormalizeInput(body, ctx) и buildReport({ input, ctx }).
+      HTTP: runCalculation(body) в api/runCalculation.js; внутри — validateAndNormalizeInput(body, ctx) и buildReport({ input, ctx }).
     properties:
       module:
         type: string
-        example: backend/src/reference/toCalcRuntimeContext.js
+        example: backend/src/api/runCalculation.js
       doc:
         type: string
         example: docs/calc-runtime-context.md

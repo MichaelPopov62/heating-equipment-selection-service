@@ -3,7 +3,7 @@
  * Описание: фильтрация по контуру, монтажу и типу горения; формирование основной линии и альтернатив
  * proposalEconomy/proposalEfficient; каскад, запас мощности и структурированные рекомендации.
  */
-import { buildCatalogIndices } from '../catalog/indices.js';
+import { buildMatchingSortPools } from '../catalog/matchingSortPools.js';
 import { logger } from '../utils/logger.js';
 import {
   buildCondensingBoilerMatchingRecommendations,
@@ -532,8 +532,8 @@ export function pickBoiler({
     boilerPlacementZone: objectMeta?.boilerPlacementZone ?? null,
   });
 
-  const indices = buildCatalogIndices(catalog);
-  const boilersAll = indices.boilersSortedByMaxPower;
+  const sortPools = buildMatchingSortPools(catalog);
+  const boilersAll = sortPools.boilersSortedByMaxPower;
   const boilersPositive = boilersAll.filter(
     (b) => (Number(b?.powerKw?.max) || 0) > 0,
   );

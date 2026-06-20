@@ -889,6 +889,12 @@ export interface CalcReport {
   warnings: string[];
 }
 
+/** Результат runCalculation() — нормализованный вход и отчёт. */
+export interface IRunCalculationResult {
+  input: CalcRequestBody;
+  report: CalcReport;
+}
+
 export interface CalcOkResponse {
   ok: true;
   report: CalcReport;
@@ -947,7 +953,7 @@ export interface CalculationDetail extends CalculationListItem {
   report: CalcReport;
 }
 
-/** Тело POST .../projects/:id/calc — calcInput или полный CalcInput; опционально survey. */
+/** Тело POST .../projects/:id/calc — calcInput, корневой CalcInput или fallback lastCalcInput; опционально survey. */
 export interface ProjectCalcBody extends CalcRequestBody {
   calcInput?: CalcRequestBody;
   survey?: Record<string, unknown>;

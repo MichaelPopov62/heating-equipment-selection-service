@@ -3,6 +3,7 @@
  * Описание: преобразование MongoDB-документов Project и Calculation в DTO для API списка,
  * деталей проекта и вложенных расчётов.
  */
+import { sanitizeCalculationSummary } from './extractCalculationSummary.js';
 /**
  * @param {import('mongoose').Document | Record<string, unknown>} doc
  * @returns {import('../types/shared-types').ProjectListItem}
@@ -44,7 +45,7 @@ export function serializeCalculationListItem(doc) {
   return {
     id: String(doc._id),
     projectId: String(doc.projectId),
-    summary: /** @type {import('../types/shared-types').CalculationSummary} */ (doc.summary ?? {}),
+    summary: sanitizeCalculationSummary(doc.summary),
     createdAt:
       doc.createdAt instanceof Date ? doc.createdAt.toISOString() : String(doc.createdAt ?? ''),
   };

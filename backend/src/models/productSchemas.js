@@ -104,9 +104,6 @@ export const indirectWaterHeaterSchema = new Schema({
 });
 
 export const pipeSchema = new Schema({
-  /** @deprecated Ранее хранили весь объект сюда; сейчас поля трубы дублируют JSON в корне документа (strict на базе). */
-  data: { type: Schema.Types.Mixed, required: false },
-
   /** Дубли id из каталога для фильтров (корневое id из JSON тоже сохраняется). */
   pipeId: { type: String, required: false, trim: true },
   brand: { type: String, required: false, trim: true },

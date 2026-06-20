@@ -1,13 +1,18 @@
 /**
  * Назначение: REST API проектов и расчётов.
- * Описание: Реализует CRUD для проектов клиента и сохранённых расчётов в MongoDB (коллекции projects, calculations). Повторно использует validateAndNormalizeInput и buildReport для пересчёта по сохранённой анкете. Экспортирует createProjectsRouter(); подключается из routes.js.
+ * Описание: CRUD для проектов клиента (ownerId + JWT) и расчётов в MongoDB. Rate limit и квоты. Экспортирует createProjectsRouter().
  */
 
 import express from 'express';
 import { Project, Calculation } from '../models/public.js';
-import { buildReport } from '../report/public.js';
-import { getReferenceBundle, toCalcRuntimeContext } from '../reference/public.js';
-import { validateAndNormalizeInput } from './validate.js';
+import { requireProjectsAuth } from '../auth/requireProjectsAuth.js';
+import { resolveProjectsDevOwnerId } from '../auth/projectsAuthConfig.js';
+import {
+  projectCalcRateLimiter,
+  projectsReadRateLimiter,
+  projectsWriteRateLimiter,
+} from './middleware/rateLimiters.js';
+import { runCalculation } from './runCalculation.js';
 import { extractCalculationSummary } from '../projects/extractCalculationSummary.js';
 import {
   validateProjectCreateBody,
@@ -16,11 +21,25 @@ import {
 import { parseObjectIdParam } from '../projects/parseObjectId.js';
 import { requireMongoForProjects } from '../projects/requireMongo.js';
 import {
+  assertCanCreateCalculation,
+  assertCanCreateProject,
+  buildProjectOwnerFilter,
+  findOwnedProjectDoc,
+  findOwnedProjectLean,
+} from '../projects/projectAccess.js';
+import {
   serializeCalculationDetail,
   serializeCalculationListItem,
   serializeProjectDetail,
   serializeProjectListItem,
 } from '../projects/serializeProject.js';
+import { resolveProjectCalcInput } from '../projects/resolveProjectCalcInput.js';
+import { assertCalculationDocumentSize } from '../projects/documentSizeLimits.js';
+import {
+  calcInputAuditMeta,
+  projectPatchFields,
+  surveyAuditMeta,
+} from '../projects/projectChangeMeta.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -35,6 +54,14 @@ async function mongoMiddleware(req, res, next) {
   } catch (err) {
     next(err);
   }
+}
+
+/**
+ * @param {import('express').Request} req
+ * @returns {string}
+ */
+function ownerSubFromRequest(req) {
+  return req.projectsUser?.sub ?? resolveProjectsDevOwnerId();
 }
 
 /**
@@ -54,15 +81,16 @@ function parseLimit(raw, fallback, max) {
 export function createProjectsRouter() {
   const router = express.Router();
 
-  router.use('/api/v1/projects', mongoMiddleware);
+  router.use('/api/v1/projects', mongoMiddleware, requireProjectsAuth);
 
   /**
    * @param {import('express').Request} req
    * @param {import('express').Response<import('../types/shared-types').ProjectsListResponse>} res
    * @param {import('express').NextFunction} next
    */
-  router.get('/api/v1/projects', async (req, res, next) => {
+  router.get('/api/v1/projects', projectsReadRateLimiter, async (req, res, next) => {
     try {
+      const ownerSub = ownerSubFromRequest(req);
       const limit = parseLimit(req.query.limit, 50, 100);
       const skip = parseLimit(req.query.skip, 0, 10_000);
       const search =
@@ -70,9 +98,14 @@ export function createProjectsRouter() {
           ? req.query.search.trim()
           : null;
 
-      const filter = search
-        ? { clientName: { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' } }
-        : {};
+      /** @type {Record<string, unknown>} */
+      const filter = { ...buildProjectOwnerFilter(ownerSub) };
+      if (search) {
+        filter.clientName = {
+          $regex: search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+          $options: 'i',
+        };
+      }
 
       const [docs, total] = await Promise.all([
         Project.find(filter).sort({ updatedAt: -1 }).skip(skip).limit(limit).lean(),
@@ -104,15 +137,23 @@ export function createProjectsRouter() {
    * @param {import('express').Response<import('../types/shared-types').ProjectCreateResponse>} res
    * @param {import('express').NextFunction} next
    */
-  router.post('/api/v1/projects', async (req, res, next) => {
+  router.post('/api/v1/projects', projectsWriteRateLimiter, async (req, res, next) => {
     try {
+      const ownerSub = ownerSubFromRequest(req);
+      await assertCanCreateProject(ownerSub);
+
       const payload = validateProjectCreateBody(req.body);
       const doc = await Project.create({
+        ownerId: ownerSub,
         clientName: payload.clientName,
         label: payload.label,
         survey: payload.survey,
       });
-      logger.info('project.create', { requestId: req.requestId ?? null }, { projectId: String(doc._id) });
+      logger.info('project.create', { requestId: req.requestId ?? null }, {
+        projectId: String(doc._id),
+        ownerId: ownerSub,
+        survey: surveyAuditMeta(payload.survey),
+      });
       res.status(201).json({
         ok: true,
         project: serializeProjectDetail(doc.toObject(), { calculationsCount: 0 }),
@@ -127,8 +168,9 @@ export function createProjectsRouter() {
    * @param {import('express').Response<import('../types/shared-types').ProjectGetResponse>} res
    * @param {import('express').NextFunction} next
    */
-  router.get('/api/v1/projects/:id', async (req, res, next) => {
+  router.get('/api/v1/projects/:id', projectsReadRateLimiter, async (req, res, next) => {
     try {
+      const ownerSub = ownerSubFromRequest(req);
       const oid = parseObjectIdParam(req.params.id);
       if (!oid) {
         res.status(400).json({
@@ -138,7 +180,7 @@ export function createProjectsRouter() {
         return;
       }
 
-      const doc = await Project.findById(oid).lean();
+      const doc = await findOwnedProjectLean(oid, ownerSub);
       if (!doc) {
         res.status(404).json({
           ok: false,
@@ -171,8 +213,9 @@ export function createProjectsRouter() {
    * @param {import('express').Response<import('../types/shared-types').ProjectUpdateResponse>} res
    * @param {import('express').NextFunction} next
    */
-  router.put('/api/v1/projects/:id', async (req, res, next) => {
+  router.put('/api/v1/projects/:id', projectsWriteRateLimiter, async (req, res, next) => {
     try {
+      const ownerSub = ownerSubFromRequest(req);
       const oid = parseObjectIdParam(req.params.id);
       if (!oid) {
         res.status(400).json({
@@ -188,7 +231,12 @@ export function createProjectsRouter() {
       if (patch.label !== undefined) update.label = patch.label;
       if (patch.survey !== undefined) update.survey = patch.survey;
 
-      const doc = await Project.findByIdAndUpdate(oid, { $set: update }, { new: true }).lean();
+      const doc = await Project.findOneAndUpdate(
+        { _id: oid, ...buildProjectOwnerFilter(ownerSub) },
+        { $set: update },
+        { new: true },
+      ).lean();
+
       if (!doc) {
         res.status(404).json({
           ok: false,
@@ -198,7 +246,12 @@ export function createProjectsRouter() {
       }
 
       const calculationsCount = await Calculation.countDocuments({ projectId: oid });
-      logger.info('project.update', { requestId: req.requestId ?? null }, { projectId: String(oid) });
+      logger.info('project.update', { requestId: req.requestId ?? null }, {
+        projectId: String(oid),
+        ownerId: ownerSub,
+        changedFields: projectPatchFields(/** @type {Record<string, unknown>} */ (patch)),
+        ...(patch.survey !== undefined ? { survey: surveyAuditMeta(patch.survey) } : {}),
+      });
 
       res.status(200).json({
         ok: true,
@@ -214,8 +267,9 @@ export function createProjectsRouter() {
    * @param {import('express').Response<import('../types/shared-types').ProjectDeleteResponse>} res
    * @param {import('express').NextFunction} next
    */
-  router.delete('/api/v1/projects/:id', async (req, res, next) => {
+  router.delete('/api/v1/projects/:id', projectsWriteRateLimiter, async (req, res, next) => {
     try {
+      const ownerSub = ownerSubFromRequest(req);
       const oid = parseObjectIdParam(req.params.id);
       if (!oid) {
         res.status(400).json({
@@ -225,7 +279,11 @@ export function createProjectsRouter() {
         return;
       }
 
-      const deleted = await Project.findByIdAndDelete(oid);
+      const deleted = await Project.findOneAndDelete({
+        _id: oid,
+        ...buildProjectOwnerFilter(ownerSub),
+      });
+
       if (!deleted) {
         res.status(404).json({
           ok: false,
@@ -237,6 +295,7 @@ export function createProjectsRouter() {
       const calcResult = await Calculation.deleteMany({ projectId: oid });
       logger.info('project.delete', { requestId: req.requestId ?? null }, {
         projectId: String(oid),
+        ownerId: ownerSub,
         calculationsRemoved: calcResult.deletedCount ?? 0,
       });
 
@@ -251,15 +310,23 @@ export function createProjectsRouter() {
   });
 
   /**
-   * Расчёт + сохранение в calculations; опционально обновление survey проекта.
-   *
    * @param {import('express').Request<{ id: string }, import('../types/shared-types').ProjectCalcResponse, import('../types/shared-types').ProjectCalcBody>} req
    * @param {import('express').Response<import('../types/shared-types').ProjectCalcResponse>} res
    * @param {import('express').NextFunction} next
    */
-  router.post('/api/v1/projects/:id/calc', async (req, res, next) => {
+  router.post('/api/v1/projects/:id/calc', projectCalcRateLimiter, async (req, res, next) => {
     const requestId = req.requestId ?? null;
+    /** @type {string | undefined} */
+    let projectIdForLog;
+    /** @type {string | undefined} */
+    let ownerIdForLog;
+    /** @type {'calcInput' | 'body' | 'lastCalcInput' | undefined} */
+    let calcInputSource;
+    /** @type {boolean | undefined} */
+    let surveyInRequest;
     try {
+      const ownerSub = ownerSubFromRequest(req);
+      ownerIdForLog = ownerSub;
       const oid = parseObjectIdParam(req.params.id);
       if (!oid) {
         res.status(400).json({
@@ -269,7 +336,7 @@ export function createProjectsRouter() {
         return;
       }
 
-      const project = await Project.findById(oid);
+      const project = await findOwnedProjectDoc(oid, ownerSub);
       if (!project) {
         res.status(404).json({
           ok: false,
@@ -278,43 +345,75 @@ export function createProjectsRouter() {
         return;
       }
 
+      await assertCanCreateCalculation(oid);
+
+      projectIdForLog = String(oid);
+
       const body = req.body ?? {};
       const saveSurvey =
         body.survey !== undefined &&
         body.survey !== null &&
         typeof body.survey === 'object' &&
         !Array.isArray(body.survey);
+      surveyInRequest = saveSurvey;
 
       if (saveSurvey) {
         const { survey } = validateProjectUpdateBody({ survey: body.survey });
         if (survey) project.survey = survey;
       }
 
-      const calcPayload =
-        body.calcInput !== undefined && body.calcInput !== null ? body.calcInput : body;
+      const resolved = resolveProjectCalcInput(body, project.lastCalcInput);
+      calcInputSource = resolved.source;
 
-      logger.debug('project.calc.start', { requestId }, { projectId: String(oid) });
+      logger.info('project.calc.start', { requestId }, {
+        projectId: projectIdForLog,
+        ownerId: ownerSub,
+        calcInputSource,
+        surveyInRequest: saveSurvey,
+        ...(saveSurvey ? { survey: surveyAuditMeta(body.survey) } : {}),
+        lastCalcInput: calcInputAuditMeta(project.lastCalcInput),
+      });
 
-      const bundle = await getReferenceBundle();
-      const ctx = toCalcRuntimeContext(bundle);
-      const input = validateAndNormalizeInput(calcPayload, ctx);
-      const report = await buildReport({ input, ctx });
+      if (calcInputSource === 'lastCalcInput' && !saveSurvey) {
+        logger.info('project.calc.reuseLastInput', { requestId }, {
+          projectId: projectIdForLog,
+          ownerId: ownerSub,
+        });
+      }
+
+      const calcPayload = resolved.payload;
+
+      const { input, report } = await runCalculation(calcPayload);
 
       const summary = extractCalculationSummary(report);
-      const calcDoc = await Calculation.create({
+      const calculationDocPayload = {
         projectId: oid,
         calcInput: input,
         report,
         summary,
-      });
+      };
+      const estimatedBsonBytes = assertCalculationDocumentSize(calculationDocPayload);
+      const calcDoc = await Calculation.create(calculationDocPayload);
 
+      if (!project.ownerId) {
+        project.ownerId = ownerSub;
+      }
       project.lastCalcInput = input;
       await project.save();
 
       logger.info('project.calc.done', { requestId }, {
-        projectId: String(oid),
+        projectId: projectIdForLog,
+        ownerId: ownerSub,
         calculationId: String(calcDoc._id),
+        calcInputSource,
+        surveySaved: saveSurvey,
+        lastCalcInputUpdated: true,
+        calcInput: calcInputAuditMeta(input),
+        heatLossKw: summary.heatLossKw,
+        objectType: summary.objectType,
+        boilerRequiredKw: summary.boilerRequiredKw,
         warnings: report?.warnings?.length ?? 0,
+        estimatedBsonBytes,
       });
 
       res.status(200).json({
@@ -326,6 +425,13 @@ export function createProjectsRouter() {
         }),
       });
     } catch (err) {
+      logger.error('project.calc.fail', { requestId }, {
+        projectId: projectIdForLog,
+        ownerId: ownerIdForLog,
+        calcInputSource,
+        surveyInRequest,
+        internalMessage: err instanceof Error ? err.message : String(err),
+      });
       next(err);
     }
   });
@@ -335,8 +441,9 @@ export function createProjectsRouter() {
    * @param {import('express').Response<import('../types/shared-types').CalculationsListResponse>} res
    * @param {import('express').NextFunction} next
    */
-  router.get('/api/v1/projects/:id/calculations', async (req, res, next) => {
+  router.get('/api/v1/projects/:id/calculations', projectsReadRateLimiter, async (req, res, next) => {
     try {
+      const ownerSub = ownerSubFromRequest(req);
       const oid = parseObjectIdParam(req.params.id);
       if (!oid) {
         res.status(400).json({
@@ -346,8 +453,8 @@ export function createProjectsRouter() {
         return;
       }
 
-      const exists = await Project.exists({ _id: oid });
-      if (!exists) {
+      const owned = await findOwnedProjectLean(oid, ownerSub);
+      if (!owned) {
         res.status(404).json({
           ok: false,
           error: { message: 'Проект не найден', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
@@ -384,35 +491,49 @@ export function createProjectsRouter() {
    * @param {import('express').Response<import('../types/shared-types').CalculationGetResponse>} res
    * @param {import('express').NextFunction} next
    */
-  router.get('/api/v1/projects/:projectId/calculations/:calcId', async (req, res, next) => {
-    try {
-      const projectOid = parseObjectIdParam(req.params.projectId);
-      const calcOid = parseObjectIdParam(req.params.calcId);
-      if (!projectOid || !calcOid) {
-        res.status(400).json({
-          ok: false,
-          error: { message: 'Некорректный id', code: 'VALIDATION_ERROR', statusCode: 400 },
-        });
-        return;
-      }
+  router.get(
+    '/api/v1/projects/:projectId/calculations/:calcId',
+    projectsReadRateLimiter,
+    async (req, res, next) => {
+      try {
+        const ownerSub = ownerSubFromRequest(req);
+        const projectOid = parseObjectIdParam(req.params.projectId);
+        const calcOid = parseObjectIdParam(req.params.calcId);
+        if (!projectOid || !calcOid) {
+          res.status(400).json({
+            ok: false,
+            error: { message: 'Некорректный id', code: 'VALIDATION_ERROR', statusCode: 400 },
+          });
+          return;
+        }
 
-      const doc = await Calculation.findOne({ _id: calcOid, projectId: projectOid }).lean();
-      if (!doc) {
-        res.status(404).json({
-          ok: false,
-          error: { message: 'Расчёт не найден', code: 'CALCULATION_NOT_FOUND', statusCode: 404 },
-        });
-        return;
-      }
+        const owned = await findOwnedProjectLean(projectOid, ownerSub);
+        if (!owned) {
+          res.status(404).json({
+            ok: false,
+            error: { message: 'Проект не найден', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+          });
+          return;
+        }
 
-      res.status(200).json({
-        ok: true,
-        calculation: serializeCalculationDetail(doc),
-      });
-    } catch (err) {
-      next(err);
-    }
-  });
+        const doc = await Calculation.findOne({ _id: calcOid, projectId: projectOid }).lean();
+        if (!doc) {
+          res.status(404).json({
+            ok: false,
+            error: { message: 'Расчёт не найден', code: 'CALCULATION_NOT_FOUND', statusCode: 404 },
+          });
+          return;
+        }
+
+        res.status(200).json({
+          ok: true,
+          calculation: serializeCalculationDetail(doc),
+        });
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
 
   return router;
 }

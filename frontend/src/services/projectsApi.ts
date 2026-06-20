@@ -14,9 +14,15 @@ import type {
 import type { SurveyDraft } from '../types/surveyDraft';
 import { parseApiErrorMessage } from '../utils/apiError';
 import { isRecord } from '../utils/jsonGuards';
+import { getProjectsAuthHeaders } from './projectsAuthHeaders';
 
 async function parseJson(res: Response): Promise<unknown> {
   return res.json().catch(() => null);
+}
+
+/** @returns {Record<string, string>} */
+function projectsFetchHeaders(extra?: Record<string, string>): Record<string, string> {
+  return { Accept: 'application/json', ...getProjectsAuthHeaders(), ...extra };
 }
 
 export async function listProjects(params?: {
@@ -30,7 +36,7 @@ export async function listProjects(params?: {
   if (params?.skip != null) q.set('skip', String(params.skip));
   const qs = q.toString();
   const res = await fetch(`/api/v1/projects${qs ? `?${qs}` : ''}`, {
-    headers: { Accept: 'application/json' },
+    headers: projectsFetchHeaders(),
   });
   const data = await parseJson(res);
   if (!res.ok) {
@@ -49,7 +55,7 @@ export async function createProject(body: {
 }): Promise<ProjectCreateResponse> {
   const res = await fetch('/api/v1/projects', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: projectsFetchHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
   });
   const data = await parseJson(res);
@@ -68,7 +74,7 @@ export async function getProject(
 ): Promise<ProjectGetResponse> {
   const q = opts?.includeLastCalculation ? '?includeLastCalculation=1' : '';
   const res = await fetch(`/api/v1/projects/${encodeURIComponent(id)}${q}`, {
-    headers: { Accept: 'application/json' },
+    headers: projectsFetchHeaders(),
   });
   const data = await parseJson(res);
   if (!res.ok) {
@@ -86,7 +92,7 @@ export async function updateProject(
 ): Promise<ProjectGetResponse> {
   const res = await fetch(`/api/v1/projects/${encodeURIComponent(id)}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: projectsFetchHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
   });
   const data = await parseJson(res);
@@ -105,7 +111,7 @@ export async function postProjectCalc(
 ): Promise<ProjectCalcResponse> {
   const res = await fetch(`/api/v1/projects/${encodeURIComponent(projectId)}/calc`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: projectsFetchHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
   });
   const data = await parseJson(res);
@@ -128,7 +134,7 @@ export async function listProjectCalculations(
   const qs = q.toString();
   const res = await fetch(
     `/api/v1/projects/${encodeURIComponent(projectId)}/calculations${qs ? `?${qs}` : ''}`,
-    { headers: { Accept: 'application/json' } },
+    { headers: projectsFetchHeaders() },
   );
   const data = await parseJson(res);
   if (!res.ok) {
@@ -146,7 +152,7 @@ export async function getProjectCalculation(
 ): Promise<CalculationGetResponse> {
   const res = await fetch(
     `/api/v1/projects/${encodeURIComponent(projectId)}/calculations/${encodeURIComponent(calcId)}`,
-    { headers: { Accept: 'application/json' } },
+    { headers: projectsFetchHeaders() },
   );
   const data = await parseJson(res);
   if (!res.ok) {

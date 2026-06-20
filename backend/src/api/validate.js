@@ -1,6 +1,8 @@
 /**
  * Назначение: валидация и нормализация входной анкеты.
- * Описание: Проверяет тело POST /api/v1/calc через AJV по схеме CalcInput.yaml (calcInputSchemaLoader.js), затем выполняет cross-validation: externalWalls, границы квартиры, схемы котёл/ГВС, монтаж котла. Нормализует типы комнат, температурный график и поля hotWater. Экспортирует validateAndNormalizeInput().
+ * Описание: Фазы: reject legacy → compat-нормализация (room type, границы квартиры) → AJV strict
+ * (coerceTypes: false) → cross-validation. Неизвестный room.type → 400 ROOM_TYPE_INVALID.
+ * Экспортирует validateAndNormalizeInput().
  */
 
 import Ajv from 'ajv';
@@ -24,7 +26,9 @@ import {
   appendThermalRegimeSchemeWarnings,
 } from '../logic/normalizeHeatingUfhPreset.js';
 import { normalizeUnderfloorDistributionPreset } from '../logic/normalizeUnderfloorDistribution.js';
+import { assertUfhModeFinishCompatibility } from '../logic/ufhModeFinishCompatibility.js';
 import { assertCalcRuntimeContext } from '../reference/assertCalcRuntimeContext.js';
+import { isPlainObject } from '../utils/isPlainObject.js';
 import { logger } from '../utils/logger.js';
 import { sanitizeTrimAngleBrackets } from '../utils/sanitizeString.js';
 import {
@@ -64,7 +68,7 @@ const ENVELOPE_FORBIDDEN_UFH_FLOOR_IDS = new Set([
 
 const ajv = new Ajv({
   allErrors: true,
-  coerceTypes: true,
+  coerceTypes: false,
   removeAdditional: true,
 });
 
@@ -115,50 +119,85 @@ function sanitizeRoomTypeString(v) {
 }
 
 /**
- * Нормализация типа комнаты до AJV: trim, синонимы, легаси, неизвестное → «помещение».
+ * @param {unknown} body
+ * @param {string} message
+ */
+function pushNormalizationWarning(body, message) {
+  if (!body || typeof body !== 'object') return;
+  const record = /** @type {Record<string, unknown>} */ (body);
+  if (!record.heatingSystem || typeof record.heatingSystem !== 'object') {
+    record.heatingSystem = {};
+  }
+  const hs = /** @type {Record<string, unknown>} */ (record.heatingSystem);
+  const prev = Array.isArray(hs._normalizationWarnings) ? hs._normalizationWarnings : [];
+  if (prev.includes(message)) return;
+  hs._normalizationWarnings = [...prev, message];
+}
+
+/**
+ * Compat-нормализация типа комнаты до AJV: trim, синонимы, legacy.
+ * Неизвестное значение → 400 ROOM_TYPE_INVALID (без silent «помещение»).
  *
  * @param {unknown} building
+ * @returns {string[]} сообщения для heatingSystem._normalizationWarnings (после AJV)
  */
 function normalizeRoomTypesBeforeValidate(building) {
-  if (!building || typeof building !== 'object') return;
+  /** @type {string[]} */
+  const compatWarnings = [];
+
+  if (!building || typeof building !== 'object') return compatWarnings;
   const rooms = building.rooms;
-  if (!Array.isArray(rooms)) return;
+  if (!Array.isArray(rooms)) return compatWarnings;
 
   for (const r of rooms) {
     if (!r || typeof r !== 'object' || r.type == null) continue;
     const raw = sanitizeRoomTypeString(r.type);
     const lower = raw.toLowerCase();
-    let next =
-      ROOM_TYPE_SYNONYMS[raw] ??
-      ROOM_TYPE_SYNONYM_BY_LOWER[lower] ??
-      LEGACY_ROOM_TYPE_MAP[raw] ??
-      LEGACY_ROOM_TYPE_BY_LOWER[lower] ??
-      matchCanonicalRoomType(raw);
-    if (next == null) next = 'помещение';
+    const roomId = typeof r.id === 'string' && r.id.trim() ? r.id.trim() : '?';
+
+    /** @type {string | null} */
+    let next;
+    /** @type {string | null} */
+    let compatSource = null;
+
+    if (Object.prototype.hasOwnProperty.call(ROOM_TYPE_SYNONYMS, raw)) {
+      next = ROOM_TYPE_SYNONYMS[raw];
+      compatSource = raw;
+    } else if (ROOM_TYPE_SYNONYM_BY_LOWER[lower] != null) {
+      next = ROOM_TYPE_SYNONYM_BY_LOWER[lower];
+      compatSource = raw;
+    } else if (Object.prototype.hasOwnProperty.call(LEGACY_ROOM_TYPE_MAP, raw)) {
+      next = LEGACY_ROOM_TYPE_MAP[raw];
+      compatSource = raw;
+    } else if (LEGACY_ROOM_TYPE_BY_LOWER[lower] != null) {
+      next = LEGACY_ROOM_TYPE_BY_LOWER[lower];
+      compatSource = raw;
+    } else {
+      next = matchCanonicalRoomType(raw);
+    }
+
+    if (next == null) {
+      const err = new Error(
+        `Неизвестный тип комнаты «${raw}» (room id=${roomId}). Допустимые значения — enum room.type в CalcInput.`,
+      );
+      err.statusCode = 400;
+      err.code = 'ROOM_TYPE_INVALID';
+      throw err;
+    }
+
+    if (compatSource != null) {
+      compatWarnings.push(
+        `Тип комнаты «${roomId}»: «${compatSource}» нормализован до «${next}».`,
+      );
+    }
+
     r.type = next;
   }
+
+  return compatWarnings;
 }
 
 /**
- * Страховка после AJV: любой тип вне справочника → «помещение».
- *
- * @param {unknown} building
- */
-function assertCanonicalRoomTypes(building) {
-  if (!building || typeof building !== 'object') return;
-  const rooms = building.rooms;
-  if (!Array.isArray(rooms)) return;
-  for (const r of rooms) {
-    if (!r || typeof r !== 'object') continue;
-    if (!CANONICAL_ROOM_TYPE_SET.has(r.type)) {
-      r.type = 'помещение';
-    }
-  }
-}
-
-/**
- * Явный отказ от удалённых полей горячей воды (до AJV, чтобы клиент получил понятное сообщение).
- *
  * @param {unknown} body — распакованное тело запроса
  */
 function rejectLegacyHotWaterFields(body) {
@@ -175,11 +214,7 @@ function rejectLegacyHotWaterFields(body) {
   }
 
   const fx = hw.fixtures;
-  if (
-    fx &&
-    typeof fx === 'object' &&
-    Object.prototype.hasOwnProperty.call(fx, 'kitchen')
-  ) {
+  if (isPlainObject(fx) && Object.prototype.hasOwnProperty.call(fx, 'kitchen')) {
     const err = new Error(
       'Поле hotWater.fixtures.kitchen удалено. Используйте только kitchenSink.',
     );
@@ -196,7 +231,8 @@ const validateInput = ajv.compile(INPUT_SCHEMA);
 // фигурирует enum [жилое, санузел, living, …] — запущен старый процесс Node (перезапустите backend).
 logger.info('validate.schema', null, {
   source: 'components/schemas/CalcInput.yaml',
-  roomType: 'normalize-then-string',
+  roomType: 'compat-then-strict-enum',
+  ajvCoerceTypes: false,
   canonicalRoomTypes: CANONICAL_ROOM_TYPES,
 });
 
@@ -209,8 +245,9 @@ export function validateAndNormalizeInput(input, ctx) {
   assertCalcRuntimeContext(ctx);
   const clone = structuredClone(input ?? {});
   rejectLegacyHotWaterFields(clone);
-  normalizeRoomTypesBeforeValidate(clone.building);
+  const roomTypeCompatWarnings = normalizeRoomTypesBeforeValidate(clone.building);
   normalizeRoomBoundariesBeforeValidate(clone.building);
+  // ТП комнаты: конструкция base+finish из data/ (статический слой, до AJV).
   normalizeUnderfloorHeatingBeforeValidate(clone);
   const ok = validateInput(clone);
   if (!ok) {
@@ -232,10 +269,12 @@ export function validateAndNormalizeInput(input, ctx) {
     throw err;
   }
 
-  assertCanonicalRoomTypes(clone.building);
+  for (const message of roomTypeCompatWarnings) {
+    pushNormalizationWarning(clone, message);
+  }
 
   // ГВС: сезон расчётной ХВ по умолчанию зима (+5 °C)
-  if (clone.hotWater && typeof clone.hotWater === 'object') {
+  if (isPlainObject(clone.hotWater)) {
     if (clone.hotWater.coldWaterDesignSeason == null) {
       clone.hotWater.coldWaterDesignSeason = 'winter';
     }
@@ -249,29 +288,29 @@ export function validateAndNormalizeInput(input, ctx) {
 
   // График отопления и база ΔT каталога радиатора по пресету (или 75/65 по умолчанию).
   normalizeHeatingSystemThermalRegime(clone);
+  // Режим ТП: heatingSystem.ufhPresetId из ctx.ufhPresets (Mongo/file bundle).
   normalizeHeatingUfhPreset(clone, ctx.ufhPresets);
+  assertUfhModeFinishCompatibility(clone);
   appendThermalRegimeSchemeWarnings(clone);
   normalizeUnderfloorDistributionPreset(clone);
 
   // Санитизация строк: trim + базовая очистка опасных символов (< >),
   // чтобы случайные пробелы/вставки не ломали дальнейшую обработку или UI.
-  const safeStr = sanitizeTrimAngleBrackets;
-
   if (clone.location?.address != null)
-    clone.location.address = safeStr(clone.location.address);
+    clone.location.address = sanitizeTrimAngleBrackets(clone.location.address);
 
   for (const r of clone.building?.rooms ?? []) {
-    if (r.id != null) r.id = safeStr(r.id);
-    if (r.name != null) r.name = safeStr(r.name);
-    if (r.type != null) r.type = safeStr(r.type);
+    if (r.id != null) r.id = sanitizeTrimAngleBrackets(r.id);
+    if (r.name != null) r.name = sanitizeTrimAngleBrackets(r.name);
+    if (r.type != null) r.type = sanitizeTrimAngleBrackets(r.type);
   }
 
   for (const e of clone.building?.envelopeElements ?? []) {
-    if (e.roomId != null) e.roomId = safeStr(e.roomId);
-    if (e.name != null) e.name = safeStr(e.name);
-    if (e.construction != null) e.construction = safeStr(e.construction);
-    if (e.material != null) e.material = safeStr(e.material);
-    if (e.presetId != null) e.presetId = safeStr(e.presetId);
+    if (e.roomId != null) e.roomId = sanitizeTrimAngleBrackets(e.roomId);
+    if (e.name != null) e.name = sanitizeTrimAngleBrackets(e.name);
+    if (e.construction != null) e.construction = sanitizeTrimAngleBrackets(e.construction);
+    if (e.material != null) e.material = sanitizeTrimAngleBrackets(e.material);
+    if (e.presetId != null) e.presetId = sanitizeTrimAngleBrackets(e.presetId);
   }
 
   // Cross-validation (базовая):
@@ -326,6 +365,7 @@ export function validateAndNormalizeInput(input, ctx) {
 
 /**
  * Убирает underfloorHeating, если ТП выключен глобально; нормализует base + finish.
+ * Источник пресетов: data/warmFloorAssemblyPresets.js + data/flooringFinishMaterials.js.
  *
  * @param {unknown} input
  */
@@ -447,6 +487,7 @@ function normalizeRoomBoundariesBeforeValidate(building) {
     om?.objectType === 'apartment' || om?.objectType === 'house' ? om.objectType : 'house';
 
   if (objectType === 'apartment' && om) {
+    // Единственная нормализация apartmentStackPosition в пайплайне (до derive границ).
     om.apartmentStackPosition = normalizeApartmentStackPosition(om.apartmentStackPosition);
     const maxF = om.floors ?? 1;
     for (const r of rooms) {
@@ -574,11 +615,11 @@ function assertBoilerPlacementAndBoilerRoom(clone, appliances) {
   );
 
   if (objectType === 'apartment') {
+    // apartmentStackPosition нормализуется в normalizeRoomBoundariesBeforeValidate (фаза 3).
     if (om.boilerPlacementZone != null) delete om.boilerPlacementZone;
     if (om.boilerRoomAreaM2 != null) delete om.boilerRoomAreaM2;
     if (om.ceilingHeightM != null) delete om.ceilingHeightM;
     if (om.indirectDhwSpaceAvailable === false) delete om.indirectDhwSpaceAvailable;
-    om.apartmentStackPosition = normalizeApartmentStackPosition(om.apartmentStackPosition);
     return;
   }
 
@@ -652,8 +693,7 @@ function assertBoilerDhwSchemeCompatibility(clone, appliances) {
   const hsEarly =
     /** @type {{ heatingSystem?: Record<string, unknown> }} */ (clone).heatingSystem;
   const scheme =
-    hsEarly &&
-    typeof hsEarly === 'object' &&
+    isPlainObject(hsEarly) &&
     typeof hsEarly.hotWaterBoilerPowerMatchingScheme === 'string'
       ? hsEarly.hotWaterBoilerPowerMatchingScheme
       : HOT_WATER_BOILER_MATCHING_SCHEME_ENUM[0];

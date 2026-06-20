@@ -23,9 +23,9 @@ npm run start          # http://localhost:3001
 - Проверка invalidate кэша: `cd backend && npm run verify:reference-cache-invalidate`
 - Линт: `cd backend && npm run lint`
 
-Calc-пайплайн: `getReferenceBundle()` → `toCalcRuntimeContext()` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })` → `matchEquipment({ …, ctx })`. On-demand сброс кэша: `POST /api/v1/system/invalidate-reference-cache` (см. docs).
+Calc-пайплайн HTTP: `runCalculation(body)` (`api/runCalculation.js`); внутри — `getReferenceBundle()` → `toCalcRuntimeContext()` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })` → `matchEquipment({ …, ctx })`. On-demand сброс кэша: `POST /api/v1/system/invalidate-reference-cache` (см. docs).
 
-Эндпоинты: `GET /health`, `GET /api/v1/catalog`, `GET /api/v1/presets/envelope`, `POST /api/v1/calc`, проекты — `/api/v1/projects/*` (нужен MongoDB). Детали — `openapi.yaml`.
+Эндпоинты: `GET /health`, `GET /api/v1/catalog`, `GET /api/v1/presets/envelope`, `POST /api/v1/calc`, проекты — `/api/v1/projects/*` (нужен MongoDB). Контракт — `openapi.yaml`; валидация calc — `docs/calc-input-validation.md`; проекты — `docs/projects-api.md`.
 
 ## Frontend
 

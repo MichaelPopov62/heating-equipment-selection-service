@@ -49,6 +49,12 @@ export function calculateUnderfloorHeating(args) {
   let modePreset = null;
   if (ufhPresetId) {
     modePreset = ufhPresets.byPresetId[ufhPresetId] ?? null;
+    if (!modePreset) {
+      const err = new Error(`Неизвестный ufhPresetId "${ufhPresetId}" в расчёте ТП.`);
+      err.statusCode = 400;
+      err.code = 'UFH_PRESET_INVALID';
+      throw err;
+    }
   }
 
   const rooms = building?.rooms ?? [];

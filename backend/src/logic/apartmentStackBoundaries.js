@@ -1,6 +1,8 @@
 /**
  * Назначение: границы комнат квартиры в стояке МКД.
- * Описание: Определяет верхнюю и нижнюю границы комнат по положению квартиры (first/middle/last_floor) и этажу. Подбирает пресеты межэтажных перекрытий и предупреждает о несоответствии потолка. Используется в validate.js при нормализации анкеты квартиры.
+ * Описание: Определяет верхнюю и нижнюю границы комнат по положению квартиры (first/middle/last_floor) и этажу;
+ * предупреждает о несоответствии пресета потолка (`warnApartmentCeilingPresetMismatch`).
+ * `normalizeApartmentStackPosition` вызывается из validate.js только в `normalizeRoomBoundariesBeforeValidate` (фаза 3).
  */
 
 /** @typedef {'first_floor' | 'middle_floor' | 'last_floor'} ApartmentStackPosition */

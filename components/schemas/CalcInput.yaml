@@ -45,8 +45,9 @@ properties:
             type:
               type: string
               description: >
-                Канонический тип помещения. Перед валидацией сервер нормализует пробелы, легаси
-                (living, bathroom, tech, жилое) и неизвестные значения заменяет на «помещение».
+                Канонический тип помещения. Перед AJV сервер нормализует trim, синонимы и legacy
+                (living, bathroom, tech, жилое) с предупреждением в heatingSystem._normalizationWarnings после AJV.
+                Неизвестные значения → 400 ROOM_TYPE_INVALID (без подстановки «помещение»).
                 Тип «котельная» — для расчёта объёма котельной при objectMeta.boilerPlacementZone=boiler_room.
               enum:
                 - прихожая

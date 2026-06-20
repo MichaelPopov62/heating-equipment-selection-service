@@ -1,33 +1,15 @@
 /**
- * Назначение: базовый расчёт теплопотерь помещения.
- * Описание: Считает потери через ограждающие конструкции (Q = U·S·ΔT) и вентиляцию (0,33·L·ΔT или 0,33·n·V·ΔT). Содержит запасной справочник U по текстовым ключам construction/material. Экспортирует calculateHeatLoss(); вызывается из logic/heatlossByRooms.js для детализации по комнатам.
+ * Назначение: математика теплопотерь через ограждения.
+ * Описание: Q = U·S·ΔT с heatLossFactor и per-element ΔT. Резолвинг U — только в heatlossByRooms.js
+ * (envelopePresets, wallAssembly). Экспортирует calculateHeatLoss(); вызывается из heatlossByRooms.js.
  */
-
-/**
- * Справочник средних коэффициентов теплопередачи U (Вт/м²·K).
- *
- * Запасной путь расчёта: если элемент ограждения приходит без `uValue`,
- * но с `construction` и `material`, совпадающими по ключу с этим словарём,
- * U подставится из таблицы. Основной путь для API — уже вычисленный `uValue`
- * из пресетов ограждений (`heatlossByRooms`).
- */
-const U_VALUES = Object.freeze({
-  // Наружные стены
-  'наружная стена:газоблок 300 мм': 0.23,
-
-  // Окна
-  'окно:пвх с двойным стеклом': 1.3,
-
-  // Потолок / перекрытие
-  'потолок:бетон + утеплитель': 0.18,
-
-  // Пол
-  'пол:бетон без утепления': 0.6,
-});
 
 /**
  * Перетворення в число з підтримкою “коми” в рядку.
- * Використовується для більш дружнього прийому даних із форм/JSON.
+ *
+ * @param {unknown} value
+ * @param {string} fieldName
+ * @returns {number}
  */
 function toNumber(value, fieldName) {
   const n =
@@ -41,29 +23,11 @@ function toNumber(value, fieldName) {
 }
 
 /**
- * Нормалізований ключ для довідника U: "конструкція:матеріал".
- */
-function keyOf(construction, material) {
-  const c = String(construction || '').trim().toLowerCase();
-  const m = String(material || '').trim().toLowerCase();
-  return `${c}:${m}`;
-}
-
-/**
- * Возвращает U по справочнику, если возможно.
- * Если в справочнике нет — возвращает null (тогда U нужно передать явно в элементе).
- */
-function lookupU(construction, material) {
-  const key = keyOf(construction, material);
-  return Object.prototype.hasOwnProperty.call(U_VALUES, key) ? U_VALUES[key] : null;
-}
-
-/**
  * Расчёт теплопотерь одного элемента ограждения.
  *
- * @param {import('./types/shared-types').HeatLossCalcElementInput} element
- * @param {number} deltaT - ΔT (K или °C, разницы нет)
- * @returns {import('./types/shared-types').HeatLossElementReport}
+ * @param {import('../types/shared-types').HeatLossCalcElementInput} element
+ * @param {number} defaultDeltaT - ΔT по умолчанию (K или °C)
+ * @returns {import('../types/shared-types').HeatLossElementReport}
  */
 function calculateElementLoss(element, defaultDeltaT) {
   if (!element || typeof element !== 'object') {
@@ -75,20 +39,12 @@ function calculateElementLoss(element, defaultDeltaT) {
     throw new Error(`Площадь areaM2 должна быть > 0. Получено: ${areaM2}`);
   }
 
-  const uFromDict = lookupU(element.construction, element.material);
-  const uValue =
-    element.uValue != null ? toNumber(element.uValue, 'uValue') : uFromDict;
-
-  if (uValue == null) {
-    const hint =
-      element.construction || element.material
-        ? `Не найден U для "${keyOf(
-            element.construction,
-            element.material,
-          )}" — передайте element.uValue вручную.`
-        : 'Не задан element.uValue и не указан construction/material для подстановки из справочника.';
-    throw new Error(hint);
+  if (element.uValue == null) {
+    throw new Error(
+      'element.uValue обязателен. Резолвинг U — в heatlossByRooms (пресеты envelopePresets, wallAssembly).',
+    );
   }
+  const uValue = toNumber(element.uValue, 'uValue');
 
   // U = 0 допустим: «теплый пол» между жилыми этажами — теплопотери не считаем (см. пресеты пола).
   if (uValue < 0) {
@@ -130,10 +86,10 @@ function calculateElementLoss(element, defaultDeltaT) {
 }
 
 /**
- * Главная функция расчёта.
+ * Суммарные теплопотери по массиву элементов ограждения.
  *
- * @param {import('./types/shared-types').HeatLossCalcInput} input
- * @returns {import('./types/shared-types').HeatLossCalcResult}
+ * @param {import('../types/shared-types').HeatLossCalcInput} input
+ * @returns {import('../types/shared-types').HeatLossCalcResult}
  */
 export function calculateHeatLoss(input) {
   if (!input || typeof input !== 'object') {

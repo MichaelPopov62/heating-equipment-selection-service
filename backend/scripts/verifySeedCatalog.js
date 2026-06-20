@@ -88,6 +88,9 @@ try {
   const pipeDocs = docs.filter((d) => d.kind === 'pipe');
   for (let i = 0; i < pipeDocs.length; i += 1) {
     const doc = pipeDocs[i];
+    if (Object.prototype.hasOwnProperty.call(doc, 'data')) {
+      throw new Error(`verify: pipe-документ [${i}] содержит legacy-поле data (нужен flat seed)`);
+    }
     if (!isNonEmptyString(doc.model)) {
       throw new Error(`verify: pipe-документ [${i}] без model после buildProductDocumentsFromNormalized`);
     }

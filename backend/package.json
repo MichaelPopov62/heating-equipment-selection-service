@@ -10,12 +10,18 @@
     "lint": "eslint \"{src,scripts}/**/*.js\"",
     "lint:fix": "eslint \"{src,scripts}/**/*.js\" --fix",
     "verify:calc-schema": "node scripts/verifyCalcInputSchema.js",
+    "verify:calc-input-validation": "node scripts/verifyCalcInputValidation.js",
     "verify:seed-catalog": "node scripts/verifySeedCatalog.js",
     "verify:pipe-catalog": "node scripts/verifyPipeCatalogValidation.js",
     "verify:ufh-presets": "node scripts/verifyUfhPresets.js",
     "verify:radiator-sections": "node scripts/verifyRadiatorSections.js",
     "verify:mixed-radiator-ufh": "node scripts/verifyMixedRadiatorUfh.js",
     "verify:reference-cache-invalidate": "node scripts/verifyReferenceCacheInvalidate.js",
+    "verify:calc-runtime-context": "node scripts/verifyCalcRuntimeContext.js",
+    "verify:project-calc-input": "node scripts/verifyProjectCalcInput.js",
+    "verify:document-size-limits": "node scripts/verifyDocumentSizeLimits.js",
+    "verify:extract-calculation-summary": "node scripts/verifyExtractCalculationSummary.js",
+    "verify:projects-auth": "node scripts/verifyProjectsAuth.js",
     "seed": "node scripts/seed.js"
   },
   "keywords": [],
@@ -35,6 +41,9 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.1.0",
+    "helmet": "^8.2.0",
+    "express-rate-limit": "^8.2.1",
+    "jose": "^6.0.11",
     "mongoose": "^9.5.0"
   }
 }

@@ -10,7 +10,17 @@
 
 ## Решение
 
-**Composition root** (routes, projects, scripts):
+**Composition root** HTTP calc (`backend/src/api/runCalculation.js`):
+
+```javascript
+import { runCalculation } from './runCalculation.js';
+
+const { input, report } = await runCalculation(body);
+```
+
+Внутри `runCalculation`: `getReferenceBundle()` → `toCalcRuntimeContext(bundle)` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })`.
+
+Verify-скрипты и фикстуры без HTTP собирают `ctx` вручную:
 
 ```javascript
 import { getReferenceBundle, toCalcRuntimeContext } from '../reference/public.js';
@@ -106,6 +116,13 @@ ESLint (`backend/eslint.config.js`): `logic/`, `api/validate.js`, `utils/**`, `m
 
 `backend/src/reference/configCache.js` — TTL bundle, `deepFreeze`, stale-while-revalidate, **`invalidateReferenceCache()`** / **`invalidateAndWarmReferenceCache()`** с **generation guard**. HTTP: **`POST /api/v1/system/invalidate-reference-cache`** (`X-System-Token`). Barrel: `reference/public.js`.
 
+### Старт API (`index.js`)
+
+- **`warmupReferenceCache()`** запускается **до** `listen` (не в callback), fire-and-forget по умолчанию — порт не ждёт Mongo.
+- **`getReferenceBundle()`** на первом calc/catalog и warmup **делят один `refreshInFlight`** — параллельной двойной загрузки bundle нет.
+- **`REFERENCE_WARMUP_BLOCK_STARTUP=true`** — `await warmupReferenceCache()` до bind порта; при ошибке процесс завершается (readiness для prod/k8s).
+- Логи: `referenceCache.warmup.start` → `referenceCache.warmup.ok` | `referenceCache.warmup.failed`; успешная загрузка также пишет `referenceCache.loaded`.
+
 ## Скрипты verify
 
 ```javascript
@@ -125,6 +142,7 @@ cd backend && npm run verify:reference-cache-invalidate
 
 ## Связанные модули
 
+- `backend/src/api/runCalculation.js` — composition root HTTP calc (POST /api/v1/calc, POST /api/v1/projects/:id/calc)
 - `backend/src/reference/configCache.js` — TTL bundle + `deepFreeze`
 - `backend/src/reference/public.js` — barrel: `getReferenceBundle`, `toCalcRuntimeContext`, `assertCalcRuntimeContext`
 - `Plan.md` § «Поток расчёта» — диаграмма пайплайна

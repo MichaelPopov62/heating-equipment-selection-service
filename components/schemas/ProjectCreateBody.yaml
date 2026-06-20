@@ -11,4 +11,6 @@ properties:
     maxLength: 200
   survey:
     type: object
-    description: Черновик анкеты с фронта (schemaVersion, rooms, objectMeta, …).
+    description: >
+      Черновик анкеты с фронта (schemaVersion, rooms, objectMeta, …).
+      Лимит размера JSON — 512 KB (413 PAYLOAD_TOO_LARGE).

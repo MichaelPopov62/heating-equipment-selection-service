@@ -4,6 +4,43 @@
 
 ---
 
+## Три слоя ТП (не один источник)
+
+| Слой | Источник | Поля / API | Роль |
+|------|----------|------------|------|
+| **1. Конструкция комнаты** | `data/warmFloorAssemblyPresets.js` + `data/flooringFinishMaterials.js` | `room.underfloorHeating.{basePresetId, finishMaterialId}`; `GET …/underfloor-heating`, `/bases` | Физика: слои, Rλ,B, теплоотдача |
+| **2. Контур по финишу** | `shared/ufhCircuitPresets.js` | derive в `ufhCircuitResolve.js` | 45/35 для плитки, 40/30 для ламината/LVT (mixed) |
+| **3. Режим системы** | Mongo/file `underfloor_heating_presets` | `heatingSystem.ufhPresetId`; `GET …/modes` | ufh_only / mixed / direct_*; график котла, skip радиаторов, maxSurface |
+
+В `validate.js`:
+
+- **Фаза 4 (до AJV):** слой 1 — `normalizeUnderfloorHeatingBeforeValidate` (статический `data/`).
+- **Фаза 6 (после AJV):** слой 3 — `normalizeHeatingUfhPreset(body, ctx.ufhPresets)` из bundle.
+- **Cross-validation:** `assertUfhModeFinishCompatibility` — для `ufh_direct_tile` / `ufh_direct_laminate` финиш комнаты должен совпадать с `finishMaterialIds` контура из слоя 2.
+
+Слои **намеренно разделены** (разный lifecycle: деплой vs Mongo/seed). Риск — рассинхрон между слоями 2 и 3; см. verify ниже.
+
+### Согласованность direct-режимов
+
+| ufhPresetId | Контур (`ufhCircuitPresets`) | Допустимые `finishMaterialId` |
+|-------------|------------------------------|-------------------------------|
+| `ufh_direct_tile` | `ufh_dt10_45_35` (45/35) | `ceramic_tile` |
+| `ufh_direct_laminate` | `ufh_dt10_40_30` (40/30) | `pvc_glue`, `pvc_click`, `laminate_click` |
+
+`ufh_mixed_radiators` и `ufh_only` — контур по финишу комнаты (слой 2) или график из mode preset (`ufh_only`).
+
+### `UFH_PRESETS_SOURCE`
+
+| Режим | Когда |
+|-------|--------|
+| `mongo` | **Production** — единственный runtime-источник mode preset |
+| `file` | Dev без Mongo |
+| `auto` | Dev fallback: Mongo → file; **не** гарантирует совпадение с prod после правок только в Mongo |
+
+Слой 1 (базы/финиши) **всегда** из `data/*.js` (деплой); `invalidate-reference-cache` обновляет только bundle (слой 3).
+
+---
+
 ## Коллекция и загрузка
 
 | Параметр | Значение |
@@ -23,11 +60,12 @@ returnC = supplyC − 10
 
 ---
 
-## Три обязательных пресета
+## Четыре обязательных пресета режима
 
 | presetId | UI (кратко) | maxSupply | maxSurface | hasMixingNode | requiresCondensingBoiler |
 |----------|-------------|-----------|------------|---------------|--------------------------|
 | `ufh_only` | Только ТП | 40 | 29 | false | **true** |
+| `ufh_mixed_radiators` | ТП + радиаторы | 45 | 29 | true | false |
 | `ufh_direct_tile` | Прямой ТП под плитку | 45 | 29 | false | false |
 | `ufh_direct_laminate` | Прямой ТП под ламинат | 40 | **27** | false | false |
 
@@ -55,6 +93,7 @@ returnC = supplyC − 10
 
 - `heatingEmittersMode` выводится из `ufhPresetId`, если не задан (`ufh_only` → `ufh_only`, иначе `mixed`).
 - Для `ufh_only`: нормализация выставляет график котла **40/30**, `thermalRegimePreset` → конденсационный при отсутствии явного выбора.
+- Несовместимый финиш при `ufh_direct_*` → **400** `UFH_MODE_FINISH_MISMATCH`.
 
 ### Meta отчёта
 
@@ -67,6 +106,7 @@ returnC = supplyC − 10
 | Модуль | Действие |
 |--------|----------|
 | `normalizeHeatingUfhPreset.js` | lookup пресета, warnings (конденсация, график) |
+| `ufhModeFinishCompatibility.js` | cross-validation mode ↔ finish |
 | `warmFloorCalc.js` | контур `ufh_direct_*` из technical пресета; `circuitSource: ufh_mode_preset` |
 | `ufhRoomHeatFlux.js` | `maxSurfaceTemperatureCelsius = min(preset, паспорт финиша)` |
 | `matching/radiators.js` | skip при `heatingEmittersMode === 'ufh_only'` |
@@ -89,4 +129,4 @@ returnC = supplyC − 10
 cd backend && npm run verify:ufh-presets
 ```
 
-Проверяет JSON, нормализацию, эталонные `technical` и smoke-тест `maxSurface`.
+Проверяет JSON, нормализацию, эталонные `technical`, согласованность `ufh_direct_*` с `shared/ufhCircuitPresets.js` и smoke-тест `maxSurface`.

@@ -1,0 +1,166 @@
+# REST API проектов
+
+CRUD клиентских проектов и сохранённых расчётов в MongoDB. Реализация: `backend/src/api/projectsRoutes.js`, модели `Project` / `Calculation`.
+
+## Безопасность (production)
+
+- **JWT обязателен** при `NODE_ENV=production` (`Authorization: Bearer <token>`, claim `sub` = `ownerId` проекта).
+- Настройка: `AUTH_JWKS_URI` (Clerk/Auth0) или `AUTH_JWT_SECRET` (HS256); опционально `AUTH_ISSUER`, `AUTH_AUDIENCE`.
+- **IDOR:** все запросы фильтруются по `ownerId`; чужой ObjectId → `404 PROJECT_NOT_FOUND`.
+- **Rate limit:** calc и projects (см. `RATE_LIMIT_*` в `backend/.env.example`).
+- **Квоты:** `PROJECTS_MAX_PER_OWNER`, `PROJECTS_MAX_CALCULATIONS_PER_PROJECT`.
+
+### Лимиты размера payload и MongoDB
+
+Защита от переполнения BSON-документа MongoDB (лимит **16 MB** на документ) и от слишком больших HTTP-тел.
+
+| Что | Лимит | Где проверяется | Код ошибки |
+|-----|-------|-----------------|------------|
+| `survey` (create/update проекта, опционально в POST …/calc) | **512 KB** JSON (`JSON.stringify`) | `validateProjectBody.js` | **413** `PAYLOAD_TOO_LARGE` |
+| `calcInput` / корневой CalcInput / `lastCalcInput` | **512 KB** JSON | `resolveProjectCalcInput.js` → `documentSizeLimits.js` | **413** `CALC_INPUT_TOO_LARGE` |
+| HTTP body (все маршруты) | **1 MB** | `express.json({ limit: '1mb' })` в `index.js` | **413** `PAYLOAD_TOO_LARGE` |
+| Документ `calculations` (`calcInput` + `report` + `summary`) | **14 MB** BSON (запас до 16 MB) | pre-save перед `Calculation.create` | **413** `CALCULATION_DOCUMENT_TOO_LARGE` |
+
+**Порядок проверок при POST …/calc:**
+
+1. Парсинг JSON (лимит Express 1 MB).
+2. Опционально `survey` → `validateProjectUpdateBody` (512 KB).
+3. Выбор входа → `assertCalcInputJsonSize` (512 KB) — в т.ч. для `lastCalcInput` из БД.
+4. `runCalculation` (расчёт может раздуть `report` относительно входа).
+5. `assertCalculationDocumentSize` — оценка BSON через `bson.calculateObjectSize` до записи.
+6. При сбое MongoDB с кодом **10334** (`BSONObjectTooLarge`) error handler отдаёт тот же **413** `CALCULATION_DOCUMENT_TOO_LARGE`.
+
+Константы и функции: `backend/src/projects/documentSizeLimits.js`.  
+В логе `project.calc.done` — поле `estimatedBsonBytes` (оценка BSON сохраняемого документа).
+
+Verify:
+
+```bash
+cd backend && npm run verify:document-size-limits
+```
+
+**Замечание:** `report` содержит копию входа в `report.input`, а в `calculations` дополнительно хранится поле `calcInput` — дублирование учитывается при оценке BSON.
+
+### Локальная разработка
+
+По умолчанию auth **выключен** (не production): используется `PROJECTS_DEV_OWNER_ID` (`dev-local`).  
+`POST /api/v1/calc` — без auth, как раньше.
+
+Включить JWT локально: `PROJECTS_AUTH_ENABLED=true` + токен в `Authorization` или `VITE_PROJECTS_BEARER_TOKEN` на фронте.
+
+Verify: `cd backend && npm run verify:projects-auth`
+
+---
+
+## POST `/api/v1/projects/{id}/calc`
+
+Расчёт + запись в коллекцию `calculations`, обновление `project.lastCalcInput`.
+
+После выбора входа (`resolveProjectCalcInput`) backend вызывает **`runCalculation(calcPayload)`** (`backend/src/api/runCalculation.js`) — тот же пайплайн, что и `POST /api/v1/calc`.
+
+### Выбор входа CalcInput
+
+Модуль `backend/src/projects/resolveProjectCalcInput.js`:
+
+| Приоритет | Условие | Источник (`calcInputSource` в логе) |
+|-----------|---------|-------------------------------------|
+| 1 | `body.calcInput` задан и не `null` | `calcInput` |
+| 2 | `body.building` — объект | `body` (поля `survey`, `calcInput` отбрасываются) |
+| 3 | иначе, если у проекта есть `lastCalcInput` с `building` | `lastCalcInput` (клон) |
+| — | ни одно не подошло | **400** `CALC_INPUT_REQUIRED` |
+
+### Типичные сценарии
+
+**Первый расчёт** — нужен явный CalcInput:
+
+```json
+{ "calcInput": { "building": { ... } }, "survey": { ... } }
+```
+
+или корневой CalcInput:
+
+```json
+{ "building": { ... }, "survey": { ... } }
+```
+
+**Повторный расчёт** (тот же вход после обновления каталога / справочников):
+
+```http
+POST /api/v1/projects/{id}/calc
+Content-Type: application/json
+
+{}
+```
+
+или сохранение черновика без повторной отправки анкеты:
+
+```json
+{ "survey": { "currentStep": 3, ... } }
+```
+
+В обоих случаях используется `project.lastCalcInput`, если он был сохранён предыдущим успешным расчётом.
+
+### Поле `survey`
+
+- Произвольный JSON черновика UI (`project.survey`).
+- **Не** конвертируется в CalcInput на backend.
+- При наличии в теле запроса обновляет проект до расчёта.
+- Лимит **512 KB** JSON — см. [Лимиты размера](#лимиты-размера-payload-и-mongodb).
+
+### Ошибки
+
+| Код | HTTP | Когда |
+|-----|------|--------|
+| `CALC_INPUT_REQUIRED` | 400 | Нет calcInput/building в теле и нет `lastCalcInput` у проекта |
+| `CALC_INPUT_TOO_LARGE` | 413 | CalcInput превышает лимит JSON (512 KB) |
+| `CALCULATION_DOCUMENT_TOO_LARGE` | 413 | `calcInput` + `report` + `summary` не помещаются в документ MongoDB (~14 MB BSON) |
+| `PAYLOAD_TOO_LARGE` | 413 | Слишком большой `survey` или HTTP body (> 1 MB Express) |
+| `VALIDATION_ERROR` | 400 | Вход выбран, но не проходит AJV / cross-validation |
+| `PROJECT_NOT_FOUND` | 404 | Неверный id |
+
+### Verify
+
+```bash
+cd backend && npm run verify:project-calc-input
+cd backend && npm run verify:document-size-limits
+```
+
+---
+
+## Коллекция `calculations`
+
+Модель `Calculation` (`backend/src/models/Calculation.js`), коллекция MongoDB **`calculations`**.
+
+| Поле | Описание |
+|------|----------|
+| `calcInput` | Нормализованный вход расчёта (Mixed) |
+| `report` | Полный JSON-отчёт (Mixed), включает `input`, `calculations`, `matching`, … |
+| `summary` | KPI для списка (без полного report) |
+
+Перед записью проверяется суммарный размер BSON документа (см. [Лимиты размера](#лимиты-размера-payload-и-mongodb)).
+
+### Поле `summary`
+
+KPI для списка расчётов формирует `backend/src/projects/extractCalculationSummary.js` перед `Calculation.create`.
+
+| Поле | Источник | Нормализация |
+|------|----------|--------------|
+| `objectType` | `calculations.hotWater.objectType`, иначе `input.building.objectMeta` | всегда `house` \| `apartment` (enum Mongoose) |
+
+При чтении API (`serializeProject.js`) legacy-документы с битым `summary.objectType` санитизируются через `sanitizeCalculationSummary`.
+
+Verify:
+
+```bash
+cd backend && npm run verify:extract-calculation-summary
+```
+
+---
+
+## Связанные файлы
+
+- `backend/src/projects/documentSizeLimits.js` — лимиты survey/calcInput/BSON
+- `backend/src/api/runCalculation.js` — общий calc-пайплайн с `POST /api/v1/calc`
+- `components/schemas/ProjectCalcBody.yaml` — OpenAPI
+- `components/schemas/ProjectDetail.yaml` — `lastCalcInput` в ответе GET project
+- `frontend/src/hooks/useSurveyProject.ts` — сохранение с `{ calcInput, survey }`

@@ -3,20 +3,12 @@
  * Описание: проверка и нормализация clientName, label и survey при создании и обновлении проекта;
  * ограничение размера payload и санитизация строк.
  */
+import { isPlainObject } from '../utils/isPlainObject.js';
 import { sanitizeTrimAngleBrackets } from '../utils/sanitizeString.js';
+import { MAX_SURVEY_JSON_CHARS } from './documentSizeLimits.js';
 
 const MAX_CLIENT_NAME_LEN = 200;
 const MAX_LABEL_LEN = 200;
-/** Лимит размера survey в JSON (символы), защита от слишком больших payload. */
-const MAX_SURVEY_JSON_CHARS = 512_000;
-
-/**
- * @param {unknown} value
- * @returns {value is Record<string, unknown>}
- */
-function isPlainObject(value) {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
-}
 
 /**
  * @param {unknown} survey

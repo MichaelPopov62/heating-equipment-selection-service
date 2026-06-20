@@ -47,11 +47,14 @@
 | `src/recommendations/` | Тексты рекомендаций по кодам `REC_*` / `WARN_*` |
 | `src/report/buildReport.js` | Сборка отчёта; вызов `calculateUnderfloorHeating` после теплопотерь |
 | `src/models/` | Mongoose-модели MongoDB (Product, Project, Calculation и др.) |
-| `src/projects/` | CRUD проектов и расчётов в MongoDB |
+| `src/projects/` | CRUD проектов; `resolveProjectCalcInput.js`, `extractCalculationSummary.js` |
 | `src/utils/` | Логер, MongoDB, математика, ограничения монтажа котлов |
 | `src/types/shared-types.d.ts` | JSDoc-типы API и отчёта |
 | `scripts/verifyCalcInputSchema.js` | Сверка CalcInput.yaml + AJV |
+| `scripts/verifyCalcInputValidation.js` | ROOM_TYPE_INVALID, coerceTypes: false |
 | `scripts/verifyUfhPresets.js` | Сверка underfloor_heating_presets + maxSurface smoke |
+| `scripts/verifyProjectCalcInput.js` | Fallback lastCalcInput для POST .../projects/:id/calc |
+| `scripts/verifyExtractCalculationSummary.js` | summary.objectType → enum house/apartment |
 
 Сверка контракта: `openapi.yaml` ↔ `validate.js` ↔ `shared-types.d.ts`.
 
@@ -379,7 +382,7 @@ isMixingNodeRequired = heatingSystem.supplyC > ufhCircuit.supplyC
 
 ### POST /api/v1/calc
 
-**Порядок в `routes.js`:** `getReferenceBundle()` → `toCalcRuntimeContext(bundle)` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })`.
+**Порядок HTTP calc:** `runCalculation(body)` в `api/runCalculation.js` (внутри: `getReferenceBundle()` → `toCalcRuntimeContext(bundle)` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })`). Вызывается из `routes.js` (`POST /api/v1/calc`) и `projectsRoutes.js` (`POST /api/v1/projects/:id/calc`).
 
 **В bundle calc:** `catalog`, `waterNorms`, `appliances`, `recommendations`, `ufhPresets`. Контекст расчёта — **`CalcRuntimeContext`** (`docs/calc-runtime-context.md`); bundle при загрузке — `deepFreeze`. **On-demand invalidate:** `POST /api/v1/system/invalidate-reference-cache` (после seed / правки Mongo; `SYSTEM_INTERNAL_TOKEN`, generation guard в `configCache.js`).
 
@@ -399,8 +402,9 @@ flowchart TD
 
   Client --> Calc["POST /api/v1/calc"]
 
-  Calc --> Bundle["getReferenceBundle()"]
-  Calc --> Ctx["toCalcRuntimeContext(bundle)"]
+  Calc --> RunCalc["runCalculation()"]
+  RunCalc --> Bundle["getReferenceBundle()"]
+  RunCalc --> Ctx["toCalcRuntimeContext(bundle)"]
   Ctx --> Validate["validateAndNormalizeInput(body, ctx)"]
 
   subgraph refs ["Справочники bundle (deepFreeze)"]

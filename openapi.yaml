@@ -8,7 +8,7 @@ info:
 servers:
   - url: /
 
-# Явно фиксируем, что для v1 авторизация не требуется.
+# Публичные эндпоинты (calc, catalog, presets) — без auth. /api/v1/projects — JWT (см. ProjectsBearerAuth).
 security: []
 
 paths:
@@ -77,7 +77,8 @@ paths:
             boilers `{ doubleCircuit, singleCircuit }`, radiators, waterHeaters (накопительные электрические, `type` electric_storage по умолчанию; варианты с объёмом, ценой, опционально heatingTimeMinutes),
             pipes (PipeCatalogItem: id, brand, material, diameter, wallThickness, price, model),
             indirectWaterHeaters (БКН, если заданы в источнике). Порядок элементов в массивах — как у источника;
-            сортировка для подбора выполняется отдельно в matching (indices на сервере), не в этом ответе.
+            сортировка для подбора — matchingSortPools (котлы, водонагреватели) и sortRadiatorsForMatching
+            (радиаторы) на сервере, не в этом ответе.
           content:
             application/json:
               schema:
@@ -326,7 +327,8 @@ paths:
           description: >
             Validation / input error. Причина — поле error.message; для интеграции — error.code.
 
-            Основные значения code: VALIDATION_ERROR (AJV после нормализации), HOT_WATER_LEGACY_FIELD
+            Основные значения code: VALIDATION_ERROR (AJV после compat-нормализации), ROOM_TYPE_INVALID
+            (неизвестный building.rooms[].type вне synonym/legacy/enum), HOT_WATER_LEGACY_FIELD
             (передано удалённое поле ГВС), HEATING_SYSTEM_INVALID (returnC должна быть ниже supplyC),
             HOT_WATER_TEMPS_INVALID.
             EXTERNAL_WALLS_* — несогласованный facadeSystem/insulationPresetId, устаревший wall_pps_*,
@@ -348,6 +350,8 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
   /api/v1/projects:
+    security:
+      - ProjectsBearerAuth: []
     get:
       summary: List client projects
       operationId: listProjects
@@ -403,6 +407,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+        "413":
+          description: PAYLOAD_TOO_LARGE — survey превышает 512 KB JSON
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
         "503":
           description: MongoDB недоступна
           content:
@@ -411,6 +421,8 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
   /api/v1/projects/{id}:
+    security:
+      - ProjectsBearerAuth: []
     get:
       summary: Get project by id
       operationId: getProject
@@ -474,6 +486,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+        "413":
+          description: PAYLOAD_TOO_LARGE — survey превышает 512 KB JSON
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
         "503":
           description: MongoDB недоступна
           content:
@@ -515,8 +533,16 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
   /api/v1/projects/{id}/calc:
+    security:
+      - ProjectsBearerAuth: []
     post:
       summary: Calculate and save result for project
+      description: >
+        Выполняет расчёт и сохраняет результат в calculations. Вход CalcInput берётся из
+        calcInput, корневого building или project.lastCalcInput (см. ProjectCalcBody).
+        Опционально обновляет project.survey из поля survey.
+        Лимиты: survey/calcInput — 512 KB JSON; документ calculations — ~14 MB BSON
+        (docs/projects-api.md).
       operationId: calculateProject
       parameters:
         - name: id
@@ -537,13 +563,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProjectCalcResponse"
         "400":
-          description: Validation / calc input error
+          description: Validation error, CALC_INPUT_REQUIRED или ошибка calc input
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "404":
           description: PROJECT_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "413":
+          description: >
+            PAYLOAD_TOO_LARGE (survey или HTTP body), CALC_INPUT_TOO_LARGE или
+            CALCULATION_DOCUMENT_TOO_LARGE
           content:
             application/json:
               schema:
@@ -556,6 +590,8 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
   /api/v1/projects/{id}/calculations:
+    security:
+      - ProjectsBearerAuth: []
     get:
       summary: List saved calculations for project
       operationId: listProjectCalculations
@@ -591,6 +627,8 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
   /api/v1/projects/{projectId}/calculations/{calcId}:
+    security:
+      - ProjectsBearerAuth: []
     get:
       summary: Get saved calculation with full report
       operationId: getProjectCalculation
@@ -624,6 +662,14 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
 components:
+  securitySchemes:
+    ProjectsBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        Access JWT с claim sub (владелец проекта). Production — обязателен.
+        Dev — опционален, если PROJECTS_AUTH_ENABLED не задан.
   schemas:
     CalcInput:
       $ref: ./components/schemas/CalcInput.yaml
