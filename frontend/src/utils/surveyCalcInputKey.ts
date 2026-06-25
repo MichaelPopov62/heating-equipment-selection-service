@@ -4,12 +4,13 @@
  */
 
 import type { ObjectMetaValue } from '../types/envelope';
-import type { HotWaterBoilerPowerMatchingScheme } from '../types/heatingMatching';
 import type { HeatingThermalRegimePreset } from '../types/heatingThermalRegime';
 import type { UfhModePresetId } from '../types/ufhModePreset';
 import type { UfhDistributionPreset } from '../types/ufhDistribution';
 import type { HotWaterFormValue } from '../types/hotWater';
+import type { WaterHeaterFormValue } from '../types/waterHeater';
 import type { RoomFormValue } from '../types/rooms';
+import { objectMetaForCalcPayload } from './objectMetaForCalcPayload';
 
 /**
  * Стабильный ключ входа для автопересчёта (как прежде в App: JSON.stringify ключевого объекта).
@@ -17,7 +18,7 @@ import type { RoomFormValue } from '../types/rooms';
 export function buildSurveyCalcInputKey(params: {
   temps: { insideC: number; outsideC: number };
   objectMeta: ObjectMetaValue;
-  hotWaterBoilerPowerMatchingScheme: HotWaterBoilerPowerMatchingScheme;
+  waterHeaterForm: WaterHeaterFormValue;
   hotWaterForm: HotWaterFormValue;
   rooms: RoomFormValue[];
   waterUnderfloorHeating: boolean;
@@ -28,7 +29,7 @@ export function buildSurveyCalcInputKey(params: {
   const {
     temps,
     objectMeta,
-    hotWaterBoilerPowerMatchingScheme,
+    waterHeaterForm,
     hotWaterForm,
     rooms,
     waterUnderfloorHeating,
@@ -36,16 +37,20 @@ export function buildSurveyCalcInputKey(params: {
     thermalRegimePreset,
     ufhPresetId = null,
   } = params;
+
+  const objectMetaForKey = objectMetaForCalcPayload(objectMeta, waterHeaterForm);
+
   const key = {
     temps,
     objectMeta: {
-      ...objectMeta,
+      ...objectMetaForKey,
       apartmentStackPosition:
-        objectMeta.objectType === 'apartment'
-          ? (objectMeta.apartmentStackPosition ?? 'middle_floor')
+        objectMetaForKey.objectType === 'apartment'
+          ? (objectMetaForKey.apartmentStackPosition ?? 'middle_floor')
           : undefined,
     },
-    hotWaterBoilerPowerMatchingScheme,
+    hotWaterBoilerPowerMatchingScheme:
+      waterHeaterForm.hotWaterBoilerPowerMatchingScheme,
     waterUnderfloorHeating,
     underfloorDistributionPreset,
     thermalRegimePreset,

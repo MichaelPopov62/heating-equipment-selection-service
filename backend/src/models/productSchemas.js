@@ -1,6 +1,6 @@
 /**
  * Назначение: Mongoose-схемы каталога оборудования и их подтипов.
- * Описание: baseProductSchema и схемы boiler, radiator, waterHeater, pipe, indirectWaterHeater
+ * Описание: baseProductSchema и схемы boiler, radiator, waterHeater, pipe, pump, indirectWaterHeater
  * для seed (scripts/seed.js). Контракт номенклатуры (powerKw, priceBasis, specs.volumeLiters и др.)
  * — validateAndNormalizeCatalog в catalog/validateCatalog.js (SSOT на чтение и запись).
  * strict: false намеренно: не дублировать полный контракт в Mongoose; прямой insert/update в
@@ -15,7 +15,7 @@ export const baseProductSchema = new Schema(
     kind: {
       type: String,
       required: true,
-      enum: ['boiler', 'radiator', 'waterHeater', 'pipe', 'indirectWaterHeater'],
+      enum: ['boiler', 'radiator', 'waterHeater', 'pipe', 'pump', 'indirectWaterHeater'],
     },
     /** Уникальный ключ строки каталога в seed (индекс + секция); не путать с «моделью для UI». */
     catalogKey: { type: String, required: true, trim: true },
@@ -112,4 +112,13 @@ export const pipeSchema = new Schema({
   wallThickness: { type: Number, required: false },
   price: { type: Number, required: false },
   category: { type: String, required: false, trim: true },
+});
+
+export const pumpSchema = new Schema({
+  /** Дубли id из каталога для round-trip Mongo → validateCatalog. */
+  pumpId: { type: String, required: false, trim: true },
+  brand: { type: String, required: false, trim: true },
+  type: { type: String, required: false, trim: true },
+  segment: { type: String, required: false, trim: true },
+  price: { type: Number, required: false },
 });

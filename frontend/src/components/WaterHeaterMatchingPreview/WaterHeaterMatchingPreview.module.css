@@ -1,0 +1,36 @@
+/* Назначение: Стили блока превью подбора водонагревателя.
+   Описание: Обёртка карточек; в форме — внутри previewSection. */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rootStandalone {
+  composes: root;
+  margin-top: 10px;
+}
+
+.title {
+  margin: 0;
+  font: 700 13px/1.2 var(--sans);
+  color: var(--text-h);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pending {
+  composes: hint from '../../styles/formElements.module.css';
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface-2) 95%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

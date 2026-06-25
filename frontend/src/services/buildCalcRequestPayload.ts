@@ -5,12 +5,13 @@
 
 import { DEFAULT_WINDOW_PRESET_ID } from '../data/fallbackEnvelopePresets';
 import type { EnvelopePreset, ObjectMetaValue } from '../types/envelope';
-import type { HotWaterBoilerPowerMatchingScheme } from '../types/heatingMatching';
 import type { UfhModePresetId } from '../types/ufhModePreset';
 import type { HeatingThermalRegimePreset } from '../types/heatingThermalRegime';
 import type { UfhDistributionPreset } from '../types/ufhDistribution';
 import type { HotWaterFormValue } from '../types/hotWater';
+import type { WaterHeaterFormValue } from '../types/waterHeater';
 import type { RoomFormValue } from '../types/rooms';
+import { objectMetaForCalcPayload } from '../utils/objectMetaForCalcPayload';
 import { inferRoomExteriorLayout, wallEnvelopeEntriesForRoom } from '../utils/roomExteriorLayout';
 
 /**
@@ -21,7 +22,7 @@ export function buildCalcRequestPayload(params: {
   temps: { insideC: number; outsideC: number };
   objectMeta: ObjectMetaValue;
   hotWaterForm: HotWaterFormValue;
-  hotWaterBoilerPowerMatchingScheme: HotWaterBoilerPowerMatchingScheme;
+  waterHeaterForm: WaterHeaterFormValue;
   windowPresets: EnvelopePreset[];
   waterUnderfloorHeating?: boolean;
   underfloorDistributionPreset?: UfhDistributionPreset;
@@ -33,7 +34,7 @@ export function buildCalcRequestPayload(params: {
     temps,
     objectMeta,
     hotWaterForm,
-    hotWaterBoilerPowerMatchingScheme,
+    waterHeaterForm,
     windowPresets,
     waterUnderfloorHeating = false,
     underfloorDistributionPreset = 'auto',
@@ -156,15 +157,18 @@ export function buildCalcRequestPayload(params: {
     return els;
   });
 
+  const objectMetaResolved = objectMetaForCalcPayload(objectMeta, waterHeaterForm);
+
   return {
     building: {
       temps,
-      objectMeta,
+      objectMeta: objectMetaResolved,
       rooms: buildingRooms,
       envelopeElements,
     },
     heatingSystem: {
-      hotWaterBoilerPowerMatchingScheme,
+      hotWaterBoilerPowerMatchingScheme:
+        waterHeaterForm.hotWaterBoilerPowerMatchingScheme,
       thermalRegimePreset,
       ...(ufhPresetId || waterUnderfloorHeating
         ? {

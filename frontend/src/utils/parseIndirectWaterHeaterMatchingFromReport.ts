@@ -1,6 +1,6 @@
 /**
  * Назначение: Парсинг БКН из отчёта.
- * Описание: Разбор matching.indirectWaterHeater для карточки бойлера косвенного нагрева.
+ * Описание: Разбор matching.indirectWaterHeater для WaterHeaterProposalCard / WaterHeaterMatchingPreview.
  */
 
 import {

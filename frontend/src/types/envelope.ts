@@ -58,7 +58,7 @@ export type ObjectMetaValue = {
   /** Запасной ввод геометрии котельной, если нет комнаты type=котельная. */
   boilerRoomAreaM2?: number;
   ceilingHeightM?: number;
-  /** Квартира: есть место под БКН (для больших квартир). */
+  /** Только для API calc: выставляется из waterHeaterForm, не хранится на шаге «Объект». */
   indirectDhwSpaceAvailable?: boolean;
   /**
    * natural — kVent 1.3 (естественная вентиляция);

@@ -76,6 +76,7 @@ paths:
             `products` (`CATALOG_SOURCE`). После `validateCatalog` ключи верхнего уровня:
             boilers `{ doubleCircuit, singleCircuit }`, radiators, waterHeaters (накопительные электрические, `type` electric_storage по умолчанию; варианты с объёмом, ценой, опционально heatingTimeMinutes),
             pipes (PipeCatalogItem: id, brand, material, diameter, wallThickness, price, model),
+            pumps (PumpCatalogItem: id, brand, model, type, segment, price, connections, operatingModes),
             indirectWaterHeaters (БКН, если заданы в источнике). Порядок элементов в массивах — как у источника;
             сортировка для подбора — matchingSortPools (котлы, водонагреватели) и sortRadiatorsForMatching
             (радиаторы) на сервере, не в этом ответе.
@@ -350,11 +351,11 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
   /api/v1/projects:
-    security:
-      - ProjectsBearerAuth: []
     get:
       summary: List client projects
       operationId: listProjects
+      security:
+        - ProjectsBearerAuth: []
       parameters:
         - name: limit
           in: query
@@ -388,6 +389,8 @@ paths:
     post:
       summary: Create project
       operationId: createProject
+      security:
+        - ProjectsBearerAuth: []
       requestBody:
         required: true
         content:
@@ -421,11 +424,11 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
   /api/v1/projects/{id}:
-    security:
-      - ProjectsBearerAuth: []
     get:
       summary: Get project by id
       operationId: getProject
+      security:
+        - ProjectsBearerAuth: []
       parameters:
         - name: id
           in: path
@@ -456,6 +459,8 @@ paths:
     put:
       summary: Update project (clientName, label, survey)
       operationId: updateProject
+      security:
+        - ProjectsBearerAuth: []
       parameters:
         - name: id
           in: path
@@ -501,6 +506,8 @@ paths:
     delete:
       summary: Delete project and its calculations
       operationId: deleteProject
+      security:
+        - ProjectsBearerAuth: []
       parameters:
         - name: id
           in: path
@@ -533,10 +540,10 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
   /api/v1/projects/{id}/calc:
-    security:
-      - ProjectsBearerAuth: []
     post:
       summary: Calculate and save result for project
+      security:
+        - ProjectsBearerAuth: []
       description: >
         Выполняет расчёт и сохраняет результат в calculations. Вход CalcInput берётся из
         calcInput, корневого building или project.lastCalcInput (см. ProjectCalcBody).
@@ -590,11 +597,11 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
   /api/v1/projects/{id}/calculations:
-    security:
-      - ProjectsBearerAuth: []
     get:
       summary: List saved calculations for project
       operationId: listProjectCalculations
+      security:
+        - ProjectsBearerAuth: []
       parameters:
         - name: id
           in: path
@@ -627,11 +634,11 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
   /api/v1/projects/{projectId}/calculations/{calcId}:
-    security:
-      - ProjectsBearerAuth: []
     get:
       summary: Get saved calculation with full report
       operationId: getProjectCalculation
+      security:
+        - ProjectsBearerAuth: []
       parameters:
         - name: projectId
           in: path
@@ -707,6 +714,8 @@ components:
       $ref: ./components/schemas/IndirectWaterHeaterCatalogItem.yaml
     PipeCatalogItem:
       $ref: ./components/schemas/PipeCatalogItem.yaml
+    PumpCatalogItem:
+      $ref: ./components/schemas/PumpCatalogItem.yaml
     BoilerEquipmentProposal:
       $ref: ./components/schemas/BoilerEquipmentProposal.yaml
     BoilerMatchingReport:

@@ -6,6 +6,7 @@
 import * as fs from 'node:fs/promises';
 import { validateAndNormalizeCatalog } from './validateCatalog.js';
 import { resolvePipeCatalogId } from './pipeCatalogHelpers.js';
+import { resolvePumpCatalogId } from './pumpCatalogHelpers.js';
 import { Product } from '../models/public.js';
 import { logger } from '../utils/logger.js';
 import { ensureMongoReferenceConnection } from '../utils/mongoReferenceConnection.js';
@@ -48,13 +49,18 @@ function countProductRowsInEnvelope(json) {
     ? products.waterHeaters.length
     : 0;
   const pipes = Array.isArray(products.pipes) ? products.pipes.length : 0;
+  const pumps = Array.isArray(/** @type {Record<string, unknown>} */ (json).pumps)
+    ? /** @type {unknown[]} */ ((/** @type {Record<string, unknown>} */ (json)).pumps).length
+    : Array.isArray(products.pumps)
+      ? products.pumps.length
+      : 0;
   const indirect = Array.isArray(
     /** @type {Record<string, unknown>} */ (json).indirectWaterHeaters,
   )
     ? /** @type {unknown[]} */ ((/** @type {Record<string, unknown>} */ (json)).indirectWaterHeaters)
         .length
     : 0;
-  return boilers + radiators + waterHeaters + pipes + indirect;
+  return boilers + radiators + waterHeaters + pipes + pumps + indirect;
 }
 
 /**
@@ -92,6 +98,24 @@ function pipeMongoDocToCatalogRow(doc) {
   /** @type {Record<string, unknown>} */
   const row = { ...rest };
   const catalogId = resolvePipeCatalogId(plain);
+  if (catalogId) {
+    row.id = catalogId;
+  }
+  return row;
+}
+
+/**
+ * Насос из Mongo → строка каталога (без kind, catalogKey, pumpId).
+ * @param {Record<string, unknown>} doc
+ */
+function pumpMongoDocToCatalogRow(doc) {
+  const plain = mongoDocToPlain(doc);
+  const { kind: _k, pumpId: _p, ...rest } = plain;
+  void _k;
+  void _p;
+  /** @type {Record<string, unknown>} */
+  const row = { ...rest };
+  const catalogId = resolvePumpCatalogId(plain);
   if (catalogId) {
     row.id = catalogId;
   }
@@ -160,6 +184,9 @@ async function loadCatalogJsonFromMongo() {
   const pipes = docs
     .filter((d) => d.kind === 'pipe')
     .map((d) => pipeMongoDocToCatalogRow(/** @type {Record<string, unknown>} */ (d)));
+  const pumps = docs
+    .filter((d) => d.kind === 'pump')
+    .map((d) => pumpMongoDocToCatalogRow(/** @type {Record<string, unknown>} */ (d)));
   const indirectWaterHeaters = docs
     .filter((d) => d.kind === 'indirectWaterHeater')
     .map((d) => mongoDocToCatalogProductDoc(/** @type {Record<string, unknown>} */ (d)));
@@ -183,6 +210,7 @@ async function loadCatalogJsonFromMongo() {
       waterHeaters,
       pipes,
     },
+    pumps,
     indirectWaterHeaters,
   };
 
@@ -218,6 +246,7 @@ function normalizeCatalogEnvelope(json, catalogSource) {
     radiators: normalized.radiators.length,
     waterHeaters: normalized.waterHeaters.length,
     pipes: Array.isArray(normalized.pipes) ? normalized.pipes.length : 0,
+    pumps: Array.isArray(normalized.pumps) ? normalized.pumps.length : 0,
     indirectWaterHeaters: Array.isArray(normalized.indirectWaterHeaters)
       ? normalized.indirectWaterHeaters.length
       : 0,
@@ -232,6 +261,7 @@ function normalizeCatalogEnvelope(json, catalogSource) {
       radiators,
       waterHeaters,
       pipes: Array.isArray(normalized.pipes) ? [...normalized.pipes] : [],
+      pumps: Array.isArray(normalized.pumps) ? [...normalized.pumps] : [],
       indirectWaterHeaters: Array.isArray(normalized.indirectWaterHeaters)
         ? [...normalized.indirectWaterHeaters]
         : [],

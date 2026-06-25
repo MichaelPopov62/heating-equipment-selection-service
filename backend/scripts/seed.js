@@ -15,6 +15,7 @@ import { Boiler } from '../src/models/Boiler.js';
 import { Radiator } from '../src/models/Radiator.js';
 import { WaterHeater } from '../src/models/WaterHeater.js';
 import { Pipe } from '../src/models/Pipe.js';
+import { Pump } from '../src/models/Pump.js';
 import { IndirectWaterHeater } from '../src/models/IndirectWaterHeater.js';
 import { resolveCatalogJsonFilePath } from './utils/catalogPaths.js';
 import {
@@ -101,6 +102,7 @@ async function loadValidatedCatalogDocuments(catalogPath) {
     `Каталог прошёл контракт SSOT: ${docs.length} документов products ` +
       `(boiler ${summary.boilerDouble + summary.boilerSingle}, radiator ${summary.radiators}, ` +
       `waterHeater ${summary.waterHeaters}, pipe ${summary.pipes}, ` +
+      `pump ${summary.pumps}, ` +
       `indirect ${summary.indirectWaterHeaters})\n`,
   );
 
@@ -120,6 +122,7 @@ function countCatalogSummaryItems(summary) {
     summary.radiators +
     summary.waterHeaters +
     summary.pipes +
+    summary.pumps +
     summary.indirectWaterHeaters
   );
 }
@@ -314,20 +317,22 @@ async function main() {
     const radiatorDocs = docs.filter((d) => d.kind === 'radiator');
     const waterHeaterDocs = docs.filter((d) => d.kind === 'waterHeater');
     const pipeDocs = docs.filter((d) => d.kind === 'pipe');
+    const pumpDocs = docs.filter((d) => d.kind === 'pump');
     const indirectDocs = docs.filter((d) => d.kind === 'indirectWaterHeater');
 
     let inserted;
     try {
       // Вставка через дискриминаторы: при Product.insertMany() Mongoose может неверно
       // назначить схему части документов, тогда в БД нет kind: "pipe" и фильтр в Compass пустой.
-      const [insBoilers, insRad, insWh, insPipes, insIndirect] = await Promise.all([
+      const [insBoilers, insRad, insWh, insPipes, insPumps, insIndirect] = await Promise.all([
         Boiler.insertMany(boilerDocs, { ordered: false }),
         Radiator.insertMany(radiatorDocs, { ordered: false }),
         WaterHeater.insertMany(waterHeaterDocs, { ordered: false }),
         Pipe.insertMany(pipeDocs, { ordered: false }),
+        Pump.insertMany(pumpDocs, { ordered: false }),
         IndirectWaterHeater.insertMany(indirectDocs, { ordered: false }),
       ]);
-      inserted = [...insBoilers, ...insRad, ...insWh, ...insPipes, ...insIndirect];
+      inserted = [...insBoilers, ...insRad, ...insWh, ...insPipes, ...insPumps, ...insIndirect];
     } catch (err) {
       const bulk = err && typeof err === 'object' ? err : null;
       const insertedCount =
@@ -362,6 +367,12 @@ async function main() {
     if (pipeInDb !== pipeDocs.length) {
       throw new Error(
         `insertMany: pipe в Mongo (${pipeInDb}) не совпало с сидом (${pipeDocs.length}); db=${dbName}, collection=${collName}`,
+      );
+    }
+    const pumpInDb = verifyAgg.find((x) => x._id === 'pump')?.n ?? 0;
+    if (pumpInDb !== pumpDocs.length) {
+      throw new Error(
+        `insertMany: pump в Mongo (${pumpInDb}) не совпало с сидом (${pumpDocs.length}); db=${dbName}, collection=${collName}`,
       );
     }
 
@@ -400,6 +411,7 @@ async function main() {
             radiator: docs.filter((d) => d.kind === 'radiator').length,
             waterHeater: docs.filter((d) => d.kind === 'waterHeater').length,
             pipe: docs.filter((d) => d.kind === 'pipe').length,
+            pump: docs.filter((d) => d.kind === 'pump').length,
             indirectWaterHeater: docs.filter((d) => d.kind === 'indirectWaterHeater').length,
           },
           referenceData: refSeed,

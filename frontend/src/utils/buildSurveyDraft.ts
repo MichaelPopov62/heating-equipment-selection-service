@@ -5,11 +5,11 @@
 
 import type { CalcReportJson } from '../types/calcApi';
 import type { ObjectMetaValue } from '../types/envelope';
-import type { HotWaterBoilerPowerMatchingScheme } from '../types/heatingMatching';
 import type { HeatingThermalRegimePreset } from '../types/heatingThermalRegime';
 import type { UfhModePresetId } from '../types/ufhModePreset';
 import type { UfhDistributionPreset } from '../types/ufhDistribution';
 import type { HotWaterFormValue } from '../types/hotWater';
+import type { WaterHeaterFormValue } from '../types/waterHeater';
 import type { RoomFormValue } from '../types/rooms';
 import {
   SURVEY_DRAFT_SCHEMA_VERSION,
@@ -25,7 +25,7 @@ export function buildSurveyDraft(params: {
   rooms: RoomFormValue[];
   temps: { insideC: number; outsideC: number };
   hotWaterForm: HotWaterFormValue;
-  hotWaterBoilerPowerMatchingScheme: HotWaterBoilerPowerMatchingScheme;
+  waterHeaterForm: WaterHeaterFormValue;
   waterUnderfloorHeating: boolean;
   underfloorDistributionPreset: UfhDistributionPreset;
   thermalRegimePreset: HeatingThermalRegimePreset;
@@ -43,7 +43,7 @@ export function buildSurveyDraft(params: {
     rooms: structuredClone(params.rooms),
     temps: { ...params.temps },
     hotWaterForm: structuredClone(params.hotWaterForm),
-    hotWaterBoilerPowerMatchingScheme: params.hotWaterBoilerPowerMatchingScheme,
+    waterHeaterForm: structuredClone(params.waterHeaterForm),
     waterUnderfloorHeating: params.waterUnderfloorHeating,
     underfloorDistributionPreset: params.underfloorDistributionPreset,
     thermalRegimePreset: params.thermalRegimePreset,

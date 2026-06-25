@@ -28,8 +28,6 @@ type Props = {
   roofPresets: EnvelopePreset[];
   loadingPresets: boolean;
   presetsError: string | null;
-  /** Показать галочку места под БКН (большая квартира). */
-  showIndirectDhwSpaceOption?: boolean;
   onChange: (next: ObjectMetaValue) => void;
 };
 
@@ -52,7 +50,6 @@ export function ObjectMetaForm({
   roofPresets,
   loadingPresets,
   presetsError,
-  showIndirectDhwSpaceOption = false,
   onChange,
 }: Props) {
   const selectedWallPreset =
@@ -312,30 +309,6 @@ export function ObjectMetaForm({
             </>
           )}
         </>
-      )}
-
-      {value.objectType === 'apartment' && showIndirectDhwSpaceOption && (
-        <div className={`${styles.field} ${styles.fullWidth}`}>
-          <label className={styles.checkboxRow}>
-            <input
-              type="checkbox"
-              checked={value.indirectDhwSpaceAvailable === true}
-              onChange={(e) =>
-                onChange({
-                  ...value,
-                  indirectDhwSpaceAvailable: e.target.checked,
-                })
-              }
-            />
-            <span>
-              Есть техпомещение или ниша под бойлер косвенного нагрева (БКН)
-            </span>
-          </label>
-          <div className={styles.hint}>
-            Для больших квартир доступна схема «1К + БКН» при наличии места под
-            накопительный бойлер.
-          </div>
-        </div>
       )}
 
       <div className={`${styles.field} ${styles.fullWidth}`}>

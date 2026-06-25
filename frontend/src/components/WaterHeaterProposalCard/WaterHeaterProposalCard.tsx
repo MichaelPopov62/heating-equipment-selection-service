@@ -9,41 +9,26 @@ import {
   formatLiters,
   formatPriceUah,
 } from '../../utils/format';
-import type { ParsedIndirectWaterHeaterMatching } from '../../utils/parseIndirectWaterHeaterMatchingFromReport';
-import type { ParsedWaterHeaterMatching } from '../../utils/parseWaterHeaterMatchingFromReport';
-import appStyles from '../../App.module.css';
+import type { WaterHeaterProposalCardProps } from '../../types/waterHeaterMatching';
+import styles from './WaterHeaterProposalCard.module.css';
 
-type Props = {
-  title: string;
-  titleDomId: string;
-  data: ParsedIndirectWaterHeaterMatching | ParsedWaterHeaterMatching;
-  /** Специфичные для БКН поля (передаются только для indirect). */
-  indirect?: {
-    coilPowerKw: number | null;
-    effectiveHeatPowerKw: number | null;
-    heatTimeMinutesFullTank: number | null;
-    skippedReason: string | null;
-  };
-  /** Мощность (только для ЭВН). */
-  electricPowerKw?: number | null;
-};
+export function WaterHeaterProposalCard(props: WaterHeaterProposalCardProps) {
+  const { title, titleDomId, data, kind } = props;
 
-export function WaterHeaterProposalCard({
-  title,
-  titleDomId,
-  data,
-  indirect,
-  electricPowerKw,
-}: Props) {
+  const cardClass =
+    kind === 'electric'
+      ? `${styles.card} ${styles.cardElectric}`
+      : styles.card;
+
   return (
-    <div className={appStyles.boilerCalcSummary} aria-labelledby={titleDomId}>
-      <h4 className={appStyles.boilerCalcSummaryTitle} id={titleDomId}>
+    <div className={cardClass} aria-labelledby={titleDomId}>
+      <h4 className={styles.title} id={titleDomId}>
         {title}
       </h4>
       {data.hasCatalogSelection ? (
-        <dl className={appStyles.boilerCalcDl}>
+        <dl className={styles.dl}>
           <dt>Модель (подбор)</dt>
-          <dd>
+          <dd className={styles.valueStrong}>
             {data.selectedModel
               ? formatBrandModel(data.brand, data.selectedModel)
               : '—'}
@@ -52,42 +37,47 @@ export function WaterHeaterProposalCard({
             <>
               <dt>Объём бака</dt>
               <dd>
-                {formatLiters(data.volumeLiters)} <span>л</span>
+                {formatLiters(data.volumeLiters)}{' '}
+                <span className={styles.unit}>л</span>
               </dd>
             </>
           )}
           {data.requiredTankLiters > 0 && (
             <>
-              <dt>Расчётный минимум по объёму</dt>
+              <dt>Расчётный минимум (подбор)</dt>
               <dd>
-                {formatLiters(data.requiredTankLiters)} <span>л</span>
+                {formatLiters(data.requiredTankLiters)}{' '}
+                <span className={styles.unit}>л</span>
               </dd>
             </>
           )}
-          {indirect && (
+          {kind === 'indirect' && (
             <>
-              {indirect.coilPowerKw != null && (
+              {data.coilPowerKw != null && (
                 <>
                   <dt>Мощность змеевика (каталог)</dt>
                   <dd>
-                    {formatKw(indirect.coilPowerKw, 1)} <span>кВт</span>
+                    {formatKw(data.coilPowerKw, 1)}{' '}
+                    <span className={styles.unit}>кВт</span>
                   </dd>
                 </>
               )}
-              {indirect.effectiveHeatPowerKw != null && (
+              {data.effectiveHeatPowerKw != null && (
                 <>
                   <dt>Эффективная мощность нагрева (min котёл, змеевик)</dt>
                   <dd>
-                    {formatKw(indirect.effectiveHeatPowerKw)} <span>кВт</span>
+                    {formatKw(data.effectiveHeatPowerKw)}{' '}
+                    <span className={styles.unit}>кВт</span>
                   </dd>
                 </>
               )}
               <dt>Время полного нагрева бака (оценка)</dt>
               <dd>
-                {indirect.heatTimeMinutesFullTank != null ? (
+                {data.heatTimeMinutesFullTank != null ? (
                   <>
-                    ~{indirect.heatTimeMinutesFullTank} <span>мин</span>
-                    <span className={appStyles.hintInline}>
+                    ~{data.heatTimeMinutesFullTank}{' '}
+                    <span className={styles.unit}>мин</span>
+                    <span className={styles.hintInline}>
                       {' '}
                       при приоритете ГВС и указанной эффективной мощности; не норматив.
                     </span>
@@ -98,32 +88,34 @@ export function WaterHeaterProposalCard({
               </dd>
             </>
           )}
-          {electricPowerKw != null && (
+          {kind === 'electric' && data.powerKw != null && (
             <>
               <dt>Мощность нагрева (каталог)</dt>
               <dd>
-                {formatKw(electricPowerKw, 1)} <span>кВт</span>
+                {formatKw(data.powerKw, 1)}{' '}
+                <span className={styles.unit}>кВт</span>
               </dd>
             </>
           )}
           {data.price != null && (
             <>
               <dt>Цена в каталоге</dt>
-              <dd>
-                {formatPriceUah(data.price)} <span>грн</span>
+              <dd className={styles.valueStrong}>
+                {formatPriceUah(data.price)}{' '}
+                <span className={styles.unit}>грн</span>
               </dd>
             </>
           )}
         </dl>
       ) : (
-        <p className={appStyles.hint}>
-          {indirect
-            ? (indirect.skippedReason ?? 'БКН из каталога не выбран.')
+        <p className={styles.emptyHint}>
+          {kind === 'indirect'
+            ? (data.skippedReason ?? 'БКН из каталога не выбран.')
             : 'Электробойлер из каталога не выбран.'}
         </p>
       )}
       {data.warnings.length > 0 && (
-        <ul className={appStyles.boilerWarningsList}>
+        <ul className={styles.warningsList}>
           {data.warnings.map((w, i) => (
             <li key={`wh-w-${i}-${w.slice(0, 96)}`}>{w}</li>
           ))}

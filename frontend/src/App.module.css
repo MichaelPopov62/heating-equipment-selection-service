@@ -144,9 +144,8 @@
   min-width: 0;
 }
 
-.hintInline {
-  font: 500 11px/1.35 var(--sans);
-  color: var(--text-m);
+.hint {
+  composes: hint from './styles/formElements.module.css';
 }
 
 .calcApiBar {
@@ -258,30 +257,20 @@
   }
 }
 
-/* Шаг «Котёл»: выбор сценария горячая вода ↔ котёл */
-.boilerHotWaterSchemeBlock {
+/* Шаг «Котёл»: пресет графика отопления (радиаторный контур) */
+.thermalRegimeBlock {
   composes: block from './styles/formElements.module.css';
 }
 
-.boilerHotWaterSchemeLabel {
+.thermalRegimeLabel {
   composes: label from './styles/formElements.module.css';
 }
 
-.boilerHotWaterSchemeSelect {
+.thermalRegimeSelect {
   composes: select from './styles/formElements.module.css';
 }
 
 .inlineCode {
   composes: inlineCode from './styles/formElements.module.css';
-}
-
-.thermalRegimeBlockedMsg {
-  margin: 8px 0 0;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--warn, #c90) 45%, var(--border));
-  background: color-mix(in srgb, var(--warn, #c90) 12%, var(--surface));
-  font: 500 13px/1.4 var(--sans);
-  color: var(--text-h);
 }
 

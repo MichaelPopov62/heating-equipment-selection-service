@@ -22,6 +22,8 @@
     "verify:document-size-limits": "node scripts/verifyDocumentSizeLimits.js",
     "verify:extract-calculation-summary": "node scripts/verifyExtractCalculationSummary.js",
     "verify:projects-auth": "node scripts/verifyProjectsAuth.js",
+    "verify:water-heater-form": "node scripts/verifyWaterHeaterFormUtils.js",
+    "verify:survey-draft-migration": "node scripts/verifySurveyDraftMigration.js",
     "seed": "node scripts/seed.js"
   },
   "keywords": [],

@@ -15,7 +15,9 @@
 
 ## Схемы котла (5)
 
-- [ ] В UI доступны все 5 схем (в малой квартире без БКН — без `singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw`)
+- [ ] В UI доступны все 5 схем на шаге **«Водонагреватель»** (`WaterHeaterForm`; в малой квартире без БКН — без `singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw`)
+- [ ] Галочка места под БКН видна **только** при квартире + схема «1К + БКН» (не на шаге «Объект», не для дома)
+- [ ] Смена схемы или галочки → debounce → обновление карточек БКН/ЭВН в `WaterHeaterMatchingPreview` (форма + «Рекомендация»)
 - [ ] `singleCircuitBoilerWithBufferElectricStorage` — подбор 1К + буферный ЭВН, `recommendedTankLiters` из `water_norms`
 - [ ] `combiBoilerWithBufferElectricStorage` — 2К + буфер, объём из `combiBufferElectricStorage`
 - [ ] Квартира + БКН-схема → нормализация на max-комби + warning в отчёте

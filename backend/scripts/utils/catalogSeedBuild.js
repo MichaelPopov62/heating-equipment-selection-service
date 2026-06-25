@@ -38,6 +38,7 @@ export function summarizeNormalizedCatalog(norm) {
     radiators: norm.radiators.length,
     waterHeaters: norm.waterHeaters.length,
     pipes: (norm.pipes ?? []).length,
+    pumps: (norm.pumps ?? []).length,
     indirectWaterHeaters: (norm.indirectWaterHeaters ?? []).length,
   };
 }
@@ -91,7 +92,18 @@ export function buildProductDocumentsFromNormalized(norm) {
     catalogKey: `indirectWaterHeater-${i}`,
   }));
 
-  return [...boilers, ...radiators, ...waterHeaters, ...pipes, ...indirectWaterHeaters];
+  const pumps = (norm.pumps ?? []).map((x, i) => {
+    const raw = cloneJsonSerializable(x);
+    const id = raw?.id != null ? String(raw.id).trim() : '';
+    return {
+      ...raw,
+      kind: 'pump',
+      catalogKey: `pump-${i}`,
+      pumpId: id || undefined,
+    };
+  });
+
+  return [...boilers, ...radiators, ...waterHeaters, ...pipes, ...pumps, ...indirectWaterHeaters];
 }
 
 /**

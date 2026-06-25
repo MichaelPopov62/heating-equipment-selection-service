@@ -16,17 +16,21 @@ import type { RoomFormValue } from './types/rooms';
 import type { UfhDistributionPreset } from './types/ufhDistribution';
 import { HotWaterForm } from './components/HotWaterForm/HotWaterForm';
 import type { HotWaterFormValue } from './types/hotWater';
-import { postCalc } from './services/calc.ts';
+import { WaterHeaterForm } from './components/WaterHeaterForm/WaterHeaterForm';
+import type { WaterHeaterFormValue } from './types/waterHeater';
+import { createDefaultWaterHeaterFormValue } from './utils/waterHeaterFormDefaults';
+import {
+  getWaterHeaterSchemeOptions,
+  isApartmentLargeForIndirectScheme,
+} from './utils/waterHeaterSchemeOptions';
 import { buildCalcRequestPayload } from './services/buildCalcRequestPayload';
 import { buildSurveyCalcInputKey } from './utils/surveyCalcInputKey';
-import type { CalcReportJson } from './types/calcApi';
 import type { SurveyCurrentStep } from './types/surveyStep';
 import { useCalcReport } from './hooks/useCalcReport';
+import { useSurveyCalcRunner } from './hooks/useSurveyCalcRunner';
 import { RecommendationsBlock } from './components/RecommendationsBlock/RecommendationsBlock';
 import {
-  HOT_WATER_BOILER_POWER_MATCHING_SCHEME_OPTIONS,
-  SCHEME_BOILER_COMBI_BUFFER_ELECTRIC,
-  SCHEME_BOILER_ELECTRIC_SEPARATE,
+  HOT_WATER_BOILER_MATCHING_SCHEME_ENUM,
   SCHEME_BOILER_MAX_COMBI,
   SCHEME_BOILER_SINGLE_INDIRECT_SUM,
   type HotWaterBoilerPowerMatchingScheme,
@@ -58,10 +62,7 @@ import {
 import { createDefaultWindowFormValue } from './utils/roomWindowDefaults';
 
 const CALC_SCHEME_VALUES: readonly HotWaterBoilerPowerMatchingScheme[] = [
-  SCHEME_BOILER_MAX_COMBI,
-  SCHEME_BOILER_ELECTRIC_SEPARATE,
-  SCHEME_BOILER_SINGLE_INDIRECT_SUM,
-  SCHEME_BOILER_COMBI_BUFFER_ELECTRIC,
+  ...HOT_WATER_BOILER_MATCHING_SCHEME_ENUM,
 ];
 
 function isCalcMatchingScheme(
@@ -157,34 +158,18 @@ function App() {
     },
   }));
 
-  const [
-    hotWaterBoilerPowerMatchingScheme,
-    setHotWaterBoilerPowerMatchingScheme,
-  ] = useState<HotWaterBoilerPowerMatchingScheme>(SCHEME_BOILER_MAX_COMBI);
+  const [waterHeaterForm, setWaterHeaterForm] = useState<WaterHeaterFormValue>(
+    createDefaultWaterHeaterFormValue,
+  );
 
-  const apartmentLargeForScheme = useMemo(() => {
-    if (objectMeta.objectType !== 'apartment') return false;
-    const totalArea = rooms.reduce((s, r) => s + (Number(r.areaM2) || 0), 0);
-    const bathRooms = rooms.filter((r) => {
-      const t = String(r.type ?? '').toLowerCase();
-      return t === 'bathroom' || t.includes('сануз');
-    }).length;
-    const fx = hotWaterForm.fixtures;
-    const bathPoints = (fx.bath ?? 0) + (fx.shower ?? 0);
-    return totalArea > 50 || Math.max(bathRooms, bathPoints) >= 2;
-  }, [objectMeta.objectType, rooms, hotWaterForm.fixtures]);
-
-  /** Схема для API — нормализация БКН в малой квартире выполняется на бэкенде. */
-  const hotWaterBoilerSchemeForCalc = hotWaterBoilerPowerMatchingScheme;
-
-  const boilerSchemeSelectOptions = useMemo(
+  const apartmentLargeForScheme = useMemo(
     () =>
-      objectMeta.objectType === 'apartment' && !apartmentLargeForScheme
-        ? HOT_WATER_BOILER_POWER_MATCHING_SCHEME_OPTIONS.filter(
-            (o) => o.value !== SCHEME_BOILER_SINGLE_INDIRECT_SUM,
-          )
-        : HOT_WATER_BOILER_POWER_MATCHING_SCHEME_OPTIONS,
-    [objectMeta.objectType, apartmentLargeForScheme],
+      isApartmentLargeForIndirectScheme(
+        objectMeta.objectType,
+        rooms,
+        hotWaterForm.fixtures,
+      ),
+    [objectMeta.objectType, rooms, hotWaterForm.fixtures],
   );
 
   const [waterUnderfloorHeating, setWaterUnderfloorHeating] = useState(false);
@@ -194,10 +179,10 @@ function App() {
   const recommendedThermalRegimePreset = useMemo(
     () =>
       recommendedThermalRegimePresetForScheme(
-        hotWaterBoilerPowerMatchingScheme,
+        waterHeaterForm.hotWaterBoilerPowerMatchingScheme,
         objectMeta.objectType,
       ),
-    [hotWaterBoilerPowerMatchingScheme, objectMeta.objectType],
+    [waterHeaterForm.hotWaterBoilerPowerMatchingScheme, objectMeta.objectType],
   );
 
   const [thermalRegimePreset, setThermalRegimePreset] =
@@ -208,11 +193,15 @@ function App() {
   const thermalRegimeRecommendationHintText = useMemo(
     () =>
       thermalRegimeRecommendationHint(
-        hotWaterBoilerPowerMatchingScheme,
+        waterHeaterForm.hotWaterBoilerPowerMatchingScheme,
         objectMeta.objectType,
         thermalRegimePreset,
       ),
-    [hotWaterBoilerPowerMatchingScheme, objectMeta.objectType, thermalRegimePreset],
+    [
+      waterHeaterForm.hotWaterBoilerPowerMatchingScheme,
+      objectMeta.objectType,
+      thermalRegimePreset,
+    ],
   );
 
   useEffect(() => {
@@ -230,28 +219,6 @@ function App() {
     ufhModePresetsError,
   } = useUfhModePresetsLoader();
 
-  const handleUfhPresetChange = useCallback((next: UfhModePresetId | null) => {
-    setUfhPresetId(next);
-    if (next != null) {
-      setWaterUnderfloorHeating(true);
-    }
-    setCalcReport(null);
-  }, []);
-
-  const [calcLoading, setCalcLoading] = useState(false);
-  const [calcError, setCalcError] = useState<string | null>(null);
-  const [calcReport, setCalcReport] = useState<CalcReportJson | null>(null);
-  const calcSeqRef = useRef(0);
-
-  /** Смена схемы подбора: сброс отчёта + рекомендуемый график (через recommendedThermalRegimePreset). */
-  const handleBoilerMatchingSchemeChange = useCallback(
-    (scheme: HotWaterBoilerPowerMatchingScheme) => {
-      setCalcReport(null);
-      setHotWaterBoilerPowerMatchingScheme(scheme);
-    },
-    [],
-  );
-
   useRoomsOrchestration({
     objectMeta,
     setObjectMeta,
@@ -265,24 +232,6 @@ function App() {
 
   const { isRoomsComplete, quickEstimate } = useSurveyEstimates(rooms);
 
-  const {
-    apiHeatLoss,
-    apiHotWaterFromReport,
-    apiBoilerFromReport,
-    apiBoilerKw,
-    apiRadiatorsFromReport,
-    apiIndirectWhFromReport,
-    apiElectricWhFromReport,
-    apiUnderfloorHeatingFromReport,
-    displayedRadiatorSectionsTotal,
-    apiCatalogSource,
-    apiAutomationHints,
-  } = useCalcReport(
-    calcReport,
-    isCalcMatchingScheme,
-    quickEstimate.radiatorsSections,
-  );
-
   const buildCalcPayload = useCallback(
     () =>
       buildCalcRequestPayload({
@@ -290,7 +239,7 @@ function App() {
         temps,
         objectMeta,
         hotWaterForm,
-        hotWaterBoilerPowerMatchingScheme: hotWaterBoilerSchemeForCalc,
+        waterHeaterForm,
         windowPresets,
         waterUnderfloorHeating,
         underfloorDistributionPreset,
@@ -298,7 +247,7 @@ function App() {
         ufhPresetId,
       }),
     [
-      hotWaterBoilerSchemeForCalc,
+      waterHeaterForm,
       hotWaterForm,
       objectMeta,
       rooms,
@@ -310,48 +259,6 @@ function App() {
       ufhPresetId,
     ],
   );
-
-  const applySurveyDraftState = useCallback((draft: SurveyDraft) => {
-    setCurrentStep(draft.currentStep);
-    setObjectMeta(draft.objectMeta);
-    setRooms(migrateRoomEnvelopeFields(migrateLegacyRoomTypes(draft.rooms)));
-    setTemps({ ...draft.temps });
-    setHotWaterForm(structuredClone(draft.hotWaterForm));
-    if (isCalcMatchingScheme(draft.hotWaterBoilerPowerMatchingScheme)) {
-      setHotWaterBoilerPowerMatchingScheme(
-        draft.hotWaterBoilerPowerMatchingScheme,
-      );
-    }
-    setWaterUnderfloorHeating(draft.waterUnderfloorHeating);
-    setUnderfloorDistributionPreset(
-      draft.underfloorDistributionPreset ?? 'auto',
-    );
-    setUfhPresetId(draft.ufhPresetId ?? null);
-    setThermalRegimePreset(draft.thermalRegimePreset);
-    thermalRegimeTouchedRef.current = true;
-    setCalcReport(draft.lastCalcReport ?? null);
-    setCalcError(null);
-  }, []);
-
-  const runApiCalc = useCallback(async () => {
-    const seq = (calcSeqRef.current += 1);
-    setCalcLoading(true);
-    setCalcError(null);
-    try {
-      const data = await postCalc(buildCalcPayload());
-      // Защита от гонок: если пришёл устаревший ответ — игнорируем.
-      if (seq !== calcSeqRef.current) return;
-      setCalcReport(data.report);
-    } catch (e: unknown) {
-      if (seq !== calcSeqRef.current) return;
-      setCalcReport(null);
-      setCalcError(e instanceof Error ? e.message : 'Ошибка расчёта');
-    } finally {
-      if (seq === calcSeqRef.current) {
-        setCalcLoading(false);
-      }
-    }
-  }, [buildCalcPayload]);
 
   const canAutoCalc = useMemo(() => {
     if (!isRoomsComplete) return false;
@@ -387,6 +294,120 @@ function App() {
     return null;
   }, [canAutoCalc, isRoomsComplete]);
 
+  const calcInputKey = useMemo(
+    () =>
+      buildSurveyCalcInputKey({
+        temps,
+        objectMeta,
+        waterHeaterForm,
+        hotWaterForm,
+        rooms,
+        waterUnderfloorHeating,
+        underfloorDistributionPreset,
+        thermalRegimePreset,
+        ufhPresetId,
+      }),
+    [
+      waterHeaterForm,
+      hotWaterForm,
+      objectMeta,
+      rooms,
+      temps,
+      waterUnderfloorHeating,
+      underfloorDistributionPreset,
+      thermalRegimePreset,
+      ufhPresetId,
+    ],
+  );
+
+  const {
+    calcLoading,
+    calcError,
+    calcReport,
+    setCalcReport,
+    invalidateCalcReport,
+    restoreCalcReport,
+    runApiCalc,
+  } = useSurveyCalcRunner({
+    buildCalcPayload,
+    canAutoCalc,
+    calcInputKey,
+  });
+
+  const {
+    apiHeatLoss,
+    apiHotWaterFromReport,
+    apiBoilerFromReport,
+    apiBoilerKw,
+    apiRadiatorsFromReport,
+    apiIndirectWhFromReport,
+    apiElectricWhFromReport,
+    apiUnderfloorHeatingFromReport,
+    displayedRadiatorSectionsTotal,
+    apiCatalogSource,
+    apiAutomationHints,
+  } = useCalcReport(
+    calcReport,
+    isCalcMatchingScheme,
+    quickEstimate.radiatorsSections,
+  );
+
+  const applySurveyDraftState = useCallback(
+    (draft: SurveyDraft) => {
+      setCurrentStep(draft.currentStep);
+      setObjectMeta(draft.objectMeta);
+      setRooms(structuredClone(draft.rooms));
+      setTemps({ ...draft.temps });
+      setHotWaterForm(structuredClone(draft.hotWaterForm));
+      setWaterHeaterForm(structuredClone(draft.waterHeaterForm));
+      setWaterUnderfloorHeating(draft.waterUnderfloorHeating);
+      setUnderfloorDistributionPreset(
+        draft.underfloorDistributionPreset ?? 'auto',
+      );
+      setUfhPresetId(draft.ufhPresetId ?? null);
+      setThermalRegimePreset(draft.thermalRegimePreset);
+      thermalRegimeTouchedRef.current = true;
+      restoreCalcReport(draft.lastCalcReport ?? null);
+    },
+    [restoreCalcReport],
+  );
+
+  /** Смена схемы из подсказок отчёта или формы водонагревателя. */
+  const handleWaterHeaterSchemeChange = useCallback(
+    (scheme: HotWaterBoilerPowerMatchingScheme) => {
+      invalidateCalcReport();
+      setWaterHeaterForm((prev) => ({
+        ...prev,
+        hotWaterBoilerPowerMatchingScheme: scheme,
+        indirectDhwSpaceAvailable:
+          objectMeta.objectType === 'apartment' &&
+          scheme === SCHEME_BOILER_SINGLE_INDIRECT_SUM
+            ? prev.indirectDhwSpaceAvailable
+            : false,
+      }));
+    },
+    [invalidateCalcReport, objectMeta.objectType],
+  );
+
+  const handleWaterHeaterFormChange = useCallback(
+    (next: WaterHeaterFormValue) => {
+      invalidateCalcReport();
+      setWaterHeaterForm(next);
+    },
+    [invalidateCalcReport],
+  );
+
+  const handleUfhPresetChange = useCallback(
+    (next: UfhModePresetId | null) => {
+      setUfhPresetId(next);
+      if (next != null) {
+        setWaterUnderfloorHeating(true);
+      }
+      invalidateCalcReport();
+    },
+    [invalidateCalcReport],
+  );
+
   const surveyProject = useSurveyProject({
     getDraftParams: () => ({
       currentStep,
@@ -394,7 +415,7 @@ function App() {
       rooms,
       temps,
       hotWaterForm,
-      hotWaterBoilerPowerMatchingScheme,
+      waterHeaterForm,
       waterUnderfloorHeating,
       underfloorDistributionPreset,
       thermalRegimePreset,
@@ -446,40 +467,31 @@ function App() {
       'summary',
     ].includes(currentStep);
 
-  const calcInputKey = useMemo(
-    () =>
-      buildSurveyCalcInputKey({
-        temps,
-        objectMeta,
-        hotWaterBoilerPowerMatchingScheme: hotWaterBoilerSchemeForCalc,
-        hotWaterForm,
-        rooms,
-        waterUnderfloorHeating,
-        underfloorDistributionPreset,
-        thermalRegimePreset,
-        ufhPresetId,
-      }),
-    [
-      hotWaterBoilerSchemeForCalc,
-      hotWaterForm,
-      objectMeta,
-      rooms,
-      temps,
-      waterUnderfloorHeating,
-      underfloorDistributionPreset,
-      thermalRegimePreset,
-      ufhPresetId,
-    ],
-  );
+  const { hotWaterBoilerPowerMatchingScheme } = waterHeaterForm;
 
-  // Автопересчёт через API (дебаунс), чтобы клиенту не нужна была кнопка.
+  // Если схема стала недоступна (малая квартира) — сброс на max-комби.
   useEffect(() => {
-    if (!canAutoCalc) return;
-    const t = window.setTimeout(() => {
-      void runApiCalc();
-    }, 700);
-    return () => window.clearTimeout(t);
-  }, [canAutoCalc, calcInputKey, runApiCalc]);
+    const allowed = getWaterHeaterSchemeOptions(
+      objectMeta.objectType,
+      apartmentLargeForScheme,
+    ).map((o) => o.value);
+    if (allowed.includes(hotWaterBoilerPowerMatchingScheme)) {
+      return;
+    }
+    queueMicrotask(() => {
+      setWaterHeaterForm((prev) => ({
+        ...prev,
+        hotWaterBoilerPowerMatchingScheme: SCHEME_BOILER_MAX_COMBI,
+        indirectDhwSpaceAvailable: false,
+      }));
+      invalidateCalcReport();
+    });
+  }, [
+    apartmentLargeForScheme,
+    hotWaterBoilerPowerMatchingScheme,
+    invalidateCalcReport,
+    objectMeta.objectType,
+  ]);
 
   return (
     <div className={styles.appContainer}>
@@ -643,8 +655,10 @@ function App() {
                 : currentStep === 'hotWater'
                   ? 'Объект и горячая вода'
                   : currentStep === 'boiler'
-                    ? 'Котёл и связка с горячей водой'
-                    : currentStep === 'warmFloor'
+                    ? 'Котёл: температурный график отопления'
+                    : currentStep === 'waterHeater'
+                      ? 'Водонагреватель и сценарий ГВС'
+                      : currentStep === 'warmFloor'
                       ? 'Тёплый пол и низкотемпературный контур'
                       : 'Параметры объекта'}
             </h2>
@@ -657,10 +671,6 @@ function App() {
                 roofPresets={roofPresets}
                 loadingPresets={presetsLoading}
                 presetsError={presetsError}
-                showIndirectDhwSpaceOption={
-                  objectMeta.objectType === 'apartment' &&
-                  apartmentLargeForScheme
-                }
                 onChange={setObjectMeta}
               />
             )}
@@ -680,8 +690,16 @@ function App() {
 
             {currentStep === 'boiler' && (
               <p className={styles.hint} style={{ marginTop: 8 }}>
-                Выберите, как котёл связан с горячей водой: это определяет
-                формулу требуемой мощности котла.
+                Задайте радиаторный график подачи/обратки. Сценарий горячей воды
+                и подбор БКН/электробойлера — на шаге «Водонагреватель».
+              </p>
+            )}
+
+            {currentStep === 'waterHeater' && (
+              <p className={styles.hint} style={{ marginTop: 8 }}>
+                Выберите стратегию ГВС: от этого зависят подбор бойлера
+                косвенного нагрева или электронакопителя и формула мощности
+                котла. Изменения пересчитываются автоматически.
               </p>
             )}
 
@@ -750,38 +768,9 @@ function App() {
             )}
 
             {currentStep === 'boiler' && (
-              <div className={styles.boilerHotWaterSchemeBlock}>
+              <div className={styles.thermalRegimeBlock}>
                 <label
-                  className={styles.boilerHotWaterSchemeLabel}
-                  htmlFor="hot-water-boiler-scheme"
-                >
-                  Сценарий подбора мощности котла относительно горячей воды
-                </label>
-                <select
-                  id="hot-water-boiler-scheme"
-                  className={styles.boilerHotWaterSchemeSelect}
-                  value={hotWaterBoilerSchemeForCalc}
-                  onChange={(e) => {
-                    handleBoilerMatchingSchemeChange(
-                      e.target.value as HotWaterBoilerPowerMatchingScheme,
-                    );
-                  }}
-                >
-                  {boilerSchemeSelectOptions.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-                <p className={styles.hint} style={{ marginTop: 10 }}>
-                  Поле отправляется в запросе как{' '}
-                  <code className={styles.inlineCode}>
-                    heatingSystem.hotWaterBoilerPowerMatchingScheme
-                  </code>
-                  .
-                </p>
-                <label
-                  className={styles.boilerHotWaterSchemeLabel}
+                  className={styles.thermalRegimeLabel}
                   htmlFor="thermal-regime-preset"
                 >
                   Режим графика отопления (подача / обратка, пресет под тип
@@ -789,13 +778,13 @@ function App() {
                 </label>
                 <select
                   id="thermal-regime-preset"
-                  className={styles.boilerHotWaterSchemeSelect}
+                  className={styles.thermalRegimeSelect}
                   value={thermalRegimePreset}
                   onChange={(e) => {
                     const next = e.target.value as HeatingThermalRegimePreset;
                     thermalRegimeTouchedRef.current = true;
                     setThermalRegimePreset(next);
-                    setCalcReport(null);
+                    invalidateCalcReport();
                   }}
                 >
                   {HEATING_THERMAL_REGIME_OPTIONS.map((o) => (
@@ -822,6 +811,20 @@ function App() {
               </div>
             )}
 
+            {currentStep === 'waterHeater' && (
+              <WaterHeaterForm
+                value={waterHeaterForm}
+                onChange={handleWaterHeaterFormChange}
+                objectType={objectMeta.objectType}
+                apartmentLarge={apartmentLargeForScheme}
+                hotWaterForm={hotWaterForm}
+                hotWaterReport={apiHotWaterFromReport}
+                calcLoading={calcLoading}
+                indirectMatching={apiIndirectWhFromReport}
+                electricMatching={apiElectricWhFromReport}
+              />
+            )}
+
             {currentStep === 'warmFloor' && (
               <WarmFloorSection
                 waterUnderfloorHeating={waterUnderfloorHeating}
@@ -834,7 +837,7 @@ function App() {
                 onWaterUnderfloorChange={(v) => {
                   setWaterUnderfloorHeating(v);
                   if (!v) setUfhPresetId(null);
-                  setCalcReport(null);
+                  invalidateCalcReport();
                 }}
                 onDistributionPresetChange={setUnderfloorDistributionPreset}
               />
@@ -914,7 +917,7 @@ function App() {
           catalogSnapLoading={catalogSnapLoading}
           catalogSnapError={catalogSnapError}
           onRetryLoadCatalog={() => void reloadCatalog()}
-          onApplyScheme={handleBoilerMatchingSchemeChange}
+          onApplyScheme={handleWaterHeaterSchemeChange}
         />
       </div>
 

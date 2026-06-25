@@ -1,6 +1,6 @@
 /**
  * Назначение: типы каталога оборудования.
- * Описание: TypeScript-декларации для JS-модулей каталога (котлы, радиаторы, БКН, трубы);
+ * Описание: TypeScript-декларации для JS-модулей каталога (котлы, радиаторы, БКН, трубы, насосы);
  * не участвует в рантайме, обеспечивает строгую типизацию в редакторе.
  */
 import type { BoilerCombustionType } from '../types/boiler-types';
@@ -171,6 +171,45 @@ export interface PipeCatalogItemNormalized extends Record<string, unknown> {
   category?: string;
 }
 
+export type PumpCatalogSegment = 'premium' | 'medium' | 'budget';
+
+export type PumpCatalogType = 'electronic' | 'three_speed' | 'circulation_hot_water';
+
+export interface PumpOperatingModeCoefficients {
+  a: number;
+  b: number;
+  c: number;
+}
+
+export interface PumpOperatingModeNormalized {
+  modeName: string;
+  speedIndex: number;
+  powerWatts: number;
+  coefficients: PumpOperatingModeCoefficients;
+  qMinM3h: number;
+  qMaxM3h: number;
+}
+
+export interface PumpConnectionsNormalized {
+  mountingLengthMm: number;
+  threadInch: string;
+  nominalDiameterMm: number;
+}
+
+/** Насос после validateAndNormalizeCatalog (контракт — PumpCatalogItem в OpenAPI). */
+export interface PumpCatalogItemNormalized extends Record<string, unknown> {
+  model: string;
+  id: string;
+  brand: string;
+  series?: string;
+  segment: PumpCatalogSegment;
+  country?: string;
+  type: PumpCatalogType;
+  price: number;
+  connections: PumpConnectionsNormalized;
+  operatingModes: PumpOperatingModeNormalized[];
+}
+
 export interface NormalizedCatalog {
   boilers: {
     doubleCircuit: BoilerCatalogItemNormalized[];
@@ -180,6 +219,8 @@ export interface NormalizedCatalog {
   waterHeaters: WaterHeaterCatalogItemNormalized[];
   /** Трубы после validateAndNormalizeCatalog (обязательные поля — PipeCatalogItem). */
   pipes?: PipeCatalogItemNormalized[];
+  /** Циркуляционные насосы после validateAndNormalizeCatalog. */
+  pumps?: PumpCatalogItemNormalized[];
   /** Бойлеры косвенного нагрева (БКН), после валидации. */
   indirectWaterHeaters?: IndirectWaterHeaterCatalogItemNormalized[];
 }

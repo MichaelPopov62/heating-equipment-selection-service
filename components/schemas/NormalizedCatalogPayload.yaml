@@ -19,6 +19,10 @@ properties:
     type: array
     items:
       $ref: PipeCatalogItem.yaml
+  pumps:
+    type: array
+    items:
+      $ref: PumpCatalogItem.yaml
   indirectWaterHeaters:
     type: array
     items:

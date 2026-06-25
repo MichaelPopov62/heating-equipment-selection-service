@@ -1,6 +1,6 @@
 /**
  * Назначение: Парсинг электробойлера из отчёта.
- * Описание: Разбор matching.waterHeater для WaterHeaterProposalCard.
+ * Описание: Разбор matching.waterHeater для WaterHeaterProposalCard / WaterHeaterMatchingPreview.
  */
 
 import {

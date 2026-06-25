@@ -62,7 +62,8 @@
 
 | Папка / файл | Назначение |
 |--------------|------------|
-| `src/main.tsx`, `src/App.tsx` | Точка входа и мастер анкеты |
+| `src/main.tsx`, `src/App.tsx` | Точка входа и мастер анкеты (оркестрация хуков, без inline calc-state) |
+| `src/hooks/useSurveyCalcRunner.ts` | POST `/api/v1/calc`, debounce 700 ms, `calcReport` / `invalidateCalcReport` |
 | `src/components/WarmFloorSection/` | Глобальный флаг `waterUnderfloorHeating` |
 | `src/components/RoomsForm/RoomAccordionItem.tsx` | Селекты **основа ТП** + **финишное покрытие** |
 | `src/components/RecommendationsBlock/` | Блок «Тёплый пол» из `calculations.underfloorHeating` |
@@ -369,6 +370,7 @@ isMixingNodeRequired = heatingSystem.supplyC > ufhCircuit.supplyC
 | Блок | Содержание | Документация |
 |------|------------|--------------|
 | 5 схем ГВС/котла | incl. `singleCircuitBoilerWithBufferElectricStorage` | [`docs/heating-schemes-thermal-regime.md`](docs/heating-schemes-thermal-regime.md) |
+| UI «Водонагреватель» | `WaterHeaterForm`, `waterHeaterForm` в `SurveyDraft`, `migrateSurveyDraft`, без ручного выбора модели | [`docs/water-heater-form.md`](docs/water-heater-form.md) |
 | Unlock графика | рекомендация 75/65 vs 55/45, расчёт по выбору пользователя | там же |
 | Mongo `underfloor_heating_presets` | 3 режима, `GET …/modes`, seed, bundle | [`docs/ufh-presets-mongo.md`](docs/ufh-presets-mongo.md) |
 | `ufh_only` | skip радиаторов; котёл от `totalHeatFluxUpWatts` | там же |

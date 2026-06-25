@@ -18,7 +18,7 @@ import {
 } from '../../utils/format';
 import { BoilerProposalCard } from '../BoilerProposalCard/BoilerProposalCard';
 import { RadiatorProposalLineTable } from '../RadiatorProposalLineTable/RadiatorProposalLineTable';
-import { WaterHeaterProposalCard } from '../WaterHeaterProposalCard/WaterHeaterProposalCard';
+import { WaterHeaterMatchingPreview } from '../WaterHeaterMatchingPreview/WaterHeaterMatchingPreview';
 import { CatalogEquipmentReference } from '../CatalogEquipmentReference/CatalogEquipmentReference';
 import { UfhMixingNodeSpecCard } from '../UnderfloorHeatingReport/UfhMixingNodeSpecCard';
 import styles from './RecommendationsBlock.module.css';
@@ -374,28 +374,11 @@ export function RecommendationsBlock({
             </dd>
           </dl>
 
-          {apiIndirectWhFromReport != null && (
-            <WaterHeaterProposalCard
-              title="Бойлер косвенного нагрева (БКН)"
-              titleDomId="indirect-wh-title"
-              data={apiIndirectWhFromReport}
-              indirect={{
-                coilPowerKw: apiIndirectWhFromReport.coilPowerKw,
-                effectiveHeatPowerKw: apiIndirectWhFromReport.effectiveHeatPowerKw,
-                heatTimeMinutesFullTank: apiIndirectWhFromReport.heatTimeMinutesFullTank,
-                skippedReason: apiIndirectWhFromReport.skippedReason,
-              }}
-            />
-          )}
-
-          {apiElectricWhFromReport != null && (
-            <WaterHeaterProposalCard
-              title="Электробойлер"
-              titleDomId="electric-wh-title"
-              data={apiElectricWhFromReport}
-              electricPowerKw={apiElectricWhFromReport.powerKw}
-            />
-          )}
+          <WaterHeaterMatchingPreview
+            idPrefix="sidebar"
+            indirect={apiIndirectWhFromReport}
+            electric={apiElectricWhFromReport}
+          />
 
           {apiRadiatorsFromReport != null && apiRadiatorsFromReport.warnings.length > 0 && (
             <ul className={styles.radiatorsWarningsList}>

@@ -8,6 +8,7 @@ import { isPlainObject } from '../utils/isPlainObject.js';
 import { sanitizeTrimAngleBrackets } from '../utils/sanitizeString.js';
 import { applyBoilerMountingType } from './boilerCatalogHelpers.js';
 import { derivePipeModelLabel } from './pipeCatalogHelpers.js';
+import { derivePumpCatalogIdFromModel } from './pumpCatalogHelpers.js';
 
 function toFiniteNumber(x, { field, min = -Infinity, max = Infinity } = {}) {
   const n = Number(x);
@@ -542,6 +543,197 @@ function validatePipe(item, idx, seenIds) {
   }
 }
 
+/** Допустимые типы насосов в каталоге. */
+const PUMP_TYPES_ALLOWED = Object.freeze([
+  'electronic',
+  'three_speed',
+  'circulation_hot_water',
+]);
+
+/** Допустимые сегменты насосов. */
+const PUMP_SEGMENTS_ALLOWED = Object.freeze(['premium', 'medium', 'budget']);
+
+/**
+ * Насосы: корень JSON или `products.pumps`.
+ *
+ * @param {Record<string, unknown>} json
+ * @returns {unknown[]}
+ */
+function collectPumps(json) {
+  if (Array.isArray(json.pumps)) return json.pumps;
+  const p = json.products;
+  if (isPlainObject(p) && Array.isArray(p.pumps)) return p.pumps;
+  return [];
+}
+
+/**
+ * @param {Record<string, unknown>} item
+ * @param {number} idx
+ */
+function normalizePumpFromExtendedFormats(item, idx) {
+  if (item.price == null && isPlainObject(item.commercial)) {
+    const commercial = /** @type {Record<string, unknown>} */ (item.commercial);
+    if (commercial.priceEstimate != null) {
+      item.price = commercial.priceEstimate;
+    }
+  }
+
+  if (!sanitizeTrimAngleBrackets(item.id)) {
+    const oidWrap = item._id;
+    if (isPlainObject(oidWrap) && oidWrap.$oid != null) {
+      item.id = `pump-${String(oidWrap.$oid).trim()}`;
+    } else {
+      const model = sanitizeTrimAngleBrackets(item.model);
+      item.id = derivePumpCatalogIdFromModel(model || '', idx);
+    }
+  }
+
+  delete item._id;
+  delete item.kind;
+  delete item.commercial;
+}
+
+/**
+ * @param {unknown} raw
+ * @param {number} idx
+ * @param {number} modeIdx
+ */
+function validatePumpOperatingMode(raw, idx, modeIdx) {
+  const ctx = `pumps[${idx}].operatingModes[${modeIdx}]`;
+  if (!isPlainObject(raw)) {
+    throw new Error(`Каталог: ${ctx} должен быть объектом.`);
+  }
+
+  /** @type {Record<string, unknown>} */
+  const mode = raw;
+  mode.modeName = sanitizeTrimAngleBrackets(mode.modeName);
+  if (!mode.modeName) {
+    throw new Error(`Каталог: modeName обязателен (${ctx}).`);
+  }
+
+  mode.speedIndex = toFiniteNumber(mode.speedIndex, {
+    field: `${ctx}.speedIndex`,
+    min: 1,
+    max: 9,
+  });
+
+  mode.powerWatts = toFiniteNumber(mode.powerWatts, {
+    field: `${ctx}.powerWatts`,
+    min: 0,
+    max: 10_000,
+  });
+
+  if (!isPlainObject(mode.coefficients)) {
+    throw new Error(`Каталог: coefficients обязателен (${ctx}).`);
+  }
+  const coef = /** @type {Record<string, unknown>} */ (mode.coefficients);
+  coef.a = toFiniteNumber(coef.a, { field: `${ctx}.coefficients.a`, min: -100, max: 100 });
+  coef.b = toFiniteNumber(coef.b, { field: `${ctx}.coefficients.b`, min: -100, max: 100 });
+  coef.c = toFiniteNumber(coef.c, { field: `${ctx}.coefficients.c`, min: -100, max: 100 });
+
+  mode.qMinM3h = toFiniteNumber(mode.qMinM3h, {
+    field: `${ctx}.qMinM3h`,
+    min: 0,
+    max: 100,
+  });
+  mode.qMaxM3h = toFiniteNumber(mode.qMaxM3h, {
+    field: `${ctx}.qMaxM3h`,
+    min: 0,
+    max: 100,
+  });
+  if (mode.qMaxM3h < mode.qMinM3h) {
+    throw new Error(`Каталог: qMaxM3h < qMinM3h (${ctx}).`);
+  }
+}
+
+/**
+ * @param {unknown} item
+ * @param {number} idx
+ * @param {Set<string>} seenIds
+ */
+function validatePump(item, idx, seenIds) {
+  const ctx = `pumps[${idx}]`;
+  if (!isPlainObject(item)) {
+    throw new Error(`Каталог: pump[${idx}] должен быть объектом.`);
+  }
+
+  normalizePumpFromExtendedFormats(item, idx);
+
+  item.id = sanitizeTrimAngleBrackets(item.id);
+  if (!item.id) {
+    throw new Error(`Каталог: id обязателен (${ctx}).`);
+  }
+  if (seenIds.has(item.id)) {
+    throw new Error(`Каталог: дубликат id="${item.id}" (${ctx}).`);
+  }
+  seenIds.add(item.id);
+
+  item.brand = sanitizeTrimAngleBrackets(item.brand);
+  if (!item.brand) {
+    throw new Error(`Каталог: brand обязателен (${ctx}).`);
+  }
+
+  item.model = sanitizeTrimAngleBrackets(item.model);
+  if (!item.model) {
+    throw new Error(`Каталог: model обязателен (${ctx}).`);
+  }
+
+  if (item.series != null) {
+    item.series = sanitizeTrimAngleBrackets(item.series);
+  }
+  if (item.country != null) {
+    item.country = sanitizeTrimAngleBrackets(item.country);
+  }
+
+  const typeRaw = sanitizeTrimAngleBrackets(item.type).trim().toLowerCase();
+  if (!PUMP_TYPES_ALLOWED.includes(typeRaw)) {
+    throw new Error(
+      `Каталог: pumps[${idx}].type недопустимое значение "${String(item.type)}"; ` +
+        `разрешено: ${PUMP_TYPES_ALLOWED.join(' | ')}.`,
+    );
+  }
+  item.type = typeRaw;
+
+  const segmentRaw = sanitizeTrimAngleBrackets(item.segment).trim().toLowerCase();
+  if (!PUMP_SEGMENTS_ALLOWED.includes(segmentRaw)) {
+    throw new Error(
+      `Каталог: pumps[${idx}].segment недопустимое значение "${String(item.segment)}"; ` +
+        `разрешено: ${PUMP_SEGMENTS_ALLOWED.join(' | ')}.`,
+    );
+  }
+  item.segment = segmentRaw;
+
+  item.price = toFiniteNumber(item.price, {
+    field: `${ctx}.price`,
+    min: 1,
+    max: 1_000_000_000,
+  });
+
+  if (!isPlainObject(item.connections)) {
+    throw new Error(`Каталог: connections обязателен (${ctx}).`);
+  }
+  const conn = /** @type {Record<string, unknown>} */ (item.connections);
+  conn.mountingLengthMm = toFiniteNumber(conn.mountingLengthMm, {
+    field: `${ctx}.connections.mountingLengthMm`,
+    min: 1,
+    max: 1000,
+  });
+  conn.threadInch = sanitizeTrimAngleBrackets(conn.threadInch);
+  if (!conn.threadInch) {
+    throw new Error(`Каталог: connections.threadInch обязателен (${ctx}).`);
+  }
+  conn.nominalDiameterMm = toFiniteNumber(conn.nominalDiameterMm, {
+    field: `${ctx}.connections.nominalDiameterMm`,
+    min: 1,
+    max: 500,
+  });
+
+  if (!Array.isArray(item.operatingModes) || item.operatingModes.length < 1) {
+    throw new Error(`Каталог: operatingModes — непустой массив (${ctx}).`);
+  }
+  item.operatingModes.forEach((mode, mi) => validatePumpOperatingMode(mode, idx, mi));
+}
+
 /**
  * Бойлеры косвенного нагрева (БКН): корень JSON или `products.indirectWaterHeaters`.
  *
@@ -677,6 +869,11 @@ export function validateAndNormalizeCatalog(json) {
   const seenPipeIds = new Set();
   pipes.forEach((p, i) => validatePipe(p, i, seenPipeIds));
 
+  const pumpsRaw = collectPumps(root);
+  const pumps = pumpsRaw.filter(isPlainObject);
+  const seenPumpIds = new Set();
+  pumps.forEach((p, i) => validatePump(p, i, seenPumpIds));
+
   const indirectWaterHeatersRaw = collectIndirectWaterHeaters(root);
   const indirectWaterHeaters = indirectWaterHeatersRaw.filter(isPlainObject);
   indirectWaterHeaters.forEach((item, i) => validateIndirectWaterHeater(item, i));
@@ -686,6 +883,7 @@ export function validateAndNormalizeCatalog(json) {
     radiators,
     waterHeaters,
     pipes,
+    pumps,
     indirectWaterHeaters,
   };
 }

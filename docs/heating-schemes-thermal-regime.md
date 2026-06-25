@@ -70,7 +70,7 @@
 | Shared | `shared/heatingMatchingSchemes.js`, `shared/heatingThermalRegimeRecommendations.js` |
 | Валидация | `backend/src/api/validate.js`, `normalizeHeatingUfhPreset.js` |
 | Matching | `backend/src/matching/index.js`, `boiler.js`, `radiators.js` |
-| Frontend | `frontend/src/App.tsx` (hint, без блокировки селекта) |
+| Frontend | `frontend/src/components/WaterHeaterForm/` (схема ГВС), `App.tsx` (thermalRegimePreset), `useSurveyCalcRunner` (calc API) |
 | OpenAPI | `components/schemas/CalcInput.yaml` |
 
 Ручной чеклист: [`heating-schemes-test-checklist.md`](heating-schemes-test-checklist.md).

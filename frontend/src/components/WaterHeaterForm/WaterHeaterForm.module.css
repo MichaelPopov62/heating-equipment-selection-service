@@ -1,0 +1,154 @@
+/* Назначение: Стили шага «Водонагреватель».
+   Описание: Согласовано с HotWaterForm, ObjectMetaForm и formElements. */
+
+@import '../../styles/custom-media.css';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.title {
+  margin: 0;
+  font: 700 16px/1.2 var(--sans);
+  color: var(--text-h);
+}
+
+.hint {
+  composes: hint from '../../styles/formElements.module.css';
+  margin: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+}
+
+.sectionTitle {
+  margin: 0;
+  font: 700 13px/1.25 var(--sans);
+  color: var(--text-h);
+}
+
+.label {
+  composes: label from '../../styles/formElements.module.css';
+  font-size: 12px;
+}
+
+.select {
+  composes: select from '../../styles/formElements.module.css';
+  max-width: 100%;
+  border-radius: 12px;
+  background: var(--surface-2);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.select:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, var(--accent) 12%);
+  background: color-mix(in srgb, var(--surface-2) 94%, var(--accent-bg) 6%);
+  font: 500 13px/1.35 var(--sans);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.checkboxLabel input {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.contextSection {
+  composes: section;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--border) 75%, var(--accent) 25%);
+  background: color-mix(in srgb, var(--surface-2) 92%, var(--accent-bg) 8%);
+}
+
+.contextDl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(140px, 42%) 1fr;
+  gap: 6px 14px;
+  font: 500 13px/1.45 var(--sans);
+  color: var(--text);
+}
+
+.contextDl dt {
+  margin: 0;
+  color: var(--text-m);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.contextDl dd {
+  margin: 0;
+  color: var(--text);
+}
+
+.contextValueHighlight {
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.warningsSection {
+  composes: section;
+  border-color: color-mix(in srgb, var(--warn, #c90) 40%, var(--border));
+  background: color-mix(in srgb, var(--warn, #c90) 6%, var(--surface-2));
+}
+
+.warningsList {
+  margin: 0;
+  padding-left: 1.15rem;
+  font: 500 12px/1.45 var(--sans);
+  color: var(--text);
+}
+
+.warningsList li + li {
+  margin-top: 6px;
+}
+
+.inlineCode {
+  composes: inlineCode from '../../styles/formElements.module.css';
+}
+
+.previewSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px dashed color-mix(in srgb, var(--border) 70%, var(--accent) 30%);
+  background: color-mix(in srgb, var(--surface-2) 90%, var(--accent-bg) 10%);
+}
+
+@media (--tablet) {
+  .root {
+    max-width: 100%;
+  }
+
+  .select {
+    max-width: 100%;
+  }
+}
