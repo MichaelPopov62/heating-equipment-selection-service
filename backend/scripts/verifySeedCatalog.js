@@ -33,6 +33,31 @@ function isNonEmptyString(value) {
 }
 
 /**
+ * @param {import('../src/catalog/types').PumpCatalogItemNormalized} pump
+ * @param {number} idx
+ */
+function assertPumpContract(pump, idx) {
+  if (!isNonEmptyString(pump?.id)) {
+    throw new Error(`verify: pumps[${idx}].id обязателен`);
+  }
+  if (!isNonEmptyString(pump?.brand)) {
+    throw new Error(`verify: pumps[${idx}].brand обязателен`);
+  }
+  if (!isNonEmptyString(pump?.model)) {
+    throw new Error(`verify: pumps[${idx}].model обязателен`);
+  }
+  if (typeof pump?.price !== 'number' || pump.price < 1) {
+    throw new Error(`verify: pumps[${idx}].price должен быть числом ≥ 1`);
+  }
+  if (Object.prototype.hasOwnProperty.call(pump, 'commercial')) {
+    throw new Error(`verify: pumps[${idx}] содержит legacy-поле commercial (нужен price на верхнем уровне)`);
+  }
+  if (Object.prototype.hasOwnProperty.call(pump, 'currency')) {
+    throw new Error(`verify: pumps[${idx}] содержит currency (валюта — только currency каталога)`);
+  }
+}
+
+/**
  * @param {import('../src/catalog/types').PipeCatalogItemNormalized} pipe
  * @param {number} idx
  */
@@ -83,6 +108,11 @@ try {
   const pipesNorm = normalized.pipes ?? [];
   for (let i = 0; i < pipesNorm.length; i += 1) {
     assertPipeContract(pipesNorm[i], i);
+  }
+
+  const pumpsNorm = normalized.pumps ?? [];
+  for (let i = 0; i < pumpsNorm.length; i += 1) {
+    assertPumpContract(pumpsNorm[i], i);
   }
 
   const pipeDocs = docs.filter((d) => d.kind === 'pipe');

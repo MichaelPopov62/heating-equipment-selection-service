@@ -567,6 +567,9 @@ function collectPumps(json) {
 }
 
 /**
+ * Импорт legacy-формата насосов (commercial.priceEstimate, _id.$oid, kind) в контракт PumpCatalogItem.
+ * Канонический JSON: id, price на верхнем уровне; валюта — только currency каталога, не у позиции.
+ *
  * @param {Record<string, unknown>} item
  * @param {number} idx
  */

@@ -1901,5 +1901,81 @@
       },
       "dimensions": { "height": 1287, "diameter": 584, "weight": 93 }
     }
+  ],
+  "pumps": [
+    {
+      "id": "pump-grundfos-alpha1-l-25-60-180",
+      "brand": "Grundfos",
+      "series": "Alpha1 L",
+      "model": "Alpha1 L 25-60 180",
+      "segment": "premium",
+      "country": "Denmark",
+      "type": "electronic",
+      "price": 7458,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "1 1/2",
+        "nominalDiameterMm": 25
+      },
+      "operatingModes": [
+        {
+          "modeName": "Пропорциональное давление PP2",
+          "speedIndex": 1,
+          "powerWatts": 45,
+          "coefficients": { "a": -0.45, "b": 0.12, "c": 6.0 },
+          "qMinM3h": 0.1,
+          "qMaxM3h": 4.5
+        },
+        {
+          "modeName": "Постоянное давление CP2",
+          "speedIndex": 2,
+          "powerWatts": 50,
+          "coefficients": { "a": -0.15, "b": -0.02, "c": 5.4 },
+          "qMinM3h": 0.2,
+          "qMaxM3h": 4.0
+        }
+      ]
+    },
+    {
+      "id": "pump-grundfos-ups-25-40-180",
+      "brand": "Grundfos",
+      "series": "UPS",
+      "model": "UPS 25-40 180",
+      "segment": "premium",
+      "country": "Denmark",
+      "type": "three_speed",
+      "price": 1250,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "1 1/2",
+        "nominalDiameterMm": 25
+      },
+      "operatingModes": [
+        {
+          "modeName": "Скорость 3",
+          "speedIndex": 3,
+          "powerWatts": 45,
+          "coefficients": { "a": -0.45, "b": -0.06, "c": 4.0 },
+          "qMinM3h": 0.4,
+          "qMaxM3h": 3.5
+        },
+        {
+          "modeName": "Скорость 2",
+          "speedIndex": 2,
+          "powerWatts": 35,
+          "coefficients": { "a": -0.4, "b": -0.05, "c": 3.2 },
+          "qMinM3h": 0.3,
+          "qMaxM3h": 2.6
+        },
+        {
+          "modeName": "Скорость 1",
+          "speedIndex": 1,
+          "powerWatts": 25,
+          "coefficients": { "a": -0.35, "b": -0.01, "c": 2.2 },
+          "qMinM3h": 0.2,
+          "qMaxM3h": 1.7
+        }
+      ]
+    }
   ]
 }

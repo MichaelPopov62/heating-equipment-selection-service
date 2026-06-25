@@ -120,5 +120,6 @@ export const pumpSchema = new Schema({
   brand: { type: String, required: false, trim: true },
   type: { type: String, required: false, trim: true },
   segment: { type: String, required: false, trim: true },
+  /** Ориентировочная цена (валюта — currency каталога); обязательна после validateCatalog. */
   price: { type: Number, required: false },
 });
