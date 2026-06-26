@@ -87,7 +87,7 @@
   },
   {
     "applianceKind": "hydraulics",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "isActive": true,
     "label": "Гидравлика — пороги расчёта и дефолты длин",
     "velocityLimitsMps": {
@@ -101,6 +101,10 @@
       "ufhCollectorBranch": 3
     },
     "maxUfhLoopLengthM": 100,
+    "ufhLoopDeltaTK": 10,
+    "ufhLoopVelocityMinMps": 0.2,
+    "ufhLoopVelocityMaxMps": 0.7,
+    "maxUfhLoopPressureDropKPa": 20,
     "roughnessMmByMaterial": {
       "pex": 0.007,
       "metal_plastic": 0.007,
@@ -112,6 +116,12 @@
       "mixingNode": 2.5,
       "collector": 1.5
     },
-    "pumpHeadMarginPercent": 12
+    "pumpHeadMarginPercent": 12,
+    "pumpDutyQMaxUtilizationPercent": 85,
+    "pumpMinHeadAtDutyM": 0.3,
+    "pumpMaxHeadMarginPercent": 60,
+    "pumpMinHeadAtQMaxM": 0.5,
+    "primaryFlowMarginPercent": 12,
+    "balancingValveKPaPerTurn": 3
   }
 ]

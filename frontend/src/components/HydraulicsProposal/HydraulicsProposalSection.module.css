@@ -1,0 +1,147 @@
+/* Назначение: стили блока предложения по гидравлике.
+   Описание: Согласовано с RecommendationsBlock и карточками оборудования. */
+
+.root {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.title {
+  margin: 0 0 8px;
+  font: 600 14px/1.35 var(--sans);
+  color: var(--text-h);
+}
+
+.subTitle {
+  margin: 12px 0 8px;
+  font: 600 13px/1.35 var(--sans);
+  color: var(--text-h);
+}
+
+.hint {
+  margin: 0 0 8px;
+  font: 12px/1.4 var(--sans);
+  color: var(--text-m);
+}
+
+.summaryDl {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(0, 1.2fr);
+  gap: 4px 12px;
+  margin: 0 0 8px;
+  font: 13px/1.4 var(--sans);
+}
+
+.summaryDl dt {
+  color: var(--text-m);
+}
+
+.summaryDl dd {
+  margin: 0;
+}
+
+.dl {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(0, 1.2fr);
+  gap: 4px 12px;
+  margin: 0;
+  font: 13px/1.4 var(--sans);
+}
+
+.dl dt {
+  color: var(--text-m);
+}
+
+.dl dd {
+  margin: 0;
+}
+
+.pumpCard {
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 90%, var(--accent-bg));
+  border: 1px solid var(--border);
+}
+
+.pumpsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tableWrap {
+  margin-top: 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font: 12px/1.35 var(--sans);
+}
+
+.table th,
+.table td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  background: color-mix(in srgb, var(--surface) 85%, var(--accent-bg));
+  font-weight: 600;
+}
+
+.tableFooter {
+  margin: 8px 0 0;
+  font: 13px/1.4 var(--sans);
+  text-align: right;
+}
+
+.details {
+  margin-top: 10px;
+  font: 13px/1.4 var(--sans);
+}
+
+.details summary {
+  cursor: pointer;
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.details .table {
+  margin-top: 8px;
+}
+
+.emptyHint {
+  margin: 8px 0 0;
+  font: 13px/1.4 var(--sans);
+  color: var(--text-m);
+}
+
+.warningsList {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  font: 12px/1.4 var(--sans);
+  color: var(--text-m);
+}
+
+.valueStrong {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.unit {
+  font-size: 0.92em;
+  color: var(--text-m);
+}
+
+.hintInline {
+  font-size: 0.92em;
+  color: var(--text-m);
+}

@@ -26,6 +26,7 @@ export interface BoilerCatalogItem {
   mountingType?: BoilerMountingType;
   /** Диаметры присоединения (например условных рядов дюймов или DN). */
   connectionDiameters?: string[];
+  circulationPump?: BoilerCirculationPumpNormalized;
 }
 
 export interface RadiatorCatalogItem {
@@ -87,6 +88,13 @@ export interface BoilerCatalogItemNormalized {
   price: number;
   mountingType?: BoilerMountingType;
   connectionDiameters?: string[];
+  /** Встроенный циркуляционный насос (кривая H(Q) — как у catalog.pumps). */
+  circulationPump?: BoilerCirculationPumpNormalized;
+}
+
+/** Встроенный насос котла после validateAndNormalizeCatalog. */
+export interface BoilerCirculationPumpNormalized {
+  operatingModes: PumpOperatingModeNormalized[];
 }
 
 /** За что указана цена радиатора в каталоге (за секцию или за готовую панель указанного размера). */

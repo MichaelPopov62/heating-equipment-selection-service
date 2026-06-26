@@ -1,5 +1,5 @@
 /**
- * Назначение: типы формы шага «Гидравлика».
+ * Назначение: типы формы шага «Гидравлика» и предложения из отчёта API.
  */
 
 export type HydraulicsPipeMaterialPreference = 'pex' | 'metal_plastic' | 'steel';
@@ -14,4 +14,72 @@ export const DEFAULT_HYDRAULICS_FORM: HydraulicsFormValue = {
   mainLineLengthM: 8,
   deltaTSystemK: 20,
   pipeMaterialPreference: '',
+};
+
+export type ParsedHydraulicsPipeLine = {
+  catalogPipeId: string;
+  brand: string;
+  model: string;
+  material: string;
+  outerDiameterMm: number;
+  wallThicknessMm: number;
+  internalDiameterMm: number;
+  totalLengthM: number;
+  edgeCount: number;
+  pricePerMeter: number;
+  linePrice: number;
+};
+
+export type ParsedHydraulicsPipeSegment = {
+  edgeId: string;
+  segmentLabel: string;
+  segmentRole: 'main' | 'branch' | 'ufh_loop' | 'dhw';
+  lengthM: number;
+  catalogPipeId: string;
+  brand: string;
+  model: string;
+  material: string;
+  outerDiameterMm: number;
+  wallThicknessMm: number;
+  internalDiameterMm: number;
+  velocityMps: number;
+  pressureDropKPa: number;
+  pricePerMeter: number;
+  linePrice: number;
+};
+
+export type ParsedHydraulicsPumpProposal = {
+  zoneId: string;
+  zoneLabel: string;
+  pumpRole: 'main' | 'zone' | 'dhw';
+  pumpSource: 'catalog' | 'boiler_builtin';
+  catalogPumpId?: string;
+  catalogBoilerId?: string;
+  brand: string;
+  model: string;
+  segment?: 'premium' | 'medium' | 'budget';
+  price: number;
+  modeName: string;
+  headAtDesignM: number;
+  headRequiredM: number;
+  designFlowM3PerHour: number;
+  headMarginPercent: number;
+  connectionNominalMm?: number;
+  note?: string;
+};
+
+export type ParsedHydraulicsProposal = {
+  designFlowM3PerHour: number;
+  headRequiredM: number;
+  topology?: 'direct' | 'mixing_valve' | 'hydraulic_separator';
+  pipeLines: ParsedHydraulicsPipeLine[];
+  pipeSegments: ParsedHydraulicsPipeSegment[];
+  pump: ParsedHydraulicsPumpProposal | null;
+  pumps: ParsedHydraulicsPumpProposal[];
+  estimatedPipesPrice: number;
+  estimatedPumpPrice: number;
+  estimatedTotalPrice: number;
+  unavailableReason: string | null;
+  warnings: string[];
+  hasCatalogSelection: boolean;
 };

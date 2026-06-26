@@ -286,6 +286,10 @@ function validateAndNormalizeApplianceDoc(doc) {
         ),
       },
       maxUfhLoopLengthM: requirePosNum(d, 'maxUfhLoopLengthM', basePath),
+      ufhLoopDeltaTK: requirePosNum(d, 'ufhLoopDeltaTK', basePath),
+      ufhLoopVelocityMinMps: requirePosNum(d, 'ufhLoopVelocityMinMps', basePath),
+      ufhLoopVelocityMaxMps: requirePosNum(d, 'ufhLoopVelocityMaxMps', basePath),
+      maxUfhLoopPressureDropKPa: requirePosNum(d, 'maxUfhLoopPressureDropKPa', basePath),
       roughnessMmByMaterial: Object.fromEntries(
         Object.entries(rough).map(([k, v]) => {
           const n = Number(v);
@@ -302,6 +306,18 @@ function validateAndNormalizeApplianceDoc(doc) {
         collector: requirePosNum(zeta, 'collector', `${basePath}.localLossZeta`),
       },
       pumpHeadMarginPercent: requirePosNum(d, 'pumpHeadMarginPercent', basePath),
+      pumpDutyQMaxUtilizationPercent: (() => {
+        const n = requirePosNum(d, 'pumpDutyQMaxUtilizationPercent', basePath);
+        if (n > 100) {
+          throw new Error(`${basePath}.pumpDutyQMaxUtilizationPercent: число ≤ 100`);
+        }
+        return n;
+      })(),
+      pumpMinHeadAtDutyM: requirePosNum(d, 'pumpMinHeadAtDutyM', basePath),
+      pumpMaxHeadMarginPercent: requirePosNum(d, 'pumpMaxHeadMarginPercent', basePath),
+      pumpMinHeadAtQMaxM: requirePosNum(d, 'pumpMinHeadAtQMaxM', basePath),
+      primaryFlowMarginPercent: requirePosNum(d, 'primaryFlowMarginPercent', basePath),
+      balancingValveKPaPerTurn: requirePosNum(d, 'balancingValveKPaPerTurn', basePath),
     };
   }
 

@@ -1,0 +1,23 @@
+type: object
+description: Зона циркуляции с расчётным расходом для подбора насоса.
+additionalProperties: false
+required:
+  - zoneId
+  - label
+  - pumpRole
+  - designFlowM3PerHour
+  - deltaTK
+  - requiresCatalogPump
+properties:
+  zoneId: { type: string }
+  label: { type: string }
+  pumpRole:
+    type: string
+    enum: [main, zone, dhw]
+  designFlowM3PerHour: { type: number, minimum: 0 }
+  heatLoadWatts: { type: number, minimum: 0 }
+  deltaTK: { type: number, minimum: 0.1 }
+  requiresCatalogPump: { type: boolean }
+  simultaneousWithHeating: { type: boolean }
+  heatingFlowM3PerHour: { type: number, minimum: 0 }
+  dhwPriorityFlowM3PerHour: { type: number, minimum: 0 }

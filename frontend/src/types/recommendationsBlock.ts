@@ -11,6 +11,7 @@ import type { HotWaterBoilerPowerMatchingScheme } from './heatingMatching';
 import type { ObjectType } from './envelope';
 import type { CatalogEquipmentSnapshot } from '../services/catalog';
 import type { ParsedUnderfloorHeating } from './underfloorHeating';
+import type { ParsedHydraulicsProposal } from './hydraulics';
 
 export type QuickEstimate = {
   totalAreaM2: number;
@@ -65,6 +66,5 @@ export type RecommendationsBlockProps = {
   catalogSnapError: string | null;
   onRetryLoadCatalog: () => void;
   onApplyScheme: (scheme: HotWaterBoilerPowerMatchingScheme) => void;
-  apiHydraulicsFromReport?: Record<string, unknown> | null;
-  apiHydraulicsMatchingFromReport?: Record<string, unknown> | null;
+  apiHydraulicsProposalFromReport?: ParsedHydraulicsProposal | null;
 };

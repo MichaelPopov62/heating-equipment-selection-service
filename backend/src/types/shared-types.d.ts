@@ -568,6 +568,22 @@ export interface UnderfloorHeatingRoomReport {
     estimatedLengthM: number;
     heatLoadWatts: number;
     flowRateM3PerHour: number;
+    hydraulics?: {
+      loopId: string;
+      lengthM: number;
+      pipeSpacingMm: number;
+      heatLoadWatts: number;
+      deltaTK: number;
+      flowRateM3PerHour: number;
+      massFlowKgPerSec: number;
+      elbowCount: number;
+      localZeta: number;
+      catalogPipeId: string | null;
+      internalDiameterMm: number | null;
+      velocityMps: number | null;
+      pressureDropKPa: number | null;
+      warnings: string[];
+    };
   }>;
   surfaceTempC: number;
   /** Применённый лимит поверхности (min пресета Mongo и паспорта финиша). */
@@ -723,6 +739,8 @@ export interface IndirectWaterHeaterMatchingReport {
 export interface HydraulicsReport {
   schemaVersion?: 1;
   flowRateM3PerHour?: number;
+  boilerPumpDesignFlowM3PerHour?: number;
+  circulationTopology?: 'direct' | 'mixing_valve' | 'hydraulic_separator';
   massFlowKgPerSec?: number;
   recommendedPipeDiameter?: string;
   recommendedVelocityRangeMPerSec?: [number, number];
@@ -752,6 +770,37 @@ export interface HydraulicsReport {
   pressure?: {
     criticalLoopEdgeIds: string[];
     headRequiredM: number;
+    criticalPressureDropKPa?: number;
+    criticalLoop?: {
+      branchId: string;
+      label: string;
+      circuit: 'radiators' | 'underfloor' | 'dhw' | 'indirect_dhw';
+      roomId?: string;
+      loopId?: string;
+      edgeIds: string[];
+      pressureDropKPa: number;
+      isCritical: boolean;
+    };
+    circulationLoops?: Array<{
+      branchId: string;
+      label: string;
+      circuit: 'radiators' | 'underfloor' | 'dhw' | 'indirect_dhw';
+      roomId?: string;
+      loopId?: string;
+      edgeIds: string[];
+      pressureDropKPa: number;
+      isCritical: boolean;
+    }>;
+    balancingRecommendations?: Array<{
+      branchId: string;
+      label: string;
+      circuit: 'radiators' | 'underfloor' | 'dhw' | 'indirect_dhw';
+      branchPressureDropKPa: number;
+      criticalPressureDropKPa: number;
+      excessPressureDropKPa: number;
+      estimatedValveTurns?: number;
+      hint: string;
+    }>;
     segments: Array<{
       edgeId: string;
       lengthM: number;
@@ -776,15 +825,11 @@ export interface HydraulicsMatchingReport {
     pressureDropKPa: number;
     internalDiameterMm: number;
   }>;
-  pump?: {
-    catalogPumpId: string;
-    modeName: string;
-    headMarginPercent: number;
-    designFlowM3PerHour: number;
-    headRequiredM: number;
-    headAtDesignM: number;
-    warnings: string[];
-  };
+  topology?: 'direct' | 'mixing_valve' | 'hydraulic_separator';
+  circulationZones?: import('../hydraulics/types').HydraulicsCirculationZone[];
+  pump?: import('../hydraulics/types').HydraulicsPumpMatch;
+  pumps?: import('../hydraulics/types').HydraulicsPumpMatch[];
+  proposal?: import('../hydraulics/types').HydraulicsProposalReport;
   warnings: string[];
 }
 

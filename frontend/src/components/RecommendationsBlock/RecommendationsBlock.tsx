@@ -21,7 +21,7 @@ import { RadiatorProposalLineTable } from '../RadiatorProposalLineTable/Radiator
 import { WaterHeaterMatchingPreview } from '../WaterHeaterMatchingPreview/WaterHeaterMatchingPreview';
 import { CatalogEquipmentReference } from '../CatalogEquipmentReference/CatalogEquipmentReference';
 import { UfhMixingNodeSpecCard } from '../UnderfloorHeatingReport/UfhMixingNodeSpecCard';
-import { HydraulicsReportCard } from '../HydraulicsReport/HydraulicsReportCard';
+import { HydraulicsProposalSection } from '../HydraulicsProposal/HydraulicsProposalSection';
 import styles from './RecommendationsBlock.module.css';
 
 export function RecommendationsBlock({
@@ -44,8 +44,7 @@ export function RecommendationsBlock({
   catalogSnapError,
   onRetryLoadCatalog,
   onApplyScheme,
-  apiHydraulicsFromReport,
-  apiHydraulicsMatchingFromReport,
+  apiHydraulicsProposalFromReport,
 }: RecommendationsBlockProps) {
   return (
     <aside className={[styles.root, className].filter(Boolean).join(' ')}>
@@ -252,9 +251,9 @@ export function RecommendationsBlock({
             </div>
           )}
 
-          <HydraulicsReportCard
-            hydraulics={apiHydraulicsFromReport}
-            matchingHydraulics={apiHydraulicsMatchingFromReport}
+          <HydraulicsProposalSection
+            proposal={apiHydraulicsProposalFromReport ?? null}
+            catalogSource={apiCatalogSource}
           />
 
         {/* Группа: Водоснабжение */}

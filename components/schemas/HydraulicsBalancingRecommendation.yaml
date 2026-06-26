@@ -1,0 +1,22 @@
+type: object
+description: Рекомендация балансировки некритичного контура относительно худшей ветки.
+additionalProperties: false
+required:
+  - branchId
+  - label
+  - circuit
+  - branchPressureDropKPa
+  - criticalPressureDropKPa
+  - excessPressureDropKPa
+  - hint
+properties:
+  branchId: { type: string }
+  label: { type: string }
+  circuit:
+    type: string
+    enum: [radiators, underfloor, dhw, indirect_dhw]
+  branchPressureDropKPa: { type: number }
+  criticalPressureDropKPa: { type: number }
+  excessPressureDropKPa: { type: number }
+  estimatedValveTurns: { type: integer, minimum: 1 }
+  hint: { type: string }

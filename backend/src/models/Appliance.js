@@ -1,6 +1,6 @@
 /**
  * Назначение: Mongoose-модель правил подбора по типам техники.
- * Описание: Коллекция appliances с методикой для котла, БКН, электробойлера и радиаторов (не номенклатура products).
+ * Описание: Коллекция appliances с методикой для котла, БКН, электробойлера, радиаторов, ТП и гидравлики (не номенклатура products).
  */
 import mongoose from 'mongoose';
 
@@ -16,6 +16,7 @@ const applianceSchema = new mongoose.Schema(
         'electric_storage',
         'radiator',
         'underfloor_heating',
+        'hydraulics',
       ],
     },
     schemaVersion: { type: Number, required: true },

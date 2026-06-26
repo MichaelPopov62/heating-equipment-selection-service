@@ -32,7 +32,9 @@ properties:
     additionalProperties: false
     required: [supplyC, returnC, deltaTK, requiredKw, connectionNominalMm]
     properties:
-      catalogBoilerId: { type: string }
+      catalogBoilerId:
+        type: string
+        description: id котла в каталоге или model (fallback для file-каталога); для поиска circulationPump.
       supplyC: { type: number }
       returnC: { type: number }
       deltaTK: { type: number, minimum: 0.1 }
@@ -80,6 +82,12 @@ properties:
       - roughnessMmByMaterial
       - localLossZeta
       - pumpHeadMarginPercent
+      - pumpDutyQMaxUtilizationPercent
+      - pumpMinHeadAtDutyM
+      - pumpMaxHeadMarginPercent
+      - pumpMinHeadAtQMaxM
+      - primaryFlowMarginPercent
+      - balancingValveKPaPerTurn
     properties:
       velocityLimitsMps:
         type: object
@@ -111,6 +119,20 @@ properties:
           mixingNode: { type: number }
           collector: { type: number }
       pumpHeadMarginPercent: { type: number }
+      pumpDutyQMaxUtilizationPercent:
+        type: number
+        description: Макс. доля Q_max режима насоса для рабочей точки (защита от перегрузки справа по кривой), %.
+      pumpMinHeadAtDutyM:
+        type: number
+        description: Минимальный напор H(Q) в рабочей точке, м.
+      pumpMaxHeadMarginPercent:
+        type: number
+        description: Верхняя граница избыточного запаса по напору (переразмеренность слева по кривой), %.
+      pumpMinHeadAtQMaxM:
+        type: number
+        description: Минимальный H(qMax) при валидации кривой в каталоге, м (SSOT appliances.hydraulics).
+      primaryFlowMarginPercent: { type: number }
+      balancingValveKPaPerTurn: { type: number }
 definitions:
   BranchLayout:
     type: object

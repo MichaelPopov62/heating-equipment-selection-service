@@ -29,6 +29,7 @@ import {
   DEFAULT_HYDRAULICS_FORM,
   type HydraulicsFormValue,
 } from './types/hydraulics';
+import { parseHydraulicsProposalFromReport } from './utils/parseHydraulicsProposalFromReport';
 import { buildSurveyCalcInputKey } from './utils/surveyCalcInputKey';
 import type { SurveyCurrentStep } from './types/surveyStep';
 import { useCalcReport } from './hooks/useCalcReport';
@@ -364,17 +365,10 @@ function App() {
     quickEstimate.radiatorsSections,
   );
 
-  const apiHydraulicsFromReport = useMemo(() => {
-    if (calcReport == null || typeof calcReport !== 'object') return null;
-    const calculations = (calcReport as { calculations?: { hydraulics?: Record<string, unknown> } })
-      .calculations;
-    return calculations?.hydraulics ?? null;
-  }, [calcReport]);
-
-  const apiHydraulicsMatchingFromReport = useMemo(() => {
+  const apiHydraulicsProposalFromReport = useMemo(() => {
     if (calcReport == null || typeof calcReport !== 'object') return null;
     const matching = (calcReport as { matching?: { hydraulics?: Record<string, unknown> } }).matching;
-    return matching?.hydraulics ?? null;
+    return parseHydraulicsProposalFromReport(matching?.hydraulics);
   }, [calcReport]);
 
   const applySurveyDraftState = useCallback(
@@ -955,8 +949,7 @@ function App() {
           catalogSnapError={catalogSnapError}
           onRetryLoadCatalog={() => void reloadCatalog()}
           onApplyScheme={handleWaterHeaterSchemeChange}
-          apiHydraulicsFromReport={apiHydraulicsFromReport}
-          apiHydraulicsMatchingFromReport={apiHydraulicsMatchingFromReport}
+          apiHydraulicsProposalFromReport={apiHydraulicsProposalFromReport}
         />
       </div>
 

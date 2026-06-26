@@ -1,0 +1,162 @@
+type: object
+description: >
+  Коммерческое предложение по гидравлике для клиента: трубы и насос с данными каталога и оценкой стоимости.
+additionalProperties: false
+required:
+  - designFlowM3PerHour
+  - headRequiredM
+  - pipeLines
+  - pipeSegments
+  - estimatedPipesPrice
+  - estimatedPumpPrice
+  - estimatedTotalPrice
+properties:
+  designFlowM3PerHour:
+    type: number
+    description: Расчётный расход для подбора насоса, м³/ч.
+  headRequiredM:
+    type: number
+    description: Требуемый напор системы, м.
+  topology:
+    type: string
+    enum: [direct, mixing_valve, hydraulic_separator]
+  circulationZones:
+    type: array
+    items:
+      $ref: HydraulicsCirculationZone.yaml
+  pipeLines:
+    type: array
+    description: Агрегированные позиции труб по catalogPipeId.
+    items:
+      $ref: '#/definitions/PipeProposalLine'
+  pipeSegments:
+    type: array
+    description: Детализация по участкам графа.
+    items:
+      $ref: '#/definitions/PipeSegmentProposal'
+  pump:
+    $ref: '#/definitions/PumpProposal'
+  pumps:
+    type: array
+    items:
+      $ref: '#/definitions/PumpProposal'
+  estimatedPipesPrice:
+    type: number
+    minimum: 0
+    description: Сумма по трубам (длина × цена за м), грн.
+  estimatedPumpPrice:
+    type: number
+    minimum: 0
+    description: Цена насоса из каталога, грн.
+  estimatedTotalPrice:
+    type: number
+    minimum: 0
+    description: estimatedPipesPrice + estimatedPumpPrice, грн.
+  unavailableReason:
+    type: string
+    description: Причина, если подбор неполный.
+definitions:
+  PipeProposalLine:
+    type: object
+    additionalProperties: false
+    required:
+      - catalogPipeId
+      - brand
+      - model
+      - material
+      - outerDiameterMm
+      - wallThicknessMm
+      - internalDiameterMm
+      - totalLengthM
+      - edgeCount
+      - pricePerMeter
+      - linePrice
+    properties:
+      catalogPipeId: { type: string }
+      brand: { type: string }
+      model: { type: string }
+      material: { type: string }
+      outerDiameterMm: { type: number }
+      wallThicknessMm: { type: number }
+      internalDiameterMm: { type: number }
+      totalLengthM: { type: number }
+      edgeCount: { type: integer, minimum: 1 }
+      pricePerMeter: { type: number }
+      linePrice: { type: number }
+  PipeSegmentProposal:
+    type: object
+    additionalProperties: false
+    required:
+      - edgeId
+      - segmentLabel
+      - segmentRole
+      - lengthM
+      - catalogPipeId
+      - brand
+      - model
+      - material
+      - outerDiameterMm
+      - wallThicknessMm
+      - internalDiameterMm
+      - velocityMps
+      - pressureDropKPa
+      - pricePerMeter
+      - linePrice
+    properties:
+      edgeId: { type: string }
+      segmentLabel: { type: string }
+      segmentRole:
+        type: string
+        enum: [main, branch, ufh_loop, dhw]
+      lengthM: { type: number }
+      catalogPipeId: { type: string }
+      brand: { type: string }
+      model: { type: string }
+      material: { type: string }
+      outerDiameterMm: { type: number }
+      wallThicknessMm: { type: number }
+      internalDiameterMm: { type: number }
+      velocityMps: { type: number }
+      pressureDropKPa: { type: number }
+      pricePerMeter: { type: number }
+      linePrice: { type: number }
+  PumpProposal:
+    type: object
+    additionalProperties: false
+    required:
+      - zoneId
+      - zoneLabel
+      - pumpRole
+      - pumpSource
+      - brand
+      - model
+      - price
+      - modeName
+      - headAtDesignM
+      - headRequiredM
+      - designFlowM3PerHour
+      - headMarginPercent
+    properties:
+      zoneId: { type: string }
+      zoneLabel: { type: string }
+      pumpRole:
+        type: string
+        enum: [main, zone, dhw]
+      pumpSource:
+        type: string
+        enum: [catalog, boiler_builtin]
+      catalogPumpId: { type: string }
+      catalogBoilerId: { type: string }
+      brand: { type: string }
+      model: { type: string }
+      segment:
+        type: string
+        enum: [premium, medium, budget]
+      price: { type: number }
+      modeName: { type: string }
+      headAtDesignM: { type: number }
+      headRequiredM: { type: number }
+      designFlowM3PerHour: { type: number }
+      headMarginPercent: { type: number }
+      connectionNominalMm: { type: number }
+      note: { type: string }

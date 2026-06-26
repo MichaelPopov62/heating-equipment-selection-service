@@ -43,6 +43,17 @@ properties:
         type: array
         items: { type: string }
       headRequiredM: { type: number }
+      criticalPressureDropKPa: { type: number }
+      criticalLoop:
+        $ref: HydraulicsCirculationLoopBranch.yaml
+      circulationLoops:
+        type: array
+        items:
+          $ref: HydraulicsCirculationLoopBranch.yaml
+      balancingRecommendations:
+        type: array
+        items:
+          $ref: HydraulicsBalancingRecommendation.yaml
       segments:
         type: array
         items:

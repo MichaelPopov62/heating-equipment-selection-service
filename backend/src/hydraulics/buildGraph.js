@@ -3,11 +3,19 @@
  * Описание: radiators_only, ufh_only, mixed — узлы и рёбра без подбора диаметров.
  */
 
+import {
+  resolveCirculationFlows,
+  resolvePrimaryMainLineFlowM3h,
+} from './resolveCirculationFlows.js';
+import { thermalLoadToFlow } from './thermalLoadToFlow.js';
+
 /**
  * @param {import('./types').HydraulicsPipelineInput} dto
  * @returns {import('./types').HydraulicsGraph}
  */
 export function buildHydraulicsGraph(dto) {
+  const flowCtx = resolveCirculationFlows(dto);
+
   /** @type {import('./types').HydraulicsGraphNode[]} */
   const nodes = [];
   /** @type {import('./types').HydraulicsGraphEdge[]} */
@@ -31,6 +39,8 @@ export function buildHydraulicsGraph(dto) {
     ufh?.isMixingNodeRequired
     && ufh.distributionPreset === 'collector_mixing_valve';
 
+  const primaryMainFlow = resolvePrimaryMainLineFlowM3h(dto);
+
   if (needsSeparator) {
     pushNode('hydraulic_separator', 'hydraulic_separator', 'Гидрострелка');
     edges.push({
@@ -39,27 +49,17 @@ export function buildHydraulicsGraph(dto) {
       to: 'hydraulic_separator',
       lengthM: dto.layout.mainLineLengthM,
       fluid: 'heating',
-      designFlowM3PerHour: resolvePrimaryFlowM3h(dto),
+      designFlowM3PerHour: primaryMainFlow,
       supplyC: dto.source.supplyC,
       returnC: dto.source.returnC,
       segmentRole: 'main',
     });
     upstreamId = 'hydraulic_separator';
-  } else if (needsMixingNode) {
-    pushNode('mixing_node', 'mixing_node', 'Насосно-смесительный узел');
-    edges.push({
-      id: 'e_boiler_mixing',
-      from: upstreamId,
-      to: 'mixing_node',
-      lengthM: dto.layout.mainLineLengthM,
-      fluid: 'heating',
-      designFlowM3PerHour: resolvePrimaryFlowM3h(dto),
-      supplyC: dto.source.supplyC,
-      returnC: dto.source.returnC,
-      segmentRole: 'main',
-    });
-    upstreamId = 'mixing_node';
-  } else if (dto.layout.mainLineLengthM > 0 || mode !== 'ufh_only') {
+  } else if (
+    dto.layout.mainLineLengthM > 0
+    || mode !== 'ufh_only'
+    || needsMixingNode
+  ) {
     pushNode('main_collector', 'main_collector', 'Магистраль / коллектор');
     edges.push({
       id: 'e_boiler_main',
@@ -67,7 +67,7 @@ export function buildHydraulicsGraph(dto) {
       to: 'main_collector',
       lengthM: dto.layout.mainLineLengthM,
       fluid: 'heating',
-      designFlowM3PerHour: resolvePrimaryFlowM3h(dto),
+      designFlowM3PerHour: primaryMainFlow,
       supplyC: dto.source.supplyC,
       returnC: dto.source.returnC,
       segmentRole: 'main',
@@ -104,10 +104,30 @@ export function buildHydraulicsGraph(dto) {
       pushNode(ufhCollectorId, 'ufh_collector', 'Коллектор ТП');
     }
 
-    if (upstreamId !== ufhCollectorId) {
+    let ufhUpstreamId = upstreamId;
+
+    if (needsMixingNode) {
+      if (!nodes.some((n) => n.id === 'mixing_node')) {
+        pushNode('mixing_node', 'mixing_node', 'Насосно-смесительный узел');
+      }
       edges.push({
-        id: `e_${upstreamId}_to_ufh_collector`,
+        id: 'e_main_to_mixing',
         from: upstreamId,
+        to: 'mixing_node',
+        lengthM: dto.rules.defaultLengthsM.ufhCollectorBranch,
+        fluid: 'heating',
+        designFlowM3PerHour: flowCtx.mixingNodePrimaryBleedM3PerHour,
+        supplyC: dto.source.supplyC,
+        returnC: dto.source.returnC,
+        segmentRole: 'main',
+      });
+      ufhUpstreamId = 'mixing_node';
+    }
+
+    if (ufhUpstreamId !== ufhCollectorId) {
+      edges.push({
+        id: `e_${ufhUpstreamId}_to_ufh_collector`,
+        from: ufhUpstreamId,
         to: ufhCollectorId,
         lengthM: dto.rules.defaultLengthsM.ufhCollectorBranch,
         fluid: 'heating',
@@ -168,17 +188,29 @@ export function buildHydraulicsGraph(dto) {
     });
   }
 
-  return { nodes, edges };
-}
+  if (
+    dhw?.indirectTank
+    && dhw.hotWaterPowerKw > 0
+    && dhw.scenario === 'storage'
+  ) {
+    const coilNodeId = 'indirect_coil';
+    pushNode(coilNodeId, 'indirect_coil', 'Змеевик БКН');
+    const coilFlow = thermalLoadToFlow({
+      heatLoadWatts: dhw.hotWaterPowerKw * 1000,
+      deltaTK: dto.source.deltaTK,
+    });
+    edges.push({
+      id: 'e_boiler_indirect_coil',
+      from: upstreamId,
+      to: coilNodeId,
+      lengthM: dto.rules.defaultLengthsM.radiatorBranch * 2,
+      fluid: 'heating',
+      designFlowM3PerHour: coilFlow.flowRateM3PerHour,
+      supplyC: dto.source.supplyC,
+      returnC: dto.source.returnC,
+      segmentRole: 'branch',
+    });
+  }
 
-/**
- * @param {import('./types').HydraulicsPipelineInput} dto
- * @returns {number}
- */
-function resolvePrimaryFlowM3h(dto) {
-  const rad = dto.circuits.radiators?.totalFlowRateM3PerHour ?? 0;
-  const ufh = dto.circuits.underfloor?.aggregate.flowRateM3PerHour ?? 0;
-  if (dto.meta.heatingEmittersMode === 'ufh_only') return ufh;
-  if (dto.meta.heatingEmittersMode === 'radiators_only') return rad;
-  return Math.max(rad, ufh);
+  return { nodes, edges };
 }

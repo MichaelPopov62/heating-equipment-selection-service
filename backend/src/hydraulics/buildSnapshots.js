@@ -66,7 +66,7 @@ export function buildHydraulicsSnapshots({
 
   /** @type {import('./types').HydraulicsSourceNode} */
   const source = {
-    catalogBoilerId: selected?.id,
+    catalogBoilerId: selected?.id ?? selected?.model,
     supplyC,
     returnC,
     deltaTK,

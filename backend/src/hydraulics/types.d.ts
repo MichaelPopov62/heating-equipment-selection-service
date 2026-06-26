@@ -37,6 +37,10 @@ export interface HydraulicsApplianceRules {
   velocityLimitsMps: HydraulicsVelocityLimits;
   defaultLengthsM: HydraulicsDefaultLengthsM;
   maxUfhLoopLengthM: number;
+  ufhLoopDeltaTK: number;
+  ufhLoopVelocityMinMps: number;
+  ufhLoopVelocityMaxMps: number;
+  maxUfhLoopPressureDropKPa: number;
   roughnessMmByMaterial: Record<string, number>;
   localLossZeta: {
     elbow90: number;
@@ -45,6 +49,12 @@ export interface HydraulicsApplianceRules {
     collector: number;
   };
   pumpHeadMarginPercent: number;
+  pumpDutyQMaxUtilizationPercent: number;
+  pumpMinHeadAtDutyM: number;
+  pumpMaxHeadMarginPercent: number;
+  pumpMinHeadAtQMaxM: number;
+  primaryFlowMarginPercent: number;
+  balancingValveKPaPerTurn: number;
 }
 
 export interface HydraulicsSourceNode {
@@ -149,6 +159,79 @@ export interface HydraulicsRules {
   roughnessMmByMaterial: Record<string, number>;
   localLossZeta: HydraulicsApplianceRules['localLossZeta'];
   pumpHeadMarginPercent: number;
+  pumpDutyQMaxUtilizationPercent: number;
+  pumpMinHeadAtDutyM: number;
+  pumpMaxHeadMarginPercent: number;
+  pumpMinHeadAtQMaxM: number;
+  primaryFlowMarginPercent: number;
+  balancingValveKPaPerTurn: number;
+}
+
+/** Пороги допустимой рабочей точки насоса (подмножество HydraulicsRules). */
+export interface HydraulicsPumpDutyRules {
+  pumpHeadMarginPercent: number;
+  pumpDutyQMaxUtilizationPercent: number;
+  pumpMinHeadAtDutyM: number;
+  pumpMaxHeadMarginPercent: number;
+}
+
+export type HydraulicsCirculationTopology =
+  | 'direct'
+  | 'mixing_valve'
+  | 'hydraulic_separator';
+
+export type HydraulicsPumpRole = 'main' | 'zone' | 'dhw';
+
+export type HydraulicsPumpSource = 'catalog' | 'boiler_builtin';
+
+export interface HydraulicsCirculationZone {
+  zoneId: string;
+  label: string;
+  pumpRole: HydraulicsPumpRole;
+  designFlowM3PerHour: number;
+  heatLoadWatts?: number;
+  deltaTK: number;
+  requiresCatalogPump: boolean;
+  simultaneousWithHeating?: boolean;
+  heatingFlowM3PerHour?: number;
+  dhwPriorityFlowM3PerHour?: number;
+}
+
+export interface HydraulicsCirculationFlowsResult {
+  zones: HydraulicsCirculationZone[];
+  topology: HydraulicsCirculationTopology;
+  primaryMainLineFlowM3PerHour: number;
+  boilerPumpDesignFlowM3PerHour: number;
+  mixingNodePrimaryBleedM3PerHour: number;
+  notes: string[];
+  warnings: string[];
+}
+
+export interface HydraulicsResolvedPump {
+  zoneId: string;
+  zoneLabel: string;
+  pumpRole: HydraulicsPumpRole;
+  pumpSource: HydraulicsPumpSource;
+  catalogPumpId?: string;
+  catalogBoilerId?: string;
+  modeName: string;
+  headMarginPercent: number;
+  designFlowM3PerHour: number;
+  headRequiredM: number;
+  headAtDesignM: number;
+  note?: string;
+  warnings: string[];
+}
+
+export interface HydraulicsSystemPumpsResult {
+  circulationZones: HydraulicsCirculationZone[];
+  topology: HydraulicsCirculationTopology;
+  boilerPumpDesignFlowM3PerHour: number;
+  primaryMainLineFlowM3PerHour: number;
+  pumps: HydraulicsResolvedPump[];
+  pump?: HydraulicsPumpMatch;
+  warnings: string[];
+  notes: string[];
 }
 
 export interface HydraulicsPipelineInput {
@@ -172,7 +255,14 @@ export type HydraulicsNodeKind =
   | 'ufh_collector'
   | 'radiator_consumer'
   | 'ufh_loop'
-  | 'dhw_load';
+  | 'dhw_load'
+  | 'indirect_coil';
+
+export type HydraulicsCirculationCircuitKind =
+  | 'radiators'
+  | 'underfloor'
+  | 'dhw'
+  | 'indirect_dhw';
 
 export interface HydraulicsGraphNode {
   id: string;
@@ -213,9 +303,35 @@ export interface HydraulicsPressureSegment {
   catalogPipeId?: string;
 }
 
+export interface HydraulicsCirculationLoopBranch {
+  branchId: string;
+  label: string;
+  circuit: HydraulicsCirculationCircuitKind;
+  roomId?: string;
+  loopId?: string;
+  edgeIds: string[];
+  pressureDropKPa: number;
+  isCritical: boolean;
+}
+
+export interface HydraulicsBalancingRecommendation {
+  branchId: string;
+  label: string;
+  circuit: HydraulicsCirculationCircuitKind;
+  branchPressureDropKPa: number;
+  criticalPressureDropKPa: number;
+  excessPressureDropKPa: number;
+  estimatedValveTurns?: number;
+  hint: string;
+}
+
 export interface HydraulicsPressureReport {
   criticalLoopEdgeIds: string[];
   headRequiredM: number;
+  criticalPressureDropKPa?: number;
+  criticalLoop?: HydraulicsCirculationLoopBranch;
+  circulationLoops?: HydraulicsCirculationLoopBranch[];
+  balancingRecommendations?: HydraulicsBalancingRecommendation[];
   segments: HydraulicsPressureSegment[];
 }
 
@@ -228,18 +344,95 @@ export interface HydraulicsPipeMatchItem {
 }
 
 export interface HydraulicsPumpMatch {
-  catalogPumpId: string;
+  zoneId?: string;
+  zoneLabel?: string;
+  pumpRole?: HydraulicsPumpRole;
+  pumpSource?: HydraulicsPumpSource;
+  catalogPumpId?: string;
+  catalogBoilerId?: string;
   modeName: string;
   headMarginPercent: number;
   designFlowM3PerHour: number;
   headRequiredM: number;
   headAtDesignM: number;
+  note?: string;
   warnings: string[];
+}
+
+export interface HydraulicsPipeProposalLine {
+  catalogPipeId: string;
+  brand: string;
+  model: string;
+  material: string;
+  outerDiameterMm: number;
+  wallThicknessMm: number;
+  internalDiameterMm: number;
+  totalLengthM: number;
+  edgeCount: number;
+  pricePerMeter: number;
+  linePrice: number;
+}
+
+export interface HydraulicsPipeSegmentProposal {
+  edgeId: string;
+  segmentLabel: string;
+  segmentRole: 'main' | 'branch' | 'ufh_loop' | 'dhw';
+  lengthM: number;
+  catalogPipeId: string;
+  brand: string;
+  model: string;
+  material: string;
+  outerDiameterMm: number;
+  wallThicknessMm: number;
+  internalDiameterMm: number;
+  velocityMps: number;
+  pressureDropKPa: number;
+  pricePerMeter: number;
+  linePrice: number;
+}
+
+export interface HydraulicsPumpProposal {
+  zoneId: string;
+  zoneLabel: string;
+  pumpRole: HydraulicsPumpRole;
+  pumpSource: HydraulicsPumpSource;
+  catalogPumpId?: string;
+  catalogBoilerId?: string;
+  brand: string;
+  model: string;
+  segment?: 'premium' | 'medium' | 'budget';
+  price: number;
+  modeName: string;
+  headAtDesignM: number;
+  headRequiredM: number;
+  designFlowM3PerHour: number;
+  headMarginPercent: number;
+  connectionNominalMm?: number;
+  note?: string;
+}
+
+export interface HydraulicsProposalReport {
+  designFlowM3PerHour: number;
+  headRequiredM: number;
+  topology?: HydraulicsCirculationTopology;
+  circulationZones?: HydraulicsCirculationZone[];
+  pipeLines: HydraulicsPipeProposalLine[];
+  pipeSegments: HydraulicsPipeSegmentProposal[];
+  pump?: HydraulicsPumpProposal;
+  pumps?: HydraulicsPumpProposal[];
+  estimatedPipesPrice: number;
+  estimatedPumpPrice: number;
+  estimatedTotalPrice: number;
+  unavailableReason?: string;
 }
 
 export interface HydraulicsMatchingReport {
   pipes: HydraulicsPipeMatchItem[];
+  topology?: HydraulicsCirculationTopology;
+  circulationZones?: HydraulicsCirculationZone[];
   pump?: HydraulicsPumpMatch;
+  pumps?: HydraulicsPumpMatch[];
+  proposal?: HydraulicsProposalReport;
   warnings: string[];
 }
 
@@ -252,6 +445,8 @@ export interface HydraulicsReport {
   };
   massFlowKgPerSec?: number;
   flowRateM3PerHour?: number;
+  boilerPumpDesignFlowM3PerHour?: number;
+  circulationTopology?: HydraulicsCirculationTopology;
   recommendedPipeDiameter?: string;
   recommendedVelocityRangeMPerSec?: [number, number];
   consumers?: HydraulicsConsumerSummary[];

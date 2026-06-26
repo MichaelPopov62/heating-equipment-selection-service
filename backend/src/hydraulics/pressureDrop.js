@@ -1,9 +1,12 @@
 /**
  * Назначение: расчёт потерь напора и критического контура.
- * Описание: Суммирует Δp по рёбрам с подобранными трубами; учитывает mixingNode.headMetersMin.
+ * Описание: Суммирует Δp по циркуляционным кольцам; учитывает mixingNode.headMetersMin.
  */
 
+import { computeCirculationLoops } from './circulationLoops.js';
 import { round } from '../utils/math.js';
+
+export { resolveDesignPumpFlowM3h } from './resolveCirculationFlows.js';
 
 /**
  * @param {object} args
@@ -17,8 +20,6 @@ export function computePressureReport({ graph, pipes, dto }) {
 
   /** @type {import('./types').HydraulicsPressureSegment[]} */
   const segments = [];
-  /** @type {{ edgeIds: string[]; headM: number }[]} */
-  const loopCandidates = [];
 
   for (const edge of graph.edges) {
     if (edge.fluid !== 'heating') continue;
@@ -32,18 +33,17 @@ export function computePressureReport({ graph, pipes, dto }) {
     });
   }
 
-  /** Критический контур — ветка с max Δp (упрощённо: max single edge × 2 для обратки) */
-  let maxKPa = 0;
-  /** @type {string[]} */
-  let criticalEdgeIds = [];
-  for (const seg of segments) {
-    if (seg.pressureDropKPa > maxKPa) {
-      maxKPa = seg.pressureDropKPa;
-      criticalEdgeIds = [seg.edgeId];
-    }
-  }
+  const balancingKPaPerTurn =
+    dto.rules.balancingValveKPaPerTurn ?? 3;
 
-  let headRequiredM = round((maxKPa * 2) / 9.81, 2);
+  const circulation = computeCirculationLoops({
+    graph,
+    pipes,
+    balancingValveKPaPerTurn: balancingKPaPerTurn,
+  });
+
+  let headRequiredM = circulation.headRequiredM;
+  const criticalEdgeIds = circulation.criticalLoopEdgeIds;
 
   const mixingMin = dto.circuits.underfloor?.mixingNode?.headMetersMin;
   if (typeof mixingMin === 'number' && mixingMin > headRequiredM) {
@@ -58,25 +58,15 @@ export function computePressureReport({ graph, pipes, dto }) {
     if (sepMin > headRequiredM) headRequiredM = sepMin;
   }
 
-  loopCandidates.push({ edgeIds: criticalEdgeIds, headM: headRequiredM });
-
   return {
     criticalLoopEdgeIds: criticalEdgeIds,
     headRequiredM,
+    criticalPressureDropKPa: circulation.criticalPressureDropKPa,
+    criticalLoop: circulation.criticalLoop ?? undefined,
+    circulationLoops: circulation.branches,
+    balancingRecommendations: circulation.balancingRecommendations,
     segments,
   };
-}
-
-/**
- * @param {import('./types').HydraulicsPipelineInput} dto
- * @returns {number}
- */
-export function resolveDesignPumpFlowM3h(dto) {
-  const rad = dto.circuits.radiators?.totalFlowRateM3PerHour ?? 0;
-  const ufh = dto.circuits.underfloor?.aggregate.flowRateM3PerHour ?? 0;
-  if (dto.meta.heatingEmittersMode === 'ufh_only') return ufh;
-  if (dto.meta.heatingEmittersMode === 'radiators_only') return rad;
-  return Math.max(rad, ufh);
 }
 
 /**

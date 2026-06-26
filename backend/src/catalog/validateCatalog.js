@@ -9,6 +9,11 @@ import { sanitizeTrimAngleBrackets } from '../utils/sanitizeString.js';
 import { applyBoilerMountingType } from './boilerCatalogHelpers.js';
 import { derivePipeModelLabel } from './pipeCatalogHelpers.js';
 import { derivePumpCatalogIdFromModel } from './pumpCatalogHelpers.js';
+import {
+  assertPumpModeCurveGeometry,
+  normalizePumpModeQMaxToCurve,
+  PUMP_CURVE_MIN_HEAD_AT_QMAX_M,
+} from '../utils/pumpCurveMath.js';
 
 function toFiniteNumber(x, { field, min = -Infinity, max = Infinity } = {}) {
   const n = Number(x);
@@ -286,6 +291,24 @@ function validateBoiler(item, ctx, expectedCircuitsCount) {
 
   if (item.priceSegment != null) {
     item.priceSegment = sanitizeTrimAngleBrackets(item.priceSegment).toLowerCase();
+  }
+
+  if (item.circulationPump != null) {
+    if (!isPlainObject(item.circulationPump)) {
+      throw new Error(`Каталог: circulationPump должен быть объектом (${ctx}).`);
+    }
+    const circulationPump = /** @type {Record<string, unknown>} */ (item.circulationPump);
+    if (
+      !Array.isArray(circulationPump.operatingModes)
+      || circulationPump.operatingModes.length < 1
+    ) {
+      throw new Error(
+        `Каталог: circulationPump.operatingModes — непустой массив (${ctx}).`,
+      );
+    }
+    circulationPump.operatingModes.forEach((mode, mi) => {
+      validatePumpOperatingMode(mode, `${ctx}.circulationPump.operatingModes[${mi}]`);
+    });
   }
 }
 
@@ -598,11 +621,9 @@ function normalizePumpFromExtendedFormats(item, idx) {
 
 /**
  * @param {unknown} raw
- * @param {number} idx
- * @param {number} modeIdx
+ * @param {string} ctx
  */
-function validatePumpOperatingMode(raw, idx, modeIdx) {
-  const ctx = `pumps[${idx}].operatingModes[${modeIdx}]`;
+function validatePumpOperatingMode(raw, ctx) {
   if (!isPlainObject(raw)) {
     throw new Error(`Каталог: ${ctx} должен быть объектом.`);
   }
@@ -647,6 +668,21 @@ function validatePumpOperatingMode(raw, idx, modeIdx) {
   if (mode.qMaxM3h < mode.qMinM3h) {
     throw new Error(`Каталог: qMaxM3h < qMinM3h (${ctx}).`);
   }
+
+  /** @type {{ qMinM3h: number; qMaxM3h: number; coefficients: object }} */
+  const modeCurve = {
+    qMinM3h: /** @type {number} */ (mode.qMinM3h),
+    qMaxM3h: /** @type {number} */ (mode.qMaxM3h),
+    coefficients: coef,
+  };
+  normalizePumpModeQMaxToCurve(modeCurve, ctx, PUMP_CURVE_MIN_HEAD_AT_QMAX_M);
+  mode.qMaxM3h = modeCurve.qMaxM3h;
+
+  assertPumpModeCurveGeometry(
+    modeCurve,
+    ctx,
+    PUMP_CURVE_MIN_HEAD_AT_QMAX_M,
+  );
 }
 
 /**
@@ -734,7 +770,9 @@ function validatePump(item, idx, seenIds) {
   if (!Array.isArray(item.operatingModes) || item.operatingModes.length < 1) {
     throw new Error(`Каталог: operatingModes — непустой массив (${ctx}).`);
   }
-  item.operatingModes.forEach((mode, mi) => validatePumpOperatingMode(mode, idx, mi));
+  item.operatingModes.forEach((mode, mi) => {
+    validatePumpOperatingMode(mode, `${ctx}.operatingModes[${mi}]`);
+  });
 }
 
 /**

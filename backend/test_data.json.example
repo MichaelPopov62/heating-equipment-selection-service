@@ -19,7 +19,35 @@
           "mountingType": "wall",
           "connectionDiameters": ["3/4 дюйма (отопление)", "1/2 дюйма (ГВС)"],
           "circuitsCount": 2,
-          "type": "condensing"
+          "type": "condensing",
+          "circulationPump": {
+            "operatingModes": [
+              {
+                "modeName": "Встроенный насос — скорость 3",
+                "speedIndex": 3,
+                "powerWatts": 40,
+                "coefficients": { "a": -0.45, "b": 0.12, "c": 6.0 },
+                "qMinM3h": 0.1,
+                "qMaxM3h": 4.5
+              },
+              {
+                "modeName": "Встроенный насос — скорость 2",
+                "speedIndex": 2,
+                "powerWatts": 35,
+                "coefficients": { "a": -0.15, "b": -0.02, "c": 5.4 },
+                "qMinM3h": 0.2,
+                "qMaxM3h": 4.0
+              },
+              {
+                "modeName": "Встроенный насос — скорость 1",
+                "speedIndex": 1,
+                "powerWatts": 30,
+                "coefficients": { "a": -0.35, "b": -0.01, "c": 2.2 },
+                "qMinM3h": 0.2,
+                "qMaxM3h": 1.7
+              }
+            ]
+          }
         },
         {
           "model": "Viessmann Vitodens 050-W",
@@ -462,7 +490,27 @@
           "gasConsumptionM3PerHour": 2.4,
           "price": 55200,
           "circuitsCount": 1,
-          "type": "condensing"
+          "type": "condensing",
+          "circulationPump": {
+            "operatingModes": [
+              {
+                "modeName": "Встроенный насос — скорость 3",
+                "speedIndex": 3,
+                "powerWatts": 40,
+                "coefficients": { "a": -0.45, "b": 0.12, "c": 6.0 },
+                "qMinM3h": 0.1,
+                "qMaxM3h": 4.5
+              },
+              {
+                "modeName": "Встроенный насос — скорость 2",
+                "speedIndex": 2,
+                "powerWatts": 35,
+                "coefficients": { "a": -0.15, "b": -0.02, "c": 5.4 },
+                "qMinM3h": 0.2,
+                "qMaxM3h": 4.0
+              }
+            ]
+          }
         },
         {
           "model": "Protherm Panther 25 KTO",

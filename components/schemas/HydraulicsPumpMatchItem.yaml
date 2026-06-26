@@ -1,0 +1,34 @@
+type: object
+description: Результат подбора насоса по зоне циркуляции.
+additionalProperties: false
+required:
+  - zoneId
+  - zoneLabel
+  - pumpRole
+  - pumpSource
+  - modeName
+  - headMarginPercent
+  - designFlowM3PerHour
+  - headRequiredM
+  - headAtDesignM
+  - warnings
+properties:
+  zoneId: { type: string }
+  zoneLabel: { type: string }
+  pumpRole:
+    type: string
+    enum: [main, zone, dhw]
+  pumpSource:
+    type: string
+    enum: [catalog, boiler_builtin]
+  catalogPumpId: { type: string }
+  catalogBoilerId: { type: string }
+  modeName: { type: string }
+  headMarginPercent: { type: number }
+  designFlowM3PerHour: { type: number }
+  headRequiredM: { type: number }
+  headAtDesignM: { type: number }
+  note: { type: string }
+  warnings:
+    type: array
+    items: { type: string }

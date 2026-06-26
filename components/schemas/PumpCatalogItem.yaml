@@ -2,6 +2,7 @@ type: object
 description: >
   Циркуляционный насос в каталоге после validateCatalog. Кривая напора H(Q) задаётся
   коэффициентами a, b, c в operatingModes (H = a·Q² + b·Q + c, Q в м³/ч, H в м).
+  При validateCatalog qMax подрезается по кривой (см. docs/hydraulics-pipeline.md § «Кривая насоса в каталоге»).
 additionalProperties: true
 required:
   - model
@@ -79,3 +80,6 @@ properties:
         qMaxM3h:
           type: number
           minimum: 0
+          description: >
+            Верхняя граница расхода режима (м³/ч). После validateCatalog может быть уменьшен,
+            если H(qMax) по полиному ниже pumpMinHeadAtQMaxM из appliances.hydraulics.

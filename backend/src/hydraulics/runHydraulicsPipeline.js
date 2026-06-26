@@ -1,17 +1,18 @@
 /**
  * Назначение: оркестратор Pure Pipeline гидравлики.
- * Описание: граф → подбор труб → Δp → насос → отчёт.
+ * Описание: граф → подбор труб → Δp → зоны циркуляции → насосы → отчёт.
  */
 
+import { buildHydraulicsProposal } from './buildHydraulicsProposal.js';
 import { buildHydraulicsGraph } from './buildGraph.js';
 import { pickPipesForGraph } from './pickPipe.js';
-import { pickPumpForSystem } from './pickPump.js';
 import {
   buildConsumerSummaries,
   coarseRecommendedDn,
   computePressureReport,
   resolveDesignPumpFlowM3h,
 } from './pressureDrop.js';
+import { resolveSystemPumps } from './resolveSystemPumps.js';
 import { thermalLoadToFlow } from './thermalLoadToFlow.js';
 
 /**
@@ -32,14 +33,10 @@ export function runHydraulicsPipeline({ dto, catalog }) {
   });
 
   const pressure = computePressureReport({ graph, pipes, dto });
+  const pumpResult = resolveSystemPumps({ dto, pressure, catalog });
   const designFlow = resolveDesignPumpFlowM3h(dto);
 
-  const { pump, warnings: pumpWarnings } = pickPumpForSystem({
-    designFlowM3PerHour: designFlow,
-    headRequiredM: pressure.headRequiredM,
-    pumps: catalog.pumps ?? [],
-    headMarginPercent: dto.rules.pumpHeadMarginPercent,
-  });
+  notes.push(...pumpResult.notes);
 
   const consumers = buildConsumerSummaries(dto);
 
@@ -75,6 +72,22 @@ export function runHydraulicsPipeline({ dto, catalog }) {
     );
   }
 
+  if (pumpResult.topology === 'direct' && dto.meta.heatingEmittersMode === 'mixed') {
+    notes.push(
+      'Смешанная система: расход котлового насоса = сумма расходов радиаторов и ТП.',
+    );
+  }
+
+  if (pressure.criticalLoop) {
+    notes.push(
+      `Критическое циркуляционное кольцо: «${pressure.criticalLoop.label}» — Δp ${pressure.criticalPressureDropKPa ?? pressure.criticalLoop.pressureDropKPa} кПа (H≈${pressure.headRequiredM} м).`,
+    );
+  }
+
+  for (const rec of pressure.balancingRecommendations ?? []) {
+    notes.push(rec.hint);
+  }
+
   /** @type {import('./types').HydraulicsReport} */
   const hydraulics = {
     schemaVersion: 1,
@@ -85,6 +98,8 @@ export function runHydraulicsPipeline({ dto, catalog }) {
     },
     massFlowKgPerSec: flowFromThermal.massFlowKgPerSec,
     flowRateM3PerHour: designFlow || flowFromThermal.flowRateM3PerHour,
+    boilerPumpDesignFlowM3PerHour: pumpResult.boilerPumpDesignFlowM3PerHour,
+    circulationTopology: pumpResult.topology,
     recommendedPipeDiameter: coarseRecommendedDn(designFlow),
     recommendedVelocityRangeMPerSec: [
       dto.rules.velocityLimitsMps.mainMin,
@@ -99,9 +114,34 @@ export function runHydraulicsPipeline({ dto, catalog }) {
   /** @type {import('./types').HydraulicsMatchingReport} */
   const hydraulicsMatching = {
     pipes,
-    ...(pump ? { pump } : {}),
-    warnings: [...pipeWarnings, ...pumpWarnings],
+    topology: pumpResult.topology,
+    circulationZones: pumpResult.circulationZones,
+    ...(pumpResult.pumps.length ? { pumps: pumpResult.pumps.map((p) => ({
+      zoneId: p.zoneId,
+      zoneLabel: p.zoneLabel,
+      pumpRole: p.pumpRole,
+      pumpSource: p.pumpSource,
+      ...(p.catalogPumpId ? { catalogPumpId: p.catalogPumpId } : {}),
+      ...(p.catalogBoilerId ? { catalogBoilerId: p.catalogBoilerId } : {}),
+      modeName: p.modeName,
+      headMarginPercent: p.headMarginPercent,
+      designFlowM3PerHour: p.designFlowM3PerHour,
+      headRequiredM: p.headRequiredM,
+      headAtDesignM: p.headAtDesignM,
+      ...(p.note ? { note: p.note } : {}),
+      warnings: p.warnings,
+    })) } : {}),
+    ...(pumpResult.pump ? { pump: pumpResult.pump } : {}),
+    warnings: [...pipeWarnings, ...pumpResult.warnings],
   };
+
+  hydraulicsMatching.proposal = buildHydraulicsProposal({
+    matching: hydraulicsMatching,
+    graph,
+    pressure,
+    catalog,
+    pumpResult,
+  });
 
   return { hydraulics, hydraulicsMatching };
 }

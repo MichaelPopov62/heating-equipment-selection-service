@@ -7,3 +7,5 @@ export { buildHydraulicsSnapshots } from './buildSnapshots.js';
 export { validateHydraulicsPipelineInput } from './validatePipelineInput.js';
 export { runHydraulicsPipeline } from './runHydraulicsPipeline.js';
 export { thermalLoadToFlow } from './thermalLoadToFlow.js';
+export { resolveCirculationFlows, resolveDesignPumpFlowM3h } from './resolveCirculationFlows.js';
+export { resolveSystemPumps } from './resolveSystemPumps.js';

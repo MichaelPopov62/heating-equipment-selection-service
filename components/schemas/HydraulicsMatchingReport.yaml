@@ -15,27 +15,21 @@ properties:
         velocityMps: { type: number }
         pressureDropKPa: { type: number }
         internalDiameterMm: { type: number }
+  topology:
+    type: string
+    enum: [direct, mixing_valve, hydraulic_separator]
+  circulationZones:
+    type: array
+    items:
+      $ref: HydraulicsCirculationZone.yaml
   pump:
-    type: object
-    additionalProperties: false
-    required:
-      - catalogPumpId
-      - modeName
-      - headMarginPercent
-      - designFlowM3PerHour
-      - headRequiredM
-      - headAtDesignM
-      - warnings
-    properties:
-      catalogPumpId: { type: string }
-      modeName: { type: string }
-      headMarginPercent: { type: number }
-      designFlowM3PerHour: { type: number }
-      headRequiredM: { type: number }
-      headAtDesignM: { type: number }
-      warnings:
-        type: array
-        items: { type: string }
+    $ref: HydraulicsPumpMatchItem.yaml
+  pumps:
+    type: array
+    items:
+      $ref: HydraulicsPumpMatchItem.yaml
+  proposal:
+    $ref: HydraulicsProposalReport.yaml
   warnings:
     type: array
     items: { type: string }

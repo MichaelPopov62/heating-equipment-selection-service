@@ -79,6 +79,10 @@ export interface HydraulicsApplianceRulesDoc {
     ufhCollectorBranch: number;
   };
   maxUfhLoopLengthM: number;
+  ufhLoopDeltaTK: number;
+  ufhLoopVelocityMinMps: number;
+  ufhLoopVelocityMaxMps: number;
+  maxUfhLoopPressureDropKPa: number;
   roughnessMmByMaterial: Record<string, number>;
   localLossZeta: {
     elbow90: number;
@@ -87,6 +91,12 @@ export interface HydraulicsApplianceRulesDoc {
     collector: number;
   };
   pumpHeadMarginPercent: number;
+  pumpDutyQMaxUtilizationPercent: number;
+  pumpMinHeadAtDutyM: number;
+  pumpMaxHeadMarginPercent: number;
+  pumpMinHeadAtQMaxM: number;
+  primaryFlowMarginPercent: number;
+  balancingValveKPaPerTurn: number;
 }
 
 export interface UnderfloorHeatingDistributionRules {

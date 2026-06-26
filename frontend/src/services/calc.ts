@@ -6,10 +6,13 @@
 import type { CalcOkPayload } from '../types/calcApi';
 import { isRecord } from '../utils/jsonGuards';
 
+/** Типичная подсказка при недоступном backend в dev (см. frontend/vite.config.ts). */
+export const CALC_BACKEND_HINT =
+  'Запустите API: `cd backend && npm run start` (или из корня: `npm run dev:full` — API + UI). В dev Vite проксирует /api на http://localhost:3001; без backend браузер получает HTTP 502.';
+
 /** Сообщение при сетевой ошибке fetch (бэкенд не слушает порт или прокси оборвал соединение). */
 function networkCalcErrorMessage(cause: unknown): string {
-  const hint =
-    'Запустите API: `cd backend && npm run start` и UI: `cd frontend && npm run dev` (запросы идут через прокси Vite → порт 3001).';
+  const hint = CALC_BACKEND_HINT;
   if (cause instanceof TypeError) {
     const m = cause.message.toLowerCase();
     if (
@@ -52,6 +55,11 @@ export async function postCalc(payload: unknown): Promise<CalcOkPayload> {
   }
   const data: unknown = await res.json().catch(() => null);
   if (!res.ok) {
+    if (res.status === 502 || res.status === 503 || res.status === 504) {
+      throw new Error(
+        `Сервер расчёта недоступен (HTTP ${res.status}). ${CALC_BACKEND_HINT}`,
+      );
+    }
     let msg = `Ошибка API: HTTP ${res.status}`;
     if (isRecord(data)) {
       const errNode = data.error;

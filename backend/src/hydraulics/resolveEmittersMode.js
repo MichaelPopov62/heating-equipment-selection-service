@@ -33,6 +33,12 @@ export function hydraulicsRulesFromAppliance(hydraulicsRules) {
     roughnessMmByMaterial: { ...hydraulicsRules.roughnessMmByMaterial },
     localLossZeta: { ...hydraulicsRules.localLossZeta },
     pumpHeadMarginPercent: hydraulicsRules.pumpHeadMarginPercent,
+    pumpDutyQMaxUtilizationPercent: hydraulicsRules.pumpDutyQMaxUtilizationPercent,
+    pumpMinHeadAtDutyM: hydraulicsRules.pumpMinHeadAtDutyM,
+    pumpMaxHeadMarginPercent: hydraulicsRules.pumpMaxHeadMarginPercent,
+    pumpMinHeadAtQMaxM: hydraulicsRules.pumpMinHeadAtQMaxM,
+    primaryFlowMarginPercent: hydraulicsRules.primaryFlowMarginPercent,
+    balancingValveKPaPerTurn: hydraulicsRules.balancingValveKPaPerTurn,
   };
 }
 

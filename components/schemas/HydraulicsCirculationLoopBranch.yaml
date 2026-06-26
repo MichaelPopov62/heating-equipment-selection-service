@@ -1,0 +1,17 @@
+type: object
+description: Циркуляционное кольцо (ветка котёл → потребитель → обратка).
+additionalProperties: false
+required: [branchId, label, circuit, edgeIds, pressureDropKPa, isCritical]
+properties:
+  branchId: { type: string }
+  label: { type: string }
+  circuit:
+    type: string
+    enum: [radiators, underfloor, dhw, indirect_dhw]
+  roomId: { type: string }
+  loopId: { type: string }
+  edgeIds:
+    type: array
+    items: { type: string }
+  pressureDropKPa: { type: number }
+  isCritical: { type: boolean }

@@ -6,6 +6,7 @@
 import { getDesignOutsideTempC } from '../climate/index.js';
 import { calculateHeatLossForBuilding } from '../logic/heatlossByRooms.js';
 import { calculateUnderfloorHeating } from '../logic/warmFloorCalc.js';
+import { enrichUnderfloorHeatingLoopHydraulics } from '../logic/ufhLoopHydraulics.js';
 import {
   applyUnderfloorHeatingRecommendations,
   applyUnderfloorMixingDistributionRecommendations,
@@ -45,6 +46,7 @@ import {
 export async function buildReport({ input, ctx }) {
   assertCalcRuntimeContext(ctx);
   const {
+    catalog,
     waterNorms,
     appliances,
     recommendations,
@@ -112,6 +114,11 @@ export async function buildReport({ input, ctx }) {
     maxUfhLoopLengthM: appliances.byKind.hydraulics.maxUfhLoopLengthM,
   });
   if (underfloorHeating?.rooms?.length) {
+    enrichUnderfloorHeatingLoopHydraulics(underfloorHeating, {
+      catalog,
+      hydraulicsRules: appliances.byKind.hydraulics,
+      materialPreference: input.hydraulics?.pipeMaterialPreference,
+    });
     applyUnderfloorHeatingRecommendations(underfloorHeating, recommendations);
     logger.info('report.underfloorHeating.done', null, {
       rooms: underfloorHeating.rooms.length,

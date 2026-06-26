@@ -1,0 +1,243 @@
+/**
+ * Назначение: продуктовое предложение по гидравлике для клиента.
+ * Описание: Обогащает matching.hydraulics данными каталога (brand, model, price).
+ */
+
+import { round } from '../utils/math.js';
+
+/** @type {Record<string, string>} */
+const SEGMENT_ROLE_LABELS = {
+  main: 'Магистраль',
+  branch: 'Ветка радиатора',
+  ufh_loop: 'Петля ТП',
+  dhw: 'ГВС',
+};
+
+/**
+ * @param {import('./types').HydraulicsGraphEdge} edge
+ * @param {Map<string, import('./types').HydraulicsGraphNode>} nodesById
+ * @returns {string}
+ */
+function edgeSegmentLabel(edge, nodesById) {
+  const from = nodesById.get(edge.from)?.label ?? edge.from;
+  const to = nodesById.get(edge.to)?.label ?? edge.to;
+  const role = SEGMENT_ROLE_LABELS[edge.segmentRole] ?? edge.segmentRole;
+  return `${role}: ${from} → ${to}`;
+}
+
+/**
+ * @param {import('../catalog/types').NormalizedCatalog['pipes']} pipes
+ * @param {string} catalogPipeId
+ * @returns {import('../catalog/types').PipeCatalogItemNormalized | null}
+ */
+function findPipeInCatalog(pipes, catalogPipeId) {
+  if (!pipes?.length || !catalogPipeId) return null;
+  return pipes.find((p) => p.id === catalogPipeId) ?? null;
+}
+
+/**
+ * @param {import('../catalog/types').NormalizedCatalog['pumps']} pumps
+ * @param {string} catalogPumpId
+ * @returns {import('../catalog/types').PumpCatalogItemNormalized | null}
+ */
+function findPumpInCatalog(pumps, catalogPumpId) {
+  if (!pumps?.length || !catalogPumpId) return null;
+  return pumps.find((p) => p.id === catalogPumpId) ?? null;
+}
+
+/**
+ * @param {import('../catalog/types').NormalizedCatalog['boilers']} boilers
+ * @param {string | undefined} catalogBoilerId
+ * @returns {import('../catalog/types').BoilerCatalogItemNormalized | null}
+ */
+function findBoilerInCatalog(boilers, catalogBoilerId) {
+  if (!catalogBoilerId || !boilers) return null;
+  const all = [
+    ...(boilers.doubleCircuit ?? []),
+    ...(boilers.singleCircuit ?? []),
+  ];
+  return all.find((b) => {
+    const id = /** @type {{ id?: string }} */ (b).id;
+    return id === catalogBoilerId || b.model === catalogBoilerId;
+  }) ?? null;
+}
+
+/**
+ * @param {import('./types').HydraulicsResolvedPump} resolved
+ * @param {import('../catalog/types').NormalizedCatalog} catalog
+ * @returns {import('./types').HydraulicsPumpProposal}
+ */
+function buildPumpProposal(resolved, catalog) {
+  if (resolved.pumpSource === 'boiler_builtin') {
+    const boiler = findBoilerInCatalog(catalog.boilers, resolved.catalogBoilerId);
+    return {
+      zoneId: resolved.zoneId,
+      zoneLabel: resolved.zoneLabel,
+      pumpRole: resolved.pumpRole,
+      pumpSource: 'boiler_builtin',
+      ...(resolved.catalogBoilerId ? { catalogBoilerId: resolved.catalogBoilerId } : {}),
+      brand: boiler?.model?.split(' ')[0] ?? 'Котёл',
+      model: boiler?.model ?? 'Встроенный насос',
+      price: 0,
+      modeName: resolved.modeName,
+      headAtDesignM: resolved.headAtDesignM,
+      headRequiredM: resolved.headRequiredM,
+      designFlowM3PerHour: resolved.designFlowM3PerHour,
+      headMarginPercent: resolved.headMarginPercent,
+      note: resolved.note ?? 'Используется встроенный насос котла.',
+    };
+  }
+
+  const catalogPump = findPumpInCatalog(catalog.pumps, resolved.catalogPumpId ?? '');
+  return {
+    zoneId: resolved.zoneId,
+    zoneLabel: resolved.zoneLabel,
+    pumpRole: resolved.pumpRole,
+    pumpSource: 'catalog',
+    catalogPumpId: resolved.catalogPumpId ?? '',
+    brand: catalogPump?.brand ?? '',
+    model: catalogPump?.model ?? resolved.catalogPumpId ?? '',
+    segment: catalogPump?.segment,
+    price: catalogPump?.price ?? 0,
+    modeName: resolved.modeName,
+    headAtDesignM: resolved.headAtDesignM,
+    headRequiredM: resolved.headRequiredM,
+    designFlowM3PerHour: resolved.designFlowM3PerHour,
+    headMarginPercent: resolved.headMarginPercent,
+    connectionNominalMm: catalogPump?.connections?.nominalDiameterMm,
+  };
+}
+
+/**
+ * @param {object} args
+ * @param {import('./types').HydraulicsMatchingReport} args.matching
+ * @param {import('./types').HydraulicsGraph} args.graph
+ * @param {import('./types').HydraulicsPressureReport} args.pressure
+ * @param {import('../catalog/types').NormalizedCatalog} args.catalog
+ * @param {import('./types').HydraulicsSystemPumpsResult} [args.pumpResult]
+ * @returns {import('./types').HydraulicsProposalReport}
+ */
+export function buildHydraulicsProposal({
+  matching,
+  graph,
+  pressure,
+  catalog,
+  pumpResult,
+}) {
+  /** @type {Map<string, import('./types').HydraulicsGraphNode>} */
+  const nodesById = new Map(graph.nodes.map((n) => [n.id, n]));
+  /** @type {Map<string, import('./types').HydraulicsGraphEdge>} */
+  const edgesById = new Map(graph.edges.map((e) => [e.id, e]));
+
+  /** @type {import('./types').HydraulicsPipeSegmentProposal[]} */
+  const pipeSegments = [];
+
+  for (const pipeMatch of matching.pipes ?? []) {
+    const edge = edgesById.get(pipeMatch.edgeId);
+    const catalogPipe = findPipeInCatalog(catalog.pipes, pipeMatch.catalogPipeId);
+    const lengthM = edge?.lengthM ?? 0;
+    const pricePerMeter = catalogPipe?.price ?? 0;
+    const linePrice = round(lengthM * pricePerMeter, 2);
+
+    pipeSegments.push({
+      edgeId: pipeMatch.edgeId,
+      segmentLabel: edge ? edgeSegmentLabel(edge, nodesById) : pipeMatch.edgeId,
+      segmentRole: edge?.segmentRole ?? 'main',
+      lengthM,
+      catalogPipeId: pipeMatch.catalogPipeId,
+      brand: catalogPipe?.brand ?? '',
+      model: catalogPipe?.model ?? pipeMatch.catalogPipeId,
+      material: catalogPipe?.material ?? '',
+      outerDiameterMm: catalogPipe?.diameter ?? 0,
+      wallThicknessMm: catalogPipe?.wallThickness ?? 0,
+      internalDiameterMm: pipeMatch.internalDiameterMm,
+      velocityMps: pipeMatch.velocityMps,
+      pressureDropKPa: pipeMatch.pressureDropKPa,
+      pricePerMeter,
+      linePrice,
+    });
+  }
+
+  /** @type {Map<string, import('./types').HydraulicsPipeProposalLine>} */
+  const aggregated = new Map();
+
+  for (const seg of pipeSegments) {
+    const prev = aggregated.get(seg.catalogPipeId);
+    if (prev) {
+      prev.totalLengthM = round(prev.totalLengthM + seg.lengthM, 2);
+      prev.edgeCount += 1;
+      prev.linePrice = round(prev.linePrice + seg.linePrice, 2);
+    } else {
+      aggregated.set(seg.catalogPipeId, {
+        catalogPipeId: seg.catalogPipeId,
+        brand: seg.brand,
+        model: seg.model,
+        material: seg.material,
+        outerDiameterMm: seg.outerDiameterMm,
+        wallThicknessMm: seg.wallThicknessMm,
+        internalDiameterMm: seg.internalDiameterMm,
+        totalLengthM: seg.lengthM,
+        edgeCount: 1,
+        pricePerMeter: seg.pricePerMeter,
+        linePrice: seg.linePrice,
+      });
+    }
+  }
+
+  const pipeLines = [...aggregated.values()].sort(
+    (a, b) => b.totalLengthM - a.totalLengthM,
+  );
+
+  const estimatedPipesPrice = round(
+    pipeLines.reduce((s, l) => s + l.linePrice, 0),
+    2,
+  );
+
+  const resolvedPumps = pumpResult?.pumps ?? [];
+  /** @type {import('./types').HydraulicsPumpProposal[]} */
+  const pumpProposals = resolvedPumps.map((p) => buildPumpProposal(p, catalog));
+  const estimatedPumpPrice = round(
+    pumpProposals.reduce((s, p) => s + (p.price ?? 0), 0),
+    2,
+  );
+  const mainPumpProposal =
+    pumpProposals.find((p) => p.zoneId === 'boiler_primary') ?? pumpProposals[0];
+
+  const designFlowM3PerHour =
+    pumpResult?.boilerPumpDesignFlowM3PerHour
+    ?? matching.pump?.designFlowM3PerHour
+    ?? pipeSegments.reduce((max, s) => {
+      const edge = edgesById.get(s.edgeId);
+      return Math.max(max, edge?.designFlowM3PerHour ?? 0);
+    }, 0);
+
+  const headRequiredM = pressure.headRequiredM ?? matching.pump?.headRequiredM ?? 0;
+
+  /** @type {string | undefined} */
+  let unavailableReason;
+  const hasAnyPump = pumpProposals.length > 0;
+  if (!pipeSegments.length && !hasAnyPump) {
+    unavailableReason = 'Не удалось подобрать трубы и насос из каталога.';
+  } else if (!pipeSegments.length) {
+    unavailableReason = 'Трубы из каталога не подобраны — проверьте каталог pipes.';
+  } else if (!hasAnyPump) {
+    unavailableReason = 'Насос из каталога не подобран — проверьте каталог pumps.';
+  }
+
+  return {
+    designFlowM3PerHour: round(designFlowM3PerHour, 3),
+    headRequiredM: round(headRequiredM, 2),
+    ...(matching.topology ? { topology: matching.topology } : {}),
+    ...(matching.circulationZones?.length
+      ? { circulationZones: matching.circulationZones }
+      : {}),
+    pipeLines,
+    pipeSegments,
+    ...(mainPumpProposal ? { pump: mainPumpProposal } : {}),
+    ...(pumpProposals.length ? { pumps: pumpProposals } : {}),
+    estimatedPipesPrice,
+    estimatedPumpPrice,
+    estimatedTotalPrice: round(estimatedPipesPrice + estimatedPumpPrice, 2),
+    ...(unavailableReason ? { unavailableReason } : {}),
+  };
+}

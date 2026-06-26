@@ -65,8 +65,24 @@ async function runFixture(label, input) {
     throw new Error(`${label}: пустой граф`);
   }
 
+  if (!result.hydraulicsMatching.proposal?.pipeSegments?.length) {
+    throw new Error(`${label}: нет proposal.pipeSegments`);
+  }
+
+  const loops = result.hydraulics.pressure?.circulationLoops ?? [];
+  if (!loops.length) {
+    throw new Error(`${label}: нет circulationLoops`);
+  }
+  const critical = result.hydraulics.pressure?.criticalLoop;
+  if (!critical?.isCritical) {
+    throw new Error(`${label}: не определено критическое кольцо`);
+  }
+  if ((result.hydraulics.pressure?.criticalPressureDropKPa ?? 0) <= 0) {
+    throw new Error(`${label}: criticalPressureDropKPa должен быть > 0`);
+  }
+
   console.log(
-    `OK ${label}: Q=${result.hydraulics.flowRateM3PerHour} m³/h, edges=${result.hydraulics.graph.edges.length}, pipes=${result.hydraulicsMatching.pipes.length}`,
+    `OK ${label}: Q=${result.hydraulics.flowRateM3PerHour} m³/h, edges=${result.hydraulics.graph.edges.length}, pipes=${result.hydraulicsMatching.pipes.length}, critical=${critical.label} Δp=${critical.pressureDropKPa} kPa, balancing=${result.hydraulics.pressure?.balancingRecommendations?.length ?? 0}, proposalTotal=${result.hydraulicsMatching.proposal.estimatedTotalPrice} UAH`,
   );
 }
 
