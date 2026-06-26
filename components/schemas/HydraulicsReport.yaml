@@ -1,0 +1,60 @@
+type: object
+description: Отчёт расчёта гидравлики Pure Pipeline.
+additionalProperties: false
+required: [schemaVersion]
+properties:
+  schemaVersion:
+    type: integer
+    const: 1
+  inputs:
+    type: object
+    additionalProperties: false
+    properties:
+      heatLoadWatts: { type: number }
+      deltaTSystemK: { type: number }
+      mainLineLengthM: { type: number }
+  massFlowKgPerSec: { type: number }
+  flowRateM3PerHour: { type: number }
+  recommendedPipeDiameter: { type: string }
+  recommendedVelocityRangeMPerSec:
+    type: array
+    minItems: 2
+    maxItems: 2
+    items: { type: number }
+  consumers:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [circuit, totalFlowRateM3PerHour]
+      properties:
+        circuit:
+          type: string
+          enum: [radiators, underfloor, dhw]
+        totalFlowRateM3PerHour: { type: number }
+        totalHeatLoadWatts: { type: number }
+  graph:
+    $ref: HydraulicsGraph.yaml
+  pressure:
+    type: object
+    additionalProperties: false
+    properties:
+      criticalLoopEdgeIds:
+        type: array
+        items: { type: string }
+      headRequiredM: { type: number }
+      segments:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [edgeId, lengthM, velocityMps, pressureDropKPa]
+          properties:
+            edgeId: { type: string }
+            lengthM: { type: number }
+            velocityMps: { type: number }
+            pressureDropKPa: { type: number }
+            catalogPipeId: { type: string }
+  notes:
+    type: array
+    items: { type: string }

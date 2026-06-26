@@ -25,6 +25,7 @@ export function buildSurveyCalcInputKey(params: {
   underfloorDistributionPreset: UfhDistributionPreset;
   thermalRegimePreset: HeatingThermalRegimePreset;
   ufhPresetId?: UfhModePresetId | null;
+  hydraulicsForm?: import('../types/hydraulics').HydraulicsFormValue;
 }) {
   const {
     temps,
@@ -36,6 +37,7 @@ export function buildSurveyCalcInputKey(params: {
     underfloorDistributionPreset,
     thermalRegimePreset,
     ufhPresetId = null,
+    hydraulicsForm,
   } = params;
 
   const objectMetaForKey = objectMetaForCalcPayload(objectMeta, waterHeaterForm);
@@ -56,6 +58,7 @@ export function buildSurveyCalcInputKey(params: {
     thermalRegimePreset,
     ufhPresetId,
     hotWater: hotWaterForm,
+    hydraulics: hydraulicsForm,
     rooms: rooms.map((r) => ({
       id: r.id,
       name: r.name,

@@ -486,10 +486,14 @@ export interface HotWaterInput {
   tropicalShower?: boolean;
 }
 
-export interface HydraulicsInput {
+export interface HydraulicsSurveyInput {
   mainLineLengthM?: number;
   deltaTSystemK?: number;
+  pipeMaterialPreference?: 'pex' | 'metal_plastic' | 'steel';
 }
+
+/** @deprecated Используйте HydraulicsSurveyInput */
+export type HydraulicsInput = HydraulicsSurveyInput;
 
 export interface CalcRequestBody {
   location?: LocationInput;
@@ -555,6 +559,16 @@ export interface UnderfloorHeatingRoomReport {
   maxAllowableHeatFluxUpWm2: number;
   heatFluxUpWatts: number;
   heatFluxDownWatts: number;
+  /** Нагрузка контура ТП в комнате (= heatFluxUpWatts). */
+  heatLoadWatts?: number;
+  flowRateM3PerHour?: number;
+  loopsCount?: number;
+  loops?: Array<{
+    loopId: string;
+    estimatedLengthM: number;
+    heatLoadWatts: number;
+    flowRateM3PerHour: number;
+  }>;
   surfaceTempC: number;
   /** Применённый лимит поверхности (min пресета Mongo и паспорта финиша). */
   maxSurfaceTemperatureCelsius: number;
@@ -707,15 +721,71 @@ export interface IndirectWaterHeaterMatchingReport {
 }
 
 export interface HydraulicsReport {
+  schemaVersion?: 1;
   flowRateM3PerHour?: number;
+  massFlowKgPerSec?: number;
   recommendedPipeDiameter?: string;
   recommendedVelocityRangeMPerSec?: [number, number];
+  consumers?: Array<{
+    circuit: 'radiators' | 'underfloor' | 'dhw';
+    totalFlowRateM3PerHour: number;
+    totalHeatLoadWatts?: number;
+  }>;
+  graph?: {
+    nodes: Array<{
+      id: string;
+      kind: string;
+      label: string;
+      roomId?: string;
+      loopId?: string;
+    }>;
+    edges: Array<{
+      id: string;
+      from: string;
+      to: string;
+      lengthM: number;
+      fluid: 'heating' | 'water';
+      designFlowM3PerHour: number;
+      segmentRole: string;
+    }>;
+  };
+  pressure?: {
+    criticalLoopEdgeIds: string[];
+    headRequiredM: number;
+    segments: Array<{
+      edgeId: string;
+      lengthM: number;
+      velocityMps: number;
+      pressureDropKPa: number;
+      catalogPipeId?: string;
+    }>;
+  };
   notes?: string[];
   inputs?: {
     heatLoadWatts: number;
     deltaTSystemK: number;
     mainLineLengthM: number;
   };
+}
+
+export interface HydraulicsMatchingReport {
+  pipes: Array<{
+    edgeId: string;
+    catalogPipeId: string;
+    velocityMps: number;
+    pressureDropKPa: number;
+    internalDiameterMm: number;
+  }>;
+  pump?: {
+    catalogPumpId: string;
+    modeName: string;
+    headMarginPercent: number;
+    designFlowM3PerHour: number;
+    headRequiredM: number;
+    headAtDesignM: number;
+    warnings: string[];
+  };
+  warnings: string[];
 }
 
 export interface EnvelopePreset {
@@ -734,6 +804,7 @@ export interface MatchingReport {
   radiators?: RadiatorsMatchingReport;
   waterHeater?: WaterHeaterMatchingReport;
   indirectWaterHeater?: IndirectWaterHeaterMatchingReport;
+  hydraulics?: HydraulicsMatchingReport;
 }
 
 export interface RadiatorsByRoomItem {
@@ -743,6 +814,8 @@ export interface RadiatorsByRoomItem {
   heatLossWatts: number;
   /** Нагрузка на подбор радиатора (Вт): designWatts − heatFluxUpWatts ТП в mixed или designWatts. */
   radiatorDesignWatts: number;
+  /** Расход теплоносителя по комнате, м³/ч (upstream thermalLoadToFlow). */
+  flowRateM3PerHour?: number;
   radiatorModel: string;
   outputPerSectionWatts: number;
   sections: number | null;

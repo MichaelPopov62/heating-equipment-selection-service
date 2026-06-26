@@ -11,6 +11,7 @@ import type { UfhDistributionPreset } from '../types/ufhDistribution';
 import type { HotWaterFormValue } from '../types/hotWater';
 import type { WaterHeaterFormValue } from '../types/waterHeater';
 import type { RoomFormValue } from '../types/rooms';
+import type { HydraulicsFormValue } from '../types/hydraulics';
 import { objectMetaForCalcPayload } from '../utils/objectMetaForCalcPayload';
 import { inferRoomExteriorLayout, wallEnvelopeEntriesForRoom } from '../utils/roomExteriorLayout';
 
@@ -28,6 +29,7 @@ export function buildCalcRequestPayload(params: {
   underfloorDistributionPreset?: UfhDistributionPreset;
   thermalRegimePreset: HeatingThermalRegimePreset;
   ufhPresetId?: UfhModePresetId | null;
+  hydraulicsForm?: HydraulicsFormValue;
 }) {
   const {
     rooms,
@@ -40,6 +42,7 @@ export function buildCalcRequestPayload(params: {
     underfloorDistributionPreset = 'auto',
     thermalRegimePreset,
     ufhPresetId = null,
+    hydraulicsForm,
   } = params;
 
   const buildingRooms = rooms.map((r) => {
@@ -195,5 +198,16 @@ export function buildCalcRequestPayload(params: {
       tropicalShower: hotWaterForm.tropicalShower,
       fixtures: { ...hotWaterForm.fixtures },
     },
+    ...(hydraulicsForm
+      ? {
+          hydraulics: {
+            mainLineLengthM: hydraulicsForm.mainLineLengthM,
+            deltaTSystemK: hydraulicsForm.deltaTSystemK,
+            ...(hydraulicsForm.pipeMaterialPreference
+              ? { pipeMaterialPreference: hydraulicsForm.pipeMaterialPreference }
+              : {}),
+          },
+        }
+      : {}),
   };
 }

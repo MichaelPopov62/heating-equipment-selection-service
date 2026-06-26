@@ -258,6 +258,53 @@ function validateAndNormalizeApplianceDoc(doc) {
     };
   }
 
+  if (kind === 'hydraulics') {
+    const vel = requireObject(d, 'velocityLimitsMps', `${basePath}.velocityLimitsMps`);
+    const len = requireObject(d, 'defaultLengthsM', `${basePath}.defaultLengthsM`);
+    const zeta = requireObject(d, 'localLossZeta', `${basePath}.localLossZeta`);
+    const rough = requireObject(d, 'roughnessMmByMaterial', `${basePath}.roughnessMmByMaterial`);
+    return {
+      applianceKind: 'hydraulics',
+      schemaVersion,
+      label,
+      velocityLimitsMps: {
+        mainMax: requirePosNum(vel, 'mainMax', `${basePath}.velocityLimitsMps`),
+        branchMax: requirePosNum(vel, 'branchMax', `${basePath}.velocityLimitsMps`),
+        mainMin: requirePosNum(vel, 'mainMin', `${basePath}.velocityLimitsMps`),
+      },
+      defaultLengthsM: {
+        mainLine: requirePosNum(len, 'mainLine', `${basePath}.defaultLengthsM`),
+        radiatorBranch: requirePosNum(
+          len,
+          'radiatorBranch',
+          `${basePath}.defaultLengthsM`,
+        ),
+        ufhCollectorBranch: requirePosNum(
+          len,
+          'ufhCollectorBranch',
+          `${basePath}.defaultLengthsM`,
+        ),
+      },
+      maxUfhLoopLengthM: requirePosNum(d, 'maxUfhLoopLengthM', basePath),
+      roughnessMmByMaterial: Object.fromEntries(
+        Object.entries(rough).map(([k, v]) => {
+          const n = Number(v);
+          if (!Number.isFinite(n) || n <= 0) {
+            throw new Error(`${basePath}.roughnessMmByMaterial.${k}: число > 0`);
+          }
+          return [k, n];
+        }),
+      ),
+      localLossZeta: {
+        elbow90: requirePosNum(zeta, 'elbow90', `${basePath}.localLossZeta`),
+        teeBranch: requirePosNum(zeta, 'teeBranch', `${basePath}.localLossZeta`),
+        mixingNode: requirePosNum(zeta, 'mixingNode', `${basePath}.localLossZeta`),
+        collector: requirePosNum(zeta, 'collector', `${basePath}.localLossZeta`),
+      },
+      pumpHeadMarginPercent: requirePosNum(d, 'pumpHeadMarginPercent', basePath),
+    };
+  }
+
   throw new Error(`appliances: неизвестный applianceKind «${kind}»`);
 }
 
@@ -289,6 +336,7 @@ export function validateAndNormalizeAppliancesBundle(json, source = 'file') {
     'electric_storage',
     'radiator',
     'underfloor_heating',
+    'hydraulics',
   ]);
   for (const k of required) {
     if (!byKind[k]) {

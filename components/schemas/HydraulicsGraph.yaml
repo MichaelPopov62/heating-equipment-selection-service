@@ -1,0 +1,47 @@
+type: object
+description: Топологический граф гидравлики (узлы и рёбра).
+additionalProperties: false
+required: [nodes, edges]
+properties:
+  nodes:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, kind, label]
+      properties:
+        id: { type: string }
+        kind:
+          type: string
+          enum:
+            - boiler
+            - hydraulic_separator
+            - mixing_node
+            - main_collector
+            - ufh_collector
+            - radiator_consumer
+            - ufh_loop
+            - dhw_load
+        label: { type: string }
+        roomId: { type: string }
+        loopId: { type: string }
+  edges:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, from, to, lengthM, fluid, designFlowM3PerHour, segmentRole]
+      properties:
+        id: { type: string }
+        from: { type: string }
+        to: { type: string }
+        lengthM: { type: number, minimum: 0 }
+        fluid:
+          type: string
+          enum: [heating, water]
+        designFlowM3PerHour: { type: number, minimum: 0 }
+        supplyC: { type: number }
+        returnC: { type: number }
+        segmentRole:
+          type: string
+          enum: [main, branch, ufh_loop, dhw]

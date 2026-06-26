@@ -12,7 +12,11 @@ import {
   buildWarmFloorCalcMatchingNotes,
 } from '../matching/warmFloor.js';
 import { calculateHotWaterDemand } from '../logic/hotWater.js';
-import { calculateHydraulics } from '../logic/hydraulics.js';
+import {
+  buildHydraulicsSnapshots,
+  runHydraulicsPipeline,
+  validateHydraulicsPipelineInput,
+} from '../hydraulics/public.js';
 import { resolveUfhDistributionWithAppliances } from '../logic/ufhDistributionResolve.js';
 import { computeUfhMixingNodeSpec } from '../logic/ufhMixingNodeHydraulics.js';
 import { matchEquipment } from '../matching/public.js';
@@ -105,6 +109,7 @@ export async function buildReport({ input, ctx }) {
     heatingSystem: input.heatingSystem,
     heatLoss,
     ufhPresets,
+    maxUfhLoopLengthM: appliances.byKind.hydraulics.maxUfhLoopLengthM,
   });
   if (underfloorHeating?.rooms?.length) {
     applyUnderfloorHeatingRecommendations(underfloorHeating, recommendations);
@@ -207,39 +212,7 @@ export async function buildReport({ input, ctx }) {
     apartmentClassification: appliances.byKind.boiler.apartmentClassification,
   });
 
-  // 4) Гидравлика (черновая)
-  const mainLineLengthM = input.hydraulics?.mainLineLengthM ?? 0;
-  const ufhFlowRateM3PerHour =
-    isUfhOnly
-    && underfloorHeating?.underfloorHydraulics?.flowRateM3PerHour != null
-      ? underfloorHeating.underfloorHydraulics.flowRateM3PerHour
-      : undefined;
-
-  /** @type {import('../types/shared-types').HydraulicsReport} */
-  let hydraulics;
-  if (isUfhOnly && ufhFlowRateM3PerHour != null) {
-    hydraulics = calculateHydraulics({
-      heatLoadWatts: underfloorHeating.totalHeatFluxUpWatts ?? 0,
-      deltaTSystemK: underfloorHeating.underfloorHydraulics?.deltaTK ?? 10,
-      mainLineLengthM,
-      flowRateM3PerHour: ufhFlowRateM3PerHour,
-    });
-    hydraulics.notes = [
-      ...(hydraulics.notes ?? []),
-      'Расчёт магистрали выполнен по расходу подсистемы водяного теплого пола (underfloorHydraulics).',
-    ];
-  } else {
-    hydraulics = calculateHydraulics({
-      heatLoadWatts: heatLoss.totalWatts,
-      deltaTSystemK: input.hydraulics?.deltaTSystemK ?? 20,
-      mainLineLengthM,
-    });
-  }
-  logger.info('report.hydraulics.done', null, {
-    flowRateM3PerHour: hydraulics?.flowRateM3PerHour ?? null,
-  });
-
-  // 5) Подбор оборудования
+  // 4) Подбор оборудования
   logger.info('report.matching.start', null);
   const { matching, hotWaterForCalculations } = matchEquipment({
     heatLoss,
@@ -277,15 +250,6 @@ export async function buildReport({ input, ctx }) {
   });
 
   const reqBoilerKw = matching.boiler?.requiredKw;
-  if (typeof reqBoilerKw === 'number' && reqBoilerKw > 50) {
-    hydraulics = {
-      ...hydraulics,
-      notes: [
-        ...(hydraulics.notes ?? []),
-        'При такой расчётной мощности котлового контура рекомендуется гидравлический разделитель (гидрострелка) и проектная проработка коллекторной схемы.',
-      ],
-    };
-  }
 
   if (underfloorHeating?.isMixingNodeRequired) {
     const requestedPreset =
@@ -352,6 +316,47 @@ export async function buildReport({ input, ctx }) {
       + (matching?.indirectWaterHeater?.warnings?.length ?? 0),
   });
 
+  // 5) Гидравлика Pure Pipeline (после matching)
+  logger.info('report.hydraulics.start', null);
+  /** @type {import('../types/shared-types').HydraulicsReport} */
+  let hydraulics;
+  try {
+    const pipelineDto = buildHydraulicsSnapshots({
+      input,
+      hotWater,
+      underfloorHeating,
+      matching,
+      hydraulicsRules: appliances.byKind.hydraulics,
+    });
+    await validateHydraulicsPipelineInput(pipelineDto);
+    const pipelineResult = runHydraulicsPipeline({
+      dto: pipelineDto,
+      catalog: ctx.catalog,
+    });
+    hydraulics = pipelineResult.hydraulics;
+    matching.hydraulics = pipelineResult.hydraulicsMatching;
+    if (pipelineResult.hydraulicsMatching.warnings?.length) {
+      warnings.push(...pipelineResult.hydraulicsMatching.warnings);
+    }
+  } catch (hydErr) {
+    logger.warn('report.hydraulics.fail', hydErr, {
+      code: hydErr?.code ?? null,
+    });
+    warnings.push(
+      hydErr?.message
+        ? `Гидравлика: ${hydErr.message}`
+        : 'Гидравлика: не удалось выполнить pipeline.',
+    );
+    hydraulics = {
+      schemaVersion: 1,
+      notes: ['Расчёт гидравлики pipeline не выполнен — см. warnings.'],
+    };
+  }
+  logger.info('report.hydraulics.done', null, {
+    flowRateM3PerHour: hydraulics?.flowRateM3PerHour ?? null,
+    headRequiredM: hydraulics?.pressure?.headRequiredM ?? null,
+  });
+
   const allWarnings = [
     ...warnings,
     ...(underfloorHeating?.warnings ?? []),
@@ -359,6 +364,7 @@ export async function buildReport({ input, ctx }) {
     ...(matching.radiators?.warnings ?? []),
     ...(matching.waterHeater?.warnings ?? []),
     ...(matching.indirectWaterHeater?.warnings ?? []),
+    ...(matching.hydraulics?.warnings ?? []),
   ];
 
   /** @type {import('../recommendations/types').ResolvedRecommendation[]} */

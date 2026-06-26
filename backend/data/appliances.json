@@ -84,5 +84,34 @@
       "headMetersMinCollector": 3,
       "headMetersMinHydraulicSeparator": 5
     }
+  },
+  {
+    "applianceKind": "hydraulics",
+    "schemaVersion": 1,
+    "isActive": true,
+    "label": "Гидравлика — пороги расчёта и дефолты длин",
+    "velocityLimitsMps": {
+      "mainMax": 0.8,
+      "branchMax": 0.5,
+      "mainMin": 0.2
+    },
+    "defaultLengthsM": {
+      "mainLine": 8,
+      "radiatorBranch": 4,
+      "ufhCollectorBranch": 3
+    },
+    "maxUfhLoopLengthM": 100,
+    "roughnessMmByMaterial": {
+      "pex": 0.007,
+      "metal_plastic": 0.007,
+      "steel": 0.15
+    },
+    "localLossZeta": {
+      "elbow90": 0.9,
+      "teeBranch": 1.2,
+      "mixingNode": 2.5,
+      "collector": 1.5
+    },
+    "pumpHeadMarginPercent": 12
   }
 ]

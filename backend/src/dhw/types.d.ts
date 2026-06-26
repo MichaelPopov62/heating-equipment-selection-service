@@ -65,7 +65,29 @@ export type ApplianceKind =
   | 'boiler'
   | 'electric_storage'
   | 'radiator'
-  | 'underfloor_heating';
+  | 'underfloor_heating'
+  | 'hydraulics';
+
+export interface HydraulicsApplianceRulesDoc {
+  applianceKind: 'hydraulics';
+  schemaVersion: number;
+  label: string;
+  velocityLimitsMps: { mainMax: number; branchMax: number; mainMin: number };
+  defaultLengthsM: {
+    mainLine: number;
+    radiatorBranch: number;
+    ufhCollectorBranch: number;
+  };
+  maxUfhLoopLengthM: number;
+  roughnessMmByMaterial: Record<string, number>;
+  localLossZeta: {
+    elbow90: number;
+    teeBranch: number;
+    mixingNode: number;
+    collector: number;
+  };
+  pumpHeadMarginPercent: number;
+}
 
 export interface UnderfloorHeatingDistributionRules {
   autoHydraulicSeparatorMinBoilerKw: number;
@@ -159,7 +181,8 @@ export type NormalizedApplianceRules =
   | BoilerApplianceRules
   | ElectricStorageApplianceRules
   | RadiatorApplianceRules
-  | UnderfloorHeatingApplianceRules;
+  | UnderfloorHeatingApplianceRules
+  | HydraulicsApplianceRulesDoc;
 
 /** Загруженные правила по категориям техники. */
 export interface AppliancesBundle {
@@ -169,6 +192,7 @@ export interface AppliancesBundle {
     electric_storage: ElectricStorageApplianceRules;
     radiator: RadiatorApplianceRules;
     underfloor_heating: UnderfloorHeatingApplianceRules;
+    hydraulics: HydraulicsApplianceRulesDoc;
   };
   schemaVersions: Partial<Record<ApplianceKind, number>>;
   source: 'file' | 'mongo';

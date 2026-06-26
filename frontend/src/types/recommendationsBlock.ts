@@ -65,4 +65,6 @@ export type RecommendationsBlockProps = {
   catalogSnapError: string | null;
   onRetryLoadCatalog: () => void;
   onApplyScheme: (scheme: HotWaterBoilerPowerMatchingScheme) => void;
+  apiHydraulicsFromReport?: Record<string, unknown> | null;
+  apiHydraulicsMatchingFromReport?: Record<string, unknown> | null;
 };

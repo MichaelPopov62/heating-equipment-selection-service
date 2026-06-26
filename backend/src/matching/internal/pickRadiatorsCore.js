@@ -4,6 +4,7 @@
  * панельных SKU и предупреждений; внутренняя реализация pickRadiators.
  */
 import { round } from '../../utils/math.js';
+import { thermalLoadToFlow } from '../../hydraulics/thermalLoadToFlow.js';
 import { logger } from '../../utils/logger.js';
 import { buildWarmFloorMatchingNotes } from '../warmFloor.js';
 import {
@@ -359,6 +360,17 @@ export function pickRadiators({
   );
 
   const targetDeltaT = deltaTmeanK({ supplyC, returnC, insideC });
+  const radiatorDeltaTK = Math.max(0.1, supplyC - returnC);
+  /**
+   * @param {number} watts
+   * @returns {number}
+   */
+  const radiatorFlowM3h = (watts) =>
+    thermalLoadToFlow({
+      heatLoadWatts: watts,
+      deltaTK: radiatorDeltaTK,
+    }).flowRateM3PerHour;
+
   logger.info('matching.radiators.start', null, {
     baseDeltaT,
     targetDeltaT: round(targetDeltaT, 1),
@@ -501,6 +513,7 @@ export function pickRadiators({
         roomName: room.name,
         heatLossWatts: qEnvelope,
         radiatorDesignWatts: 0,
+        flowRateM3PerHour: 0,
         radiatorModel: '—',
         outputPerSectionWatts: 0,
         sections: null,
@@ -527,6 +540,7 @@ export function pickRadiators({
         roomName: room.name,
         heatLossWatts: qEnvelope,
         radiatorDesignWatts: Math.round(qRad),
+        flowRateM3PerHour: radiatorFlowM3h(qRad),
         radiatorModel: '—',
         outputPerSectionWatts: 0,
         sections: null,
@@ -555,6 +569,7 @@ export function pickRadiators({
       roomName: room.name,
       heatLossWatts: qEnvelope,
       radiatorDesignWatts: Math.round(qRad),
+      flowRateM3PerHour: radiatorFlowM3h(qRad),
       radiatorModel: sized.radiator.model,
       outputPerSectionWatts: outputLabel,
       sections: sized.sections,

@@ -14,6 +14,7 @@ import {
 } from '../../../shared/ufhModePresetIds.js';
 import { computeUfhMixingNodeSpec } from './ufhMixingNodeHydraulics.js';
 import { computeUnderfloorHydraulicsCircuit } from './ufhHydraulicsCircuit.js';
+import { computeUfhLoopGeometry } from './ufhLoopGeometry.js';
 import { computeUfhRoomHeatFlux } from './ufhRoomHeatFlux.js';
 import {
   assessUfhRoomHeatLossCoverage,
@@ -28,10 +29,11 @@ import { round } from '../utils/math.js';
  * @param {import('../types/shared-types').HeatingSystemInput | undefined | null} args.heatingSystem
  * @param {import('../types/shared-types').HeatLossReport | undefined | null} [args.heatLoss]
  * @param {import('../ufh/types').UnderfloorHeatingPresetsBundle} args.ufhPresets
+ * @param {number} [args.maxUfhLoopLengthM]
  * @returns {import('../types/shared-types').UnderfloorHeatingReport | null}
  */
 export function calculateUnderfloorHeating(args) {
-  const { temps, building, heatingSystem, heatLoss, ufhPresets } = args;
+  const { temps, building, heatingSystem, heatLoss, ufhPresets, maxUfhLoopLengthM = 100 } = args;
 
   if (!ufhPresets?.byPresetId) {
     throw new Error('Расчёт ТП: ufhPresets обязательны.');
@@ -148,6 +150,15 @@ export function calculateUnderfloorHeating(args) {
       roomHeatLossWatts,
     });
 
+    const loopGeom = computeUfhLoopGeometry({
+      areaM2: flux.areaM2,
+      pipeSpacingMm: flux.pipeSpacingMm,
+      heatLoadWatts: flux.heatFluxUpWatts,
+      deltaTK: 10,
+      maxLoopLengthM: maxUfhLoopLengthM,
+      roomId: room.id,
+    });
+
     const roomWarnings = [
       ...flux.roomWarnings.map((w) => `Комната «${room.name}»: ${w}`),
       ...coverage.warnings,
@@ -179,6 +190,10 @@ export function calculateUnderfloorHeating(args) {
       maxAllowableHeatFluxUpWm2: flux.maxAllowableHeatFluxUpWm2,
       heatFluxUpWatts: flux.heatFluxUpWatts,
       heatFluxDownWatts: flux.heatFluxDownWatts,
+      heatLoadWatts: flux.heatFluxUpWatts,
+      flowRateM3PerHour: loopGeom.flowRateM3PerHour,
+      loopsCount: loopGeom.loopsCount,
+      loops: loopGeom.loops,
       surfaceTempC: flux.surfaceTempC,
       maxSurfaceTemperatureCelsius: flux.maxSurfaceTemperatureCelsius,
       comfortMaxSurfaceTemperatureCelsius:

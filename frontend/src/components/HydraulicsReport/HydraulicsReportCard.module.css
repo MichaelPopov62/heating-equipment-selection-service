@@ -1,0 +1,16 @@
+.root {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--surface-alt, #f4f7fa);
+}
+
+.root h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.root p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}

@@ -24,6 +24,11 @@ import {
   isApartmentLargeForIndirectScheme,
 } from './utils/waterHeaterSchemeOptions';
 import { buildCalcRequestPayload } from './services/buildCalcRequestPayload';
+import { HydraulicsSection } from './components/HydraulicsSection/HydraulicsSection';
+import {
+  DEFAULT_HYDRAULICS_FORM,
+  type HydraulicsFormValue,
+} from './types/hydraulics';
 import { buildSurveyCalcInputKey } from './utils/surveyCalcInputKey';
 import type { SurveyCurrentStep } from './types/surveyStep';
 import { useCalcReport } from './hooks/useCalcReport';
@@ -212,6 +217,9 @@ function App() {
   }, [recommendedThermalRegimePreset]);
 
   const [ufhPresetId, setUfhPresetId] = useState<UfhModePresetId | null>(null);
+  const [hydraulicsForm, setHydraulicsForm] = useState<HydraulicsFormValue>(
+    () => ({ ...DEFAULT_HYDRAULICS_FORM }),
+  );
 
   const {
     ufhModePresets,
@@ -245,6 +253,7 @@ function App() {
         underfloorDistributionPreset,
         thermalRegimePreset,
         ufhPresetId,
+        hydraulicsForm,
       }),
     [
       waterHeaterForm,
@@ -257,6 +266,7 @@ function App() {
       underfloorDistributionPreset,
       thermalRegimePreset,
       ufhPresetId,
+      hydraulicsForm,
     ],
   );
 
@@ -306,6 +316,7 @@ function App() {
         underfloorDistributionPreset,
         thermalRegimePreset,
         ufhPresetId,
+        hydraulicsForm,
       }),
     [
       waterHeaterForm,
@@ -317,6 +328,7 @@ function App() {
       underfloorDistributionPreset,
       thermalRegimePreset,
       ufhPresetId,
+      hydraulicsForm,
     ],
   );
 
@@ -351,6 +363,19 @@ function App() {
     isCalcMatchingScheme,
     quickEstimate.radiatorsSections,
   );
+
+  const apiHydraulicsFromReport = useMemo(() => {
+    if (calcReport == null || typeof calcReport !== 'object') return null;
+    const calculations = (calcReport as { calculations?: { hydraulics?: Record<string, unknown> } })
+      .calculations;
+    return calculations?.hydraulics ?? null;
+  }, [calcReport]);
+
+  const apiHydraulicsMatchingFromReport = useMemo(() => {
+    if (calcReport == null || typeof calcReport !== 'object') return null;
+    const matching = (calcReport as { matching?: { hydraulics?: Record<string, unknown> } }).matching;
+    return matching?.hydraulics ?? null;
+  }, [calcReport]);
 
   const applySurveyDraftState = useCallback(
     (draft: SurveyDraft) => {
@@ -660,7 +685,9 @@ function App() {
                       ? 'Водонагреватель и сценарий ГВС'
                       : currentStep === 'warmFloor'
                       ? 'Тёплый пол и низкотемпературный контур'
-                      : 'Параметры объекта'}
+                      : currentStep === 'hydraulics'
+                        ? 'Гидравлика и разводка'
+                        : 'Параметры объекта'}
             </h2>
             {currentStep === 'object' && (
               <ObjectMetaForm
@@ -825,6 +852,16 @@ function App() {
               />
             )}
 
+            {currentStep === 'hydraulics' && (
+              <HydraulicsSection
+                value={hydraulicsForm}
+                onChange={(next) => {
+                  setHydraulicsForm(next);
+                  invalidateCalcReport();
+                }}
+              />
+            )}
+
             {currentStep === 'warmFloor' && (
               <WarmFloorSection
                 waterUnderfloorHeating={waterUnderfloorHeating}
@@ -918,6 +955,8 @@ function App() {
           catalogSnapError={catalogSnapError}
           onRetryLoadCatalog={() => void reloadCatalog()}
           onApplyScheme={handleWaterHeaterSchemeChange}
+          apiHydraulicsFromReport={apiHydraulicsFromReport}
+          apiHydraulicsMatchingFromReport={apiHydraulicsMatchingFromReport}
         />
       </div>
 

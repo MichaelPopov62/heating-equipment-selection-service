@@ -1,0 +1,41 @@
+type: object
+description: Подбор труб и насоса по результатам гидравлики (диаметры только здесь).
+additionalProperties: false
+required: [pipes, warnings]
+properties:
+  pipes:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [edgeId, catalogPipeId, velocityMps, pressureDropKPa, internalDiameterMm]
+      properties:
+        edgeId: { type: string }
+        catalogPipeId: { type: string }
+        velocityMps: { type: number }
+        pressureDropKPa: { type: number }
+        internalDiameterMm: { type: number }
+  pump:
+    type: object
+    additionalProperties: false
+    required:
+      - catalogPumpId
+      - modeName
+      - headMarginPercent
+      - designFlowM3PerHour
+      - headRequiredM
+      - headAtDesignM
+      - warnings
+    properties:
+      catalogPumpId: { type: string }
+      modeName: { type: string }
+      headMarginPercent: { type: number }
+      designFlowM3PerHour: { type: number }
+      headRequiredM: { type: number }
+      headAtDesignM: { type: number }
+      warnings:
+        type: array
+        items: { type: string }
+  warnings:
+    type: array
+    items: { type: string }

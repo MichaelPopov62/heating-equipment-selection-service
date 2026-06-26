@@ -19,6 +19,22 @@ properties:
   maxAllowableHeatFluxUpWm2: { type: number }
   heatFluxUpWatts: { type: number }
   heatFluxDownWatts: { type: number }
+  heatLoadWatts:
+    type: number
+    description: Нагрузка контура ТП в комнате (= heatFluxUpWatts).
+  flowRateM3PerHour: { type: number }
+  loopsCount: { type: integer, minimum: 1 }
+  loops:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [loopId, estimatedLengthM, heatLoadWatts, flowRateM3PerHour]
+      properties:
+        loopId: { type: string }
+        estimatedLengthM: { type: number }
+        heatLoadWatts: { type: number }
+        flowRateM3PerHour: { type: number }
   roomHeatLossWatts:
     type: number
     description: Теплопотери комнаты из heatLoss.byRoom (для проверки покрытия нагрузки ТП).

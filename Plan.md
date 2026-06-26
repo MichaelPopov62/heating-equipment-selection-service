@@ -82,7 +82,7 @@
 
 | Модуль | Где | Что делает | Статус UI |
 |--------|-----|------------|-----------|
-| **Гидравлика** | `logic/hydraulics.js` | Расход по теплонагрузке и `Δt`; выход — `report.calculations.hydraulics`; при `requiredKw > 50` — note про гидрострелку | Шаг в навигации есть; **форма hydraulics в API пока не подключена** — дефолты backend |
+| **Гидравлика** | `hydraulics/public.js` | Pure Pipeline: DTO → граф → Δp → подбор труб/насосов из каталога | Шаг в анкете + блок в RecommendationsBlock |
 | **ТП — расчёт** | `logic/warmFloorCalc.js` | Rλ,B = база над контуром + финиш; q↑/q↓, Tповерх, `maxAllowableHeatFluxUpWm2`; warning при превышении лимита покрытия | Результат в `RecommendationsBlock` |
 | **ТП — matching** | `matching/warmFloor.js` | Подсказки в `radiatorSelectionNotes` + цифры из отчёта ТП | Шаг `warmFloor` + селекты в комнатах |
 | **ТП — heatloss** | `heatlossByRooms.js` + `floorPresetId` | Теплопотери через пол; при `bottomBoundary: heated` пол не считается | Поле «Пол (ограждение)» в комнате |
@@ -268,7 +268,7 @@ flowchart TB
 **Не в scope (backlog)**
 
 - [ ] Обратный расчёт: требуемая T теплоносителя под заданную мощность комнаты
-- [ ] Шаг гидравлики в UI (форма `input.hydraulics`)
+- [x] Шаг гидравлики в UI (форма `input.hydraulics`)
 - [x] Сценарий «только ТП» с котлом на 40/30 без радиаторов (`ufhPresetId=ufh_only`, v3)
 - [ ] **Тепловой насос** — не котёл; вне scope MVP (массовый рынок: газ/электро котлы)
 

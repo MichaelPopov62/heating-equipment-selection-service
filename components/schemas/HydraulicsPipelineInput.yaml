@@ -1,0 +1,240 @@
+type: object
+description: >
+  Внутренний DTO Pure Pipeline — собирается buildHydraulicsSnapshots после matchEquipment.
+  Диаметры и id каталога во входе запрещены (additionalProperties: false).
+additionalProperties: false
+required:
+  - schemaVersion
+  - meta
+  - source
+  - circuits
+  - layout
+  - rules
+properties:
+  schemaVersion:
+    type: integer
+    const: 1
+  meta:
+    type: object
+    additionalProperties: false
+    required: [heatingEmittersMode, objectType, dhwMatchingScheme]
+    properties:
+      heatingEmittersMode:
+        type: string
+        enum: [radiators_only, ufh_only, mixed]
+      objectType:
+        type: string
+        enum: [house, apartment]
+      dhwMatchingScheme:
+        type: string
+  source:
+    type: object
+    additionalProperties: false
+    required: [supplyC, returnC, deltaTK, requiredKw, connectionNominalMm]
+    properties:
+      catalogBoilerId: { type: string }
+      supplyC: { type: number }
+      returnC: { type: number }
+      deltaTK: { type: number, minimum: 0.1 }
+      requiredKw: { type: number, minimum: 0 }
+      connectionNominalMm:
+        type: array
+        items: { type: number, minimum: 1 }
+      mountingType:
+        type: string
+        enum: [wall, floor]
+  circuits:
+    type: object
+    additionalProperties: false
+    properties:
+      radiators:
+        $ref: '#/definitions/RadiatorsCircuit'
+      underfloor:
+        $ref: '#/definitions/UnderfloorCircuit'
+      dhw:
+        $ref: '#/definitions/DhwCircuit'
+  layout:
+    type: object
+    additionalProperties: false
+    required: [mainLineLengthM, radiatorBranches, ufhBranches]
+    properties:
+      mainLineLengthM: { type: number, minimum: 0 }
+      pipeMaterialPreference:
+        type: string
+        enum: [pex, metal_plastic, steel]
+      radiatorBranches:
+        type: array
+        items:
+          $ref: '#/definitions/BranchLayout'
+      ufhBranches:
+        type: array
+        items:
+          $ref: '#/definitions/BranchLayout'
+  rules:
+    type: object
+    additionalProperties: false
+    required:
+      - velocityLimitsMps
+      - defaultLengthsM
+      - maxUfhLoopLengthM
+      - roughnessMmByMaterial
+      - localLossZeta
+      - pumpHeadMarginPercent
+    properties:
+      velocityLimitsMps:
+        type: object
+        additionalProperties: false
+        required: [mainMax, branchMax, mainMin]
+        properties:
+          mainMax: { type: number }
+          branchMax: { type: number }
+          mainMin: { type: number }
+      defaultLengthsM:
+        type: object
+        additionalProperties: false
+        required: [mainLine, radiatorBranch, ufhCollectorBranch]
+        properties:
+          mainLine: { type: number }
+          radiatorBranch: { type: number }
+          ufhCollectorBranch: { type: number }
+      maxUfhLoopLengthM: { type: number }
+      roughnessMmByMaterial:
+        type: object
+        additionalProperties: { type: number }
+      localLossZeta:
+        type: object
+        additionalProperties: false
+        required: [elbow90, teeBranch, mixingNode, collector]
+        properties:
+          elbow90: { type: number }
+          teeBranch: { type: number }
+          mixingNode: { type: number }
+          collector: { type: number }
+      pumpHeadMarginPercent: { type: number }
+definitions:
+  BranchLayout:
+    type: object
+    additionalProperties: false
+    required: [roomId, estimatedLengthM]
+    properties:
+      roomId: { type: string }
+      estimatedLengthM: { type: number, minimum: 0 }
+  RadiatorConsumer:
+    type: object
+    additionalProperties: false
+    required: [roomId, roomName, floor, heatLoadWatts, flowRateM3PerHour]
+    properties:
+      roomId: { type: string }
+      roomName: { type: string }
+      floor: { type: integer, minimum: 1 }
+      heatLoadWatts: { type: number, minimum: 0 }
+      flowRateM3PerHour: { type: number, minimum: 0 }
+  RadiatorsCircuit:
+    type: object
+    additionalProperties: false
+    required: [thermalRegime, connectionType, consumers, totalFlowRateM3PerHour]
+    properties:
+      thermalRegime:
+        type: object
+        additionalProperties: false
+        required: [supplyC, returnC, deltaTK]
+        properties:
+          supplyC: { type: number }
+          returnC: { type: number }
+          deltaTK: { type: number }
+      connectionType:
+        type: string
+        enum: [side, bottom]
+      consumers:
+        type: array
+        items:
+          $ref: '#/definitions/RadiatorConsumer'
+      totalFlowRateM3PerHour: { type: number, minimum: 0 }
+  UfhLoop:
+    type: object
+    additionalProperties: false
+    required: [loopId, estimatedLengthM, heatLoadWatts, flowRateM3PerHour]
+    properties:
+      loopId: { type: string }
+      estimatedLengthM: { type: number, minimum: 0 }
+      heatLoadWatts: { type: number, minimum: 0 }
+      flowRateM3PerHour: { type: number, minimum: 0 }
+  UfhRoom:
+    type: object
+    additionalProperties: false
+    required:
+      - roomId
+      - roomName
+      - floor
+      - areaM2
+      - pipeSpacingMm
+      - circuitSupplyC
+      - circuitReturnC
+      - heatLoadWatts
+      - flowRateM3PerHour
+    properties:
+      roomId: { type: string }
+      roomName: { type: string }
+      floor: { type: integer, minimum: 1 }
+      areaM2: { type: number }
+      pipeSpacingMm: { type: number }
+      circuitSupplyC: { type: number }
+      circuitReturnC: { type: number }
+      heatLoadWatts: { type: number, minimum: 0 }
+      flowRateM3PerHour: { type: number, minimum: 0 }
+      loopsCount: { type: integer, minimum: 1 }
+      loops:
+        type: array
+        items:
+          $ref: '#/definitions/UfhLoop'
+  UnderfloorCircuit:
+    type: object
+    additionalProperties: false
+    required: [deltaTK, aggregate, isMixingNodeRequired, rooms]
+    properties:
+      deltaTK: { type: number }
+      aggregate:
+        type: object
+        additionalProperties: false
+        required: [heatLoadWatts, flowRateM3PerHour]
+        properties:
+          heatLoadWatts: { type: number }
+          flowRateM3PerHour: { type: number }
+      isMixingNodeRequired: { type: boolean }
+      distributionPreset:
+        type: string
+        enum: [collector_mixing_valve, hydraulic_separator]
+      mixingNode:
+        type: object
+        additionalProperties: false
+        required: [flowRateM3PerHour, headMetersMin, valveKvsMin]
+        properties:
+          flowRateM3PerHour: { type: number }
+          headMetersMin: { type: number }
+          valveKvsMin: { type: number }
+          boilerSupplyC: { type: number }
+          floorCircuitSupplyC: { type: number }
+      rooms:
+        type: array
+        minItems: 1
+        items:
+          $ref: '#/definitions/UfhRoom'
+  DhwCircuit:
+    type: object
+    additionalProperties: false
+    required: [scenario, peakFlowLps, hotWaterPowerKw]
+    properties:
+      scenario:
+        type: string
+        enum: [flowThrough, storage]
+      peakFlowLps: { type: number, minimum: 0 }
+      hotWaterPowerKw: { type: number, minimum: 0 }
+      designColdWaterC: { type: number }
+      hotWaterC: { type: number }
+      indirectTank:
+        type: object
+        additionalProperties: false
+        required: [volumeLiters, coilPowerKw]
+        properties:
+          volumeLiters: { type: number }
+          coilPowerKw: { type: number }

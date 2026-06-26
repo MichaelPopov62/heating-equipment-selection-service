@@ -1,0 +1,19 @@
+type: object
+description: >
+  Ввод пользователя для шага «Гидравлика» — только геометрия и предпочтения материала.
+  Диаметры труб и насосов не задаются; подбор — в matching.hydraulics.
+additionalProperties: false
+properties:
+  mainLineLengthM:
+    type: number
+    minimum: 0
+    description: Длина магистрали котёл → распределитель, м
+  deltaTSystemK:
+    type: number
+    minimum: 1
+    maximum: 30
+    description: Δt радиаторного контура; fallback — supplyC−returnC из heatingSystem
+  pipeMaterialPreference:
+    type: string
+    enum: [pex, metal_plastic, steel]
+    description: Предпочтение материала для pickPipe; не диаметр

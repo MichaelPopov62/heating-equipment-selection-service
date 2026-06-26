@@ -33,8 +33,7 @@ properties:
       hotWater:
         $ref: HotWaterReport.yaml
       hydraulics:
-        type: object
-        additionalProperties: true
+        $ref: HydraulicsReport.yaml
       underfloorHeating:
         nullable: true
         $ref: UnderfloorHeatingReport.yaml
@@ -55,6 +54,8 @@ properties:
         type: object
         nullable: true
         additionalProperties: true
+      hydraulics:
+        $ref: HydraulicsMatchingReport.yaml
   recommendations:
     type: array
     description: Структурированные сообщения из коллекции recommendations (по code).

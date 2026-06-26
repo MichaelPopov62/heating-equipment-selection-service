@@ -21,6 +21,7 @@ import { RadiatorProposalLineTable } from '../RadiatorProposalLineTable/Radiator
 import { WaterHeaterMatchingPreview } from '../WaterHeaterMatchingPreview/WaterHeaterMatchingPreview';
 import { CatalogEquipmentReference } from '../CatalogEquipmentReference/CatalogEquipmentReference';
 import { UfhMixingNodeSpecCard } from '../UnderfloorHeatingReport/UfhMixingNodeSpecCard';
+import { HydraulicsReportCard } from '../HydraulicsReport/HydraulicsReportCard';
 import styles from './RecommendationsBlock.module.css';
 
 export function RecommendationsBlock({
@@ -43,6 +44,8 @@ export function RecommendationsBlock({
   catalogSnapError,
   onRetryLoadCatalog,
   onApplyScheme,
+  apiHydraulicsFromReport,
+  apiHydraulicsMatchingFromReport,
 }: RecommendationsBlockProps) {
   return (
     <aside className={[styles.root, className].filter(Boolean).join(' ')}>
@@ -248,6 +251,11 @@ export function RecommendationsBlock({
               )}
             </div>
           )}
+
+          <HydraulicsReportCard
+            hydraulics={apiHydraulicsFromReport}
+            matchingHydraulics={apiHydraulicsMatchingFromReport}
+          />
 
         {/* Группа: Водоснабжение */}
         <div className={styles.summaryGroup} aria-labelledby="hotWater-title">

@@ -209,8 +209,4 @@ properties:
           washingMachine: { type: integer, minimum: 0, maximum: 30 }
           bidet: { type: integer, minimum: 0, maximum: 30 }
   hydraulics:
-    type: object
-    additionalProperties: false
-    properties:
-      mainLineLengthM: { type: number, minimum: 0 }
-      deltaTSystemK: { type: number, minimum: 1 }
+    $ref: HydraulicsSurveyInput.yaml
