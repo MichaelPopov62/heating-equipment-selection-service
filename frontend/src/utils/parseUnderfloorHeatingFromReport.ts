@@ -7,6 +7,7 @@ import type {
   ParsedUnderfloorHeating,
   ParsedUnderfloorHeatingRoom,
   ParsedUnderfloorHydraulics,
+  ParsedUfhLoopHydraulics,
   ParsedUfhMixingNodeSpec,
 } from '../types/underfloorHeating';
 import type { UfhDistributionPreset } from '../types/ufhDistribution';
@@ -60,6 +61,78 @@ function parseDistributionPreset(
     return null;
   }
   return value;
+}
+
+function parseLoopResolutionStatus(
+  value: unknown,
+): ParsedUnderfloorHeatingRoom['loopHydraulicsResolutionStatus'] | null {
+  if (
+    value === 'resolved_auto'
+    || value === 'unresolved_velocity'
+    || value === 'unresolved_pressure'
+    || value === 'unresolved_conflict'
+  ) {
+    return value;
+  }
+  return null;
+}
+
+function parseLoopAppliedFix(
+  value: unknown,
+): ParsedUnderfloorHeatingRoom['loopHydraulicsAppliedFix'] | null {
+  if (
+    value === 'none'
+    || value === 'loops_reduced'
+    || value === 'loops_increased'
+    || value === 'pipe_downsized'
+    || value === 'pipe_upsized'
+  ) {
+    return value;
+  }
+  return null;
+}
+
+function parseUfhLoopHydraulics(item: unknown): ParsedUfhLoopHydraulics | null {
+  if (!isRecord(item)) return null;
+
+  const hydRaw = item.hydraulics;
+  const src = isRecord(hydRaw) ? hydRaw : item;
+
+  const loopId = typeof src.loopId === 'string' ? src.loopId : '';
+  if (!loopId) return null;
+
+  const lengthM = readFiniteNumber(src.lengthM) ?? readFiniteNumber(item.estimatedLengthM);
+  const flowRateM3PerHour =
+    readFiniteNumber(src.flowRateM3PerHour) ?? readFiniteNumber(item.flowRateM3PerHour);
+  if (lengthM == null || flowRateM3PerHour == null) return null;
+
+  const actionRaw = src.pipeResizeAction;
+  const pipeResizeAction =
+    actionRaw === 'upsized'
+    || actionRaw === 'downsized'
+    || actionRaw === 'loops_adjusted'
+    || actionRaw === 'unchanged'
+      ? actionRaw
+      : 'unchanged';
+
+  const reasonRaw = src.pipeResizeReason;
+  const pipeResizeReason =
+    typeof reasonRaw === 'string' && reasonRaw.trim() !== '' ? reasonRaw : null;
+
+  return {
+    loopId,
+    lengthM,
+    flowRateM3PerHour,
+    internalDiameterMm: readFiniteNumber(src.internalDiameterMm),
+    velocityMps: readFiniteNumber(src.velocityMps),
+    pressureDropKPa: readFiniteNumber(src.pressureDropKPa),
+    catalogPipeId: typeof src.catalogPipeId === 'string' ? src.catalogPipeId : null,
+    initialCatalogPipeId:
+      typeof src.initialCatalogPipeId === 'string' ? src.initialCatalogPipeId : null,
+    pipeResizeAction,
+    pipeResizeReason,
+    warnings: readStringArray(src.warnings),
+  };
 }
 
 function parseRoomRow(item: unknown): ParsedUnderfloorHeatingRoom | null {
@@ -131,6 +204,25 @@ function parseRoomRow(item: unknown): ParsedUnderfloorHeatingRoom | null {
       ? presetMaxRaw
       : undefined;
 
+  const loopsCountRaw = item.loopsCount;
+  const loopsCount =
+    typeof loopsCountRaw === 'number' && Number.isFinite(loopsCountRaw)
+      ? loopsCountRaw
+      : undefined;
+
+  const loops: ParsedUfhLoopHydraulics[] = [];
+  if (Array.isArray(item.loops)) {
+    for (const loopRow of item.loops) {
+      const parsedLoop = parseUfhLoopHydraulics(loopRow);
+      if (parsedLoop) loops.push(parsedLoop);
+    }
+  }
+
+  const loopHydraulicsResolutionStatus = parseLoopResolutionStatus(
+    item.loopHydraulicsResolutionStatus,
+  );
+  const loopHydraulicsAppliedFix = parseLoopAppliedFix(item.loopHydraulicsAppliedFix);
+
   return {
     roomId,
     roomName,
@@ -150,6 +242,13 @@ function parseRoomRow(item: unknown): ParsedUnderfloorHeatingRoom | null {
     pipeEmbedmentResistanceM2KW,
     finishCoveringResistanceM2KW,
     coveringResistanceM2KW: item.coveringResistanceM2KW as number,
+    ...(loopsCount != null ? { loopsCount } : {}),
+    ...(item.pipeResizeApplied === true ? { pipeResizeApplied: true } : {}),
+    ...(loopHydraulicsResolutionStatus
+      ? { loopHydraulicsResolutionStatus }
+      : {}),
+    ...(loopHydraulicsAppliedFix ? { loopHydraulicsAppliedFix } : {}),
+    ...(loops.length > 0 ? { loops } : {}),
     warnings: readStringArray(item.warnings),
   };
 }

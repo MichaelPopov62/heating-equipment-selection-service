@@ -63,7 +63,7 @@
 | Папка / файл | Назначение |
 |--------------|------------|
 | `src/main.tsx`, `src/App.tsx` | Точка входа и мастер анкеты (оркестрация хуков, без inline calc-state) |
-| `src/hooks/useSurveyCalcRunner.ts` | POST `/api/v1/calc`, debounce 700 ms, `calcReport` / `invalidateCalcReport` |
+| `src/hooks/useSurveyCalcRunner.ts` | POST `/api/v1/calc`, debounce 700 ms, `calcReport` / `beginDraftInitialization` |
 | `src/components/WarmFloorSection/` | Глобальный флаг `waterUnderfloorHeating` |
 | `src/components/RoomsForm/RoomAccordionItem.tsx` | Селекты **основа ТП** + **финишное покрытие** |
 | `src/components/RecommendationsBlock/` | Блок «Тёплый пол» из `calculations.underfloorHeating` |

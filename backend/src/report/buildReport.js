@@ -6,7 +6,7 @@
 import { getDesignOutsideTempC } from '../climate/index.js';
 import { calculateHeatLossForBuilding } from '../logic/heatlossByRooms.js';
 import { calculateUnderfloorHeating } from '../logic/warmFloorCalc.js';
-import { enrichUnderfloorHeatingLoopHydraulics } from '../logic/ufhLoopHydraulics.js';
+import { enrichUnderfloorHeatingLoopHydraulics, applyUfhLoopHydraulicsRecommendations } from '../logic/ufhLoopHydraulics.js';
 import {
   applyUnderfloorHeatingRecommendations,
   applyUnderfloorMixingDistributionRecommendations,
@@ -119,6 +119,11 @@ export async function buildReport({ input, ctx }) {
       hydraulicsRules: appliances.byKind.hydraulics,
       materialPreference: input.hydraulics?.pipeMaterialPreference,
     });
+    applyUfhLoopHydraulicsRecommendations(
+      underfloorHeating,
+      recommendations,
+      appliances.byKind.hydraulics,
+    );
     applyUnderfloorHeatingRecommendations(underfloorHeating, recommendations);
     logger.info('report.underfloorHeating.done', null, {
       rooms: underfloorHeating.rooms.length,
@@ -349,14 +354,29 @@ export async function buildReport({ input, ctx }) {
     logger.warn('report.hydraulics.fail', hydErr, {
       code: hydErr?.code ?? null,
     });
-    warnings.push(
+    const hydraulicsFailMessage =
       hydErr?.message
         ? `Гидравлика: ${hydErr.message}`
-        : 'Гидравлика: не удалось выполнить pipeline.',
-    );
+        : 'Гидравлика: не удалось выполнить pipeline.';
+    warnings.push(hydraulicsFailMessage);
     hydraulics = {
       schemaVersion: 1,
       notes: ['Расчёт гидравлики pipeline не выполнен — см. warnings.'],
+    };
+    matching.hydraulics = {
+      proposal: {
+        designFlowM3PerHour: 0,
+        headRequiredM: 0,
+        pipeLines: [],
+        pipeSegments: [],
+        pumps: [],
+        estimatedPipesPrice: 0,
+        estimatedPumpPrice: 0,
+        estimatedTotalPrice: 0,
+        unavailableReason: hydErr?.message ?? 'Расчёт гидравлики не выполнен.',
+      },
+      warnings: [hydraulicsFailMessage],
+      pipes: [],
     };
   }
   logger.info('report.hydraulics.done', null, {

@@ -106,6 +106,15 @@ properties:
           radiatorBranch: { type: number }
           ufhCollectorBranch: { type: number }
       maxUfhLoopLengthM: { type: number }
+      ufhLoopDeltaTK: { type: number }
+      ufhLoopVelocityMinMps: { type: number }
+      ufhLoopVelocityMaxMps: { type: number }
+      maxUfhLoopPressureDropKPa: { type: number }
+      ufhLoopMinNominalDiameterMm: { type: number, minimum: 1 }
+      ufhParasiticDownTriggerWm2: { type: number }
+      ufhParasiticDownToUpRatio: { type: number, maximum: 1 }
+      ufhLoopPipeResizeEnabled: { type: boolean }
+      ufhLoopPressureUtilizationForResize: { type: number, maximum: 1 }
       roughnessMmByMaterial:
         type: object
         additionalProperties: { type: number }
@@ -181,6 +190,9 @@ definitions:
       estimatedLengthM: { type: number, minimum: 0 }
       heatLoadWatts: { type: number, minimum: 0 }
       flowRateM3PerHour: { type: number, minimum: 0 }
+      catalogPipeId:
+        type: string
+        description: Предпочтительная труба из ufhLoopHydraulics (без повторного pickPipe).
   UfhRoom:
     type: object
     additionalProperties: false

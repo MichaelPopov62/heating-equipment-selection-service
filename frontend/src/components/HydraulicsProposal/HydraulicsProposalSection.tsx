@@ -2,7 +2,12 @@
  * Назначение: блок предложения по гидравлике (трубы + насос) для клиента.
  */
 
-import type { ParsedHydraulicsProposal, ParsedHydraulicsPumpProposal } from '../../types/hydraulics';
+import type {
+  ParsedHydraulicsPipeLine,
+  ParsedHydraulicsPipeLineGroup,
+  ParsedHydraulicsProposal,
+  ParsedHydraulicsPumpProposal,
+} from '../../types/hydraulics';
 import {
   formatBrandModel,
   formatPriceUah,
@@ -40,6 +45,68 @@ function topologyLabel(topology: ParsedHydraulicsProposal['topology']): string |
     default:
       return null;
   }
+}
+
+function PipeLinesTable({
+  title,
+  pipeLines,
+  footerPrice,
+}: {
+  title: string;
+  pipeLines: ParsedHydraulicsPipeLine[];
+  footerPrice?: number;
+}) {
+  if (pipeLines.length === 0) return null;
+
+  return (
+    <div className={styles.tableWrap}>
+      <h4 className={styles.subTitle}>{title}</h4>
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th>Модель</th>
+            <th>Материал</th>
+            <th>Ø внутр.</th>
+            <th>Длина</th>
+            <th>Цена/м</th>
+            <th>Сумма</th>
+          </tr>
+        </thead>
+        <tbody>
+          {pipeLines.map((line) => (
+            <tr key={line.catalogPipeId}>
+              <td>{formatBrandModel(line.brand, line.model)}</td>
+              <td>{line.material || '—'}</td>
+              <td>
+                {line.internalDiameterMm.toFixed(1)} <span className={styles.unit}>мм</span>
+              </td>
+              <td>
+                {line.totalLengthM.toFixed(1)} <span className={styles.unit}>м</span>
+                {line.edgeCount > 1 ? (
+                  <span className={styles.hintInline}> ({line.edgeCount} уч.)</span>
+                ) : null}
+              </td>
+              <td>
+                {line.pricePerMeter > 0
+                  ? `${formatPriceUah(line.pricePerMeter)} грн`
+                  : '—'}
+              </td>
+              <td>
+                {line.linePrice > 0
+                  ? `${formatPriceUah(line.linePrice)} грн`
+                  : '—'}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {footerPrice != null && footerPrice > 0 && (
+        <p className={styles.tableFooter}>
+          Итого по контуру: <strong>{formatPriceUah(footerPrice)} грн</strong>
+        </p>
+      )}
+    </div>
+  );
 }
 
 function PumpCard({ pump }: { pump: ParsedHydraulicsPumpProposal }) {
@@ -91,7 +158,19 @@ export function HydraulicsProposalSection({
   proposal,
   catalogSource,
 }: HydraulicsProposalSectionProps) {
-  if (!proposal) return null;
+  if (!proposal) {
+    return (
+      <div className={styles.root} aria-labelledby="hydraulics-proposal-title">
+        <h3 id="hydraulics-proposal-title" className={styles.title}>
+          Гидравлика — рекомендуемое решение
+        </h3>
+        <p className={styles.emptyHint}>
+          Предложение по трубам и насосу не сформировано — выполните расчёт или проверьте
+          предупреждения в отчёте.
+        </p>
+      </div>
+    );
+  }
 
   const sourceLine =
     catalogSource === 'mongo'
@@ -132,10 +211,12 @@ export function HydraulicsProposalSection({
         )}
       </dl>
 
-      {!proposal.hasCatalogSelection && (
-        <p className={styles.emptyHint}>
-          {proposal.unavailableReason ?? 'Подбор труб и насоса из каталога не выполнен.'}
-        </p>
+      {!proposal.hasPipeSelection && proposal.unavailableReason && (
+        <p className={styles.emptyHint}>{proposal.unavailableReason}</p>
+      )}
+
+      {proposal.pumpUnavailableReason && proposal.pumps.length === 0 && (
+        <p className={styles.hint}>{proposal.pumpUnavailableReason}</p>
       )}
 
       {proposal.pumps.length > 0 && (
@@ -146,54 +227,29 @@ export function HydraulicsProposalSection({
         </div>
       )}
 
-      {proposal.pipeLines.length > 0 && (
-        <div className={styles.tableWrap}>
-          <h4 className={styles.subTitle}>Трубы (сводка по позициям каталога)</h4>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Модель</th>
-                <th>Материал</th>
-                <th>Ø внутр.</th>
-                <th>Длина</th>
-                <th>Цена/м</th>
-                <th>Сумма</th>
-              </tr>
-            </thead>
-            <tbody>
-              {proposal.pipeLines.map((line) => (
-                <tr key={line.catalogPipeId}>
-                  <td>{formatBrandModel(line.brand, line.model)}</td>
-                  <td>{line.material || '—'}</td>
-                  <td>
-                    {line.internalDiameterMm.toFixed(1)} <span className={styles.unit}>мм</span>
-                  </td>
-                  <td>
-                    {line.totalLengthM.toFixed(1)} <span className={styles.unit}>м</span>
-                    {line.edgeCount > 1 ? (
-                      <span className={styles.hintInline}> ({line.edgeCount} уч.)</span>
-                    ) : null}
-                  </td>
-                  <td>
-                    {line.pricePerMeter > 0
-                      ? `${formatPriceUah(line.pricePerMeter)} грн`
-                      : '—'}
-                  </td>
-                  <td>
-                    {line.linePrice > 0
-                      ? `${formatPriceUah(line.linePrice)} грн`
-                      : '—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {proposal.estimatedPipesPrice > 0 && (
-            <p className={styles.tableFooter}>
-              Итого по трубам: <strong>{formatPriceUah(proposal.estimatedPipesPrice)} грн</strong>
-            </p>
-          )}
-        </div>
+      {proposal.pipeLineGroups.length > 0
+        ? proposal.pipeLineGroups.map((group: ParsedHydraulicsPipeLineGroup) => (
+            <PipeLinesTable
+              key={group.circuitId}
+              title={`Трубы — ${group.label}`}
+              pipeLines={group.pipeLines}
+              footerPrice={group.estimatedPrice}
+            />
+          ))
+        : (
+          <PipeLinesTable
+            title="Трубы (сводка по позициям каталога)"
+            pipeLines={proposal.pipeLines}
+            footerPrice={
+              proposal.estimatedPipesPrice > 0 ? proposal.estimatedPipesPrice : undefined
+            }
+          />
+        )}
+
+      {proposal.hasPipeSelection && proposal.estimatedPipesPrice > 0 && proposal.pipeLineGroups.length > 1 && (
+        <p className={styles.tableFooter}>
+          Итого по трубам: <strong>{formatPriceUah(proposal.estimatedPipesPrice)} грн</strong>
+        </p>
       )}
 
       {proposal.pipeSegments.length > 0 && (

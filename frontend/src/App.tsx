@@ -338,7 +338,8 @@ function App() {
     calcError,
     calcReport,
     setCalcReport,
-    invalidateCalcReport,
+    beginDraftInitialization,
+    endDraftInitialization,
     restoreCalcReport,
     runApiCalc,
   } = useSurveyCalcRunner({
@@ -373,6 +374,7 @@ function App() {
 
   const applySurveyDraftState = useCallback(
     (draft: SurveyDraft) => {
+      beginDraftInitialization();
       setCurrentStep(draft.currentStep);
       setObjectMeta(draft.objectMeta);
       setRooms(structuredClone(draft.rooms));
@@ -387,14 +389,16 @@ function App() {
       setThermalRegimePreset(draft.thermalRegimePreset);
       thermalRegimeTouchedRef.current = true;
       restoreCalcReport(draft.lastCalcReport ?? null);
+      queueMicrotask(() => {
+        endDraftInitialization();
+      });
     },
-    [restoreCalcReport],
+    [beginDraftInitialization, endDraftInitialization, restoreCalcReport],
   );
 
   /** Смена схемы из подсказок отчёта или формы водонагревателя. */
   const handleWaterHeaterSchemeChange = useCallback(
     (scheme: HotWaterBoilerPowerMatchingScheme) => {
-      invalidateCalcReport();
       setWaterHeaterForm((prev) => ({
         ...prev,
         hotWaterBoilerPowerMatchingScheme: scheme,
@@ -405,27 +409,19 @@ function App() {
             : false,
       }));
     },
-    [invalidateCalcReport, objectMeta.objectType],
+    [objectMeta.objectType],
   );
 
-  const handleWaterHeaterFormChange = useCallback(
-    (next: WaterHeaterFormValue) => {
-      invalidateCalcReport();
-      setWaterHeaterForm(next);
-    },
-    [invalidateCalcReport],
-  );
+  const handleWaterHeaterFormChange = useCallback((next: WaterHeaterFormValue) => {
+    setWaterHeaterForm(next);
+  }, []);
 
-  const handleUfhPresetChange = useCallback(
-    (next: UfhModePresetId | null) => {
-      setUfhPresetId(next);
-      if (next != null) {
-        setWaterUnderfloorHeating(true);
-      }
-      invalidateCalcReport();
-    },
-    [invalidateCalcReport],
-  );
+  const handleUfhPresetChange = useCallback((next: UfhModePresetId | null) => {
+    setUfhPresetId(next);
+    if (next != null) {
+      setWaterUnderfloorHeating(true);
+    }
+  }, []);
 
   const surveyProject = useSurveyProject({
     getDraftParams: () => ({
@@ -503,12 +499,10 @@ function App() {
         hotWaterBoilerPowerMatchingScheme: SCHEME_BOILER_MAX_COMBI,
         indirectDhwSpaceAvailable: false,
       }));
-      invalidateCalcReport();
     });
   }, [
     apartmentLargeForScheme,
     hotWaterBoilerPowerMatchingScheme,
-    invalidateCalcReport,
     objectMeta.objectType,
   ]);
 
@@ -805,7 +799,6 @@ function App() {
                     const next = e.target.value as HeatingThermalRegimePreset;
                     thermalRegimeTouchedRef.current = true;
                     setThermalRegimePreset(next);
-                    invalidateCalcReport();
                   }}
                 >
                   {HEATING_THERMAL_REGIME_OPTIONS.map((o) => (
@@ -849,10 +842,7 @@ function App() {
             {currentStep === 'hydraulics' && (
               <HydraulicsSection
                 value={hydraulicsForm}
-                onChange={(next) => {
-                  setHydraulicsForm(next);
-                  invalidateCalcReport();
-                }}
+                onChange={setHydraulicsForm}
               />
             )}
 
@@ -868,7 +858,6 @@ function App() {
                 onWaterUnderfloorChange={(v) => {
                   setWaterUnderfloorHeating(v);
                   if (!v) setUfhPresetId(null);
-                  invalidateCalcReport();
                 }}
                 onDistributionPresetChange={setUnderfloorDistributionPreset}
               />

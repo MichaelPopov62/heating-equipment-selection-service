@@ -61,10 +61,15 @@ function envLimit(name, fallback) {
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
 }
 
+/** Дефолт calc-лимита: в dev выше, чтобы автопересчёт анкеты не упирался в 429 при заполнении. */
+function defaultCalcRateLimitPer15m() {
+  return process.env.NODE_ENV === 'production' ? 20 : 120;
+}
+
 /** Лимит stateless POST /api/v1/calc */
 export const calcRateLimiter = createLimiter({
   windowMs: 15 * 60 * 1000,
-  max: envLimit('RATE_LIMIT_CALC_PER_15M', 20),
+  max: envLimit('RATE_LIMIT_CALC_PER_15M', defaultCalcRateLimitPer15m()),
   code: 'CALC_RATE_LIMIT_EXCEEDED',
 });
 

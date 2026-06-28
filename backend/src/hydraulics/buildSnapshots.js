@@ -13,6 +13,29 @@ import {
 import { round } from '../utils/math.js';
 
 /**
+ * Нормалізує петлю ТП до полів HydraulicsPipelineInput (без hydraulics з enrich).
+ * @param {import('./types').HydraulicsUfhLoop & { hydraulics?: unknown }} loop
+ * @returns {import('./types').HydraulicsUfhLoop}
+ */
+function toPipelineUfhLoop(loop) {
+  const hydraulics = loop.hydraulics;
+  const catalogPipeId =
+    typeof hydraulics === 'object'
+    && hydraulics !== null
+    && typeof /** @type {{ catalogPipeId?: string }} */ (hydraulics).catalogPipeId === 'string'
+      ? /** @type {{ catalogPipeId: string }} */ (hydraulics).catalogPipeId
+      : loop.catalogPipeId;
+
+  return {
+    loopId: loop.loopId,
+    estimatedLengthM: loop.estimatedLengthM,
+    heatLoadWatts: loop.heatLoadWatts,
+    flowRateM3PerHour: loop.flowRateM3PerHour,
+    ...(catalogPipeId ? { catalogPipeId } : {}),
+  };
+}
+
+/**
  * @param {import('../types/shared-types').BuildingInput | undefined | null} building
  * @returns {Map<string, number>}
  */
@@ -130,7 +153,9 @@ export function buildHydraulicsSnapshots({
       heatLoadWatts: room.heatLoadWatts ?? room.heatFluxUpWatts,
       flowRateM3PerHour: room.flowRateM3PerHour ?? 0,
       ...(room.loopsCount != null ? { loopsCount: room.loopsCount } : {}),
-      ...(room.loops?.length ? { loops: room.loops } : {}),
+      ...(room.loops?.length
+        ? { loops: room.loops.map(toPipelineUfhLoop) }
+        : {}),
     }));
 
     /** @type {import('./types').HydraulicsMixingNodeSnapshot | undefined} */

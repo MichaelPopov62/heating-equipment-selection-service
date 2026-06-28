@@ -11,5 +11,9 @@
     "lint": "npm run lint --prefix backend",
     "seed": "npm run seed --prefix backend",
     "verify:seed-catalog": "npm run verify:seed-catalog --prefix backend"
+  },
+  "devDependencies": {
+    "axios": "^1.18.1",
+    "tsx": "^4.22.4"
   }
 }

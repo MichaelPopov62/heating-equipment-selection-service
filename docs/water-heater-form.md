@@ -116,7 +116,7 @@ Discriminated union в `frontend/src/types/waterHeaterMatching.ts`:
 
 ## Реактивность
 
-Изменение схемы или галочки → `invalidateCalcReport()` (`useSurveyCalcRunner`) → `calcInputKey` меняется → debounce **700 ms** → `POST /api/v1/calc` → обновление карточек БКН и ЭВН в форме и в правой колонке.
+Изменение схемы или галочки → `calcInputKey` меняется → хук сбрасывает отчёт → debounce **700 ms** → `POST /api/v1/calc` → обновление карточек БКН и ЭВН в форме и в правой колонке.
 
 Подробнее: [`frontend-calc-runner.md`](frontend-calc-runner.md).
 
@@ -163,7 +163,7 @@ Discriminated union в `frontend/src/types/waterHeaterMatching.ts`:
 | `frontend/src/utils/waterHeaterSchemeOptions.ts` | Фильтр схем, видимость БКН |
 | `shared/waterHeaterFormContract.js` | Видимость галочки БКН, мерж `objectMeta.indirectDhwSpaceAvailable` |
 | `frontend/src/utils/objectMetaForCalcPayload.ts` | Типизированный re-export shared |
-| `frontend/src/hooks/useSurveyCalcRunner.ts` | Calc API, debounce, invalidate/restore report |
+| `frontend/src/hooks/useSurveyCalcRunner.ts` | Calc API, debounce, begin/end draft guard, restore report |
 | `frontend/src/utils/migrateSurveyDraft.ts` | Нормализация snapshot → SurveyDraft |
 | `frontend/src/services/buildCalcRequestPayload.ts` | Сборка CalcInput |
 | `backend/src/matching/index.js` | Оркестрация pickIndirect / pickWaterHeater |

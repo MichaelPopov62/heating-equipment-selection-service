@@ -83,6 +83,11 @@ export interface HydraulicsApplianceRulesDoc {
   ufhLoopVelocityMinMps: number;
   ufhLoopVelocityMaxMps: number;
   maxUfhLoopPressureDropKPa: number;
+  ufhLoopMinNominalDiameterMm: number;
+  ufhParasiticDownTriggerWm2: number;
+  ufhParasiticDownToUpRatio: number;
+  ufhLoopPipeResizeEnabled: boolean;
+  ufhLoopPressureUtilizationForResize: number;
   roughnessMmByMaterial: Record<string, number>;
   localLossZeta: {
     elbow90: number;

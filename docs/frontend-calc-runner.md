@@ -9,7 +9,7 @@
 | Ответственность | Модуль |
 |-----------------|--------|
 | Состояние `calcLoading` / `calcError` / `calcReport` | `frontend/src/hooks/useSurveyCalcRunner.ts` |
-| Debounce автопересчёта (`SURVEY_CALC_DEBOUNCE_MS = 700`) | тот же хук |
+| Сброс отчёта и debounce автопересчёта (`SURVEY_CALC_DEBOUNCE_MS = 700`) | тот же хук |
 | Сборка тела запроса | `frontend/src/services/buildCalcRequestPayload.ts` |
 | Ключ изменений входа (для debounce) | `frontend/src/utils/surveyCalcInputKey.ts` |
 | Парсинг отчёта для UI | `frontend/src/hooks/useCalcReport.ts` |
@@ -25,27 +25,27 @@ const {
   calcLoading,
   calcError,
   calcReport,
-  setCalcReport,           // useSurveyProject (сохранение расчёта на сервер)
-  invalidateCalcReport,    // сброс отчёта при изменении формы
-  restoreCalcReport,       // загрузка lastCalcReport из черновика
-  runApiCalc,              // ручной пересчёт (кнопка)
+  setCalcReport,              // useSurveyProject (сохранение / загрузка расчёта с сервера)
+  beginDraftInitialization,   // guard перед программной загрузкой черновика
+  endDraftInitialization,     // снять guard после applySurveyDraftState
+  restoreCalcReport,          // lastCalcReport из черновика
+  runApiCalc,                 // ручной пересчёт (кнопка)
 } = useSurveyCalcRunner({ buildCalcPayload, canAutoCalc, calcInputKey });
 ```
 
-### `invalidateCalcReport()`
+### Сброс отчёта при вводе
 
-Единая точка сброса отчёта при изменении полей, влияющих на calc:
+Один `useEffect` на `calcInputKey` (и переход `canAutoCalc` false→true): debounced `runApiCalc` (если `canAutoCalc`). Перед POST сравнивается `JSON.stringify(buildCalcPayload())` с последним **успешным** запросом — дубликаты не уходят (типично: оркестрация комнат, поля ГВС без изменения CalcInput). `runApiCalc`/`buildCalcPayload` — через ref.
 
-- смена схемы ГВС / формы водонагревателя;
-- смена температурного пресета котла;
-- включение/выключение ТП;
-- смена пресета режима ТП.
+Ручной `invalidateCalcReport()` в формах **не нужен** — сброс централизован в хуке.
 
-Не вызывает `setCalcError(null)` — ошибка последнего запроса сохраняется до следующего успешного `runApiCalc` или `restoreCalcReport`.
+### `beginDraftInitialization()` + `endDraftInitialization()` + `isDraftInitializingRef`
+
+`beginDraftInitialization()` вызывается в **начале** `applySurveyDraftState` (до пачки `setState`). `endDraftInitialization()` — в `queueMicrotask` **после** `restoreCalcReport`, когда React обработал все обновления. Guard блокирует сброс отчёта и автопересчёт на всём интервале загрузки черновика/проекта.
 
 ### `restoreCalcReport(report)`
 
-Используется в `applySurveyDraftState` при загрузке проекта: восстанавливает `lastCalcReport` и очищает `calcError`.
+В конце `applySurveyDraftState`: восстанавливает `lastCalcReport` и очищает `calcError`.
 
 ---
 
@@ -54,15 +54,15 @@ const {
 ```mermaid
 flowchart LR
   Form[Поля анкеты] --> Key[surveyCalcInputKey]
-  Key --> Hook[useSurveyCalcRunner debounce 700ms]
+  Key --> Hook[useSurveyCalcRunner: сброс + debounce 700ms]
   Hook --> API[POST /api/v1/calc]
   API --> Report[calcReport]
   Report --> Parse[useCalcReport]
   Parse --> UI[RecommendationsBlock / WaterHeaterForm]
 ```
 
-1. Пользователь меняет поле → при необходимости `invalidateCalcReport()`.
-2. `calcInputKey` меняется → хук планирует `runApiCalc` через 700 ms.
+1. Пользователь меняет поле → `calcInputKey` меняется.
+2. Хук сбрасывает старый отчёт и планирует `runApiCalc` через 700 ms.
 3. Ответ кладётся в `calcReport` → `useCalcReport` обновляет карточки matching.
 
 ---

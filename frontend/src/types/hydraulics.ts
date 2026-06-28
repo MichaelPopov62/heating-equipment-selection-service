@@ -30,6 +30,13 @@ export type ParsedHydraulicsPipeLine = {
   linePrice: number;
 };
 
+export type ParsedHydraulicsPipeLineGroup = {
+  circuitId: 'heating' | 'ufh';
+  label: string;
+  pipeLines: ParsedHydraulicsPipeLine[];
+  estimatedPrice: number;
+};
+
 export type ParsedHydraulicsPipeSegment = {
   edgeId: string;
   segmentLabel: string;
@@ -73,6 +80,7 @@ export type ParsedHydraulicsProposal = {
   headRequiredM: number;
   topology?: 'direct' | 'mixing_valve' | 'hydraulic_separator';
   pipeLines: ParsedHydraulicsPipeLine[];
+  pipeLineGroups: ParsedHydraulicsPipeLineGroup[];
   pipeSegments: ParsedHydraulicsPipeSegment[];
   pump: ParsedHydraulicsPumpProposal | null;
   pumps: ParsedHydraulicsPumpProposal[];
@@ -80,6 +88,8 @@ export type ParsedHydraulicsProposal = {
   estimatedPumpPrice: number;
   estimatedTotalPrice: number;
   unavailableReason: string | null;
+  pumpUnavailableReason: string | null;
   warnings: string[];
   hasCatalogSelection: boolean;
+  hasPipeSelection: boolean;
 };

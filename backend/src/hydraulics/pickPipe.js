@@ -11,6 +11,45 @@ import {
 } from './pipeHydraulics.js';
 
 /**
+ * Подбор конкретной трубы из каталога по id (для петель ТП после ufhLoopHydraulics).
+ * @param {object} args
+ * @param {import('./types').HydraulicsGraphEdge} args.edge
+ * @param {import('../catalog/types').NormalizedCatalog['pipes']} args.pipes
+ * @param {string} args.catalogPipeId
+ * @param {import('./types').HydraulicsRules} args.rules
+ * @param {number} [args.localZeta]
+ * @returns {import('./types').HydraulicsPipeMatchItem | null}
+ */
+export function pickPipeForEdgeByCatalogId({
+  edge,
+  pipes,
+  catalogPipeId,
+  rules,
+  localZeta = 0,
+}) {
+  const pipe = pipes?.find((p) => p.id === catalogPipeId);
+  if (!pipe || edge.designFlowM3PerHour <= 0) return null;
+
+  const internalMm = pipeInternalDiameterMm(pipe);
+  const roughness = resolveRoughnessMm(pipe.material, rules.roughnessMmByMaterial);
+  const hyd = computeSegmentHydraulics({
+    flowM3PerHour: edge.designFlowM3PerHour,
+    lengthM: edge.lengthM,
+    internalDiameterMm: internalMm,
+    roughnessMm: roughness,
+    localZeta,
+  });
+
+  return {
+    edgeId: edge.id,
+    catalogPipeId: pipe.id,
+    velocityMps: hyd.velocityMps,
+    pressureDropKPa: hyd.pressureDropKPa,
+    internalDiameterMm: internalMm,
+  };
+}
+
+/**
  * @param {object} args
  * @param {import('./types').HydraulicsGraphEdge} args.edge
  * @param {import('../catalog/types').NormalizedCatalog['pipes']} args.pipes
@@ -113,13 +152,23 @@ export function pickPipesForGraph({ graph, catalog, dto }) {
             ? zeta.elbow90
             : 0;
 
-    const match = pickPipeForEdge({
-      edge,
-      pipes: catalog.pipes ?? [],
-      rules: dto.rules,
-      materialPreference: dto.layout.pipeMaterialPreference,
-      localZeta,
-    });
+    const preferredId = edge.preferredCatalogPipeId;
+    const match =
+      preferredId
+        ? pickPipeForEdgeByCatalogId({
+            edge,
+            pipes: catalog.pipes ?? [],
+            catalogPipeId: preferredId,
+            rules: dto.rules,
+            localZeta,
+          })
+        : pickPipeForEdge({
+            edge,
+            pipes: catalog.pipes ?? [],
+            rules: dto.rules,
+            materialPreference: dto.layout.pipeMaterialPreference,
+            localZeta,
+          });
 
     if (match) {
       pipes.push(match);

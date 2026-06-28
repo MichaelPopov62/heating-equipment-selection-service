@@ -41,6 +41,11 @@ export interface HydraulicsApplianceRules {
   ufhLoopVelocityMinMps: number;
   ufhLoopVelocityMaxMps: number;
   maxUfhLoopPressureDropKPa: number;
+  ufhLoopMinNominalDiameterMm: number;
+  ufhParasiticDownTriggerWm2: number;
+  ufhParasiticDownToUpRatio: number;
+  ufhLoopPipeResizeEnabled: boolean;
+  ufhLoopPressureUtilizationForResize: number;
   roughnessMmByMaterial: Record<string, number>;
   localLossZeta: {
     elbow90: number;
@@ -87,6 +92,8 @@ export interface HydraulicsUfhLoop {
   estimatedLengthM: number;
   heatLoadWatts: number;
   flowRateM3PerHour: number;
+  /** Подобранный Ø из ufhLoopHydraulics — для pipeline без повторного pickPipe. */
+  catalogPipeId?: string;
 }
 
 export interface HydraulicsUfhRoom {
@@ -282,6 +289,8 @@ export interface HydraulicsGraphEdge {
   supplyC?: number;
   returnC?: number;
   segmentRole: 'main' | 'branch' | 'ufh_loop' | 'dhw';
+  /** Предпочтительная труба из расчёта петли ТП (ufhLoopHydraulics). */
+  preferredCatalogPipeId?: string;
 }
 
 export interface HydraulicsGraph {
@@ -373,6 +382,13 @@ export interface HydraulicsPipeProposalLine {
   linePrice: number;
 }
 
+export interface HydraulicsPipeLineGroup {
+  circuitId: 'heating' | 'ufh';
+  label: string;
+  pipeLines: HydraulicsPipeProposalLine[];
+  estimatedPrice: number;
+}
+
 export interface HydraulicsPipeSegmentProposal {
   edgeId: string;
   segmentLabel: string;
@@ -417,6 +433,7 @@ export interface HydraulicsProposalReport {
   topology?: HydraulicsCirculationTopology;
   circulationZones?: HydraulicsCirculationZone[];
   pipeLines: HydraulicsPipeProposalLine[];
+  pipeLineGroups?: HydraulicsPipeLineGroup[];
   pipeSegments: HydraulicsPipeSegmentProposal[];
   pump?: HydraulicsPumpProposal;
   pumps?: HydraulicsPumpProposal[];
@@ -424,6 +441,7 @@ export interface HydraulicsProposalReport {
   estimatedPumpPrice: number;
   estimatedTotalPrice: number;
   unavailableReason?: string;
+  pumpUnavailableReason?: string;
 }
 
 export interface HydraulicsMatchingReport {

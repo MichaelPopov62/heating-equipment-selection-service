@@ -74,6 +74,10 @@
 | `pumpMinHeadAtQMaxM` | 0.5 | Минимальный `H(qMax)` при валидации кривой в каталоге |
 | `primaryFlowMarginPercent` | 12 | Запас расхода первички при гидрострелке |
 | `balancingValveKPaPerTurn` | 3 | Балансировка веток |
+| `ufhLoopDeltaTK`, `ufhLoopVelocityMinMps`, `ufhLoopVelocityMaxMps`, `maxUfhLoopPressureDropKPa` | 10 / 0.2 / 0.7 / 20 | Петли ТП (`ufhLoopHydraulics.js`) |
+| `ufhLoopMinNominalDiameterMm` | 16 | Мин. номинал трубы ТП в каталоге |
+| `ufhParasiticDownTriggerWm2`, `ufhParasiticDownToUpRatio` | 5 / 0.15 | Триггер оптимизации Ø при q↓ в перекрытие |
+| `ufhLoopPipeResizeEnabled`, `ufhLoopPressureUtilizationForResize` | true / 0.85 | Совместный подбор Ø и числа петель |
 | `velocityLimitsMps`, `defaultLengthsM`, `roughnessMmByMaterial`, `localLossZeta`, `maxUfhLoopLengthM` | см. JSON | Трубы, петли ТП, граф |
 
 ## Кривая насоса в каталоге

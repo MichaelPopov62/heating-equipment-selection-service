@@ -63,6 +63,51 @@ function findBoilerInCatalog(boilers, catalogBoilerId) {
 }
 
 /**
+ * @param {import('./types').HydraulicsPipeSegmentProposal[]} segments
+ * @returns {import('./types').HydraulicsPipeProposalLine[]}
+ */
+function aggregatePipeLinesFromSegments(segments) {
+  /** @type {Map<string, import('./types').HydraulicsPipeProposalLine>} */
+  const aggregated = new Map();
+
+  for (const seg of segments) {
+    const prev = aggregated.get(seg.catalogPipeId);
+    if (prev) {
+      prev.totalLengthM = round(prev.totalLengthM + seg.lengthM, 2);
+      prev.edgeCount += 1;
+      prev.linePrice = round(prev.linePrice + seg.linePrice, 2);
+    } else {
+      aggregated.set(seg.catalogPipeId, {
+        catalogPipeId: seg.catalogPipeId,
+        brand: seg.brand,
+        model: seg.model,
+        material: seg.material,
+        outerDiameterMm: seg.outerDiameterMm,
+        wallThicknessMm: seg.wallThicknessMm,
+        internalDiameterMm: seg.internalDiameterMm,
+        totalLengthM: seg.lengthM,
+        edgeCount: 1,
+        pricePerMeter: seg.pricePerMeter,
+        linePrice: seg.linePrice,
+      });
+    }
+  }
+
+  return [...aggregated.values()].sort((a, b) => b.totalLengthM - a.totalLengthM);
+}
+
+/**
+ * @param {import('./types').HydraulicsPipeSegmentProposal[]} segments
+ * @param {Set<string>} roles
+ * @returns {import('./types').HydraulicsPipeProposalLine[]}
+ */
+function pipeLinesForRoles(segments, roles) {
+  return aggregatePipeLinesFromSegments(
+    segments.filter((seg) => roles.has(seg.segmentRole)),
+  );
+}
+
+/**
  * @param {import('./types').HydraulicsResolvedPump} resolved
  * @param {import('../catalog/types').NormalizedCatalog} catalog
  * @returns {import('./types').HydraulicsPumpProposal}
@@ -158,35 +203,33 @@ export function buildHydraulicsProposal({
     });
   }
 
-  /** @type {Map<string, import('./types').HydraulicsPipeProposalLine>} */
-  const aggregated = new Map();
+  const pipeLines = aggregatePipeLinesFromSegments(pipeSegments);
 
-  for (const seg of pipeSegments) {
-    const prev = aggregated.get(seg.catalogPipeId);
-    if (prev) {
-      prev.totalLengthM = round(prev.totalLengthM + seg.lengthM, 2);
-      prev.edgeCount += 1;
-      prev.linePrice = round(prev.linePrice + seg.linePrice, 2);
-    } else {
-      aggregated.set(seg.catalogPipeId, {
-        catalogPipeId: seg.catalogPipeId,
-        brand: seg.brand,
-        model: seg.model,
-        material: seg.material,
-        outerDiameterMm: seg.outerDiameterMm,
-        wallThicknessMm: seg.wallThicknessMm,
-        internalDiameterMm: seg.internalDiameterMm,
-        totalLengthM: seg.lengthM,
-        edgeCount: 1,
-        pricePerMeter: seg.pricePerMeter,
-        linePrice: seg.linePrice,
-      });
-    }
+  const heatingRoles = new Set(['main', 'branch']);
+  const ufhRoles = new Set(['ufh_loop']);
+
+  /** @type {import('./types').HydraulicsPipeLineGroup[]} */
+  const pipeLineGroups = [];
+
+  const heatingLines = pipeLinesForRoles(pipeSegments, heatingRoles);
+  if (heatingLines.length > 0) {
+    pipeLineGroups.push({
+      circuitId: 'heating',
+      label: 'Контур отопления (радиаторы)',
+      pipeLines: heatingLines,
+      estimatedPrice: round(heatingLines.reduce((s, l) => s + l.linePrice, 0), 2),
+    });
   }
 
-  const pipeLines = [...aggregated.values()].sort(
-    (a, b) => b.totalLengthM - a.totalLengthM,
-  );
+  const ufhLines = pipeLinesForRoles(pipeSegments, ufhRoles);
+  if (ufhLines.length > 0) {
+    pipeLineGroups.push({
+      circuitId: 'ufh',
+      label: 'Контур тёплого пола',
+      pipeLines: ufhLines,
+      estimatedPrice: round(ufhLines.reduce((s, l) => s + l.linePrice, 0), 2),
+    });
+  }
 
   const estimatedPipesPrice = round(
     pipeLines.reduce((s, l) => s + l.linePrice, 0),
@@ -215,13 +258,18 @@ export function buildHydraulicsProposal({
 
   /** @type {string | undefined} */
   let unavailableReason;
+  /** @type {string | undefined} */
+  let pumpUnavailableReason;
   const hasAnyPump = pumpProposals.length > 0;
-  if (!pipeSegments.length && !hasAnyPump) {
+  const hasPipes = pipeSegments.length > 0;
+
+  if (!hasPipes && !hasAnyPump) {
     unavailableReason = 'Не удалось подобрать трубы и насос из каталога.';
-  } else if (!pipeSegments.length) {
+  } else if (!hasPipes) {
     unavailableReason = 'Трубы из каталога не подобраны — проверьте каталог pipes.';
   } else if (!hasAnyPump) {
-    unavailableReason = 'Насос из каталога не подобран — проверьте каталог pumps.';
+    pumpUnavailableReason =
+      'Насос из каталога не подобран для расчётной рабочей точки — см. предупреждения.';
   }
 
   return {
@@ -232,6 +280,7 @@ export function buildHydraulicsProposal({
       ? { circulationZones: matching.circulationZones }
       : {}),
     pipeLines,
+    ...(pipeLineGroups.length ? { pipeLineGroups } : {}),
     pipeSegments,
     ...(mainPumpProposal ? { pump: mainPumpProposal } : {}),
     ...(pumpProposals.length ? { pumps: pumpProposals } : {}),
@@ -239,5 +288,6 @@ export function buildHydraulicsProposal({
     estimatedPumpPrice,
     estimatedTotalPrice: round(estimatedPipesPrice + estimatedPumpPrice, 2),
     ...(unavailableReason ? { unavailableReason } : {}),
+    ...(pumpUnavailableReason ? { pumpUnavailableReason } : {}),
   };
 }

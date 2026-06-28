@@ -4,6 +4,7 @@
 
 import type {
   ParsedHydraulicsPipeLine,
+  ParsedHydraulicsPipeLineGroup,
   ParsedHydraulicsPipeSegment,
   ParsedHydraulicsProposal,
   ParsedHydraulicsPumpProposal,
@@ -120,6 +121,92 @@ function parsePipeSegment(raw: unknown): ParsedHydraulicsPipeSegment | null {
 }
 
 /**
+ * Агрегирует участки в сводные позиции каталога.
+ */
+function aggregatePipeLinesFromSegments(
+  segments: ParsedHydraulicsPipeSegment[],
+): ParsedHydraulicsPipeLine[] {
+  const map = new Map<string, ParsedHydraulicsPipeLine>();
+
+  for (const seg of segments) {
+    const prev = map.get(seg.catalogPipeId);
+    if (prev) {
+      prev.totalLengthM = Math.round((prev.totalLengthM + seg.lengthM) * 100) / 100;
+      prev.edgeCount += 1;
+      prev.linePrice = Math.round((prev.linePrice + seg.linePrice) * 100) / 100;
+    } else {
+      map.set(seg.catalogPipeId, {
+        catalogPipeId: seg.catalogPipeId,
+        brand: seg.brand,
+        model: seg.model,
+        material: seg.material,
+        outerDiameterMm: seg.outerDiameterMm,
+        wallThicknessMm: seg.wallThicknessMm,
+        internalDiameterMm: seg.internalDiameterMm,
+        totalLengthM: seg.lengthM,
+        edgeCount: 1,
+        pricePerMeter: seg.pricePerMeter,
+        linePrice: seg.linePrice,
+      });
+    }
+  }
+
+  return [...map.values()].sort((a, b) => b.totalLengthM - a.totalLengthM);
+}
+
+function buildPipeLineGroupsFromSegments(
+  segments: ParsedHydraulicsPipeSegment[],
+): ParsedHydraulicsPipeLineGroup[] {
+  const defs: Array<{
+    circuitId: ParsedHydraulicsPipeLineGroup['circuitId'];
+    label: string;
+    roles: ParsedHydraulicsPipeSegment['segmentRole'][];
+  }> = [
+    {
+      circuitId: 'heating',
+      label: 'Контур отопления (радиаторы)',
+      roles: ['main', 'branch'],
+    },
+    {
+      circuitId: 'ufh',
+      label: 'Контур тёплого пола',
+      roles: ['ufh_loop'],
+    },
+  ];
+
+  return defs
+    .map((def) => {
+      const filtered = segments.filter((s) => def.roles.includes(s.segmentRole));
+      const pipeLines = aggregatePipeLinesFromSegments(filtered);
+      if (pipeLines.length === 0) return null;
+      return {
+        circuitId: def.circuitId,
+        label: def.label,
+        pipeLines,
+        estimatedPrice: Math.round(pipeLines.reduce((s, l) => s + l.linePrice, 0) * 100) / 100,
+      };
+    })
+    .filter((g): g is ParsedHydraulicsPipeLineGroup => g != null);
+}
+
+function parsePipeLineGroup(raw: unknown): ParsedHydraulicsPipeLineGroup | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const g = raw as Record<string, unknown>;
+  const circuitId = g.circuitId;
+  if (circuitId !== 'heating' && circuitId !== 'ufh') return null;
+  const pipeLines = (Array.isArray(g.pipeLines) ? g.pipeLines : [])
+    .map(parsePipeLine)
+    .filter((x): x is ParsedHydraulicsPipeLine => x != null);
+  if (pipeLines.length === 0) return null;
+  return {
+    circuitId,
+    label: str(g.label) || (circuitId === 'ufh' ? 'Контур тёплого пола' : 'Контур отопления (радиаторы)'),
+    pipeLines,
+    estimatedPrice: num(g.estimatedPrice),
+  };
+}
+
+/**
  * @param matchingHydraulics report.matching.hydraulics
  */
 export function parseHydraulicsProposalFromReport(
@@ -138,6 +225,7 @@ export function parseHydraulicsProposalFromReport(
       designFlowM3PerHour: 0,
       headRequiredM: 0,
       pipeLines: [],
+      pipeLineGroups: [],
       pipeSegments: [],
       pump: null,
       pumps: [],
@@ -145,8 +233,10 @@ export function parseHydraulicsProposalFromReport(
       estimatedPumpPrice: 0,
       estimatedTotalPrice: 0,
       unavailableReason: 'Предложение по гидравлике не сформировано.',
+      pumpUnavailableReason: null,
       warnings,
       hasCatalogSelection: false,
+      hasPipeSelection: false,
     };
   }
 
@@ -158,6 +248,14 @@ export function parseHydraulicsProposalFromReport(
     .map(parsePipeSegment)
     .filter((x): x is ParsedHydraulicsPipeSegment => x != null);
 
+  const pipeLineGroupsFromApi = (Array.isArray(proposal.pipeLineGroups) ? proposal.pipeLineGroups : [])
+    .map(parsePipeLineGroup)
+    .filter((x): x is ParsedHydraulicsPipeLineGroup => x != null);
+  const pipeLineGroups =
+    pipeLineGroupsFromApi.length > 0
+      ? pipeLineGroupsFromApi
+      : buildPipeLineGroupsFromSegments(pipeSegments);
+
   const pumpsRaw = Array.isArray(proposal.pumps) ? proposal.pumps : [];
   const pumpsFromArray = pumpsRaw
     .map(parsePump)
@@ -167,12 +265,17 @@ export function parseHydraulicsProposalFromReport(
 
   const unavailableReason =
     typeof proposal.unavailableReason === 'string' ? proposal.unavailableReason : null;
+  const pumpUnavailableReason =
+    typeof proposal.pumpUnavailableReason === 'string' ? proposal.pumpUnavailableReason : null;
+
+  const hasPipeSelection = pipeLines.length > 0 || pipeLineGroups.length > 0;
 
   return {
     designFlowM3PerHour: num(proposal.designFlowM3PerHour),
     headRequiredM: num(proposal.headRequiredM),
     topology: parseTopology(proposal.topology),
     pipeLines,
+    pipeLineGroups,
     pipeSegments,
     pump,
     pumps,
@@ -180,7 +283,9 @@ export function parseHydraulicsProposalFromReport(
     estimatedPumpPrice: num(proposal.estimatedPumpPrice),
     estimatedTotalPrice: num(proposal.estimatedTotalPrice),
     unavailableReason,
+    pumpUnavailableReason,
     warnings,
-    hasCatalogSelection: pipeLines.length > 0 || pumps.length > 0,
+    hasCatalogSelection: hasPipeSelection || pumps.length > 0,
+    hasPipeSelection,
   };
 }

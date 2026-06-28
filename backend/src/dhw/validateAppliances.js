@@ -290,6 +290,28 @@ function validateAndNormalizeApplianceDoc(doc) {
       ufhLoopVelocityMinMps: requirePosNum(d, 'ufhLoopVelocityMinMps', basePath),
       ufhLoopVelocityMaxMps: requirePosNum(d, 'ufhLoopVelocityMaxMps', basePath),
       maxUfhLoopPressureDropKPa: requirePosNum(d, 'maxUfhLoopPressureDropKPa', basePath),
+      ufhLoopMinNominalDiameterMm: requirePosNum(d, 'ufhLoopMinNominalDiameterMm', basePath),
+      ufhParasiticDownTriggerWm2: requirePosNum(d, 'ufhParasiticDownTriggerWm2', basePath),
+      ufhParasiticDownToUpRatio: (() => {
+        const n = requirePosNum(d, 'ufhParasiticDownToUpRatio', basePath);
+        if (n > 1) {
+          throw new Error(`${basePath}.ufhParasiticDownToUpRatio: число ≤ 1`);
+        }
+        return n;
+      })(),
+      ufhLoopPipeResizeEnabled: (() => {
+        if (typeof d.ufhLoopPipeResizeEnabled !== 'boolean') {
+          throw new Error(`${basePath}.ufhLoopPipeResizeEnabled: ожидается boolean`);
+        }
+        return d.ufhLoopPipeResizeEnabled;
+      })(),
+      ufhLoopPressureUtilizationForResize: (() => {
+        const n = requirePosNum(d, 'ufhLoopPressureUtilizationForResize', basePath);
+        if (n > 1) {
+          throw new Error(`${basePath}.ufhLoopPressureUtilizationForResize: число ≤ 1`);
+        }
+        return n;
+      })(),
       roughnessMmByMaterial: Object.fromEntries(
         Object.entries(rough).map(([k, v]) => {
           const n = Number(v);

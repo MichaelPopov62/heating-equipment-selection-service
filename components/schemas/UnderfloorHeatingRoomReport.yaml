@@ -24,6 +24,18 @@ properties:
     description: Нагрузка контура ТП в комнате (= heatFluxUpWatts).
   flowRateM3PerHour: { type: number }
   loopsCount: { type: integer, minimum: 1 }
+  pipeResizeApplied:
+    type: boolean
+    description: true, если применена автооптимизация Ø или числа петель.
+  loopHydraulicsResolutionStatus:
+    type: string
+    enum: [resolved_auto, unresolved_velocity, unresolved_pressure, unresolved_conflict]
+  loopHydraulicsAppliedFix:
+    type: string
+    enum: [none, loops_reduced, loops_increased, pipe_downsized, pipe_upsized]
+  loopHydraulicsMinLoopsGeom:
+    type: integer
+    minimum: 1
   loops:
     type: array
     items:
@@ -35,6 +47,11 @@ properties:
         estimatedLengthM: { type: number }
         heatLoadWatts: { type: number }
         flowRateM3PerHour: { type: number }
+        catalogPipeId:
+          type: string
+          description: Подобранный Ø для pipeline (из hydraulics.catalogPipeId).
+        hydraulics:
+          $ref: ./UfhLoopHydraulicsResult.yaml
   roomHeatLossWatts:
     type: number
     description: Теплопотери комнаты из heatLoss.byRoom (для проверки покрытия нагрузки ТП).

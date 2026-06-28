@@ -105,6 +105,11 @@
     "ufhLoopVelocityMinMps": 0.2,
     "ufhLoopVelocityMaxMps": 0.7,
     "maxUfhLoopPressureDropKPa": 20,
+    "ufhLoopMinNominalDiameterMm": 16,
+    "ufhParasiticDownTriggerWm2": 5,
+    "ufhParasiticDownToUpRatio": 0.15,
+    "ufhLoopPipeResizeEnabled": true,
+    "ufhLoopPressureUtilizationForResize": 0.85,
     "roughnessMmByMaterial": {
       "pex": 0.007,
       "metal_plastic": 0.007,

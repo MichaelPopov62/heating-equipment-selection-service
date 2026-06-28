@@ -28,3 +28,4 @@ yarn-error.log*
 
 # Локальные переменные окружения Vercel (если будешь линковать проект через CLI)
 .vercel/
+.fuzz-calc.ts

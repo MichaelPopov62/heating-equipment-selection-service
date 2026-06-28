@@ -1,0 +1,52 @@
+type: object
+additionalProperties: false
+description: Гидравлическая проверка одной петли ТП (ufhLoopHydraulics).
+required:
+  - loopId
+  - lengthM
+  - pipeSpacingMm
+  - heatLoadWatts
+  - deltaTK
+  - flowRateM3PerHour
+  - massFlowKgPerSec
+  - elbowCount
+  - localZeta
+  - pipeResizeAction
+  - warnings
+properties:
+  loopId: { type: string }
+  lengthM: { type: number, minimum: 0 }
+  pipeSpacingMm: { type: integer }
+  heatLoadWatts: { type: number, minimum: 0 }
+  deltaTK: { type: number, minimum: 0 }
+  flowRateM3PerHour: { type: number, minimum: 0 }
+  massFlowKgPerSec: { type: number, minimum: 0 }
+  elbowCount: { type: integer, minimum: 0 }
+  localZeta: { type: number, minimum: 0 }
+  catalogPipeId:
+    type: string
+    nullable: true
+    description: Подобранная труба из каталога (после оптимизации Ø).
+  initialCatalogPipeId:
+    type: string
+    nullable: true
+    description: Минимальный Ø из каталога до оптимизации.
+  internalDiameterMm:
+    type: number
+    nullable: true
+  velocityMps:
+    type: number
+    nullable: true
+  pressureDropKPa:
+    type: number
+    nullable: true
+  pipeResizeAction:
+    type: string
+    enum: [unchanged, upsized, downsized, loops_adjusted]
+  pipeResizeReason:
+    type: string
+    nullable: true
+  warnings:
+    type: array
+    items:
+      type: string

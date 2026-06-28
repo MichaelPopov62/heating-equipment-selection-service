@@ -38,6 +38,20 @@ export type UnderfloorHeatingPresetsBundle = {
   finishes: FlooringFinishMaterial[];
 };
 
+export type ParsedUfhLoopHydraulics = {
+  loopId: string;
+  lengthM: number;
+  flowRateM3PerHour: number;
+  internalDiameterMm: number | null;
+  velocityMps: number | null;
+  pressureDropKPa: number | null;
+  catalogPipeId: string | null;
+  initialCatalogPipeId: string | null;
+  pipeResizeAction: 'unchanged' | 'upsized' | 'downsized' | 'loops_adjusted';
+  pipeResizeReason: string | null;
+  warnings: string[];
+};
+
 export type ParsedUnderfloorHeatingRoom = {
   roomId: string;
   roomName: string;
@@ -57,6 +71,20 @@ export type ParsedUnderfloorHeatingRoom = {
   pipeEmbedmentResistanceM2KW: number;
   finishCoveringResistanceM2KW: number;
   coveringResistanceM2KW: number;
+  loopsCount?: number;
+  pipeResizeApplied?: boolean;
+  loopHydraulicsResolutionStatus?:
+    | 'resolved_auto'
+    | 'unresolved_velocity'
+    | 'unresolved_pressure'
+    | 'unresolved_conflict';
+  loopHydraulicsAppliedFix?:
+    | 'none'
+    | 'loops_reduced'
+    | 'loops_increased'
+    | 'pipe_downsized'
+    | 'pipe_upsized';
+  loops?: ParsedUfhLoopHydraulics[];
   warnings: string[];
 };
 

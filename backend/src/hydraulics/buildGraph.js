@@ -168,6 +168,7 @@ export function buildHydraulicsGraph(dto) {
           supplyC: room.circuitSupplyC,
           returnC: room.circuitReturnC,
           segmentRole: 'ufh_loop',
+          ...(loop.catalogPipeId ? { preferredCatalogPipeId: loop.catalogPipeId } : {}),
         });
       }
     }

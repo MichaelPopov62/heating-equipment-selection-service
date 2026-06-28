@@ -86,9 +86,8 @@ export function useSurveyProject({
       applyDraft(draft);
       setClientName(draft.clientName);
       setProjectId(draft.projectId ?? null);
-      if (draft.lastCalcReport) setCalcReport(draft.lastCalcReport);
     },
-    [applyDraft, setCalcReport],
+    [applyDraft],
   );
 
   useEffect(() => {

@@ -21,6 +21,7 @@ import { RadiatorProposalLineTable } from '../RadiatorProposalLineTable/Radiator
 import { WaterHeaterMatchingPreview } from '../WaterHeaterMatchingPreview/WaterHeaterMatchingPreview';
 import { CatalogEquipmentReference } from '../CatalogEquipmentReference/CatalogEquipmentReference';
 import { UfhMixingNodeSpecCard } from '../UnderfloorHeatingReport/UfhMixingNodeSpecCard';
+import { UfhLoopHydraulicsTable } from '../UnderfloorHeatingReport/UfhLoopHydraulicsTable';
 import { HydraulicsProposalSection } from '../HydraulicsProposal/HydraulicsProposalSection';
 import styles from './RecommendationsBlock.module.css';
 
@@ -231,7 +232,20 @@ export function RecommendationsBlock({
                         </dd>
                       </>
                     )}
+                    {room.loopsCount != null && room.loopsCount > 0 && (
+                      <>
+                        <dt>Число петель ТП</dt>
+                        <dd>{room.loopsCount}</dd>
+                      </>
+                    )}
                   </dl>
+                  {room.loops != null && room.loops.length > 0 && (
+                    <UfhLoopHydraulicsTable
+                      loopsCount={room.loopsCount ?? room.loops.length}
+                      loops={room.loops}
+                      pipeResizeApplied={room.pipeResizeApplied}
+                    />
+                  )}
                   {room.warnings.length > 0 && (
                     <ul className={styles.radiatorsWarningsList}>
                       {room.warnings.map((w, i) => (

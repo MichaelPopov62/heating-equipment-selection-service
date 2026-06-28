@@ -29,6 +29,11 @@ properties:
     description: Агрегированные позиции труб по catalogPipeId.
     items:
       $ref: '#/definitions/PipeProposalLine'
+  pipeLineGroups:
+    type: array
+    description: Трубы по контурам — отопление (радиаторы) и тёплый пол.
+    items:
+      $ref: '#/definitions/PipeLineGroup'
   pipeSegments:
     type: array
     description: Детализация по участкам графа.
@@ -54,8 +59,27 @@ properties:
     description: estimatedPipesPrice + estimatedPumpPrice, грн.
   unavailableReason:
     type: string
-    description: Причина, если подбор неполный.
+    description: Причина, если подбор неполный (трубы и насос).
+  pumpUnavailableReason:
+    type: string
+    description: Насос не подобран при успешном подборе труб.
 definitions:
+  PipeLineGroup:
+    type: object
+    additionalProperties: false
+    required: [circuitId, label, pipeLines, estimatedPrice]
+    properties:
+      circuitId:
+        type: string
+        enum: [heating, ufh]
+      label: { type: string }
+      pipeLines:
+        type: array
+        items:
+          $ref: '#/definitions/PipeProposalLine'
+      estimatedPrice:
+        type: number
+        minimum: 0
   PipeProposalLine:
     type: object
     additionalProperties: false

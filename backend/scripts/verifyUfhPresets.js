@@ -355,6 +355,129 @@ if (base && tile && laminate) {
       ),
     );
   }
+  console.log('\n=== ufhLoopHydraulics: appliances + enrich ===');
+  const hydRules = calcCtx.appliances.byKind.hydraulics;
+  tally(
+    logCheck(
+      hydRules.ufhLoopPipeResizeEnabled === true,
+      'appliances.hydraulics.ufhLoopPipeResizeEnabled = true',
+    ),
+  );
+  tally(
+    logCheck(
+      hydRules.ufhParasiticDownTriggerWm2 === 5,
+      'appliances.hydraulics.ufhParasiticDownTriggerWm2 = 5',
+    ),
+  );
+
+  const { enrichUnderfloorHeatingLoopHydraulics, shouldTriggerUfhPipeResize } = await import(
+    '../src/logic/ufhLoopHydraulics.js'
+  );
+  const { calculateUnderfloorHeating } = await import('../src/logic/warmFloorCalc.js');
+  const { calculateHeatLossForBuilding } = await import('../src/logic/heatlossByRooms.js');
+
+  const ufhInputBuilding = {
+    temps: { insideC: 20, outsideC: -5 },
+    objectMeta: {
+      objectType: 'house',
+      floors: 1,
+      roomsCount: 1,
+      externalWalls: {
+        presetId: 'wall_gas_concrete_d500',
+        thicknessMm: 375,
+        facadeSystem: 'none',
+      },
+    },
+    rooms: [{
+      id: 'r_ufh',
+      name: 'Гостиная',
+      type: 'living',
+      floor: 1,
+      topBoundary: 'heated',
+      bottomBoundary: 'heated',
+      areaM2: 20,
+      heightM: 2.7,
+      underfloorHeating: {
+        enabled: true,
+        basePresetId: 'ufh_base_interstory_screed_65',
+        finishMaterialId: 'ceramic_tile',
+        pipeSpacingMm: 150,
+      },
+    }],
+    envelopeElements: [{
+      kind: 'wall',
+      roomId: 'r_ufh',
+      construction: 'наружная стена',
+      presetId: 'wall_gas_concrete_d500',
+      areaM2: 12,
+      orientation: 'N',
+    }],
+  };
+
+  const heatLoss = calculateHeatLossForBuilding({
+    temps: { insideC: 20, outsideC: -5 },
+    building: ufhInputBuilding,
+  });
+  const ufhReport = calculateUnderfloorHeating({
+    temps: { insideC: 20, outsideC: -5 },
+    building: ufhInputBuilding,
+    heatingSystem: {
+      supplyC: 40,
+      returnC: 30,
+      insideC: 20,
+      waterUnderfloorHeating: true,
+      heatingEmittersMode: 'ufh_only',
+      ufhPresetId: 'ufh_only',
+    },
+    heatLoss,
+    ufhPresets: calcCtx.ufhPresets,
+    maxUfhLoopLengthM: hydRules.maxUfhLoopLengthM,
+  });
+
+  if (!ufhReport?.rooms?.[0]) {
+    tally(logCheck(false, 'warmFloorCalc → комната с ТП'));
+  } else {
+    const ufhRoom = ufhReport.rooms[0];
+    const trigger = shouldTriggerUfhPipeResize({
+      heatFluxDownWm2: ufhRoom.heatFluxDownWm2,
+      heatFluxDownWatts: ufhRoom.heatFluxDownWatts,
+      heatFluxUpWatts: ufhRoom.heatFluxUpWatts,
+      bottomBoundary: ufhRoom.bottomBoundary,
+      hydraulicsRules: hydRules,
+    });
+    tally(
+      logCheck(
+        trigger === (ufhRoom.bottomBoundary === 'heated' && ufhRoom.heatFluxDownWm2 >= 5),
+        `shouldTriggerUfhPipeResize для heated + q↓=${ufhRoom.heatFluxDownWm2?.toFixed(1)}`,
+      ),
+    );
+
+    enrichUnderfloorHeatingLoopHydraulics(ufhReport, {
+      catalog: calcCtx.catalog,
+      hydraulicsRules: hydRules,
+    });
+
+    const enriched = ufhReport.rooms[0];
+    tally(
+      logCheck(
+        (enriched.loops?.length ?? 0) > 0,
+        `enrich → loopsCount=${enriched.loopsCount}, loops=${enriched.loops?.length}`,
+      ),
+    );
+    const loopHyd = enriched.loops?.[0]?.hydraulics;
+    tally(
+      logCheck(
+        loopHyd?.catalogPipeId != null && loopHyd.velocityMps != null,
+        `enrich → loop hydraulics v=${loopHyd?.velocityMps}, pipe=${loopHyd?.catalogPipeId}`,
+      ),
+    );
+    tally(
+      logCheck(
+        loopHyd?.initialCatalogPipeId != null,
+        'enrich → initialCatalogPipeId задан',
+      ),
+    );
+  }
 } else {
   tally(logCheck(false, 'база ТП или финиши для smoke-теста maxSurface'));
 }

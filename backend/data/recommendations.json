@@ -124,5 +124,41 @@
     "equipmentType": "boiler",
     "title": "Только ТП и высокотемпературный котёл",
     "text": "Режим «только тёплый пол» рассчитан на низкотемпературный контур (40/30 °C). При графике {{supplyC}}/{{returnC}} °C ({{thermalRegimeLabel}}) или неконденсационном котле «{{boilerModel}}» возможны тактование и снижение КПД — выберите конденсационный котёл и график 55/45 или 40/30."
+  },
+  {
+    "code": "REC_UFH_LOOP_VELOCITY_AUTO_FIXED",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "automationHints",
+    "equipmentType": "underfloor_heating",
+    "title": "Гидравлика петель ТП скорректирована",
+    "text": "Комната «{{roomName}}»: скорость и потери на петлях приведены к норме ({{loopsCount}} контур(ов), оптимизация: {{appliedFix}})."
+  },
+  {
+    "code": "WARN_UFH_LOOP_LOW_VELOCITY_UNRESOLVED",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "underfloor_heating",
+    "title": "Низкая скорость в петле ТП",
+    "text": "Комната «{{roomName}}»: при минимальном Ø 16 мм и {{loopsCount}} петле(ях) скорость ниже {{velocityMinMps}} м/с — малая нагрузка на контур; требуется проектная проработка (объединение зон, пусковая продувка)."
+  },
+  {
+    "code": "WARN_UFH_LOOP_HIGH_PRESSURE",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "underfloor_heating",
+    "title": "Высокие потери на петле ТП",
+    "text": "Комната «{{roomName}}»: не удалось уложиться в {{maxPressureDropKPa}} кПа на петлю при {{loopsCount}} контурах — увеличьте число петель или пересмотрите длину трасс."
+  },
+  {
+    "code": "WARN_UFH_LOOP_VELOCITY_PRESSURE_CONFLICT",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "underfloor_heating",
+    "title": "Конфликт скорости и давления на петлях ТП",
+    "text": "Комната «{{roomName}}»: нельзя одновременно обеспечить скорость ≥ {{velocityMinMps}} м/с и Δp ≤ {{maxPressureDropKPa}} кПа на петлю (геом. минимум {{minLoopsGeom}} контур(ов)) — требуется проектная проработка."
   }
 ]

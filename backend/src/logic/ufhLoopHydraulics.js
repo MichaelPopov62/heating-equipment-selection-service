@@ -1,17 +1,23 @@
 /**
  * Назначение: гидравлическая проверка петель ТП (СП 60.13330 / ГОСТ Р 70834-2023, MVP).
  * Описание: Расход по Q/(c·Δt), подбор трубы из каталога, v и Δp (Darcy + повороты 90°).
+ * Автооптимизация: число петель (v ↔ Δp) и Ø (мин. номинал из appliances, типично 16 мм).
  */
 
 import { pickPipeForEdge } from '../hydraulics/pickPipe.js';
+import {
+  computeSegmentHydraulics,
+  pipeInternalDiameterMm,
+  resolveRoughnessMm,
+} from '../hydraulics/pipeHydraulics.js';
 import { thermalLoadToFlow } from '../hydraulics/thermalLoadToFlow.js';
+import { pushRecommendation } from '../recommendations/recommendationResolver.js';
 import { round } from '../utils/math.js';
 
 const MAX_LOOPS_HEURISTIC = 32;
 
 /**
  * Оценка числа поворотов 90° в «змейке» петли ТП.
- * L ≈ A/s, рядов ~√(L·s)/s → поворотов ~2·√(L/s).
  * @param {number} lengthM
  * @param {number} pipeSpacingMm
  * @returns {number}
@@ -39,6 +45,365 @@ export function ufhLoopHydraulicsThresholds(rules) {
 }
 
 /**
+ * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} rules
+ * @returns {number}
+ */
+function ufhLoopMinNominalDiameterMm(rules) {
+  const n = Number(rules.ufhLoopMinNominalDiameterMm);
+  return Number.isFinite(n) && n > 0 ? n : 16;
+}
+
+/**
+ * @param {object} args
+ * @param {number} [args.heatFluxDownWm2]
+ * @param {number} [args.heatFluxDownWatts]
+ * @param {number} [args.heatFluxUpWatts]
+ * @param {string} [args.bottomBoundary]
+ * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} args.hydraulicsRules
+ * @returns {boolean}
+ */
+export function shouldTriggerUfhPipeResize({
+  heatFluxDownWm2 = 0,
+  heatFluxDownWatts = 0,
+  heatFluxUpWatts = 0,
+  bottomBoundary,
+  hydraulicsRules,
+}) {
+  if (!hydraulicsRules.ufhLoopPipeResizeEnabled) return false;
+
+  if (
+    bottomBoundary === 'heated'
+    && heatFluxDownWm2 >= hydraulicsRules.ufhParasiticDownTriggerWm2
+  ) {
+    return true;
+  }
+
+  if (
+    heatFluxUpWatts > 0
+    && heatFluxDownWatts / heatFluxUpWatts >= hydraulicsRules.ufhParasiticDownToUpRatio
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * @param {import('../catalog/types').NormalizedCatalog['pipes']} pipes
+ * @param {import('../hydraulics/types').HydraulicsSurveyInput['pipeMaterialPreference']} [materialPreference]
+ * @param {number} minNominalDiameterMm
+ * @returns {import('../catalog/types').PipeCatalogItemNormalized[]}
+ */
+function filterUfhPipePool(pipes, materialPreference, minNominalDiameterMm) {
+  if (!pipes?.length) return [];
+
+  const minNom = Math.max(1, minNominalDiameterMm);
+
+  /** @type {import('../catalog/types').PipeCatalogItemNormalized[]} */
+  let pool = pipes.filter((p) => (Number(p.diameter) || 0) >= minNom);
+
+  if (materialPreference) {
+    const pref = materialPreference.toLowerCase();
+    const filtered = pool.filter((p) => {
+      const m = String(p.material ?? '').toLowerCase();
+      if (pref === 'pex') return m.includes('pex');
+      if (pref === 'metal_plastic') {
+        return m.includes('metal') || m.includes('pex-al') || m.includes('ал');
+      }
+      if (pref === 'steel') return m.includes('steel') || m.includes('сталь');
+      return true;
+    });
+    if (filtered.length) pool = filtered;
+  }
+
+  pool.sort((a, b) => pipeInternalDiameterMm(a) - pipeInternalDiameterMm(b));
+  return pool;
+}
+
+/**
+ * @param {object} args
+ * @param {import('../catalog/types').PipeCatalogItemNormalized} args.pipe
+ * @param {number} args.lengthM
+ * @param {number} args.flowRateM3PerHour
+ * @param {number} args.localZeta
+ * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} args.hydraulicsRules
+ * @returns {{ catalogPipeId: string; internalDiameterMm: number; velocityMps: number; pressureDropKPa: number } | null}
+ */
+function computeUfhLoopPipeHydraulics({
+  pipe,
+  lengthM,
+  flowRateM3PerHour,
+  localZeta,
+  hydraulicsRules,
+}) {
+  if (lengthM <= 0 || flowRateM3PerHour <= 0) return null;
+
+  const internalMm = pipeInternalDiameterMm(pipe);
+  const roughness = resolveRoughnessMm(
+    pipe.material,
+    hydraulicsRules.roughnessMmByMaterial,
+  );
+  const hyd = computeSegmentHydraulics({
+    flowM3PerHour: flowRateM3PerHour,
+    lengthM,
+    internalDiameterMm: internalMm,
+    roughnessMm: roughness,
+    localZeta,
+  });
+
+  return {
+    catalogPipeId: pipe.id,
+    internalDiameterMm: internalMm,
+    velocityMps: hyd.velocityMps,
+    pressureDropKPa: hyd.pressureDropKPa,
+  };
+}
+
+/**
+ * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult} h
+ * @param {{ velocityMinMps: number; velocityMaxMps: number; maxPressureDropKPa: number }} thresholds
+ * @returns {boolean}
+ */
+function isLoopVelocityOk(h, thresholds) {
+  return (
+    h.velocityMps != null
+    && h.velocityMps >= thresholds.velocityMinMps
+    && h.velocityMps <= thresholds.velocityMaxMps
+  );
+}
+
+/**
+ * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult} h
+ * @param {{ maxPressureDropKPa: number }} thresholds
+ * @returns {boolean}
+ */
+function isLoopPressureOk(h, thresholds) {
+  return (
+    h.pressureDropKPa == null
+    || h.pressureDropKPa <= thresholds.maxPressureDropKPa
+  );
+}
+
+/**
+ * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]} loopHydraulics
+ * @param {{ velocityMinMps: number; velocityMaxMps: number; maxPressureDropKPa: number }} thresholds
+ * @returns {{ pressureOk: boolean; velocityOk: boolean }}
+ */
+function evaluateLoopsHydraulics(loopHydraulics, thresholds) {
+  const pressureOk = loopHydraulics.every((h) => isLoopPressureOk(h, thresholds));
+  const velocityOk = loopHydraulics.every((h) => isLoopVelocityOk(h, thresholds));
+  return { pressureOk, velocityOk };
+}
+
+/**
+ * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]} loopHydraulics
+ * @param {{ velocityMinMps: number; velocityMaxMps: number; maxPressureDropKPa: number }} thresholds
+ * @returns {number}
+ */
+function scorePartialLoopsConfiguration(loopHydraulics, thresholds) {
+  let score = 0;
+  for (const h of loopHydraulics) {
+    if (h.velocityMps == null || h.pressureDropKPa == null) {
+      return Number.MAX_SAFE_INTEGER;
+    }
+    if (h.velocityMps < thresholds.velocityMinMps) {
+      score += 1000 + (thresholds.velocityMinMps - h.velocityMps) * 100;
+    } else if (h.velocityMps > thresholds.velocityMaxMps) {
+      score += 500 + (h.velocityMps - thresholds.velocityMaxMps) * 100;
+    }
+    if (h.pressureDropKPa > thresholds.maxPressureDropKPa) {
+      score += 800 + (h.pressureDropKPa - thresholds.maxPressureDropKPa) * 10;
+    }
+  }
+  return score;
+}
+
+/**
+ * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]} loopHydraulics
+ * @param {{ velocityMinMps: number; maxPressureDropKPa: number }} thresholds
+ * @returns {import('./ufhLoopHydraulics.types').UfhLoopResolutionStatus}
+ */
+function deriveResolutionStatus(loopHydraulics, thresholds) {
+  let hasLowVelocity = false;
+  let hasHighVelocity = false;
+  let hasHighPressure = false;
+
+  for (const h of loopHydraulics) {
+    if (h.velocityMps == null || h.pressureDropKPa == null) continue;
+    if (h.velocityMps < thresholds.velocityMinMps) hasLowVelocity = true;
+    if (h.velocityMps > thresholds.velocityMaxMps) hasHighVelocity = true;
+    if (h.pressureDropKPa > thresholds.maxPressureDropKPa) hasHighPressure = true;
+  }
+
+  const velocityBad = hasLowVelocity || hasHighVelocity;
+
+  if (!velocityBad && !hasHighPressure) {
+    return 'resolved_auto';
+  }
+  if (velocityBad && hasHighPressure) {
+    return 'unresolved_conflict';
+  }
+  if (hasHighPressure) {
+    return 'unresolved_pressure';
+  }
+  return 'unresolved_velocity';
+}
+
+/**
+ * @param {object} args
+ * @param {number} args.loopsCount
+ * @param {number} args.minLoopsGeom
+ * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]} args.loopHydraulics
+ * @returns {import('./ufhLoopHydraulics.types').UfhLoopAppliedFix}
+ */
+function deriveAppliedFix({ loopsCount, minLoopsGeom, loopHydraulics }) {
+  if (loopsCount < minLoopsGeom) return 'loops_reduced';
+  if (loopsCount > minLoopsGeom) return 'loops_increased';
+  if (loopHydraulics.some((h) => h.pipeResizeAction === 'downsized')) {
+    return 'pipe_downsized';
+  }
+  if (loopHydraulics.some((h) => h.pipeResizeAction === 'upsized')) {
+    return 'pipe_upsized';
+  }
+  return 'none';
+}
+
+/**
+ * @param {object} args
+ * @param {import('../hydraulics/types').HydraulicsPipeMatchItem} args.defaultMatch
+ * @param {import('../catalog/types').PipeCatalogItemNormalized[]} args.pool
+ * @param {number} args.lengthM
+ * @param {number} args.flowRateM3PerHour
+ * @param {number} args.localZeta
+ * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} args.hydraulicsRules
+ * @param {{ velocityMinMps: number; velocityMaxMps: number; maxPressureDropKPa: number }} args.thresholds
+ * @param {string} args.loopId
+ * @returns {{ finalMatch: import('../hydraulics/types').HydraulicsPipeMatchItem; pipeResizeAction: import('./ufhLoopHydraulics.types').UfhLoopPipeResizeAction; pipeResizeReason: string | null }}
+ */
+function optimizeUfhLoopPipe({
+  defaultMatch,
+  pool,
+  lengthM,
+  flowRateM3PerHour,
+  localZeta,
+  hydraulicsRules,
+  thresholds,
+  loopId,
+}) {
+  let finalMatch = defaultMatch;
+  /** @type {import('./ufhLoopHydraulics.types').UfhLoopPipeResizeAction} */
+  let pipeResizeAction = 'unchanged';
+  /** @type {string | null} */
+  let pipeResizeReason = null;
+
+  if (!hydraulicsRules.ufhLoopPipeResizeEnabled || pool.length === 0) {
+    return { finalMatch, pipeResizeAction, pipeResizeReason };
+  }
+
+  const pressureUtilThreshold =
+    thresholds.maxPressureDropKPa * hydraulicsRules.ufhLoopPressureUtilizationForResize;
+
+  const vLow = defaultMatch.velocityMps < thresholds.velocityMinMps;
+  const vHigh = defaultMatch.velocityMps > thresholds.velocityMaxMps;
+  const dpHigh = defaultMatch.pressureDropKPa > pressureUtilThreshold;
+
+  if (vLow) {
+    /** @type {import('./ufhLoopHydraulics.types').UfhLoopPipeCandidate | null} */
+    let smallerCandidate = null;
+    for (const pipe of pool) {
+      const computed = computeUfhLoopPipeHydraulics({
+        pipe,
+        lengthM,
+        flowRateM3PerHour,
+        localZeta,
+        hydraulicsRules,
+      });
+      if (!computed) continue;
+      if (computed.velocityMps < thresholds.velocityMinMps) continue;
+      if (computed.pressureDropKPa > thresholds.maxPressureDropKPa) continue;
+      if (
+        !smallerCandidate
+        || computed.internalDiameterMm < smallerCandidate.internalDiameterMm
+      ) {
+        smallerCandidate = { ...computed, pipe };
+      }
+    }
+
+    if (
+      smallerCandidate
+      && smallerCandidate.catalogPipeId !== defaultMatch.catalogPipeId
+    ) {
+      finalMatch = {
+        edgeId: loopId,
+        catalogPipeId: smallerCandidate.catalogPipeId,
+        velocityMps: smallerCandidate.velocityMps,
+        pressureDropKPa: smallerCandidate.pressureDropKPa,
+        internalDiameterMm: smallerCandidate.internalDiameterMm,
+      };
+      pipeResizeAction = 'downsized';
+      pipeResizeReason =
+        `Низкая скорость ${defaultMatch.velocityMps} м/с — `
+        + `рекомендован меньший Ø ${smallerCandidate.internalDiameterMm} мм.`;
+    }
+  } else if (vHigh || dpHigh) {
+    /** @type {import('./ufhLoopHydraulics.types').UfhLoopPipeCandidate | null} */
+    let best = null;
+    for (const pipe of pool) {
+      const computed = computeUfhLoopPipeHydraulics({
+        pipe,
+        lengthM,
+        flowRateM3PerHour,
+        localZeta,
+        hydraulicsRules,
+      });
+      if (!computed) continue;
+
+      const vOk =
+        computed.velocityMps >= thresholds.velocityMinMps
+        && computed.velocityMps <= thresholds.velocityMaxMps;
+      const dpOk = computed.pressureDropKPa <= thresholds.maxPressureDropKPa;
+
+      if (!vOk || !dpOk) continue;
+
+      const candidate = { ...computed, pipe };
+
+      if (
+        !best
+        || computed.internalDiameterMm > best.internalDiameterMm
+        || (
+          computed.internalDiameterMm === best.internalDiameterMm
+          && computed.pressureDropKPa < (best.pressureDropKPa ?? Infinity)
+        )
+      ) {
+        best = candidate;
+      }
+    }
+
+    if (best && best.catalogPipeId !== defaultMatch.catalogPipeId) {
+      finalMatch = {
+        edgeId: loopId,
+        catalogPipeId: best.catalogPipeId,
+        velocityMps: best.velocityMps,
+        pressureDropKPa: best.pressureDropKPa,
+        internalDiameterMm: best.internalDiameterMm,
+      };
+      pipeResizeAction = 'upsized';
+      if (vHigh) {
+        pipeResizeReason =
+          `Скорость ${defaultMatch.velocityMps} м/с выше порога ${thresholds.velocityMaxMps} м/с — `
+          + `рекомендован Ø ${best.internalDiameterMm} мм.`;
+      } else {
+        pipeResizeReason =
+          `Потери ${defaultMatch.pressureDropKPa} кПа близки к лимиту — `
+          + `рекомендован Ø ${best.internalDiameterMm} мм.`;
+      }
+    }
+  }
+
+  return { finalMatch, pipeResizeAction, pipeResizeReason };
+}
+
+/**
  * @param {object} args
  * @param {string} args.loopId
  * @param {number} args.lengthM
@@ -63,6 +428,7 @@ export function validateUfhLoopHydraulics({
   /** @type {string[]} */
   const warnings = [];
   const thresholds = ufhLoopHydraulicsThresholds(hydraulicsRules);
+  const minNominalMm = ufhLoopMinNominalDiameterMm(hydraulicsRules);
   const flow = thermalLoadToFlow({ heatLoadWatts, deltaTK });
   const elbowCount = estimateUfhLoopElbowCount(lengthM, pipeSpacingMm);
   const localZeta = elbowCount * hydraulicsRules.localLossZeta.elbow90;
@@ -79,9 +445,12 @@ export function validateUfhLoopHydraulics({
     elbowCount,
     localZeta: round(localZeta, 2),
     catalogPipeId: null,
+    initialCatalogPipeId: null,
     internalDiameterMm: null,
     velocityMps: null,
     pressureDropKPa: null,
+    pipeResizeAction: 'unchanged',
+    pipeResizeReason: null,
     warnings,
   };
 
@@ -90,7 +459,10 @@ export function validateUfhLoopHydraulics({
     return base;
   }
 
-  if (!pipes?.length) {
+  const pool = filterUfhPipePool(pipes, materialPreference, minNominalMm);
+  const pipesForPick = pool.length ? pool : pipes;
+
+  if (!pipesForPick?.length) {
     warnings.push(`Петля ${loopId}: каталог труб пуст — подбор невозможен.`);
     return base;
   }
@@ -107,7 +479,7 @@ export function validateUfhLoopHydraulics({
     pumpHeadMarginPercent: hydraulicsRules.pumpHeadMarginPercent,
   };
 
-  const match = pickPipeForEdge({
+  const defaultMatch = pickPipeForEdge({
     edge: {
       id: loopId,
       from: 'ufh_collector',
@@ -117,36 +489,54 @@ export function validateUfhLoopHydraulics({
       designFlowM3PerHour: flow.flowRateM3PerHour,
       segmentRole: 'ufh_loop',
     },
-    pipes,
+    pipes: pipesForPick,
     rules: rulesForPick,
     materialPreference,
     localZeta,
   });
 
-  if (!match) {
+  if (!defaultMatch) {
     warnings.push(`Петля ${loopId}: не удалось подобрать трубу из каталога.`);
     return base;
   }
 
-  base.catalogPipeId = match.catalogPipeId;
-  base.internalDiameterMm = match.internalDiameterMm;
-  base.velocityMps = match.velocityMps;
-  base.pressureDropKPa = match.pressureDropKPa;
+  base.initialCatalogPipeId = defaultMatch.catalogPipeId;
 
-  if (match.velocityMps < thresholds.velocityMinMps) {
+  const { finalMatch, pipeResizeAction, pipeResizeReason } = optimizeUfhLoopPipe({
+    defaultMatch,
+    pool: pool.length ? pool : pipesForPick,
+    lengthM,
+    flowRateM3PerHour: flow.flowRateM3PerHour,
+    localZeta,
+    hydraulicsRules,
+    thresholds,
+    loopId,
+  });
+
+  base.catalogPipeId = finalMatch.catalogPipeId;
+  base.internalDiameterMm = finalMatch.internalDiameterMm;
+  base.velocityMps = finalMatch.velocityMps;
+  base.pressureDropKPa = finalMatch.pressureDropKPa;
+  base.pipeResizeAction = pipeResizeAction;
+  base.pipeResizeReason = pipeResizeReason;
+
+  if (finalMatch.velocityMps < thresholds.velocityMinMps) {
     warnings.push(
-      `Петля ${loopId}: низкая скорость ${match.velocityMps} м/с (< ${thresholds.velocityMinMps} м/с) — высокий риск завоздушивания контура.`,
+      `Петля ${loopId}: низкая скорость ${finalMatch.velocityMps} м/с (< ${thresholds.velocityMinMps} м/с) — высокий риск завоздушивания контура.`,
     );
   }
-  if (match.velocityMps > thresholds.velocityMaxMps) {
+  if (finalMatch.velocityMps > thresholds.velocityMaxMps) {
     warnings.push(
-      `Петля ${loopId}: скорость ${match.velocityMps} м/с превышает шумовой порог ${thresholds.velocityMaxMps} м/с.`,
+      `Петля ${loopId}: скорость ${finalMatch.velocityMps} м/с превышает шумовой порог ${thresholds.velocityMaxMps} м/с.`,
     );
   }
-  if (match.pressureDropKPa > thresholds.maxPressureDropKPa) {
+  if (finalMatch.pressureDropKPa > thresholds.maxPressureDropKPa) {
     warnings.push(
-      `Петля ${loopId}: потери давления ${match.pressureDropKPa} кПа превышают допустимые ${thresholds.maxPressureDropKPa} кПа — уменьшите длину петли или увеличьте число контуров.`,
+      `Петля ${loopId}: потери давления ${finalMatch.pressureDropKPa} кПа превышают допустимые ${thresholds.maxPressureDropKPa} кПа — уменьшите длину петли или увеличьте число контуров.`,
     );
+  }
+  if (pipeResizeReason) {
+    warnings.push(`Петля ${loopId}: ${pipeResizeReason}`);
   }
 
   return base;
@@ -190,21 +580,104 @@ function buildLoopsArray({
 }
 
 /**
- * Подбор числа петель: геометрия + ограничение Δp ≤ maxUfhLoopPressureDropKPa.
+ * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]} loopHydraulics
+ * @param {number} loopsCount
+ * @param {number} minLoopsGeom
+ */
+function markLoopsCountAdjustment(loopHydraulics, loopsCount, minLoopsGeom) {
+  if (loopsCount === minLoopsGeom) return;
+
+  const reason =
+    loopsCount < minLoopsGeom
+      ? `Число петель снижено до ${loopsCount} (вместо ${minLoopsGeom}) для повышения скорости на петле.`
+      : `Число петель увеличено до ${loopsCount} (вместо ${minLoopsGeom}) для снижения потерь давления.`;
+
+  for (const h of loopHydraulics) {
+    if (h.pipeResizeAction === 'unchanged') {
+      h.pipeResizeAction = 'loops_adjusted';
+      h.pipeResizeReason = reason;
+      h.warnings.push(`Петля ${h.loopId}: ${reason}`);
+    }
+  }
+}
+
+/**
  * @param {object} args
- * @param {number} args.areaM2
+ * @param {number} args.loopsCount
+ * @param {number} args.totalLengthM
  * @param {number} args.pipeSpacingMm
  * @param {number} args.heatLoadWatts
+ * @param {number} args.minLoopsGeom
  * @param {string} args.roomId
  * @param {import('../catalog/types').NormalizedCatalog['pipes']} args.pipes
  * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} args.hydraulicsRules
  * @param {import('../hydraulics/types').HydraulicsSurveyInput['pipeMaterialPreference']} [args.materialPreference]
- * @returns {{ loopsCount: number; loops: import('../hydraulics/types').HydraulicsUfhLoop[]; loopHydraulics: import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]; warnings: string[] }}
+ * @param {{ velocityMinMps: number; velocityMaxMps: number; maxPressureDropKPa: number; deltaTK: number }} args.thresholds
+ * @returns {{ loops: import('../hydraulics/types').HydraulicsUfhLoop[]; loopHydraulics: import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]; pressureOk: boolean; velocityOk: boolean }}
+ */
+function buildAndValidateLoopsConfiguration({
+  loopsCount,
+  totalLengthM,
+  pipeSpacingMm,
+  heatLoadWatts,
+  roomId,
+  pipes,
+  hydraulicsRules,
+  materialPreference,
+  thresholds,
+}) {
+  const loops = buildLoopsArray({
+    loopsCount,
+    totalLengthM,
+    heatLoadWatts,
+    deltaTK: thresholds.deltaTK,
+    roomId,
+  });
+
+  const loopHydraulics = loops.map((loop) =>
+    validateUfhLoopHydraulics({
+      loopId: loop.loopId,
+      lengthM: loop.estimatedLengthM,
+      pipeSpacingMm,
+      heatLoadWatts: loop.heatLoadWatts,
+      deltaTK: thresholds.deltaTK,
+      pipes,
+      hydraulicsRules,
+      materialPreference,
+    }),
+  );
+
+  return {
+    loops,
+    loopHydraulics,
+    ...evaluateLoopsHydraulics(loopHydraulics, thresholds),
+  };
+}
+
+/**
+ * Подбор числа петель: геометрия + ограничения v и Δp на петлю.
+ * @param {object} args
+ * @param {number} args.areaM2
+ * @param {number} args.pipeSpacingMm
+ * @param {number} args.heatLoadWatts
+ * @param {number} [args.heatFluxDownWm2]
+ * @param {number} [args.heatFluxDownWatts]
+ * @param {number} [args.heatFluxUpWatts]
+ * @param {string} [args.bottomBoundary]
+ * @param {string} args.roomId
+ * @param {import('../catalog/types').NormalizedCatalog['pipes']} args.pipes
+ * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} args.hydraulicsRules
+ * @param {import('../hydraulics/types').HydraulicsSurveyInput['pipeMaterialPreference']} [args.materialPreference]
+ * @returns {import('./ufhLoopHydraulics.types').UfhRoomLoopsHydraulicsResult}
  */
 export function resolveUfhRoomLoopsHydraulics({
   areaM2,
   pipeSpacingMm,
   heatLoadWatts,
+  heatFluxDownWm2: _heatFluxDownWm2 = 0,
+  heatFluxDownWatts: _heatFluxDownWatts = 0,
+  heatFluxUpWatts: _heatFluxUpWatts = 0,
+  bottomBoundary: _bottomBoundary,
   roomId,
   pipes,
   hydraulicsRules,
@@ -216,65 +689,235 @@ export function resolveUfhRoomLoopsHydraulics({
   const spacingM = Math.max(0.05, (Number(pipeSpacingMm) || 150) / 1000);
   const totalLengthM = areaM2 > 0 ? areaM2 / spacingM : 0;
   const maxLen = Math.max(20, hydraulicsRules.maxUfhLoopLengthM);
+  const minLoopsGeom = Math.max(1, Math.ceil(totalLengthM / maxLen));
 
-  let loopsCount = Math.max(1, Math.ceil(totalLengthM / maxLen));
-  let resolved = false;
+  /** @type {{ loopsCount: number; loops: import('../hydraulics/types').HydraulicsUfhLoop[]; loopHydraulics: import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]; distance: number } | null} */
+  let bestResolved = null;
+  /** @type {{ loopsCount: number; loops: import('../hydraulics/types').HydraulicsUfhLoop[]; loopHydraulics: import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]; score: number; distance: number } | null} */
+  let bestPartial = null;
 
-  /** @type {import('../hydraulics/types').HydraulicsUfhLoop[]} */
-  let loops = [];
-  /** @type {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]} */
-  let loopHydraulics = [];
+  for (let loopsCount = 1; loopsCount <= MAX_LOOPS_HEURISTIC; loopsCount += 1) {
+    const perLoopLength = totalLengthM / loopsCount;
+    if (perLoopLength > maxLen + 0.01) continue;
 
-  for (; loopsCount <= MAX_LOOPS_HEURISTIC; loopsCount += 1) {
-    loops = buildLoopsArray({
+    const cfg = buildAndValidateLoopsConfiguration({
       loopsCount,
       totalLengthM,
+      pipeSpacingMm,
       heatLoadWatts,
-      deltaTK: thresholds.deltaTK,
       roomId,
+      pipes,
+      hydraulicsRules,
+      materialPreference,
+      thresholds,
     });
 
-    loopHydraulics = loops.map((loop) =>
-      validateUfhLoopHydraulics({
-        loopId: loop.loopId,
-        lengthM: loop.estimatedLengthM,
-        pipeSpacingMm,
-        heatLoadWatts: loop.heatLoadWatts,
-        deltaTK: thresholds.deltaTK,
-        pipes,
-        hydraulicsRules,
-        materialPreference,
-      }),
-    );
+    const distance = Math.abs(loopsCount - minLoopsGeom);
 
-    const pressureOk = loopHydraulics.every(
-      (h) =>
-        h.pressureDropKPa == null
-        || h.pressureDropKPa <= thresholds.maxPressureDropKPa,
-    );
+    if (cfg.pressureOk && cfg.velocityOk) {
+      if (!bestResolved || distance < bestResolved.distance) {
+        bestResolved = {
+          loopsCount,
+          loops: cfg.loops,
+          loopHydraulics: cfg.loopHydraulics,
+          distance,
+        };
+      }
+      continue;
+    }
 
-    if (pressureOk) {
-      resolved = true;
-      break;
+    const score = scorePartialLoopsConfiguration(cfg.loopHydraulics, thresholds);
+    if (!bestPartial || score < bestPartial.score || (score === bestPartial.score && distance < bestPartial.distance)) {
+      bestPartial = {
+        loopsCount,
+        loops: cfg.loops,
+        loopHydraulics: cfg.loopHydraulics,
+        score,
+        distance,
+      };
     }
   }
 
-  if (!resolved) {
-    warnings.push(
-      `Комната ${roomId}: не удалось уложиться в ${thresholds.maxPressureDropKPa} кПа на петлю за ${MAX_LOOPS_HEURISTIC} контуров — требуется проектная проработка.`,
-    );
-  }
+  const outcome = (() => {
+    if (bestResolved) {
+      const { loops, loopHydraulics, loopsCount: chosenLoopsCount } = bestResolved;
+      markLoopsCountAdjustment(loopHydraulics, chosenLoopsCount, minLoopsGeom);
+      return {
+        loops,
+        loopHydraulics,
+        chosenLoopsCount,
+        resolutionStatus: 'resolved_auto',
+        appliedFix: deriveAppliedFix({
+          loopsCount: chosenLoopsCount,
+          minLoopsGeom,
+          loopHydraulics,
+        }),
+        pipeResizeApplied: loopHydraulics.some(
+          (h) => h.pipeResizeAction !== 'unchanged',
+        ),
+        extraWarnings: [],
+      };
+    }
 
-  for (const h of loopHydraulics) {
+    if (bestPartial) {
+      const { loops, loopHydraulics, loopsCount: chosenLoopsCount } = bestPartial;
+      const resolutionStatus = deriveResolutionStatus(loopHydraulics, thresholds);
+      markLoopsCountAdjustment(loopHydraulics, chosenLoopsCount, minLoopsGeom);
+      /** @type {string[]} */
+      const extraWarnings = [];
+      if (resolutionStatus === 'unresolved_pressure') {
+        extraWarnings.push(
+          `Комната ${roomId}: не удалось уложиться в ${thresholds.maxPressureDropKPa} кПа на петлю при допустимом числе контуров — требуется проектная проработка.`,
+        );
+      }
+      return {
+        loops,
+        loopHydraulics,
+        chosenLoopsCount,
+        resolutionStatus,
+        appliedFix: deriveAppliedFix({
+          loopsCount: chosenLoopsCount,
+          minLoopsGeom,
+          loopHydraulics,
+        }),
+        pipeResizeApplied: loopHydraulics.some(
+          (h) => h.pipeResizeAction !== 'unchanged',
+        ),
+        extraWarnings,
+      };
+    }
+
+    const fallback = buildAndValidateLoopsConfiguration({
+      loopsCount: minLoopsGeom,
+      totalLengthM,
+      pipeSpacingMm,
+      heatLoadWatts,
+      roomId,
+      pipes,
+      hydraulicsRules,
+      materialPreference,
+      thresholds,
+    });
+    return {
+      loops: fallback.loops,
+      loopHydraulics: fallback.loopHydraulics,
+      chosenLoopsCount: minLoopsGeom,
+      resolutionStatus: deriveResolutionStatus(fallback.loopHydraulics, thresholds),
+      appliedFix: deriveAppliedFix({
+        loopsCount: minLoopsGeom,
+        minLoopsGeom,
+        loopHydraulics: fallback.loopHydraulics,
+      }),
+      pipeResizeApplied: false,
+      extraWarnings: [
+        `Комната ${roomId}: не удалось подобрать конфигурацию петель — требуется проектная проработка.`,
+      ],
+    };
+  })();
+
+  warnings.push(...outcome.extraWarnings);
+  for (const h of outcome.loopHydraulics) {
     warnings.push(...h.warnings);
   }
 
   return {
-    loopsCount: loops.length,
-    loops,
-    loopHydraulics,
+    loopsCount: outcome.loops.length,
+    loops: outcome.loops,
+    loopHydraulics: outcome.loopHydraulics,
     warnings,
+    pipeResizeApplied: outcome.pipeResizeApplied,
+    resolutionStatus: outcome.resolutionStatus,
+    appliedFix: outcome.appliedFix,
+    minLoopsGeom,
+    chosenLoopsCount: outcome.chosenLoopsCount,
   };
+}
+
+/**
+ * Структурированные REC/WARN по гидравлике петель ТП.
+ * @param {import('../types/shared-types').UnderfloorHeatingReport} underfloorHeating
+ * @param {import('../recommendations/types').RecommendationsBundle} recommendations
+ */
+export function applyUfhLoopHydraulicsRecommendations(
+  underfloorHeating,
+  recommendations,
+  hydraulicsRules,
+) {
+  if (!underfloorHeating?.rooms?.length) return;
+
+  const thresholds = ufhLoopHydraulicsThresholds(hydraulicsRules);
+
+  /** @type {string[]} */
+  const warnings = [];
+  /** @type {import('../recommendations/types').ResolvedRecommendation[]} */
+  const resolvedRecommendations = [];
+
+  for (const room of underfloorHeating.rooms) {
+    const status = room.loopHydraulicsResolutionStatus;
+    if (!status) continue;
+
+    const vars = {
+      roomName: room.roomName,
+      loopsCount: room.loopsCount ?? 0,
+      minLoopsGeom: room.loopHydraulicsMinLoopsGeom ?? room.loopsCount ?? 0,
+      velocityMinMps: thresholds.velocityMinMps,
+      maxPressureDropKPa: thresholds.maxPressureDropKPa,
+    };
+
+    if (
+      status === 'resolved_auto'
+      && room.loopHydraulicsAppliedFix
+      && room.loopHydraulicsAppliedFix !== 'none'
+    ) {
+      pushRecommendation(
+        warnings,
+        resolvedRecommendations,
+        recommendations,
+        'REC_UFH_LOOP_VELOCITY_AUTO_FIXED',
+        {
+          ...vars,
+          appliedFix: room.loopHydraulicsAppliedFix,
+        },
+      );
+      continue;
+    }
+
+    if (status === 'unresolved_velocity') {
+      pushRecommendation(
+        warnings,
+        resolvedRecommendations,
+        recommendations,
+        'WARN_UFH_LOOP_LOW_VELOCITY_UNRESOLVED',
+        vars,
+      );
+    } else if (status === 'unresolved_pressure') {
+      pushRecommendation(
+        warnings,
+        resolvedRecommendations,
+        recommendations,
+        'WARN_UFH_LOOP_HIGH_PRESSURE',
+        vars,
+      );
+    } else if (status === 'unresolved_conflict') {
+      pushRecommendation(
+        warnings,
+        resolvedRecommendations,
+        recommendations,
+        'WARN_UFH_LOOP_VELOCITY_PRESSURE_CONFLICT',
+        vars,
+      );
+    }
+  }
+
+  if (warnings.length > 0) {
+    underfloorHeating.warnings = [...(underfloorHeating.warnings ?? []), ...warnings];
+  }
+  if (resolvedRecommendations.length > 0) {
+    underfloorHeating.resolvedRecommendations = [
+      ...(underfloorHeating.resolvedRecommendations ?? []),
+      ...resolvedRecommendations,
+    ];
+  }
 }
 
 /**
@@ -298,6 +941,10 @@ export function enrichUnderfloorHeatingLoopHydraulics(
       areaM2: room.areaM2,
       pipeSpacingMm: room.pipeSpacingMm,
       heatLoadWatts: room.heatLoadWatts ?? room.heatFluxUpWatts,
+      heatFluxDownWm2: room.heatFluxDownWm2,
+      heatFluxDownWatts: room.heatFluxDownWatts,
+      heatFluxUpWatts: room.heatFluxUpWatts,
+      bottomBoundary: room.bottomBoundary,
       roomId: room.roomId,
       pipes,
       hydraulicsRules,
@@ -307,12 +954,20 @@ export function enrichUnderfloorHeatingLoopHydraulics(
     room.loopsCount = resolved.loopsCount;
     room.loops = resolved.loops.map((loop, idx) => ({
       ...loop,
+      catalogPipeId: resolved.loopHydraulics[idx]?.catalogPipeId ?? undefined,
       hydraulics: resolved.loopHydraulics[idx],
     }));
     room.flowRateM3PerHour = round(
       resolved.loops.reduce((s, l) => s + l.flowRateM3PerHour, 0),
       3,
     );
+    room.loopHydraulicsResolutionStatus = resolved.resolutionStatus;
+    room.loopHydraulicsAppliedFix = resolved.appliedFix;
+    room.loopHydraulicsMinLoopsGeom = resolved.minLoopsGeom;
+
+    if (resolved.pipeResizeApplied) {
+      room.pipeResizeApplied = true;
+    }
 
     const prefixed = resolved.warnings.map(
       (w) => `Комната «${room.roomName}»: ${w}`,

@@ -563,11 +563,25 @@ export interface UnderfloorHeatingRoomReport {
   heatLoadWatts?: number;
   flowRateM3PerHour?: number;
   loopsCount?: number;
+  pipeResizeApplied?: boolean;
+  loopHydraulicsResolutionStatus?:
+    | 'resolved_auto'
+    | 'unresolved_velocity'
+    | 'unresolved_pressure'
+    | 'unresolved_conflict';
+  loopHydraulicsAppliedFix?:
+    | 'none'
+    | 'loops_reduced'
+    | 'loops_increased'
+    | 'pipe_downsized'
+    | 'pipe_upsized';
+  loopHydraulicsMinLoopsGeom?: number;
   loops?: Array<{
     loopId: string;
     estimatedLengthM: number;
     heatLoadWatts: number;
     flowRateM3PerHour: number;
+    catalogPipeId?: string;
     hydraulics?: {
       loopId: string;
       lengthM: number;
@@ -579,9 +593,12 @@ export interface UnderfloorHeatingRoomReport {
       elbowCount: number;
       localZeta: number;
       catalogPipeId: string | null;
+      initialCatalogPipeId: string | null;
       internalDiameterMm: number | null;
       velocityMps: number | null;
       pressureDropKPa: number | null;
+      pipeResizeAction: 'unchanged' | 'upsized' | 'downsized' | 'loops_adjusted';
+      pipeResizeReason: string | null;
       warnings: string[];
     };
   }>;
