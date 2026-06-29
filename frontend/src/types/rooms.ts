@@ -44,8 +44,10 @@ export type RoomUnderfloorHeatingFormValue = {
   enabled: boolean;
   basePresetId: string;
   finishMaterialId: string;
-  /** Шаг укладки трубы; по умолчанию 150 мм. */
+  /** Желаемый шаг укладки; сервер может подобрать меньший. */
   pipeSpacingMm?: UfhPipeSpacingMm;
+  /** Площадь под мебелью без укладки ТП, м² (S_meb). */
+  furnitureOccupiedAreaM2?: number | '';
   /** @deprecated Монолитный пресет; мигрируется в migrateRoomUnderfloorHeating */
   presetId?: string;
 };

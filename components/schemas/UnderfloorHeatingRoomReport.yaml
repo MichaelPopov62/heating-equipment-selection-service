@@ -4,6 +4,31 @@ description: Расчёт теплоотдачи водяного ТП по од
 properties:
   roomId: { type: string }
   roomName: { type: string }
+  roomAreaM2:
+    type: number
+    description: Полная площадь комнаты из анкеты (теплопотери).
+  furnitureOccupiedAreaM2:
+    type: number
+    description: S_meb — площадь под мебелью без ТП.
+  heatedAreaM2:
+    type: number
+    description: S_акт = roomAreaM2 − furnitureOccupiedAreaM2; SSOT для змейки и мощности ТП.
+  requiredHeatFluxUpWm2:
+    type: number
+    description: q_треб = roomHeatLossWatts / heatedAreaM2 (Вт/м² на активной зоне).
+  requestedPipeSpacingMm:
+    type: integer
+    enum: [100, 150, 200]
+    description: Желаемый шаг из анкеты.
+  resolvedPipeSpacingMm:
+    type: integer
+    enum: [100, 150, 200]
+    description: Фактический шаг после авто-подбора (вариант B).
+  pipeSpacingResolution:
+    $ref: ./UfhPipeSpacingResolution.yaml
+  areaM2:
+    type: number
+    description: Активная площадь ТП (= heatedAreaM2); сохранено для обратной совместимости.
   basePresetId: { type: string }
   finishMaterialId: { type: string }
   ufhCircuitPresetId:

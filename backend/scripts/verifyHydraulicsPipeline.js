@@ -52,6 +52,7 @@ async function runFixture(label, input) {
     heatingSystem: input.heatingSystem ?? {},
     building: input.building,
     underfloorHeating,
+    hydraulics: input.hydraulics,
     ctx,
   });
 
@@ -65,6 +66,28 @@ async function runFixture(label, input) {
 
   await validateHydraulicsPipelineInput(dto);
   const result = runHydraulicsPipeline({ dto, catalog: ctx.catalog });
+
+  if (label === 'radiators_only') {
+    const flowDt = matching.radiators?.inputs?.flowDeltaTK;
+    if (flowDt !== 20) {
+      throw new Error(`${label}: ожидался flowDeltaTK=20, получено ${flowDt}`);
+    }
+    if (dto.circuits.radiators?.flowDeltaTK !== 20) {
+      throw new Error(`${label}: dto.flowDeltaTK должен быть 20`);
+    }
+    if (dto.circuits.radiators?.thermalRegime.deltaTK !== 10) {
+      throw new Error(`${label}: thermalRegime.deltaTK графика должен быть 10 (75/65)`);
+    }
+    const branchPipe = result.hydraulicsMatching.pipes.find((p) =>
+      p.edgeId.includes('_to_rad_'),
+    );
+    const branchMax = dto.rules.velocityLimitsMps.branchMax;
+    if (branchPipe && branchPipe.velocityMps > branchMax) {
+      throw new Error(
+        `${label}: скорость ветки радиатора ${branchPipe.velocityMps} > ${branchMax} м/с`,
+      );
+    }
+  }
 
   if (result.hydraulics.flowRateM3PerHour == null) {
     throw new Error(`${label}: нет flowRateM3PerHour`);

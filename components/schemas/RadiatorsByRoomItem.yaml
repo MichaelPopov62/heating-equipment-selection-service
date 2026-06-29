@@ -19,6 +19,10 @@ properties:
     description: >
       Нагрузка на подбор радиатора, Вт: designWatts комнаты (envelopeWatts × kVent);
       в смешанном режиме с ТП — остаток после вычета heatFluxUpWatts (0, если ТП покрывает нагрузку).
+  flowRateM3PerHour:
+    type: number
+    minimum: 0
+    description: Расход теплоносителя по комнате, м³/ч (thermalLoadToFlow с flowDeltaTK).
   radiatorModel: { type: string }
   outputPerSectionWatts:
     type: number

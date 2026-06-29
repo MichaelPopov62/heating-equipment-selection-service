@@ -82,6 +82,8 @@ export interface HydraulicsRadiatorConsumer {
 
 export interface HydraulicsRadiatorsCircuit {
   thermalRegime: { supplyC: number; returnC: number; deltaTK: number };
+  /** ΔT для Q=P/(c·ΔT); может отличаться от thermalRegime.deltaTK (анкета deltaTSystemK). */
+  flowDeltaTK: number;
   connectionType: 'side' | 'bottom';
   consumers: HydraulicsRadiatorConsumer[];
   totalFlowRateM3PerHour: number;
@@ -350,6 +352,8 @@ export interface HydraulicsPipeMatchItem {
   velocityMps: number;
   pressureDropKPa: number;
   internalDiameterMm: number;
+  /** true — ни одна труба каталога не уложилась в vMax; подобран max Ø с превышением. */
+  velocityLimitExceeded?: boolean;
 }
 
 export interface HydraulicsPumpMatch {
@@ -405,6 +409,7 @@ export interface HydraulicsPipeSegmentProposal {
   pressureDropKPa: number;
   pricePerMeter: number;
   linePrice: number;
+  velocityLimitExceeded?: boolean;
 }
 
 export interface HydraulicsPumpProposal {

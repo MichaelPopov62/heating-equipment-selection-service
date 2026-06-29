@@ -21,6 +21,7 @@ import {
 import { resolveUfhDistributionWithAppliances } from '../logic/ufhDistributionResolve.js';
 import { computeUfhMixingNodeSpec } from '../logic/ufhMixingNodeHydraulics.js';
 import { matchEquipment } from '../matching/public.js';
+import { pushRecommendation } from '../recommendations/recommendationResolver.js';
 import { assertCalcRuntimeContext } from '../reference/assertCalcRuntimeContext.js';
 import { logger } from '../utils/logger.js';
 import { buildMatchingAutomationHints } from './automationHints.js';
@@ -36,6 +37,51 @@ import {
   SCHEME_BOILER_SINGLE_BUFFER_ELECTRIC,
   SCHEME_BOILER_SINGLE_INDIRECT_SUM,
 } from '../../../shared/heatingMatchingSchemes.js';
+
+/**
+ * Структурированные WARN_* по превышению скорости в трубах pipeline.
+ * @param {object} args
+ * @param {import('../hydraulics/types').HydraulicsMatchingReport} args.hydraulicsMatching
+ * @param {import('../types/shared-types').HydraulicsReport} args.hydraulics
+ * @param {import('../appliances/types').HydraulicsApplianceRules} args.hydraulicsRules
+ * @param {string[]} args.warnings
+ * @param {import('../recommendations/types').RecommendationsBundle} args.recommendations
+ * @returns {import('../recommendations/types').ResolvedRecommendation[]}
+ */
+function applyHydraulicsVelocityRecommendations({
+  hydraulicsMatching,
+  hydraulics,
+  hydraulicsRules,
+  warnings,
+  recommendations,
+}) {
+  /** @type {import('../recommendations/types').ResolvedRecommendation[]} */
+  const resolved = [];
+  const edgesById = new Map(
+    (hydraulics.graph?.edges ?? []).map((edge) => [edge.id, edge]),
+  );
+  for (const pipe of hydraulicsMatching.pipes ?? []) {
+    if (!pipe.velocityLimitExceeded) continue;
+    const edge = edgesById.get(pipe.edgeId);
+    const vMax =
+      edge?.segmentRole === 'main'
+        ? hydraulicsRules.velocityLimitsMps.mainMax
+        : hydraulicsRules.velocityLimitsMps.branchMax;
+    pushRecommendation(
+      warnings,
+      resolved,
+      recommendations,
+      'WARN_PIPE_VELOCITY_EXCEEDED',
+      {
+        edgeId: pipe.edgeId,
+        velocityMps: Math.round(pipe.velocityMps * 100) / 100,
+        velocityMaxMps: vMax,
+        catalogPipeId: pipe.catalogPipeId,
+      },
+    );
+  }
+  return resolved;
+}
 
 /**
  * @param {object} args
@@ -232,6 +278,7 @@ export async function buildReport({ input, ctx }) {
     heatingSystem: input.heatingSystem ?? {},
     building: input.building,
     underfloorHeating,
+    hydraulics: input.hydraulics,
     ctx,
   });
 
@@ -347,6 +394,16 @@ export async function buildReport({ input, ctx }) {
     });
     hydraulics = pipelineResult.hydraulics;
     matching.hydraulics = pipelineResult.hydraulicsMatching;
+    const hydraulicsResolved = applyHydraulicsVelocityRecommendations({
+      hydraulicsMatching: pipelineResult.hydraulicsMatching,
+      hydraulics: pipelineResult.hydraulics,
+      hydraulicsRules: appliances.byKind.hydraulics,
+      warnings,
+      recommendations,
+    });
+    if (hydraulicsResolved.length) {
+      matching.hydraulics.resolvedRecommendations = hydraulicsResolved;
+    }
     if (pipelineResult.hydraulicsMatching.warnings?.length) {
       warnings.push(...pipelineResult.hydraulicsMatching.warnings);
     }
@@ -399,6 +456,7 @@ export async function buildReport({ input, ctx }) {
     ...(matching.boiler?.resolvedRecommendations ?? []),
     ...(matching.indirectWaterHeater?.resolvedRecommendations ?? []),
     ...(underfloorHeating?.resolvedRecommendations ?? []),
+    ...(matching.hydraulics?.resolvedRecommendations ?? []),
   ];
 
   /** Внутренние флаги нормализации не попадают в echo input отчёта. */

@@ -53,6 +53,7 @@ export type ParsedHydraulicsPipeSegment = {
   pressureDropKPa: number;
   pricePerMeter: number;
   linePrice: number;
+  velocityLimitExceeded?: boolean;
 };
 
 export type ParsedHydraulicsPumpProposal = {
@@ -92,4 +93,31 @@ export type ParsedHydraulicsProposal = {
   warnings: string[];
   hasCatalogSelection: boolean;
   hasPipeSelection: boolean;
+};
+
+/** Расчётные показатели из report.calculations.hydraulics (без подбора каталога). */
+export type ParsedHydraulicsCalculations = {
+  flowRateM3PerHour: number;
+  headRequiredM: number;
+  deltaTSystemK: number | null;
+  mainLineLengthM: number | null;
+  recommendedPipeDiameter: string | null;
+  notes: string[];
+};
+
+/** Контекст ΔT: график радиаторов vs ΔT для расчёта расхода. */
+export type ParsedHydraulicsFlowContext = {
+  supplyC: number | null;
+  returnC: number | null;
+  thermalRegimeDeltaTK: number | null;
+  flowDeltaTK: number | null;
+};
+
+/** Сводка гидравлики для UI: proposal + calculations + предупреждения matching. */
+export type ParsedHydraulicsView = {
+  proposal: ParsedHydraulicsProposal | null;
+  calculations: ParsedHydraulicsCalculations | null;
+  flowContext: ParsedHydraulicsFlowContext | null;
+  matchingWarnings: string[];
+  hasData: boolean;
 };

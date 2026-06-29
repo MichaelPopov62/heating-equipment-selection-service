@@ -378,6 +378,15 @@ isMixingNodeRequired = heatingSystem.supplyC > ufhCircuit.supplyC
 | Verify | `npm run verify:ufh-presets` | `backend/scripts/verifyUfhPresets.js` |
 | Чеклист | ручные сценарии v3 | [`docs/heating-schemes-test-checklist.md`](docs/heating-schemes-test-checklist.md) |
 
+### План v4 — мебель на полу ТП (S_meb → S_акт)
+
+| Блок | Содержание | Документация |
+|------|------------|--------------|
+| Анкета | `furnitureOccupiedAreaM2` в `room.underfloorHeating` | [`docs/ufh-furniture-active-area.md`](docs/ufh-furniture-active-area.md) |
+| Расчёт | S_акт, q_треб, авто-шаг (вариант B), длина змейки | там же |
+| Рекомендации | `WARN_UFH_ACTIVE_AREA_INSUFFICIENT`, `REC_UFH_PIPE_SPACING_AUTO`, … | `recommendations.json` |
+| Verify | `npm run verify:ufh-active-area` | `backend/scripts/verifyUfhActiveArea.js` |
+
 ---
 
 ## Поток расчёта

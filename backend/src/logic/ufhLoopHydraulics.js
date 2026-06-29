@@ -938,7 +938,7 @@ export function enrichUnderfloorHeatingLoopHydraulics(
 
   for (const room of underfloorHeating.rooms) {
     const resolved = resolveUfhRoomLoopsHydraulics({
-      areaM2: room.areaM2,
+      areaM2: room.heatedAreaM2 ?? room.areaM2,
       pipeSpacingMm: room.pipeSpacingMm,
       heatLoadWatts: room.heatLoadWatts ?? room.heatFluxUpWatts,
       heatFluxDownWm2: room.heatFluxDownWm2,

@@ -119,12 +119,15 @@ export function pickPipeForEdge({
     localZeta,
   });
 
+  const velocityLimitExceeded = hyd.velocityMps > vMax;
+
   return {
     edgeId: edge.id,
     catalogPipeId: chosen.id,
     velocityMps: hyd.velocityMps,
     pressureDropKPa: hyd.pressureDropKPa,
     internalDiameterMm: internalMm,
+    ...(velocityLimitExceeded ? { velocityLimitExceeded: true } : {}),
   };
 }
 
@@ -176,7 +179,7 @@ export function pickPipesForGraph({ graph, catalog, dto }) {
         edge.segmentRole === 'main'
           ? dto.rules.velocityLimitsMps.mainMax
           : dto.rules.velocityLimitsMps.branchMax;
-      if (match.velocityMps > vMax) {
+      if (match.velocityLimitExceeded || match.velocityMps > vMax) {
         warnings.push(
           `Участок ${edge.id}: скорость ${match.velocityMps} м/с выше лимита ${vMax} м/с — проверьте каталог.`,
         );

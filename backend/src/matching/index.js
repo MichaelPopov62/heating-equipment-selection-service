@@ -39,6 +39,7 @@ import { logger } from '../utils/logger.js';
  * @param {import('../types/shared-types').HeatingSystemInput} args.heatingSystem
  * @param {import('../types/shared-types').BuildingInput | undefined} args.building
  * @param {import('../types/shared-types').UnderfloorHeatingReport | null} [args.underfloorHeating]
+ * @param {import('../types/shared-types').HydraulicsSurveyInput | undefined} [args.hydraulics]
  * @param {import('../types/shared-types').CalcRuntimeContext} args.ctx
  * @returns {{
  *   matching: import('../types/shared-types').MatchingReport,
@@ -87,6 +88,7 @@ export function matchEquipment({
   heatingSystem,
   building,
   underfloorHeating = null,
+  hydraulics,
   ctx,
 } = {}) {
   assertCalcRuntimeContext(ctx);
@@ -233,6 +235,7 @@ export function matchEquipment({
     building,
     boiler,
     underfloorHeating,
+    hydraulics,
   });
 
   /** @type {import('../types/shared-types').WaterHeaterMatchingReport} */

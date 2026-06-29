@@ -64,11 +64,15 @@ export function buildCalcRequestPayload(params: {
         const spacing = r.underfloorHeating.pipeSpacingMm;
         const pipeSpacingMm =
           spacing === 100 || spacing === 150 || spacing === 200 ? spacing : 150;
+        const furnitureRaw = r.underfloorHeating.furnitureOccupiedAreaM2;
+        const furnitureOccupiedAreaM2 =
+          typeof furnitureRaw === 'number' && furnitureRaw > 0 ? furnitureRaw : undefined;
         room.underfloorHeating = {
           enabled: true,
           basePresetId,
           finishMaterialId,
           pipeSpacingMm,
+          ...(furnitureOccupiedAreaM2 != null ? { furnitureOccupiedAreaM2 } : {}),
         };
       }
     }

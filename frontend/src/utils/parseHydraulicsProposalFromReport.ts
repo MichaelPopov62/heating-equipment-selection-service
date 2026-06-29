@@ -117,6 +117,7 @@ function parsePipeSegment(raw: unknown): ParsedHydraulicsPipeSegment | null {
     pressureDropKPa: num(p.pressureDropKPa),
     pricePerMeter: num(p.pricePerMeter),
     linePrice: num(p.linePrice),
+    ...(p.velocityLimitExceeded === true ? { velocityLimitExceeded: true } : {}),
   };
 }
 

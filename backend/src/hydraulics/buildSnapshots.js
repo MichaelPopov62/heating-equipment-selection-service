@@ -11,6 +11,7 @@ import {
   resolvePipelineEmittersMode,
 } from './resolveEmittersMode.js';
 import { round } from '../utils/math.js';
+import { resolveFlowDeltaTK } from './resolveFlowDeltaTK.js';
 
 /**
  * Нормалізує петлю ТП до полів HydraulicsPipelineInput (без hydraulics з enrich).
@@ -77,10 +78,11 @@ export function buildHydraulicsSnapshots({
   const supplyC = Number(heatingSystem.supplyC) || 75;
   const returnC = Number(heatingSystem.returnC) || 65;
   const deltaTFromSurvey = input.hydraulics?.deltaTSystemK;
-  const deltaTK =
-    typeof deltaTFromSurvey === 'number' && deltaTFromSurvey > 0
-      ? deltaTFromSurvey
-      : Math.max(0.1, supplyC - returnC);
+  const deltaTK = resolveFlowDeltaTK({
+    deltaTSystemK: deltaTFromSurvey,
+    supplyC,
+    returnC,
+  });
 
   const selected = matching.boiler?.selected ?? matching.boiler?.proposal;
   const connectionNominalMm = parseConnectionDiametersMm(
@@ -107,7 +109,14 @@ export function buildHydraulicsSnapshots({
     const radInputs = matching.radiators.inputs;
     const radSupply = radInputs?.supplyC ?? supplyC;
     const radReturn = radInputs?.returnC ?? returnC;
-    const radDelta = Math.max(0.1, radSupply - radReturn);
+    const radGraphDeltaTK = Math.max(0.1, radSupply - radReturn);
+    const radFlowDeltaTK =
+      matching.radiators.inputs?.flowDeltaTK
+      ?? resolveFlowDeltaTK({
+        deltaTSystemK: deltaTFromSurvey,
+        supplyC: radSupply,
+        returnC: radReturn,
+      });
 
     /** @type {import('./types').HydraulicsRadiatorConsumer[]} */
     const consumers = matching.radiators.byRoom
@@ -129,8 +138,9 @@ export function buildHydraulicsSnapshots({
       thermalRegime: {
         supplyC: radSupply,
         returnC: radReturn,
-        deltaTK: radDelta,
+        deltaTK: radGraphDeltaTK,
       },
+      flowDeltaTK: radFlowDeltaTK,
       connectionType: radInputs?.radiatorConnection === 'bottom' ? 'bottom' : 'side',
       consumers,
       totalFlowRateM3PerHour: totalFlow,
@@ -146,7 +156,7 @@ export function buildHydraulicsSnapshots({
       roomId: room.roomId,
       roomName: room.roomName,
       floor: floors.get(room.roomId) ?? 1,
-      areaM2: room.areaM2,
+      areaM2: room.heatedAreaM2 ?? room.areaM2,
       pipeSpacingMm: room.pipeSpacingMm,
       circuitSupplyC: room.circuitSupplyC,
       circuitReturnC: room.circuitReturnC,

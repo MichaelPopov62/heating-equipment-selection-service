@@ -41,6 +41,12 @@ properties:
         type: integer
         enum: [50, 70]
       targetDeltaT: { type: number }
+      flowDeltaTK:
+        type: number
+        description: ΔT для расчёта flowRateM3PerHour по комнатам.
+      deltaTSystemK:
+        type: number
+        description: Значение из анкеты hydraulics.deltaTSystemK (если задано).
       ventilationReserveFactor:
         type: number
         description: Множитель kVent (1.3 natural / 1.1 recuperation) — запас вентиляции по комнатам.

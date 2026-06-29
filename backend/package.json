@@ -27,9 +27,11 @@
     "verify:hydraulics-pipeline": "node scripts/verifyHydraulicsPipeline.js",
     "verify:hydraulics-pipeline-input": "node scripts/verifyHydraulicsPipeline.js",
     "verify:circulation-flows": "node scripts/verifyCirculationFlows.js",
+    "verify:flow-delta-tk": "node scripts/verifyFlowDeltaTK.js",
     "verify:builtin-boiler-pump": "node scripts/verifyBuiltinBoilerPump.js",
     "verify:pump-duty": "node scripts/verifyPumpDuty.js",
     "verify:ufh-loop-hydraulics": "node scripts/verifyUfhLoopHydraulics.js",
+    "verify:ufh-active-area": "node scripts/verifyUfhActiveArea.js",
     "seed": "node scripts/seed.js",
     "test:fuzz": "tsx scripts/fuzz-calc.ts"
   },

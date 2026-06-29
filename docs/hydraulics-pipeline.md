@@ -10,13 +10,30 @@
 4. **Порядок в buildReport** — `matchEquipment` → `buildHydraulicsSnapshots` → `validateHydraulicsPipelineInput` → `runHydraulicsPipeline`.
 5. **Зоны циркуляции** — Q и насосы по топологии (`resolveCirculationFlows` → `resolveSystemPumps`), не одной формулой `Math.max`.
 
+## ΔT расхода vs температурный график
+
+Два независимых поля для радиаторного контура:
+
+| Поле | Смысл | Пример |
+|------|--------|--------|
+| `thermalRegime.deltaTK` | Перепад **номинального графика** `supplyC − returnC` | 75/65 → 10 K |
+| `flowDeltaTK` | ΔT для **расчёта расхода** Q = P/(c·ΔT) | анкета `deltaTSystemK: 20` |
+
+`input.hydraulics.deltaTSystemK` может отличаться от ΔT графика — это нормально для проектного расчёта гидравлики. Резолвер — `resolveFlowDeltaTK.js`; расходы по комнатам считаются в `pickRadiatorsCore` и попадают в pipeline через `matching.radiators.byRoom[].flowRateM3PerHour`.
+
+Подбор труб (`pickPipe.js`): если ни одна позиция каталога не укладывается в диапазон скорости (0,05…`velocityLimitsMps`), подбирается fallback Ø; флаг `velocityLimitExceeded` выставляется только при **превышении верхнего** лимита vMax после fallback.
+
 ## Маппинг upstream → DTO
 
 | Поле DTO | Источник |
 |----------|----------|
 | `source.catalogBoilerId` | `matching.boiler.selected.id` или, если нет `id`, `selected.model` (file-каталог) |
 | `source.*` (остальное) | `matching.boiler` + `heatingSystem` |
-| `circuits.radiators` | `matching.radiators.byRoom[]` + `inputs` |
+| `source.deltaTK` | `resolveFlowDeltaTK(input.hydraulics.deltaTSystemK, heatingSystem)` — ΔT для Q котлового контура |
+| `circuits.radiators.flowDeltaTK` | `matching.radiators.inputs.flowDeltaTK` |
+| `circuits.radiators.thermalRegime.deltaTK` | `supplyC − returnC` графика (не для Q) |
+| `circuits.radiators.consumers[].flowRateM3PerHour` | `matching.radiators.byRoom[]` |
+| `circuits.radiators` (остальное) | `matching.radiators.byRoom[]` + `inputs` |
 | `circuits.underfloor` | `calculations.underfloorHeating` |
 | `circuits.dhw` | `calculations.hotWater` + `matching.indirectWaterHeater` |
 | `layout.*` | `input.hydraulics` + `appliances.hydraulics` |
@@ -28,6 +45,7 @@
 |------|------------|
 | `hydraulics/public.js` | Barrel API |
 | `hydraulics/thermalLoadToFlow.js` | SSOT Q/(c·Δt) |
+| `hydraulics/resolveFlowDeltaTK.js` | SSOT ΔT расхода (анкета → fallback график) |
 | `hydraulics/resolveCirculationFlows.js` | Зоны циркуляции, Q, топология |
 | `hydraulics/resolveZoneHead.js` | Напор H по зоне |
 | `hydraulics/resolveSystemPumps.js` | Подбор насосов (встроенный котла → каталог) |
@@ -64,6 +82,16 @@
 Документ MongoDB / `backend/data/appliances.json`, **`schemaVersion: 2`**. После изменения — `cd backend && npm run seed` и рестарт API (или TTL `REFERENCE_CACHE_TTL_MS`).
 
 Поля попадают в `HydraulicsPipelineInput.rules` и в runtime через `CalcRuntimeContext`.
+
+### Длины трасс ТП и мебель
+
+| Участок | Формула | Зависит от S_meb |
+|---------|---------|------------------|
+| Змейка в полу | `heatedAreaM2 / pipeSpacingMm` | **да** |
+| Подвод коллектор → комната | `estimateBranchLengthM(этаж, ufhCollectorBranch)` | нет |
+| Магистраль котёл → распределитель | `hydraulics.mainLineLengthM` (анкета) | нет |
+
+См. [`ufh-furniture-active-area.md`](ufh-furniture-active-area.md).
 
 | Поле | Значение MVP | Назначение |
 |------|--------------|------------|
@@ -139,6 +167,7 @@
 ## Verify
 
 ```bash
+cd backend && npm run verify:flow-delta-tk       # SSOT resolveFlowDeltaTK
 cd backend && npm run verify:circulation-flows   # зоны Q, топологии
 cd backend && npm run verify:pump-duty          # зона рабочей точки, геометрия каталога
 cd backend && npm run verify:builtin-boiler-pump # circulationPump котла

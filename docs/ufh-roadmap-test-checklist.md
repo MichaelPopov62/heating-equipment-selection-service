@@ -14,6 +14,7 @@
 - [ ] Frontend: Vite dev или собранный UI
 - [ ] `cd backend && npm run verify:calc-schema` — OK
 - [ ] `cd backend && npm run verify:ufh-presets` — OK
+- [ ] `cd backend && npm run verify:ufh-active-area` — OK (S_meb / S_акт)
 - [ ] `GET /api/v1/presets/underfloor-heating` — bases + finishes
 - [ ] `GET /api/v1/presets/underfloor-heating/modes` — 3 режима v3
 
@@ -95,6 +96,29 @@
 
 - [ ] `underfloorDistributionPreset: auto` → для квартиры `collector_mixing_valve`
 - [ ] Для дома с `requiredKw > 50` — note / `hydraulic_separator`
+
+---
+
+## Сценарий 5 — Мебель на полу ТП (S_meb)
+
+См. [`ufh-furniture-active-area.md`](ufh-furniture-active-area.md).
+
+**Вход:**
+
+- Комната с ТП, `areaM2: 20`, `furnitureOccupiedAreaM2: 15`, ламинат, контур 40/30
+
+**Ожидание:**
+
+- [ ] `heatedAreaM2` = 5, `roomAreaM2` = 20
+- [ ] `requiredHeatFluxUpWm2` = Q_потерь / 5
+- [ ] `resolvedPipeSpacingMm` при необходимости &lt; `requestedPipeSpacingMm`
+- [ ] `WARN_UFH_ACTIVE_AREA_INSUFFICIENT` при q_треб &gt; maxAllowable
+- [ ] Длина змейки `≈ heatedAreaM2 / (resolvedPipeSpacingMm/1000)`
+
+**Регрессия:**
+
+- [ ] `furnitureOccupiedAreaM2: 0` или поле отсутствует — как до фичи
+- [ ] `npm run verify:ufh-active-area` — OK
 
 ---
 

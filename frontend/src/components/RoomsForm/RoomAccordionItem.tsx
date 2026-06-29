@@ -140,6 +140,8 @@ export function RoomAccordionItem({
       ? room.underfloorHeating.pipeSpacingMm
       : DEFAULT_UFH_PIPE_SPACING_MM;
 
+  const resolvedFurnitureArea = room.underfloorHeating?.furnitureOccupiedAreaM2 ?? '';
+
   const setUnderfloorEnabled = (enabled: boolean) => {
     if (!enabled) {
       updateRoom({
@@ -148,6 +150,7 @@ export function RoomAccordionItem({
           basePresetId: resolvedBaseId,
           finishMaterialId: resolvedFinishId,
           pipeSpacingMm: resolvedPipeSpacing,
+          furnitureOccupiedAreaM2: resolvedFurnitureArea,
         },
       });
       return;
@@ -158,6 +161,7 @@ export function RoomAccordionItem({
         basePresetId: resolvedBaseId || defaultBaseId,
         finishMaterialId: resolvedFinishId || defaultFinishId,
         pipeSpacingMm: resolvedPipeSpacing,
+        furnitureOccupiedAreaM2: resolvedFurnitureArea,
       },
     });
   };
@@ -166,6 +170,7 @@ export function RoomAccordionItem({
     basePresetId?: string;
     finishMaterialId?: string;
     pipeSpacingMm?: UfhPipeSpacingMm;
+    furnitureOccupiedAreaM2?: number | '';
   }) => {
     updateRoom({
       underfloorHeating: {
@@ -173,6 +178,10 @@ export function RoomAccordionItem({
         basePresetId: patch.basePresetId ?? resolvedBaseId,
         finishMaterialId: patch.finishMaterialId ?? resolvedFinishId,
         pipeSpacingMm: patch.pipeSpacingMm ?? resolvedPipeSpacing,
+        furnitureOccupiedAreaM2:
+          patch.furnitureOccupiedAreaM2 !== undefined
+            ? patch.furnitureOccupiedAreaM2
+            : resolvedFurnitureArea,
       },
     });
   };
@@ -547,7 +556,7 @@ export function RoomAccordionItem({
                   </div>
                   <div className={styles.field}>
                     <label className={styles.label} htmlFor={`ufh-spacing-${room.id}`}>
-                      Шаг укладки трубы, мм
+                      Желаемый шаг укладки, мм
                     </label>
                     <select
                       id={`ufh-spacing-${room.id}`}
@@ -565,6 +574,32 @@ export function RoomAccordionItem({
                         </option>
                       ))}
                     </select>
+                  </div>
+                  <div className={styles.field}>
+                    <label
+                      className={styles.label}
+                      htmlFor={`ufh-furniture-${room.id}`}
+                      title="Укажите площадь большой мебели, под которой не будет укладываться тёплый пол. Это защитит мебель от перегрева и позволит точнее рассчитать шаг трубы."
+                    >
+                      Площадь, занятая мебелью (без ножек / низкая посадка), S<sub>meb</sub> (м²)
+                    </label>
+                    <input
+                      id={`ufh-furniture-${room.id}`}
+                      className={styles.control}
+                      type="number"
+                      min={0}
+                      step={0.1}
+                      value={resolvedFurnitureArea}
+                      onChange={(e) =>
+                        patchUnderfloor({
+                          furnitureOccupiedAreaM2: toNumberOrEmpty(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+                  <div className={`${styles.hint} ${styles.fullWidth}`}>
+                    Укажите площадь большой мебели, под которой не будет укладываться тёплый пол.
+                    Это защитит мебель от перегрева и позволит точнее рассчитать шаг трубы.
                   </div>
                   <div className={`${styles.hint} ${styles.fullWidth}`}>
                     Отдельно от «Пол (ограждение)»: Rλ,B = основа над контуром + финиш (керамика,

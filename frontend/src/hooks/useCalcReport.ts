@@ -13,6 +13,7 @@ import { parseIndirectWaterHeaterMatchingFromReport } from '../utils/parseIndire
 import { parseRadiatorsMatchingFromReport } from '../utils/parseRadiatorsMatchingFromReport';
 import { parseWaterHeaterMatchingFromReport } from '../utils/parseWaterHeaterMatchingFromReport';
 import { parseUnderfloorHeatingFromReport } from '../utils/parseUnderfloorHeatingFromReport';
+import { parseHydraulicsFromReport } from '../utils/parseHydraulicsFromReport';
 
 type IsCalcMatchingScheme = (v: string) => v is HotWaterBoilerPowerMatchingScheme;
 
@@ -133,6 +134,11 @@ export function useCalcReport(
     [calcReport],
   );
 
+  const apiHydraulicsFromReport = useMemo(
+    () => parseHydraulicsFromReport(calcReport),
+    [calcReport],
+  );
+
   return {
     apiHeatLoss,
     apiHotWaterFromReport,
@@ -142,6 +148,7 @@ export function useCalcReport(
     apiIndirectWhFromReport,
     apiElectricWhFromReport,
     apiUnderfloorHeatingFromReport,
+    apiHydraulicsFromReport,
     displayedRadiatorSectionsTotal,
     apiCatalogSource,
     apiAutomationHints,

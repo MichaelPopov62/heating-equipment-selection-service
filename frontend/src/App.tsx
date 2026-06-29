@@ -29,7 +29,6 @@ import {
   DEFAULT_HYDRAULICS_FORM,
   type HydraulicsFormValue,
 } from './types/hydraulics';
-import { parseHydraulicsProposalFromReport } from './utils/parseHydraulicsProposalFromReport';
 import { buildSurveyCalcInputKey } from './utils/surveyCalcInputKey';
 import type { SurveyCurrentStep } from './types/surveyStep';
 import { useCalcReport } from './hooks/useCalcReport';
@@ -342,6 +341,7 @@ function App() {
     endDraftInitialization,
     restoreCalcReport,
     runApiCalc,
+    scheduleFreshCalc,
   } = useSurveyCalcRunner({
     buildCalcPayload,
     canAutoCalc,
@@ -357,6 +357,7 @@ function App() {
     apiIndirectWhFromReport,
     apiElectricWhFromReport,
     apiUnderfloorHeatingFromReport,
+    apiHydraulicsFromReport,
     displayedRadiatorSectionsTotal,
     apiCatalogSource,
     apiAutomationHints,
@@ -365,12 +366,6 @@ function App() {
     isCalcMatchingScheme,
     quickEstimate.radiatorsSections,
   );
-
-  const apiHydraulicsProposalFromReport = useMemo(() => {
-    if (calcReport == null || typeof calcReport !== 'object') return null;
-    const matching = (calcReport as { matching?: { hydraulics?: Record<string, unknown> } }).matching;
-    return parseHydraulicsProposalFromReport(matching?.hydraulics);
-  }, [calcReport]);
 
   const applySurveyDraftState = useCallback(
     (draft: SurveyDraft) => {
@@ -388,12 +383,18 @@ function App() {
       setUfhPresetId(draft.ufhPresetId ?? null);
       setThermalRegimePreset(draft.thermalRegimePreset);
       thermalRegimeTouchedRef.current = true;
-      restoreCalcReport(draft.lastCalcReport ?? null);
+      setHydraulicsForm(
+        draft.hydraulicsForm
+          ? structuredClone(draft.hydraulicsForm)
+          : { ...DEFAULT_HYDRAULICS_FORM },
+      );
+      restoreCalcReport(null);
       queueMicrotask(() => {
         endDraftInitialization();
+        scheduleFreshCalc();
       });
     },
-    [beginDraftInitialization, endDraftInitialization, restoreCalcReport],
+    [beginDraftInitialization, endDraftInitialization, restoreCalcReport, scheduleFreshCalc],
   );
 
   /** Смена схемы из подсказок отчёта или формы водонагревателя. */
@@ -435,6 +436,7 @@ function App() {
       underfloorDistributionPreset,
       thermalRegimePreset,
       ufhPresetId,
+      hydraulicsForm,
       lastCalcReport: calcReport,
     }),
     applyDraft: applySurveyDraftState,
@@ -938,7 +940,8 @@ function App() {
           catalogSnapError={catalogSnapError}
           onRetryLoadCatalog={() => void reloadCatalog()}
           onApplyScheme={handleWaterHeaterSchemeChange}
-          apiHydraulicsProposalFromReport={apiHydraulicsProposalFromReport}
+          apiHydraulicsFromReport={apiHydraulicsFromReport}
+          calcLoading={calcLoading}
         />
       </div>
 

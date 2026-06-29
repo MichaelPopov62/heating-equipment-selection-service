@@ -1,39 +1,53 @@
 /**
- * Назначение: проверка, покрывает ли теплоотдача ТП теплопотери комнаты.
- * Описание: Особенно важно для контура 40/30 с меньшим q↑.
+ * Назначение: проверка покрытия теплопотерь и активной площади ТП.
+ * Описание: Только структурные статусы; тексты — recommendations.json.
  */
 
 import { round } from '../utils/math.js';
 
 /**
  * @param {object} args
- * @param {string} args.roomName
  * @param {number} args.heatFluxUpWatts — полезная отдача ТП вверх, Вт
- * @param {number | undefined | null} args.roomHeatLossWatts — designWatts или envelopeWatts из heatLoss
- * @returns {{ heatFluxCoverageRatio: number | null, warnings: string[] }}
+ * @param {number | undefined | null} args.roomHeatLossWatts
+ * @returns {{ heatFluxCoverageRatio: number | null, coverageStatus: 'ok' | 'low' | 'unknown' }}
  */
 export function assessUfhRoomHeatLossCoverage(args) {
-  const { roomName, heatFluxUpWatts, roomHeatLossWatts } = args;
+  const { heatFluxUpWatts, roomHeatLossWatts } = args;
   const loss = Number(roomHeatLossWatts);
-  /** @type {string[]} */
-  const warnings = [];
 
   if (!Number.isFinite(loss) || loss <= 0) {
-    return { heatFluxCoverageRatio: null, warnings };
+    return { heatFluxCoverageRatio: null, coverageStatus: 'unknown' };
   }
 
   const ratio = heatFluxUpWatts / loss;
-  if (ratio < 0.95) {
-    warnings.push(
-      `Комната «${roomName}»: отдача ТП ≈${round(heatFluxUpWatts, 0)} Вт не покрывает расчётные потери ≈${round(loss, 0)} Вт `
-        + `(коэффициент ${round(ratio * 100, 0)} %). Уточните шаг трубы, покрытие или дополните отопление.`,
-    );
-  }
-
   return {
     heatFluxCoverageRatio: round(ratio, 3),
-    warnings,
+    coverageStatus: ratio < 0.95 ? 'low' : 'ok',
   };
+}
+
+/**
+ * @param {object} args
+ * @param {number} args.heatedAreaM2
+ * @param {number | null} args.qRequiredWm2
+ * @param {number} args.maxAllowableHeatFluxUpWm2
+ * @returns {{ status: 'ok' | 'zero_heated_area' | 'insufficient_active_area' }}
+ */
+export function assessUfhActiveAreaHeatFlux(args) {
+  const { heatedAreaM2, qRequiredWm2, maxAllowableHeatFluxUpWm2 } = args;
+
+  if (!(heatedAreaM2 > 0)) {
+    return { status: 'zero_heated_area' };
+  }
+
+  if (
+    qRequiredWm2 != null
+    && qRequiredWm2 > maxAllowableHeatFluxUpWm2 + 1e-6
+  ) {
+    return { status: 'insufficient_active_area' };
+  }
+
+  return { status: 'ok' };
 }
 
 /**

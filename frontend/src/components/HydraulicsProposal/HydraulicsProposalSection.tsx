@@ -3,10 +3,13 @@
  */
 
 import type {
+  ParsedHydraulicsCalculations,
+  ParsedHydraulicsFlowContext,
   ParsedHydraulicsPipeLine,
   ParsedHydraulicsPipeLineGroup,
   ParsedHydraulicsProposal,
   ParsedHydraulicsPumpProposal,
+  ParsedHydraulicsView,
 } from '../../types/hydraulics';
 import {
   formatBrandModel,
@@ -15,8 +18,9 @@ import {
 import styles from './HydraulicsProposalSection.module.css';
 
 type HydraulicsProposalSectionProps = {
-  proposal: ParsedHydraulicsProposal | null;
+  hydraulics: ParsedHydraulicsView | null;
   catalogSource?: 'file' | 'mongo' | null;
+  calcLoading?: boolean;
 };
 
 function segmentRoleLabel(role: string): string {
@@ -45,6 +49,102 @@ function topologyLabel(topology: ParsedHydraulicsProposal['topology']): string |
     default:
       return null;
   }
+}
+
+function FlowContextBlock({ flowContext }: { flowContext: ParsedHydraulicsFlowContext }) {
+  const hasGraph =
+    flowContext.supplyC != null && flowContext.returnC != null;
+  const hasFlowDt = flowContext.flowDeltaTK != null;
+  if (!hasGraph && !hasFlowDt) return null;
+
+  return (
+    <dl className={styles.summaryDl}>
+      {hasGraph && (
+        <>
+          <dt>Температурный график радиаторов</dt>
+          <dd>
+            {flowContext.supplyC}/{flowContext.returnC}{' '}
+            <span className={styles.unit}>°C</span>
+            {flowContext.thermalRegimeDeltaTK != null && (
+              <span className={styles.hintInline}>
+                {' '}
+                (Δt графика {flowContext.thermalRegimeDeltaTK} K)
+              </span>
+            )}
+          </dd>
+        </>
+      )}
+      {hasFlowDt && (
+        <>
+          <dt>Δt для расчёта расхода (анкета)</dt>
+          <dd>
+            {flowContext.flowDeltaTK} <span className={styles.unit}>K</span>
+            {flowContext.thermalRegimeDeltaTK != null
+              && flowContext.flowDeltaTK !== flowContext.thermalRegimeDeltaTK && (
+                <span className={styles.hintInline}>
+                  {' '}
+                  — отличается от Δt графика; расход Q = P/(c·Δt) считается по этому значению
+                </span>
+            )}
+          </dd>
+        </>
+      )}
+    </dl>
+  );
+}
+
+function CalculationsSummary({
+  calculations,
+  proposal,
+}: {
+  calculations: ParsedHydraulicsCalculations;
+  proposal: ParsedHydraulicsProposal | null;
+}) {
+  const flow =
+    proposal != null && proposal.designFlowM3PerHour > 0
+      ? proposal.designFlowM3PerHour
+      : calculations.flowRateM3PerHour;
+  const head =
+    proposal != null && proposal.headRequiredM > 0
+      ? proposal.headRequiredM
+      : calculations.headRequiredM;
+
+  if (flow <= 0 && head <= 0) return null;
+
+  return (
+    <dl className={styles.summaryDl}>
+      <dt>Расчётный расход системы</dt>
+      <dd>
+        {flow.toFixed(3)} <span className={styles.unit}>м³/ч</span>
+      </dd>
+      <dt>Требуемый напор</dt>
+      <dd>
+        {head.toFixed(2)} <span className={styles.unit}>м</span>
+      </dd>
+      {calculations.deltaTSystemK != null && (
+        <>
+          <dt>Δt расхода (из расчёта)</dt>
+          <dd>
+            {calculations.deltaTSystemK} <span className={styles.unit}>K</span>
+          </dd>
+        </>
+      )}
+      {calculations.mainLineLengthM != null && calculations.mainLineLengthM > 0 && (
+        <>
+          <dt>Длина магистрали (анкета)</dt>
+          <dd>
+            {calculations.mainLineLengthM.toFixed(1)} <span className={styles.unit}>м</span>
+          </dd>
+        </>
+      )}
+      {calculations.recommendedPipeDiameter && (
+        <>
+          <dt>Ориентировочный DN (по расходу)</dt>
+          <dd>{calculations.recommendedPipeDiameter}</dd>
+        </>
+      )}
+    </dl>
+  );
 }
 
 function PipeLinesTable({
@@ -154,24 +254,13 @@ function PumpCard({ pump }: { pump: ParsedHydraulicsPumpProposal }) {
   );
 }
 
-export function HydraulicsProposalSection({
+function ProposalContent({
   proposal,
   catalogSource,
-}: HydraulicsProposalSectionProps) {
-  if (!proposal) {
-    return (
-      <div className={styles.root} aria-labelledby="hydraulics-proposal-title">
-        <h3 id="hydraulics-proposal-title" className={styles.title}>
-          Гидравлика — рекомендуемое решение
-        </h3>
-        <p className={styles.emptyHint}>
-          Предложение по трубам и насосу не сформировано — выполните расчёт или проверьте
-          предупреждения в отчёте.
-        </p>
-      </div>
-    );
-  }
-
+}: {
+  proposal: ParsedHydraulicsProposal;
+  catalogSource?: 'file' | 'mongo' | null;
+}) {
   const sourceLine =
     catalogSource === 'mongo'
       ? 'Подбор по каталогу из базы данных (MongoDB).'
@@ -180,36 +269,34 @@ export function HydraulicsProposalSection({
         : null;
 
   return (
-    <div className={styles.root} aria-labelledby="hydraulics-proposal-title">
-      <h3 id="hydraulics-proposal-title" className={styles.title}>
-        Гидравлика — рекомендуемое решение
-      </h3>
-
+    <>
       {sourceLine && <p className={styles.hint}>{sourceLine}</p>}
 
       {topologyLabel(proposal.topology) && (
         <p className={styles.hint}>{topologyLabel(proposal.topology)}</p>
       )}
 
-      <dl className={styles.summaryDl}>
-        <dt>Расчётный расход контура</dt>
-        <dd>
-          {proposal.designFlowM3PerHour.toFixed(3)} <span className={styles.unit}>м³/ч</span>
-        </dd>
-        <dt>Требуемый напор</dt>
-        <dd>
-          {proposal.headRequiredM.toFixed(2)} <span className={styles.unit}>м</span>
-        </dd>
-        {proposal.estimatedTotalPrice > 0 && (
-          <>
-            <dt>Ориентировочная стоимость (трубы + насос)</dt>
-            <dd className={styles.valueStrong}>
-              {formatPriceUah(proposal.estimatedTotalPrice)}{' '}
-              <span className={styles.unit}>грн</span>
-            </dd>
-          </>
-        )}
-      </dl>
+      {(proposal.designFlowM3PerHour > 0 || proposal.headRequiredM > 0) && (
+        <dl className={styles.summaryDl}>
+          <dt>Расчётный расход контура (подбор)</dt>
+          <dd>
+            {proposal.designFlowM3PerHour.toFixed(3)} <span className={styles.unit}>м³/ч</span>
+          </dd>
+          <dt>Требуемый напор (подбор)</dt>
+          <dd>
+            {proposal.headRequiredM.toFixed(2)} <span className={styles.unit}>м</span>
+          </dd>
+          {proposal.estimatedTotalPrice > 0 && (
+            <>
+              <dt>Ориентировочная стоимость (трубы + насос)</dt>
+              <dd className={styles.valueStrong}>
+                {formatPriceUah(proposal.estimatedTotalPrice)}{' '}
+                <span className={styles.unit}>грн</span>
+              </dd>
+            </>
+          )}
+        </dl>
+      )}
 
       {!proposal.hasPipeSelection && proposal.unavailableReason && (
         <p className={styles.emptyHint}>{proposal.unavailableReason}</p>
@@ -268,7 +355,10 @@ export function HydraulicsProposalSection({
             </thead>
             <tbody>
               {proposal.pipeSegments.map((seg) => (
-                <tr key={seg.edgeId}>
+                <tr
+                  key={seg.edgeId}
+                  className={seg.velocityLimitExceeded ? styles.segmentRowWarning : undefined}
+                >
                   <td>{seg.segmentLabel}</td>
                   <td>{segmentRoleLabel(seg.segmentRole)}</td>
                   <td>
@@ -277,6 +367,9 @@ export function HydraulicsProposalSection({
                   <td>{formatBrandModel(seg.brand, seg.model)}</td>
                   <td>
                     {seg.velocityMps.toFixed(2)} <span className={styles.unit}>м/с</span>
+                    {seg.velocityLimitExceeded ? (
+                      <span className={styles.hintInline}> (выше нормы)</span>
+                    ) : null}
                   </td>
                   <td>
                     {seg.pressureDropKPa.toFixed(1)} <span className={styles.unit}>кПа</span>
@@ -292,6 +385,89 @@ export function HydraulicsProposalSection({
         <ul className={styles.warningsList}>
           {proposal.warnings.map((w, i) => (
             <li key={`hyd-w-${i}-${w.slice(0, 64)}`}>{w}</li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+export function HydraulicsProposalSection({
+  hydraulics,
+  catalogSource,
+  calcLoading = false,
+}: HydraulicsProposalSectionProps) {
+  const proposal = hydraulics?.proposal ?? null;
+  const calculations = hydraulics?.calculations ?? null;
+  const flowContext = hydraulics?.flowContext ?? null;
+  const matchingWarnings = hydraulics?.matchingWarnings ?? [];
+
+  const allWarnings = [
+    ...matchingWarnings,
+    ...(calculations?.notes ?? []),
+  ];
+
+  if (!hydraulics?.hasData) {
+    return (
+      <div className={styles.root} aria-labelledby="hydraulics-proposal-title">
+        <h3 id="hydraulics-proposal-title" className={styles.title}>
+          Гидравлика — рекомендуемое решение
+        </h3>
+        {calcLoading ? (
+          <p className={styles.hint} role="status">
+            Ожидание ответа сервера…
+          </p>
+        ) : (
+          <p className={styles.emptyHint}>
+            Заполните помещения и ограждения, затем дождитесь расчёта API — здесь появятся
+            расход, напор и подбор труб/насоса. Параметры магистрали задаются на шаге
+            «Гидравлика» слева.
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={[styles.root, calcLoading ? styles.rootStale : ''].filter(Boolean).join(' ')}
+      aria-labelledby="hydraulics-proposal-title"
+    >
+      <h3 id="hydraulics-proposal-title" className={styles.title}>
+        Гидравлика — рекомендуемое решение
+      </h3>
+
+      {calcLoading && (
+        <p className={styles.hint} role="status">
+          Обновление расчёта… показаны данные предыдущего ответа сервера.
+        </p>
+      )}
+
+      <p className={styles.hint}>
+        Источник: расчёт API (Pure Pipeline) · подбор труб и насоса из каталога.
+      </p>
+
+      {flowContext && <FlowContextBlock flowContext={flowContext} />}
+
+      {calculations && (
+        <CalculationsSummary calculations={calculations} proposal={proposal} />
+      )}
+
+      {proposal ? (
+        <ProposalContent proposal={proposal} catalogSource={catalogSource} />
+      ) : (
+        calculations != null && (
+          <p className={styles.hint}>
+            Подбор позиций каталога не сформирован — см. предупреждения ниже или проверьте каталог
+            труб/насосов.
+          </p>
+        )
+      )}
+
+      {allWarnings.length > 0 && (
+        <ul className={styles.warningsList}>
+          {allWarnings.map((w, i) => (
+            <li key={`hyd-mw-${i}-${w.slice(0, 64)}`}>{w}</li>
           ))}
         </ul>
       )}

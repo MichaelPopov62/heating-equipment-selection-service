@@ -437,11 +437,42 @@ function normalizeUnderfloorHeatingBeforeValidate(input) {
       pipeSpacingMm = spacingNum;
     }
 
+    let furnitureOccupiedAreaM2 = 0;
+    if (
+      ufh.furnitureOccupiedAreaM2 !== undefined
+      && ufh.furnitureOccupiedAreaM2 !== null
+    ) {
+      const furnitureNum = Number(ufh.furnitureOccupiedAreaM2);
+      if (!Number.isFinite(furnitureNum) || furnitureNum < 0) {
+        const err = new Error(
+          `furnitureOccupiedAreaM2: ожидается число ≥ 0 (roomId="${room.id}").`,
+        );
+        err.statusCode = 400;
+        err.code = 'UNDERFLOOR_HEATING_FURNITURE_AREA_INVALID';
+        throw err;
+      }
+      furnitureOccupiedAreaM2 = furnitureNum;
+    }
+
+    const roomAreaM2 = Number(room.areaM2);
+    if (
+      Number.isFinite(roomAreaM2)
+      && furnitureOccupiedAreaM2 >= roomAreaM2
+    ) {
+      const err = new Error(
+        `furnitureOccupiedAreaM2=${furnitureOccupiedAreaM2} м²: должно быть строго меньше площади комнаты ${roomAreaM2} м² (roomId="${room.id}").`,
+      );
+      err.statusCode = 400;
+      err.code = 'UNDERFLOOR_HEATING_FURNITURE_AREA_INVALID';
+      throw err;
+    }
+
     room.underfloorHeating = {
       enabled: true,
       basePresetId,
       finishMaterialId,
       pipeSpacingMm,
+      ...(furnitureOccupiedAreaM2 > 0 ? { furnitureOccupiedAreaM2 } : {}),
     };
   }
 }

@@ -200,6 +200,9 @@ export function buildHydraulicsProposal({
       pressureDropKPa: pipeMatch.pressureDropKPa,
       pricePerMeter,
       linePrice,
+      ...(pipeMatch.velocityLimitExceeded
+        ? { velocityLimitExceeded: true }
+        : {}),
     });
   }
 

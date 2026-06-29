@@ -1,6 +1,6 @@
 /**
  * Назначение: оркестратор расчёта водяного тёплого пола по комнатам.
- * Описание: Пресет контура по финишу, смеситель, делегирование в ufhRoomHeatFlux / ufhRoomCoverageCheck.
+ * Описание: Пресет контура по финишу, смеситель, S_акт, авто-шаг, ufhRoomHeatFlux.
  */
 
 import { resolveUnderfloorHeatingComposition } from '../data/warmFloorAssemblyPresets.js';
@@ -16,7 +16,11 @@ import { computeUfhMixingNodeSpec } from './ufhMixingNodeHydraulics.js';
 import { computeUnderfloorHydraulicsCircuit } from './ufhHydraulicsCircuit.js';
 import { computeUfhLoopGeometry } from './ufhLoopGeometry.js';
 import { computeUfhRoomHeatFlux } from './ufhRoomHeatFlux.js';
+import { resolveUfhActiveFloorAreaM2 } from './ufhActiveFloorArea.js';
+import { computeUfhRequiredHeatFluxUpWm2 } from './ufhRequiredHeatFlux.js';
+import { resolveUfhPipeSpacingMm } from './ufhPipeSpacingResolve.js';
 import {
+  assessUfhActiveAreaHeatFlux,
   assessUfhRoomHeatLossCoverage,
   resolveRoomDesignHeatLossWatts,
 } from './ufhRoomCoverageCheck.js';
@@ -94,7 +98,6 @@ export function calculateUnderfloorHeating(args) {
       && typeof heatingSystem.supplyC === 'number'
       && typeof heatingSystem.returnC === 'number'
     ) {
-      // Fallback: график из normalizeHeatingUfhPreset (ufh_only), если modePreset не переопределяет контур
       circuitResolved = {
         preset: {
           id: 'ufh_dt10_40_30',
@@ -113,11 +116,16 @@ export function calculateUnderfloorHeating(args) {
 
     const { preset } = circuitResolved;
     const circuitMeanC = (preset.supplyC + preset.returnC) / 2;
-    const pipeSpacingMm =
+    const requestedPipeSpacingMm =
       room.underfloorHeating?.pipeSpacingMm ?? DEFAULT_PIPE_SPACING_MM;
     const bottomBoundary =
       room.bottomBoundary ?? base.bottomBoundary ?? 'heated';
-    const areaM2 = room.areaM2;
+
+    const areaResolved = resolveUfhActiveFloorAreaM2({
+      roomAreaM2: room.areaM2,
+      furnitureOccupiedAreaM2: room.underfloorHeating?.furnitureOccupiedAreaM2,
+    });
+    const { roomAreaM2, furnitureOccupiedAreaM2, heatedAreaM2 } = areaResolved;
 
     const heatingIdx = base.layers.findIndex((l) => l.isHeatingLayer);
     if (heatingIdx < 0) {
@@ -128,11 +136,15 @@ export function calculateUnderfloorHeating(args) {
     }
 
     const presetMaxSurfaceT = modePreset?.technical?.maxSurfaceTemperatureC;
+    const roomHeatLossWatts = resolveRoomDesignHeatLossWatts(heatLoss, room.id);
+    const requiredHeatFluxUpWm2 = computeUfhRequiredHeatFluxUpWm2({
+      roomHeatLossWatts,
+      heatedAreaM2,
+    });
 
-    const flux = computeUfhRoomHeatFlux({
+    const fluxContext = {
       base,
       finish,
-      pipeSpacingMm,
       circuitMeanC,
       circuitSupplyC: preset.supplyC,
       circuitReturnC: preset.returnC,
@@ -140,29 +152,43 @@ export function calculateUnderfloorHeating(args) {
       insideC,
       outsideC: temps.outsideC,
       bottomBoundary,
-      areaM2,
+    };
+
+    const spacingResolved = resolveUfhPipeSpacingMm({
+      requestedPipeSpacingMm,
+      qRequiredWm2: requiredHeatFluxUpWm2,
+      fluxContext,
     });
 
-    const roomHeatLossWatts = resolveRoomDesignHeatLossWatts(heatLoss, room.id);
+    const flux = computeUfhRoomHeatFlux({
+      ...fluxContext,
+      pipeSpacingMm: spacingResolved.resolvedPipeSpacingMm,
+      areaM2: heatedAreaM2,
+    });
+
+    const activeAreaCheck = assessUfhActiveAreaHeatFlux({
+      heatedAreaM2,
+      qRequiredWm2: requiredHeatFluxUpWm2,
+      maxAllowableHeatFluxUpWm2: flux.maxAllowableHeatFluxUpWm2,
+    });
+
     const coverage = assessUfhRoomHeatLossCoverage({
-      roomName: room.name,
       heatFluxUpWatts: flux.heatFluxUpWatts,
       roomHeatLossWatts,
     });
 
     const loopGeom = computeUfhLoopGeometry({
-      areaM2: flux.areaM2,
-      pipeSpacingMm: flux.pipeSpacingMm,
+      areaM2: heatedAreaM2,
+      pipeSpacingMm: spacingResolved.resolvedPipeSpacingMm,
       heatLoadWatts: flux.heatFluxUpWatts,
       deltaTK: 10,
       maxLoopLengthM: maxUfhLoopLengthM,
       roomId: room.id,
     });
 
-    const roomWarnings = [
-      ...flux.roomWarnings.map((w) => `Комната «${room.name}»: ${w}`),
-      ...coverage.warnings,
-    ];
+    const roomWarnings = flux.roomWarnings.map(
+      (w) => `Комната «${room.name}»: ${w}`,
+    );
 
     roomReports.push({
       roomId: room.id,
@@ -172,8 +198,15 @@ export function calculateUnderfloorHeating(args) {
       basePresetName: base.name,
       finishMaterialName: finish.name,
       ufhCircuitPresetId: preset.id,
-      areaM2: flux.areaM2,
-      pipeSpacingMm: flux.pipeSpacingMm,
+      roomAreaM2,
+      furnitureOccupiedAreaM2,
+      heatedAreaM2,
+      requiredHeatFluxUpWm2: requiredHeatFluxUpWm2 ?? undefined,
+      requestedPipeSpacingMm: spacingResolved.requestedPipeSpacingMm,
+      resolvedPipeSpacingMm: spacingResolved.resolvedPipeSpacingMm,
+      pipeSpacingResolution: spacingResolved.pipeSpacingResolution,
+      areaM2: heatedAreaM2,
+      pipeSpacingMm: spacingResolved.resolvedPipeSpacingMm,
       pipeEmbedmentResistanceM2KW: flux.pipeEmbedmentResistanceM2KW,
       baseCoveringResistanceM2KW: flux.baseCoveringResistanceM2KW,
       finishCoveringResistanceM2KW: flux.finishCoveringResistanceM2KW,
@@ -185,6 +218,8 @@ export function calculateUnderfloorHeating(args) {
       circuitMeanC: flux.circuitMeanC,
       roomHeatLossWatts: roomHeatLossWatts ?? undefined,
       heatFluxCoverageRatio: coverage.heatFluxCoverageRatio ?? undefined,
+      heatFluxCoverageStatus: coverage.coverageStatus,
+      activeAreaCheckStatus: activeAreaCheck.status,
       heatFluxUpWm2: flux.heatFluxUpWm2,
       heatFluxDownWm2: flux.heatFluxDownWm2,
       maxAllowableHeatFluxUpWm2: flux.maxAllowableHeatFluxUpWm2,
@@ -239,8 +274,8 @@ export function calculateUnderfloorHeating(args) {
 
   if (mixingRequired) {
     globalWarnings.push(
-      `Требуется насосно-смесительный узел: подача котла ${boilerSupplyC ?? '—'} °C выше температуры контура ТП ` +
-        `(по комнатам ${roomReports.map((r) => `${r.circuitSupplyC}/${r.circuitReturnC}`).join(', ')} °C).`,
+      `Требуется насосно-смесительный узел: подача котла ${boilerSupplyC ?? '—'} °C выше температуры контура ТП `
+        + `(по комнатам ${roomReports.map((r) => `${r.circuitSupplyC}/${r.circuitReturnC}`).join(', ')} °C).`,
     );
   } else if (roomReports.length > 0 && typeof boilerSupplyC === 'number') {
     globalWarnings.push(

@@ -163,7 +163,7 @@ definitions:
   RadiatorsCircuit:
     type: object
     additionalProperties: false
-    required: [thermalRegime, connectionType, consumers, totalFlowRateM3PerHour]
+    required: [thermalRegime, flowDeltaTK, connectionType, consumers, totalFlowRateM3PerHour]
     properties:
       thermalRegime:
         type: object
@@ -172,7 +172,13 @@ definitions:
         properties:
           supplyC: { type: number }
           returnC: { type: number }
-          deltaTK: { type: number }
+          deltaTK:
+            type: number
+            description: ΔT номинального температурного графика (supplyC−returnC), не для Q.
+      flowDeltaTK:
+        type: number
+        minimum: 0.1
+        description: ΔT для расчёта расхода Q=P/(c·ΔT); из анкеты deltaTSystemK или fallback supplyC−returnC.
       connectionType:
         type: string
         enum: [side, bottom]

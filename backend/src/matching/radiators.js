@@ -64,6 +64,7 @@ function wrapRadiatorProposalLine(tierReport, tier, boilerProposal) {
  * @param {import('../types/shared-types').BuildingInput | null} [args.building]
  * @param {import('../types/boiler-types').BoilerMatchingReport} args.boiler
  * @param {import('../types/shared-types').UnderfloorHeatingReport | null} [args.underfloorHeating]
+ * @param {import('../types/shared-types').HydraulicsSurveyInput | undefined} [args.hydraulics]
  * @returns {import('../types/shared-types').RadiatorsMatchingReport}
  */
 export function pickRadiatorsWithProposalLines({
@@ -73,7 +74,9 @@ export function pickRadiatorsWithProposalLines({
   building = null,
   boiler,
   underfloorHeating = null,
+  hydraulics,
 } = {}) {
+  const deltaTSystemK = hydraulics?.deltaTSystemK;
   if (heatingSystem?.heatingEmittersMode === 'ufh_only') {
     const skipMsg =
       'Подбор радиаторов пропущен: выбран режим отопления только теплым полом (heatingEmittersMode=ufh_only).';
@@ -116,6 +119,7 @@ export function pickRadiatorsWithProposalLines({
       boilerMatching: null,
       radiatorLineTier: 'economy',
       underfloorHeating,
+      deltaTSystemK,
     });
     lineEconomy = wrapRadiatorProposalLine(
       ecoReport,
@@ -147,6 +151,7 @@ export function pickRadiatorsWithProposalLines({
       boilerMatching: null,
       radiatorLineTier: 'efficient',
       underfloorHeating,
+      deltaTSystemK,
     });
     lineEfficient = wrapRadiatorProposalLine(
       effReport,
@@ -173,6 +178,7 @@ export function pickRadiatorsWithProposalLines({
     building,
     boilerMatching: boiler,
     underfloorHeating,
+    deltaTSystemK,
   });
 
   return {

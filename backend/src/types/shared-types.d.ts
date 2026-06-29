@@ -208,11 +208,19 @@ export interface RoomUnderfloorHeatingInput {
   enabled: boolean;
   basePresetId: string;
   finishMaterialId: string;
-  /** Шаг укладки трубы, мм: 100 | 150 | 200; по умолчанию 150. */
+  /** Желаемый шаг укладки, мм: 100 | 150 | 200; сервер может подобрать меньший. */
   pipeSpacingMm?: 100 | 150 | 200;
+  /** Площадь пола под мебелью без укладки ТП, м² (S_meb). */
+  furnitureOccupiedAreaM2?: number;
   /** @deprecated Миграция монолитных пресетов; не задавать в новых анкетах */
   presetId?: string;
 }
+
+/** Результат авто-подбора шага укладки ТП. */
+export type UfhPipeSpacingResolution =
+  | 'matched_requested'
+  | 'tightened'
+  | 'none_sufficient';
 
 export interface RoomInput {
   id: string;
@@ -538,7 +546,22 @@ export interface UnderfloorHeatingRoomReport {
   finishMaterialId: string;
   basePresetName?: string;
   finishMaterialName?: string;
+  /** Полная площадь комнаты (теплопотери). */
+  roomAreaM2: number;
+  /** S_meb — площадь под мебелью без ТП. */
+  furnitureOccupiedAreaM2: number;
+  /** S_акт — активная площадь укладки ТП. */
+  heatedAreaM2: number;
+  /** q_треб = roomHeatLossWatts / heatedAreaM2, Вт/м². */
+  requiredHeatFluxUpWm2?: number;
+  /** Желаемый шаг из анкеты. */
+  requestedPipeSpacingMm: number;
+  /** Фактический шаг после авто-подбора. */
+  resolvedPipeSpacingMm: number;
+  pipeSpacingResolution: UfhPipeSpacingResolution;
+  /** Активная площадь (= heatedAreaM2); обратная совместимость. */
   areaM2: number;
+  /** Фактический шаг (= resolvedPipeSpacingMm); обратная совместимость. */
   pipeSpacingMm: number;
   pipeEmbedmentResistanceM2KW: number;
   baseCoveringResistanceM2KW: number;
@@ -612,6 +635,10 @@ export interface UnderfloorHeatingRoomReport {
   presetMaxSurfaceTemperatureCelsius?: number;
   /** q↑ снижен до maxAllowableHeatFluxUpWm2 из-за лимита поверхности. */
   heatFluxUpLimitedBySurface?: boolean;
+  /** Проверка активной площади: ok | zero_heated_area | insufficient_active_area. */
+  activeAreaCheckStatus?: 'ok' | 'zero_heated_area' | 'insufficient_active_area';
+  /** Покрытие теплопотерь: ok | low | unknown. */
+  heatFluxCoverageStatus?: 'ok' | 'low' | 'unknown';
   bottomBoundary: 'heated' | 'unheated';
   neighborTempC: number;
   warnings: string[];
@@ -841,6 +868,7 @@ export interface HydraulicsMatchingReport {
     velocityMps: number;
     pressureDropKPa: number;
     internalDiameterMm: number;
+    velocityLimitExceeded?: boolean;
   }>;
   topology?: 'direct' | 'mixing_valve' | 'hydraulic_separator';
   circulationZones?: import('../hydraulics/types').HydraulicsCirculationZone[];
@@ -922,6 +950,10 @@ export interface RadiatorsProposalLineReport {
     insideC: number;
     baseDeltaT: 50 | 70;
     targetDeltaT: number;
+    /** ΔT для расчёта flowRateM3PerHour по комнатам. */
+    flowDeltaTK?: number;
+    /** Значение из анкеты hydraulics.deltaTSystemK (если задано). */
+    deltaTSystemK?: number;
     /** Множитель kVent (1.3 natural / 1.1 recuperation). */
     ventilationReserveFactor?: number;
     radiatorSizingAlignedWithCondensing?: boolean;
@@ -953,6 +985,8 @@ export interface RadiatorsMatchingReport {
     radiatorConnection?: 'side' | 'bottom';
     /** Фактично застосований пресет графіка (якщо був у запиті). */
     thermalRegimePreset?: HeatingThermalRegimePreset;
+    flowDeltaTK?: number;
+    deltaTSystemK?: number;
   };
   /** Пояснення щодо сімейства радіаторів / панельних моделей. */
   radiatorSelectionNotes?: string[];

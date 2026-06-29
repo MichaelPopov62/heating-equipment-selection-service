@@ -160,5 +160,50 @@
     "equipmentType": "underfloor_heating",
     "title": "Конфликт скорости и давления на петлях ТП",
     "text": "Комната «{{roomName}}»: нельзя одновременно обеспечить скорость ≥ {{velocityMinMps}} м/с и Δp ≤ {{maxPressureDropKPa}} кПа на петлю (геом. минимум {{minLoopsGeom}} контур(ов)) — требуется проектная проработка."
+  },
+  {
+    "code": "WARN_UFH_ACTIVE_AREA_INSUFFICIENT",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "underfloor_heating",
+    "title": "Недостаточная активная площадь ТП",
+    "text": "Комната «{{roomName}}»: при S_акт={{heatedAreaM2}} м² (мебель {{furnitureOccupiedAreaM2}} м²) требуется q↑≈{{requiredHeatFluxUpWm2}} Вт/м², допустимо ≈{{maxAllowableHeatFluxUpWm2}} Вт/м². Активной площади ТП недостаточно для покрытия теплопотерь. Рекомендуется добавить радиаторное отопление или снизить теплопотери."
+  },
+  {
+    "code": "WARN_UFH_HEATED_AREA_ZERO",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "underfloor_heating",
+    "title": "Нет активной площади для ТП",
+    "text": "Комната «{{roomName}}»: площадь под мебелью ({{furnitureOccupiedAreaM2}} м²) равна или превышает площадь комнаты — активная зона укладки ТП отсутствует."
+  },
+  {
+    "code": "WARN_UFH_COVERAGE_LOW",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "underfloor_heating",
+    "title": "ТП не покрывает теплопотери комнаты",
+    "text": "Комната «{{roomName}}»: отдача ТП ≈{{heatFluxUpWatts}} Вт не покрывает расчётные потери ≈{{roomHeatLossWatts}} Вт (коэффициент {{coveragePercent}} %). Уточните шаг трубы, покрытие или дополните отопление."
+  },
+  {
+    "code": "REC_UFH_PIPE_SPACING_AUTO",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "automationHints",
+    "equipmentType": "underfloor_heating",
+    "title": "Шаг укладки подобран автоматически",
+    "text": "Комната «{{roomName}}»: для покрытия нагрузки q↑≈{{requiredHeatFluxUpWm2}} Вт/м² применён шаг {{resolvedPipeSpacingMm}} мм вместо запрошенных {{requestedPipeSpacingMm}} мм."
+  },
+  {
+    "code": "WARN_PIPE_VELOCITY_EXCEEDED",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "hydraulics",
+    "title": "Превышение скорости в трубе",
+    "text": "Участок «{{edgeId}}»: скорость {{velocityMps}} м/с выше лимита {{velocityMaxMps}} м/с — в каталоге нет подходящего диаметра; подобран максимальный Ø {{catalogPipeId}}."
   }
 ]

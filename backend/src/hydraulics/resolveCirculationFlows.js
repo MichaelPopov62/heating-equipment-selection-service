@@ -197,7 +197,7 @@ export function resolveCirculationFlows(dto) {
         pumpRole: 'zone',
         designFlowM3PerHour: rad,
         heatLoadWatts: pRad,
-        deltaTK: dto.circuits.radiators?.thermalRegime.deltaTK ?? dtBoiler,
+        deltaTK: dto.circuits.radiators?.flowDeltaTK ?? dtBoiler,
         requiresCatalogPump: true,
       });
     }

@@ -25,6 +25,10 @@ import { migrateLegacyRoomTypes } from './migrateLegacyRoomTypes';
 import { migrateRoomUnderfloorHeating } from './migrateRoomUnderfloorHeating';
 import { migrateRoomEnvelopeFields } from './roomEnvelopeFields';
 import { normalizeWaterHeaterForm } from './normalizeWaterHeaterForm';
+import {
+  DEFAULT_HYDRAULICS_FORM,
+  type HydraulicsFormValue,
+} from '../types/hydraulics';
 
 const SURVEY_STEPS: readonly SurveyCurrentStep[] = [
   'object',
@@ -122,6 +126,28 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
     ufhPresetId: (() => {
       const id = String(raw.ufhPresetId ?? '').trim();
       return isUfhModePresetId(id) ? id : null;
+    })(),
+    hydraulicsForm: (() => {
+      if (!isRecord(raw.hydraulicsForm)) {
+        return { ...DEFAULT_HYDRAULICS_FORM };
+      }
+      const h = raw.hydraulicsForm;
+      const prefRaw = h.pipeMaterialPreference;
+      const pipeMaterialPreference: HydraulicsFormValue['pipeMaterialPreference'] =
+        prefRaw === 'pex' || prefRaw === 'metal_plastic' || prefRaw === 'steel'
+          ? prefRaw
+          : '';
+      return {
+        mainLineLengthM:
+          typeof h.mainLineLengthM === 'number' && h.mainLineLengthM >= 0
+            ? h.mainLineLengthM
+            : DEFAULT_HYDRAULICS_FORM.mainLineLengthM,
+        deltaTSystemK:
+          typeof h.deltaTSystemK === 'number' && h.deltaTSystemK > 0
+            ? h.deltaTSystemK
+            : DEFAULT_HYDRAULICS_FORM.deltaTSystemK,
+        pipeMaterialPreference,
+      } satisfies HydraulicsFormValue;
     })(),
     lastCalcReport: (isRecord(raw.lastCalcReport)
       ? raw.lastCalcReport

@@ -45,12 +45,19 @@ export function RecommendationsBlock({
   catalogSnapError,
   onRetryLoadCatalog,
   onApplyScheme,
-  apiHydraulicsProposalFromReport,
+  apiHydraulicsFromReport,
+  calcLoading = false,
 }: RecommendationsBlockProps) {
   return (
     <aside className={[styles.root, className].filter(Boolean).join(' ')}>
       <section aria-labelledby="calculation-results-title">
         <h2 id="calculation-results-title">Результаты расчета</h2>
+
+        {calcLoading && (
+          <p className={styles.hint} role="status" aria-live="polite">
+            Обновление расчёта на сервере…
+          </p>
+        )}
 
         {apiAutomationHints.length > 0 && (
           <div className={styles.boilerCalcSummary} role="status" aria-live="polite">
@@ -169,9 +176,40 @@ export function RecommendationsBlock({
                     <dd>{room.basePresetName}</dd>
                     <dt>Покрытие</dt>
                     <dd>{room.finishMaterialName}</dd>
+                    {room.heatedAreaM2 != null && room.heatedAreaM2 > 0 && (
+                      <>
+                        <dt>S_акт (пол под ТП)</dt>
+                        <dd>
+                          {room.heatedAreaM2.toFixed(1)} <span>м²</span>
+                          {room.furnitureOccupiedAreaM2 != null && room.furnitureOccupiedAreaM2 > 0 && (
+                            <span className={styles.radiatorsTotalSource}>
+                              {' '}
+                              (мебель {room.furnitureOccupiedAreaM2.toFixed(1)} м²
+                              {room.roomAreaM2 != null ? ` из ${room.roomAreaM2.toFixed(1)} м²` : ''})
+                            </span>
+                          )}
+                        </dd>
+                      </>
+                    )}
+                    {room.requiredHeatFluxUpWm2 != null && room.requiredHeatFluxUpWm2 > 0 && (
+                      <>
+                        <dt>q_треб (на S_акт)</dt>
+                        <dd>
+                          {formatHeatFluxWm2(room.requiredHeatFluxUpWm2)} <span>Вт/м²</span>
+                        </dd>
+                      </>
+                    )}
                     <dt>Шаг укладки</dt>
                     <dd>
                       {room.pipeSpacingMm} <span>мм</span>
+                      {room.requestedPipeSpacingMm != null
+                        && room.resolvedPipeSpacingMm != null
+                        && room.requestedPipeSpacingMm !== room.resolvedPipeSpacingMm && (
+                          <span className={styles.radiatorsTotalSource}>
+                            {' '}
+                            (запрошено {room.requestedPipeSpacingMm} мм)
+                          </span>
+                        )}
                       <span className={styles.radiatorsTotalSource}>
                         {' '}
                         (R_embed {room.pipeEmbedmentResistanceM2KW.toFixed(3)} м²·K/Вт)
@@ -265,10 +303,13 @@ export function RecommendationsBlock({
             </div>
           )}
 
+        <div className={styles.summaryGroup} aria-labelledby="hydraulics-proposal-title">
           <HydraulicsProposalSection
-            proposal={apiHydraulicsProposalFromReport ?? null}
+            hydraulics={apiHydraulicsFromReport ?? null}
             catalogSource={apiCatalogSource}
+            calcLoading={calcLoading}
           />
+        </div>
 
         {/* Группа: Водоснабжение */}
         <div className={styles.summaryGroup} aria-labelledby="hotWater-title">
@@ -363,6 +404,32 @@ export function RecommendationsBlock({
               <>
                 <dt>Модель радиатора (подбор)</dt>
                 <dd>{apiRadiatorsFromReport.chosenModel}</dd>
+              </>
+            )}
+
+            {apiRadiatorsFromReport?.inputs != null
+              && (apiRadiatorsFromReport.inputs.supplyC != null
+                || apiRadiatorsFromReport.inputs.flowDeltaTK != null) && (
+              <>
+                <dt>График / Δt расхода радиаторов</dt>
+                <dd>
+                  {apiRadiatorsFromReport.inputs.supplyC != null
+                    && apiRadiatorsFromReport.inputs.returnC != null
+                    ? `${apiRadiatorsFromReport.inputs.supplyC}/${apiRadiatorsFromReport.inputs.returnC} °C`
+                    : '—'}
+                  {apiRadiatorsFromReport.inputs.thermalRegimeDeltaTK != null && (
+                    <span className={styles.radiatorsTotalSource}>
+                      {' '}
+                      · Δt графика {apiRadiatorsFromReport.inputs.thermalRegimeDeltaTK} K
+                    </span>
+                  )}
+                  {apiRadiatorsFromReport.inputs.flowDeltaTK != null && (
+                    <span className={styles.radiatorsTotalSource}>
+                      {' '}
+                      · Δt расхода {apiRadiatorsFromReport.inputs.flowDeltaTK} K
+                    </span>
+                  )}
+                </dd>
               </>
             )}
 

@@ -103,7 +103,6 @@ export function useSurveyCalcRunner({
       const payloadKey = JSON.stringify(payload);
       if (payloadKey === lastSentPayloadKeyRef.current) return;
 
-      setCalcReport(null);
       setCalcError(null);
       void executeCalcRequest();
     }, SURVEY_CALC_DEBOUNCE_MS);
@@ -115,10 +114,16 @@ export function useSurveyCalcRunner({
 
   const runApiCalc = useCallback(async () => {
     clearDebounceTimer();
-    setCalcReport(null);
+    lastSentPayloadKeyRef.current = null;
     setCalcError(null);
     await executeCalcRequest();
   }, [clearDebounceTimer, executeCalcRequest]);
+
+  /** Сброс dedup-кэша и debounce-пересчёт (после загрузки черновика / смены API). */
+  const scheduleFreshCalc = useCallback(() => {
+    lastSentPayloadKeyRef.current = null;
+    scheduleAutoCalc();
+  }, [scheduleAutoCalc]);
 
   useEffect(() => () => clearDebounceTimer(), [clearDebounceTimer]);
 
@@ -133,6 +138,9 @@ export function useSurveyCalcRunner({
     const isFirstRun = prevCalcInputKeyRef.current === null;
     if (isFirstRun) {
       prevCalcInputKeyRef.current = calcInputKey;
+      if (canAutoCalc && !isDraftInitializingRef.current) {
+        scheduleAutoCalcRef.current();
+      }
       return;
     }
 
@@ -165,5 +173,6 @@ export function useSurveyCalcRunner({
     endDraftInitialization,
     restoreCalcReport,
     runApiCalc,
+    scheduleFreshCalc,
   };
 }

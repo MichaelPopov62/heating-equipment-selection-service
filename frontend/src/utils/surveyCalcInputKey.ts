@@ -95,6 +95,7 @@ export function buildSurveyCalcInputKey(params: {
               || r.underfloorHeating.pipeSpacingMm === 200
                 ? r.underfloorHeating.pipeSpacingMm
                 : 150,
+            furnitureOccupiedAreaM2: r.underfloorHeating.furnitureOccupiedAreaM2,
           }
         : undefined,
     })),

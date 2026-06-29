@@ -59,6 +59,11 @@ export function buildWarmFloorCalcMatchingNotes(report) {
  * @returns {Record<string, string | number | undefined>}
  */
 function recommendationVarsForRoom(room) {
+  const coveragePercent =
+    typeof room.heatFluxCoverageRatio === 'number'
+      ? Math.round(room.heatFluxCoverageRatio * 100)
+      : undefined;
+
   return {
     roomName: room.roomName,
     surfaceTempC: room.surfaceTempC,
@@ -70,7 +75,16 @@ function recommendationVarsForRoom(room) {
     heatFluxUpWm2: room.heatFluxUpWm2,
     maxAllowableHeatFluxUpWm2: room.maxAllowableHeatFluxUpWm2,
     pipeSpacingMm: room.pipeSpacingMm,
+    requestedPipeSpacingMm: room.requestedPipeSpacingMm,
+    resolvedPipeSpacingMm: room.resolvedPipeSpacingMm,
     suggestedPipeSpacingMm: SUGGESTED_MAX_PIPE_SPACING_MM,
+    roomAreaM2: room.roomAreaM2,
+    furnitureOccupiedAreaM2: room.furnitureOccupiedAreaM2,
+    heatedAreaM2: room.heatedAreaM2,
+    requiredHeatFluxUpWm2: room.requiredHeatFluxUpWm2,
+    heatFluxUpWatts: room.heatFluxUpWatts,
+    roomHeatLossWatts: room.roomHeatLossWatts,
+    coveragePercent,
   };
 }
 
@@ -108,6 +122,52 @@ export function applyUnderfloorHeatingRecommendations(report, recommendations) {
 
   for (const room of report.rooms) {
     const vars = recommendationVarsForRoom(room);
+
+    if (room.activeAreaCheckStatus === 'zero_heated_area') {
+      pushUfhRecommendation(
+        room,
+        warnings,
+        resolvedRecommendations,
+        recommendations,
+        'WARN_UFH_HEATED_AREA_ZERO',
+        vars,
+      );
+    } else if (room.activeAreaCheckStatus === 'insufficient_active_area') {
+      pushUfhRecommendation(
+        room,
+        warnings,
+        resolvedRecommendations,
+        recommendations,
+        'WARN_UFH_ACTIVE_AREA_INSUFFICIENT',
+        vars,
+      );
+    }
+
+    if (room.heatFluxCoverageStatus === 'low') {
+      pushUfhRecommendation(
+        room,
+        warnings,
+        resolvedRecommendations,
+        recommendations,
+        'WARN_UFH_COVERAGE_LOW',
+        vars,
+      );
+    }
+
+    if (
+      room.pipeSpacingResolution === 'tightened'
+      && typeof room.requestedPipeSpacingMm === 'number'
+      && typeof room.resolvedPipeSpacingMm === 'number'
+      && room.requestedPipeSpacingMm !== room.resolvedPipeSpacingMm
+    ) {
+      pushRecommendation(
+        warnings,
+        resolvedRecommendations,
+        recommendations,
+        'REC_UFH_PIPE_SPACING_AUTO',
+        vars,
+      );
+    }
 
     const presetMax = room.presetMaxSurfaceTemperatureCelsius;
     const finishMax = room.finishMaxSurfaceTemperatureCelsius;

@@ -4,6 +4,7 @@
  * панельных SKU и предупреждений; внутренняя реализация pickRadiators.
  */
 import { round } from '../../utils/math.js';
+import { resolveFlowDeltaTK } from '../../hydraulics/resolveFlowDeltaTK.js';
 import { thermalLoadToFlow } from '../../hydraulics/thermalLoadToFlow.js';
 import { logger } from '../../utils/logger.js';
 import { buildWarmFloorMatchingNotes } from '../warmFloor.js';
@@ -321,6 +322,7 @@ function pickRoomRadiatorSizing(args) {
  * @param {import('../types/boiler-types').BoilerMatchingReport | null} [args.boilerMatching]
  * @param {'economy' | 'efficient' | null} [args.radiatorLineTier] лінія «Економ» / «Ефективний» (фіксований графік)
  * @param {import('../types/shared-types').UnderfloorHeatingReport | null} [args.underfloorHeating]
+ * @param {number | undefined} [args.deltaTSystemK] — input.hydraulics.deltaTSystemK для расхода Q
  * @returns {import('../types/shared-types').RadiatorsMatchingReport}
  */
 export function pickRadiators({
@@ -332,6 +334,7 @@ export function pickRadiators({
   boilerMatching = null,
   radiatorLineTier = null,
   underfloorHeating = null,
+  deltaTSystemK,
 } = {}) {
   const supplyC = heatingSystem.supplyC ?? 75;
   const returnC = heatingSystem.returnC ?? 65;
@@ -360,7 +363,7 @@ export function pickRadiators({
   );
 
   const targetDeltaT = deltaTmeanK({ supplyC, returnC, insideC });
-  const radiatorDeltaTK = Math.max(0.1, supplyC - returnC);
+  const flowDeltaTK = resolveFlowDeltaTK({ deltaTSystemK, supplyC, returnC });
   /**
    * @param {number} watts
    * @returns {number}
@@ -368,7 +371,7 @@ export function pickRadiators({
   const radiatorFlowM3h = (watts) =>
     thermalLoadToFlow({
       heatLoadWatts: watts,
-      deltaTK: radiatorDeltaTK,
+      deltaTK: flowDeltaTK,
     }).flowRateM3PerHour;
 
   logger.info('matching.radiators.start', null, {
@@ -662,6 +665,10 @@ export function pickRadiators({
       insideC,
       baseDeltaT,
       targetDeltaT: round(targetDeltaT, 1),
+      flowDeltaTK,
+      ...(typeof deltaTSystemK === 'number' && deltaTSystemK > 0
+        ? { deltaTSystemK }
+        : {}),
       ventilationReserveFactor,
       radiatorSizingAlignedWithCondensing: hasEfficientProposal,
       heatingDistribution,

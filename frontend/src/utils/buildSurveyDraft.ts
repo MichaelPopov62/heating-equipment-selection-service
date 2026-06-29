@@ -16,6 +16,8 @@ import {
   type SurveyDraft,
 } from '../types/surveyDraft';
 import type { SurveyCurrentStep } from '../types/surveyStep';
+import type { HydraulicsFormValue } from '../types/hydraulics';
+import { DEFAULT_HYDRAULICS_FORM } from '../types/hydraulics';
 
 export function buildSurveyDraft(params: {
   clientName: string;
@@ -30,6 +32,7 @@ export function buildSurveyDraft(params: {
   underfloorDistributionPreset: UfhDistributionPreset;
   thermalRegimePreset: HeatingThermalRegimePreset;
   ufhPresetId?: UfhModePresetId | null;
+  hydraulicsForm?: HydraulicsFormValue;
   lastCalcReport?: CalcReportJson | null;
 }): SurveyDraft {
   const name = params.clientName.trim() || 'Без имени';
@@ -48,6 +51,7 @@ export function buildSurveyDraft(params: {
     underfloorDistributionPreset: params.underfloorDistributionPreset,
     thermalRegimePreset: params.thermalRegimePreset,
     ufhPresetId: params.ufhPresetId ?? null,
+    hydraulicsForm: structuredClone(params.hydraulicsForm ?? DEFAULT_HYDRAULICS_FORM),
     lastCalcReport: params.lastCalcReport ?? null,
   };
 }

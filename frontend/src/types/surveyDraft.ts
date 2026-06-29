@@ -12,6 +12,7 @@ import type { HotWaterFormValue } from './hotWater';
 import type { RoomFormValue } from './rooms';
 import type { SurveyCurrentStep } from './surveyStep';
 import type { WaterHeaterFormValue } from './waterHeater';
+import type { HydraulicsFormValue } from './hydraulics';
 
 /** Единственный контракт черновика survey (увеличивать при несовместимых изменениях). */
 export const SURVEY_DRAFT_SCHEMA_VERSION = 3;
@@ -32,6 +33,8 @@ export type SurveyDraft = {
   underfloorDistributionPreset: UfhDistributionPreset;
   thermalRegimePreset: HeatingThermalRegimePreset;
   ufhPresetId?: UfhModePresetId | null;
+  /** Шаг «Гидравлика» (ΔT расхода, длина магистрали, материал). */
+  hydraulicsForm?: HydraulicsFormValue;
   /** Последний отчёт (в ссылку URL не кладём — слишком большой). */
   lastCalcReport?: CalcReportJson | null;
 };

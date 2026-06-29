@@ -223,11 +223,31 @@ function parseRoomRow(item: unknown): ParsedUnderfloorHeatingRoom | null {
   );
   const loopHydraulicsAppliedFix = parseLoopAppliedFix(item.loopHydraulicsAppliedFix);
 
+  const readOptionalNumber = (key: string): number | undefined => {
+    const raw = item[key];
+    return typeof raw === 'number' && Number.isFinite(raw) ? raw : undefined;
+  };
+
+  const pipeSpacingResolutionRaw = item.pipeSpacingResolution;
+  const pipeSpacingResolution =
+    pipeSpacingResolutionRaw === 'matched_requested'
+    || pipeSpacingResolutionRaw === 'tightened'
+    || pipeSpacingResolutionRaw === 'none_sufficient'
+      ? pipeSpacingResolutionRaw
+      : undefined;
+
   return {
     roomId,
     roomName,
     basePresetName,
     finishMaterialName,
+    roomAreaM2: readOptionalNumber('roomAreaM2'),
+    furnitureOccupiedAreaM2: readOptionalNumber('furnitureOccupiedAreaM2'),
+    heatedAreaM2: readOptionalNumber('heatedAreaM2'),
+    requiredHeatFluxUpWm2: readOptionalNumber('requiredHeatFluxUpWm2'),
+    requestedPipeSpacingMm: readOptionalNumber('requestedPipeSpacingMm'),
+    resolvedPipeSpacingMm: readOptionalNumber('resolvedPipeSpacingMm'),
+    ...(pipeSpacingResolution ? { pipeSpacingResolution } : {}),
     heatFluxUpWm2: item.heatFluxUpWm2 as number,
     heatFluxDownWm2: item.heatFluxDownWm2 as number,
     maxAllowableHeatFluxUpWm2,

@@ -1,7 +1,10 @@
 /**
  * Назначение: cross-validation режима контуров HydraulicsPipelineInput.
- * Описание: Дополняет AJV — режим emitters vs наличие radiators/underfloor.
+ * Описание: Дополняет AJV — режим emitters vs наличие radiators/underfloor; согласованность Q.
  */
+
+import { thermalLoadToFlow } from './thermalLoadToFlow.js';
+import { round } from '../utils/math.js';
 
 /**
  * @param {import('./types').HydraulicsPipelineInput} dto
@@ -47,6 +50,38 @@ export function crossValidateHydraulicsPipelineInput(dto) {
       throw validationError(
         `radiators consumer ${c.roomId}: flowRateM3PerHour обязателен при heatLoadWatts > 0`,
         `circuits.radiators.consumers`,
+      );
+    }
+  }
+
+  const radCircuit = dto.circuits.radiators;
+  if (radCircuit?.consumers?.length && radCircuit.flowDeltaTK > 0) {
+    const flowDt = radCircuit.flowDeltaTK;
+    for (const c of radCircuit.consumers) {
+      if (c.heatLoadWatts <= 0 || c.flowRateM3PerHour <= 0) continue;
+      const expected = thermalLoadToFlow({
+        heatLoadWatts: c.heatLoadWatts,
+        deltaTK: flowDt,
+      }).flowRateM3PerHour;
+      const relErr = Math.abs(c.flowRateM3PerHour - expected) / expected;
+      if (relErr > 0.02) {
+        throw validationError(
+          `radiators consumer ${c.roomId}: flowRateM3PerHour ${c.flowRateM3PerHour} не согласован с flowDeltaTK=${flowDt} (ожид. ≈${expected})`,
+          'circuits.radiators.consumers',
+        );
+      }
+    }
+    const sumConsumers = round(
+      radCircuit.consumers.reduce((s, c) => s + c.flowRateM3PerHour, 0),
+      3,
+    );
+    if (
+      radCircuit.totalFlowRateM3PerHour > 0
+      && Math.abs(sumConsumers - radCircuit.totalFlowRateM3PerHour) > 0.002
+    ) {
+      throw validationError(
+        `radiators totalFlowRateM3PerHour (${radCircuit.totalFlowRateM3PerHour}) ≠ sum(consumers) (${sumConsumers})`,
+        'circuits.radiators.totalFlowRateM3PerHour',
       );
     }
   }

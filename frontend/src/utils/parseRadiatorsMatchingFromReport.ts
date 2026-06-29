@@ -34,6 +34,13 @@ export type ParsedRadiatorsMatching = {
   warnings: string[];
   lineEconomy: RadiatorsProposalLineView | null;
   lineEfficient: RadiatorsProposalLineView | null;
+  /** Входные параметры подбора (график и ΔT расхода). */
+  inputs: {
+    supplyC: number | null;
+    returnC: number | null;
+    flowDeltaTK: number | null;
+    thermalRegimeDeltaTK: number | null;
+  } | null;
 };
 
 function parseByRoomRows(byRoomRaw: unknown): RadiatorsByRoomRow[] {
@@ -119,6 +126,28 @@ export function parseRadiatorsMatchingFromReport(
   const totalSections = totalFromByRoom(byRoom);
   const warnings = readStringArray(radiators.warnings);
 
+  const inputsRaw = isRecord(radiators.inputs) ? radiators.inputs : null;
+  let inputs: ParsedRadiatorsMatching['inputs'] = null;
+  if (inputsRaw) {
+    const supplyC =
+      typeof inputsRaw.supplyC === 'number' && Number.isFinite(inputsRaw.supplyC)
+        ? inputsRaw.supplyC
+        : null;
+    const returnC =
+      typeof inputsRaw.returnC === 'number' && Number.isFinite(inputsRaw.returnC)
+        ? inputsRaw.returnC
+        : null;
+    const flowDeltaTK =
+      typeof inputsRaw.flowDeltaTK === 'number' && Number.isFinite(inputsRaw.flowDeltaTK)
+        ? inputsRaw.flowDeltaTK
+        : null;
+    const thermalRegimeDeltaTK =
+      supplyC != null && returnC != null
+        ? Math.round((supplyC - returnC) * 100) / 100
+        : null;
+    inputs = { supplyC, returnC, flowDeltaTK, thermalRegimeDeltaTK };
+  }
+
   return {
     chosenModel,
     byRoom,
@@ -126,5 +155,6 @@ export function parseRadiatorsMatchingFromReport(
     warnings,
     lineEconomy: parseProposalLine(radiators.lineEconomy, 'economy'),
     lineEfficient: parseProposalLine(radiators.lineEfficient, 'efficient'),
+    inputs,
   };
 }

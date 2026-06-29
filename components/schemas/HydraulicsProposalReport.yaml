@@ -144,6 +144,9 @@ definitions:
       pressureDropKPa: { type: number }
       pricePerMeter: { type: number }
       linePrice: { type: number }
+      velocityLimitExceeded:
+        type: boolean
+        description: Превышение лимита скорости — подобран max Ø каталога.
   PumpProposal:
     type: object
     additionalProperties: false

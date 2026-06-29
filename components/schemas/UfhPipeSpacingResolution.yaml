@@ -1,0 +1,10 @@
+type: string
+enum:
+  - matched_requested
+  - tightened
+  - none_sufficient
+description: |
+  Результат авто-подбора шага укладки (вариант B).
+  matched_requested — запрошенный шаг достаточен;
+  tightened — применён меньший шаг;
+  none_sufficient — даже 100 мм не покрывает q_треб в пределах лимита поверхности.

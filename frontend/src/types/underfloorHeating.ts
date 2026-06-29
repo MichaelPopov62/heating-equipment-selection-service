@@ -52,11 +52,23 @@ export type ParsedUfhLoopHydraulics = {
   warnings: string[];
 };
 
+export type UfhPipeSpacingResolution =
+  | 'matched_requested'
+  | 'tightened'
+  | 'none_sufficient';
+
 export type ParsedUnderfloorHeatingRoom = {
   roomId: string;
   roomName: string;
   basePresetName: string;
   finishMaterialName: string;
+  roomAreaM2?: number;
+  furnitureOccupiedAreaM2?: number;
+  heatedAreaM2?: number;
+  requiredHeatFluxUpWm2?: number;
+  requestedPipeSpacingMm?: number;
+  resolvedPipeSpacingMm?: number;
+  pipeSpacingResolution?: UfhPipeSpacingResolution;
   heatFluxUpWm2: number;
   heatFluxDownWm2: number;
   maxAllowableHeatFluxUpWm2: number;

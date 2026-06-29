@@ -13,11 +13,20 @@ properties:
     type: string
     minLength: 1
     description: id финиша из GET /api/v1/presets/flooring-finishes
+  furnitureOccupiedAreaM2:
+    type: number
+    minimum: 0
+    default: 0
+    description: |
+      Площадь пола под мебелью без укладки ТП (S_meb), м².
+      Активная зона S_акт = areaM2 комнаты − S_meb. Должно быть строго меньше areaM2.
   pipeSpacingMm:
     type: integer
     enum: [100, 150, 200]
     default: 150
-    description: Шаг укладки трубы, мм; влияет на R_embed в R↑
+    description: |
+      Желаемый шаг укладки трубы, мм (requestedPipeSpacingMm).
+      Сервер может подобрать меньший шаг (resolvedPipeSpacingMm) для покрытия q_треб.
   presetId:
     type: string
     description: Устаревшее монолитное поле; мигрируется на сервере в basePresetId + finishMaterialId

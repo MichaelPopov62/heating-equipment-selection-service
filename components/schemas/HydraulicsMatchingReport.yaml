@@ -15,6 +15,9 @@ properties:
         velocityMps: { type: number }
         pressureDropKPa: { type: number }
         internalDiameterMm: { type: number }
+        velocityLimitExceeded:
+          type: boolean
+          description: true — ни одна труба каталога не уложилась в vMax; подобран max Ø с превышением скорости.
   topology:
     type: string
     enum: [direct, mixing_valve, hydraulic_separator]
