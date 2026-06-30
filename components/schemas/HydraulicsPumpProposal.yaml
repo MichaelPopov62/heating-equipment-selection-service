@@ -1,0 +1,40 @@
+type: object
+description: Насос в коммерческом предложении по гидравлике.
+additionalProperties: false
+required:
+  - zoneId
+  - zoneLabel
+  - pumpRole
+  - pumpSource
+  - brand
+  - model
+  - price
+  - modeName
+  - headAtDesignM
+  - headRequiredM
+  - designFlowM3PerHour
+  - headMarginPercent
+properties:
+  zoneId: { type: string }
+  zoneLabel: { type: string }
+  pumpRole:
+    type: string
+    enum: [main, zone, dhw]
+  pumpSource:
+    type: string
+    enum: [catalog, boiler_builtin]
+  catalogPumpId: { type: string }
+  catalogBoilerId: { type: string }
+  brand: { type: string }
+  model: { type: string }
+  segment:
+    type: string
+    enum: [premium, medium, budget]
+  price: { type: number }
+  modeName: { type: string }
+  headAtDesignM: { type: number }
+  headRequiredM: { type: number }
+  designFlowM3PerHour: { type: number }
+  headMarginPercent: { type: number }
+  connectionNominalMm: { type: number }
+  note: { type: string }

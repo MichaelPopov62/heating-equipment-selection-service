@@ -87,13 +87,20 @@
   },
   {
     "applianceKind": "hydraulics",
-    "schemaVersion": 2,
+    "schemaVersion": 3,
     "isActive": true,
     "label": "Гидравлика — пороги расчёта и дефолты длин",
     "velocityLimitsMps": {
       "mainMax": 0.8,
       "branchMax": 0.5,
-      "mainMin": 0.2
+      "mainMin": 0.2,
+      "branchMin": 0
+    },
+    "radiatorBranchGrouping": {
+      "minFlowM3PerHourForIndividualBranch": 0.019,
+      "minHeatLoadWattsForIndividualBranch": 150,
+      "manifoldTrunkLengthM": 2,
+      "localZetaManifold": 1.5
     },
     "defaultLengthsM": {
       "mainLine": 8,

@@ -357,9 +357,21 @@ function ProposalContent({
               {proposal.pipeSegments.map((seg) => (
                 <tr
                   key={seg.edgeId}
-                  className={seg.velocityLimitExceeded ? styles.segmentRowWarning : undefined}
+                  className={
+                    seg.velocityLimitExceeded || seg.velocityBelowMin
+                      ? styles.segmentRowWarning
+                      : undefined
+                  }
                 >
-                  <td>{seg.segmentLabel}</td>
+                  <td>
+                    {seg.segmentLabel}
+                    {seg.groupedRoomIds && seg.groupedRoomIds.length > 0 ? (
+                      <span className={styles.hintInline}>
+                        {' '}
+                        (коллектор: {seg.groupedRoomIds.join(', ')})
+                      </span>
+                    ) : null}
+                  </td>
                   <td>{segmentRoleLabel(seg.segmentRole)}</td>
                   <td>
                     {seg.lengthM.toFixed(1)} <span className={styles.unit}>м</span>
@@ -369,6 +381,9 @@ function ProposalContent({
                     {seg.velocityMps.toFixed(2)} <span className={styles.unit}>м/с</span>
                     {seg.velocityLimitExceeded ? (
                       <span className={styles.hintInline}> (выше нормы)</span>
+                    ) : null}
+                    {seg.velocityBelowMin ? (
+                      <span className={styles.hintInline}> (ниже нормы)</span>
                     ) : null}
                   </td>
                   <td>

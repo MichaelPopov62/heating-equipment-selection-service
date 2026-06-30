@@ -118,6 +118,10 @@ function parsePipeSegment(raw: unknown): ParsedHydraulicsPipeSegment | null {
     pricePerMeter: num(p.pricePerMeter),
     linePrice: num(p.linePrice),
     ...(p.velocityLimitExceeded === true ? { velocityLimitExceeded: true } : {}),
+    ...(p.velocityBelowMin === true ? { velocityBelowMin: true } : {}),
+    ...(Array.isArray(p.groupedRoomIds) && p.groupedRoomIds.length
+      ? { groupedRoomIds: p.groupedRoomIds.map((id) => str(id)) }
+      : {}),
   };
 }
 

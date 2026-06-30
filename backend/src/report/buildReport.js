@@ -39,7 +39,7 @@ import {
 } from '../../../shared/heatingMatchingSchemes.js';
 
 /**
- * Структурированные WARN_* по превышению скорости в трубах pipeline.
+ * Структурированные WARN_* / REC_* по подбору труб pipeline.
  * @param {object} args
  * @param {import('../hydraulics/types').HydraulicsMatchingReport} args.hydraulicsMatching
  * @param {import('../types/shared-types').HydraulicsReport} args.hydraulics
@@ -48,7 +48,7 @@ import {
  * @param {import('../recommendations/types').RecommendationsBundle} args.recommendations
  * @returns {import('../recommendations/types').ResolvedRecommendation[]}
  */
-function applyHydraulicsVelocityRecommendations({
+function applyHydraulicsPipeRecommendations({
   hydraulicsMatching,
   hydraulics,
   hydraulicsRules,
@@ -60,26 +60,68 @@ function applyHydraulicsVelocityRecommendations({
   const edgesById = new Map(
     (hydraulics.graph?.edges ?? []).map((edge) => [edge.id, edge]),
   );
+  const nodesById = new Map(
+    (hydraulics.graph?.nodes ?? []).map((node) => [node.id, node]),
+  );
+
   for (const pipe of hydraulicsMatching.pipes ?? []) {
-    if (!pipe.velocityLimitExceeded) continue;
     const edge = edgesById.get(pipe.edgeId);
     const vMax =
       edge?.segmentRole === 'main'
         ? hydraulicsRules.velocityLimitsMps.mainMax
         : hydraulicsRules.velocityLimitsMps.branchMax;
+    const vMin =
+      edge?.segmentRole === 'main'
+        ? hydraulicsRules.velocityLimitsMps.mainMin
+        : (hydraulicsRules.velocityLimitsMps.branchMin ?? 0);
+
+    if (pipe.velocityLimitExceeded) {
+      pushRecommendation(
+        warnings,
+        resolved,
+        recommendations,
+        'WARN_PIPE_VELOCITY_EXCEEDED',
+        {
+          edgeId: pipe.edgeId,
+          velocityMps: Math.round(pipe.velocityMps * 100) / 100,
+          velocityMaxMps: vMax,
+          catalogPipeId: pipe.catalogPipeId,
+        },
+      );
+    } else if (pipe.velocityBelowMin) {
+      pushRecommendation(
+        warnings,
+        resolved,
+        recommendations,
+        'WARN_PIPE_VELOCITY_BELOW_MIN',
+        {
+          edgeId: pipe.edgeId,
+          velocityMps: Math.round(pipe.velocityMps * 100) / 100,
+          velocityMinMps: vMin,
+          catalogPipeId: pipe.catalogPipeId,
+        },
+      );
+    }
+  }
+
+  for (const node of nodesById.values()) {
+    if (node.kind !== 'radiator_manifold' || !node.roomIds?.length) continue;
+    const manifoldEdge = (hydraulics.graph?.edges ?? []).find(
+      (e) => e.to === node.id && e.segmentRole === 'branch',
+    );
     pushRecommendation(
       warnings,
       resolved,
       recommendations,
-      'WARN_PIPE_VELOCITY_EXCEEDED',
+      'REC_RADIATOR_MICRO_BRANCH_MANIFOLD',
       {
-        edgeId: pipe.edgeId,
-        velocityMps: Math.round(pipe.velocityMps * 100) / 100,
-        velocityMaxMps: vMax,
-        catalogPipeId: pipe.catalogPipeId,
+        roomCount: node.roomIds.length,
+        roomNames: node.label,
+        totalFlowM3PerHour: manifoldEdge?.designFlowM3PerHour ?? 0,
       },
     );
   }
+
   return resolved;
 }
 
@@ -394,7 +436,7 @@ export async function buildReport({ input, ctx }) {
     });
     hydraulics = pipelineResult.hydraulics;
     matching.hydraulics = pipelineResult.hydraulicsMatching;
-    const hydraulicsResolved = applyHydraulicsVelocityRecommendations({
+    const hydraulicsResolved = applyHydraulicsPipeRecommendations({
       hydraulicsMatching: pipelineResult.hydraulicsMatching,
       hydraulics: pipelineResult.hydraulics,
       hydraulicsRules: appliances.byKind.hydraulics,

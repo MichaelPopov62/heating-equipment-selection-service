@@ -1,17 +1,96 @@
 /**
  * Назначение: подбор трубы из каталога по расходу и скорости.
- * Описание: Минимальный Ø при v ≤ vMax; диаметры только на выходе matching.
+ * Описание: Минимальный Ø при v ≤ vMax; fallback вверх при перегрузке, вниз при микропотоке.
  */
 
 import {
   computeSegmentHydraulics,
   pipeInternalDiameterMm,
-  pipeMeetsVelocityLimit,
+  pipeVelocityMps,
+  pickLargestPipe,
+  pickSmallestPipe,
+  pickSmallestPipeWithinVelocityRange,
   resolveRoughnessMm,
+  resolveVelocityMinMps,
 } from './pipeHydraulics.js';
+import { RAD_MICRO_MANIFOLD_NODE_ID } from './groupRadiatorGraphBranches.js';
 
 /**
- * Подбор конкретной трубы из каталога по id (для петель ТП после ufhLoopHydraulics).
+ * @param {'main' | 'branch' | 'ufh_loop' | 'dhw'} segmentRole
+ * @param {import('./types').HydraulicsRules} rules
+ * @returns {number}
+ */
+function resolveVelocityMaxMps(segmentRole, rules) {
+  return segmentRole === 'main'
+    ? rules.velocityLimitsMps.mainMax
+    : rules.velocityLimitsMps.branchMax;
+}
+
+/**
+ * @param {import('../catalog/types').PipeCatalogItemNormalized[]} pipes
+ * @param {import('./types').HydraulicsSurveyInput['pipeMaterialPreference']} [materialPreference]
+ * @returns {import('../catalog/types').PipeCatalogItemNormalized[]}
+ */
+function filterPipePool(pipes, materialPreference) {
+  /** @type {import('../catalog/types').PipeCatalogItemNormalized[]} */
+  let pool = [...pipes];
+
+  if (materialPreference) {
+    const pref = materialPreference.toLowerCase();
+    const filtered = pool.filter((p) => {
+      const m = String(p.material ?? '').toLowerCase();
+      if (pref === 'pex') return m.includes('pex');
+      if (pref === 'metal_plastic') {
+        return m.includes('metal') || m.includes('pex-al') || m.includes('ал');
+      }
+      if (pref === 'steel') return m.includes('steel') || m.includes('сталь');
+      return true;
+    });
+    if (filtered.length) pool = filtered;
+  }
+
+  pool.sort(
+    (a, b) => pipeInternalDiameterMm(a) - pipeInternalDiameterMm(b),
+  );
+  return pool;
+}
+
+/**
+ * @param {object} args
+ * @param {import('../catalog/types').PipeCatalogItemNormalized[]} args.pool
+ * @param {number} args.flowM3PerHour
+ * @param {number} args.vMax
+ * @param {number} args.vMin
+ * @returns {{
+ *   pipe: import('../catalog/types').PipeCatalogItemNormalized;
+ *   velocityLimitExceeded?: boolean;
+ *   velocityBelowMin?: boolean;
+ * }}
+ */
+function selectPipeFromPool({ pool, flowM3PerHour, vMax, vMin }) {
+  const withinRange = pickSmallestPipeWithinVelocityRange(
+    pool,
+    flowM3PerHour,
+    vMin,
+    vMax,
+  );
+  if (withinRange) {
+    return { pipe: withinRange };
+  }
+
+  const smallest = pickSmallestPipe(pool);
+  const largest = pickLargestPipe(pool);
+  if (!smallest || !largest) {
+    throw new Error('pickPipe: пустой пул каталога');
+  }
+
+  if (pipeVelocityMps(smallest, flowM3PerHour) > vMax) {
+    return { pipe: largest, velocityLimitExceeded: true };
+  }
+  return { pipe: smallest, velocityBelowMin: true };
+}
+
+/**
  * @param {object} args
  * @param {import('./types').HydraulicsGraphEdge} args.edge
  * @param {import('../catalog/types').NormalizedCatalog['pipes']} args.pipes
@@ -67,44 +146,17 @@ export function pickPipeForEdge({
 }) {
   if (!pipes?.length || edge.designFlowM3PerHour <= 0) return null;
 
-  const vMax =
-    edge.segmentRole === 'main'
-      ? rules.velocityLimitsMps.mainMax
-      : rules.velocityLimitsMps.branchMax;
+  const vMax = resolveVelocityMaxMps(edge.segmentRole, rules);
+  const vMin = resolveVelocityMinMps(edge.segmentRole, rules);
+  const pool = filterPipePool(pipes, materialPreference);
+  if (!pool.length) return null;
 
-  /** @type {import('../catalog/types').PipeCatalogItemNormalized[]} */
-  let pool = [...pipes];
-
-  if (materialPreference) {
-    const pref = materialPreference.toLowerCase();
-    const filtered = pool.filter((p) => {
-      const m = String(p.material ?? '').toLowerCase();
-      if (pref === 'pex') return m.includes('pex');
-      if (pref === 'metal_plastic') {
-        return m.includes('metal') || m.includes('pex-al') || m.includes('ал');
-      }
-      if (pref === 'steel') return m.includes('steel') || m.includes('сталь');
-      return true;
-    });
-    if (filtered.length) pool = filtered;
-  }
-
-  pool.sort(
-    (a, b) => pipeInternalDiameterMm(a) - pipeInternalDiameterMm(b),
-  );
-
-  /** @type {import('../catalog/types').PipeCatalogItemNormalized | null} */
-  let chosen = null;
-  for (const pipe of pool) {
-    if (pipeMeetsVelocityLimit(pipe, edge.designFlowM3PerHour, vMax)) {
-      chosen = pipe;
-      break;
-    }
-  }
-  if (!chosen && pool.length) {
-    chosen = pool[pool.length - 1];
-  }
-  if (!chosen) return null;
+  const { pipe: chosen, velocityLimitExceeded, velocityBelowMin } = selectPipeFromPool({
+    pool,
+    flowM3PerHour: edge.designFlowM3PerHour,
+    vMax,
+    vMin,
+  });
 
   const internalMm = pipeInternalDiameterMm(chosen);
   const roughness = resolveRoughnessMm(
@@ -119,8 +171,6 @@ export function pickPipeForEdge({
     localZeta,
   });
 
-  const velocityLimitExceeded = hyd.velocityMps > vMax;
-
   return {
     edgeId: edge.id,
     catalogPipeId: chosen.id,
@@ -128,7 +178,30 @@ export function pickPipeForEdge({
     pressureDropKPa: hyd.pressureDropKPa,
     internalDiameterMm: internalMm,
     ...(velocityLimitExceeded ? { velocityLimitExceeded: true } : {}),
+    ...(velocityBelowMin ? { velocityBelowMin: true } : {}),
   };
+}
+
+/**
+ * @param {import('./types').HydraulicsGraphEdge} edge
+ * @param {import('./types').HydraulicsRules} rules
+ * @param {import('./types').HydraulicsApplianceRules['localLossZeta']} zeta
+ * @returns {number}
+ */
+function resolveLocalZetaForEdge(edge, rules, zeta) {
+  let localZeta =
+    edge.segmentRole === 'ufh_loop'
+      ? zeta.collector + zeta.elbow90
+      : edge.segmentRole === 'branch'
+        ? zeta.teeBranch + zeta.elbow90
+        : edge.segmentRole === 'main'
+          ? zeta.elbow90
+          : 0;
+
+  if (edge.to === RAD_MICRO_MANIFOLD_NODE_ID) {
+    localZeta += rules.radiatorBranchGrouping.localZetaManifold;
+  }
+  return localZeta;
 }
 
 /**
@@ -146,14 +219,7 @@ export function pickPipesForGraph({ graph, catalog, dto }) {
   const zeta = dto.rules.localLossZeta;
 
   for (const edge of graph.edges) {
-    const localZeta =
-      edge.segmentRole === 'ufh_loop'
-        ? zeta.collector + zeta.elbow90
-        : edge.segmentRole === 'branch'
-          ? zeta.teeBranch + zeta.elbow90
-          : edge.segmentRole === 'main'
-            ? zeta.elbow90
-            : 0;
+    const localZeta = resolveLocalZetaForEdge(edge, dto.rules, zeta);
 
     const preferredId = edge.preferredCatalogPipeId;
     const match =
@@ -175,11 +241,17 @@ export function pickPipesForGraph({ graph, catalog, dto }) {
 
     if (match) {
       pipes.push(match);
-      const vMax =
-        edge.segmentRole === 'main'
-          ? dto.rules.velocityLimitsMps.mainMax
-          : dto.rules.velocityLimitsMps.branchMax;
-      if (match.velocityLimitExceeded || match.velocityMps > vMax) {
+      const vMax = resolveVelocityMaxMps(edge.segmentRole, dto.rules);
+      const vMin = resolveVelocityMinMps(edge.segmentRole, dto.rules);
+      if (match.velocityLimitExceeded) {
+        warnings.push(
+          `Участок ${edge.id}: скорость ${match.velocityMps} м/с выше лимита ${vMax} м/с — подобран максимальный Ø каталога.`,
+        );
+      } else if (match.velocityBelowMin) {
+        warnings.push(
+          `Участок ${edge.id}: скорость ${match.velocityMps} м/с ниже минимума ${vMin} м/с — подобран минимальный Ø.`,
+        );
+      } else if (match.velocityMps > vMax) {
         warnings.push(
           `Участок ${edge.id}: скорость ${match.velocityMps} м/с выше лимита ${vMax} м/с — проверьте каталог.`,
         );

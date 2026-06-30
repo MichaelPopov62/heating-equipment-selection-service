@@ -18,6 +18,9 @@ properties:
         velocityLimitExceeded:
           type: boolean
           description: true — ни одна труба каталога не уложилась в vMax; подобран max Ø с превышением скорости.
+        velocityBelowMin:
+          type: boolean
+          description: true — расход слишком мал для vMin; подобран min Ø каталога.
   topology:
     type: string
     enum: [direct, mixing_valve, hydraulic_separator]

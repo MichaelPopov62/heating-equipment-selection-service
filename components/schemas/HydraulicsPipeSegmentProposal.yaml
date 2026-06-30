@@ -1,0 +1,47 @@
+type: object
+description: Участок трубы в предложении по гидравлике (детализация по рёбрам графа).
+additionalProperties: false
+required:
+  - edgeId
+  - segmentLabel
+  - segmentRole
+  - lengthM
+  - catalogPipeId
+  - brand
+  - model
+  - material
+  - outerDiameterMm
+  - wallThicknessMm
+  - internalDiameterMm
+  - velocityMps
+  - pressureDropKPa
+  - pricePerMeter
+  - linePrice
+properties:
+  edgeId: { type: string }
+  segmentLabel: { type: string }
+  segmentRole:
+    type: string
+    enum: [main, branch, ufh_loop, dhw]
+  lengthM: { type: number }
+  catalogPipeId: { type: string }
+  brand: { type: string }
+  model: { type: string }
+  material: { type: string }
+  outerDiameterMm: { type: number }
+  wallThicknessMm: { type: number }
+  internalDiameterMm: { type: number }
+  velocityMps: { type: number }
+  pressureDropKPa: { type: number }
+  pricePerMeter: { type: number }
+  linePrice: { type: number }
+  velocityLimitExceeded:
+    type: boolean
+    description: Превышение лимита скорости — подобран max Ø каталога.
+  velocityBelowMin:
+    type: boolean
+    description: Скорость ниже минимума — подобран min Ø каталога.
+  groupedRoomIds:
+    type: array
+    items: { type: string }
+    description: Комнаты, объединённые в коллектор микроветок (radiator_manifold).

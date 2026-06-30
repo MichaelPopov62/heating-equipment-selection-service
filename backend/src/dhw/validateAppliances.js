@@ -271,7 +271,44 @@ function validateAndNormalizeApplianceDoc(doc) {
         mainMax: requirePosNum(vel, 'mainMax', `${basePath}.velocityLimitsMps`),
         branchMax: requirePosNum(vel, 'branchMax', `${basePath}.velocityLimitsMps`),
         mainMin: requirePosNum(vel, 'mainMin', `${basePath}.velocityLimitsMps`),
+        ...(vel.branchMin != null
+          ? {
+            branchMin: (() => {
+              const n = Number(vel.branchMin);
+              if (!Number.isFinite(n) || n < 0) {
+                throw new Error(`${basePath}.velocityLimitsMps.branchMin: число ≥ 0`);
+              }
+              return n;
+            })(),
+          }
+          : { branchMin: 0 }),
       },
+      radiatorBranchGrouping: (() => {
+        if (d.radiatorBranchGrouping == null) {
+          return {
+            minFlowM3PerHourForIndividualBranch: 0.019,
+            minHeatLoadWattsForIndividualBranch: 150,
+            manifoldTrunkLengthM: 2,
+            localZetaManifold: 1.5,
+          };
+        }
+        const g = requireObject(d, 'radiatorBranchGrouping', `${basePath}.radiatorBranchGrouping`);
+        const gp = `${basePath}.radiatorBranchGrouping`;
+        return {
+          minFlowM3PerHourForIndividualBranch: requirePosNum(
+            g,
+            'minFlowM3PerHourForIndividualBranch',
+            gp,
+          ),
+          minHeatLoadWattsForIndividualBranch: requirePosNum(
+            g,
+            'minHeatLoadWattsForIndividualBranch',
+            gp,
+          ),
+          manifoldTrunkLengthM: requirePosNum(g, 'manifoldTrunkLengthM', gp),
+          localZetaManifold: requirePosNum(g, 'localZetaManifold', gp),
+        };
+      })(),
       defaultLengthsM: {
         mainLine: requirePosNum(len, 'mainLine', `${basePath}.defaultLengthsM`),
         radiatorBranch: requirePosNum(

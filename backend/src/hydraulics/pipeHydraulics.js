@@ -91,11 +91,62 @@ export function resolveRoughnessMm(material, roughnessMap) {
 /**
  * @param {import('../catalog/types').PipeCatalogItemNormalized} pipe
  * @param {number} flowM3PerHour
- * @param {number} maxVelocityMps
- * @returns {boolean}
+ * @returns {number}
  */
-export function pipeMeetsVelocityLimit(pipe, flowM3PerHour, maxVelocityMps) {
-  const dMm = pipeInternalDiameterMm(pipe);
-  const v = flowVelocityMps(flowM3PerHour, dMm);
-  return v >= 0.05 && v <= maxVelocityMps;
+export function pipeVelocityMps(pipe, flowM3PerHour) {
+  return flowVelocityMps(flowM3PerHour, pipeInternalDiameterMm(pipe));
+}
+
+/**
+ * @param {'main' | 'branch' | 'ufh_loop' | 'dhw'} segmentRole
+ * @param {import('./types').HydraulicsRules} rules
+ * @returns {number}
+ */
+export function resolveVelocityMinMps(segmentRole, rules) {
+  const limits = rules.velocityLimitsMps;
+  if (segmentRole === 'main') return limits.mainMin;
+  if (segmentRole === 'branch' || segmentRole === 'dhw') {
+    return limits.branchMin ?? 0;
+  }
+  return 0;
+}
+
+/**
+ * @param {import('../catalog/types').PipeCatalogItemNormalized[]} pool — отсортирован по Ø↑
+ * @returns {import('../catalog/types').PipeCatalogItemNormalized | null}
+ */
+export function pickSmallestPipe(pool) {
+  return pool.length ? pool[0] : null;
+}
+
+/**
+ * @param {import('../catalog/types').PipeCatalogItemNormalized[]} pool — отсортирован по Ø↑
+ * @returns {import('../catalog/types').PipeCatalogItemNormalized | null}
+ */
+export function pickLargestPipe(pool) {
+  return pool.length ? pool[pool.length - 1] : null;
+}
+
+/**
+ * Минимальный Ø при vMin ≤ v ≤ vMax.
+ *
+ * @param {import('../catalog/types').PipeCatalogItemNormalized[]} pool — отсортирован по Ø↑
+ * @param {number} flowM3PerHour
+ * @param {number} minVelocityMps
+ * @param {number} maxVelocityMps
+ * @returns {import('../catalog/types').PipeCatalogItemNormalized | null}
+ */
+export function pickSmallestPipeWithinVelocityRange(
+  pool,
+  flowM3PerHour,
+  minVelocityMps,
+  maxVelocityMps,
+) {
+  for (const pipe of pool) {
+    const v = pipeVelocityMps(pipe, flowM3PerHour);
+    if (v >= minVelocityMps && v <= maxVelocityMps) {
+      return pipe;
+    }
+  }
+  return null;
 }

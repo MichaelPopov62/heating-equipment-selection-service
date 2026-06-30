@@ -9,6 +9,7 @@ import { round } from '../utils/math.js';
 /** @type {import('./types').HydraulicsNodeKind[]} */
 const LEAF_NODE_KINDS = [
   'radiator_consumer',
+  'radiator_manifold',
   'ufh_loop',
   'dhw_load',
   'indirect_coil',
@@ -70,7 +71,9 @@ function tracePathFromBoiler(graph, leafId) {
  * @returns {import('./types').HydraulicsCirculationCircuitKind}
  */
 function resolveCircuitKind(node) {
-  if (node.kind === 'radiator_consumer') return 'radiators';
+  if (node.kind === 'radiator_consumer' || node.kind === 'radiator_manifold') {
+    return 'radiators';
+  }
   if (node.kind === 'ufh_loop') return 'underfloor';
   if (node.kind === 'indirect_coil') return 'indirect_dhw';
   return 'dhw';

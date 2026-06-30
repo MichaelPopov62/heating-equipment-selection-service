@@ -8,6 +8,13 @@ import {
   resolvePrimaryMainLineFlowM3h,
 } from './resolveCirculationFlows.js';
 import { thermalLoadToFlow } from './thermalLoadToFlow.js';
+import {
+  buildMicroManifoldLabel,
+  partitionRadiatorConsumersForGraph,
+  RAD_MICRO_MANIFOLD_NODE_ID,
+  resolveMicroManifoldEdgeLength,
+  sumMicroConsumersFlowM3h,
+} from './groupRadiatorGraphBranches.js';
 
 /**
  * @param {import('./types').HydraulicsPipelineInput} dto
@@ -76,7 +83,12 @@ export function buildHydraulicsGraph(dto) {
   }
 
   if (rad?.consumers?.length && mode !== 'ufh_only') {
-    for (const consumer of rad.consumers) {
+    const { individual, microConsumers } = partitionRadiatorConsumersForGraph({
+      consumers: rad.consumers,
+      grouping: dto.rules.radiatorBranchGrouping,
+    });
+
+    for (const consumer of individual) {
       const nodeId = `rad_${consumer.roomId}`;
       pushNode(nodeId, 'radiator_consumer', consumer.roomName, {
         roomId: consumer.roomId,
@@ -91,6 +103,29 @@ export function buildHydraulicsGraph(dto) {
         lengthM: branch?.estimatedLengthM ?? dto.rules.defaultLengthsM.radiatorBranch,
         fluid: 'heating',
         designFlowM3PerHour: consumer.flowRateM3PerHour,
+        supplyC: rad.thermalRegime.supplyC,
+        returnC: rad.thermalRegime.returnC,
+        segmentRole: 'branch',
+      });
+    }
+
+    if (microConsumers.length > 0) {
+      const roomIds = microConsumers.map((c) => c.roomId);
+      pushNode(RAD_MICRO_MANIFOLD_NODE_ID, 'radiator_manifold', buildMicroManifoldLabel(microConsumers), {
+        roomIds,
+      });
+      edges.push({
+        id: `e_${upstreamId}_to_${RAD_MICRO_MANIFOLD_NODE_ID}`,
+        from: upstreamId,
+        to: RAD_MICRO_MANIFOLD_NODE_ID,
+        lengthM: resolveMicroManifoldEdgeLength({
+          microConsumers,
+          branches: dto.layout.radiatorBranches,
+          defaultBranchLengthM: dto.rules.defaultLengthsM.radiatorBranch,
+          manifoldTrunkLengthM: dto.rules.radiatorBranchGrouping.manifoldTrunkLengthM,
+        }),
+        fluid: 'heating',
+        designFlowM3PerHour: sumMicroConsumersFlowM3h(microConsumers),
         supplyC: rad.thermalRegime.supplyC,
         returnC: rad.thermalRegime.returnC,
         segmentRole: 'branch',

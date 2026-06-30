@@ -799,6 +799,8 @@ export interface HydraulicsReport {
       kind: string;
       label: string;
       roomId?: string;
+      /** Комнаты коллектора микроветок (kind=radiator_manifold). */
+      roomIds?: string[];
       loopId?: string;
     }>;
     edges: Array<{
@@ -869,6 +871,7 @@ export interface HydraulicsMatchingReport {
     pressureDropKPa: number;
     internalDiameterMm: number;
     velocityLimitExceeded?: boolean;
+    velocityBelowMin?: boolean;
   }>;
   topology?: 'direct' | 'mixing_valve' | 'hydraulic_separator';
   circulationZones?: import('../hydraulics/types').HydraulicsCirculationZone[];

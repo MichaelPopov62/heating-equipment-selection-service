@@ -25,6 +25,7 @@
     "verify:water-heater-form": "node scripts/verifyWaterHeaterFormUtils.js",
     "verify:survey-draft-migration": "node scripts/verifySurveyDraftMigration.js",
     "verify:hydraulics-pipeline": "node scripts/verifyHydraulicsPipeline.js",
+    "verify:pick-pipe": "node scripts/verifyPickPipe.js",
     "verify:hydraulics-pipeline-input": "node scripts/verifyHydraulicsPipeline.js",
     "verify:circulation-flows": "node scripts/verifyCirculationFlows.js",
     "verify:flow-delta-tk": "node scripts/verifyFlowDeltaTK.js",

@@ -1,0 +1,16 @@
+type: object
+description: Группа труб предложения по контуру (отопление или ТП).
+additionalProperties: false
+required: [circuitId, label, pipeLines, estimatedPrice]
+properties:
+  circuitId:
+    type: string
+    enum: [heating, ufh]
+  label: { type: string }
+  pipeLines:
+    type: array
+    items:
+      $ref: HydraulicsPipeProposalLine.yaml
+  estimatedPrice:
+    type: number
+    minimum: 0

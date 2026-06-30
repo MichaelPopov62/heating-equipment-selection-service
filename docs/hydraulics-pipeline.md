@@ -21,7 +21,37 @@
 
 `input.hydraulics.deltaTSystemK` может отличаться от ΔT графика — это нормально для проектного расчёта гидравлики. Резолвер — `resolveFlowDeltaTK.js`; расходы по комнатам считаются в `pickRadiatorsCore` и попадают в pipeline через `matching.radiators.byRoom[].flowRateM3PerHour`.
 
-Подбор труб (`pickPipe.js`): если ни одна позиция каталога не укладывается в диапазон скорости (0,05…`velocityLimitsMps`), подбирается fallback Ø; флаг `velocityLimitExceeded` выставляется только при **превышении верхнего** лимита vMax после fallback.
+Подбор труб (`pickPipe.js`): трёхрежимный fallback — (1) минимальный Ø при `v ≤ vMax`; (2) при перегрузке (`v > vMax` на всех Ø) — максимальный Ø + `velocityLimitExceeded`; (3) при микропотоке (`v < vMin` на всех Ø) — минимальный Ø + `velocityBelowMin`. Нижний порог веток задаётся `velocityLimitsMps.branchMin` (0 = не отсекать микропотоки).
+
+Группировка микроветок (`groupRadiatorGraphBranches.js` + `buildGraph.js`): комнаты с `flow < minFlowM3PerHourForIndividualBranch` или `heatLoad < minHeatLoadWattsForIndividualBranch` объединяются в узел `radiator_manifold` (`rad_micro_manifold`); комнаты с нулевой нагрузкой (`skipRadiator`) не попадают в граф. `Σ designFlow` по веткам графа = `circuits.radiators.totalFlowRateM3PerHour`.
+
+| Поле `velocityLimitsMps` | Назначение | MVP |
+|--------------------------|------------|-----|
+| `mainMin` / `mainMax` | Магистраль котла | 0.2 / 0.8 м/с |
+| `branchMin` / `branchMax` | Ветки радиаторов | 0 / 0.5 м/с |
+
+| Поле `radiatorBranchGrouping` | Назначение |
+|-------------------------------|------------|
+| `minFlowM3PerHourForIndividualBranch` | Порог Q для отдельной ветки (~0.019 м³/ч ≈ v=0.05 на Ø16) |
+| `minHeatLoadWattsForIndividualBranch` | Порог мощности (150 Вт) |
+| `manifoldTrunkLengthM` | Длина общего шлейфа коллектора |
+| `localZetaManifold` | Местные потери коллектора (Δp) |
+
+### Кейс: mixed + ТП + offset (квартира, гидрострелка)
+
+Фикстура `apartment_mixed_ufh_micro_branches` в `verifyHydraulicsPipeline.js` — регрессия бага Ø63 на микроветках.
+
+| Было (до группировки) | Стало |
+|------------------------|--------|
+| 4 отдельных ребра r1–r4 с Q ≈ 0.01 / 0.005 / 0.004 / 0.002 м³/ч → fallback max Ø (p-27, Ø63) | 1 ребро `e_*_to_rad_micro_manifold`, Q ≈ 0.021 м³/ч → min Ø (p-01, Ø16) |
+| r5, r6 — отдельные ветки | без изменений |
+| 6 листьев в балансировке | 3: manifold + r5 + r6 |
+
+Условия: `heatingEmittersMode=mixed`, `underfloorDistributionPreset=auto` → гидрострелка; комнаты с ТП получают `radiatorDesignWatts` за вычетом `heatFluxUpWatts` — малый остаток попадает в `microConsumers` по порогам `radiatorBranchGrouping`. `Σ designFlow` веток графа = `circuits.radiators.totalFlowRateM3PerHour`.
+
+### Вне scope этого пайплайна: НСУ (`collector_mixing_valve`)
+
+Ветка `resolveCirculationFlows` для смесительного узла ТП использует `qMainThermal = (pRad + pUfh) / (c·ΔT_boiler)`. Если upstream когда-либо передаст несбалансированные `pRad`/`pUfh` (двойной учёт теплопотерь), расход первички завысится. Для mixed+offset с гидрострелкой (типовой кейс verify) баланс `pRad + pUfh = heatLoss.totalWatts` подтверждён — отдельная задача, если появится отчёт с НСУ и расхождением мощностей.
 
 ## Маппинг upstream → DTO
 
@@ -52,6 +82,7 @@
 | `hydraulics/pickPump.js` | `evaluatePumpModeAtDuty`, `pickPumpForSystem`, `evaluatePumpCurveAtDuty` |
 | `hydraulics/buildSnapshots.js` | Сборка DTO |
 | `hydraulics/validatePipelineInput.js` | AJV + cross-validation |
+| `hydraulics/groupRadiatorGraphBranches.js` | Группировка микроветок радиаторов в графе |
 | `hydraulics/buildGraph.js` | Граф (радиаторы до смесителя ТП) |
 | `hydraulics/pickPipe.js` | Подбор труб |
 | `hydraulics/buildHydraulicsProposal.js` | Предложение клиенту |
@@ -79,7 +110,7 @@
 
 ## Правила `appliances.hydraulics`
 
-Документ MongoDB / `backend/data/appliances.json`, **`schemaVersion: 2`**. После изменения — `cd backend && npm run seed` и рестарт API (или TTL `REFERENCE_CACHE_TTL_MS`).
+Документ MongoDB / `backend/data/appliances.json`, **`schemaVersion: 3`** (`branchMin`, `radiatorBranchGrouping`). После изменения — `cd backend && npm run seed` и рестарт API (или TTL `REFERENCE_CACHE_TTL_MS`).
 
 Поля попадают в `HydraulicsPipelineInput.rules` и в runtime через `CalcRuntimeContext`.
 
@@ -171,6 +202,7 @@ cd backend && npm run verify:flow-delta-tk       # SSOT resolveFlowDeltaTK
 cd backend && npm run verify:circulation-flows   # зоны Q, топологии
 cd backend && npm run verify:pump-duty          # зона рабочей точки, геометрия каталога
 cd backend && npm run verify:builtin-boiler-pump # circulationPump котла
+cd backend && npm run verify:pick-pipe           # fallback min/max Ø веток
 cd backend && npm run verify:hydraulics-pipeline # end-to-end фикстуры calc
 cd backend && npm run verify:ufh-loop-hydraulics # гидравлика петель ТП (logic/)
 cd backend && npm run verify:seed-catalog       # контракт products + нормализация насосов

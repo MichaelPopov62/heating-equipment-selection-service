@@ -20,10 +20,16 @@ properties:
             - main_collector
             - ufh_collector
             - radiator_consumer
+            - radiator_manifold
             - ufh_loop
             - dhw_load
+            - indirect_coil
         label: { type: string }
         roomId: { type: string }
+        roomIds:
+          type: array
+          items: { type: string }
+          description: Комнаты, объединённые в коллектор микроветок (kind=radiator_manifold).
         loopId: { type: string }
   edges:
     type: array

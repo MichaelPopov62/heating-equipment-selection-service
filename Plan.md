@@ -83,6 +83,16 @@
 | Модуль | Где | Что делает | Статус UI |
 |--------|-----|------------|-----------|
 | **Гидравлика** | `hydraulics/public.js` | Pure Pipeline: DTO → граф → Δp → подбор труб/насосов из каталога | Шаг в анкете + блок в RecommendationsBlock |
+
+**Гидравлика — подбор труб и микроветки (выполнено):** см. [`docs/hydraulics-pipeline.md`](docs/hydraulics-pipeline.md).
+
+| # | Задача | Статус |
+|---|--------|--------|
+| H.1 | Трёхрежимный fallback `pickPipe.js` (optimal / max Ø / min Ø) | ✅ |
+| H.2 | `velocityLimitsMps.branchMin`, `radiatorBranchGrouping` в `appliances.hydraulics` v3 | ✅ |
+| H.3 | Группировка микроветок → узел `radiator_manifold` (`groupRadiatorGraphBranches.js`) | ✅ |
+| H.4 | Рекомендации `WARN_PIPE_VELOCITY_*`, `REC_RADIATOR_MICRO_BRANCH_MANIFOLD` | ✅ |
+| H.5 | `npm run verify:pick-pipe`, фикстура `apartment_mixed_ufh_micro_branches` в `verify:hydraulics-pipeline` | ✅ |
 | **ТП — расчёт** | `logic/warmFloorCalc.js` | Rλ,B = база над контуром + финиш; q↑/q↓, Tповерх, `maxAllowableHeatFluxUpWm2`; warning при превышении лимита покрытия | Результат в `RecommendationsBlock` |
 | **ТП — matching** | `matching/warmFloor.js` | Подсказки в `radiatorSelectionNotes` + цифры из отчёта ТП | Шаг `warmFloor` + селекты в комнатах |
 | **ТП — heatloss** | `heatlossByRooms.js` + `floorPresetId` | Теплопотери через пол; при `bottomBoundary: heated` пол не считается | Поле «Пол (ограждение)» в комнате |

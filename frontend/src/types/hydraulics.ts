@@ -54,6 +54,8 @@ export type ParsedHydraulicsPipeSegment = {
   pricePerMeter: number;
   linePrice: number;
   velocityLimitExceeded?: boolean;
+  velocityBelowMin?: boolean;
+  groupedRoomIds?: string[];
 };
 
 export type ParsedHydraulicsPumpProposal = {

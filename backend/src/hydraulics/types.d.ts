@@ -22,6 +22,15 @@ export interface HydraulicsVelocityLimits {
   mainMax: number;
   branchMax: number;
   mainMin: number;
+  /** Нижний порог v для веток; 0 — не отсекать микропотоки на мин. Ø. */
+  branchMin?: number;
+}
+
+export interface HydraulicsRadiatorBranchGrouping {
+  minFlowM3PerHourForIndividualBranch: number;
+  minHeatLoadWattsForIndividualBranch: number;
+  manifoldTrunkLengthM: number;
+  localZetaManifold: number;
 }
 
 export interface HydraulicsDefaultLengthsM {
@@ -35,6 +44,7 @@ export interface HydraulicsApplianceRules {
   schemaVersion: number;
   label: string;
   velocityLimitsMps: HydraulicsVelocityLimits;
+  radiatorBranchGrouping: HydraulicsRadiatorBranchGrouping;
   defaultLengthsM: HydraulicsDefaultLengthsM;
   maxUfhLoopLengthM: number;
   ufhLoopDeltaTK: number;
@@ -163,6 +173,7 @@ export interface HydraulicsLayout {
 
 export interface HydraulicsRules {
   velocityLimitsMps: HydraulicsVelocityLimits;
+  radiatorBranchGrouping: HydraulicsRadiatorBranchGrouping;
   defaultLengthsM: HydraulicsDefaultLengthsM;
   maxUfhLoopLengthM: number;
   roughnessMmByMaterial: Record<string, number>;
@@ -263,6 +274,7 @@ export type HydraulicsNodeKind =
   | 'main_collector'
   | 'ufh_collector'
   | 'radiator_consumer'
+  | 'radiator_manifold'
   | 'ufh_loop'
   | 'dhw_load'
   | 'indirect_coil';
@@ -278,6 +290,7 @@ export interface HydraulicsGraphNode {
   kind: HydraulicsNodeKind;
   label: string;
   roomId?: string;
+  roomIds?: string[];
   loopId?: string;
 }
 
@@ -354,6 +367,8 @@ export interface HydraulicsPipeMatchItem {
   internalDiameterMm: number;
   /** true — ни одна труба каталога не уложилась в vMax; подобран max Ø с превышением. */
   velocityLimitExceeded?: boolean;
+  /** true — расход слишком мал для vMin; подобран min Ø. */
+  velocityBelowMin?: boolean;
 }
 
 export interface HydraulicsPumpMatch {
@@ -410,6 +425,8 @@ export interface HydraulicsPipeSegmentProposal {
   pricePerMeter: number;
   linePrice: number;
   velocityLimitExceeded?: boolean;
+  velocityBelowMin?: boolean;
+  groupedRoomIds?: string[];
 }
 
 export interface HydraulicsPumpProposal {

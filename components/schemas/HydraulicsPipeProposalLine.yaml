@@ -1,0 +1,27 @@
+type: object
+description: Агрегированная позиция трубы в предложении по гидравлике.
+additionalProperties: false
+required:
+  - catalogPipeId
+  - brand
+  - model
+  - material
+  - outerDiameterMm
+  - wallThicknessMm
+  - internalDiameterMm
+  - totalLengthM
+  - edgeCount
+  - pricePerMeter
+  - linePrice
+properties:
+  catalogPipeId: { type: string }
+  brand: { type: string }
+  model: { type: string }
+  material: { type: string }
+  outerDiameterMm: { type: number }
+  wallThicknessMm: { type: number }
+  internalDiameterMm: { type: number }
+  totalLengthM: { type: number }
+  edgeCount: { type: integer, minimum: 1 }
+  pricePerMeter: { type: number }
+  linePrice: { type: number }

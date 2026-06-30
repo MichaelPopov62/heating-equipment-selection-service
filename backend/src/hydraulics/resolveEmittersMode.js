@@ -26,8 +26,21 @@ export function resolvePipelineEmittersMode(heatingSystem, underfloorHeating) {
  * @returns {import('./types').HydraulicsRules}
  */
 export function hydraulicsRulesFromAppliance(hydraulicsRules) {
+  const vel = hydraulicsRules.velocityLimitsMps;
+  const grouping = hydraulicsRules.radiatorBranchGrouping ?? {
+    minFlowM3PerHourForIndividualBranch: 0.019,
+    minHeatLoadWattsForIndividualBranch: 150,
+    manifoldTrunkLengthM: 2,
+    localZetaManifold: 1.5,
+  };
   return {
-    velocityLimitsMps: { ...hydraulicsRules.velocityLimitsMps },
+    velocityLimitsMps: {
+      mainMax: vel.mainMax,
+      branchMax: vel.branchMax,
+      mainMin: vel.mainMin,
+      branchMin: vel.branchMin ?? 0,
+    },
+    radiatorBranchGrouping: { ...grouping },
     defaultLengthsM: { ...hydraulicsRules.defaultLengthsM },
     maxUfhLoopLengthM: hydraulicsRules.maxUfhLoopLengthM,
     roughnessMmByMaterial: { ...hydraulicsRules.roughnessMmByMaterial },

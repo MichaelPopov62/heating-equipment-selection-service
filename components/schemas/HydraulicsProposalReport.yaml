@@ -28,23 +28,23 @@ properties:
     type: array
     description: Агрегированные позиции труб по catalogPipeId.
     items:
-      $ref: '#/definitions/PipeProposalLine'
+      $ref: HydraulicsPipeProposalLine.yaml
   pipeLineGroups:
     type: array
     description: Трубы по контурам — отопление (радиаторы) и тёплый пол.
     items:
-      $ref: '#/definitions/PipeLineGroup'
+      $ref: HydraulicsPipeLineGroup.yaml
   pipeSegments:
     type: array
     description: Детализация по участкам графа.
     items:
-      $ref: '#/definitions/PipeSegmentProposal'
+      $ref: HydraulicsPipeSegmentProposal.yaml
   pump:
-    $ref: '#/definitions/PumpProposal'
+    $ref: HydraulicsPumpProposal.yaml
   pumps:
     type: array
     items:
-      $ref: '#/definitions/PumpProposal'
+      $ref: HydraulicsPumpProposal.yaml
   estimatedPipesPrice:
     type: number
     minimum: 0
@@ -63,127 +63,3 @@ properties:
   pumpUnavailableReason:
     type: string
     description: Насос не подобран при успешном подборе труб.
-definitions:
-  PipeLineGroup:
-    type: object
-    additionalProperties: false
-    required: [circuitId, label, pipeLines, estimatedPrice]
-    properties:
-      circuitId:
-        type: string
-        enum: [heating, ufh]
-      label: { type: string }
-      pipeLines:
-        type: array
-        items:
-          $ref: '#/definitions/PipeProposalLine'
-      estimatedPrice:
-        type: number
-        minimum: 0
-  PipeProposalLine:
-    type: object
-    additionalProperties: false
-    required:
-      - catalogPipeId
-      - brand
-      - model
-      - material
-      - outerDiameterMm
-      - wallThicknessMm
-      - internalDiameterMm
-      - totalLengthM
-      - edgeCount
-      - pricePerMeter
-      - linePrice
-    properties:
-      catalogPipeId: { type: string }
-      brand: { type: string }
-      model: { type: string }
-      material: { type: string }
-      outerDiameterMm: { type: number }
-      wallThicknessMm: { type: number }
-      internalDiameterMm: { type: number }
-      totalLengthM: { type: number }
-      edgeCount: { type: integer, minimum: 1 }
-      pricePerMeter: { type: number }
-      linePrice: { type: number }
-  PipeSegmentProposal:
-    type: object
-    additionalProperties: false
-    required:
-      - edgeId
-      - segmentLabel
-      - segmentRole
-      - lengthM
-      - catalogPipeId
-      - brand
-      - model
-      - material
-      - outerDiameterMm
-      - wallThicknessMm
-      - internalDiameterMm
-      - velocityMps
-      - pressureDropKPa
-      - pricePerMeter
-      - linePrice
-    properties:
-      edgeId: { type: string }
-      segmentLabel: { type: string }
-      segmentRole:
-        type: string
-        enum: [main, branch, ufh_loop, dhw]
-      lengthM: { type: number }
-      catalogPipeId: { type: string }
-      brand: { type: string }
-      model: { type: string }
-      material: { type: string }
-      outerDiameterMm: { type: number }
-      wallThicknessMm: { type: number }
-      internalDiameterMm: { type: number }
-      velocityMps: { type: number }
-      pressureDropKPa: { type: number }
-      pricePerMeter: { type: number }
-      linePrice: { type: number }
-      velocityLimitExceeded:
-        type: boolean
-        description: Превышение лимита скорости — подобран max Ø каталога.
-  PumpProposal:
-    type: object
-    additionalProperties: false
-    required:
-      - zoneId
-      - zoneLabel
-      - pumpRole
-      - pumpSource
-      - brand
-      - model
-      - price
-      - modeName
-      - headAtDesignM
-      - headRequiredM
-      - designFlowM3PerHour
-      - headMarginPercent
-    properties:
-      zoneId: { type: string }
-      zoneLabel: { type: string }
-      pumpRole:
-        type: string
-        enum: [main, zone, dhw]
-      pumpSource:
-        type: string
-        enum: [catalog, boiler_builtin]
-      catalogPumpId: { type: string }
-      catalogBoilerId: { type: string }
-      brand: { type: string }
-      model: { type: string }
-      segment:
-        type: string
-        enum: [premium, medium, budget]
-      price: { type: number }
-      modeName: { type: string }
-      headAtDesignM: { type: number }
-      headRequiredM: { type: number }
-      designFlowM3PerHour: { type: number }
-      headMarginPercent: { type: number }
-      connectionNominalMm: { type: number }
-      note: { type: string }

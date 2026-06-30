@@ -77,6 +77,7 @@ properties:
     additionalProperties: false
     required:
       - velocityLimitsMps
+      - radiatorBranchGrouping
       - defaultLengthsM
       - maxUfhLoopLengthM
       - roughnessMmByMaterial
@@ -97,6 +98,23 @@ properties:
           mainMax: { type: number }
           branchMax: { type: number }
           mainMin: { type: number }
+          branchMin:
+            type: number
+            minimum: 0
+            description: Нижний порог v для веток; 0 — не отсекать микропотоки на мин. Ø.
+      radiatorBranchGrouping:
+        type: object
+        additionalProperties: false
+        required:
+          - minFlowM3PerHourForIndividualBranch
+          - minHeatLoadWattsForIndividualBranch
+          - manifoldTrunkLengthM
+          - localZetaManifold
+        properties:
+          minFlowM3PerHourForIndividualBranch: { type: number, exclusiveMinimum: 0 }
+          minHeatLoadWattsForIndividualBranch: { type: number, exclusiveMinimum: 0 }
+          manifoldTrunkLengthM: { type: number, exclusiveMinimum: 0 }
+          localZetaManifold: { type: number, exclusiveMinimum: 0 }
       defaultLengthsM:
         type: object
         additionalProperties: false

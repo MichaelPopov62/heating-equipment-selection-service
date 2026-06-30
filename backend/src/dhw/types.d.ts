@@ -72,7 +72,13 @@ export interface HydraulicsApplianceRulesDoc {
   applianceKind: 'hydraulics';
   schemaVersion: number;
   label: string;
-  velocityLimitsMps: { mainMax: number; branchMax: number; mainMin: number };
+  velocityLimitsMps: { mainMax: number; branchMax: number; mainMin: number; branchMin?: number };
+  radiatorBranchGrouping: {
+    minFlowM3PerHourForIndividualBranch: number;
+    minHeatLoadWattsForIndividualBranch: number;
+    manifoldTrunkLengthM: number;
+    localZetaManifold: number;
+  };
   defaultLengthsM: {
     mainLine: number;
     radiatorBranch: number;

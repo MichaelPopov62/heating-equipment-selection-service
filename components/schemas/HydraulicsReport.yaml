@@ -5,7 +5,7 @@ required: [schemaVersion]
 properties:
   schemaVersion:
     type: integer
-    const: 1
+    enum: [1]
   inputs:
     type: object
     additionalProperties: false

@@ -203,6 +203,15 @@ export function buildHydraulicsProposal({
       ...(pipeMatch.velocityLimitExceeded
         ? { velocityLimitExceeded: true }
         : {}),
+      ...(pipeMatch.velocityBelowMin ? { velocityBelowMin: true } : {}),
+      ...(edge?.to
+        ? (() => {
+          const toNode = nodesById.get(edge.to);
+          return toNode?.roomIds?.length
+            ? { groupedRoomIds: [...toNode.roomIds] }
+            : {};
+        })()
+        : {}),
     });
   }
 
