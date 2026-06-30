@@ -311,6 +311,7 @@ export function RoomAccordionItem({
               }}
             >
               <option value="прихожая">Прихожая</option>
+              <option value="тамбур">Тамбур / входная зона</option>
               <option value="гостиная">Гостиная</option>
               <option value="коридор">Коридор</option>
               <option value="спальня">Спальня</option>

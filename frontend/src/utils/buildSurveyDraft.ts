@@ -17,6 +17,7 @@ import {
 } from '../types/surveyDraft';
 import type { SurveyCurrentStep } from '../types/surveyStep';
 import type { HydraulicsFormValue } from '../types/hydraulics';
+import type { WiringLayoutV3 } from '../surveySession/wiringLayoutV3';
 import { DEFAULT_HYDRAULICS_FORM } from '../types/hydraulics';
 
 export function buildSurveyDraft(params: {
@@ -33,6 +34,7 @@ export function buildSurveyDraft(params: {
   thermalRegimePreset: HeatingThermalRegimePreset;
   ufhPresetId?: UfhModePresetId | null;
   hydraulicsForm?: HydraulicsFormValue;
+  wiringLayoutV3?: WiringLayoutV3;
   lastCalcReport?: CalcReportJson | null;
 }): SurveyDraft {
   const name = params.clientName.trim() || 'Без имени';
@@ -52,6 +54,9 @@ export function buildSurveyDraft(params: {
     thermalRegimePreset: params.thermalRegimePreset,
     ufhPresetId: params.ufhPresetId ?? null,
     hydraulicsForm: structuredClone(params.hydraulicsForm ?? DEFAULT_HYDRAULICS_FORM),
+    ...(params.wiringLayoutV3
+      ? { wiringLayoutV3: structuredClone(params.wiringLayoutV3) }
+      : {}),
     lastCalcReport: params.lastCalcReport ?? null,
   };
 }

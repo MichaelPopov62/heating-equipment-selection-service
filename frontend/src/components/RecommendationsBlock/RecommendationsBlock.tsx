@@ -47,15 +47,18 @@ export function RecommendationsBlock({
   onApplyScheme,
   apiHydraulicsFromReport,
   calcLoading = false,
+  reportIsStale = false,
+  uiPhase = 'idle',
 }: RecommendationsBlockProps) {
+  const showRecalculating = calcLoading || reportIsStale || uiPhase === 'recalculating';
   return (
     <aside className={[styles.root, className].filter(Boolean).join(' ')}>
       <section aria-labelledby="calculation-results-title">
         <h2 id="calculation-results-title">Результаты расчета</h2>
 
-        {calcLoading && (
+        {showRecalculating && (
           <p className={styles.hint} role="status" aria-live="polite">
-            Обновление расчёта на сервере…
+            Обновление расчёта на сервере… Показаны данные предыдущего ответа до завершения пересчёта.
           </p>
         )}
 
@@ -307,7 +310,8 @@ export function RecommendationsBlock({
           <HydraulicsProposalSection
             hydraulics={apiHydraulicsFromReport ?? null}
             catalogSource={apiCatalogSource}
-            calcLoading={calcLoading}
+            calcLoading={showRecalculating}
+            reportIsStale={showRecalculating}
           />
         </div>
 

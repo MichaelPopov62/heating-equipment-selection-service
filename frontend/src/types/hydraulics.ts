@@ -55,6 +55,9 @@ export type ParsedHydraulicsPipeSegment = {
   linePrice: number;
   velocityLimitExceeded?: boolean;
   velocityBelowMin?: boolean;
+  isMainLine?: boolean;
+  mainTransitGuardApplied?: boolean;
+  catalogPoolExhausted?: boolean;
   groupedRoomIds?: string[];
 };
 

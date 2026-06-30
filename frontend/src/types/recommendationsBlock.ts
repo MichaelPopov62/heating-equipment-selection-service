@@ -12,6 +12,7 @@ import type { ObjectType } from './envelope';
 import type { CatalogEquipmentSnapshot } from '../services/catalog';
 import type { ParsedUnderfloorHeating } from './underfloorHeating';
 import type { ParsedHydraulicsView } from './hydraulics';
+import type { SurveyUiPhase } from '../surveySession/types';
 
 export type QuickEstimate = {
   totalAreaM2: number;
@@ -68,4 +69,7 @@ export type RecommendationsBlockProps = {
   onApplyScheme: (scheme: HotWaterBoilerPowerMatchingScheme) => void;
   apiHydraulicsFromReport?: ParsedHydraulicsView | null;
   calcLoading?: boolean;
+  /** Единый флаг устаревания всех секций отчёта (pipeline recalculating). */
+  reportIsStale?: boolean;
+  uiPhase?: SurveyUiPhase;
 };

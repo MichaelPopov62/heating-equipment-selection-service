@@ -13,7 +13,7 @@ export type RoomExteriorLayout = 'corner' | 'facade' | 'internal';
 /** Строка construction для стены в неотапливаемый коридор в API calc. */
 export const INTERNAL_CORRIDOR_WALL_CONSTRUCTION = 'стена в неотапливаемый коридор';
 
-const INTERNAL_ROOM_TYPES = new Set<RoomType>(['прихожая', 'коридор']);
+const INTERNAL_ROOM_TYPES = new Set<RoomType>(['прихожая', 'коридор', 'тамбур']);
 
 export type ExternalWallFieldConfig = {
   slot: 'externalWall1' | 'externalWall2';

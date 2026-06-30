@@ -44,9 +44,18 @@ export function useRoomsOrchestration(params: {
     windowPresets,
   } = params;
 
+  const roomEnvelopeMigratedRef = useRef(false);
+
+  /** Миграция legacy-полей комнат — один раз после монтирования. */
   useEffect(() => {
-    setRooms((prev) => migrateRoomEnvelopeFields(prev));
-  }, [setRooms]);
+    if (roomEnvelopeMigratedRef.current) return;
+    roomEnvelopeMigratedRef.current = true;
+    setRooms((prev) => {
+      const next = migrateRoomEnvelopeFields(prev);
+      return next === prev ? prev : next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- не привязываем к setRooms: иначе цикл dispatch
+  }, []);
 
   /** Миграция wall_pps_* и ошибочного insul_* в presetId стены. */
   useEffect(() => {

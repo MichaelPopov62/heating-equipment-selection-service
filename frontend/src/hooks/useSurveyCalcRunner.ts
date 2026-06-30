@@ -1,6 +1,6 @@
 /**
  * Назначение: Оркестрация POST /api/v1/calc на клиенте.
- * Описание: Состояние отчёта, сброс при смене calcInputKey, debounce-автопересчёт, guard загрузки черновика.
+ * Описание: Исполнитель calc для SurveySession; uiPhase управляется снаружи.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -15,15 +15,29 @@ export type UseSurveyCalcRunnerParams = {
   buildCalcPayload: () => unknown;
   canAutoCalc: boolean;
   calcInputKey: string;
+  /** Успешный ответ — полная замена отчёта в сессии. */
+  onCalcSuccess?: (report: CalcReportJson) => void;
+  /** Ошибка — предыдущий отчёт сохраняется в сессии. */
+  onCalcError?: (message: string) => void;
+  /** Не обнулять локальный report при ошибке (legacy App без сессии). */
+  preserveReportOnError?: boolean;
+  /** Сессия владеет report; runner только loading + HTTP. */
+  managedBySession?: boolean;
+  draftInitializing?: boolean;
 };
 
 /**
- * Управление жизненным циклом расчёта анкеты: loading/error/report и автозапрос к API.
+ * HTTP-исполнитель расчёта: debounce, dedup, отмена устаревших запросов.
  */
 export function useSurveyCalcRunner({
   buildCalcPayload,
   canAutoCalc,
   calcInputKey,
+  onCalcSuccess,
+  onCalcError,
+  preserveReportOnError = false,
+  managedBySession = false,
+  draftInitializing = false,
 }: UseSurveyCalcRunnerParams) {
   const [calcLoading, setCalcLoading] = useState(false);
   const [calcError, setCalcError] = useState<string | null>(null);
@@ -31,37 +45,42 @@ export function useSurveyCalcRunner({
   const calcSeqRef = useRef(0);
   const prevCalcInputKeyRef = useRef<string | null>(null);
   const prevCanAutoCalcRef = useRef(canAutoCalc);
-  /** Guard: не сбрасывать отчёт и не запускать автопересчёт при программной загрузке черновика. */
   const isDraftInitializingRef = useRef(false);
   const buildCalcPayloadRef = useRef(buildCalcPayload);
   const canAutoCalcRef = useRef(canAutoCalc);
   const debounceTimerRef = useRef<number | null>(null);
-  /** JSON последнего успешно отправленного CalcInput — защита от лишних POST при том же теле. */
   const lastSentPayloadKeyRef = useRef<string | null>(null);
+  const onCalcSuccessRef = useRef(onCalcSuccess);
+  const onCalcErrorRef = useRef(onCalcError);
 
   useEffect(() => {
     buildCalcPayloadRef.current = buildCalcPayload;
     canAutoCalcRef.current = canAutoCalc;
-  }, [buildCalcPayload, canAutoCalc]);
+    onCalcSuccessRef.current = onCalcSuccess;
+    onCalcErrorRef.current = onCalcError;
+  }, [buildCalcPayload, canAutoCalc, onCalcSuccess, onCalcError]);
 
-  /**
-   * Вызвать в начале applySurveyDraftState (до пачки setState), чтобы сохранить lastCalcReport.
-   */
+  useEffect(() => {
+    if (managedBySession) {
+      isDraftInitializingRef.current = draftInitializing;
+    }
+  }, [draftInitializing, managedBySession]);
+
   const beginDraftInitialization = useCallback(() => {
     isDraftInitializingRef.current = true;
   }, []);
 
-  /** Снять guard после применения всех setState из черновика (см. applySurveyDraftState). */
   const endDraftInitialization = useCallback(() => {
     isDraftInitializingRef.current = false;
   }, []);
 
-  /** Восстановление отчёта из черновика или сохранённого расчёта проекта. */
   const restoreCalcReport = useCallback((report: CalcReportJson | null) => {
-    setCalcReport(report);
+    if (!managedBySession) {
+      setCalcReport(report);
+    }
     setCalcError(null);
     lastSentPayloadKeyRef.current = null;
-  }, []);
+  }, [managedBySession]);
 
   const clearDebounceTimer = useCallback(() => {
     if (debounceTimerRef.current != null) {
@@ -69,6 +88,12 @@ export function useSurveyCalcRunner({
       debounceTimerRef.current = null;
     }
   }, []);
+
+  const abortInFlightCalc = useCallback(() => {
+    calcSeqRef.current += 1;
+    clearDebounceTimer();
+    setCalcLoading(false);
+  }, [clearDebounceTimer]);
 
   const executeCalcRequest = useCallback(async () => {
     const seq = (calcSeqRef.current += 1);
@@ -79,17 +104,28 @@ export function useSurveyCalcRunner({
       const data = await postCalc(payload);
       if (seq !== calcSeqRef.current) return;
       lastSentPayloadKeyRef.current = JSON.stringify(payload);
-      setCalcReport(data.report);
+      if (managedBySession) {
+        onCalcSuccessRef.current?.(data.report);
+      } else {
+        setCalcReport(data.report);
+      }
     } catch (e: unknown) {
       if (seq !== calcSeqRef.current) return;
-      setCalcReport(null);
-      setCalcError(e instanceof Error ? e.message : 'Ошибка расчёта');
+      const message = e instanceof Error ? e.message : 'Ошибка расчёта';
+      if (managedBySession) {
+        onCalcErrorRef.current?.(message);
+      } else if (preserveReportOnError) {
+        setCalcError(message);
+      } else {
+        setCalcReport(null);
+        setCalcError(message);
+      }
     } finally {
       if (seq === calcSeqRef.current) {
         setCalcLoading(false);
       }
     }
-  }, []);
+  }, [managedBySession, preserveReportOnError]);
 
   const scheduleAutoCalcRef = useRef<() => void>(() => {});
 
@@ -119,7 +155,6 @@ export function useSurveyCalcRunner({
     await executeCalcRequest();
   }, [clearDebounceTimer, executeCalcRequest]);
 
-  /** Сброс dedup-кэша и debounce-пересчёт (после загрузки черновика / смены API). */
   const scheduleFreshCalc = useCallback(() => {
     lastSentPayloadKeyRef.current = null;
     scheduleAutoCalc();
@@ -127,11 +162,9 @@ export function useSurveyCalcRunner({
 
   useEffect(() => () => clearDebounceTimer(), [clearDebounceTimer]);
 
-  /**
-   * Автопересчёт при смене calcInputKey или при первом включении canAutoCalc.
-   * Лишний POST не уходит, если JSON CalcInput совпадает с последним успешным (типично при ГВС/оркестрации комнат).
-   */
   useEffect(() => {
+    if (managedBySession) return;
+
     const wasCanAuto = prevCanAutoCalcRef.current;
     prevCanAutoCalcRef.current = canAutoCalc;
 
@@ -162,17 +195,46 @@ export function useSurveyCalcRunner({
     }
 
     scheduleAutoCalcRef.current();
-  }, [calcInputKey, canAutoCalc]);
+  }, [calcInputKey, canAutoCalc, managedBySession]);
+
+  useEffect(() => {
+    if (!managedBySession) return;
+
+    const wasCanAuto = prevCanAutoCalcRef.current;
+    prevCanAutoCalcRef.current = canAutoCalc;
+
+    const isFirstRun = prevCalcInputKeyRef.current === null;
+    if (isFirstRun) {
+      prevCalcInputKeyRef.current = calcInputKey;
+      return;
+    }
+
+    const keyChanged = prevCalcInputKeyRef.current !== calcInputKey;
+    const canAutoJustEnabled = !wasCanAuto && canAutoCalc;
+
+    if (!keyChanged && !canAutoJustEnabled) return;
+
+    prevCalcInputKeyRef.current = calcInputKey;
+
+    if (isDraftInitializingRef.current) return;
+    if (!canAutoCalc) {
+      abortInFlightCalc();
+      return;
+    }
+
+    scheduleAutoCalcRef.current();
+  }, [abortInFlightCalc, calcInputKey, canAutoCalc, managedBySession]);
 
   return {
     calcLoading,
     calcError,
-    calcReport,
+    calcReport: managedBySession ? null : calcReport,
     setCalcReport,
     beginDraftInitialization,
     endDraftInitialization,
     restoreCalcReport,
     runApiCalc,
     scheduleFreshCalc,
+    abortInFlightCalc,
   };
 }

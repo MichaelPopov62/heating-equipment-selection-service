@@ -29,6 +29,10 @@ import {
   DEFAULT_HYDRAULICS_FORM,
   type HydraulicsFormValue,
 } from '../types/hydraulics';
+import {
+  adaptFlatRoomsToWiringLayout,
+  type WiringLayoutV3,
+} from '../surveySession/wiringLayoutV3';
 
 const SURVEY_STEPS: readonly SurveyCurrentStep[] = [
   'object',
@@ -148,6 +152,12 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
             : DEFAULT_HYDRAULICS_FORM.deltaTSystemK,
         pipeMaterialPreference,
       } satisfies HydraulicsFormValue;
+    })(),
+    wiringLayoutV3: (() => {
+      if (isRecord(raw.wiringLayoutV3) && raw.wiringLayoutV3.schemaVersion === 3) {
+        return raw.wiringLayoutV3 as WiringLayoutV3;
+      }
+      return adaptFlatRoomsToWiringLayout(rooms, 'auto');
     })(),
     lastCalcReport: (isRecord(raw.lastCalcReport)
       ? raw.lastCalcReport

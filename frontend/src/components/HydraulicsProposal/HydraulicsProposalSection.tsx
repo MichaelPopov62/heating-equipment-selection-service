@@ -21,9 +21,14 @@ type HydraulicsProposalSectionProps = {
   hydraulics: ParsedHydraulicsView | null;
   catalogSource?: 'file' | 'mongo' | null;
   calcLoading?: boolean;
+  reportIsStale?: boolean;
 };
 
-function segmentRoleLabel(role: string): string {
+function segmentRoleLabel(
+  role: string,
+  isMainLine?: boolean,
+): string {
+  if (isMainLine) return 'Транзит котла';
   switch (role) {
     case 'main':
       return 'Магистраль';
@@ -358,7 +363,9 @@ function ProposalContent({
                 <tr
                   key={seg.edgeId}
                   className={
-                    seg.velocityLimitExceeded || seg.velocityBelowMin
+                    seg.velocityLimitExceeded
+                    || seg.catalogPoolExhausted
+                    || (seg.velocityBelowMin && !seg.mainTransitGuardApplied)
                       ? styles.segmentRowWarning
                       : undefined
                   }
@@ -372,7 +379,7 @@ function ProposalContent({
                       </span>
                     ) : null}
                   </td>
-                  <td>{segmentRoleLabel(seg.segmentRole)}</td>
+                  <td>{segmentRoleLabel(seg.segmentRole, seg.isMainLine)}</td>
                   <td>
                     {seg.lengthM.toFixed(1)} <span className={styles.unit}>м</span>
                   </td>
@@ -383,7 +390,14 @@ function ProposalContent({
                       <span className={styles.hintInline}> (выше нормы)</span>
                     ) : null}
                     {seg.velocityBelowMin ? (
-                      <span className={styles.hintInline}> (ниже нормы)</span>
+                      <span className={styles.hintInline}>
+                        {seg.mainTransitGuardApplied
+                          ? ' (ниже нормы v, guard Dвн)'
+                          : ' (ниже нормы)'}
+                      </span>
+                    ) : null}
+                    {seg.catalogPoolExhausted ? (
+                      <span className={styles.hintInline}> (нет Ø в каталоге)</span>
                     ) : null}
                   </td>
                   <td>
@@ -411,7 +425,9 @@ export function HydraulicsProposalSection({
   hydraulics,
   catalogSource,
   calcLoading = false,
+  reportIsStale = false,
 }: HydraulicsProposalSectionProps) {
+  const showStale = calcLoading || reportIsStale;
   const proposal = hydraulics?.proposal ?? null;
   const calculations = hydraulics?.calculations ?? null;
   const flowContext = hydraulics?.flowContext ?? null;
@@ -445,14 +461,14 @@ export function HydraulicsProposalSection({
 
   return (
     <div
-      className={[styles.root, calcLoading ? styles.rootStale : ''].filter(Boolean).join(' ')}
+      className={[styles.root, showStale ? styles.rootStale : ''].filter(Boolean).join(' ')}
       aria-labelledby="hydraulics-proposal-title"
     >
       <h3 id="hydraulics-proposal-title" className={styles.title}>
         Гидравлика — рекомендуемое решение
       </h3>
 
-      {calcLoading && (
+      {showStale && (
         <p className={styles.hint} role="status">
           Обновление расчёта… показаны данные предыдущего ответа сервера.
         </p>
