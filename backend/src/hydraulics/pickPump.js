@@ -9,7 +9,11 @@ import { round } from '../utils/math.js';
 export { pumpHeadM };
 
 /**
- * @typedef {'out_of_flow_range' | 'near_qmax' | 'negative_or_tiny_head' | 'insufficient_head' | 'head_oversized'} PumpDutyIssue
+ * @typedef {'below_manufacturer_qmin' | 'curve_unavailable' | 'near_qmax' | 'negative_or_tiny_head' | 'insufficient_head' | 'head_oversized'} PumpDutyIssue
+ */
+
+/**
+ * @typedef {'ok' | 'below_manufacturer_qmin' | 'curve_unavailable' | 'insufficient_head' | 'no_suitable_mode'} BuiltinPumpDutyStatus
  */
 
 /**
@@ -26,12 +30,24 @@ export function pumpDutyRulesFromHydraulicsRules(rules) {
 }
 
 /**
+ * @param {Array<{ qMinM3h?: number }>} modes
+ * @returns {number}
+ */
+export function resolveHeatingCircuitMinFlowM3h(modes) {
+  const mins = modes
+    .map((m) => m.qMinM3h)
+    .filter((v) => typeof v === 'number' && Number.isFinite(v) && v > 0);
+  return mins.length ? Math.min(...mins) : 0;
+}
+
+/**
  * @param {object} args
  * @param {{ qMinM3h?: number; qMaxM3h?: number; coefficients: object }} args.mode
  * @param {number} args.q
  * @param {number} args.headRequiredM
  * @param {number} args.headTarget
  * @param {import('./types').HydraulicsPumpDutyRules} args.dutyRules
+ * @param {boolean} [args.skipHeadOversizedCheck]
  * @returns {{ ok: boolean; headAtQ?: number; marginPercent?: number; issue?: PumpDutyIssue }}
  */
 export function evaluatePumpModeAtDuty({
@@ -40,12 +56,16 @@ export function evaluatePumpModeAtDuty({
   headRequiredM,
   headTarget,
   dutyRules,
+  skipHeadOversizedCheck = false,
 }) {
   const qMin = mode.qMinM3h ?? 0;
   const qMax = mode.qMaxM3h ?? Infinity;
 
-  if (q < qMin || q > qMax) {
-    return { ok: false, issue: 'out_of_flow_range' };
+  if (q < qMin) {
+    return { ok: false, issue: 'below_manufacturer_qmin' };
+  }
+  if (q > qMax) {
+    return { ok: false, issue: 'curve_unavailable' };
   }
 
   const qMaxUtil = dutyRules.pumpDutyQMaxUtilizationPercent / 100;
@@ -55,14 +75,14 @@ export function evaluatePumpModeAtDuty({
 
   const headAtQ = pumpHeadM(mode.coefficients, q);
   if (headAtQ < dutyRules.pumpMinHeadAtDutyM) {
-    return { ok: false, issue: 'negative_or_tiny_head' };
+    return { ok: false, issue: 'curve_unavailable' };
   }
   if (headAtQ < headTarget) {
     return { ok: false, issue: 'insufficient_head' };
   }
 
   const margin = ((headAtQ - headRequiredM) / headRequiredM) * 100;
-  if (margin > dutyRules.pumpMaxHeadMarginPercent) {
+  if (!skipHeadOversizedCheck && margin > dutyRules.pumpMaxHeadMarginPercent) {
     return { ok: false, issue: 'head_oversized' };
   }
 
@@ -146,14 +166,14 @@ export function pickPumpForSystem({
 }
 
 /**
- * Проверка кривой насоса (котёл или каталог) в рабочей точке.
+ * Проверка кривой встроенного насоса котла в рабочей точке.
  *
  * @param {object} args
  * @param {Array<{ modeName: string; qMinM3h?: number; qMaxM3h?: number; coefficients: object }>} args.operatingModes
  * @param {number} args.designFlowM3PerHour
  * @param {number} args.headRequiredM
  * @param {import('./types').HydraulicsPumpDutyRules} args.dutyRules
- * @returns {{ ok: boolean; modeName?: string; headAtDesignM?: number; headMarginPercent?: number }}
+ * @returns {import('./types').BuiltinPumpCurveEvaluation}
  */
 export function evaluatePumpCurveAtDuty({
   operatingModes,
@@ -163,9 +183,19 @@ export function evaluatePumpCurveAtDuty({
 }) {
   const q = designFlowM3PerHour;
   const headTarget = headRequiredM * (1 + dutyRules.pumpHeadMarginPercent / 100);
+  const heatingCircuitMinFlowM3h = resolveHeatingCircuitMinFlowM3h(operatingModes);
 
   if (q <= 0 || headRequiredM <= 0 || !operatingModes?.length) {
-    return { ok: false };
+    return { ok: false, builtinPumpRecognized: false };
+  }
+
+  if (heatingCircuitMinFlowM3h > 0 && q < heatingCircuitMinFlowM3h) {
+    return {
+      ok: false,
+      dutyStatus: 'below_manufacturer_qmin',
+      heatingCircuitMinFlowM3h,
+      builtinPumpRecognized: true,
+    };
   }
 
   /** @type {{ modeName: string; headAtDesignM: number; headMarginPercent: number } | null} */
@@ -178,6 +208,7 @@ export function evaluatePumpCurveAtDuty({
       headRequiredM,
       headTarget,
       dutyRules,
+      skipHeadOversizedCheck: true,
     });
     if (!evalResult.ok || evalResult.headAtQ == null || evalResult.marginPercent == null) {
       continue;
@@ -193,12 +224,22 @@ export function evaluatePumpCurveAtDuty({
     }
   }
 
-  if (!best) return { ok: false };
+  if (!best) {
+    return {
+      ok: false,
+      dutyStatus: 'no_suitable_mode',
+      heatingCircuitMinFlowM3h,
+      builtinPumpRecognized: true,
+    };
+  }
 
   return {
     ok: true,
+    dutyStatus: 'ok',
     modeName: best.modeName,
     headAtDesignM: best.headAtDesignM,
     headMarginPercent: best.headMarginPercent,
+    heatingCircuitMinFlowM3h,
+    builtinPumpRecognized: true,
   };
 }

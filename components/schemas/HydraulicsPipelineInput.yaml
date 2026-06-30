@@ -76,6 +76,8 @@ properties:
     type: object
     additionalProperties: false
     required:
+      - mainTransitMinInternalDiameterMm
+      - branchMinInternalDiameterMm
       - velocityLimitsMps
       - radiatorBranchGrouping
       - defaultLengthsM
@@ -90,6 +92,14 @@ properties:
       - primaryFlowMarginPercent
       - balancingValveKPaPerTurn
     properties:
+      mainTransitMinInternalDiameterMm:
+        type: number
+        exclusiveMinimum: 0
+        description: Мин. внутренний Ø (мм) транзита котла (isMainLine).
+      branchMinInternalDiameterMm:
+        type: number
+        exclusiveMinimum: 0
+        description: Мин. внутренний Ø (мм) веток и зональных участков.
       velocityLimitsMps:
         type: object
         additionalProperties: false

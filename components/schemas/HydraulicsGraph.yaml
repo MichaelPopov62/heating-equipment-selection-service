@@ -51,3 +51,6 @@ properties:
         segmentRole:
           type: string
           enum: [main, branch, ufh_loop, dhw]
+        isMainLine:
+          type: boolean
+          description: Транзит котлового контура (boiler_primary); guard Dвн ≥ mainTransitMin.

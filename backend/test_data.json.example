@@ -65,6 +65,7 @@
         },
         {
           "model": "Baxi ECO Home 24 F",
+          "brand": "Baxi",
           "powerKw": {
             "max": 24,
             "min": 9.3
@@ -74,8 +75,38 @@
           "isDoubleCircuit": true,
           "gasConsumptionM3PerHour": 2.73,
           "price": 35000,
+          "mountingType": "wall",
+          "connectionDiameters": ["3/4″ (отопление)", "1/2″ (ГВС)"],
           "circuitsCount": 2,
-          "type": "traditional"
+          "type": "traditional",
+          "circulationPump": {
+            "operatingModes": [
+              {
+                "modeName": "Baxi встроенный — скорость 1",
+                "speedIndex": 1,
+                "powerWatts": 30,
+                "coefficients": { "a": -1.667, "b": 0.167, "c": 2.0 },
+                "qMinM3h": 0.4,
+                "qMaxM3h": 0.6
+              },
+              {
+                "modeName": "Baxi встроенный — скорость 2",
+                "speedIndex": 2,
+                "powerWatts": 40,
+                "coefficients": { "a": -0.833, "b": -0.667, "c": 3.5 },
+                "qMinM3h": 0.4,
+                "qMaxM3h": 1.0
+              },
+              {
+                "modeName": "Baxi встроенный — скорость 3",
+                "speedIndex": 3,
+                "powerWatts": 45,
+                "coefficients": { "a": -1.429, "b": -0.571, "c": 4.0 },
+                "qMinM3h": 0.4,
+                "qMaxM3h": 1.4
+              }
+            ]
+          }
         },
         {
           "brand": "Baxi",
@@ -302,7 +333,37 @@
             "high-power"
           ],
           "price": 56500,
-          "isDoubleCircuit": true
+          "isDoubleCircuit": true,
+          "mountingType": "wall",
+          "connectionDiameters": ["3/4″ (отопление)", "1/2″ (ГВС)"],
+          "circulationPump": {
+            "operatingModes": [
+              {
+                "modeName": "Baxi встроенный — скорость 1 (20%)",
+                "speedIndex": 1,
+                "powerWatts": 25,
+                "coefficients": { "a": -1.667, "b": 0.167, "c": 1.3 },
+                "qMinM3h": 0.5,
+                "qMaxM3h": 0.6
+              },
+              {
+                "modeName": "Baxi встроенный — скорость 2 (40%)",
+                "speedIndex": 2,
+                "powerWatts": 35,
+                "coefficients": { "a": -0.833, "b": -0.667, "c": 2.6 },
+                "qMinM3h": 0.5,
+                "qMaxM3h": 1.2
+              },
+              {
+                "modeName": "Baxi встроенный — скорость 3 (100%)",
+                "speedIndex": 3,
+                "powerWatts": 45,
+                "coefficients": { "a": -0.85, "b": -1.15, "c": 6.5 },
+                "qMinM3h": 0.5,
+                "qMaxM3h": 2.0
+              }
+            ]
+          }
         },
         {
           "brand": "Baxi",

@@ -30,13 +30,34 @@ function findBoilerInCatalog(boilers, catalogBoilerId) {
 }
 
 /**
+ * @param {Record<string, unknown> | null | undefined} boilerRecord
+ * @returns {boolean}
+ */
+function isWallMountedBoiler(boilerRecord) {
+  if (!boilerRecord) return false;
+  const mt = boilerRecord.mountingType;
+  if (mt === 'wall') return true;
+  if (mt === 'floor') return false;
+  const tags = boilerRecord.tags;
+  if (Array.isArray(tags)) {
+    if (tags.includes('wall-mounted')) return true;
+    if (tags.includes('floor-standing')) return false;
+  }
+  return !!(/** @type {{ circulationPump?: unknown }} */ (boilerRecord).circulationPump);
+}
+
+/**
  * @param {object} args
  * @param {import('./types').HydraulicsCirculationZone} args.zone
  * @param {number} args.headRequiredM
  * @param {import('./types').HydraulicsPumpDutyRules} args.dutyRules
  * @param {Record<string, unknown> | null | undefined} args.boilerRecord
  * @param {import('../catalog/types').NormalizedCatalog['pumps']} args.catalogPumps
- * @returns {{ match: import('./types').HydraulicsResolvedPump | null; warnings: string[] }}
+ * @returns {{
+ *   match: import('./types').HydraulicsResolvedPump | null;
+ *   warnings: string[];
+ *   builtinPumpDuty?: import('./types').BuiltinPumpDutyReport;
+ * }}
  */
 function resolvePumpForZone({
   zone,
@@ -66,6 +87,9 @@ function resolvePumpForZone({
     warnings: [],
   };
 
+  /** @type {import('./types').BuiltinPumpDutyReport | undefined} */
+  let builtinPumpDuty;
+
   if (zone.pumpRole === 'main') {
     const builtinModes = /** @type {{ operatingModes?: unknown[] } | undefined} */ (
       boilerRecord?.circulationPump
@@ -81,26 +105,51 @@ function resolvePumpForZone({
         dutyRules,
       });
 
+      const boilerModel = typeof boilerRecord?.model === 'string' ? boilerRecord.model : undefined;
+      const boilerId = typeof boilerRecord?.id === 'string' ? boilerRecord.id : undefined;
+
+      if (evalResult.heatingCircuitMinFlowM3h != null && evalResult.builtinPumpRecognized) {
+        builtinPumpDuty = {
+          status: evalResult.ok ? 'ok' : (evalResult.dutyStatus ?? 'no_suitable_mode'),
+          heatingCircuitMinFlowM3h: evalResult.heatingCircuitMinFlowM3h,
+          ...(boilerId ? { catalogBoilerId: boilerId } : {}),
+          ...(boilerModel ? { catalogBoilerModel: boilerModel } : {}),
+          designFlowM3PerHour: q,
+          headRequiredM: round(h, 2),
+        };
+      }
+
       if (evalResult.ok && evalResult.modeName != null && evalResult.headAtDesignM != null) {
         return {
           match: {
             ...base,
             pumpSource: 'boiler_builtin',
-            catalogBoilerId:
-              typeof boilerRecord?.id === 'string' ? boilerRecord.id : undefined,
+            catalogBoilerId: boilerId,
             modeName: evalResult.modeName,
             headAtDesignM: evalResult.headAtDesignM,
             headMarginPercent: evalResult.headMarginPercent ?? 0,
             note: 'Используется встроенный насос котла.',
           },
           warnings,
+          builtinPumpDuty,
         };
       }
 
-      warnings.push(
-        `[${zone.label}] Встроенный насос котла не перекрывает рабочую точку `
-        + `(Q=${q} м³/ч, H=${round(h, 2)} м) — подбор из каталога.`,
-      );
+      if (evalResult.dutyStatus === 'below_manufacturer_qmin') {
+        const qMin = evalResult.heatingCircuitMinFlowM3h ?? 0;
+        warnings.push(
+          `[${zone.label}] Расход Q=${q} м³/ч ниже заводского минимума встроенного насоса `
+          + `(q_min=${qMin} м³/ч) — риск тактования и перегрева теплообменника.`,
+        );
+        if (isWallMountedBoiler(boilerRecord)) {
+          return { match: null, warnings, builtinPumpDuty };
+        }
+      } else {
+        warnings.push(
+          `[${zone.label}] Встроенный насос котла не перекрывает рабочую точку `
+          + `(Q=${q} м³/ч, H=${round(h, 2)} м) — подбор из каталога.`,
+        );
+      }
     }
   }
 
@@ -114,7 +163,7 @@ function resolvePumpForZone({
   warnings.push(...pickWarnings.map((w) => `[${zone.label}] ${w}`));
 
   if (!pump) {
-    return { match: null, warnings };
+    return { match: null, warnings, builtinPumpDuty };
   }
 
   return {
@@ -128,6 +177,7 @@ function resolvePumpForZone({
       warnings: pump.warnings,
     },
     warnings,
+    builtinPumpDuty,
   };
 }
 
@@ -175,12 +225,14 @@ export function resolveSystemPumps({ dto, pressure, catalog }) {
   const warnings = [...flows.warnings];
   /** @type {string[]} */
   const notes = [...flows.notes];
+  /** @type {import('./types').BuiltinPumpDutyReport | undefined} */
+  let builtinPumpDuty;
 
   for (const zone of flows.zones) {
     if (!zone.requiresCatalogPump) continue;
 
     const headRequiredM = resolveHeadForZone(zone.zoneId, pressure, dto);
-    const { match, warnings: zoneWarnings } = resolvePumpForZone({
+    const { match, warnings: zoneWarnings, builtinPumpDuty: zoneBuiltin } = resolvePumpForZone({
       zone,
       headRequiredM,
       dutyRules,
@@ -188,6 +240,9 @@ export function resolveSystemPumps({ dto, pressure, catalog }) {
       catalogPumps: catalog.pumps,
     });
     warnings.push(...zoneWarnings);
+    if (zoneBuiltin) {
+      builtinPumpDuty = zoneBuiltin;
+    }
     if (match) {
       pumps.push(match);
       if (match.note) notes.push(`[${match.zoneLabel}] ${match.note}`);
@@ -203,6 +258,7 @@ export function resolveSystemPumps({ dto, pressure, catalog }) {
     primaryMainLineFlowM3PerHour: flows.primaryMainLineFlowM3PerHour,
     pumps,
     ...(mainResolved ? { pump: toLegacyPumpMatch(mainResolved) } : {}),
+    ...(builtinPumpDuty ? { builtinPumpDuty } : {}),
     warnings,
     notes,
   };

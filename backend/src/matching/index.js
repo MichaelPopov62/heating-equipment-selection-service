@@ -92,7 +92,7 @@ export function matchEquipment({
   ctx,
 } = {}) {
   assertCalcRuntimeContext(ctx);
-  const { catalog, waterNorms } = ctx;
+  const { catalog, waterNorms, appliances, recommendations } = ctx;
   const heatingLoad = resolveBoilerHeatingLoadWatts(
     heatingSystem,
     heatLoss,
@@ -236,6 +236,8 @@ export function matchEquipment({
     boiler,
     underfloorHeating,
     hydraulics,
+    radiatorRules: appliances.byKind.radiator,
+    recommendations,
   });
 
   /** @type {import('../types/shared-types').WaterHeaterMatchingReport} */

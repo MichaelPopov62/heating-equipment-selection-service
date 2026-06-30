@@ -40,7 +40,16 @@ properties:
     description: Превышение лимита скорости — подобран max Ø каталога.
   velocityBelowMin:
     type: boolean
-    description: Скорость ниже минимума — подобран min Ø каталога.
+    description: Скорость ниже минимума; на транзите котла Ø выбран по guard Dвн.
+  isMainLine:
+    type: boolean
+    description: Транзит котлового контура.
+  mainTransitGuardApplied:
+    type: boolean
+    description: Применён guard Dвн ≥ mainTransitMinInternalDiameterMm.
+  catalogPoolExhausted:
+    type: boolean
+    description: В каталоге нет трубы с требуемым Dвн.
   groupedRoomIds:
     type: array
     items: { type: string }

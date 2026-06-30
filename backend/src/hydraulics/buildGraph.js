@@ -60,6 +60,7 @@ export function buildHydraulicsGraph(dto) {
       supplyC: dto.source.supplyC,
       returnC: dto.source.returnC,
       segmentRole: 'main',
+      isMainLine: true,
     });
     upstreamId = 'hydraulic_separator';
   } else if (
@@ -78,6 +79,7 @@ export function buildHydraulicsGraph(dto) {
       supplyC: dto.source.supplyC,
       returnC: dto.source.returnC,
       segmentRole: 'main',
+      isMainLine: true,
     });
     upstreamId = 'main_collector';
   }
@@ -155,6 +157,7 @@ export function buildHydraulicsGraph(dto) {
         supplyC: dto.source.supplyC,
         returnC: dto.source.returnC,
         segmentRole: 'main',
+        isMainLine: true,
       });
       ufhUpstreamId = 'mixing_node';
     }

@@ -134,10 +134,39 @@ async function runFixture(label, input) {
       const edge = edgesById.get(pipe.edgeId);
       if (edge?.segmentRole !== 'branch') continue;
       if (!edge.to.startsWith('rad_') && edge.to !== 'rad_micro_manifold') continue;
+      if (pipe.internalDiameterMm < dto.rules.branchMinInternalDiameterMm - 0.01) {
+        throw new Error(
+          `${label}: ветка ${pipe.edgeId} Dвн ${pipe.internalDiameterMm} `
+          + `< branchMin ${dto.rules.branchMinInternalDiameterMm}`,
+        );
+      }
       if (pipe.catalogPipeId === 'p-27' && !pipe.velocityLimitExceeded) {
         throw new Error(
           `${label}: ветка ${pipe.edgeId} ошибочно получила p-27 (Ø63) без перегрузки`,
         );
+      }
+    }
+
+    const mainTransitMin = dto.rules.mainTransitMinInternalDiameterMm;
+    for (const edge of graph.edges) {
+      if (edge.isMainLine !== true) continue;
+      const pipe = result.hydraulicsMatching.pipes.find((p) => p.edgeId === edge.id);
+      if (!pipe) {
+        throw new Error(`${label}: нет подбора трубы для транзита ${edge.id}`);
+      }
+      if (pipe.catalogPoolExhausted) {
+        throw new Error(`${label}: транзит ${edge.id}: исчерпан каталог по Dвн`);
+      }
+      if (pipe.internalDiameterMm < mainTransitMin - 0.01) {
+        throw new Error(
+          `${label}: транзит ${edge.id} Dвн ${pipe.internalDiameterMm} < ${mainTransitMin}`,
+        );
+      }
+      if (!pipe.mainTransitGuardApplied) {
+        throw new Error(`${label}: транзит ${edge.id} без mainTransitGuardApplied`);
+      }
+      if (pipe.catalogPipeId === 'p-01') {
+        throw new Error(`${label}: транзит ${edge.id} ошибочно получил p-01`);
       }
     }
   }
@@ -155,13 +184,27 @@ async function runFixture(label, input) {
     if (!manifoldEdge) {
       throw new Error(`${label}: нет ребра к rad_micro_manifold`);
     }
-    const sepEdge = result.hydraulicsMatching.pipes.find(
-      (p) => p.edgeId === 'e_boiler_separator',
-    );
-    if (sepEdge && sepEdge.catalogPipeId !== 'p-01') {
+  }
+
+  if (label === 'apartment_mixed_ufh_mixing_valve') {
+    if (result.hydraulicsMatching.topology !== 'mixing_valve') {
       throw new Error(
-        `${label}: магистраль котла ожидалась p-01, получена ${sepEdge.catalogPipeId}`,
+        `${label}: ожидалась топология mixing_valve, получена ${result.hydraulicsMatching.topology}`,
       );
+    }
+    const mainEdge = result.hydraulics.graph?.edges?.find((e) => e.id === 'e_boiler_main');
+    if (mainEdge?.isMainLine !== true) {
+      throw new Error(`${label}: e_boiler_main без isMainLine`);
+    }
+    const mixingEdge = result.hydraulics.graph?.edges?.find((e) => e.id === 'e_main_to_mixing');
+    if (mixingEdge?.isMainLine !== true) {
+      throw new Error(`${label}: e_main_to_mixing без isMainLine`);
+    }
+    const boilerMainPipe = result.hydraulicsMatching.pipes.find(
+      (p) => p.edgeId === 'e_boiler_main',
+    );
+    if (!boilerMainPipe || boilerMainPipe.internalDiameterMm < 20) {
+      throw new Error(`${label}: e_boiler_main без трубы Dвн ≥ 20`);
     }
   }
 
@@ -417,6 +460,65 @@ await runFixture('apartment_mixed_ufh_micro_branches', {
     tropicalShower: true,
   },
   hydraulics: { mainLineLengthM: 6, deltaTSystemK: 20 },
+});
+
+await runFixture('apartment_mixed_ufh_mixing_valve', {
+  building: {
+    temps: { insideC: 20, outsideC: -22 },
+    objectMeta: {
+      objectType: 'apartment',
+      apartmentStackPosition: 'middle_floor',
+      floors: 1,
+      roomsCount: 6,
+      ventilationReserveMode: 'natural',
+      externalWalls: {
+        presetId: 'wall_gas_concrete_d500',
+        thicknessMm: 450,
+        facadeSystem: 'sftk',
+        insulationPresetId: 'insul_sftk_pps16f',
+        insulationThicknessMm: 40,
+      },
+      roofPresetId: 'roof_concrete_insulated_flat',
+    },
+    rooms: [
+      { id: 'r1', name: 'Коридор', type: 'коридор', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 12, heightM: 2.75, roomExteriorLayout: 'internal' },
+      { id: 'r2', name: 'Санузел', type: 'санузел', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 5, heightM: 2.75, roomExteriorLayout: 'internal' },
+      { id: 'r3', name: 'Гостиная', type: 'гостиная', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 12, heightM: 2.75, roomExteriorLayout: 'facade', underfloorHeating: { enabled: true, basePresetId: 'ufh_base_interstory_screed_65', finishMaterialId: 'pvc_glue', pipeSpacingMm: 150, furnitureOccupiedAreaM2: 2 } },
+      { id: 'r4', name: 'Кухня', type: 'кухня', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 12, heightM: 2.75, roomExteriorLayout: 'facade', underfloorHeating: { enabled: true, basePresetId: 'ufh_base_interstory_screed_65', finishMaterialId: 'pvc_glue', pipeSpacingMm: 150, furnitureOccupiedAreaM2: 6.5 } },
+      { id: 'r5', name: 'Спальня 1', type: 'спальня', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 15, heightM: 2.75, roomExteriorLayout: 'facade' },
+      { id: 'r6', name: 'Спальня 2', type: 'спальня', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 14, heightM: 2.75, roomExteriorLayout: 'corner' },
+    ],
+    envelopeElements: [
+      { kind: 'wall', roomId: 'r1', name: 'Стена в коридор', construction: 'стена в неотапливаемый коридор', presetId: 'wall_gas_concrete_d500', areaM2: 12, orientation: 'SE' },
+      { kind: 'wall', roomId: 'r3', name: 'Стена №1', construction: 'наружная стена', presetId: 'wall_gas_concrete_d500', areaM2: 5, orientation: 'NE' },
+      { kind: 'window', roomId: 'r3', construction: 'окно', presetId: 'window_pvc_double_chamber_3_glass', areaM2: 7.41, orientation: 'NE', openingWidthMm: 3900, openingHeightMm: 1900, name: 'Окно r3' },
+      { kind: 'wall', roomId: 'r4', name: 'Стена №1', construction: 'наружная стена', presetId: 'wall_gas_concrete_d500', areaM2: 6, orientation: 'NE' },
+      { kind: 'window', roomId: 'r4', construction: 'окно', presetId: 'window_pvc_double_chamber_3_glass', areaM2: 3.24, orientation: 'NE', openingWidthMm: 1800, openingHeightMm: 1800, name: 'Окно r4' },
+      { kind: 'wall', roomId: 'r5', name: 'Стена №1', construction: 'наружная стена', presetId: 'wall_gas_concrete_d500', areaM2: 6, orientation: 'NW' },
+      { kind: 'window', roomId: 'r5', construction: 'окно', presetId: 'window_pvc_double_chamber_3_glass', areaM2: 3.24, orientation: 'NW', openingWidthMm: 1800, openingHeightMm: 1800, name: 'Окно r5' },
+      { kind: 'wall', roomId: 'r6', name: 'Стена №1', construction: 'наружная стена', presetId: 'wall_gas_concrete_d500', areaM2: 12, orientation: 'NE' },
+      { kind: 'wall', roomId: 'r6', name: 'Стена №2', construction: 'наружная стена', presetId: 'wall_gas_concrete_d500', areaM2: 4, orientation: 'NW' },
+      { kind: 'window', roomId: 'r6', construction: 'окно', presetId: 'window_pvc_double_chamber_3_glass', areaM2: 3.42, orientation: 'NW', openingWidthMm: 1900, openingHeightMm: 1800, name: 'Окно r6' },
+    ],
+  },
+  heatingSystem: {
+    hotWaterBoilerPowerMatchingScheme: 'combiBoilerWithBufferElectricStorage',
+    thermalRegimePreset: 'condensing_dt30_55_45',
+    waterUnderfloorHeating: true,
+    underfloorDistributionPreset: 'auto',
+    ufhPresetId: 'ufh_mixed_radiators',
+    heatingEmittersMode: 'mixed',
+    supplyC: 55,
+    returnC: 45,
+    radiatorReferenceDeltaT: 50,
+  },
+  hotWater: {
+    residents: 3,
+    coldWaterDesignSeason: 'winter',
+    hotWaterC: 60,
+    fixtures: { shower: 1, sink: 1, toilet: 1, kitchenSink: 1, dishwasher: 1, washingMachine: 1, bidet: 1 },
+  },
+  hydraulics: { mainLineLengthM: 10, deltaTSystemK: 20 },
 });
 
 await runFixture('ufh_parasitic_down_resize', {

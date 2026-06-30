@@ -205,11 +205,32 @@ function validateAndNormalizeApplianceDoc(doc) {
     if (!Number.isFinite(max) || max < min) {
       throw new Error(`${basePath}.panelLengthRangeMm.max: обязательное целое >= min`);
     }
+    const ml = requireObject(d, 'microLoad', `${basePath}.microLoad`);
+    const threshold = requirePosNum(
+      ml,
+      'minDesignWattsThreshold',
+      `${basePath}.microLoad`,
+    );
+    const entryRaw = ml.entryRoomTypes;
+    if (!Array.isArray(entryRaw) || entryRaw.length === 0) {
+      throw new Error(`${basePath}.microLoad.entryRoomTypes: непустой массив строк`);
+    }
+    const entryRoomTypes = entryRaw.map((t, i) => {
+      const s = String(t ?? '').trim();
+      if (!s) {
+        throw new Error(`${basePath}.microLoad.entryRoomTypes[${i}]: непустая строка`);
+      }
+      return s;
+    });
     return {
       applianceKind: 'radiator',
       schemaVersion,
       label,
       panelLengthRangeMm: { min, max },
+      microLoad: {
+        minDesignWattsThreshold: threshold,
+        entryRoomTypes,
+      },
     };
   }
 
@@ -263,10 +284,18 @@ function validateAndNormalizeApplianceDoc(doc) {
     const len = requireObject(d, 'defaultLengthsM', `${basePath}.defaultLengthsM`);
     const zeta = requireObject(d, 'localLossZeta', `${basePath}.localLossZeta`);
     const rough = requireObject(d, 'roughnessMmByMaterial', `${basePath}.roughnessMmByMaterial`);
-    return {
+    const rec = {
       applianceKind: 'hydraulics',
       schemaVersion,
       label,
+      mainTransitMinInternalDiameterMm: (() => {
+        if (d.mainTransitMinInternalDiameterMm == null) return 20;
+        return requirePosNum(d, 'mainTransitMinInternalDiameterMm', basePath);
+      })(),
+      branchMinInternalDiameterMm: (() => {
+        if (d.branchMinInternalDiameterMm == null) return 12;
+        return requirePosNum(d, 'branchMinInternalDiameterMm', basePath);
+      })(),
       velocityLimitsMps: {
         mainMax: requirePosNum(vel, 'mainMax', `${basePath}.velocityLimitsMps`),
         branchMax: requirePosNum(vel, 'branchMax', `${basePath}.velocityLimitsMps`),
@@ -378,6 +407,15 @@ function validateAndNormalizeApplianceDoc(doc) {
       primaryFlowMarginPercent: requirePosNum(d, 'primaryFlowMarginPercent', basePath),
       balancingValveKPaPerTurn: requirePosNum(d, 'balancingValveKPaPerTurn', basePath),
     };
+    const mainTransitMin = rec.mainTransitMinInternalDiameterMm;
+    const branchMin = rec.branchMinInternalDiameterMm;
+    if (branchMin > mainTransitMin) {
+      throw new Error(
+        `${basePath}.branchMinInternalDiameterMm (${branchMin}) не может быть больше `
+        + `mainTransitMinInternalDiameterMm (${mainTransitMin})`,
+      );
+    }
+    return rec;
   }
 
   throw new Error(`appliances: неизвестный applianceKind «${kind}»`);

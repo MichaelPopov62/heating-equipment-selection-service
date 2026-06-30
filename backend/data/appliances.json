@@ -61,12 +61,16 @@
   },
   {
     "applianceKind": "radiator",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "isActive": true,
-    "label": "Радиаторы — резерв правил",
+    "label": "Радиаторы — микронагрузка и входные зоны",
     "panelLengthRangeMm": {
       "min": 400,
       "max": 3000
+    },
+    "microLoad": {
+      "minDesignWattsThreshold": 150,
+      "entryRoomTypes": ["прихожая", "коридор", "тамбур"]
     }
   },
   {
@@ -87,9 +91,11 @@
   },
   {
     "applianceKind": "hydraulics",
-    "schemaVersion": 3,
+    "schemaVersion": 4,
     "isActive": true,
     "label": "Гидравлика — пороги расчёта и дефолты длин",
+    "mainTransitMinInternalDiameterMm": 20,
+    "branchMinInternalDiameterMm": 12,
     "velocityLimitsMps": {
       "mainMax": 0.8,
       "branchMax": 0.5,

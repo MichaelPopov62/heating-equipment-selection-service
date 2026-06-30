@@ -468,6 +468,8 @@ export function validateUfhLoopHydraulics({
   }
 
   const rulesForPick = {
+    mainTransitMinInternalDiameterMm: hydraulicsRules.mainTransitMinInternalDiameterMm ?? 20,
+    branchMinInternalDiameterMm: hydraulicsRules.branchMinInternalDiameterMm ?? 12,
     velocityLimitsMps: {
       ...hydraulicsRules.velocityLimitsMps,
       branchMax: thresholds.velocityMaxMps,

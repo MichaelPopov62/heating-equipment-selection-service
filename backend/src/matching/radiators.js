@@ -65,6 +65,8 @@ function wrapRadiatorProposalLine(tierReport, tier, boilerProposal) {
  * @param {import('../types/boiler-types').BoilerMatchingReport} args.boiler
  * @param {import('../types/shared-types').UnderfloorHeatingReport | null} [args.underfloorHeating]
  * @param {import('../types/shared-types').HydraulicsSurveyInput | undefined} [args.hydraulics]
+ * @param {import('../../dhw/types').RadiatorApplianceRules} [args.radiatorRules]
+ * @param {import('../types/shared-types').RecommendationCatalogItem[]} [args.recommendations]
  * @returns {import('../types/shared-types').RadiatorsMatchingReport}
  */
 export function pickRadiatorsWithProposalLines({
@@ -75,6 +77,8 @@ export function pickRadiatorsWithProposalLines({
   boiler,
   underfloorHeating = null,
   hydraulics,
+  radiatorRules = null,
+  recommendations = null,
 } = {}) {
   const deltaTSystemK = hydraulics?.deltaTSystemK;
   if (heatingSystem?.heatingEmittersMode === 'ufh_only') {
@@ -120,6 +124,8 @@ export function pickRadiatorsWithProposalLines({
       radiatorLineTier: 'economy',
       underfloorHeating,
       deltaTSystemK,
+      radiatorRules,
+      recommendations,
     });
     lineEconomy = wrapRadiatorProposalLine(
       ecoReport,
@@ -152,6 +158,8 @@ export function pickRadiatorsWithProposalLines({
       radiatorLineTier: 'efficient',
       underfloorHeating,
       deltaTSystemK,
+      radiatorRules,
+      recommendations,
     });
     lineEfficient = wrapRadiatorProposalLine(
       effReport,
@@ -179,6 +187,8 @@ export function pickRadiatorsWithProposalLines({
     boilerMatching: boiler,
     underfloorHeating,
     deltaTSystemK,
+    radiatorRules,
+    recommendations,
   });
 
   return {

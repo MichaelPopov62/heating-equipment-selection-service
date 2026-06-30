@@ -43,6 +43,8 @@ export interface HydraulicsApplianceRules {
   applianceKind: 'hydraulics';
   schemaVersion: number;
   label: string;
+  mainTransitMinInternalDiameterMm: number;
+  branchMinInternalDiameterMm: number;
   velocityLimitsMps: HydraulicsVelocityLimits;
   radiatorBranchGrouping: HydraulicsRadiatorBranchGrouping;
   defaultLengthsM: HydraulicsDefaultLengthsM;
@@ -172,6 +174,8 @@ export interface HydraulicsLayout {
 }
 
 export interface HydraulicsRules {
+  mainTransitMinInternalDiameterMm: number;
+  branchMinInternalDiameterMm: number;
   velocityLimitsMps: HydraulicsVelocityLimits;
   radiatorBranchGrouping: HydraulicsRadiatorBranchGrouping;
   defaultLengthsM: HydraulicsDefaultLengthsM;
@@ -203,6 +207,32 @@ export type HydraulicsCirculationTopology =
 export type HydraulicsPumpRole = 'main' | 'zone' | 'dhw';
 
 export type HydraulicsPumpSource = 'catalog' | 'boiler_builtin';
+
+export type BuiltinPumpDutyStatus =
+  | 'ok'
+  | 'below_manufacturer_qmin'
+  | 'curve_unavailable'
+  | 'insufficient_head'
+  | 'no_suitable_mode';
+
+export interface BuiltinPumpDutyReport {
+  status: BuiltinPumpDutyStatus;
+  heatingCircuitMinFlowM3h: number;
+  catalogBoilerId?: string;
+  catalogBoilerModel?: string;
+  designFlowM3PerHour: number;
+  headRequiredM: number;
+}
+
+export interface BuiltinPumpCurveEvaluation {
+  ok: boolean;
+  dutyStatus?: BuiltinPumpDutyStatus;
+  modeName?: string;
+  headAtDesignM?: number;
+  headMarginPercent?: number;
+  heatingCircuitMinFlowM3h?: number;
+  builtinPumpRecognized?: boolean;
+}
 
 export interface HydraulicsCirculationZone {
   zoneId: string;
@@ -250,6 +280,7 @@ export interface HydraulicsSystemPumpsResult {
   primaryMainLineFlowM3PerHour: number;
   pumps: HydraulicsResolvedPump[];
   pump?: HydraulicsPumpMatch;
+  builtinPumpDuty?: BuiltinPumpDutyReport;
   warnings: string[];
   notes: string[];
 }
@@ -304,6 +335,8 @@ export interface HydraulicsGraphEdge {
   supplyC?: number;
   returnC?: number;
   segmentRole: 'main' | 'branch' | 'ufh_loop' | 'dhw';
+  /** Транзит котлового контура (boiler_primary): guard Dвн ≥ mainTransitMin. */
+  isMainLine?: boolean;
   /** Предпочтительная труба из расчёта петли ТП (ufhLoopHydraulics). */
   preferredCatalogPipeId?: string;
 }
@@ -367,8 +400,12 @@ export interface HydraulicsPipeMatchItem {
   internalDiameterMm: number;
   /** true — ни одна труба каталога не уложилась в vMax; подобран max Ø с превышением. */
   velocityLimitExceeded?: boolean;
-  /** true — расход слишком мал для vMin; подобран min Ø. */
+  /** true — расход слишком мал для vMin; подобран min Ø из guard-пула. */
   velocityBelowMin?: boolean;
+  /** true — на транзите котла применён guard Dвн ≥ mainTransitMin. */
+  mainTransitGuardApplied?: boolean;
+  /** true — в каталоге нет трубы с требуемым Dвн. */
+  catalogPoolExhausted?: boolean;
 }
 
 export interface HydraulicsPumpMatch {
@@ -426,6 +463,9 @@ export interface HydraulicsPipeSegmentProposal {
   linePrice: number;
   velocityLimitExceeded?: boolean;
   velocityBelowMin?: boolean;
+  isMainLine?: boolean;
+  mainTransitGuardApplied?: boolean;
+  catalogPoolExhausted?: boolean;
   groupedRoomIds?: string[];
 }
 
@@ -472,6 +512,7 @@ export interface HydraulicsMatchingReport {
   circulationZones?: HydraulicsCirculationZone[];
   pump?: HydraulicsPumpMatch;
   pumps?: HydraulicsPumpMatch[];
+  builtinPumpDuty?: BuiltinPumpDutyReport;
   proposal?: HydraulicsProposalReport;
   warnings: string[];
 }

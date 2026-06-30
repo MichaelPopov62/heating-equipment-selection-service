@@ -20,7 +20,13 @@ properties:
           description: true — ни одна труба каталога не уложилась в vMax; подобран max Ø с превышением скорости.
         velocityBelowMin:
           type: boolean
-          description: true — расход слишком мал для vMin; подобран min Ø каталога.
+          description: Скорость ниже минимума; на транзите котла Ø выбран по guard Dвн, не по vMin.
+        mainTransitGuardApplied:
+          type: boolean
+          description: true — применён guard Dвн ≥ mainTransitMinInternalDiameterMm.
+        catalogPoolExhausted:
+          type: boolean
+          description: true — в каталоге нет трубы с требуемым Dвн.
   topology:
     type: string
     enum: [direct, mixing_valve, hydraulic_separator]

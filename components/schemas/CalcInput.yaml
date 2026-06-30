@@ -51,6 +51,7 @@ properties:
                 Тип «котельная» — для расчёта объёма котельной при objectMeta.boilerPlacementZone=boiler_room.
               enum:
                 - прихожая
+                - тамбур
                 - гостиная
                 - коридор
                 - спальня

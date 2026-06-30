@@ -67,13 +67,32 @@ function applyHydraulicsPipeRecommendations({
   for (const pipe of hydraulicsMatching.pipes ?? []) {
     const edge = edgesById.get(pipe.edgeId);
     const vMax =
-      edge?.segmentRole === 'main'
+      edge?.isMainLine === true || edge?.segmentRole === 'main'
         ? hydraulicsRules.velocityLimitsMps.mainMax
         : hydraulicsRules.velocityLimitsMps.branchMax;
     const vMin =
-      edge?.segmentRole === 'main'
+      edge?.isMainLine === true
         ? hydraulicsRules.velocityLimitsMps.mainMin
-        : (hydraulicsRules.velocityLimitsMps.branchMin ?? 0);
+        : edge?.segmentRole === 'main'
+          ? hydraulicsRules.velocityLimitsMps.mainMin
+          : (hydraulicsRules.velocityLimitsMps.branchMin ?? 0);
+
+    if (pipe.catalogPoolExhausted) {
+      const minInternal = edge?.isMainLine === true
+        ? hydraulicsRules.mainTransitMinInternalDiameterMm
+        : hydraulicsRules.branchMinInternalDiameterMm;
+      pushRecommendation(
+        warnings,
+        resolved,
+        recommendations,
+        'WARN_PIPE_CATALOG_NO_INTERNAL_DIAMETER',
+        {
+          edgeId: pipe.edgeId,
+          minInternalDiameterMm: minInternal,
+        },
+      );
+      continue;
+    }
 
     if (pipe.velocityLimitExceeded) {
       pushRecommendation(
@@ -89,16 +108,45 @@ function applyHydraulicsPipeRecommendations({
         },
       );
     } else if (pipe.velocityBelowMin) {
+      if (pipe.mainTransitGuardApplied) {
+        pushRecommendation(
+          warnings,
+          resolved,
+          recommendations,
+          'WARN_PIPE_MAIN_TRANSIT_LOW_VELOCITY',
+          {
+            edgeId: pipe.edgeId,
+            velocityMps: Math.round(pipe.velocityMps * 100) / 100,
+            velocityMinMps: vMin,
+            catalogPipeId: pipe.catalogPipeId,
+            minInternalDiameterMm: hydraulicsRules.mainTransitMinInternalDiameterMm,
+          },
+        );
+      } else {
+        pushRecommendation(
+          warnings,
+          resolved,
+          recommendations,
+          'WARN_PIPE_VELOCITY_BELOW_MIN',
+          {
+            edgeId: pipe.edgeId,
+            velocityMps: Math.round(pipe.velocityMps * 100) / 100,
+            velocityMinMps: vMin,
+            catalogPipeId: pipe.catalogPipeId,
+          },
+        );
+      }
+    } else if (pipe.mainTransitGuardApplied) {
       pushRecommendation(
         warnings,
         resolved,
         recommendations,
-        'WARN_PIPE_VELOCITY_BELOW_MIN',
+        'REC_PIPE_MAIN_TRANSIT_GUARD_APPLIED',
         {
           edgeId: pipe.edgeId,
-          velocityMps: Math.round(pipe.velocityMps * 100) / 100,
-          velocityMinMps: vMin,
           catalogPipeId: pipe.catalogPipeId,
+          internalDiameterMm: pipe.internalDiameterMm,
+          minInternalDiameterMm: hydraulicsRules.mainTransitMinInternalDiameterMm,
         },
       );
     }
@@ -118,6 +166,21 @@ function applyHydraulicsPipeRecommendations({
         roomCount: node.roomIds.length,
         roomNames: node.label,
         totalFlowM3PerHour: manifoldEdge?.designFlowM3PerHour ?? 0,
+      },
+    );
+  }
+
+  const builtinDuty = hydraulicsMatching.builtinPumpDuty;
+  if (builtinDuty?.status === 'below_manufacturer_qmin') {
+    pushRecommendation(
+      warnings,
+      resolved,
+      recommendations,
+      'WARN_BOILER_HEATING_FLOW_BELOW_MIN',
+      {
+        designFlowM3PerHour: builtinDuty.designFlowM3PerHour,
+        qMinM3h: builtinDuty.heatingCircuitMinFlowM3h,
+        catalogBoilerModel: builtinDuty.catalogBoilerModel ?? builtinDuty.catalogBoilerId ?? 'котёл',
       },
     );
   }
@@ -498,6 +561,7 @@ export async function buildReport({ input, ctx }) {
     ...(matching.boiler?.resolvedRecommendations ?? []),
     ...(matching.indirectWaterHeater?.resolvedRecommendations ?? []),
     ...(underfloorHeating?.resolvedRecommendations ?? []),
+    ...(matching.radiators?.resolvedRecommendations ?? []),
     ...(matching.hydraulics?.resolvedRecommendations ?? []),
   ];
 

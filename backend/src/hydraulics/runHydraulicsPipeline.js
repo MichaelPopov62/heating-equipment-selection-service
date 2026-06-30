@@ -40,10 +40,18 @@ export function runHydraulicsPipeline({ dto, catalog }) {
 
   const consumers = buildConsumerSummaries(dto);
 
+  const pRad = dto.circuits.radiators?.consumers?.reduce(
+    (s, c) => s + c.heatLoadWatts,
+    0,
+  ) ?? 0;
+  const pUfh = dto.circuits.underfloor?.aggregate.heatLoadWatts ?? 0;
+  const emittersMode = dto.meta.heatingEmittersMode;
   const primaryHeatWatts =
-    dto.circuits.underfloor?.aggregate.heatLoadWatts
-    ?? dto.circuits.radiators?.consumers.reduce((s, c) => s + c.heatLoadWatts, 0)
-    ?? 0;
+    emittersMode === 'mixed'
+      ? pRad + pUfh
+      : emittersMode === 'ufh_only'
+        ? pUfh
+        : pRad;
 
   const flowFromThermal = thermalLoadToFlow({
     heatLoadWatts: primaryHeatWatts,
@@ -132,6 +140,7 @@ export function runHydraulicsPipeline({ dto, catalog }) {
       warnings: p.warnings,
     })) } : {}),
     ...(pumpResult.pump ? { pump: pumpResult.pump } : {}),
+    ...(pumpResult.builtinPumpDuty ? { builtinPumpDuty: pumpResult.builtinPumpDuty } : {}),
     warnings: [...pipeWarnings, ...pumpResult.warnings],
   };
 

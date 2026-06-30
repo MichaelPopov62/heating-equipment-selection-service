@@ -213,7 +213,34 @@
     "category": "warnings",
     "equipmentType": "hydraulics",
     "title": "Низкая скорость в трубе",
-    "text": "Участок «{{edgeId}}»: скорость {{velocityMps}} м/с ниже минимума {{velocityMinMps}} м/с — подобран минимальный Ø {{catalogPipeId}}; возможно завоздушивание."
+    "text": "Участок «{{edgeId}}»: скорость {{velocityMps}} м/с ниже минимума {{velocityMinMps}} м/с — подобран минимальный Ø {{catalogPipeId}} из допустимого пула; возможно завоздушивание."
+  },
+  {
+    "code": "WARN_PIPE_MAIN_TRANSIT_LOW_VELOCITY",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "hydraulics",
+    "title": "Низкая скорость на транзите котла",
+    "text": "Участок «{{edgeId}}»: скорость {{velocityMps}} м/с ниже {{velocityMinMps}} м/с — выбран Ø {{catalogPipeId}} по guard Dвн ≥ {{minInternalDiameterMm}} мм (приоритет над vMin)."
+  },
+  {
+    "code": "WARN_PIPE_CATALOG_NO_INTERNAL_DIAMETER",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "hydraulics",
+    "title": "Нет трубы в каталоге по Dвн",
+    "text": "Участок «{{edgeId}}»: в каталоге нет трубы с внутренним Ø ≥ {{minInternalDiameterMm}} мм — расширьте номенклатуру."
+  },
+  {
+    "code": "REC_PIPE_MAIN_TRANSIT_GUARD_APPLIED",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "automationHints",
+    "equipmentType": "hydraulics",
+    "title": "Guard транзита котла",
+    "text": "Участок «{{edgeId}}»: подобран {{catalogPipeId}} (Dвн {{internalDiameterMm}} мм) — guard мин. Dвн ≥ {{minInternalDiameterMm}} мм."
   },
   {
     "code": "REC_RADIATOR_MICRO_BRANCH_MANIFOLD",
@@ -223,5 +250,32 @@
     "equipmentType": "hydraulics",
     "title": "Микроконтуры радиаторов объединены",
     "text": "{{roomCount}} комнат(ы) с малым расходом объединены в коллектор «{{roomNames}}» (суммарный Q ≈ {{totalFlowM3PerHour}} м³/ч). Балансировка — на коллекторе."
+  },
+  {
+    "code": "REC_RADIATOR_ENTRY_ZONE_MINIMUM",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "automationHints",
+    "equipmentType": "radiator",
+    "title": "Входная зона: минимальный радиатор",
+    "text": "В одной или нескольких входных зонах (прихожая, коридор, тамбур или фасад) остаточная нагрузка на радиатор ниже порога — подобран минимальный жизнеспособный прибор для защиты от промерзания и комфорта у двери."
+  },
+  {
+    "code": "REC_RADIATOR_MICRO_LOAD_SKIP",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "automationHints",
+    "equipmentType": "radiator",
+    "title": "Микронагрузка: радиатор не требуется",
+    "text": "Во внутренних помещениях с остаточной нагрузкой на радиатор ниже порога прибор не ставится — тепло обеспечивается перетоком; гидравлика учитывает микроколлектор при необходимости."
+  },
+  {
+    "code": "WARN_BOILER_HEATING_FLOW_BELOW_MIN",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "boiler",
+    "title": "Расход отопления ниже заводского минимума",
+    "text": "Расчётный расход контура отопления {{designFlowM3PerHour}} м³/ч ниже минимального протока через теплообменник котла «{{catalogBoilerModel}}» (q_min={{qMinM3h}} м³/ч). Возможны тактование горелки и перегрев (ΔT > 30 °C) при перегрузке байпаса. Увеличьте нагрузку контура, объедините микроконтуры или выберите котёл с меньшим P_min."
   }
 ]

@@ -97,6 +97,38 @@ export function assertPumpModeCurveGeometry(mode, ctx, minHeadAtQMaxM = PUMP_CUR
 }
 
 /**
+ * Аппроксимация H(Q)=a·Q²+b·Q+c по трём точкам (полезный напор, м).
+ *
+ * @param {[number, number, number]} qPoints — Q, м³/ч
+ * @param {[number, number, number]} hPoints — H, м
+ * @returns {{ a: number; b: number; c: number }}
+ */
+export function fitPumpCurveFromThreePoints(qPoints, hPoints) {
+  const [q0, q1, q2] = qPoints;
+  const [h0, h1, h2] = hPoints;
+
+  if (Math.abs(q1 - q0) < 1e-9 || Math.abs(q2 - q1) < 1e-9) {
+    throw new Error('fitPumpCurveFromThreePoints: точки Q должны быть различны');
+  }
+
+  const c = h0;
+  const delta1 = h1 - h0;
+  const delta2 = h2 - h0;
+  const dq1 = q1 - q0;
+  const dq2 = q2 - q0;
+
+  const denom = dq1 * dq2 * (dq2 - dq1);
+  const a = (delta2 * dq1 - delta1 * dq2) / denom;
+  const b = (delta1 - a * dq1 * dq1) / dq1;
+
+  return {
+    a: round3(a),
+    b: round3(b),
+    c: round3(c),
+  };
+}
+
+/**
  * @param {number} x
  * @returns {number}
  */

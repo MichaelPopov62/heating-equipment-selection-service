@@ -13,6 +13,9 @@ const SEGMENT_ROLE_LABELS = {
   dhw: 'ГВС',
 };
 
+/** @type {Record<string, string>} */
+const MAIN_TRANSIT_ROLE_LABEL = 'Транзит котла';
+
 /**
  * @param {import('./types').HydraulicsGraphEdge} edge
  * @param {Map<string, import('./types').HydraulicsGraphNode>} nodesById
@@ -21,7 +24,9 @@ const SEGMENT_ROLE_LABELS = {
 function edgeSegmentLabel(edge, nodesById) {
   const from = nodesById.get(edge.from)?.label ?? edge.from;
   const to = nodesById.get(edge.to)?.label ?? edge.to;
-  const role = SEGMENT_ROLE_LABELS[edge.segmentRole] ?? edge.segmentRole;
+  const role = edge.isMainLine === true
+    ? MAIN_TRANSIT_ROLE_LABEL
+    : (SEGMENT_ROLE_LABELS[edge.segmentRole] ?? edge.segmentRole);
   return `${role}: ${from} → ${to}`;
 }
 
@@ -184,6 +189,10 @@ export function buildHydraulicsProposal({
     const pricePerMeter = catalogPipe?.price ?? 0;
     const linePrice = round(lengthM * pricePerMeter, 2);
 
+    if (pipeMatch.catalogPoolExhausted) {
+      continue;
+    }
+
     pipeSegments.push({
       edgeId: pipeMatch.edgeId,
       segmentLabel: edge ? edgeSegmentLabel(edge, nodesById) : pipeMatch.edgeId,
@@ -204,6 +213,13 @@ export function buildHydraulicsProposal({
         ? { velocityLimitExceeded: true }
         : {}),
       ...(pipeMatch.velocityBelowMin ? { velocityBelowMin: true } : {}),
+      ...(edge?.isMainLine === true ? { isMainLine: true } : {}),
+      ...(pipeMatch.mainTransitGuardApplied
+        ? { mainTransitGuardApplied: true }
+        : {}),
+      ...(pipeMatch.catalogPoolExhausted
+        ? { catalogPoolExhausted: true }
+        : {}),
       ...(edge?.to
         ? (() => {
           const toNode = nodesById.get(edge.to);
@@ -280,8 +296,15 @@ export function buildHydraulicsProposal({
   } else if (!hasPipes) {
     unavailableReason = 'Трубы из каталога не подобраны — проверьте каталог pipes.';
   } else if (!hasAnyPump) {
-    pumpUnavailableReason =
-      'Насос из каталога не подобран для расчётной рабочей точки — см. предупреждения.';
+    if (matching.builtinPumpDuty?.status === 'below_manufacturer_qmin') {
+      pumpUnavailableReason =
+        `Встроенный насос котла учтён: расход ${matching.builtinPumpDuty.designFlowM3PerHour} м³/ч `
+        + `ниже заводского q_min=${matching.builtinPumpDuty.heatingCircuitMinFlowM3h} м³/ч — `
+        + 'отдельный насос из каталога не подбирается.';
+    } else {
+      pumpUnavailableReason =
+        'Насос из каталога не подобран для расчётной рабочей точки — см. предупреждения.';
+    }
   }
 
   return {

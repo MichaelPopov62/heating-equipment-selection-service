@@ -72,6 +72,10 @@ export interface HydraulicsApplianceRulesDoc {
   applianceKind: 'hydraulics';
   schemaVersion: number;
   label: string;
+  /** Мин. внутренний Ø (мм) транзита котла (isMainLine). */
+  mainTransitMinInternalDiameterMm: number;
+  /** Мин. внутренний Ø (мм) веток и зональных участков. */
+  branchMinInternalDiameterMm: number;
   velocityLimitsMps: { mainMax: number; branchMax: number; mainMin: number; branchMin?: number };
   radiatorBranchGrouping: {
     minFlowM3PerHourForIndividualBranch: number;
@@ -195,6 +199,11 @@ export interface RadiatorApplianceRules {
   schemaVersion: number;
   label: string;
   panelLengthRangeMm: { min: number; max: number };
+  /** Ф5 «Тамбур»: порог микронагрузки и типы входных зон. */
+  microLoad: {
+    minDesignWattsThreshold: number;
+    entryRoomTypes: string[];
+  };
 }
 
 export type NormalizedApplianceRules =

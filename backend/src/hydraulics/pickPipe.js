@@ -1,6 +1,6 @@
 /**
  * Назначение: подбор трубы из каталога по расходу и скорости.
- * Описание: Минимальный Ø при v ≤ vMax; fallback вверх при перегрузке, вниз при микропотоке.
+ * Описание: Guard Dвн → минимальный Ø при v ≤ vMax; fallback вверх/вниз внутри guard-пула.
  */
 
 import {
@@ -14,6 +14,10 @@ import {
   resolveVelocityMinMps,
 } from './pipeHydraulics.js';
 import { RAD_MICRO_MANIFOLD_NODE_ID } from './groupRadiatorGraphBranches.js';
+import {
+  filterPoolByMinInternalDiameter,
+  resolveMinInternalDiameterMm,
+} from './pipeCatalogPoolFilter.js';
 
 /**
  * @param {'main' | 'branch' | 'ufh_loop' | 'dhw'} segmentRole
@@ -91,6 +95,31 @@ function selectPipeFromPool({ pool, flowM3PerHour, vMax, vMin }) {
 }
 
 /**
+ * @param {import('./types').HydraulicsGraphEdge} edge
+ * @param {import('./types').HydraulicsRules} rules
+ * @param {import('../catalog/types').PipeCatalogItemNormalized[]} materialPool
+ * @returns {{
+ *   pool: import('../catalog/types').PipeCatalogItemNormalized[];
+ *   exhausted: boolean;
+ *   minInternalMm: number;
+ *   mainTransitGuardApplied: boolean;
+ * }}
+ */
+function applyInternalDiameterGuard(edge, rules, materialPool) {
+  const minInternalMm = resolveMinInternalDiameterMm(edge, rules);
+  const { pool, exhausted } = filterPoolByMinInternalDiameter(
+    materialPool,
+    minInternalMm,
+  );
+  return {
+    pool,
+    exhausted,
+    minInternalMm,
+    mainTransitGuardApplied: edge.isMainLine === true,
+  };
+}
+
+/**
  * @param {object} args
  * @param {import('./types').HydraulicsGraphEdge} args.edge
  * @param {import('../catalog/types').NormalizedCatalog['pipes']} args.pipes
@@ -148,11 +177,26 @@ export function pickPipeForEdge({
 
   const vMax = resolveVelocityMaxMps(edge.segmentRole, rules);
   const vMin = resolveVelocityMinMps(edge.segmentRole, rules);
-  const pool = filterPipePool(pipes, materialPreference);
-  if (!pool.length) return null;
+  const materialPool = filterPipePool(pipes, materialPreference);
+  if (!materialPool.length) return null;
+
+  const guard = applyInternalDiameterGuard(edge, rules, materialPool);
+  if (guard.exhausted) {
+    return {
+      edgeId: edge.id,
+      catalogPipeId: '',
+      velocityMps: 0,
+      pressureDropKPa: 0,
+      internalDiameterMm: 0,
+      catalogPoolExhausted: true,
+      ...(guard.mainTransitGuardApplied
+        ? { mainTransitGuardApplied: true }
+        : {}),
+    };
+  }
 
   const { pipe: chosen, velocityLimitExceeded, velocityBelowMin } = selectPipeFromPool({
-    pool,
+    pool: guard.pool,
     flowM3PerHour: edge.designFlowM3PerHour,
     vMax,
     vMin,
@@ -179,6 +223,9 @@ export function pickPipeForEdge({
     internalDiameterMm: internalMm,
     ...(velocityLimitExceeded ? { velocityLimitExceeded: true } : {}),
     ...(velocityBelowMin ? { velocityBelowMin: true } : {}),
+    ...(guard.mainTransitGuardApplied
+      ? { mainTransitGuardApplied: true }
+      : {}),
   };
 }
 
@@ -202,6 +249,18 @@ function resolveLocalZetaForEdge(edge, rules, zeta) {
     localZeta += rules.radiatorBranchGrouping.localZetaManifold;
   }
   return localZeta;
+}
+
+/**
+ * @param {import('./types').HydraulicsGraphEdge} edge
+ * @param {import('./types').HydraulicsRules} rules
+ * @returns {number}
+ */
+function resolveVelocityMinForEdge(edge, rules) {
+  if (edge.isMainLine === true) {
+    return rules.velocityLimitsMps.mainMin;
+  }
+  return resolveVelocityMinMps(edge.segmentRole, rules);
 }
 
 /**
@@ -240,21 +299,35 @@ export function pickPipesForGraph({ graph, catalog, dto }) {
           });
 
     if (match) {
-      pipes.push(match);
-      const vMax = resolveVelocityMaxMps(edge.segmentRole, dto.rules);
-      const vMin = resolveVelocityMinMps(edge.segmentRole, dto.rules);
-      if (match.velocityLimitExceeded) {
+      if (match.catalogPoolExhausted) {
+        const minInternal = resolveMinInternalDiameterMm(edge, dto.rules);
         warnings.push(
-          `Участок ${edge.id}: скорость ${match.velocityMps} м/с выше лимита ${vMax} м/с — подобран максимальный Ø каталога.`,
+          `Участок ${edge.id}: в каталоге нет трубы с Dвн ≥ ${minInternal} мм.`,
         );
-      } else if (match.velocityBelowMin) {
-        warnings.push(
-          `Участок ${edge.id}: скорость ${match.velocityMps} м/с ниже минимума ${vMin} м/с — подобран минимальный Ø.`,
-        );
-      } else if (match.velocityMps > vMax) {
-        warnings.push(
-          `Участок ${edge.id}: скорость ${match.velocityMps} м/с выше лимита ${vMax} м/с — проверьте каталог.`,
-        );
+      } else {
+        pipes.push(match);
+        const vMax = resolveVelocityMaxMps(edge.segmentRole, dto.rules);
+        const vMin = resolveVelocityMinForEdge(edge, dto.rules);
+        if (match.velocityLimitExceeded) {
+          warnings.push(
+            `Участок ${edge.id}: скорость ${match.velocityMps} м/с выше лимита ${vMax} м/с — подобран максимальный Ø каталога.`,
+          );
+        } else if (match.velocityBelowMin) {
+          if (match.mainTransitGuardApplied) {
+            warnings.push(
+              `Участок ${edge.id}: скорость ${match.velocityMps} м/с ниже минимума ${vMin} м/с `
+              + `— применён guard Dвн ≥ ${dto.rules.mainTransitMinInternalDiameterMm} мм.`,
+            );
+          } else {
+            warnings.push(
+              `Участок ${edge.id}: скорость ${match.velocityMps} м/с ниже минимума ${vMin} м/с — подобран минимальный Ø.`,
+            );
+          }
+        } else if (match.velocityMps > vMax) {
+          warnings.push(
+            `Участок ${edge.id}: скорость ${match.velocityMps} м/с выше лимита ${vMax} м/с — проверьте каталог.`,
+          );
+        }
       }
     } else if (edge.designFlowM3PerHour > 0) {
       warnings.push(`Участок ${edge.id}: не удалось подобрать трубу из каталога.`);

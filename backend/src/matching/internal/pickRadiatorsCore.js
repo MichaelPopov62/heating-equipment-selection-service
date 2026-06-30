@@ -12,6 +12,9 @@ import {
   buildUfhHeatFluxUpWattsByRoomId,
   resolveMixedRadiatorRoomLoad,
 } from './resolveMixedRadiatorRoomLoad.js';
+import { resolveMicroLoadRadiatorStrategy } from './resolveMicroLoadRadiatorStrategy.js';
+import { pickMinimumViableRadiatorSizing } from './pickMinimumViableRadiatorSizing.js';
+import { resolveRecommendation } from '../../recommendations/recommendationResolver.js';
 import { isMixedRadiatorsUfhHeatingMode } from './mixedRadiatorsUfhMode.js';
 import { resolveKVent } from '../../logic/ventilationReserve.js';
 import {
@@ -323,6 +326,8 @@ function pickRoomRadiatorSizing(args) {
  * @param {'economy' | 'efficient' | null} [args.radiatorLineTier] лінія «Економ» / «Ефективний» (фіксований графік)
  * @param {import('../types/shared-types').UnderfloorHeatingReport | null} [args.underfloorHeating]
  * @param {number | undefined} [args.deltaTSystemK] — input.hydraulics.deltaTSystemK для расхода Q
+ * @param {import('../../dhw/types').RadiatorApplianceRules} [args.radiatorRules]
+ * @param {import('../../types/shared-types').RecommendationCatalogItem[]} [args.recommendations]
  * @returns {import('../types/shared-types').RadiatorsMatchingReport}
  */
 export function pickRadiators({
@@ -335,6 +340,8 @@ export function pickRadiators({
   radiatorLineTier = null,
   underfloorHeating = null,
   deltaTSystemK,
+  radiatorRules = null,
+  recommendations = null,
 } = {}) {
   const supplyC = heatingSystem.supplyC ?? 75;
   const returnC = heatingSystem.returnC ?? 65;
@@ -499,6 +506,9 @@ export function pickRadiators({
 
   const minRoomWattsForWindowWidthRule = 800;
 
+  /** @type {Set<string>} */
+  const microRecCodes = new Set();
+
   const byRoom = (roomsHeatLoss?.rooms ?? []).map((room) => {
     const qEnvelope = room.envelopeWatts ?? 0;
     const qDesignFull = room.designWatts ?? qEnvelope * ventilationReserveFactor;
@@ -523,6 +533,103 @@ export function pickRadiators({
         warnings: [],
         sizingNotes: mixedLoad.sizingNotes,
       };
+    }
+
+    const microRules = radiatorRules?.microLoad ?? null;
+    if (microRules) {
+      const microStrategy = resolveMicroLoadRadiatorStrategy({
+        rules: microRules,
+        room,
+        building,
+        qRad,
+      });
+
+      if (microStrategy.action === 'skip') {
+        microRecCodes.add('REC_RADIATOR_MICRO_LOAD_SKIP');
+        return {
+          roomId: room.id,
+          roomName: room.name,
+          heatLossWatts: qEnvelope,
+          radiatorDesignWatts: 0,
+          flowRateM3PerHour: 0,
+          radiatorModel: '—',
+          outputPerSectionWatts: 0,
+          sections: null,
+          warnings: [],
+          sizingNotes: [...mixedLoad.sizingNotes, ...microStrategy.sizingNotes],
+        };
+      }
+
+      if (microStrategy.action === 'minimum_viable') {
+        const minSized = pickMinimumViableRadiatorSizing({
+          sectionalPool: sortedSectional,
+          panelPoolFiltered,
+          baseDeltaT,
+          targetDeltaT,
+          radiatorConnection,
+          windowOpeningWidthMm: maxWindowWidthByRoom.get(room.id) ?? null,
+          openingHeightMm: maxWindowHeightByRoom.get(room.id) ?? null,
+        });
+
+        if (!minSized) {
+          return {
+            roomId: room.id,
+            roomName: room.name,
+            heatLossWatts: qEnvelope,
+            radiatorDesignWatts: Math.round(qRad),
+            flowRateM3PerHour: radiatorFlowM3h(qRad),
+            radiatorModel: '—',
+            outputPerSectionWatts: 0,
+            sections: null,
+            warnings: ['Не удалось подобрать минимальный радиатор для входной зоны.'],
+            sizingNotes: [...mixedLoad.sizingNotes, ...microStrategy.sizingNotes],
+          };
+        }
+
+        microRecCodes.add('REC_RADIATOR_ENTRY_ZONE_MINIMUM');
+
+        const deliverableWatts = Math.round(
+          minSized.kind === 'panel'
+            ? minSized.adjustedWatts
+            : minSized.adjustedWatts * (minSized.sections ?? 1),
+        );
+        const hydraulicsWatts = Math.max(
+          qRad,
+          deliverableWatts,
+          microRules.minDesignWattsThreshold,
+        );
+
+        const outputLabel =
+          minSized.kind === 'panel'
+            ? Math.max(1, Math.round(minSized.adjustedWatts))
+            : Math.max(1, Math.round(minSized.adjustedWatts));
+
+        return {
+          roomId: room.id,
+          roomName: room.name,
+          heatLossWatts: qEnvelope,
+          radiatorDesignWatts: Math.round(hydraulicsWatts),
+          flowRateM3PerHour: radiatorFlowM3h(hydraulicsWatts),
+          radiatorModel: minSized.radiator.model,
+          outputPerSectionWatts: outputLabel,
+          sections: minSized.sections,
+          sectionsThermalMin: minSized.sectionsThermalMin ?? minSized.sections,
+          windowOpeningWidthMm: maxWindowWidthByRoom.get(room.id) ?? null,
+          radiatorWidthMm: minSized.radiatorWidthMm,
+          widthCoverageRatio:
+            minSized.widthCoverageRatio != null
+              ? Math.round(minSized.widthCoverageRatio * 1000) / 1000
+              : null,
+          widthOk: minSized.widthOk,
+          warnings: [],
+          sizingNotes: [
+            ...mixedLoad.sizingNotes,
+            ...microStrategy.sizingNotes,
+            ...(minSized.sizingNotes ?? []),
+          ],
+          priceBasis: minSized.kind === 'panel' ? 'panel' : 'section',
+        };
+      }
     }
 
     const sized = pickRoomRadiatorSizing({
@@ -643,6 +750,15 @@ export function pickRadiators({
     for (const w of item.warnings ?? []) warnings.push(`[${item.roomName}] ${w}`);
   }
 
+  /** @type {import('../../recommendations/types').ResolvedRecommendation[]} */
+  const resolvedRecommendations = [];
+  if (recommendations) {
+    for (const code of microRecCodes) {
+      const resolved = resolveRecommendation(recommendations, code);
+      if (resolved) resolvedRecommendations.push(resolved);
+    }
+  }
+
   return {
     chosen: chosen
       ? {
@@ -676,5 +792,6 @@ export function pickRadiators({
       thermalRegimePreset: heatingSystem.thermalRegimePreset,
     },
     radiatorSelectionNotes,
+    ...(resolvedRecommendations.length > 0 ? { resolvedRecommendations } : {}),
   };
 }

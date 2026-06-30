@@ -191,6 +191,7 @@ export interface TempsInput {
 
 export type RoomType =
   | 'прихожая'
+  | 'тамбур'
   | 'гостиная'
   | 'коридор'
   | 'спальня'
@@ -872,6 +873,8 @@ export interface HydraulicsMatchingReport {
     internalDiameterMm: number;
     velocityLimitExceeded?: boolean;
     velocityBelowMin?: boolean;
+    mainTransitGuardApplied?: boolean;
+    catalogPoolExhausted?: boolean;
   }>;
   topology?: 'direct' | 'mixing_valve' | 'hydraulic_separator';
   circulationZones?: import('../hydraulics/types').HydraulicsCirculationZone[];
@@ -993,6 +996,8 @@ export interface RadiatorsMatchingReport {
   };
   /** Пояснення щодо сімейства радіаторів / панельних моделей. */
   radiatorSelectionNotes?: string[];
+  /** REC_* по микронагрузке / входным зонам (Ф5). */
+  resolvedRecommendations?: import('../recommendations/types').ResolvedRecommendation[];
 }
 
 export interface WaterHeaterChosenVariant {

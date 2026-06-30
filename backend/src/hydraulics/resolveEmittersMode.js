@@ -34,6 +34,10 @@ export function hydraulicsRulesFromAppliance(hydraulicsRules) {
     localZetaManifold: 1.5,
   };
   return {
+    mainTransitMinInternalDiameterMm:
+      hydraulicsRules.mainTransitMinInternalDiameterMm ?? 20,
+    branchMinInternalDiameterMm:
+      hydraulicsRules.branchMinInternalDiameterMm ?? 12,
     velocityLimitsMps: {
       mainMax: vel.mainMax,
       branchMax: vel.branchMax,

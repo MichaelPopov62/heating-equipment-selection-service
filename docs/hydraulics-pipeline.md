@@ -21,14 +21,46 @@
 
 `input.hydraulics.deltaTSystemK` может отличаться от ΔT графика — это нормально для проектного расчёта гидравлики. Резолвер — `resolveFlowDeltaTK.js`; расходы по комнатам считаются в `pickRadiatorsCore` и попадают в pipeline через `matching.radiators.byRoom[].flowRateM3PerHour`.
 
-Подбор труб (`pickPipe.js`): трёхрежимный fallback — (1) минимальный Ø при `v ≤ vMax`; (2) при перегрузке (`v > vMax` на всех Ø) — максимальный Ø + `velocityLimitExceeded`; (3) при микропотоке (`v < vMin` на всех Ø) — минимальный Ø + `velocityBelowMin`. Нижний порог веток задаётся `velocityLimitsMps.branchMin` (0 = не отсекать микропотоки).
+## SurveySession (единый pipeline анкеты)
 
-Группировка микроветок (`groupRadiatorGraphBranches.js` + `buildGraph.js`): комнаты с `flow < minFlowM3PerHourForIndividualBranch` или `heatLoad < minHeatLoadWattsForIndividualBranch` объединяются в узел `radiator_manifold` (`rad_micro_manifold`); комнаты с нулевой нагрузкой (`skipRadiator`) не попадают в граф. `Σ designFlow` по веткам графа = `circuits.radiators.totalFlowRateM3PerHour`.
+Все мутации анкеты проходят через `dispatch` → `runSurveyMutationPipeline` (`frontend/src/surveySession/`). Подробнее — [`frontend-calc-runner.md`](frontend-calc-runner.md).
 
-| Поле `velocityLimitsMps` | Назначение | MVP |
-|--------------------------|------------|-----|
-| `mainMin` / `mainMax` | Магистраль котла | 0.2 / 0.8 м/с |
-| `branchMin` / `branchMax` | Ветки радиаторов | 0 / 0.5 м/с |
+Кратко:
+
+1. `reduceSurveyMutation` — черновик
+2. `migrateDerivedState` — синхронизация ТП, layout v3 (`wiringLayoutV3`)
+3. `buildCalcInputKeyFromDraft` — ключ calc
+4. `decideCalcAction` — schedule / abort / manual
+5. `useSurveyCalcRunner` — HTTP-исполнитель (`managedBySession`)
+
+Черновик: `SURVEY_DRAFT_SCHEMA_VERSION=4`, поля `hydraulicsForm`, `wiringLayoutV3`. Verify: `cd frontend && npm run verify:survey-session`.
+
+Подбор труб (`pickPipe.js` + `pipeCatalogPoolFilter.js`): **сначала guard Dвн** (`mainTransitMinInternalDiameterMm` / `branchMinInternalDiameterMm` из `appliances.hydraulics` v4), затем трёхрежимный fallback внутри отфильтрованного пула — (1) минимальный Ø при `v ≤ vMax`; (2) при перегрузке — max Ø + `velocityLimitExceeded`; (3) при микропотоке — min Ø из guard-пула + `velocityBelowMin`. На транзите котла (`isMainLine: true`) guard **приоритетнее** `mainMin`.
+
+Группировка микроветок (`groupRadiatorGraphBranches.js` + `buildGraph.js`): комнаты с `flow < minFlowM3PerHourForIndividualBranch` или `heatLoad < minHeatLoadWattsForIndividualBranch` объединяются в узел `radiator_manifold` (`rad_micro_manifold`); комнаты с нулевой нагрузкой (`skipRadiator` от ТП или **Ф5 skip** внутренних микрокомнат) не попадают в граф. `Σ designFlow` по веткам графа = `circuits.radiators.totalFlowRateM3PerHour`.
+
+### Ф5 «Тамбур» — микронагрузка на радиатор
+
+Порог и типы входных зон — `appliances.radiator.microLoad` (v2): `minDesignWattsThreshold` (150 Вт), `entryRoomTypes` (`прихожая`, `коридор`, `тамбур`).
+
+| Условие | Действие |
+|---------|----------|
+| `qRad < порога` и (тип входной зоны **или** `roomExteriorLayout` = `facade`/`corner`) | Минимальный прибор (`pickMinimumViableRadiatorSizing`), `radiatorDesignWatts ≥ порога` для гидравлики |
+| `qRad < порога` и внутреннее помещение | `radiatorDesignWatts = 0` — в микроколлектор / переток |
+| `qRad ≥ порога` | Обычный подбор |
+
+Модуль: `matching/internal/resolveMicroLoadRadiatorStrategy.js`. Verify: `npm run verify:micro-load-radiator`. Рекомендации: `REC_RADIATOR_ENTRY_ZONE_MINIMUM`, `REC_RADIATOR_MICRO_LOAD_SKIP`.
+
+| Поле guard / скорости | Назначение | MVP |
+|-----------------------|------------|-----|
+| `mainTransitMinInternalDiameterMm` | Мин. Dвн (мм) для `isMainLine` | 20 |
+| `branchMinInternalDiameterMm` | Мин. Dвн (мм) для веток | 12 |
+| `mainMin` / `mainMax` | Скорость магистрали | 0.2 / 0.8 м/с |
+| `branchMin` / `branchMax` | Скорость веток | 0 / 0.5 м/с |
+
+**`isMainLine: true`:** `e_boiler_main`, `e_boiler_separator`, `e_main_to_mixing`. Не путать с `segmentRole: main` на `e_*_to_ufh_collector`.
+
+**Исключение:** `segmentRole: ufh_loop` — guard Dвн не применяется (отдельный пул и min номинальный Ø в `ufhLoopHydraulics.js`).
 
 | Поле `radiatorBranchGrouping` | Назначение |
 |-------------------------------|------------|
@@ -43,11 +75,15 @@
 
 | Было (до группировки) | Стало |
 |------------------------|--------|
-| 4 отдельных ребра r1–r4 с Q ≈ 0.01 / 0.005 / 0.004 / 0.002 м³/ч → fallback max Ø (p-27, Ø63) | 1 ребро `e_*_to_rad_micro_manifold`, Q ≈ 0.021 м³/ч → min Ø (p-01, Ø16) |
+| 4 отдельных ребра r1–r4 с Q ≈ 0.01 / 0.005 / 0.004 / 0.002 м³/ч → fallback max Ø (p-27, Ø63) | 1 ребро `e_*_to_rad_micro_manifold`, Q ≈ 0.021 м³/ч → min Ø из guard-пула (Dвн ≥ 12) |
 | r5, r6 — отдельные ветки | без изменений |
 | 6 листьев в балансировке | 3: manifold + r5 + r6 |
 
-Условия: `heatingEmittersMode=mixed`, `underfloorDistributionPreset=auto` → гидрострелка; комнаты с ТП получают `radiatorDesignWatts` за вычетом `heatFluxUpWatts` — малый остаток попадает в `microConsumers` по порогам `radiatorBranchGrouping`. `Σ designFlow` веток графа = `circuits.radiators.totalFlowRateM3PerHour`.
+Условия: `heatingEmittersMode=mixed`, `underfloorDistributionPreset=auto` → гидрострелка; комнаты с ТП получают `radiatorDesignWatts` за вычетом `heatFluxUpWatts` — малый остаток попадает в `microConsumers` по порогам `radiatorBranchGrouping`. `Σ designFlow` веток графа = `circuits.radiators.totalFlowRateM3PerHour`. Транзит котла (`e_boiler_separator`) — Dвн ≥ 20 мм (guard), не p-01.
+
+### Кейс: mixed + ТП + НСУ (квартира, mixing_valve)
+
+Фикстура `apartment_mixed_ufh_mixing_valve` — регрессия guard на `e_boiler_main` / `e_main_to_mixing` при Q≈0,075 м³/ч (низкая отопительная нагрузка, пик ГВС < 50 кВт → авто-НСУ, не гидрострелка).
 
 ### Вне scope этого пайплайна: НСУ (`collector_mixing_valve`)
 
@@ -84,7 +120,8 @@
 | `hydraulics/validatePipelineInput.js` | AJV + cross-validation |
 | `hydraulics/groupRadiatorGraphBranches.js` | Группировка микроветок радиаторов в графе |
 | `hydraulics/buildGraph.js` | Граф (радиаторы до смесителя ТП) |
-| `hydraulics/pickPipe.js` | Подбор труб |
+| `hydraulics/pickPipe.js` | Подбор труб (guard Dвн + скорость) |
+| `hydraulics/pipeCatalogPoolFilter.js` | Guard мин. внутреннего Ø |
 | `hydraulics/buildHydraulicsProposal.js` | Предложение клиенту |
 | `hydraulics/pressureDrop.js` | Δp, критическое кольцо |
 | `hydraulics/circulationLoops.js` | Сумма Δp по веткам |
@@ -110,7 +147,7 @@
 
 ## Правила `appliances.hydraulics`
 
-Документ MongoDB / `backend/data/appliances.json`, **`schemaVersion: 3`** (`branchMin`, `radiatorBranchGrouping`). После изменения — `cd backend && npm run seed` и рестарт API (или TTL `REFERENCE_CACHE_TTL_MS`).
+Документ MongoDB / `backend/data/appliances.json`, **`schemaVersion: 4`** (`branchMin`, `radiatorBranchGrouping`, `mainTransitMinInternalDiameterMm`, `branchMinInternalDiameterMm`). После изменения — `cd backend && npm run seed` и рестарт API (или TTL `REFERENCE_CACHE_TTL_MS`).
 
 Поля попадают в `HydraulicsPipelineInput.rules` и в runtime через `CalcRuntimeContext`.
 
@@ -176,7 +213,29 @@
 
 Поиск котла в каталоге: `source.catalogBoilerId` сопоставляется с `boiler.id` **или** `boiler.model`.
 
-В seed `circulationPump` задан для **Vaillant ecoTEC pro VUW 246/5-3** и **Vaillant ecoTEC plus VU 246/5-5**.
+В seed `circulationPump` задан для **Vaillant ecoTEC pro VUW 246/5-3**, **Vaillant ecoTEC plus VU 246/5-5**, **Baxi ECO Home 24 F** (3 скорости, q_min=0,4 м³/ч) и **Baxi Luna Duo-Tec E 33** (3 скорости, q_min=0,5 м³/ч). Кривые — **полезный напор**; коэффициенты через `fitPumpCurveFromThreePoints` в `pumpCurveMath.js`.
+
+### Встроенный насос Baxi (Ф2)
+
+| Условие | `issue` / `builtinPumpDuty.status` | Действие |
+|---------|-------------------------------------|----------|
+| Q < min(qMin режимов) | `below_manufacturer_qmin` | Встроенный насос **учтён**; для настенного котла **без** fallback в каталог |
+| Q > qMax режима или H(Q) < `pumpMinHeadAtDutyM` | `curve_unavailable` | Режим не подбирается |
+| H(Q) < headTarget | `insufficient_head` | Режим не подбирается |
+| OK | `ok` | `pumpSource: boiler_builtin`, режим с минимальным запасом (без `head_oversized` для встроенного) |
+
+Рекомендация: `WARN_BOILER_HEATING_FLOW_BELOW_MIN` при `below_manufacturer_qmin`.
+
+**Где смотреть в JSON-отчёте:**
+
+| Поле | Путь |
+|------|------|
+| Статус встроенного насоса | `matching.hydraulics.builtinPumpDuty.status` (`ok` \| `below_manufacturer_qmin` \| …) |
+| Режим насоса котла | `matching.hydraulics.pumps[]` с `pumpSource: boiler_builtin` |
+| Структурированное предупреждение | `report.recommendations[]` — код `WARN_BOILER_HEATING_FLOW_BELOW_MIN` |
+| Текст в proposal | `matching.hydraulics.proposal` / `matching.hydraulics.warnings` |
+
+Условие срабатывания: расчётный расход котлового контура ниже `qMin` всех режимов `circulationPump` выбранного котла (Baxi ECO Home 24 F: 0,4 м³/ч; Luna Duo-Tec E 33: 0,5 м³/ч). Для **настенного** котла при `below_manufacturer_qmin` **нет** fallback в каталог насосов — учитывается встроенный насос с предупреждением.
 
 ## Отчёт `matching.hydraulics`
 
@@ -187,6 +246,7 @@
 | `pumps[]` | Подбор по зонам (`HydraulicsPumpMatchItem`) |
 | `pump` | Legacy: котловая зона (`boiler_primary`) |
 | `pumpSource` | `catalog` \| `boiler_builtin` |
+| `builtinPumpDuty` | Встроенный насос котла: Q, q_min, `status`, выбранный режим |
 | `proposal` | Клиентское предложение (трубы, насосы, цены) |
 
 ## Режимы emitters
@@ -195,15 +255,32 @@
 - `ufh_only` — котёл → коллектор ТП (смеситель / гидрострелка при необходимости)
 - `mixed` — параллельно или через смеситель / гидрострелку
 
+## Dev: почему UI не меняется после правок
+
+| Действие | Что обновляет | Чего **не** обновляет |
+|----------|---------------|------------------------|
+| `npm run seed` | MongoDB: `appliances`, `recommendations`, `products` | JS-модули `pickPipe.js`, `buildGraph.js` в памяти API |
+| `npm run start` (рестарт) | Код backend из `backend/src/` | Кэш bundle, если TTL ещё не истёк |
+| Пересчёт в UI (POST `/api/v1/calc`) | JSON-отчёт в React | Ничего без рестарта API при смене **кода** |
+
+**Обязательно после merge/коммита гидравлики:** остановить API (`Ctrl+C`) и снова `cd backend && npm run start` (или `npm run dev` с nodemon).
+
+**После `seed` в dev:** in-memory bundle (`REFERENCE_CACHE_TTL_MS`, по умолчанию 1 ч) может остаться старым. Варианты: рестарт API; `AUTO_INVALIDATE_CACHE=true` + `SYSTEM_INTERNAL_TOKEN` в `backend/.env` (см. `.env.example`); `POST /api/v1/system/invalidate-reference-cache`.
+
+**В UI:** подписи `groupedRoomIds` и `(ниже нормы)` — только в раскрываемом блоке **«Детализация по участкам»**; сводная таблица **«Контур отопления (радиаторы)»** показывает агрегат по позициям каталога (суммарная длина), без списка комнат. `REC_RADIATOR_MICRO_BRANCH_MANIFOLD` (`category: automationHints`) попадает в `report.recommendations`, но **не** в `matching.hydraulics.warnings` — в блоке гидравлики видны только строковые `warnings` pipeline.
+
 ## Verify
 
 ```bash
 cd backend && npm run verify:flow-delta-tk       # SSOT resolveFlowDeltaTK
 cd backend && npm run verify:circulation-flows   # зоны Q, топологии
 cd backend && npm run verify:pump-duty          # зона рабочей точки, геометрия каталога
-cd backend && npm run verify:builtin-boiler-pump # circulationPump котла
-cd backend && npm run verify:pick-pipe           # fallback min/max Ø веток
+cd backend && npm run verify:builtin-boiler-pump # circulationPump котла (Baxi 6 режимов)
+cd backend && npm run verify:fit-pump-curve      # аппроксимация H(Q) Baxi
+cd backend && npm run verify:pick-pipe           # fallback min/max Ø + guard транзита
+cd backend && npm run verify:pipe-catalog-pool-filter  # guard Dвн пула каталога
 cd backend && npm run verify:hydraulics-pipeline # end-to-end фикстуры calc
+cd backend && npm run verify:micro-load-radiator  # Ф5 Тамбур
 cd backend && npm run verify:ufh-loop-hydraulics # гидравлика петель ТП (logic/)
 cd backend && npm run verify:seed-catalog       # контракт products + нормализация насосов
 ```
