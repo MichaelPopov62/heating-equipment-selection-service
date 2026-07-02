@@ -31,7 +31,7 @@
 2. `migrateDerivedState` — синхронизация ТП, layout v3 (`wiringLayoutV3`)
 3. `buildCalcInputKeyFromDraft` — ключ calc
 4. `decideCalcAction` — schedule / abort / manual
-5. `useSurveyCalcRunner` — HTTP-исполнитель (`managedBySession`)
+5. `useSurveyCalc` — HTTP-исполнитель calc (React Query)
 
 Черновик: `SURVEY_DRAFT_SCHEMA_VERSION=4`, поля `hydraulicsForm`, `wiringLayoutV3`. Verify: `cd frontend && npm run verify:survey-session`.
 

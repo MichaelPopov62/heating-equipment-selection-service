@@ -117,7 +117,7 @@ returnC = supplyC − 10
 
 ## Frontend
 
-- Карточки режима: `UfhPresetCards`, загрузка `useUfhModePresetsLoader`
+- Карточки режима: `UfhPresetCards`, загрузка `useUfhModePresetsQuery` (`frontend/src/query/`)
 - Секция: `WarmFloorSection` — при `ufh_only` скрыта схема распределения ТП
 - Payload: `buildCalcRequestPayload.ts` — `ufhPresetId`, `heatingEmittersMode`
 

@@ -1,73 +1,38 @@
-# React + TypeScript + Vite
+# Frontend (HeatCalc)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite + TypeScript + **@tanstack/react-query**. Точка входа: `src/main.tsx` (`QueryProvider` → `App`).
 
-Currently, two official plugins are available:
+## Архитектура
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Слой | Путь | Назначение |
+|------|------|------------|
+| Точка входа | `main.tsx`, `App.tsx`, `AppSurveyContent.tsx` | Провайдер RQ, справочники, форма анкеты |
+| Сессия анкеты | `src/surveySession/` | `SurveySessionProvider`, `dispatch` → pipeline; `report` / `uiPhase` |
+| Серверные данные | `src/query/` | React Query: справочники, calc, проекты |
+| HTTP-клиенты | `src/services/` | Чистые `fetch`-функции (queryFn / mutationFn) |
+| UI-оркестрация | `src/hooks/` | Парсинг отчёта, оценки, проекты (без прямого HTTP) |
+| UI | `src/components/` | Формы и блоки отчёта |
 
-## React Compiler
+### `src/query/`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Модуль | Назначение |
+|--------|------------|
+| `QueryProvider.tsx` | Корневой `QueryClientProvider` |
+| `queryClient.ts`, `queryKeys.ts` | Конфигурация и ключи кэша |
+| `useDebouncedValue.ts` | Debounce автопересчёта (700 ms) |
+| `useReferenceData.ts` | Композиция справочников для `App.tsx` |
+| `useSurveyCalc.ts` | POST `/api/v1/calc` |
+| `queries/*` | envelope, underfloor, ufh-modes, catalog, projects |
+| `mutations/useProjectMutations.ts` | save/load проекта |
 
-## Expanding the ESLint configuration
+Подробнее: [`docs/frontend-calc-runner.md`](../docs/frontend-calc-runner.md), структура в [`Plan.md`](../Plan.md).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Команды
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev          # http://localhost:5173 (прокси /api → backend :3001)
+npm run build
+npm run lint
+npm run verify:survey-session
 ```

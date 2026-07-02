@@ -15,6 +15,15 @@
 | Водяной ТП: композиция base + finish, `warmFloorCalc` | выполнено |
 | ТП: пресеты 45/35 и 40/30, смеситель, гидравлика узла | фаза 0 ✅ → фазы 1–8 |
 
+## Статус MVP (frontend)
+
+| Область | Статус |
+|---------|--------|
+| Анкета, формы, отчёт в UI | выполнено |
+| `SurveySession` — единый pipeline мутаций и calc-state | выполнено |
+| React Query (`@tanstack/react-query`) — справочники, calc, проекты | выполнено |
+| Проекты: файлы, hash-URL, Mongo CRUD | выполнено |
+
 ## Структура сервиса по папкам
 
 ### Корень репозитория
@@ -63,24 +72,80 @@
 
 Сверка контракта: `openapi.yaml` ↔ `validate.js` ↔ `shared-types.d.ts`.
 
-### `frontend/` — клиент (React + Vite + TypeScript)
+### `frontend/` — клиент (React + Vite + TypeScript + React Query)
 
-| Папка / файл | Назначение |
-|--------------|------------|
-| `src/main.tsx`, `src/App.tsx` | Точка входа; `AppSurveyContent` — форма; calc-state в `SurveySessionProvider` |
-| `src/surveySession/` | Единый pipeline: `dispatch` → `runSurveyMutationPipeline` → calc; `wiringLayoutV3` |
-| `src/hooks/useSurveyCalcRunner.ts` | HTTP-исполнитель POST `/api/v1/calc` (`managedBySession`), debounce 700 ms |
-| `src/components/WarmFloorSection/` | Глобальный флаг `waterUnderfloorHeating` |
-| `src/components/RoomsForm/RoomAccordionItem.tsx` | Селекты **основа ТП** + **финишное покрытие** |
-| `src/components/RecommendationsBlock/` | Блок «Тёплый пол» из `calculations.underfloorHeating` |
-| `src/components/HydraulicsProposal/` | Блок гидравлики из `matching.hydraulics` |
-| `src/hooks/useUnderfloorHeatingPresetsLoader.ts` | Загрузка bases + finishes |
-| `src/services/underfloorHeatingPresets.ts` | `GET /api/v1/presets/underfloor-heating` |
-| `src/services/buildCalcRequestPayload.ts` | `basePresetId` + `finishMaterialId` в `building.rooms` |
-| `src/data/fallbackUnderfloorHeatingPresets.ts` | Офлайн-базы ТП |
-| `src/data/fallbackFlooringFinishes.ts` | Офлайн-финиши (4 покрытия) |
-| `src/utils/migrateRoomUnderfloorHeating.ts` | Миграция legacy `presetId` → base + finish |
-| `src/data/fallbackEnvelopePresets.ts` | Fallback ограждений |
+Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md). Черновик анкеты: [`docs/survey-draft.md`](docs/survey-draft.md).
+
+#### Точка входа и корень UI
+
+| Путь | Назначение |
+|------|------------|
+| `src/main.tsx` | `QueryProvider` → `App` (StrictMode) |
+| `src/App.tsx` | `useReferenceData` + `usePresetLists` + `SurveySessionProvider` |
+| `src/AppSurveyContent.tsx` | Шаги анкеты, формы, отчёт; `useSurveySession`, `useCatalogEquipmentQuery`, `useSurveyProject` |
+
+#### `src/query/` — React Query (серверные данные)
+
+| Путь | Назначение |
+|------|------------|
+| `QueryProvider.tsx` | `QueryClientProvider` + devtools (dev) |
+| `queryClient.ts`, `queryKeys.ts` | Дефолты кэша и реестр ключей |
+| `useDebouncedValue.ts` | Debounce 700 ms для автопересчёта calc |
+| `useReferenceData.ts` | Композиция справочных query для `App.tsx` |
+| `useSurveyCalc.ts` | POST `/api/v1/calc`: auto `useQuery` + ручная `useMutation` |
+| `queries/useEnvelopePresetsQuery.ts` | `GET /api/v1/presets/envelope` |
+| `queries/useUnderfloorHeatingPresetsQuery.ts` | `GET /api/v1/presets/underfloor-heating` (bases + finishes) |
+| `queries/useUfhModePresetsQuery.ts` | `GET /api/v1/presets/underfloor-heating/modes` |
+| `queries/useCatalogEquipmentQuery.ts` | `GET /api/v1/catalog` (+ `reloadCatalog`) |
+| `queries/useProjectsListQuery.ts` | Список проектов (диалог) |
+| `queries/useProjectCalculationsQuery.ts` | Список расчётов выбранного проекта |
+| `mutations/useProjectMutations.ts` | save/load проекта и расчётов |
+
+#### `src/surveySession/` — клиентское состояние анкеты (не React Query)
+
+| Путь | Назначение |
+|------|------------|
+| `SurveySessionProvider.tsx` | Контекст: `dispatch`, `report`, `uiPhase`, `useSurveyCalc` |
+| `surveySessionContext.ts`, `useSurveySession.ts` | Типы контекста и хук доступа |
+| `runSurveyMutationPipeline.ts` | `reduce` → `migrateDerivedState` → `decideCalcAction` |
+| `buildCalcInputSnapshot.ts` | `buildCalcPayloadFromDraft`, `buildCalcInputKeyFromDraft`, `canAutoCalcFromDraft` |
+| `wiringLayoutV3.ts`, `migrateDerivedState.ts` | Layout разводки, синхронизация ТП |
+| `surveyDraftBridge.ts` | `SurveyDraft` → `SurveyDraftSnapshot` при `DRAFT_LOADED` |
+
+#### `src/hooks/` — UI-оркестрация (без прямого HTTP)
+
+| Путь | Назначение |
+|------|------------|
+| `useCalcReport.ts` | Парсинг JSON-отчёта для блоков UI |
+| `usePresetLists.ts` | Фильтрация пресетов ограждений по `kind` |
+| `useRoomsOrchestration.ts` | Синхронизация комнат с `objectMeta` |
+| `useSurveyEstimates.ts` | Локальные оценки до ответа API |
+| `useSurveyProject.ts` | Файлы, hash-URL, диалог проектов (поверх RQ mutations/queries) |
+
+#### `src/services/` — HTTP-клиенты (queryFn / mutationFn)
+
+| Путь | Назначение |
+|------|------------|
+| `calc.ts` | `POST /api/v1/calc` |
+| `envelopePresets.ts` | `GET /api/v1/presets/envelope` (+ fallback) |
+| `underfloorHeatingPresets.ts` | `GET /api/v1/presets/underfloor-heating` |
+| `ufhModePresets.ts` | `GET /api/v1/presets/underfloor-heating/modes` |
+| `catalog.ts` | `GET /api/v1/catalog` |
+| `projectsApi.ts` | CRUD `/api/v1/projects/*` |
+| `buildCalcRequestPayload.ts` | Сборка тела CalcInput (вызывается из `buildCalcInputSnapshot`) |
+
+#### Компоненты, данные, утилиты
+
+| Путь | Назначение |
+|------|------------|
+| `src/components/WarmFloorSection/` | Режим emitters, карточки ТП |
+| `src/components/RoomsForm/RoomAccordionItem.tsx` | Основа ТП + финишное покрытие в комнате |
+| `src/components/RecommendationsBlock/` | Отчёт: теплопотери, котёл, радиаторы, ТП, гидравлика |
+| `src/components/HydraulicsProposal/` | Блок `matching.hydraulics` |
+| `src/components/CatalogEquipmentReference/` | Справочник номенклатуры из каталога |
+| `src/components/ProjectsDialog/` | Диалог проектов на сервере |
+| `src/data/fallback*.ts` | Офлайн-fallback справочников |
+| `src/utils/migrateRoomUnderfloorHeating.ts` | Legacy `presetId` → base + finish |
 | `src/styles/` | Общие CSS-переменные и элементы форм |
 
 В заголовке каждого исходного файла — комментарий «Назначение / Описание».
@@ -245,7 +310,7 @@ flowchart TB
 
 | # | Задача | Статус |
 |---|--------|--------|
-| 3.1 | `fetchUnderfloorHeatingPresets()`, `useUnderfloorHeatingPresetsLoader` | ✅ |
+| 3.1 | `fetchUnderfloorHeatingPresets()`, `useUnderfloorHeatingPresetsQuery` | ✅ |
 | 3.2 | Два селекта: основа ТП + финиш в `RoomAccordionItem` | ✅ |
 | 3.3 | Блок «Тёплый пол» в `RecommendationsBlock` | ✅ |
 | 3.4 | Fallback: `fallbackUnderfloorHeatingPresets.ts`, `fallbackFlooringFinishes.ts` | ✅ |

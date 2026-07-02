@@ -6,10 +6,6 @@
 import type { EnvelopePreset } from '../types/envelope';
 import { FALLBACK_ENVELOPE_PRESETS } from '../data/fallbackEnvelopePresets';
 import { envelopePresetKindNormalized } from '../utils/envelopePresetKind';
-import { fetchOnce } from '../utils/fetchOnce';
-
-const ENVELOPE_PRESETS_ONCE_KEY = 'GET /api/v1/presets/envelope';
-
 /** Нормализация элементов ответа API и восстановление kind, если поле отсутствует. */
 function normalizePresetsList(arr: unknown[]): EnvelopePreset[] {
   const out: EnvelopePreset[] = [];
@@ -47,7 +43,7 @@ function mergeWithFallback(api: EnvelopePreset[]): EnvelopePreset[] {
  * чтобы селекты стен/пола/окон не оставались пустыми.
  */
 export function fetchEnvelopePresets(): Promise<EnvelopePreset[]> {
-  return fetchOnce(ENVELOPE_PRESETS_ONCE_KEY, loadEnvelopePresetsFromApi);
+  return loadEnvelopePresetsFromApi();
 }
 
 /**

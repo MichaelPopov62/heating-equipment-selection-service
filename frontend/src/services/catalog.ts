@@ -3,10 +3,6 @@
  * Описание: Загрузка снимка каталога с GET /api/v1/catalog для справочника в UI.
  */
 
-import { fetchOnce, invalidateFetchOnce } from '../utils/fetchOnce';
-
-const CATALOG_EQUIPMENT_ONCE_KEY = 'GET /api/v1/catalog';
-
 /** Типичная подсказка при недоступном upstream в dev (см. frontend/vite.config.ts). */
 const CATALOG_BACKEND_HINT =
   'Запустите API-сервер из каталога backend (npm run start). В режиме разработки Vite проксирует запросы /api на http://localhost:3001 — пока backend не слушает этот порт, браузер может получить ошибку шлюза (502).';
@@ -38,14 +34,9 @@ function catalogFailureMessage(status: number, raw: unknown): string {
 
 /**
  * Загружает GET /api/v1/catalog и возвращает сводку для отображения.
- *
- * @param {boolean} [force=false] — сбросить кэш fetchOnce (reloadCatalog в UI).
  */
-export function fetchCatalogEquipment(force = false): Promise<CatalogEquipmentSnapshot> {
-  if (force) {
-    invalidateFetchOnce(CATALOG_EQUIPMENT_ONCE_KEY);
-  }
-  return fetchOnce(CATALOG_EQUIPMENT_ONCE_KEY, loadCatalogEquipmentFromApi);
+export function fetchCatalogEquipment(): Promise<CatalogEquipmentSnapshot> {
+  return loadCatalogEquipmentFromApi();
 }
 
 /**

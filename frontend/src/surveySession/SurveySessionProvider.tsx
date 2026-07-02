@@ -4,9 +4,8 @@
  */
 
 import {
-  createContext,
   useCallback,
-  useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -14,7 +13,7 @@ import {
 } from 'react';
 
 import type { EnvelopePreset } from '../types/envelope';
-import { useSurveyCalcRunner } from '../hooks/useSurveyCalcRunner';
+import { useSurveyCalc } from '../query/useSurveyCalc';
 import type { CalcReportJson } from '../types/calcApi';
 import { buildCalcPayloadFromDraft, canAutoCalcFromDraft } from './buildCalcInputSnapshot';
 import {
@@ -23,28 +22,17 @@ import {
   endDraftInitializationPhase,
   runSurveyMutationPipeline,
 } from './runSurveyMutationPipeline';
+import {
+  SurveySessionContext,
+  type SurveySessionContextValue,
+} from './surveySessionContext';
 import type {
   SurveyCalcAction,
-  SurveyDraftSnapshot,
   SurveyMutation,
   SurveySessionState,
-  SurveyUiPhase,
 } from './types';
 
-export type SurveySessionContextValue = {
-  state: SurveySessionState;
-  dispatch: (mutation: SurveyMutation) => void;
-  draft: SurveyDraftSnapshot;
-  report: CalcReportJson | null;
-  uiPhase: SurveyUiPhase;
-  calcLoading: boolean;
-  calcError: string | null;
-  canAutoCalc: boolean;
-  runApiCalc: () => Promise<void>;
-  setReportFromProject: (report: CalcReportJson | null) => void;
-};
-
-const SurveySessionContext = createContext<SurveySessionContextValue | null>(null);
+export type { SurveySessionContextValue } from './surveySessionContext';
 
 export type SurveySessionProviderProps = {
   initialState: SurveySessionState;
@@ -62,10 +50,15 @@ export function SurveySessionProvider({
 }: SurveySessionProviderProps) {
   const [session, setSession] = useState<SurveySessionState>(initialState);
   const windowPresetsRef = useRef(windowPresets);
-  windowPresetsRef.current = windowPresets;
-
   const sessionRef = useRef(session);
-  sessionRef.current = session;
+
+  useEffect(() => {
+    windowPresetsRef.current = windowPresets;
+  }, [windowPresets]);
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
 
   const onCalcSuccess = useCallback((report: CalcReportJson) => {
     setSession((prev) => applyCalcResponseOk(prev, report));
@@ -85,18 +78,15 @@ export function SurveySessionProvider({
   const {
     calcLoading,
     calcError: runnerError,
-    beginDraftInitialization,
-    endDraftInitialization,
     scheduleFreshCalc,
     runApiCalc,
     abortInFlightCalc,
-  } = useSurveyCalcRunner({
+  } = useSurveyCalc({
     buildCalcPayload,
     canAutoCalc,
     calcInputKey: session.calcInputKey,
     onCalcSuccess,
     onCalcError,
-    managedBySession: true,
     draftInitializing: session.draftInitializing,
   });
 
@@ -119,10 +109,6 @@ export function SurveySessionProvider({
 
   const dispatch = useCallback(
     (mutation: SurveyMutation) => {
-      if (mutation.type === 'DRAFT_LOADED') {
-        beginDraftInitialization();
-      }
-
       setSession((prev) => {
         const result = runSurveyMutationPipeline(prev, mutation);
         queueMicrotask(() => handleCalcAction(result.calcAction));
@@ -132,17 +118,11 @@ export function SurveySessionProvider({
       if (mutation.type === 'DRAFT_LOADED') {
         queueMicrotask(() => {
           setSession((prev) => endDraftInitializationPhase(prev));
-          endDraftInitialization();
           scheduleFreshCalc();
         });
       }
     },
-    [
-      beginDraftInitialization,
-      endDraftInitialization,
-      handleCalcAction,
-      scheduleFreshCalc,
-    ],
+    [handleCalcAction, scheduleFreshCalc],
   );
 
   const setReportFromProject = useCallback((report: CalcReportJson | null) => {
@@ -178,15 +158,4 @@ export function SurveySessionProvider({
       {children}
     </SurveySessionContext.Provider>
   );
-}
-
-/**
- * @returns {SurveySessionContextValue}
- */
-export function useSurveySession(): SurveySessionContextValue {
-  const ctx = useContext(SurveySessionContext);
-  if (ctx == null) {
-    throw new Error('useSurveySession: вне SurveySessionProvider');
-  }
-  return ctx;
 }

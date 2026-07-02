@@ -5,20 +5,10 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  createProject,
-  getProject,
-  getProjectCalculation,
-  listProjectCalculations,
-  listProjects,
-  postProjectCalc,
-  updateProject,
-} from '../services/projectsApi';
+import { useProjectMutations } from '../query/mutations/useProjectMutations';
+import { useProjectCalculationsQuery } from '../query/queries/useProjectCalculationsQuery';
+import { useProjectsListQuery } from '../query/queries/useProjectsListQuery';
 import type { CalcReportJson } from '../types/calcApi';
-import type {
-  CalculationListItem,
-  ProjectListItem,
-} from '../types/projectsApi';
 import type { SurveyDraft } from '../types/surveyDraft';
 import { buildSurveyDraft } from '../utils/buildSurveyDraft';
 import { downloadJsonFile, downloadTextFile } from '../utils/fileDownload';
@@ -55,11 +45,25 @@ export function useSurveyProject({
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
   const [projectsOpen, setProjectsOpen] = useState(false);
-  const [projectsLoading, setProjectsLoading] = useState(false);
-  const [projectList, setProjectList] = useState<ProjectListItem[]>([]);
-  const [calculations, setCalculations] = useState<CalculationListItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hashAppliedRef = useRef(false);
+
+  const {
+    saveProjectMutation,
+    loadProjectMutation,
+    loadCalculationMutation,
+  } = useProjectMutations();
+
+  const {
+    projectList,
+    projectsLoading,
+    refetch: refetchProjects,
+  } = useProjectsListQuery({ enabled: projectsOpen });
+
+  const { calculations, refetch: refetchCalculations } = useProjectCalculationsQuery({
+    projectId,
+    enabled: projectsOpen && projectId != null,
+  });
 
   const buildDraft = useCallback((): SurveyDraft => {
     const p = getDraftParams();
@@ -137,38 +141,26 @@ export function useSurveyProject({
 
   const saveToServer = useCallback(
     async (withCalc: boolean) => {
-      const name = clientName.trim();
-      if (!name) {
-        showErr('Укажите имя клиента перед сохранением на сервер');
-        return;
-      }
       try {
         const draft = buildDraft();
-        let id = projectId;
-        if (!id) {
-          const created = await createProject({
-            clientName: name,
-            survey: draft,
-          });
-          id = created.project.id;
-          setProjectId(id);
-        } else {
-          await updateProject(id, { clientName: name, survey: draft });
+        const result = await saveProjectMutation.mutateAsync({
+          projectId,
+          clientName,
+          draft,
+          withCalc,
+          canRunCalc,
+          buildCalcPayload,
+        });
+        setProjectId(result.projectId);
+        if (result.report) {
+          setCalcReport(result.report);
         }
-
-        if (withCalc && canRunCalc && id) {
-          const calcRes = await postProjectCalc(id, {
-            calcInput: buildCalcPayload(),
-            survey: draft,
-          });
-          setCalcReport(calcRes.report);
+        if (withCalc && result.report) {
           showOk('Проект и расчёт сохранены на сервере');
+        } else if (withCalc && !canRunCalc) {
+          showOk('Проект сохранён (расчёт пропущен: неполная анкета)');
         } else {
-          showOk(
-            withCalc && !canRunCalc
-              ? 'Проект сохранён (расчёт пропущен: неполная анкета)'
-              : 'Проект сохранён на сервере',
-          );
+          showOk('Проект сохранён на сервере');
         }
       } catch (e) {
         const msg = e instanceof Error ? e.message : 'Ошибка сохранения';
@@ -180,11 +172,12 @@ export function useSurveyProject({
       }
     },
     [
-      clientName,
-      projectId,
       buildDraft,
       buildCalcPayload,
       canRunCalc,
+      clientName,
+      projectId,
+      saveProjectMutation,
       setCalcReport,
       showOk,
       showErr,
@@ -233,17 +226,12 @@ export function useSurveyProject({
   }, [buildDraft, showOk, showErr]);
 
   const refreshProjectList = useCallback(async () => {
-    setProjectsLoading(true);
     try {
-      const res = await listProjects({ limit: 50 });
-      setProjectList(res.projects);
+      await refetchProjects();
     } catch (e) {
       showErr(e instanceof Error ? e.message : 'Не удалось загрузить проекты');
-      setProjectList([]);
-    } finally {
-      setProjectsLoading(false);
     }
-  }, [showErr]);
+  }, [refetchProjects, showErr]);
 
   const openProjectsPanel = useCallback(() => {
     setProjectsOpen(true);
@@ -253,54 +241,52 @@ export function useSurveyProject({
   const loadProjectById = useCallback(
     async (id: string) => {
       try {
-        const res = await getProject(id, { includeLastCalculation: true });
-        const surveyRaw = res.project.survey;
-        if (surveyRaw && typeof surveyRaw === 'object') {
-          const draft = parseSurveyDraft(surveyRaw);
-          draft.projectId = res.project.id;
-          draft.clientName = res.project.clientName;
-          applyDraftAndMeta(draft);
+        const result = await loadProjectMutation.mutateAsync({ projectId: id });
+        if (result.draft) {
+          applyDraftAndMeta(result.draft);
         } else {
-          setClientName(res.project.clientName);
-          setProjectId(res.project.id);
+          setClientName(result.clientName);
+          setProjectId(result.projectId);
         }
-        const calcList = await listProjectCalculations(id, { limit: 10 });
-        setCalculations(calcList.calculations);
-        const latest = calcList.calculations[0];
-        if (latest) {
-          try {
-            const full = await getProjectCalculation(id, latest.id);
-            setCalcReport(full.calculation.report);
-          } catch {
-            /* отчёт опционален */
-          }
+        if (result.report) {
+          setCalcReport(result.report);
         }
         setProjectsOpen(false);
-        showOk(`Загружен проект: ${res.project.clientName}`);
+        showOk(`Загружен проект: ${result.clientName}`);
+        void refetchCalculations();
       } catch (e) {
         showErr(e instanceof Error ? e.message : 'Не удалось открыть проект');
       }
     },
-    [applyDraftAndMeta, setCalcReport, showOk, showErr],
+    [
+      applyDraftAndMeta,
+      loadProjectMutation,
+      refetchCalculations,
+      setCalcReport,
+      showOk,
+      showErr,
+    ],
   );
 
   const loadCalculationById = useCallback(
     async (calcId: string) => {
       if (!projectId) return;
       try {
-        const res = await getProjectCalculation(projectId, calcId);
-        setCalcReport(res.calculation.report);
+        const report = await loadCalculationMutation.mutateAsync({
+          projectId,
+          calculationId: calcId,
+        });
+        setCalcReport(report);
         showOk('Загружен сохранённый расчёт');
       } catch (e) {
         showErr(e instanceof Error ? e.message : 'Не удалось загрузить расчёт');
       }
     },
-    [projectId, setCalcReport, showOk, showErr],
+    [projectId, loadCalculationMutation, setCalcReport, showOk, showErr],
   );
 
   const startNewProject = useCallback(() => {
     setProjectId(null);
-    setCalculations([]);
     showOk('Новый проект — сохраните на сервер, чтобы получить id');
   }, [showOk]);
 

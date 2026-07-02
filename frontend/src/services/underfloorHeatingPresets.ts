@@ -9,10 +9,6 @@ import type {
   UnderfloorHeatingBasePreset,
   UnderfloorHeatingPresetsBundle,
 } from '../types/underfloorHeating';
-import { fetchOnce } from '../utils/fetchOnce';
-
-const UFH_BASES_FINISHES_ONCE_KEY = 'GET /api/v1/presets/underfloor-heating';
-
 function normalizeBases(arr: unknown[]): UnderfloorHeatingBasePreset[] {
   const out: UnderfloorHeatingBasePreset[] = [];
   for (const item of arr) {
@@ -75,7 +71,7 @@ function mergeFinishes(api: FlooringFinishMaterial[]): FlooringFinishMaterial[] 
 
 /** Загружает bundle: bases + finishes (GET /api/v1/presets/underfloor-heating). */
 export function fetchUnderfloorHeatingPresets(): Promise<UnderfloorHeatingPresetsBundle> {
-  return fetchOnce(UFH_BASES_FINISHES_ONCE_KEY, loadUnderfloorHeatingPresetsFromApi);
+  return loadUnderfloorHeatingPresetsFromApi();
 }
 
 /**

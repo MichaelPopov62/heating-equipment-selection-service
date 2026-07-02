@@ -24,7 +24,7 @@
 | Парсинг (алиас) | `parseSurveyDraft()` → `migrateSurveyDraft()` |
 | Применение в сессию | `DRAFT_LOADED` → `runSurveyMutationPipeline` |
 
-Точки вызова загрузки: файл JSON, `projects.survey` на сервере, hash-URL (`surveyShare.ts`), хук `useSurveyProject`.
+Точки вызова загрузки: файл JSON, `projects.survey` на сервере (через `useProjectMutations` / `useSurveyProject`), hash-URL (`surveyShare.ts`).
 
 ## Устаревшие поля в snapshot (только при чтении)
 

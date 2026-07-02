@@ -26,7 +26,7 @@ import { HydraulicsSection } from './components/HydraulicsSection/HydraulicsSect
 import type { HydraulicsFormValue } from './types/hydraulics';
 import type { SurveyCurrentStep } from './types/surveyStep';
 import { useCalcReport } from './hooks/useCalcReport';
-import { useSurveySession } from './surveySession/SurveySessionProvider';
+import { useSurveySession } from './surveySession/useSurveySession';
 import { surveyDraftToSessionSnapshot } from './surveySession/surveyDraftBridge';
 import { RecommendationsBlock } from './components/RecommendationsBlock/RecommendationsBlock';
 import {
@@ -49,7 +49,7 @@ import { ProjectsDialog } from './components/ProjectsDialog/ProjectsDialog';
 import type { SurveyDraft } from './types/surveyDraft';
 import type { UfhModePresetId, UfhModePresetCard } from './types/ufhModePreset';
 import type { UnderfloorHeatingBasePreset, FlooringFinishMaterial } from './types/underfloorHeating';
-import { useCatalogEquipmentLoader } from './hooks/useCatalogEquipmentLoader';
+import { useCatalogEquipmentQuery } from './query/queries/useCatalogEquipmentQuery';
 
 const CALC_SCHEME_VALUES: readonly HotWaterBoilerPowerMatchingScheme[] = [
   ...HOT_WATER_BOILER_MATCHING_SCHEME_ENUM,
@@ -127,10 +127,13 @@ export function AppSurveyContent({
   } = draft;
 
   const draftRef = useRef(draft);
-  draftRef.current = draft;
+
+  useEffect(() => {
+    draftRef.current = draft;
+  }, [draft]);
 
   const { catalogSnap, catalogSnapLoading, catalogSnapError, reloadCatalog } =
-    useCatalogEquipmentLoader();
+    useCatalogEquipmentQuery();
 
   const setCurrentStep = useCallback(
     (step: SurveyCurrentStep) => dispatch({ type: 'SET_CURRENT_STEP', step }),

@@ -163,4 +163,7 @@ cd backend && npm run verify:extract-calculation-summary
 - `backend/src/api/runCalculation.js` — общий calc-пайплайн с `POST /api/v1/calc`
 - `components/schemas/ProjectCalcBody.yaml` — OpenAPI
 - `components/schemas/ProjectDetail.yaml` — `lastCalcInput` в ответе GET project
-- `frontend/src/hooks/useSurveyProject.ts` — сохранение с `{ calcInput, survey }`
+- `frontend/src/hooks/useSurveyProject.ts` — UI-хук: файлы, hash-URL, диалог проектов
+- `frontend/src/query/mutations/useProjectMutations.ts` — React Query: save/load проекта и расчётов
+- `frontend/src/query/queries/useProjectsListQuery.ts` — список проектов при открытии диалога
+- `frontend/src/query/queries/useProjectCalculationsQuery.ts` — список расчётов выбранного проекта

@@ -1,23 +1,27 @@
 /**
- * Назначение: Корень приложения — загрузчики справочников и SurveySessionProvider.
+ * Назначение: Корень приложения — справочники (React Query) и SurveySessionProvider.
  */
 
 import { useMemo } from 'react';
 
 import { AppSurveyContent } from './AppSurveyContent';
-import { useEnvelopePresetsLoader } from './hooks/useEnvelopePresetsLoader';
 import { usePresetLists } from './hooks/usePresetLists';
-import { useUfhModePresetsLoader } from './hooks/useUfhModePresetsLoader';
-import { useUnderfloorHeatingPresetsLoader } from './hooks/useUnderfloorHeatingPresetsLoader';
+import { useReferenceData } from './query/useReferenceData';
 import { createInitialSurveySessionState } from './surveySession/createInitialSurveySessionState';
 import { SurveySessionProvider } from './surveySession/SurveySessionProvider';
 
 function App() {
-  const { envelopePresets, presetsLoading, presetsError } =
-    useEnvelopePresetsLoader();
-
-  const { underfloorHeatingBases, flooringFinishes, underfloorPresetsLoading } =
-    useUnderfloorHeatingPresetsLoader();
+  const {
+    envelopePresets,
+    presetsLoading,
+    presetsError,
+    underfloorHeatingBases,
+    flooringFinishes,
+    underfloorPresetsLoading,
+    ufhModePresets,
+    ufhModePresetsLoading,
+    ufhModePresetsError,
+  } = useReferenceData();
 
   const {
     wallPresets,
@@ -29,12 +33,6 @@ function App() {
     ventilatedInsulationPresets,
     insulationPresets,
   } = usePresetLists(envelopePresets);
-
-  const {
-    ufhModePresets,
-    ufhModePresetsLoading,
-    ufhModePresetsError,
-  } = useUfhModePresetsLoader();
 
   const initialSessionState = useMemo(() => createInitialSurveySessionState(), []);
 

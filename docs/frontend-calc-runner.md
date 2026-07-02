@@ -1,4 +1,4 @@
-# Frontend: оркестрация расчёта (SurveySession + useSurveyCalcRunner)
+# Frontend: оркестрация расчёта (SurveySession + React Query)
 
 Документ описывает слой клиента: единая сессия анкеты, вызов `POST /api/v1/calc`, хранение отчёта и синхронизация с формой.
 
@@ -11,13 +11,16 @@
 | Ответственность | Модуль |
 |-----------------|--------|
 | Состояние `report`, `uiPhase`, `calcInputKey`, черновик | `frontend/src/surveySession/SurveySessionProvider.tsx` |
+| Контекст сессии (хук) | `frontend/src/surveySession/useSurveySession.ts` |
 | Pipeline мутаций | `runSurveyMutationPipeline.ts` → `reduceSurveyMutation` → `migrateDerivedState` → `decideCalcAction` |
-| HTTP calc (debounce, dedup, отмена гонок) | `frontend/src/hooks/useSurveyCalcRunner.ts` (`managedBySession: true`) |
+| HTTP calc (debounce, dedup, отмена гонок) | `frontend/src/query/useSurveyCalc.ts` (React Query) |
+| Справочники (GET) | `frontend/src/query/queries/*`, композиция — `useReferenceData.ts` |
+| Проекты (CRUD) | `frontend/src/query/mutations/useProjectMutations.ts`, `useProjectsListQuery`, `useProjectCalculationsQuery` |
 | Сборка тела запроса | `buildCalcPayloadFromDraft` в `buildCalcInputSnapshot.ts` |
 | Ключ изменений входа | `buildCalcInputKeyFromDraft` в том же модуле |
 | Парсинг отчёта для UI | `frontend/src/hooks/useCalcReport.ts` |
 
-`App.tsx` оборачивает форму в `SurveySessionProvider`. **`calcReport` не хранится в `App.tsx`** — компоненты читают `report` из контекста сессии.
+`main.tsx` оборачивает приложение в `QueryProvider` (`@tanstack/react-query`). `App.tsx` — справочники и `SurveySessionProvider`. **`calcReport` не хранится в `App.tsx`** — компоненты читают `report` из контекста сессии.
 
 ---
 
@@ -29,8 +32,8 @@ flowchart LR
   Reduce --> Migrate[migrateDerivedState]
   Migrate --> Key[buildCalcInputKeyFromDraft]
   Key --> Decide[decideCalcAction]
-  Decide -->|schedule| Runner[useSurveyCalcRunner debounce 700ms]
-  Runner --> API[POST /api/v1/calc]
+  Decide -->|schedule| CalcRQ[useSurveyCalc debounce 700ms]
+  CalcRQ --> API[POST /api/v1/calc]
   API -->|ok| ApplyOk[applyCalcResponseOk — полная замена report]
   API -->|fail| ApplyFail[applyCalcResponseFail — report сохраняется]
 ```
@@ -62,50 +65,63 @@ flowchart LR
 
 ---
 
-## API хука (legacy / внутри сессии)
+## React Query: calc
 
 ```typescript
 const {
   calcLoading,
   calcError,
-  beginDraftInitialization,
-  endDraftInitialization,
   scheduleFreshCalc,
   runApiCalc,
   abortInFlightCalc,
-} = useSurveyCalcRunner({
+} = useSurveyCalc({
   buildCalcPayload,
   canAutoCalc,
   calcInputKey,
   onCalcSuccess,
   onCalcError,
-  managedBySession: true,
   draftInitializing,
 });
 ```
 
-При `managedBySession: true` хук **не** владеет `calcReport` — только loading, HTTP и колбэки.
+Отчёт **не** кэшируется в React Query — после успешного POST колбэк пишет `report` в `SurveySession`.
 
 ### Debounce и dedup
 
-- `SURVEY_CALC_DEBOUNCE_MS = 700`
+- `SURVEY_CALC_DEBOUNCE_MS = 700` (`useDebouncedValue` + `useQuery`)
 - Перед POST сравнивается `JSON.stringify(payload)` с последним успешным — дубликаты не уходят
-- `runApiCalc` (кнопка «Рассчитать») сбрасывает dedup и вызывает POST немедленно
+- `runApiCalc` (кнопка «Рассчитать») — `useMutation`, сброс dedup и немедленный POST
+- `abortInFlightCalc` — `queryClient.cancelQueries({ queryKey: ['calc'] })`
 
 ### Загрузка черновика
 
-`beginDraftInitialization()` в начале `applySurveyDraftState`; `endDraftInitialization()` в `queueMicrotask` после `restoreCalcReport`. На интервале guard блокируется автопересчёт.
+`DRAFT_LOADED` выставляет `draftInitializing` в pipeline; автопересчёт заблокирован (`enabled: false`). После `endDraftInitializationPhase` — `scheduleFreshCalc`.
 
 ---
 
-## Связанные модули (`App.tsx` / `AppSurveyContent.tsx`)
+## React Query: справочники
+
+| Query | Ключ | Сервис |
+|-------|------|--------|
+| Пресеты ограждений | `['presets','envelope']` | `fetchEnvelopePresets` |
+| Базы ТП + финиш | `['presets','underfloor-heating']` | `fetchUnderfloorHeatingPresets` |
+| Режимы ТП | `['presets','ufh-modes']` | `fetchUfhModePresets` |
+| Каталог | `['catalog']` | `fetchCatalogEquipment` |
+
+`reloadCatalog` — `invalidateQueries` + `refetch` (`useCatalogEquipmentQuery`).
+
+---
+
+## Связанные модули
 
 | Модуль | Назначение |
 |--------|------------|
+| `QueryProvider` | `QueryClientProvider` + devtools |
 | `SurveySessionProvider` | контекст, `dispatch`, `report`, `uiPhase` |
-| `useSurveyCalcRunner` | calc API (исполнитель) |
+| `useSurveyCalc` | calc API (авто query + ручная mutation) |
+| `useReferenceData` | композиция справочных query |
 | `useCalcReport` | парсинг report → DTO для UI |
-| `useSurveyProject` | файлы, Mongo, hash-URL |
+| `useSurveyProject` | файлы, Mongo, hash-URL (поверх project mutations) |
 | `useRoomsOrchestration` | синхронизация комнат с objectMeta |
 | `useSurveyEstimates` | локальные оценки до API |
 | `HydraulicsProposalSection` | блок гидравлики из `matching.hydraulics` |

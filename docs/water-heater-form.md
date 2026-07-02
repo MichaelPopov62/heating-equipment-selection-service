@@ -163,7 +163,7 @@ Discriminated union в `frontend/src/types/waterHeaterMatching.ts`:
 | `frontend/src/utils/waterHeaterSchemeOptions.ts` | Фильтр схем, видимость БКН |
 | `shared/waterHeaterFormContract.js` | Видимость галочки БКН, мерж `objectMeta.indirectDhwSpaceAvailable` |
 | `frontend/src/utils/objectMetaForCalcPayload.ts` | Типизированный re-export shared |
-| `frontend/src/hooks/useSurveyCalcRunner.ts` | Calc API, debounce, begin/end draft guard, restore report |
+| `frontend/src/query/useSurveyCalc.ts` | Calc API (React Query), debounce, draftInitializing guard |
 | `frontend/src/utils/migrateSurveyDraft.ts` | Нормализация snapshot → SurveyDraft |
 | `frontend/src/services/buildCalcRequestPayload.ts` | Сборка CalcInput |
 | `backend/src/matching/index.js` | Оркестрация pickIndirect / pickWaterHeater |
@@ -176,7 +176,7 @@ Discriminated union в `frontend/src/types/waterHeaterMatching.ts`:
 
 1. Типы и утилиты (`waterHeater.ts`, `waterHeaterSchemeOptions`, `validateWaterHeaterForm`, `normalizeWaterHeaterForm`)
 2. Компонент `WaterHeaterForm` + CSS
-3. Интеграция в `App.tsx`, `useSurveyCalcRunner`, `migrateSurveyDraft`, `surveyCalcInputKey`
+3. Интеграция в `App.tsx`, `useSurveyCalc`, `migrateSurveyDraft`, `surveyCalcInputKey`
 4. Удаление дублирующей галочки БКН из `ObjectMetaForm`
 5. Перенос селектора схемы со шага «Котёл» на «Водонагреватель»
 6. Превью через `WaterHeaterMatchingPreview` на шаге формы и в сайдбаре
