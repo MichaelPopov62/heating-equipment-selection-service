@@ -98,14 +98,14 @@ export function pipeVelocityMps(pipe, flowM3PerHour) {
 }
 
 /**
- * @param {'main' | 'branch' | 'ufh_loop' | 'dhw'} segmentRole
+ * @param {'main' | 'trunk' | 'branch' | 'ufh_loop' | 'ufh_collector_transit' | 'dhw'} segmentRole
  * @param {import('./types').HydraulicsRules} rules
  * @returns {number}
  */
 export function resolveVelocityMinMps(segmentRole, rules) {
   const limits = rules.velocityLimitsMps;
-  if (segmentRole === 'main') return limits.mainMin;
-  if (segmentRole === 'branch' || segmentRole === 'dhw') {
+  if (segmentRole === 'main' || segmentRole === 'trunk') return limits.mainMin;
+  if (segmentRole === 'branch' || segmentRole === 'dhw' || segmentRole === 'ufh_collector_transit') {
     return limits.branchMin ?? 0;
   }
   return 0;

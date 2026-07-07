@@ -70,7 +70,7 @@ export function resolveMicroManifoldEdgeLength({
   let maxBranchLen = 0;
   for (const consumer of microConsumers) {
     const branch = branches.find((b) => b.roomId === consumer.roomId);
-    const len = branch?.estimatedLengthM ?? defaultBranchLengthM;
+    const len = branch?.pipeLengthToEquipmentM ?? defaultBranchLengthM;
     maxBranchLen = Math.max(maxBranchLen, len);
   }
   return round(manifoldTrunkLengthM + maxBranchLen, 1);

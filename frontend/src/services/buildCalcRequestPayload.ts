@@ -12,6 +12,7 @@ import type { HotWaterFormValue } from '../types/hotWater';
 import type { WaterHeaterFormValue } from '../types/waterHeater';
 import type { RoomFormValue } from '../types/rooms';
 import type { HydraulicsFormValue } from '../types/hydraulics';
+import type { WiringLayoutV3 } from '../surveySession/wiringLayoutV3';
 import { objectMetaForCalcPayload } from '../utils/objectMetaForCalcPayload';
 import { inferRoomExteriorLayout, wallEnvelopeEntriesForRoom } from '../utils/roomExteriorLayout';
 
@@ -30,6 +31,7 @@ export function buildCalcRequestPayload(params: {
   thermalRegimePreset: HeatingThermalRegimePreset;
   ufhPresetId?: UfhModePresetId | null;
   hydraulicsForm?: HydraulicsFormValue;
+  wiringLayoutV3?: WiringLayoutV3;
 }) {
   const {
     rooms,
@@ -43,6 +45,7 @@ export function buildCalcRequestPayload(params: {
     thermalRegimePreset,
     ufhPresetId = null,
     hydraulicsForm,
+    wiringLayoutV3,
   } = params;
 
   const buildingRooms = rooms.map((r) => {
@@ -207,8 +210,19 @@ export function buildCalcRequestPayload(params: {
           hydraulics: {
             mainLineLengthM: hydraulicsForm.mainLineLengthM,
             deltaTSystemK: hydraulicsForm.deltaTSystemK,
+            radiatorWiringSystemType: wiringLayoutV3?.systemType ?? 'auto',
             ...(hydraulicsForm.pipeMaterialPreference
               ? { pipeMaterialPreference: hydraulicsForm.pipeMaterialPreference }
+              : {}),
+            ...(wiringLayoutV3?.branches?.length
+              ? {
+                  radiatorBranchOverrides: wiringLayoutV3.branches
+                    .filter((b) => rooms.some((r) => r.id === b.roomId))
+                    .map((b) => ({
+                      roomId: b.roomId,
+                      pipeLengthToEquipmentM: b.pipeLengthToEquipmentM,
+                    })),
+                }
               : {}),
           },
         }

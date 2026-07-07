@@ -1,5 +1,5 @@
 /**
- * Назначение: контракт layout v3 разводки (черновик анкеты).
+ * Назначение: контракт layout v3 разводки радиаторов (черновик анкеты).
  * Описание: flat consumers/branches → дефолтная схема; systemType auto = серверный buildGraph.
  */
 
@@ -15,7 +15,8 @@ export type WiringSystemType =
 /** Ветка радиаторного контура в layout v3. */
 export type WiringBranchV3 = {
   roomId: string;
-  estimatedLengthM: number;
+  /** Длина подвода от коллектора/магистрали до прибора, м (→ hydraulics.radiatorBranchOverrides). */
+  pipeLengthToEquipmentM: number;
 };
 
 /** Layout разводки в черновике анкеты. */
@@ -57,7 +58,7 @@ function branchesEqual(a: WiringBranchV3[], b: WiringBranchV3[]): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i += 1) {
     if (a[i].roomId !== b[i].roomId) return false;
-    if (a[i].estimatedLengthM !== b[i].estimatedLengthM) return false;
+    if (a[i].pipeLengthToEquipmentM !== b[i].pipeLengthToEquipmentM) return false;
   }
   return true;
 }
@@ -81,7 +82,7 @@ export function adaptFlatRoomsToWiringLayout(
     if (!room.id) continue;
     branches.push({
       roomId: room.id,
-      estimatedLengthM: defaultBranchLengthM,
+      pipeLengthToEquipmentM: defaultBranchLengthM,
     });
   }
 
@@ -133,7 +134,7 @@ export function migrateWiringLayoutOnSystemTypeChange(
 
   for (const room of rooms) {
     if (!room.id || keptIds.has(room.id)) continue;
-    kept.push({ roomId: room.id, estimatedLengthM: defaultBranchLengthM });
+    kept.push({ roomId: room.id, pipeLengthToEquipmentM: defaultBranchLengthM });
   }
 
   if (

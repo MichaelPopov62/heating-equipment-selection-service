@@ -58,20 +58,25 @@ properties:
   layout:
     type: object
     additionalProperties: false
-    required: [mainLineLengthM, radiatorBranches, ufhBranches]
+    required: [mainLineLengthM, radiatorBranches, ufhCollectorTransit]
     properties:
       mainLineLengthM: { type: number, minimum: 0 }
       pipeMaterialPreference:
         type: string
         enum: [pex, metal_plastic, steel]
+      radiatorWiringSystemType:
+        type: string
+        enum: [auto, two-pipe-dead-end, two-pipe-pass, manifold]
+        default: auto
+        description: Тип разводки радиаторов из анкеты (wiringLayoutV3.systemType).
       radiatorBranches:
         type: array
         items:
-          $ref: '#/definitions/BranchLayout'
-      ufhBranches:
+          $ref: '#/definitions/RadiatorBranchLayout'
+      ufhCollectorTransit:
         type: array
         items:
-          $ref: '#/definitions/BranchLayout'
+          $ref: '#/definitions/UfhCollectorTransit'
   rules:
     type: object
     additionalProperties: false
@@ -149,10 +154,12 @@ properties:
       localLossZeta:
         type: object
         additionalProperties: false
-        required: [elbow90, teeBranch, mixingNode, collector]
+        required: [elbow90, teeBranch, teePass, teeBranchTakeoff, mixingNode, collector]
         properties:
           elbow90: { type: number }
           teeBranch: { type: number }
+          teePass: { type: number }
+          teeBranchTakeoff: { type: number }
           mixingNode: { type: number }
           collector: { type: number }
       pumpHeadMarginPercent: { type: number }
@@ -171,13 +178,23 @@ properties:
       primaryFlowMarginPercent: { type: number }
       balancingValveKPaPerTurn: { type: number }
 definitions:
-  BranchLayout:
+  RadiatorBranchLayout:
     type: object
     additionalProperties: false
-    required: [roomId, estimatedLengthM]
+    required: [roomId, pipeLengthToEquipmentM]
     properties:
       roomId: { type: string }
-      estimatedLengthM: { type: number, minimum: 0 }
+      pipeLengthToEquipmentM:
+        type: number
+        minimum: 0
+        description: Подвод магистраль/коллектор → радиатор, м.
+  UfhCollectorTransit:
+    type: object
+    additionalProperties: false
+    required: [floor, transitLengthM]
+    properties:
+      floor: { type: integer, minimum: 1, maximum: 3 }
+      transitLengthM: { type: number, minimum: 0 }
   RadiatorConsumer:
     type: object
     additionalProperties: false
@@ -216,17 +233,7 @@ definitions:
           $ref: '#/definitions/RadiatorConsumer'
       totalFlowRateM3PerHour: { type: number, minimum: 0 }
   UfhLoop:
-    type: object
-    additionalProperties: false
-    required: [loopId, estimatedLengthM, heatLoadWatts, flowRateM3PerHour]
-    properties:
-      loopId: { type: string }
-      estimatedLengthM: { type: number, minimum: 0 }
-      heatLoadWatts: { type: number, minimum: 0 }
-      flowRateM3PerHour: { type: number, minimum: 0 }
-      catalogPipeId:
-        type: string
-        description: Предпочтительная труба из ufhLoopHydraulics (без повторного pickPipe).
+    $ref: ./UfhLoopSpec.yaml
   UfhRoom:
     type: object
     additionalProperties: false

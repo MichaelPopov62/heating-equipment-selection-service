@@ -18,6 +18,11 @@ export function resolveMinInternalDiameterMm(edge, rules) {
   if (edge.isMainLine === true) {
     return rules.mainTransitMinInternalDiameterMm ?? 20;
   }
+  if (edge.segmentRole === 'trunk') {
+    // Распределительный транзит: жёсткий guard 12 мм только для одиночного trunk;
+    // цепочка dead-end/pass — pickTrunkChain.js (монотонное заужение).
+    return rules.branchMinInternalDiameterMm ?? 12;
+  }
   return rules.branchMinInternalDiameterMm ?? 12;
 }
 

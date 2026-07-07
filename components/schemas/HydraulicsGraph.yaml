@@ -21,10 +21,16 @@ properties:
             - ufh_collector
             - radiator_consumer
             - radiator_manifold
+            - radiator_trunk_junction
+            - radiator_distribution_manifold
             - ufh_loop
             - dhw_load
             - indirect_coil
         label: { type: string }
+        floor:
+          type: integer
+          minimum: 1
+          description: Этаж (узел ufh_collector этажа).
         roomId: { type: string }
         roomIds:
           type: array
@@ -50,7 +56,11 @@ properties:
         returnC: { type: number }
         segmentRole:
           type: string
-          enum: [main, branch, ufh_loop, dhw]
+          enum: [main, trunk, branch, ufh_collector_transit, ufh_loop, dhw]
+        teeRole:
+          type: string
+          enum: [pass_through, branch_takeoff]
+          description: Роль тройника для расчёта местных потерь (dead-end / pass).
         isMainLine:
           type: boolean
           description: Транзит котлового контура (boiler_primary); guard Dвн ≥ mainTransitMin.

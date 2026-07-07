@@ -14,18 +14,26 @@ import {
   resolveVelocityMinMps,
 } from './pipeHydraulics.js';
 import { RAD_MICRO_MANIFOLD_NODE_ID } from './groupRadiatorGraphBranches.js';
+import { RAD_DISTRIBUTION_MANIFOLD_NODE_ID } from './radiatorGraphHelpers.js';
 import {
   filterPoolByMinInternalDiameter,
   resolveMinInternalDiameterMm,
 } from './pipeCatalogPoolFilter.js';
+import {
+  orderTrunkChainEdges,
+  pickTrunkChainWithTaper,
+  usesTrunkTaperPick,
+} from './pickTrunkChain.js';
 
 /**
- * @param {'main' | 'branch' | 'ufh_loop' | 'dhw'} segmentRole
+ * @param {'main' | 'trunk' | 'branch' | 'ufh_collector_transit' | 'ufh_loop' | 'dhw'} segmentRole
  * @param {import('./types').HydraulicsRules} rules
  * @returns {number}
  */
 function resolveVelocityMaxMps(segmentRole, rules) {
   return segmentRole === 'main'
+    || segmentRole === 'trunk'
+    || segmentRole === 'ufh_collector_transit'
     ? rules.velocityLimitsMps.mainMax
     : rules.velocityLimitsMps.branchMax;
 }
@@ -236,17 +244,34 @@ export function pickPipeForEdge({
  * @returns {number}
  */
 function resolveLocalZetaForEdge(edge, rules, zeta) {
+  if (edge.segmentRole === 'trunk' && edge.teeRole === 'pass_through') {
+    return zeta.teePass;
+  }
+  if (edge.segmentRole === 'branch' && edge.teeRole === 'branch_takeoff') {
+    return zeta.teeBranchTakeoff + zeta.elbow90;
+  }
+  if (edge.to === RAD_DISTRIBUTION_MANIFOLD_NODE_ID) {
+    return zeta.collector;
+  }
+
   let localZeta =
     edge.segmentRole === 'ufh_loop'
       ? zeta.collector + zeta.elbow90
-      : edge.segmentRole === 'branch'
-        ? zeta.teeBranch + zeta.elbow90
-        : edge.segmentRole === 'main'
-          ? zeta.elbow90
-          : 0;
+      : edge.segmentRole === 'ufh_collector_transit'
+        ? zeta.collector + zeta.elbow90
+        : edge.segmentRole === 'branch'
+          ? zeta.teeBranch + zeta.elbow90
+          : edge.segmentRole === 'main'
+            ? zeta.elbow90
+            : edge.segmentRole === 'trunk'
+              ? zeta.teePass
+              : 0;
 
   if (edge.to === RAD_MICRO_MANIFOLD_NODE_ID) {
     localZeta += rules.radiatorBranchGrouping.localZetaManifold;
+  }
+  if (edge.from === RAD_DISTRIBUTION_MANIFOLD_NODE_ID) {
+    localZeta = zeta.teeBranch + zeta.elbow90;
   }
   return localZeta;
 }
@@ -257,7 +282,7 @@ function resolveLocalZetaForEdge(edge, rules, zeta) {
  * @returns {number}
  */
 function resolveVelocityMinForEdge(edge, rules) {
-  if (edge.isMainLine === true) {
+  if (edge.isMainLine === true || edge.segmentRole === 'trunk') {
     return rules.velocityLimitsMps.mainMin;
   }
   return resolveVelocityMinMps(edge.segmentRole, rules);
@@ -277,30 +302,58 @@ export function pickPipesForGraph({ graph, catalog, dto }) {
   const warnings = [];
   const zeta = dto.rules.localLossZeta;
 
+  /** @type {Map<string, import('./types').HydraulicsPipeMatchItem | null>} */
+  const trunkChainMatches = new Map();
+  /** @type {Set<string>} */
+  const trunkChainEdgeIds = new Set();
+
+  if (usesTrunkTaperPick(dto.layout.radiatorWiringSystemType)) {
+    const chain = orderTrunkChainEdges(graph);
+    for (const edge of chain) {
+      trunkChainEdgeIds.add(edge.id);
+    }
+    if (chain.length > 0) {
+      const chainResults = pickTrunkChainWithTaper({
+        chain,
+        pipes: catalog.pipes ?? [],
+        rules: dto.rules,
+        materialPreference: dto.layout.pipeMaterialPreference,
+        resolveLocalZeta: (edge) => resolveLocalZetaForEdge(edge, dto.rules, zeta),
+        filterMaterialPool: filterPipePool,
+      });
+      for (const [edgeId, match] of chainResults) {
+        trunkChainMatches.set(edgeId, match);
+      }
+    }
+  }
+
   for (const edge of graph.edges) {
     const localZeta = resolveLocalZetaForEdge(edge, dto.rules, zeta);
 
     const preferredId = edge.preferredCatalogPipeId;
     const match =
-      preferredId
-        ? pickPipeForEdgeByCatalogId({
-            edge,
-            pipes: catalog.pipes ?? [],
-            catalogPipeId: preferredId,
-            rules: dto.rules,
-            localZeta,
-          })
-        : pickPipeForEdge({
-            edge,
-            pipes: catalog.pipes ?? [],
-            rules: dto.rules,
-            materialPreference: dto.layout.pipeMaterialPreference,
-            localZeta,
-          });
+      trunkChainEdgeIds.has(edge.id)
+        ? trunkChainMatches.get(edge.id) ?? null
+        : preferredId
+          ? pickPipeForEdgeByCatalogId({
+              edge,
+              pipes: catalog.pipes ?? [],
+              catalogPipeId: preferredId,
+              rules: dto.rules,
+              localZeta,
+            })
+          : pickPipeForEdge({
+              edge,
+              pipes: catalog.pipes ?? [],
+              rules: dto.rules,
+              materialPreference: dto.layout.pipeMaterialPreference,
+              localZeta,
+            });
 
     if (match) {
       if (match.catalogPoolExhausted) {
-        const minInternal = resolveMinInternalDiameterMm(edge, dto.rules);
+        const minInternal = match.trunkTaperFloorMm
+          ?? resolveMinInternalDiameterMm(edge, dto.rules);
         warnings.push(
           `Участок ${edge.id}: в каталоге нет трубы с Dвн ≥ ${minInternal} мм.`,
         );
@@ -317,6 +370,14 @@ export function pickPipesForGraph({ graph, catalog, dto }) {
             warnings.push(
               `Участок ${edge.id}: скорость ${match.velocityMps} м/с ниже минимума ${vMin} м/с `
               + `— применён guard Dвн ≥ ${dto.rules.mainTransitMinInternalDiameterMm} мм.`,
+            );
+          } else if (
+            edge.segmentRole === 'trunk'
+            && match.trunkTaperFromDownstreamMm != null
+          ) {
+            warnings.push(
+              `Участок ${edge.id}: скорость ${match.velocityMps} м/с ниже минимума ${vMin} м/с `
+              + `— удержан Ø ≥ ${match.trunkTaperFromDownstreamMm} мм downstream (без отката к guard 12 мм).`,
             );
           } else {
             warnings.push(

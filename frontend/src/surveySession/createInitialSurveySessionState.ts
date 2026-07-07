@@ -13,7 +13,7 @@ import { createDefaultWindowFormValue } from '../utils/roomWindowDefaults';
 import { recommendedThermalRegimePresetForScheme } from '../types/heatingThermalRegime';
 import { buildCalcInputKeyFromDraft } from './buildCalcInputSnapshot';
 import { createInitialDraftSnapshot } from './migrateDerivedState';
-import { createDefaultWiringLayout } from './wiringLayoutV3';
+import { adaptFlatRoomsToWiringLayout } from './wiringLayoutV3';
 import type { SurveySessionState } from './types';
 
 /**
@@ -26,22 +26,7 @@ export function createInitialSurveySessionState(): SurveySessionState {
     'house',
   );
 
-  const draft = createInitialDraftSnapshot({
-    objectMeta: {
-      objectType: 'house',
-      apartmentStackPosition: 'middle_floor',
-      floors: 1,
-      roomsCount: 1,
-      externalWalls: {
-        presetId: 'wall_gas_concrete_d500',
-        thicknessMm: 300,
-        facadeSystem: 'none',
-      },
-      roofPresetId: 'roof_concrete_insulated_flat',
-      boilerPlacementZone: 'kitchen',
-      ventilationReserveMode: 'natural',
-    },
-    rooms: migrateRoomEnvelopeFields(
+  const initialRooms = migrateRoomEnvelopeFields(
       migrateLegacyRoomTypes([
         {
           id: 'r1',
@@ -62,7 +47,24 @@ export function createInitialSurveySessionState(): SurveySessionState {
           windows: [createDefaultWindowFormValue('r1', 1)],
         },
       ]),
-    ),
+    );
+
+  const draft = createInitialDraftSnapshot({
+    objectMeta: {
+      objectType: 'house',
+      apartmentStackPosition: 'middle_floor',
+      floors: 1,
+      roomsCount: 1,
+      externalWalls: {
+        presetId: 'wall_gas_concrete_d500',
+        thicknessMm: 300,
+        facadeSystem: 'none',
+      },
+      roofPresetId: 'roof_concrete_insulated_flat',
+      boilerPlacementZone: 'kitchen',
+      ventilationReserveMode: 'natural',
+    },
+    rooms: initialRooms,
     hotWaterForm: {
       residents: 0,
       coldWaterDesignSeason: 'winter',
@@ -83,7 +85,7 @@ export function createInitialSurveySessionState(): SurveySessionState {
     waterHeaterForm,
     thermalRegimePreset,
     hydraulicsForm: { ...DEFAULT_HYDRAULICS_FORM },
-    wiringLayoutV3: createDefaultWiringLayout(),
+    wiringLayoutV3: adaptFlatRoomsToWiringLayout(initialRooms, 'auto'),
   });
 
   const calcInputKey = buildCalcInputKeyFromDraft(draft);

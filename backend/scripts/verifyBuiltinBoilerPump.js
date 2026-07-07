@@ -122,7 +122,7 @@ function runCase(boilerModel, operatingModes, designFlow) {
     layout: {
       mainLineLengthM: 8,
       radiatorBranches: [],
-      ufhBranches: [],
+      ufhCollectorTransit: [],
     },
     rules: BASE_RULES,
   };
@@ -240,7 +240,7 @@ function runCase(boilerModel, operatingModes, designFlow) {
           totalFlowRateM3PerHour: 1.0,
         },
       },
-      layout: { mainLineLengthM: 8, radiatorBranches: [], ufhBranches: [] },
+      layout: { mainLineLengthM: 8, radiatorBranches: [], ufhCollectorTransit: [] },
       rules: BASE_RULES,
     },
     pressure: pressureHigh,

@@ -8,7 +8,9 @@ import { round } from '../utils/math.js';
 /** @type {Record<string, string>} */
 const SEGMENT_ROLE_LABELS = {
   main: 'Магистраль',
+  trunk: 'Магистраль (последовательная)',
   branch: 'Ветка радиатора',
+  ufh_collector_transit: 'Транзит коллектора ТП',
   ufh_loop: 'Петля ТП',
   dhw: 'ГВС',
 };
@@ -234,7 +236,7 @@ export function buildHydraulicsProposal({
   const pipeLines = aggregatePipeLinesFromSegments(pipeSegments);
 
   const heatingRoles = new Set(['main', 'branch']);
-  const ufhRoles = new Set(['ufh_loop']);
+  const ufhRoles = new Set(['ufh_collector_transit', 'ufh_loop']);
 
   /** @type {import('./types').HydraulicsPipeLineGroup[]} */
   const pipeLineGroups = [];

@@ -495,10 +495,24 @@ export interface HotWaterInput {
   tropicalShower?: boolean;
 }
 
+export type RadiatorWiringSystemType =
+  | 'auto'
+  | 'two-pipe-dead-end'
+  | 'two-pipe-pass'
+  | 'manifold';
+
 export interface HydraulicsSurveyInput {
   mainLineLengthM?: number;
   deltaTSystemK?: number;
   pipeMaterialPreference?: 'pex' | 'metal_plastic' | 'steel';
+  /** Тип разводки радиаторов из wiringLayoutV3. */
+  radiatorWiringSystemType?: RadiatorWiringSystemType;
+  radiatorBranchOverrides?: HydraulicsRadiatorBranchOverride[];
+}
+
+export interface HydraulicsRadiatorBranchOverride {
+  roomId: string;
+  pipeLengthToEquipmentM: number;
 }
 
 /** @deprecated Используйте HydraulicsSurveyInput */
@@ -602,13 +616,13 @@ export interface UnderfloorHeatingRoomReport {
   loopHydraulicsMinLoopsGeom?: number;
   loops?: Array<{
     loopId: string;
-    estimatedLengthM: number;
+    loopLengthM: number;
     heatLoadWatts: number;
     flowRateM3PerHour: number;
     catalogPipeId?: string;
     hydraulics?: {
       loopId: string;
-      lengthM: number;
+      loopLengthM: number;
       pipeSpacingMm: number;
       heatLoadWatts: number;
       deltaTK: number;

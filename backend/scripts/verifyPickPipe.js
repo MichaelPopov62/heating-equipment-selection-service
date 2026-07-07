@@ -5,6 +5,9 @@
 
 import { getReferenceBundle } from '../src/reference/public.js';
 import { pickPipeForEdge } from '../src/hydraulics/pickPipe.js';
+import {
+  pickTrunkChainWithTaper,
+} from '../src/hydraulics/pickTrunkChain.js';
 import { pipeInternalDiameterMm } from '../src/hydraulics/pipeHydraulics.js';
 import { hydraulicsRulesFromAppliance } from '../src/hydraulics/resolveEmittersMode.js';
 
@@ -142,5 +145,88 @@ runCase('main_transit_normal_Q', mainTransitEdge, 0.2, (m) => {
     throw new Error('main_transit_normal_Q: v выше mainMax');
   }
 });
+
+const trunkEdgeHigh = {
+  id: 'e_trunk_high',
+  from: 'rad_trunk_j_0',
+  to: 'rad_trunk_j_1',
+  lengthM: 3,
+  fluid: 'heating',
+  designFlowM3PerHour: 0,
+  segmentRole: 'trunk',
+  teeRole: 'pass_through',
+};
+
+const trunkEdgeLow = {
+  id: 'e_trunk_low',
+  from: 'rad_trunk_j_1',
+  to: 'rad_trunk_j_2',
+  lengthM: 3,
+  fluid: 'heating',
+  designFlowM3PerHour: 0,
+  segmentRole: 'trunk',
+  teeRole: 'pass_through',
+};
+
+runCase('trunk_high_flow', trunkEdgeHigh, 0.12, (m) => {
+  if (m.internalDiameterMm < 12) {
+    throw new Error(`trunk_high_flow: Dвн ${m.internalDiameterMm} < 12`);
+  }
+});
+
+runCase('trunk_low_flow', trunkEdgeLow, 0.03, (m) => {
+  if (m.internalDiameterMm < 12) {
+    throw new Error(`trunk_low_flow: Dвн ${m.internalDiameterMm} < 12`);
+  }
+});
+
+const highMatch = pickPipeForEdge({
+  edge: { ...trunkEdgeHigh, designFlowM3PerHour: 0.12 },
+  pipes,
+  rules,
+});
+const lowMatch = pickPipeForEdge({
+  edge: { ...trunkEdgeLow, designFlowM3PerHour: 0.03 },
+  pipes,
+  rules,
+});
+if (highMatch && lowMatch && lowMatch.internalDiameterMm > highMatch.internalDiameterMm) {
+  throw new Error(
+    `trunk_monotonic_isolated: Ø low ${lowMatch.internalDiameterMm} > Ø high ${highMatch.internalDiameterMm}`,
+  );
+}
+console.log('OK trunk_monotonic_isolated: Ø high ≥ Ø low при убывающем Q (без цепочки)');
+
+const taperMatches = pickTrunkChainWithTaper({
+  chain: [
+    { ...trunkEdgeHigh, designFlowM3PerHour: 0.12 },
+    { ...trunkEdgeLow, designFlowM3PerHour: 0.03 },
+  ],
+  pipes,
+  rules,
+  resolveLocalZeta: () => 0.6,
+  filterMaterialPool: (catalogPipes) =>
+    [...catalogPipes].sort(
+      (a, b) => pipeInternalDiameterMm(a) - pipeInternalDiameterMm(b),
+    ),
+});
+const taperHigh = taperMatches.get('e_trunk_high');
+const taperLow = taperMatches.get('e_trunk_low');
+if (!taperHigh || !taperLow) {
+  throw new Error('trunk_taper_chain: нет подбора для цепочки');
+}
+if (taperLow.internalDiameterMm > taperHigh.internalDiameterMm) {
+  throw new Error(
+    `trunk_taper_chain: downstream Ø ${taperLow.internalDiameterMm} `
+    + `> upstream Ø ${taperHigh.internalDiameterMm}`,
+  );
+}
+if (taperHigh.velocityMps > rules.velocityLimitsMps.mainMax) {
+  throw new Error(`trunk_taper_chain: upstream v=${taperHigh.velocityMps} > mainMax`);
+}
+console.log(
+  `OK trunk_taper_chain: Ø upstream ${taperHigh.internalDiameterMm} `
+  + `≥ downstream ${taperLow.internalDiameterMm}, v=${taperHigh.velocityMps} м/с`,
+);
 
 console.log('verify:pick-pipe — все кейсы прошли');

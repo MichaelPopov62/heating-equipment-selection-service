@@ -22,7 +22,7 @@ properties:
   segmentLabel: { type: string }
   segmentRole:
     type: string
-    enum: [main, branch, ufh_loop, dhw]
+    enum: [main, trunk, branch, ufh_collector_transit, ufh_loop, dhw]
   lengthM: { type: number }
   catalogPipeId: { type: string }
   brand: { type: string }

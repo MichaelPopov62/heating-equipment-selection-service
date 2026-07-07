@@ -66,7 +66,7 @@ export function UfhLoopHydraulicsTable({
         <thead>
           <tr>
             <th>Петля</th>
-            <th>Длина</th>
+            <th>Длина петли</th>
             <th>Q</th>
             <th>Ø</th>
             <th>v</th>
@@ -79,7 +79,7 @@ export function UfhLoopHydraulicsTable({
             <tr key={loop.loopId}>
               <td>{loop.loopId}</td>
               <td>
-                {loop.lengthM.toFixed(1)} <span className={styles.unit}>м</span>
+                {loop.loopLengthM.toFixed(1)} <span className={styles.unit}>м</span>
               </td>
               <td>
                 {loop.flowRateM3PerHour.toFixed(3)} <span className={styles.unit}>м³/ч</span>

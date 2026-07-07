@@ -3,7 +3,7 @@ additionalProperties: false
 description: Гидравлическая проверка одной петли ТП (ufhLoopHydraulics).
 required:
   - loopId
-  - lengthM
+  - loopLengthM
   - pipeSpacingMm
   - heatLoadWatts
   - deltaTK
@@ -15,7 +15,10 @@ required:
   - warnings
 properties:
   loopId: { type: string }
-  lengthM: { type: number, minimum: 0 }
+  loopLengthM:
+    type: number
+    minimum: 0
+    description: Длина петли в стяжке, м (без транзита до коллектора).
   pipeSpacingMm: { type: integer }
   heatLoadWatts: { type: number, minimum: 0 }
   deltaTK: { type: number, minimum: 0 }

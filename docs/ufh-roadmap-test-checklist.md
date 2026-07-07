@@ -113,7 +113,7 @@
 - [ ] `requiredHeatFluxUpWm2` = Q_потерь / 5
 - [ ] `resolvedPipeSpacingMm` при необходимости &lt; `requestedPipeSpacingMm`
 - [ ] `WARN_UFH_ACTIVE_AREA_INSUFFICIENT` при q_треб &gt; maxAllowable
-- [ ] Длина змейки `≈ heatedAreaM2 / (resolvedPipeSpacingMm/1000)`
+- [ ] Длина петли `loopLengthM` ≈ `heatedAreaM2 / (resolvedPipeSpacingMm/1000) / loopsCount`
 
 **Регрессия:**
 

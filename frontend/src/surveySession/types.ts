@@ -12,7 +12,7 @@ import type { RoomFormValue } from '../types/rooms';
 import type { SurveyCurrentStep } from '../types/surveyStep';
 import type { WaterHeaterFormValue } from '../types/waterHeater';
 import type { HydraulicsFormValue } from '../types/hydraulics';
-import type { WiringLayoutV3, WiringSystemType } from './wiringLayoutV3';
+import type { WiringBranchV3, WiringLayoutV3, WiringSystemType } from './wiringLayoutV3';
 
 /** Фаза UI отчёта: все секции используют один флаг. */
 export type SurveyUiPhase = 'idle' | 'stable' | 'recalculating' | 'error';
@@ -44,6 +44,9 @@ export type SurveyMutation =
   | { type: 'WATER_UFH_FLAG_SET'; enabled: boolean }
   | { type: 'UFH_DISTRIBUTION_PRESET_SET'; preset: UfhDistributionPreset }
   | { type: 'WIRING_SCHEME_SET'; systemType: WiringSystemType }
+  | { type: 'SET_WIRING_BRANCHES'; branches: WiringBranchV3[] }
+  | { type: 'WIRING_BRANCH_LENGTH_SET'; roomId: string; pipeLengthToEquipmentM: number }
+  | { type: 'WIRING_BRANCH_REORDER'; roomId: string; direction: 'up' | 'down' }
   | { type: 'SET_THERMAL_REGIME_PRESET'; preset: HeatingThermalRegimePreset; touched?: boolean }
   | { type: 'SET_HYDRAULICS_FORM'; hydraulicsForm: HydraulicsFormValue }
   | { type: 'DRAFT_LOADED'; draft: SurveyDraftSnapshot; lastCalcReport?: CalcReportJson | null }

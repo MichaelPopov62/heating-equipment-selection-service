@@ -31,7 +31,7 @@ export interface UfhLoopPipeCandidate {
 
 export interface UfhLoopHydraulicsResult {
   loopId: string;
-  lengthM: number;
+  loopLengthM: number;
   pipeSpacingMm: number;
   heatLoadWatts: number;
   deltaTK: number;

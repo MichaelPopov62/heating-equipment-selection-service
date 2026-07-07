@@ -47,7 +47,7 @@ export function computeUfhLoopGeometry({
   for (let i = 0; i < loopsCount; i += 1) {
     loops.push({
       loopId: `${roomId}_loop_${i + 1}`,
-      estimatedLengthM: round(perLoopLength, 1),
+      loopLengthM: round(perLoopLength, 1),
       heatLoadWatts: round(perLoopHeat, 0),
       flowRateM3PerHour: perLoopFlow.flowRateM3PerHour,
     });

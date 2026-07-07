@@ -9,9 +9,31 @@
 
 | Поле | Назначение |
 |------|------------|
-| `hydraulicsForm` | Шаг «Гидравлика»: `deltaTSystemK`, `mainLineLengthM`, `pipeMaterialPreference` |
-| `wiringLayoutV3` | Схема разводки v3: `systemType` (`auto` \| `two-pipe-dead-end` \| …), ветки для UI/графа |
+| `hydraulicsForm` | Шаг «Гидравлика»: `mainLineLengthM` (котёл → коллектор), `deltaTSystemK`, `pipeMaterialPreference` |
+| `wiringLayoutV3` | Схема разводки v3: `systemType` (`auto` \| `two-pipe-dead-end` \| …), `branches[]` (длина коллектор → радиатор); на calc уходит `hydraulics.radiatorWiringSystemType` + `radiatorBranchOverrides` |
 | `ufhPresetId` | Режим emitters (`ufh_only`, `ufh_mixed_radiators`, …); `null` — классика без ТП |
+
+### UI шага «Гидравлика»
+
+Компонент `frontend/src/components/HydraulicsSection/HydraulicsSection.tsx`:
+
+| Поле в UI | Источник в черновике | Поле в POST `/api/v1/calc` |
+|-----------|----------------------|----------------------------|
+| Тип разводки (radio-список с пояснениями) | `wiringLayoutV3.systemType` | `hydraulics.radiatorWiringSystemType` |
+| Длина котёл → коллектор | `hydraulicsForm.mainLineLengthM` | `hydraulics.mainLineLengthM` |
+| Подвод коллектор → радиатор (по комнатам) | `wiringLayoutV3.branches[].pipeLengthToEquipmentM` | `hydraulics.radiatorBranchOverrides[]` |
+| Порядок радиаторов на магистрали | порядок `branches[]` (кнопки ↑↓ для dead-end / pass) | порядок `radiatorBranchOverrides[]` |
+
+Подписи схем — `frontend/src/utils/wiringSystemTypeLabels.ts` (`WIRING_SYSTEM_TYPE_OPTIONS`: заголовок + `description` под каждым radio). Дефолт — `auto` (бейдж «Рекомендуется»).
+
+| `systemType` | Смысл для пользователя |
+|--------------|------------------------|
+| `auto` | Группировка: крупные ветки отдельно, мелкие зоны в микроколлектор |
+| `two-pipe-dead-end` | Последовательная магистраль, убывающий расход и Ø |
+| `two-pipe-pass` | Проходная магистраль, постоянный расход на trunk |
+| `manifold` | Все радиаторы строго параллельно от распределительного узла |
+
+Мутации сессии: `WIRING_SCHEME_SET`, `WIRING_BRANCH_LENGTH_SET`, `WIRING_BRANCH_REORDER`, `SET_HYDRAULICS_FORM`.
 
 Миграция v3→v4: `migrateSurveyDraft.ts` — дефолты для `hydraulicsForm` и `wiringLayoutV3`.
 

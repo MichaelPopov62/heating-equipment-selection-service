@@ -12,10 +12,25 @@ export type HydraulicsFluid = 'heating' | 'water';
 
 export type HydraulicsPipeMaterialPreference = 'pex' | 'metal_plastic' | 'steel';
 
+export type RadiatorWiringSystemType =
+  | 'auto'
+  | 'two-pipe-dead-end'
+  | 'two-pipe-pass'
+  | 'manifold';
+
 export interface HydraulicsSurveyInput {
   mainLineLengthM?: number;
   deltaTSystemK?: number;
   pipeMaterialPreference?: HydraulicsPipeMaterialPreference;
+  /** Тип разводки радиаторов из wiringLayoutV3. */
+  radiatorWiringSystemType?: RadiatorWiringSystemType;
+  /** Ручные длины подводов к радиаторам (приоритет над эвристикой этажа). */
+  radiatorBranchOverrides?: HydraulicsRadiatorBranchOverride[];
+}
+
+export interface HydraulicsRadiatorBranchOverride {
+  roomId: string;
+  pipeLengthToEquipmentM: number;
 }
 
 export interface HydraulicsVelocityLimits {
@@ -59,9 +74,11 @@ export interface HydraulicsApplianceRules {
   ufhLoopPipeResizeEnabled: boolean;
   ufhLoopPressureUtilizationForResize: number;
   roughnessMmByMaterial: Record<string, number>;
-  localLossZeta: {
+    localLossZeta: {
     elbow90: number;
     teeBranch: number;
+    teePass: number;
+    teeBranchTakeoff: number;
     mixingNode: number;
     collector: number;
   };
@@ -103,7 +120,7 @@ export interface HydraulicsRadiatorsCircuit {
 
 export interface HydraulicsUfhLoop {
   loopId: string;
-  estimatedLengthM: number;
+  loopLengthM: number;
   heatLoadWatts: number;
   flowRateM3PerHour: number;
   /** Подобранный Ø из ufhLoopHydraulics — для pipeline без повторного pickPipe. */
@@ -161,15 +178,21 @@ export interface HydraulicsCircuits {
   dhw?: HydraulicsDhwCircuit;
 }
 
-export interface HydraulicsBranchLayout {
+export interface HydraulicsRadiatorBranchLayout {
   roomId: string;
-  estimatedLengthM: number;
+  pipeLengthToEquipmentM: number;
+}
+
+export interface HydraulicsUfhCollectorTransit {
+  floor: number;
+  transitLengthM: number;
 }
 
 export interface HydraulicsLayout {
   mainLineLengthM: number;
-  radiatorBranches: HydraulicsBranchLayout[];
-  ufhBranches: HydraulicsBranchLayout[];
+  radiatorWiringSystemType?: RadiatorWiringSystemType;
+  radiatorBranches: HydraulicsRadiatorBranchLayout[];
+  ufhCollectorTransit: HydraulicsUfhCollectorTransit[];
   pipeMaterialPreference?: HydraulicsPipeMaterialPreference;
 }
 
@@ -306,6 +329,8 @@ export type HydraulicsNodeKind =
   | 'ufh_collector'
   | 'radiator_consumer'
   | 'radiator_manifold'
+  | 'radiator_trunk_junction'
+  | 'radiator_distribution_manifold'
   | 'ufh_loop'
   | 'dhw_load'
   | 'indirect_coil';
@@ -323,6 +348,8 @@ export interface HydraulicsGraphNode {
   roomId?: string;
   roomIds?: string[];
   loopId?: string;
+  /** Этаж коллектора ТП (kind=ufh_collector). */
+  floor?: number;
 }
 
 export interface HydraulicsGraphEdge {
@@ -334,7 +361,9 @@ export interface HydraulicsGraphEdge {
   designFlowM3PerHour: number;
   supplyC?: number;
   returnC?: number;
-  segmentRole: 'main' | 'branch' | 'ufh_loop' | 'dhw';
+  segmentRole: 'main' | 'trunk' | 'branch' | 'ufh_collector_transit' | 'ufh_loop' | 'dhw';
+  /** Роль тройника для ζ (dead-end / pass). */
+  teeRole?: 'pass_through' | 'branch_takeoff';
   /** Транзит котлового контура (boiler_primary): guard Dвн ≥ mainTransitMin. */
   isMainLine?: boolean;
   /** Предпочтительная труба из расчёта петли ТП (ufhLoopHydraulics). */
@@ -406,6 +435,10 @@ export interface HydraulicsPipeMatchItem {
   mainTransitGuardApplied?: boolean;
   /** true — в каталоге нет трубы с требуемым Dвн. */
   catalogPoolExhausted?: boolean;
+  /** Нижняя граница Ø при каскадном подборе trunk (dead-end). */
+  trunkTaperFromDownstreamMm?: number;
+  /** Минимальный Ø, по которому исчерпан пул trunk. */
+  trunkTaperFloorMm?: number;
 }
 
 export interface HydraulicsPumpMatch {
@@ -448,7 +481,7 @@ export interface HydraulicsPipeLineGroup {
 export interface HydraulicsPipeSegmentProposal {
   edgeId: string;
   segmentLabel: string;
-  segmentRole: 'main' | 'branch' | 'ufh_loop' | 'dhw';
+  segmentRole: 'main' | 'trunk' | 'branch' | 'ufh_collector_transit' | 'ufh_loop' | 'dhw';
   lengthM: number;
   catalogPipeId: string;
   brand: string;

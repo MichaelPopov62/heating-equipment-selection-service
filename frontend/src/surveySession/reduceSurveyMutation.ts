@@ -40,6 +40,58 @@ export function reduceSurveyMutation(
           systemType: mutation.systemType,
         },
       };
+    case 'SET_WIRING_BRANCHES':
+      return {
+        ...draft,
+        wiringLayoutV3: {
+          ...draft.wiringLayoutV3,
+          branches: structuredClone(mutation.branches),
+          metadata: {
+            ...draft.wiringLayoutV3.metadata,
+            migratedFrom: 'native-v3',
+            updatedAt: new Date().toISOString(),
+          },
+        },
+      };
+    case 'WIRING_BRANCH_LENGTH_SET':
+      return {
+        ...draft,
+        wiringLayoutV3: {
+          ...draft.wiringLayoutV3,
+          branches: draft.wiringLayoutV3.branches.map((b) =>
+            b.roomId === mutation.roomId
+              ? { ...b, pipeLengthToEquipmentM: mutation.pipeLengthToEquipmentM }
+              : b,
+          ),
+          metadata: {
+            ...draft.wiringLayoutV3.metadata,
+            migratedFrom: 'native-v3',
+            updatedAt: new Date().toISOString(),
+          },
+        },
+      };
+    case 'WIRING_BRANCH_REORDER': {
+      const branches = [...draft.wiringLayoutV3.branches];
+      const idx = branches.findIndex((b) => b.roomId === mutation.roomId);
+      if (idx < 0) return draft;
+      const swapIdx = mutation.direction === 'up' ? idx - 1 : idx + 1;
+      if (swapIdx < 0 || swapIdx >= branches.length) return draft;
+      const tmp = branches[idx];
+      branches[idx] = branches[swapIdx];
+      branches[swapIdx] = tmp;
+      return {
+        ...draft,
+        wiringLayoutV3: {
+          ...draft.wiringLayoutV3,
+          branches,
+          metadata: {
+            ...draft.wiringLayoutV3.metadata,
+            migratedFrom: 'native-v3',
+            updatedAt: new Date().toISOString(),
+          },
+        },
+      };
+    }
     case 'SET_THERMAL_REGIME_PRESET':
       return { ...draft, thermalRegimePreset: mutation.preset };
     case 'SET_HYDRAULICS_FORM':

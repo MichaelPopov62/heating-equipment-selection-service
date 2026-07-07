@@ -170,6 +170,7 @@
 | H.8 | Рекомендации `WARN_PIPE_MAIN_TRANSIT_*`, `WARN_PIPE_CATALOG_*`, `REC_PIPE_MAIN_TRANSIT_GUARD_APPLIED` | ✅ |
 | H.9 | `verify:pipe-catalog-pool-filter`, фикстура `apartment_mixed_ufh_mixing_valve` | ✅ |
 | H.10 | `SurveySession` pipeline (`dispatch` → migrate → calc), `wiringLayoutV3`, `verify:survey-session` | ✅ |
+| H.14 | Интеграция `radiatorWiringSystemType` в граф: фабрика `buildRadiatorSubgraph.js`, dead-end / pass / manifold | ✅ |
 | H.11 | `circulationPump` Baxi ECO Home 24 F + Luna Duo-Tec E 33 (6 режимов, полезный H) | ✅ |
 | H.12 | Ф2: `below_manufacturer_qmin`, `curve_unavailable`, без catalog fallback для wall boiler | ✅ |
 | H.13 | Ф5 «Тамбур»: микронагрузка радиаторов (`resolveMicroLoadRadiatorStrategy`, тип `тамбур`) | ✅ |
@@ -477,7 +478,7 @@ isMixingNodeRequired = heatingSystem.supplyC > ufhCircuit.supplyC
 | Блок | Содержание | Документация |
 |------|------------|--------------|
 | Анкета | `furnitureOccupiedAreaM2` в `room.underfloorHeating` | [`docs/ufh-furniture-active-area.md`](docs/ufh-furniture-active-area.md) |
-| Расчёт | S_акт, q_треб, авто-шаг (вариант B), длина змейки | там же |
+| Расчёт | S_акт, q_треб, авто-шаг (вариант B), длина петли (`loopLengthM`) | там же |
 | Рекомендации | `WARN_UFH_ACTIVE_AREA_INSUFFICIENT`, `REC_UFH_PIPE_SPACING_AUTO`, … | `recommendations.json` |
 | Verify | `npm run verify:ufh-active-area` | `backend/scripts/verifyUfhActiveArea.js` |
 

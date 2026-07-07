@@ -279,6 +279,17 @@ export function RecommendationsBlock({
                         <dd>{room.loopsCount}</dd>
                       </>
                     )}
+                    {room.loops != null && room.loops.length > 0 && (
+                      <>
+                        <dt>Σ длина петель</dt>
+                        <dd>
+                          {room.loops
+                            .reduce((sum, loop) => sum + loop.loopLengthM, 0)
+                            .toFixed(1)}{' '}
+                          <span>м</span>
+                        </dd>
+                      </>
+                    )}
                   </dl>
                   {room.loops != null && room.loops.length > 0 && (
                     <UfhLoopHydraulicsTable

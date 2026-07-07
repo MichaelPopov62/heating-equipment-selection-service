@@ -17,3 +17,17 @@ properties:
     type: string
     enum: [pex, metal_plastic, steel]
     description: Предпочтение материала для pickPipe; не диаметр
+  radiatorWiringSystemType:
+    type: string
+    enum: [auto, two-pipe-dead-end, two-pipe-pass, manifold]
+    default: auto
+    description: >
+      Тип разводки радиаторов из wiringLayoutV3;
+      auto — звезда от распределителя (текущий buildGraph).
+  radiatorBranchOverrides:
+    type: array
+    description: >
+      Ручные длины подводов к радиаторам (приоритет над эвристикой этажа).
+      Порядок элементов задаёт последовательность на магистрали (dead-end / pass).
+    items:
+      $ref: ./RadiatorBranchOverride.yaml

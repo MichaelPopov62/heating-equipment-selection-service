@@ -40,7 +40,7 @@ export type UnderfloorHeatingPresetsBundle = {
 
 export type ParsedUfhLoopHydraulics = {
   loopId: string;
-  lengthM: number;
+  loopLengthM: number;
   flowRateM3PerHour: number;
   internalDiameterMm: number | null;
   velocityMps: number | null;

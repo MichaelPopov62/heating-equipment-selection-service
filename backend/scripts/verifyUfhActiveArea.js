@@ -130,10 +130,10 @@ const expectedLoopLen =
   roomFurniture != null
     ? roomFurniture.heatedAreaM2 / (roomFurniture.resolvedPipeSpacingMm / 1000)
     : 0;
-const actualLoopLen = roomFurniture?.loops?.[0]?.estimatedLengthM ?? 0;
+const actualLoopLen = roomFurniture?.loops?.[0]?.loopLengthM ?? 0;
 check(
   Math.abs(actualLoopLen - expectedLoopLen) < 0.2,
-  `длина змейки ≈ S_акт/шаг (${actualLoopLen} ≈ ${expectedLoopLen.toFixed(1)})`,
+  `длина петли ТП ≈ S_акт/шаг (${actualLoopLen} ≈ ${expectedLoopLen.toFixed(1)})`,
 );
 
 check(

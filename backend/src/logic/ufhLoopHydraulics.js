@@ -17,14 +17,14 @@ import { round } from '../utils/math.js';
 const MAX_LOOPS_HEURISTIC = 32;
 
 /**
- * Оценка числа поворотов 90° в «змейке» петли ТП.
- * @param {number} lengthM
+ * Оценка числа поворотов 90° в контуре петли ТП (MVP: аппроксимация меандра).
+ * @param {number} loopLengthM
  * @param {number} pipeSpacingMm
  * @returns {number}
  */
-export function estimateUfhLoopElbowCount(lengthM, pipeSpacingMm) {
+export function estimateUfhLoopElbowCount(loopLengthM, pipeSpacingMm) {
   const spacingM = Math.max(0.05, (Number(pipeSpacingMm) || 150) / 1000);
-  const len = Math.max(0, Number(lengthM) || 0);
+  const len = Math.max(0, Number(loopLengthM) || 0);
   if (len <= 0) return 0;
   const ratio = len / spacingM;
   if (ratio <= 0) return 2;
@@ -123,7 +123,7 @@ function filterUfhPipePool(pipes, materialPreference, minNominalDiameterMm) {
 /**
  * @param {object} args
  * @param {import('../catalog/types').PipeCatalogItemNormalized} args.pipe
- * @param {number} args.lengthM
+ * @param {number} args.loopLengthM
  * @param {number} args.flowRateM3PerHour
  * @param {number} args.localZeta
  * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} args.hydraulicsRules
@@ -131,12 +131,12 @@ function filterUfhPipePool(pipes, materialPreference, minNominalDiameterMm) {
  */
 function computeUfhLoopPipeHydraulics({
   pipe,
-  lengthM,
+  loopLengthM,
   flowRateM3PerHour,
   localZeta,
   hydraulicsRules,
 }) {
-  if (lengthM <= 0 || flowRateM3PerHour <= 0) return null;
+  if (loopLengthM <= 0 || flowRateM3PerHour <= 0) return null;
 
   const internalMm = pipeInternalDiameterMm(pipe);
   const roughness = resolveRoughnessMm(
@@ -145,7 +145,7 @@ function computeUfhLoopPipeHydraulics({
   );
   const hyd = computeSegmentHydraulics({
     flowM3PerHour: flowRateM3PerHour,
-    lengthM,
+    lengthM: loopLengthM,
     internalDiameterMm: internalMm,
     roughnessMm: roughness,
     localZeta,
@@ -272,7 +272,7 @@ function deriveAppliedFix({ loopsCount, minLoopsGeom, loopHydraulics }) {
  * @param {object} args
  * @param {import('../hydraulics/types').HydraulicsPipeMatchItem} args.defaultMatch
  * @param {import('../catalog/types').PipeCatalogItemNormalized[]} args.pool
- * @param {number} args.lengthM
+ * @param {number} args.loopLengthM
  * @param {number} args.flowRateM3PerHour
  * @param {number} args.localZeta
  * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} args.hydraulicsRules
@@ -283,7 +283,7 @@ function deriveAppliedFix({ loopsCount, minLoopsGeom, loopHydraulics }) {
 function optimizeUfhLoopPipe({
   defaultMatch,
   pool,
-  lengthM,
+  loopLengthM,
   flowRateM3PerHour,
   localZeta,
   hydraulicsRules,
@@ -313,7 +313,7 @@ function optimizeUfhLoopPipe({
     for (const pipe of pool) {
       const computed = computeUfhLoopPipeHydraulics({
         pipe,
-        lengthM,
+        loopLengthM,
         flowRateM3PerHour,
         localZeta,
         hydraulicsRules,
@@ -351,7 +351,7 @@ function optimizeUfhLoopPipe({
     for (const pipe of pool) {
       const computed = computeUfhLoopPipeHydraulics({
         pipe,
-        lengthM,
+        loopLengthM,
         flowRateM3PerHour,
         localZeta,
         hydraulicsRules,
@@ -406,7 +406,7 @@ function optimizeUfhLoopPipe({
 /**
  * @param {object} args
  * @param {string} args.loopId
- * @param {number} args.lengthM
+ * @param {number} args.loopLengthM
  * @param {number} args.pipeSpacingMm
  * @param {number} args.heatLoadWatts
  * @param {number} args.deltaTK
@@ -417,7 +417,7 @@ function optimizeUfhLoopPipe({
  */
 export function validateUfhLoopHydraulics({
   loopId,
-  lengthM,
+  loopLengthM,
   pipeSpacingMm,
   heatLoadWatts,
   deltaTK,
@@ -430,13 +430,13 @@ export function validateUfhLoopHydraulics({
   const thresholds = ufhLoopHydraulicsThresholds(hydraulicsRules);
   const minNominalMm = ufhLoopMinNominalDiameterMm(hydraulicsRules);
   const flow = thermalLoadToFlow({ heatLoadWatts, deltaTK });
-  const elbowCount = estimateUfhLoopElbowCount(lengthM, pipeSpacingMm);
+  const elbowCount = estimateUfhLoopElbowCount(loopLengthM, pipeSpacingMm);
   const localZeta = elbowCount * hydraulicsRules.localLossZeta.elbow90;
 
   /** @type {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult} */
   const base = {
     loopId,
-    lengthM: round(lengthM, 1),
+    loopLengthM: round(loopLengthM, 1),
     pipeSpacingMm,
     heatLoadWatts: round(heatLoadWatts, 0),
     deltaTK,
@@ -454,7 +454,7 @@ export function validateUfhLoopHydraulics({
     warnings,
   };
 
-  if (lengthM <= 0 || heatLoadWatts <= 0) {
+  if (loopLengthM <= 0 || heatLoadWatts <= 0) {
     warnings.push(`Петля ${loopId}: нулевая длина или нагрузка — гидравлика не рассчитана.`);
     return base;
   }
@@ -486,7 +486,7 @@ export function validateUfhLoopHydraulics({
       id: loopId,
       from: 'ufh_collector',
       to: loopId,
-      lengthM,
+      lengthM: loopLengthM,
       fluid: 'heating',
       designFlowM3PerHour: flow.flowRateM3PerHour,
       segmentRole: 'ufh_loop',
@@ -507,7 +507,7 @@ export function validateUfhLoopHydraulics({
   const { finalMatch, pipeResizeAction, pipeResizeReason } = optimizeUfhLoopPipe({
     defaultMatch,
     pool: pool.length ? pool : pipesForPick,
-    lengthM,
+    loopLengthM,
     flowRateM3PerHour: flow.flowRateM3PerHour,
     localZeta,
     hydraulicsRules,
@@ -573,7 +573,7 @@ function buildLoopsArray({
   for (let i = 0; i < count; i += 1) {
     loops.push({
       loopId: `${roomId}_loop_${i + 1}`,
-      estimatedLengthM: round(perLoopLength, 1),
+      loopLengthM: round(perLoopLength, 1),
       heatLoadWatts: round(perLoopHeat, 0),
       flowRateM3PerHour: perLoopFlow.flowRateM3PerHour,
     });
@@ -639,7 +639,7 @@ function buildAndValidateLoopsConfiguration({
   const loopHydraulics = loops.map((loop) =>
     validateUfhLoopHydraulics({
       loopId: loop.loopId,
-      lengthM: loop.estimatedLengthM,
+      loopLengthM: loop.loopLengthM,
       pipeSpacingMm,
       heatLoadWatts: loop.heatLoadWatts,
       deltaTK: thresholds.deltaTK,

@@ -24,6 +24,7 @@ import {
 import { buildCalcPayloadFromDraft } from './surveySession/buildCalcInputSnapshot';
 import { HydraulicsSection } from './components/HydraulicsSection/HydraulicsSection';
 import type { HydraulicsFormValue } from './types/hydraulics';
+import type { WiringSystemType } from './surveySession/wiringLayoutV3';
 import type { SurveyCurrentStep } from './types/surveyStep';
 import { useCalcReport } from './hooks/useCalcReport';
 import { useSurveySession } from './surveySession/useSurveySession';
@@ -124,6 +125,7 @@ export function AppSurveyContent({
     thermalRegimePreset,
     ufhPresetId,
     hydraulicsForm,
+    wiringLayoutV3,
   } = draft;
 
   const draftRef = useRef(draft);
@@ -190,6 +192,36 @@ export function AppSurveyContent({
     (hydraulicsFormValue: HydraulicsFormValue) => {
       if (hydraulicsFormValue === draftRef.current.hydraulicsForm) return;
       dispatch({ type: 'SET_HYDRAULICS_FORM', hydraulicsForm: hydraulicsFormValue });
+    },
+    [dispatch],
+  );
+
+  const setWiringSystemType = useCallback(
+    (systemType: WiringSystemType) => {
+      if (systemType === draftRef.current.wiringLayoutV3.systemType) return;
+      dispatch({ type: 'WIRING_SCHEME_SET', systemType });
+    },
+    [dispatch],
+  );
+
+  const setBranchLength = useCallback(
+    (roomId: string, pipeLengthToEquipmentM: number) => {
+      const prev = draftRef.current.wiringLayoutV3.branches.find(
+        (b) => b.roomId === roomId,
+      );
+      if (prev?.pipeLengthToEquipmentM === pipeLengthToEquipmentM) return;
+      dispatch({
+        type: 'WIRING_BRANCH_LENGTH_SET',
+        roomId,
+        pipeLengthToEquipmentM,
+      });
+    },
+    [dispatch],
+  );
+
+  const reorderBranch = useCallback(
+    (roomId: string, direction: 'up' | 'down') => {
+      dispatch({ type: 'WIRING_BRANCH_REORDER', roomId, direction });
     },
     [dispatch],
   );
@@ -765,6 +797,12 @@ export function AppSurveyContent({
               <HydraulicsSection
                 value={hydraulicsForm}
                 onChange={setHydraulicsForm}
+                wiringSystemType={wiringLayoutV3.systemType}
+                onWiringSystemTypeChange={setWiringSystemType}
+                branches={wiringLayoutV3.branches}
+                rooms={rooms}
+                onBranchLengthChange={setBranchLength}
+                onBranchReorder={reorderBranch}
               />
             )}
 

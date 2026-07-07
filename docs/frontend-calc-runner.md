@@ -61,7 +61,7 @@ flowchart LR
 
 ### `wiringLayoutV3`
 
-Черновик v4 хранит layout разводки (`systemType`, ветки). При `WIRING_SCHEME_SET` и `SET_ROOMS` — `migrateWiringLayoutOnSystemTypeChange` / `adaptFlatRoomsToWiringLayout`. На сервер уходит через `buildCalcPayloadFromDraft`; граф гидравлики строится в `buildGraph.js`.
+Черновик v4 хранит layout разводки (`systemType`, ветки). При `WIRING_SCHEME_SET` и `SET_ROOMS` — `migrateWiringLayoutOnSystemTypeChange` / `adaptFlatRoomsToWiringLayout`. Ручной ввод длин и порядка — `WIRING_BRANCH_LENGTH_SET`, `WIRING_BRANCH_REORDER` (UI: `HydraulicsSection`). На сервер уходит через `buildCalcPayloadFromDraft`; граф гидравлики строится в `buildGraph.js`.
 
 ---
 

@@ -32,7 +32,7 @@ if (elbow85 < 2) {
 
 const single = validateUfhLoopHydraulics({
   loopId: 'test_loop_1',
-  lengthM: 85,
+  loopLengthM: 85,
   pipeSpacingMm: 150,
   heatLoadWatts: 1500,
   deltaTK: rules.ufhLoopDeltaTK,
@@ -82,7 +82,7 @@ for (const h of room.loopHydraulics) {
 }
 
 console.log(
-  `OK room 20m²: loops=${room.loopsCount}, status=${room.resolutionStatus}, L1=${room.loops[0].estimatedLengthM} m, Δp=${room.loopHydraulics[0].pressureDropKPa} kPa`,
+  `OK room 20m²: loops=${room.loopsCount}, status=${room.resolutionStatus}, L1=${room.loops[0].loopLengthM} m, Δp=${room.loopHydraulics[0].pressureDropKPa} kPa`,
 );
 
 const parasitic = shouldTriggerUfhPipeResize({

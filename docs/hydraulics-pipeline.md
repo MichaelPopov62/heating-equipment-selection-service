@@ -35,6 +35,21 @@
 
 Черновик: `SURVEY_DRAFT_SCHEMA_VERSION=4`, поля `hydraulicsForm`, `wiringLayoutV3`. Verify: `cd frontend && npm run verify:survey-session`.
 
+**UI анкеты (шаг «Гидравлика»):** `HydraulicsSection` — вертикальный radio-список типа разводки (4 схемы с пояснениями под каждым пунктом; `auto` — «Рекомендуется»), длина магистрали котёл → коллектор, таблица подводов коллектор → радиатор по комнатам; для `two-pipe-dead-end` / `two-pipe-pass` — порядок строк (кнопки ↑↓). Подписи — `wiringSystemTypeLabels.ts`. См. [`survey-draft.md`](survey-draft.md) § UI шага «Гидравлика`.
+
+### Схемы разводки радиаторов (`wiringLayoutV3` → граф)
+
+| `wiringLayoutV3.systemType` | `hydraulics.radiatorWiringSystemType` | Топология в `buildRadiatorSubgraph.js` |
+|-----------------------------|---------------------------------------|----------------------------------------|
+| `auto` | `auto` | Звезда от `main_collector` + `rad_micro_manifold` для микроветок |
+| `two-pipe-dead-end` | `two-pipe-dead-end` | Цепочка `radiator_trunk_junction`, Q на `trunk` убывает |
+| `two-pipe-pass` | `two-pipe-pass` | Та же цепочка, Q на `trunk` = total |
+| `manifold` | `manifold` | Узел `radiator_distribution_manifold`, параллельные ветки |
+
+Порядок радиаторов на магистрали — `radiatorBranchOverrides[]` (из `wiringLayoutV3.branches`). Новые `segmentRole`: `trunk`; узлы: `radiator_trunk_junction`, `radiator_distribution_manifold`. Verify: `npm run verify:radiator-wiring-graph`, фикстуры `radiators_wiring_*` в `verify:hydraulics-pipeline`.
+
+**Подбор trunk (dead-end / pass):** `pickTrunkChain.js` — каскад от downstream к upstream. На участке с максимальным Q — минимальный Ø при `v ≤ mainMax`. При `v < mainMin` **не** откатываться к guard 12 мм: удерживать `Dвн ≥ Ø` следующего downstream-участка (магистраль только заужается, не расширяется).
+
 Подбор труб (`pickPipe.js` + `pipeCatalogPoolFilter.js`): **сначала guard Dвн** (`mainTransitMinInternalDiameterMm` / `branchMinInternalDiameterMm` из `appliances.hydraulics` v4), затем трёхрежимный fallback внутри отфильтрованного пула — (1) минимальный Ø при `v ≤ vMax`; (2) при перегрузке — max Ø + `velocityLimitExceeded`; (3) при микропотоке — min Ø из guard-пула + `velocityBelowMin`. На транзите котла (`isMainLine: true`) guard **приоритетнее** `mainMin`.
 
 Группировка микроветок (`groupRadiatorGraphBranches.js` + `buildGraph.js`): комнаты с `flow < minFlowM3PerHourForIndividualBranch` или `heatLoad < minHeatLoadWattsForIndividualBranch` объединяются в узел `radiator_manifold` (`rad_micro_manifold`); комнаты с нулевой нагрузкой (`skipRadiator` от ТП или **Ф5 skip** внутренних микрокомнат) не попадают в граф. `Σ designFlow` по веткам графа = `circuits.radiators.totalFlowRateM3PerHour`.
@@ -121,6 +136,7 @@
 | `hydraulics/groupRadiatorGraphBranches.js` | Группировка микроветок радиаторов в графе |
 | `hydraulics/buildGraph.js` | Граф (радиаторы до смесителя ТП) |
 | `hydraulics/pickPipe.js` | Подбор труб (guard Dвн + скорость) |
+| `hydraulics/pickTrunkChain.js` | Каскадный подбор trunk dead-end/pass (монотонное заужение Ø) |
 | `hydraulics/pipeCatalogPoolFilter.js` | Guard мин. внутреннего Ø |
 | `hydraulics/buildHydraulicsProposal.js` | Предложение клиенту |
 | `hydraulics/pressureDrop.js` | Δp, критическое кольцо |
@@ -155,9 +171,12 @@
 
 | Участок | Формула | Зависит от S_meb |
 |---------|---------|------------------|
-| Змейка в полу | `heatedAreaM2 / pipeSpacingMm` | **да** |
-| Подвод коллектор → комната | `estimateBranchLengthM(этаж, ufhCollectorBranch)` | нет |
+| Петля в стяжке (`loopLengthM`) | `heatedAreaM2 / pipeSpacingMm / loopsCount` | **да** |
+| Транзит до коллектора ТП (`ufh_collector_transit`) | `estimateBranchLengthM(этаж, ufhCollectorBranch)` — одно ребро на этаж | нет |
+| Подвод радиатора | `radiatorBranchOverrides[].pipeLengthToEquipmentM` или дефолт из rules | нет |
 | Магистраль котёл → распределитель | `hydraulics.mainLineLengthM` (анкета) | нет |
+
+Топология ТП в `buildGraph.js`: узел `ufh_collector_floor_{F}` на каждый этаж; ребро `ufh_collector_transit` от upstream (mixing_node / main) до коллектора; петли `ufh_loop` параллельно от коллектора, `edge.lengthM = loop.loopLengthM` **без** транзита.
 
 См. [`ufh-furniture-active-area.md`](ufh-furniture-active-area.md).
 

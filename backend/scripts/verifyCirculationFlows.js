@@ -53,7 +53,7 @@ function baseDto(overrides = {}) {
     layout: {
       mainLineLengthM: 8,
       radiatorBranches: [],
-      ufhBranches: [],
+      ufhCollectorTransit: [],
     },
     rules: {
       velocityLimitsMps: { mainMax: 0.8, branchMax: 0.5, mainMin: 0.2 },

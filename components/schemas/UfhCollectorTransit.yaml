@@ -1,0 +1,13 @@
+type: object
+additionalProperties: false
+description: Транзит от узла смешения/гидрострелки до коллектора ТП на этаже.
+required: [floor, transitLengthM]
+properties:
+  floor:
+    type: integer
+    minimum: 1
+    maximum: 3
+  transitLengthM:
+    type: number
+    minimum: 0
+    description: Длина подводящей магистрали ТП до этажного коллектора, м.

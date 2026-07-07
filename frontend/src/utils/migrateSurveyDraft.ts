@@ -155,7 +155,26 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
     })(),
     wiringLayoutV3: (() => {
       if (isRecord(raw.wiringLayoutV3) && raw.wiringLayoutV3.schemaVersion === 3) {
-        return raw.wiringLayoutV3 as WiringLayoutV3;
+        type LegacyWiringBranch = {
+          roomId: string;
+          pipeLengthToEquipmentM?: number;
+          estimatedLengthM?: number;
+        };
+        const wl = raw.wiringLayoutV3 as WiringLayoutV3 & {
+          branches?: LegacyWiringBranch[];
+        };
+        return {
+          ...wl,
+          branches: (wl.branches ?? []).map((b: LegacyWiringBranch) => ({
+            roomId: b.roomId,
+            pipeLengthToEquipmentM:
+              typeof b.pipeLengthToEquipmentM === 'number'
+                ? b.pipeLengthToEquipmentM
+                : typeof b.estimatedLengthM === 'number'
+                  ? b.estimatedLengthM
+                  : 4,
+          })),
+        } satisfies WiringLayoutV3;
       }
       return adaptFlatRoomsToWiringLayout(rooms, 'auto');
     })(),

@@ -85,5 +85,6 @@ export function buildCalcPayloadFromDraft(
     thermalRegimePreset: draft.thermalRegimePreset,
     ufhPresetId: draft.ufhPresetId,
     hydraulicsForm: draft.hydraulicsForm,
+    wiringLayoutV3: draft.wiringLayoutV3,
   });
 }

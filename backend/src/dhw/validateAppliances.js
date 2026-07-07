@@ -390,6 +390,12 @@ function validateAndNormalizeApplianceDoc(doc) {
       localLossZeta: {
         elbow90: requirePosNum(zeta, 'elbow90', `${basePath}.localLossZeta`),
         teeBranch: requirePosNum(zeta, 'teeBranch', `${basePath}.localLossZeta`),
+        teePass: requirePosNum(zeta, 'teePass', `${basePath}.localLossZeta`),
+        teeBranchTakeoff: requirePosNum(
+          zeta,
+          'teeBranchTakeoff',
+          `${basePath}.localLossZeta`,
+        ),
         mixingNode: requirePosNum(zeta, 'mixingNode', `${basePath}.localLossZeta`),
         collector: requirePosNum(zeta, 'collector', `${basePath}.localLossZeta`),
       },

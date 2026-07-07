@@ -12,7 +12,7 @@ properties:
     description: S_meb — площадь под мебелью без ТП.
   heatedAreaM2:
     type: number
-    description: S_акт = roomAreaM2 − furnitureOccupiedAreaM2; SSOT для змейки и мощности ТП.
+    description: S_акт = roomAreaM2 − furnitureOccupiedAreaM2; SSOT для длины петель ТП и мощности.
   requiredHeatFluxUpWm2:
     type: number
     description: q_треб = roomHeatLossWatts / heatedAreaM2 (Вт/м² на активной зоне).
@@ -64,19 +64,7 @@ properties:
   loops:
     type: array
     items:
-      type: object
-      additionalProperties: false
-      required: [loopId, estimatedLengthM, heatLoadWatts, flowRateM3PerHour]
-      properties:
-        loopId: { type: string }
-        estimatedLengthM: { type: number }
-        heatLoadWatts: { type: number }
-        flowRateM3PerHour: { type: number }
-        catalogPipeId:
-          type: string
-          description: Подобранный Ø для pipeline (из hydraulics.catalogPipeId).
-        hydraulics:
-          $ref: ./UfhLoopHydraulicsResult.yaml
+      $ref: ./UfhLoopSpec.yaml
   roomHeatLossWatts:
     type: number
     description: Теплопотери комнаты из heatLoss.byRoom (для проверки покрытия нагрузки ТП).

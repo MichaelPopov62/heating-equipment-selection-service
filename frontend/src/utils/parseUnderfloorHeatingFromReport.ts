@@ -101,10 +101,12 @@ function parseUfhLoopHydraulics(item: unknown): ParsedUfhLoopHydraulics | null {
   const loopId = typeof src.loopId === 'string' ? src.loopId : '';
   if (!loopId) return null;
 
-  const lengthM = readFiniteNumber(src.lengthM) ?? readFiniteNumber(item.estimatedLengthM);
+  const loopLengthM =
+    readFiniteNumber(src.loopLengthM)
+    ?? readFiniteNumber(item.loopLengthM);
   const flowRateM3PerHour =
     readFiniteNumber(src.flowRateM3PerHour) ?? readFiniteNumber(item.flowRateM3PerHour);
-  if (lengthM == null || flowRateM3PerHour == null) return null;
+  if (loopLengthM == null || flowRateM3PerHour == null) return null;
 
   const actionRaw = src.pipeResizeAction;
   const pipeResizeAction =
@@ -121,7 +123,7 @@ function parseUfhLoopHydraulics(item: unknown): ParsedUfhLoopHydraulics | null {
 
   return {
     loopId,
-    lengthM,
+    loopLengthM,
     flowRateM3PerHour,
     internalDiameterMm: readFiniteNumber(src.internalDiameterMm),
     velocityMps: readFiniteNumber(src.velocityMps),

@@ -40,7 +40,7 @@ export type ParsedHydraulicsPipeLineGroup = {
 export type ParsedHydraulicsPipeSegment = {
   edgeId: string;
   segmentLabel: string;
-  segmentRole: 'main' | 'branch' | 'ufh_loop' | 'dhw';
+  segmentRole: 'main' | 'trunk' | 'branch' | 'ufh_loop' | 'ufh_collector_transit' | 'dhw';
   lengthM: number;
   catalogPipeId: string;
   brand: string;

@@ -14,7 +14,6 @@ import { round } from '../utils/math.js';
 import { resolveFlowDeltaTK } from './resolveFlowDeltaTK.js';
 
 /**
- * Нормалізує петлю ТП до полів HydraulicsPipelineInput (без hydraulics з enrich).
  * @param {import('./types').HydraulicsUfhLoop & { hydraulics?: unknown }} loop
  * @returns {import('./types').HydraulicsUfhLoop}
  */
@@ -29,7 +28,7 @@ function toPipelineUfhLoop(loop) {
 
   return {
     loopId: loop.loopId,
-    estimatedLengthM: loop.estimatedLengthM,
+    loopLengthM: loop.loopLengthM,
     heatLoadWatts: loop.heatLoadWatts,
     flowRateM3PerHour: loop.flowRateM3PerHour,
     ...(catalogPipeId ? { catalogPipeId } : {}),
@@ -47,6 +46,74 @@ function roomFloorById(building) {
     if (room?.id) map.set(room.id, Number(room.floor) || 1);
   }
   return map;
+}
+
+/**
+ * @param {import('../types/shared-types').HydraulicsSurveyInput | undefined | null} hydraulics
+ * @returns {Map<string, number>}
+ */
+function radiatorBranchOverrideByRoomId(hydraulics) {
+  /** @type {Map<string, number>} */
+  const map = new Map();
+  for (const item of hydraulics?.radiatorBranchOverrides ?? []) {
+    if (
+      item?.roomId
+      && typeof item.pipeLengthToEquipmentM === 'number'
+      && item.pipeLengthToEquipmentM >= 0
+    ) {
+      map.set(item.roomId, item.pipeLengthToEquipmentM);
+    }
+  }
+  return map;
+}
+
+/**
+ * @param {import('./types').HydraulicsRadiatorConsumer[]} consumers
+ * @param {import('../types/shared-types').HydraulicsRadiatorBranchOverride[] | undefined} overrides
+ * @param {Map<string, number>} radiatorOverrides
+ * @param {number} defaultBranchLengthM
+ * @returns {import('./types').HydraulicsRadiatorBranchLayout[]}
+ */
+function buildOrderedRadiatorBranches(consumers, overrides, radiatorOverrides, defaultBranchLengthM) {
+  /** @type {Map<string, number>} */
+  const orderIndex = new Map();
+  for (let i = 0; i < (overrides?.length ?? 0); i += 1) {
+    const item = overrides[i];
+    if (item?.roomId) orderIndex.set(item.roomId, i);
+  }
+
+  const sorted = [...consumers].sort((a, b) => {
+    const ai = orderIndex.get(a.roomId);
+    const bi = orderIndex.get(b.roomId);
+    if (ai != null && bi != null) return ai - bi;
+    if (ai != null) return -1;
+    if (bi != null) return 1;
+    return a.floor - b.floor || a.roomId.localeCompare(b.roomId);
+  });
+
+  return sorted.map((c) => ({
+    roomId: c.roomId,
+    pipeLengthToEquipmentM:
+      radiatorOverrides.get(c.roomId)
+      ?? estimateBranchLengthM(c.floor, defaultBranchLengthM),
+  }));
+}
+
+/**
+ * @param {string | undefined} raw
+ * @returns {import('./types').RadiatorWiringSystemType}
+ */
+function resolveRadiatorWiringSystemType(raw) {
+  const allowed = new Set([
+    'auto',
+    'two-pipe-dead-end',
+    'two-pipe-pass',
+    'manifold',
+  ]);
+  if (raw && allowed.has(raw)) {
+    return /** @type {import('./types').RadiatorWiringSystemType} */ (raw);
+  }
+  return 'auto';
 }
 
 /**
@@ -104,6 +171,7 @@ export function buildHydraulicsSnapshots({
   const circuits = {};
 
   const floors = roomFloorById(input.building);
+  const radiatorOverrides = radiatorBranchOverrideByRoomId(input.hydraulics);
 
   if (emittersMode !== 'ufh_only' && matching.radiators?.byRoom?.length) {
     const radInputs = matching.radiators.inputs;
@@ -227,23 +295,33 @@ export function buildHydraulicsSnapshots({
       ? surveyMain
       : rules.defaultLengthsM.mainLine;
 
-  /** @type {import('./types').HydraulicsBranchLayout[]} */
-  const radiatorBranches = (circuits.radiators?.consumers ?? []).map((c) => ({
-    roomId: c.roomId,
-    estimatedLengthM: estimateBranchLengthM(
-      c.floor,
-      rules.defaultLengthsM.radiatorBranch,
-    ),
-  }));
+  const radiatorBranches = buildOrderedRadiatorBranches(
+    circuits.radiators?.consumers ?? [],
+    input.hydraulics?.radiatorBranchOverrides,
+    radiatorOverrides,
+    rules.defaultLengthsM.radiatorBranch,
+  );
 
-  /** @type {import('./types').HydraulicsBranchLayout[]} */
-  const ufhBranches = (circuits.underfloor?.rooms ?? []).map((r) => ({
-    roomId: r.roomId,
-    estimatedLengthM: estimateBranchLengthM(
-      r.floor,
-      rules.defaultLengthsM.ufhCollectorBranch,
-    ),
-  }));
+  const radiatorWiringSystemType = resolveRadiatorWiringSystemType(
+    input.hydraulics?.radiatorWiringSystemType,
+  );
+
+  /** @type {import('./types').HydraulicsUfhCollectorTransit[]} */
+  const ufhCollectorTransit = [];
+  if (circuits.underfloor?.rooms?.length) {
+    const floorsWithUfh = new Set(
+      circuits.underfloor.rooms.map((r) => r.floor),
+    );
+    for (const floor of [...floorsWithUfh].sort((a, b) => a - b)) {
+      ufhCollectorTransit.push({
+        floor,
+        transitLengthM: estimateBranchLengthM(
+          floor,
+          rules.defaultLengthsM.ufhCollectorBranch,
+        ),
+      });
+    }
+  }
 
   /** @type {import('./types').HydraulicsPipelineInput} */
   return {
@@ -257,8 +335,9 @@ export function buildHydraulicsSnapshots({
     circuits,
     layout: {
       mainLineLengthM,
+      radiatorWiringSystemType,
       radiatorBranches,
-      ufhBranches,
+      ufhCollectorTransit,
       ...(input.hydraulics?.pipeMaterialPreference
         ? { pipeMaterialPreference: input.hydraulics.pipeMaterialPreference }
         : {}),

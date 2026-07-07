@@ -27,6 +27,24 @@ function clearRoomUnderfloorHeating(rooms: RoomFormValue[]): RoomFormValue[] {
 }
 
 /**
+ * Заполнить ветки layout, если комнаты есть, а branches пусты.
+ *
+ * @param draft
+ */
+function ensureWiringBranches(draft: SurveyDraftSnapshot): SurveyDraftSnapshot {
+  if (draft.rooms.length === 0 || draft.wiringLayoutV3.branches.length > 0) {
+    return draft;
+  }
+  return {
+    ...draft,
+    wiringLayoutV3: adaptFlatRoomsToWiringLayout(
+      draft.rooms,
+      draft.wiringLayoutV3.systemType,
+    ),
+  };
+}
+
+/**
  * Пересборка layout v3 из комнат и флагов ТП.
  *
  * @param draft
@@ -113,15 +131,19 @@ export function migrateDerivedState(
 
   if (mutation.type === 'DRAFT_LOADED') {
     if (!mutation.draft.wiringLayoutV3?.schemaVersion) {
-      return {
+      return ensureWiringBranches({
         ...draft,
         wiringLayoutV3: adaptFlatRoomsToWiringLayout(draft.rooms, 'auto'),
-      };
+      });
     }
-    return draft;
+    return ensureWiringBranches(draft);
   }
 
-  return draft;
+  if (mutation.type === 'SET_CURRENT_STEP' && mutation.step === 'hydraulics') {
+    return ensureWiringBranches(draft);
+  }
+
+  return ensureWiringBranches(draft);
 }
 
 /**

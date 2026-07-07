@@ -131,6 +131,8 @@
     "localLossZeta": {
       "elbow90": 0.9,
       "teeBranch": 1.2,
+      "teePass": 0.6,
+      "teeBranchTakeoff": 1.2,
       "mixingNode": 2.5,
       "collector": 1.5
     },

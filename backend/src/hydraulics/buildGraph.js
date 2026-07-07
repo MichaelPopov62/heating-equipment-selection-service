@@ -8,13 +8,33 @@ import {
   resolvePrimaryMainLineFlowM3h,
 } from './resolveCirculationFlows.js';
 import { thermalLoadToFlow } from './thermalLoadToFlow.js';
-import {
-  buildMicroManifoldLabel,
-  partitionRadiatorConsumersForGraph,
-  RAD_MICRO_MANIFOLD_NODE_ID,
-  resolveMicroManifoldEdgeLength,
-  sumMicroConsumersFlowM3h,
-} from './groupRadiatorGraphBranches.js';
+import { round } from '../utils/math.js';
+import { buildRadiatorSubgraph } from './buildRadiatorSubgraph.js';
+
+/**
+ * @param {number} floor
+ * @returns {string}
+ */
+function ufhCollectorNodeId(floor) {
+  return `ufh_collector_floor_${floor}`;
+}
+
+/**
+ * @param {import('./types').HydraulicsUfhRoom} room
+ * @returns {import('./types').HydraulicsUfhLoop[]}
+ */
+function resolveRoomLoopsForGraph(room) {
+  if (room.loops?.length) return room.loops;
+  const spacingM = Math.max(0.05, (Number(room.pipeSpacingMm) || 150) / 1000);
+  const area = Math.max(0, Number(room.areaM2) || 0);
+  const loopLengthM = area > 0 ? round(area / spacingM, 1) : 0;
+  return [{
+    loopId: `${room.roomId}_loop_1`,
+    loopLengthM,
+    heatLoadWatts: room.heatLoadWatts,
+    flowRateM3PerHour: room.flowRateM3PerHour,
+  }];
+}
 
 /**
  * @param {import('./types').HydraulicsPipelineInput} dto
@@ -85,62 +105,15 @@ export function buildHydraulicsGraph(dto) {
   }
 
   if (rad?.consumers?.length && mode !== 'ufh_only') {
-    const { individual, microConsumers } = partitionRadiatorConsumersForGraph({
-      consumers: rad.consumers,
-      grouping: dto.rules.radiatorBranchGrouping,
+    buildRadiatorSubgraph({
+      upstreamId,
+      dto,
+      pushNode,
+      pushEdge: (edge) => edges.push(edge),
     });
-
-    for (const consumer of individual) {
-      const nodeId = `rad_${consumer.roomId}`;
-      pushNode(nodeId, 'radiator_consumer', consumer.roomName, {
-        roomId: consumer.roomId,
-      });
-      const branch = dto.layout.radiatorBranches.find(
-        (b) => b.roomId === consumer.roomId,
-      );
-      edges.push({
-        id: `e_${upstreamId}_to_${nodeId}`,
-        from: upstreamId,
-        to: nodeId,
-        lengthM: branch?.estimatedLengthM ?? dto.rules.defaultLengthsM.radiatorBranch,
-        fluid: 'heating',
-        designFlowM3PerHour: consumer.flowRateM3PerHour,
-        supplyC: rad.thermalRegime.supplyC,
-        returnC: rad.thermalRegime.returnC,
-        segmentRole: 'branch',
-      });
-    }
-
-    if (microConsumers.length > 0) {
-      const roomIds = microConsumers.map((c) => c.roomId);
-      pushNode(RAD_MICRO_MANIFOLD_NODE_ID, 'radiator_manifold', buildMicroManifoldLabel(microConsumers), {
-        roomIds,
-      });
-      edges.push({
-        id: `e_${upstreamId}_to_${RAD_MICRO_MANIFOLD_NODE_ID}`,
-        from: upstreamId,
-        to: RAD_MICRO_MANIFOLD_NODE_ID,
-        lengthM: resolveMicroManifoldEdgeLength({
-          microConsumers,
-          branches: dto.layout.radiatorBranches,
-          defaultBranchLengthM: dto.rules.defaultLengthsM.radiatorBranch,
-          manifoldTrunkLengthM: dto.rules.radiatorBranchGrouping.manifoldTrunkLengthM,
-        }),
-        fluid: 'heating',
-        designFlowM3PerHour: sumMicroConsumersFlowM3h(microConsumers),
-        supplyC: rad.thermalRegime.supplyC,
-        returnC: rad.thermalRegime.returnC,
-        segmentRole: 'branch',
-      });
-    }
   }
 
   if (ufh?.rooms?.length && mode !== 'radiators_only') {
-    const ufhCollectorId = 'ufh_collector';
-    if (!nodes.some((n) => n.id === ufhCollectorId)) {
-      pushNode(ufhCollectorId, 'ufh_collector', 'Коллектор ТП');
-    }
-
     let ufhUpstreamId = upstreamId;
 
     if (needsMixingNode) {
@@ -162,52 +135,69 @@ export function buildHydraulicsGraph(dto) {
       ufhUpstreamId = 'mixing_node';
     }
 
-    if (ufhUpstreamId !== ufhCollectorId) {
-      edges.push({
-        id: `e_${ufhUpstreamId}_to_ufh_collector`,
-        from: ufhUpstreamId,
-        to: ufhCollectorId,
-        lengthM: dto.rules.defaultLengthsM.ufhCollectorBranch,
-        fluid: 'heating',
-        designFlowM3PerHour: ufh.aggregate.flowRateM3PerHour,
-        supplyC: ufh.rooms[0]?.circuitSupplyC,
-        returnC: ufh.rooms[0]?.circuitReturnC,
-        segmentRole: 'main',
-      });
+    const transitByFloor = new Map(
+      (dto.layout.ufhCollectorTransit ?? []).map((t) => [t.floor, t.transitLengthM]),
+    );
+
+    /** @type {Map<number, import('./types').HydraulicsUfhRoom[]>} */
+    const roomsByFloor = new Map();
+    for (const room of ufh.rooms) {
+      const floor = room.floor ?? 1;
+      const list = roomsByFloor.get(floor) ?? [];
+      list.push(room);
+      roomsByFloor.set(floor, list);
     }
 
-    for (const room of ufh.rooms) {
-      const loops = room.loops?.length
-        ? room.loops
-        : [{
-            loopId: `${room.roomId}_loop_1`,
-            estimatedLengthM: dto.rules.defaultLengthsM.ufhCollectorBranch * 2,
-            heatLoadWatts: room.heatLoadWatts,
-            flowRateM3PerHour: room.flowRateM3PerHour,
-          }];
+    for (const floor of [...roomsByFloor.keys()].sort((a, b) => a - b)) {
+      const floorRooms = roomsByFloor.get(floor) ?? [];
+      const collectorId = ufhCollectorNodeId(floor);
+      if (!nodes.some((n) => n.id === collectorId)) {
+        pushNode(collectorId, 'ufh_collector', `Коллектор ТП, этаж ${floor}`, {
+          floor,
+        });
+      }
 
-      for (const loop of loops) {
-        const loopNodeId = `ufh_loop_${loop.loopId}`;
-        pushNode(loopNodeId, 'ufh_loop', `${room.roomName} — ${loop.loopId}`, {
-          roomId: room.roomId,
-          loopId: loop.loopId,
-        });
-        const branch = dto.layout.ufhBranches.find((b) => b.roomId === room.roomId);
-        const supplyLen =
-          (branch?.estimatedLengthM ?? dto.rules.defaultLengthsM.ufhCollectorBranch)
-          + loop.estimatedLengthM;
-        edges.push({
-          id: `e_ufh_collector_to_${loop.loopId}`,
-          from: ufhCollectorId,
-          to: loopNodeId,
-          lengthM: supplyLen,
-          fluid: 'heating',
-          designFlowM3PerHour: loop.flowRateM3PerHour,
-          supplyC: room.circuitSupplyC,
-          returnC: room.circuitReturnC,
-          segmentRole: 'ufh_loop',
-          ...(loop.catalogPipeId ? { preferredCatalogPipeId: loop.catalogPipeId } : {}),
-        });
+      const floorFlow = round(
+        floorRooms.reduce((s, r) => s + (r.flowRateM3PerHour ?? 0), 0),
+        3,
+      );
+      const transitLengthM =
+        transitByFloor.get(floor)
+        ?? dto.rules.defaultLengthsM.ufhCollectorBranch;
+
+      edges.push({
+        id: `e_${ufhUpstreamId}_to_${collectorId}`,
+        from: ufhUpstreamId,
+        to: collectorId,
+        lengthM: transitLengthM,
+        fluid: 'heating',
+        designFlowM3PerHour: floorFlow,
+        supplyC: floorRooms[0]?.circuitSupplyC,
+        returnC: floorRooms[0]?.circuitReturnC,
+        segmentRole: 'ufh_collector_transit',
+      });
+
+      for (const room of floorRooms) {
+        const loops = resolveRoomLoopsForGraph(room);
+        for (const loop of loops) {
+          const loopNodeId = `ufh_loop_${loop.loopId}`;
+          pushNode(loopNodeId, 'ufh_loop', `${room.roomName} — ${loop.loopId}`, {
+            roomId: room.roomId,
+            loopId: loop.loopId,
+          });
+          edges.push({
+            id: `e_${collectorId}_to_${loop.loopId}`,
+            from: collectorId,
+            to: loopNodeId,
+            lengthM: loop.loopLengthM,
+            fluid: 'heating',
+            designFlowM3PerHour: loop.flowRateM3PerHour,
+            supplyC: room.circuitSupplyC,
+            returnC: room.circuitReturnC,
+            segmentRole: 'ufh_loop',
+            ...(loop.catalogPipeId ? { preferredCatalogPipeId: loop.catalogPipeId } : {}),
+          });
+        }
       }
     }
   }

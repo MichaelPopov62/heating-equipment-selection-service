@@ -1,0 +1,19 @@
+type: object
+additionalProperties: false
+description: >
+  Петля ТП — гидравлический контур от коллектора через стяжку комнаты и обратно.
+  Форма укладки (меандр, улитка) в backend не задаётся; учитывается только длина в полу.
+required: [loopId, loopLengthM, heatLoadWatts, flowRateM3PerHour]
+properties:
+  loopId: { type: string }
+  loopLengthM:
+    type: number
+    minimum: 0
+    description: Длина трубы петли в стяжке, м (S_акт / шаг / число петель комнаты).
+  heatLoadWatts: { type: number, minimum: 0 }
+  flowRateM3PerHour: { type: number, minimum: 0 }
+  catalogPipeId:
+    type: string
+    description: Подобранный Ø для pipeline (из ufhLoopHydraulics).
+  hydraulics:
+    $ref: ./UfhLoopHydraulicsResult.yaml
