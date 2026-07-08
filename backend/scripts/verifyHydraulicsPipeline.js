@@ -364,7 +364,7 @@ const baseBuilding = {
   rooms: [{
     id: 'r1',
     name: 'Комната',
-    type: 'living',
+    type: 'гостиная',
     floor: 1,
     topBoundary: 'heated',
     bottomBoundary: 'heated',
@@ -394,8 +394,8 @@ const houseThreeRooms = {
     },
   },
   rooms: [
-    { id: 'r1', name: 'Гостиная', type: 'living', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 20, heightM: 2.7 },
-    { id: 'r2', name: 'Спальня', type: 'living', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 14, heightM: 2.7 },
+    { id: 'r1', name: 'Гостиная', type: 'гостиная', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 20, heightM: 2.7 },
+    { id: 'r2', name: 'Спальня', type: 'гостиная', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 14, heightM: 2.7 },
     { id: 'r3', name: 'Кухня', type: 'kitchen', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 12, heightM: 2.7 },
   ],
   envelopeElements: [
@@ -597,10 +597,10 @@ await runFixture('apartment_mixed_ufh_micro_branches', {
       },
     },
     rooms: [
-      { id: 'r1', name: 'Гостиная', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 18, heightM: 2.7, roomExteriorLayout: 'facade', underfloorHeating: ufhRoomPartial },
-      { id: 'r2', name: 'Спальня 1', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 12, heightM: 2.7, roomExteriorLayout: 'facade', underfloorHeating: ufhRoomPartial },
-      { id: 'r3', name: 'Спальня 2', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 10, heightM: 2.7, roomExteriorLayout: 'internal', underfloorHeating: ufhRoomPartial },
-      { id: 'r4', name: 'Детская', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 9, heightM: 2.7, roomExteriorLayout: 'internal', underfloorHeating: ufhRoomPartial },
+      { id: 'r1', name: 'Гостиная', type: 'гостиная', floor: 1, topBoundary: 'heated', areaM2: 18, heightM: 2.7, roomExteriorLayout: 'facade', underfloorHeating: ufhRoomPartial },
+      { id: 'r2', name: 'Спальня 1', type: 'гостиная', floor: 1, topBoundary: 'heated', areaM2: 12, heightM: 2.7, roomExteriorLayout: 'facade', underfloorHeating: ufhRoomPartial },
+      { id: 'r3', name: 'Спальня 2', type: 'гостиная', floor: 1, topBoundary: 'heated', areaM2: 10, heightM: 2.7, roomExteriorLayout: 'internal', underfloorHeating: ufhRoomPartial },
+      { id: 'r4', name: 'Детская', type: 'гостиная', floor: 1, topBoundary: 'heated', areaM2: 9, heightM: 2.7, roomExteriorLayout: 'internal', underfloorHeating: ufhRoomPartial },
       { id: 'r5', name: 'Кухня', type: 'kitchen', floor: 1, topBoundary: 'heated', areaM2: 14, heightM: 2.7, roomExteriorLayout: 'facade' },
     ],
     envelopeElements: [

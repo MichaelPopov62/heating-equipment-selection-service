@@ -17,6 +17,11 @@ export const CANONICAL_ROOM_TYPES = Object.freeze([
   'помещение',
 ]);
 
+/**
+ * Устаревшие типы помещений → канон. Используется ТОЛЬКО фронтендом для ленивой
+ * миграции черновиков (Mixed) при загрузке. Расчётная валидация (backend CalcInput)
+ * эти значения больше не принимает: неизвестный тип → 400 ROOM_TYPE_INVALID.
+ */
 export const LEGACY_ROOM_TYPE_MAP = Object.freeze({
   жилое: 'гостиная',
   living: 'гостиная',

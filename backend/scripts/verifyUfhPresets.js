@@ -15,12 +15,9 @@ import { getFlooringFinishMaterialById } from '../src/data/flooringFinishMateria
 import { getUnderfloorHeatingBasePresetById } from '../src/data/warmFloorAssemblyPresets.js';
 import {
   UFH_MODE_PRESET_IDS,
-  UFH_PRESET_DIRECT_LAMINATE,
-  UFH_PRESET_DIRECT_TILE,
   UFH_PRESET_MIXED_RADIATORS,
   UFH_PRESET_ONLY,
 } from '../../shared/ufhModePresetIds.js';
-import { collectUfhModeCircuitAlignmentIssues } from '../src/logic/ufhModeFinishCompatibility.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_FILE = path.join(__dirname, '..', 'data', 'underfloor_heating_presets.json');
@@ -39,18 +36,6 @@ const EXPECTED_TECHNICAL = {
     maxSupplyTemperatureC: 45,
     maxSurfaceTemperatureC: 29,
     hasMixingNode: true,
-    requiresCondensingBoiler: false,
-  },
-  [UFH_PRESET_DIRECT_TILE]: {
-    maxSupplyTemperatureC: 45,
-    maxSurfaceTemperatureC: 29,
-    hasMixingNode: false,
-    requiresCondensingBoiler: false,
-  },
-  [UFH_PRESET_DIRECT_LAMINATE]: {
-    maxSupplyTemperatureC: 40,
-    maxSurfaceTemperatureC: 27,
-    hasMixingNode: false,
     requiresCondensingBoiler: false,
   },
 };
@@ -131,15 +116,6 @@ for (const id of UFH_MODE_PRESET_IDS) {
   );
 }
 
-console.log('\n=== согласованность mode preset ↔ shared/ufhCircuitPresets ===');
-const circuitAlignmentIssues = collectUfhModeCircuitAlignmentIssues(bundle);
-for (const issue of circuitAlignmentIssues) {
-  tally(logCheck(false, issue));
-}
-if (circuitAlignmentIssues.length === 0) {
-  tally(logCheck(true, 'ufh_direct_tile / ufh_direct_laminate ↔ ufh_dt10_45_35 / ufh_dt10_40_30'));
-}
-
 console.log('\n=== maxSurface: min(пресет, финиш) в computeUfhRoomHeatFlux ===');
 await warmupReferenceCache();
 const calcCtx = toCalcRuntimeContext(await getReferenceBundle());
@@ -155,7 +131,7 @@ if (base && tile && laminate) {
     circuitMeanC: 40,
     circuitSupplyC: 45,
     circuitReturnC: 35,
-    presetMaxSurfaceTemperatureC: EXPECTED_TECHNICAL[UFH_PRESET_DIRECT_TILE].maxSurfaceTemperatureC,
+    presetMaxSurfaceTemperatureC: 29,
     insideC: 20,
     outsideC: -5,
     bottomBoundary: 'unheated',
@@ -214,8 +190,7 @@ if (base && tile && laminate) {
     circuitMeanC: 35,
     circuitSupplyC: 40,
     circuitReturnC: 30,
-    presetMaxSurfaceTemperatureC:
-      EXPECTED_TECHNICAL[UFH_PRESET_DIRECT_LAMINATE].maxSurfaceTemperatureC,
+    presetMaxSurfaceTemperatureC: 27,
     insideC: 20,
     outsideC: -5,
     bottomBoundary: 'unheated',
@@ -391,7 +366,7 @@ if (base && tile && laminate) {
     rooms: [{
       id: 'r_ufh',
       name: 'Гостиная',
-      type: 'living',
+      type: 'гостиная',
       floor: 1,
       topBoundary: 'heated',
       bottomBoundary: 'heated',

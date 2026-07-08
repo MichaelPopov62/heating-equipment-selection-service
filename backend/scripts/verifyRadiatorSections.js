@@ -75,7 +75,7 @@ function minimalCalcBody(overrides = {}) {
         {
           id: 'r1',
           name: 'Гостиная',
-          type: 'living',
+          type: 'гостиная',
           floor: 1,
           topBoundary: 'heated',
           areaM2: 25,

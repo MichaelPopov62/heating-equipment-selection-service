@@ -8,7 +8,6 @@
 import Ajv from 'ajv';
 import {
   CANONICAL_ROOM_TYPES,
-  LEGACY_ROOM_TYPE_MAP,
   ROOM_TYPE_SYNONYMS,
 } from '../../../shared/roomTypeNormalization.js';
 import {
@@ -26,7 +25,6 @@ import {
   appendThermalRegimeSchemeWarnings,
 } from '../logic/normalizeHeatingUfhPreset.js';
 import { normalizeUnderfloorDistributionPreset } from '../logic/normalizeUnderfloorDistribution.js';
-import { assertUfhModeFinishCompatibility } from '../logic/ufhModeFinishCompatibility.js';
 import { assertCalcRuntimeContext } from '../reference/assertCalcRuntimeContext.js';
 import { isPlainObject } from '../utils/isPlainObject.js';
 import { logger } from '../utils/logger.js';
@@ -73,10 +71,6 @@ const ajv = new Ajv({
 });
 
 const CANONICAL_ROOM_TYPE_SET = new Set(CANONICAL_ROOM_TYPES);
-
-const LEGACY_ROOM_TYPE_BY_LOWER = Object.fromEntries(
-  Object.entries(LEGACY_ROOM_TYPE_MAP).map(([k, v]) => [k.toLowerCase(), v]),
-);
 
 const ROOM_TYPE_SYNONYM_BY_LOWER = Object.fromEntries(
   Object.entries(ROOM_TYPE_SYNONYMS).map(([k, v]) => [k.toLowerCase(), v]),
@@ -135,8 +129,9 @@ function pushNormalizationWarning(body, message) {
 }
 
 /**
- * Compat-нормализация типа комнаты до AJV: trim, синонимы, legacy.
+ * Compat-нормализация типа комнаты до AJV: trim, синонимы (исправление опечаток UI).
  * Неизвестное значение → 400 ROOM_TYPE_INVALID (без silent «помещение»).
+ * Legacy-типы (living/bathroom/tech/жилое) больше не поддерживаются: их мигрирует клиент.
  *
  * @param {unknown} building
  * @returns {string[]} сообщения для heatingSystem._normalizationWarnings (после AJV)
@@ -165,12 +160,6 @@ function normalizeRoomTypesBeforeValidate(building) {
       compatSource = raw;
     } else if (ROOM_TYPE_SYNONYM_BY_LOWER[lower] != null) {
       next = ROOM_TYPE_SYNONYM_BY_LOWER[lower];
-      compatSource = raw;
-    } else if (Object.prototype.hasOwnProperty.call(LEGACY_ROOM_TYPE_MAP, raw)) {
-      next = LEGACY_ROOM_TYPE_MAP[raw];
-      compatSource = raw;
-    } else if (LEGACY_ROOM_TYPE_BY_LOWER[lower] != null) {
-      next = LEGACY_ROOM_TYPE_BY_LOWER[lower];
       compatSource = raw;
     } else {
       next = matchCanonicalRoomType(raw);
@@ -290,7 +279,6 @@ export function validateAndNormalizeInput(input, ctx) {
   normalizeHeatingSystemThermalRegime(clone);
   // Режим ТП: heatingSystem.ufhPresetId из ctx.ufhPresets (Mongo/file bundle).
   normalizeHeatingUfhPreset(clone, ctx.ufhPresets);
-  assertUfhModeFinishCompatibility(clone);
   appendThermalRegimeSchemeWarnings(clone);
   normalizeUnderfloorDistributionPreset(clone);
 

@@ -46,7 +46,7 @@ const baseBody = {
       {
         id: 'r1',
         name: 'Гостиная',
-        type: 'living',
+        type: 'гостиная',
         floor: 1,
         topBoundary: 'heated',
         bottomBoundary: 'heated',

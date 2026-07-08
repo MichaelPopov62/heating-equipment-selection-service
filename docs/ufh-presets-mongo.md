@@ -106,8 +106,7 @@ returnC = supplyC − 10
 | Модуль | Действие |
 |--------|----------|
 | `normalizeHeatingUfhPreset.js` | lookup пресета, warnings (конденсация, график) |
-| `ufhModeFinishCompatibility.js` | cross-validation mode ↔ finish |
-| `warmFloorCalc.js` | контур `ufh_direct_*` из technical пресета; `circuitSource: ufh_mode_preset` |
+| `warmFloorCalc.js` | контур ТП из финиша комнаты; `circuitSource: finish_preset` (или `ufh_mode_preset` для `ufh_only`) |
 | `ufhRoomHeatFlux.js` | `maxSurfaceTemperatureCelsius = min(preset, паспорт финиша)` |
 | `matching/radiators.js` | skip при `heatingEmittersMode === 'ufh_only'` |
 | `matching/index.js` | котёл: при `ufh_only` база = `totalHeatFluxUpWatts` |

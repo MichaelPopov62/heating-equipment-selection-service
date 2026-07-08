@@ -64,7 +64,7 @@ function tinyCalcInput() {
       rooms: [{
         id: 'r1',
         name: 'Комната',
-        type: 'living',
+        type: 'гостиная',
         floor: 1,
         topBoundary: 'heated',
         areaM2: 10,
@@ -94,7 +94,7 @@ const hugeCalcInput = {
     rooms: [{
       id: 'r1',
       name: 'x'.repeat(padLen),
-      type: 'living',
+      type: 'гостиная',
       floor: 1,
       topBoundary: 'heated',
       areaM2: 10,

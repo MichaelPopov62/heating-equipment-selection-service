@@ -444,7 +444,7 @@ export interface HeatingSystemInput {
   /** В проекте предусмотрен водяной тёплый пол (подсказки при подборе излучателей). */
   waterUnderfloorHeating?: boolean;
   /** Режим ТП из справочника underfloor_heating_presets. */
-  ufhPresetId?: 'ufh_only' | 'ufh_mixed_radiators' | 'ufh_direct_tile' | 'ufh_direct_laminate';
+  ufhPresetId?: 'ufh_only' | 'ufh_mixed_radiators';
   /** Режим излучателей: radiators | mixed | ufh_only. */
   heatingEmittersMode?: 'radiators' | 'mixed' | 'ufh_only';
   /** Схема подключения ТП; по умолчанию auto (нормализация — roadmap). */

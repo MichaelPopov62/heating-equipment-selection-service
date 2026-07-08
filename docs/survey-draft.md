@@ -3,6 +3,7 @@
 ## SSOT
 
 - `frontend/src/types/surveyDraft.ts` — `SURVEY_DRAFT_SCHEMA_VERSION` (**4**), тип `SurveyDraft`
+- Порядок шагов UI и валидация `currentStep` — `frontend/src/constants/surveySteps.ts` (`SURVEY_STEPS`, `isSurveyStep`)
 - Производный runtime-снимок — `SurveyDraftSnapshot` в `frontend/src/surveySession/types.ts` (включает `wiringLayoutV3`)
 
 ## Поля v4 (добавлено после гидравлики и SurveySession)

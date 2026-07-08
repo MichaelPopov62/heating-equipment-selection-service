@@ -1,6 +1,6 @@
 /**
  * Назначение: валидация параметров наружных стен объекта.
- * Описание: Проверяет и нормализует objectMeta.externalWalls: фасадная система, пресеты утеплителя (СФТК — ППС 16Ф, вентфасад — минвата), толщины. Мигрирует legacy wall_pps_* в новую схему. Экспортирует assertExternalWalls(); вызывается из validate.js после AJV.
+ * Описание: Проверяет и нормализует objectMeta.externalWalls: фасадная система, пресеты утеплителя (СФТК — ППС 16Ф, вентфасад — минвата), толщины. Экспортирует assertExternalWalls(); вызывается из validate.js после AJV.
  */
 
 import { getEnvelopePresetById } from './envelopePresets.js';
@@ -8,29 +8,9 @@ import {
   FACADE_SYSTEMS,
   INSUL_SFTK_PPS16F_ID,
   INSULATION_THICKNESS_BOUNDS,
-  LEGACY_COMBINED_WALL_PRESET_IDS,
   isMineralWoolInsulationPresetId,
   isSftkInsulationPresetId,
 } from './wallAssembly.js';
-
-/**
- * Миграция wall_pps_* → несущий слой + СФТК (ППС 16Ф).
- *
- * @param {Record<string, unknown>} ew
- * @returns {boolean} true, если выполнена миграция
- */
-function normalizeLegacyCombinedWallPresets(ew) {
-  const presetId = String(ew.presetId ?? '').trim();
-  if (!LEGACY_COMBINED_WALL_PRESET_IDS.has(presetId)) return false;
-
-  const insulationThicknessMm = presetId === 'wall_pps_50' ? 50 : 100;
-  ew.presetId = 'wall_gas_concrete_d500';
-  if (ew.thicknessMm == null) ew.thicknessMm = 375;
-  ew.facadeSystem = 'sftk';
-  ew.insulationPresetId = INSUL_SFTK_PPS16F_ID;
-  ew.insulationThicknessMm = ew.insulationThicknessMm ?? insulationThicknessMm;
-  return true;
-}
 
 /**
  * Нормализация и cross-validation externalWalls (СП 50.13330: СФТК — только ППС 16Ф; открытый фасад — минвата).
@@ -46,18 +26,9 @@ export function assertExternalWalls(building) {
     )
   );
 
-  normalizeLegacyCombinedWallPresets(ew);
-
   const presetId = String(ew.presetId ?? '').trim();
   if (!presetId) {
     throw fieldError('EXTERNAL_WALLS_PRESET_REQUIRED', 'Укажите building.objectMeta.externalWalls.presetId');
-  }
-
-  if (LEGACY_COMBINED_WALL_PRESET_IDS.has(presetId)) {
-    throw fieldError(
-      'EXTERNAL_WALLS_LEGACY_PRESET',
-      `Пресет "${presetId}" устарел: укажите несущую стену без утеплителя и систему фасада (facadeSystem: sftk | ventilated | none).`,
-    );
   }
 
   const wallPreset = getEnvelopePresetById(presetId);
@@ -146,14 +117,9 @@ export function assertExternalWalls(building) {
     );
   }
 
-  const structuralWallPresetId = String(ew.presetId ?? '').trim();
   for (const el of building.envelopeElements ?? []) {
     if (el?.kind !== 'wall') continue;
     const elPreset = el.presetId ? String(el.presetId) : '';
-    if (LEGACY_COMBINED_WALL_PRESET_IDS.has(elPreset)) {
-      el.presetId = structuralWallPresetId;
-      continue;
-    }
     if (elPreset.startsWith('insul_')) {
       throw fieldError(
         'ENVELOPE_WALL_INSULATION_PRESET',

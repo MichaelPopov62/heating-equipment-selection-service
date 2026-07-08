@@ -102,6 +102,5 @@ cd backend && npm run verify:calc-schema
 - `shared/roomTypeNormalization.js` — CANONICAL_ROOM_TYPES, legacy, synonyms
 - `backend/src/logic/apartmentStackBoundaries.js` — derive границ квартиры
 - `backend/src/logic/heatlossByRooms.js` — резолв U и теплопотери; `envelopeHeatLoss.js` — только Q = U·S·ΔT
-- `backend/src/logic/ufhModeFinishCompatibility.js` — mode preset ↔ finish
-- `docs/ufh-presets-mongo.md` — три слоя ТП, `UFH_PRESETS_SOURCE`
+- `docs/ufh-presets-mongo.md` — режимы ТП (`ufh_only`, `ufh_mixed_radiators`), `UFH_PRESETS_SOURCE`
 - `docs/projects-api.md` — расчёт через проекты (тот же `validateAndNormalizeInput`)

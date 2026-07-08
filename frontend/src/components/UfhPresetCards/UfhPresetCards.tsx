@@ -45,7 +45,7 @@ export function UfhPresetCards({
             Водяной тёплый пол не выбран как режим отопления.
           </span>
         </button>
-        {ufhPresetCardsForUi(presets, selectedPresetId).map((p) => (
+        {ufhPresetCardsForUi(presets).map((p) => (
           <button
             key={p.presetId}
             type="button"

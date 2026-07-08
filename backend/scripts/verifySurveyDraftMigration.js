@@ -95,7 +95,7 @@ const baseMeta = {
   externalWalls: { presetId: 'wall_gas_concrete_d500', facadeSystem: 'none' },
 };
 
-assert(SURVEY_DRAFT_SCHEMA_VERSION === 3, 'SURVEY_DRAFT_SCHEMA_VERSION = 3');
+assert(SURVEY_DRAFT_SCHEMA_VERSION === 4, 'SURVEY_DRAFT_SCHEMA_VERSION = 4');
 
 const fromAlternateFields = resolveWaterHeaterForm(
   {

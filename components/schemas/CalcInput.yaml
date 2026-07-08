@@ -45,8 +45,9 @@ properties:
             type:
               type: string
               description: >
-                Канонический тип помещения. Перед AJV сервер нормализует trim, синонимы и legacy
-                (living, bathroom, tech, жилое) с предупреждением в heatingSystem._normalizationWarnings после AJV.
+                Канонический тип помещения. Перед AJV сервер нормализует trim и синонимы
+                (исправление опечаток UI) с предупреждением в heatingSystem._normalizationWarnings после AJV.
+                Legacy-типы (living, bathroom, tech, жилое) не поддерживаются — их мигрирует клиент.
                 Неизвестные значения → 400 ROOM_TYPE_INVALID (без подстановки «помещение»).
                 Тип «котельная» — для расчёта объёма котельной при objectMeta.boilerPlacementZone=boiler_room.
               enum:
@@ -149,8 +150,6 @@ properties:
         enum:
           - ufh_only
           - ufh_mixed_radiators
-          - ufh_direct_tile
-          - ufh_direct_laminate
         description: >
           Режим тёплого пола из справочника underfloor_heating_presets (Mongo/file).
           UI-подписи — GET /api/v1/presets/underfloor-heating/modes. При задании включает waterUnderfloorHeating.

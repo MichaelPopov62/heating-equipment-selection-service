@@ -124,16 +124,34 @@ const {
 | `useSurveyProject` | файлы, Mongo, hash-URL (поверх project mutations) |
 | `useRoomsOrchestration` | синхронизация комнат с objectMeta |
 | `useSurveyEstimates` | локальные оценки до API |
+| `constants/surveySteps.ts` | SSOT шагов: `SURVEY_STEPS`, навигация, `isSurveyStep` |
 | `HydraulicsProposalSection` | блок гидравлики из `matching.hydraulics` |
 
 Ручной `invalidateCalcReport()` в формах **не нужен** — пересчёт централизован в сессии.
+
+### Шаги анкеты (навигация)
+
+Порядок и подписи шагов — **`frontend/src/constants/surveySteps.ts`** (`SURVEY_STEPS`, `SURVEY_STEP_NAV_ITEMS`). `AppSurveyContent` рендерит боковую навигацию из этого списка; `migrateSurveyDraft` валидирует `currentStep` через `isSurveyStep`. Новый шаг добавляется **только** в `SURVEY_STEPS` и в union `SurveyCurrentStep` (`types/surveyStep.ts`).
 
 ---
 
 ## Verify
 
+Перед сдачей на чистой кодовой базе:
+
 ```bash
-cd frontend && npm run verify:survey-session
-cd frontend && npm run lint && npm run build
+cd frontend && npm run verify && npm run build
+```
+
+- **`npm run verify`** — exit `0` обязателен (`lint` + `verify:survey-session` + `verify:dead-code`/knip).
+- **`npm run build`** — `tsc -b` + Vite без ошибок.
+
+Из корня репозитория: `npm run verify:frontend`, `npm run lint:frontend`.
+
+Связанные backend-проверки:
+
+```bash
 cd backend && npm run verify:survey-draft-migration && npm run verify:water-heater-form
 ```
+
+Knip: compat-модули миграции в `knip.json` → `ignore` — см. [`survey-draft.md`](survey-draft.md).

@@ -89,14 +89,10 @@ assertThrowsCode(
   'неизвестный type «офис» → ROOM_TYPE_INVALID',
 );
 
-const legacy = validateAndNormalizeInput(minimalBody({ type: 'living' }), ctx);
-const legacyWarns = legacy.heatingSystem?._normalizationWarnings ?? [];
-tally(
-  logCheck(
-    legacy.building?.rooms?.[0]?.type === 'гостиная'
-      && legacyWarns.some((w) => w.includes('living')),
-    'legacy living → гостиная + _normalizationWarnings',
-  ),
+assertThrowsCode(
+  () => validateAndNormalizeInput(minimalBody({ type: 'living' }), ctx),
+  'ROOM_TYPE_INVALID',
+  'legacy living больше не поддерживается → ROOM_TYPE_INVALID',
 );
 
 console.log('\n=== AJV coerceTypes: false ===');
@@ -120,14 +116,14 @@ assertThrowsCode(
 const ok = validateAndNormalizeInput(minimalBody(), ctx);
 tally(logCheck(ok.building?.rooms?.[0]?.type === 'гостиная', 'канонический type → OK'));
 
-console.log('\n=== UFH mode ↔ finish ===');
+console.log('\n=== UFH mode preset ===');
 
 /**
  * @param {string} finishMaterialId
  * @param {string} ufhPresetId
  * @returns {import('../src/types/shared-types').CalcRequestBody}
  */
-function ufhDirectBody(finishMaterialId, ufhPresetId) {
+function ufhBody(finishMaterialId, ufhPresetId) {
   const body = minimalBody({
     underfloorHeating: {
       enabled: true,
@@ -148,18 +144,19 @@ function ufhDirectBody(finishMaterialId, ufhPresetId) {
   return body;
 }
 
-assertThrowsCode(
-  () => validateAndNormalizeInput(ufhDirectBody('laminate_click', 'ufh_direct_tile'), ctx),
-  'UFH_MODE_FINISH_MISMATCH',
-  'ufh_direct_tile + laminate_click → UFH_MODE_FINISH_MISMATCH',
-);
-
-const tileOk = validateAndNormalizeInput(ufhDirectBody('ceramic_tile', 'ufh_direct_tile'), ctx);
+const mixedOk = validateAndNormalizeInput(ufhBody('ceramic_tile', 'ufh_mixed_radiators'), ctx);
 tally(
   logCheck(
-    tileOk.heatingSystem?.ufhPresetId === 'ufh_direct_tile',
-    'ufh_direct_tile + ceramic_tile → OK',
+    mixedOk.heatingSystem?.ufhPresetId === 'ufh_mixed_radiators'
+      && mixedOk.heatingSystem?.heatingEmittersMode === 'mixed',
+    'ufh_mixed_radiators + ceramic_tile → OK (mixed)',
   ),
+);
+
+assertThrowsCode(
+  () => validateAndNormalizeInput(ufhBody('ceramic_tile', 'ufh_direct_tile'), ctx),
+  'VALIDATION_ERROR',
+  'удалённый ufh_direct_tile вне enum → VALIDATION_ERROR',
 );
 
 console.log(

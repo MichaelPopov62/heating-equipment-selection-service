@@ -25,6 +25,11 @@ import { buildCalcPayloadFromDraft } from './surveySession/buildCalcInputSnapsho
 import { HydraulicsSection } from './components/HydraulicsSection/HydraulicsSection';
 import type { HydraulicsFormValue } from './types/hydraulics';
 import type { WiringSystemType } from './surveySession/wiringLayoutV3';
+import {
+  isCalcApiBarStep,
+  SURVEY_STEP_NAV_ITEMS,
+  surveyStepGlobalMetaTitle,
+} from './constants/surveySteps';
 import type { SurveyCurrentStep } from './types/surveyStep';
 import { useCalcReport } from './hooks/useCalcReport';
 import { useSurveySession } from './surveySession/useSurveySession';
@@ -414,18 +419,7 @@ export function AppSurveyContent({
     refreshProjectList,
   } = surveyProject;
 
-  const showCalcApiBar =
-    currentStep !== 'object' &&
-    [
-      'rooms',
-      'hotWater',
-      'boiler',
-      'warmFloor',
-      'radiators',
-      'waterHeater',
-      'hydraulics',
-      'summary',
-    ].includes(currentStep);
+  const showCalcApiBar = isCalcApiBarStep(currentStep);
 
   const { hotWaterBoilerPowerMatchingScheme } = waterHeaterForm;
 
@@ -503,104 +497,18 @@ export function AppSurveyContent({
           <nav aria-label="Этапы анкеты">
             {/* Навигация по шагам (пока без роутинга) */}
             <ul className={styles.stepList}>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep('object')}
-                  aria-current={currentStep === 'object' ? 'step' : undefined}
-                  className={styles.stepButton}
-                >
-                  Объект
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep('rooms')}
-                  aria-current={currentStep === 'rooms' ? 'step' : undefined}
-                  className={styles.stepButton}
-                >
-                  Помещения
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep('hotWater')}
-                  aria-current={currentStep === 'hotWater' ? 'step' : undefined}
-                  className={styles.stepButton}
-                >
-                  Горячая вода
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep('boiler')}
-                  aria-current={currentStep === 'boiler' ? 'step' : undefined}
-                  className={styles.stepButton}
-                >
-                  Котёл
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep('warmFloor')}
-                  aria-current={
-                    currentStep === 'warmFloor' ? 'step' : undefined
-                  }
-                  className={styles.stepButton}
-                >
-                  Тёплый пол
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep('radiators')}
-                  aria-current={
-                    currentStep === 'radiators' ? 'step' : undefined
-                  }
-                  className={styles.stepButton}
-                >
-                  Радиаторы
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep('waterHeater')}
-                  aria-current={
-                    currentStep === 'waterHeater' ? 'step' : undefined
-                  }
-                  className={styles.stepButton}
-                >
-                  Водонагреватель
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep('hydraulics')}
-                  aria-current={
-                    currentStep === 'hydraulics' ? 'step' : undefined
-                  }
-                  className={styles.stepButton}
-                >
-                  Гидравлика
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep('summary')}
-                  aria-current={currentStep === 'summary' ? 'step' : undefined}
-                  className={styles.stepButton}
-                >
-                  Итог
-                </button>
-              </li>
+              {SURVEY_STEP_NAV_ITEMS.map(({ step, label }) => (
+                <li key={step}>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(step)}
+                    aria-current={currentStep === step ? 'step' : undefined}
+                    className={styles.stepButton}
+                  >
+                    {label}
+                  </button>
+                </li>
+              ))}
             </ul>
           </nav>
         </aside>
@@ -613,19 +521,7 @@ export function AppSurveyContent({
           >
             {/* Инпуты для города и материалов */}
             <h2 id="global-meta-title">
-              {currentStep === 'rooms'
-                ? 'Параметры помещений'
-                : currentStep === 'hotWater'
-                  ? 'Объект и горячая вода'
-                  : currentStep === 'boiler'
-                    ? 'Котёл: температурный график отопления'
-                    : currentStep === 'waterHeater'
-                      ? 'Водонагреватель и сценарий ГВС'
-                      : currentStep === 'warmFloor'
-                      ? 'Тёплый пол и низкотемпературный контур'
-                      : currentStep === 'hydraulics'
-                        ? 'Гидравлика и разводка'
-                        : 'Параметры объекта'}
+              {surveyStepGlobalMetaTitle(currentStep)}
             </h2>
             {currentStep === 'object' && (
               <ObjectMetaForm

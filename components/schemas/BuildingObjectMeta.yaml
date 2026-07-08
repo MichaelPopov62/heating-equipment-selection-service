@@ -68,7 +68,7 @@ properties:
         minLength: 1
         description: >
           presetId **несущего слоя** (EnvelopePreset kind=wall), без утеплителя.
-          Не используйте kind=insulation и устаревшие wall_pps_*.
+          Не используйте kind=insulation.
       thicknessMm:
         type: number
         minimum: 50

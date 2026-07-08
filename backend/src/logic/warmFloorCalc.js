@@ -8,10 +8,7 @@ import { DEFAULT_PIPE_SPACING_MM } from './ufhPipeEmbedment.js';
 import { resolveUfhCircuitForFinish } from './ufhCircuitResolve.js';
 import { isMixingNodeRequiredForProject } from './ufhMixingNode.js';
 import { resolveUfhDistributionPreset } from '../../../shared/ufhDistributionPresets.js';
-import {
-  UFH_PRESET_MIXED_RADIATORS,
-  ufhModePresetOverridesFinishCircuit,
-} from '../../../shared/ufhModePresetIds.js';
+import { UFH_PRESET_MIXED_RADIATORS } from '../../../shared/ufhModePresetIds.js';
 import { computeUfhMixingNodeSpec } from './ufhMixingNodeHydraulics.js';
 import { computeUnderfloorHydraulicsCircuit } from './ufhHydraulicsCircuit.js';
 import { computeUfhLoopGeometry } from './ufhLoopGeometry.js';
@@ -81,19 +78,7 @@ export function calculateUnderfloorHeating(args) {
 
     const { basePresetId, finishMaterialId, base, finish } = composed;
     let circuitResolved = resolveUfhCircuitForFinish(finishMaterialId);
-    if (modePreset && ufhModePresetOverridesFinishCircuit(modePreset.presetId)) {
-      const tech = modePreset.technical;
-      const circuitPresetId =
-        tech.supplyC >= 45 ? 'ufh_dt10_45_35' : 'ufh_dt10_40_30';
-      circuitResolved = {
-        preset: {
-          id: circuitPresetId,
-          supplyC: tech.supplyC,
-          returnC: tech.returnC,
-        },
-        finishMaterialId,
-      };
-    } else if (
+    if (
       isUfhOnly
       && typeof heatingSystem.supplyC === 'number'
       && typeof heatingSystem.returnC === 'number'
@@ -285,15 +270,13 @@ export function calculateUnderfloorHeating(args) {
 
   const primaryRoom = roomReports[0];
   const circuitSource =
-    modePreset && ufhModePresetOverridesFinishCircuit(modePreset.presetId)
-      ? 'ufh_mode_preset'
-      : modePreset?.presetId === UFH_PRESET_MIXED_RADIATORS
-        ? 'finish_preset'
-        : modePreset
-          ? 'ufh_mode_preset'
-          : primaryRoom
-            ? 'finish_preset'
-            : 'mixed_default';
+    modePreset?.presetId === UFH_PRESET_MIXED_RADIATORS
+      ? 'finish_preset'
+      : modePreset
+        ? 'ufh_mode_preset'
+        : primaryRoom
+          ? 'finish_preset'
+          : 'mixed_default';
 
   const totalHeatFluxUpWatts = round(
     roomReports.reduce((s, r) => s + r.heatFluxUpWatts, 0),

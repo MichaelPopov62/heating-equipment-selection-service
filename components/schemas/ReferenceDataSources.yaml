@@ -93,7 +93,7 @@ properties:
   underfloor_heating_presets:
     type: object
     description: >
-      Режимы водяного ТП (ufh_only, ufh_direct_tile, …); коллекция MongoDB underfloor_heating_presets.
+      Режимы водяного ТП (ufh_only, ufh_mixed_radiators); коллекция MongoDB underfloor_heating_presets.
       В calc передаётся через CalcRuntimeContext.ufhPresets (docs/calc-runtime-context.md).
     properties:
       fileSeed:

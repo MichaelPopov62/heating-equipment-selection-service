@@ -4,9 +4,7 @@
 
 export type UfhModePresetId =
   | 'ufh_only'
-  | 'ufh_mixed_radiators'
-  | 'ufh_direct_tile'
-  | 'ufh_direct_laminate';
+  | 'ufh_mixed_radiators';
 
 export type UfhModePresetUi = {
   title: string;

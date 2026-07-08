@@ -74,7 +74,7 @@
 
 ### `frontend/` — клиент (React + Vite + TypeScript + React Query)
 
-Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md). Черновик анкеты: [`docs/survey-draft.md`](docs/survey-draft.md).
+Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md), [`docs/frontend-query-inventory.md`](docs/frontend-query-inventory.md). Черновик анкеты: [`docs/survey-draft.md`](docs/survey-draft.md).
 
 #### Точка входа и корень UI
 
@@ -82,7 +82,17 @@
 |------|------------|
 | `src/main.tsx` | `QueryProvider` → `App` (StrictMode) |
 | `src/App.tsx` | `useReferenceData` + `usePresetLists` + `SurveySessionProvider` |
-| `src/AppSurveyContent.tsx` | Шаги анкеты, формы, отчёт; `useSurveySession`, `useCatalogEquipmentQuery`, `useSurveyProject` |
+| `src/AppSurveyContent.tsx` | Шаги анкеты, формы, отчёт; навигация по `constants/surveySteps.ts` (`SURVEY_STEPS`); `useSurveySession`, `useCatalogEquipmentQuery`, `useSurveyProject` |
+
+#### `src/constants/` — UI-конфиги (SSOT)
+
+| Путь | Назначение |
+|------|------------|
+| `surveySteps.ts` | `SURVEY_STEPS`, `SURVEY_STEP_NAV_ITEMS`, `isSurveyStep`, `isCalcApiBarStep` — порядок шагов, навигация, валидация `currentStep` при загрузке черновика |
+| `roomTypes.ts` | `ROOM_TYPE_UI_OPTIONS` — селект типа помещения |
+| `compatLegacyIds.ts` | `LEGACY_COMBINED_WALL_PRESET_IDS` — compat-слой пресетов стен |
+
+Compat-телеметрия: `utils/compatTelemetry.ts` (`[survey-compat]` в DEV). Политика freeze — `docs/survey-draft.md`.
 
 #### `src/query/` — React Query (серверные данные)
 
@@ -627,8 +637,10 @@ cd backend && npm run verify:builtin-boiler-pump
 **Сессия анкеты (frontend):**
 
 ```bash
-cd frontend && npm run verify:survey-session
+cd frontend && npm run verify && npm run build
 ```
+
+`npm run verify` = `lint` + `verify:survey-session` + `verify:dead-code` (knip). Из корня: `npm run verify:frontend`.
 
 **Пресеты ТП:**
 

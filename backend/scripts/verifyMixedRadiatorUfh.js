@@ -34,7 +34,7 @@ const body = {
       {
         id: 'r1',
         name: 'Комната 1',
-        type: 'living',
+        type: 'гостиная',
         floor: 1,
         topBoundary: 'heated',
         areaM2: 20,

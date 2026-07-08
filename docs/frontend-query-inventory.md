@@ -34,7 +34,7 @@
 
 | Файл | Содержание |
 |------|------------|
-| `surveySteps.ts` | `SURVEY_STEPS`, `isSurveyStep` |
+| `surveySteps.ts` | `SURVEY_STEPS`, `SURVEY_STEP_NAV_ITEMS`, `isSurveyStep`, `isCalcApiBarStep`, `surveyStepGlobalMetaTitle` |
 | `roomTypes.ts` | `ROOM_TYPE_UI_OPTIONS` (селект типа помещения) |
 | `compatLegacyIds.ts` | `LEGACY_COMBINED_WALL_PRESET_IDS` |
 

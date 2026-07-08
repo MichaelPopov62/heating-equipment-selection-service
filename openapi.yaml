@@ -102,7 +102,7 @@ paths:
             Справочник: kind=wall (несущий слой без утеплителя), kind=insulation (отдельно:
             СФТК — insul_sftk_pps16f, вентфасад — insul_minwool_*), window, ceiling, floor, roof.
             U наружной стены для расчёта собирается из building.objectMeta.externalWalls
-            (многослойная формула wallAssembly.js), а не из комбинированных wall_pps_* (удалены).
+            (многослойная формула wallAssembly.js): несущий слой + отдельный утеплитель.
             Для kind=wall с uModel — пересчёт U по толщине несущего слоя; утеплитель — по
             insulationPresetId + insulationThicknessMm. EnvelopePreset.description — подсказки UI.
             uValue=0 — «потери не считаем» (внутри тёплого контура).
@@ -170,7 +170,7 @@ paths:
                       properties:
                         presetId:
                           type: string
-                          enum: [ufh_only, ufh_mixed_radiators, ufh_direct_tile, ufh_direct_laminate]
+                          enum: [ufh_only, ufh_mixed_radiators]
                         ui:
                           type: object
                           additionalProperties: false
@@ -329,10 +329,10 @@ paths:
             Validation / input error. Причина — поле error.message; для интеграции — error.code.
 
             Основные значения code: VALIDATION_ERROR (AJV после compat-нормализации), ROOM_TYPE_INVALID
-            (неизвестный building.rooms[].type вне synonym/legacy/enum), HOT_WATER_LEGACY_FIELD
+            (неизвестный building.rooms[].type вне synonym/enum), HOT_WATER_LEGACY_FIELD
             (передано удалённое поле ГВС), HEATING_SYSTEM_INVALID (returnC должна быть ниже supplyC),
             HOT_WATER_TEMPS_INVALID.
-            EXTERNAL_WALLS_* — несогласованный facadeSystem/insulationPresetId, устаревший wall_pps_*,
+            EXTERNAL_WALLS_* — несогласованный facadeSystem/insulationPresetId,
             insul_* в presetId стены и т.п. (см. externalWallsValidate.js).
 
             Нормализация входа: квартира + схема БКН без 400 — схема подменяется на двухконтурную по умолчанию,

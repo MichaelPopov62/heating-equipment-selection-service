@@ -11,11 +11,6 @@ export const FACADE_SYSTEMS = Object.freeze(['none', 'sftk', 'ventilated']);
 /** ППС 16Ф (ПСБ-С 25Ф) — единственный ППС для СФТК по СП 50.13330. */
 export const INSUL_SFTK_PPS16F_ID = 'insul_sftk_pps16f';
 
-/** Устаревшие комбинированные пресеты «стена + ППС». */
-export const LEGACY_COMBINED_WALL_PRESET_IDS = Object.freeze(
-  new Set(['wall_pps_50', 'wall_pps_100']),
-);
-
 const MINERAL_WOOL_PREFIX = 'insul_minwool_';
 
 /** Поверхностное сопротивление Rsi+Rse для вертикальных стен, м²·К/Вт. */
@@ -98,11 +93,6 @@ export function resolveExternalWallUValue(externalWalls, wallPresetIdOverride = 
   const wallPreset = getEnvelopePresetById(wallPresetId);
   if (!wallPreset || wallPreset.kind !== 'wall') {
     throw new Error(`resolveExternalWallUValue: неизвестный пресет стены "${wallPresetId}"`);
-  }
-  if (LEGACY_COMBINED_WALL_PRESET_IDS.has(String(wallPresetId))) {
-    throw new Error(
-      `Пресет "${wallPresetId}" устарел: выберите несущую стену и утеплитель отдельно (facadeSystem + insulationPresetId).`,
-    );
   }
 
   const facadeSystem = externalWalls?.facadeSystem ?? 'none';

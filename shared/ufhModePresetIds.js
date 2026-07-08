@@ -6,8 +6,6 @@
 export const UFH_MODE_PRESET_IDS = Object.freeze([
   'ufh_only',
   'ufh_mixed_radiators',
-  'ufh_direct_tile',
-  'ufh_direct_laminate',
 ]);
 
 /**
@@ -24,24 +22,6 @@ export const UFH_PRESET_ONLY = 'ufh_only';
 /** Смешанный режим: ТП в выбранных комнатах + радиаторы (остаточная нагрузка). */
 export const UFH_PRESET_MIXED_RADIATORS = 'ufh_mixed_radiators';
 
-/** Прямое подключение под плитку (45/35). */
-export const UFH_PRESET_DIRECT_TILE = 'ufh_direct_tile';
-
-/** Прямое подключение под ламинат (40/30). */
-export const UFH_PRESET_DIRECT_LAMINATE = 'ufh_direct_laminate';
-
-/**
- * Пресеты, где контур ТП фиксируется technical пресета (не по финишу комнаты).
- *
- * @param {string | undefined | null} presetId
- * @returns {boolean}
- */
-export function ufhModePresetOverridesFinishCircuit(presetId) {
-  return (
-    presetId === UFH_PRESET_DIRECT_TILE || presetId === UFH_PRESET_DIRECT_LAMINATE
-  );
-}
-
 /**
  * Режим смешанных излучателей (радиаторы + ТП без дублирования нагрузки).
  *
@@ -49,9 +29,5 @@ export function ufhModePresetOverridesFinishCircuit(presetId) {
  * @returns {boolean}
  */
 export function ufhModePresetIsMixedRadiators(presetId) {
-  return (
-    presetId === UFH_PRESET_MIXED_RADIATORS
-    || presetId === UFH_PRESET_DIRECT_TILE
-    || presetId === UFH_PRESET_DIRECT_LAMINATE
-  );
+  return presetId === UFH_PRESET_MIXED_RADIATORS;
 }

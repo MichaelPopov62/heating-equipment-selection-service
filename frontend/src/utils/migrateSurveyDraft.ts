@@ -132,6 +132,11 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
     thermalRegimePreset,
     ufhPresetId: (() => {
       const id = String(raw.ufhPresetId ?? '').trim();
+      if (!id) return null;
+      if (id === 'ufh_direct_tile' || id === 'ufh_direct_laminate') {
+        warnCompatMigration('SurveyDraftLoad', `${id} → ufh_mixed_radiators`);
+        return 'ufh_mixed_radiators';
+      }
       return isUfhModePresetId(id) ? id : null;
     })(),
     hydraulicsForm: (() => {

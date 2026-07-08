@@ -1,6 +1,6 @@
 /**
  * Назначение: Тип шагов мастера анкеты.
- * Описание: Union SurveyCurrentStep: object, rooms, hotWater, warmFloor, summary.
+ * Описание: Union SurveyCurrentStep; порядок и навигация — constants/surveySteps.ts (SURVEY_STEPS).
  */
 
 export type SurveyCurrentStep =
