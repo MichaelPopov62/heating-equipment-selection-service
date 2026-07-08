@@ -1,6 +1,6 @@
 /**
  * Назначение: Хелперы полей ограждений комнаты.
- * Описание: Ориентации, миграция legacy-полей и расчёт площадей envelope.
+ * Описание: Ориентации, нормализация layout и compat-миграция wallAreaM2.
  */
 
 import type {
@@ -9,6 +9,7 @@ import type {
   WindowOrientation,
 } from '../types/rooms';
 import { defaultHouseBottomBoundary } from './apartmentStackBoundaries';
+import { warnCompatMigration } from './compatTelemetry';
 import {
   inferRoomExteriorLayout,
   showSecondExternalWall,
@@ -52,13 +53,20 @@ type RoomFormLegacyFields = {
   wallAreaM2?: number | '';
 };
 
-/** Миграция старого поля wallAreaM2 → externalWall1/externalWall2. */
-export function migrateRoomEnvelopeFields(
-  rooms: RoomFormValue[],
-): RoomFormValue[] {
+/**
+ * Compat: миграция wallAreaM2 → externalWall1/externalWall2.
+ *
+ * @param rooms
+ */
+function migrateLegacyWallAreaM2(rooms: RoomFormValue[]): RoomFormValue[] {
   let changed = false;
   const next = rooms.map((room) => {
     const legacy = room as RoomFormValue & RoomFormLegacyFields;
+    if (!('wallAreaM2' in legacy)) return room;
+
+    changed = true;
+    warnCompatMigration('RoomWallAreaM2', `roomId=${room.id}`);
+
     const patch: Partial<RoomFormValue> = {};
     if (
       room.bottomBoundaryType !== 'heated' &&
@@ -66,26 +74,7 @@ export function migrateRoomEnvelopeFields(
     ) {
       patch.bottomBoundaryType = defaultHouseBottomBoundary(room.floor);
     }
-    if (!('wallAreaM2' in legacy)) {
-      const inferredLayout = inferRoomExteriorLayout(room);
-      if (room.roomExteriorLayout !== inferredLayout) {
-        patch.roomExteriorLayout = inferredLayout;
-      }
-      if (
-        !showSecondExternalWall(inferredLayout) &&
-        typeof room.externalWall2?.areaM2 === 'number' &&
-        room.externalWall2.areaM2 > 0
-      ) {
-        patch.externalWall2 = createDefaultExternalWall();
-      }
-      if (Object.keys(patch).length > 0) {
-        changed = true;
-        return { ...room, ...patch };
-      }
-      return room;
-    }
 
-    changed = true;
     const wallArea =
       typeof legacy.wallAreaM2 === 'number' && legacy.wallAreaM2 > 0
         ? legacy.wallAreaM2
@@ -114,4 +103,52 @@ export function migrateRoomEnvelopeFields(
     };
   });
   return changed ? next : rooms;
+}
+
+/**
+ * Нормализация layout и границ пола (живая логика, не только compat).
+ *
+ * @param rooms
+ */
+function normalizeRoomEnvelopeFields(
+  rooms: RoomFormValue[],
+): RoomFormValue[] {
+  let changed = false;
+  const next = rooms.map((room) => {
+    const patch: Partial<RoomFormValue> = {};
+    if (
+      room.bottomBoundaryType !== 'heated' &&
+      room.bottomBoundaryType !== 'unheated'
+    ) {
+      patch.bottomBoundaryType = defaultHouseBottomBoundary(room.floor);
+    }
+    const inferredLayout = inferRoomExteriorLayout(room);
+    if (room.roomExteriorLayout !== inferredLayout) {
+      patch.roomExteriorLayout = inferredLayout;
+    }
+    if (
+      !showSecondExternalWall(inferredLayout) &&
+      typeof room.externalWall2?.areaM2 === 'number' &&
+      room.externalWall2.areaM2 > 0
+    ) {
+      patch.externalWall2 = createDefaultExternalWall();
+    }
+    if (Object.keys(patch).length > 0) {
+      changed = true;
+      return { ...room, ...patch };
+    }
+    return room;
+  });
+  return changed ? next : rooms;
+}
+
+/**
+ * Полный проход: compat wallAreaM2 + нормализация layout.
+ *
+ * @param rooms
+ */
+export function migrateRoomEnvelopeFields(
+  rooms: RoomFormValue[],
+): RoomFormValue[] {
+  return normalizeRoomEnvelopeFields(migrateLegacyWallAreaM2(rooms));
 }

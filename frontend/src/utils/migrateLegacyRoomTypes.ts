@@ -5,6 +5,7 @@
 
 import { CANONICAL_ROOM_TYPES, LEGACY_ROOM_TYPE_MAP } from '../../../shared/roomTypeNormalization.js';
 import type { RoomFormValue } from '../types/rooms';
+import { warnCompatMigration } from './compatTelemetry';
 
 const LEGACY = LEGACY_ROOM_TYPE_MAP as Readonly<
   Record<string, RoomFormValue['type']>
@@ -18,7 +19,10 @@ export function migrateLegacyRoomTypes(rooms: RoomFormValue[]): RoomFormValue[] 
     const t = r.type as string;
     const nt: RoomFormValue['type'] =
       LEGACY[t] ?? (allowed.has(t) ? (t as RoomFormValue['type']) : 'помещение');
-    if (nt !== r.type) changed = true;
+    if (nt !== r.type) {
+      changed = true;
+      warnCompatMigration('RoomTypes', `${t} → ${nt} (roomId=${r.id})`);
+    }
     return { ...r, type: nt };
   });
   return changed ? next : rooms;

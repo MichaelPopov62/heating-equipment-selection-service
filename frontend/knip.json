@@ -1,0 +1,17 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["src/main.tsx"],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": [
+    "src/utils/migrateLegacyRoomTypes.ts",
+    "src/utils/migrateRoomUnderfloorHeating.ts",
+    "src/utils/migrateLegacyExternalWalls.ts",
+    "src/surveySession/migrateDerivedState.ts",
+    "src/utils/migrateSurveyDraft.ts"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": ["postcss-custom-media"],
+  "ignoreIssues": {
+    "**/*": ["types"]
+  }
+}

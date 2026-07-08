@@ -4,9 +4,7 @@
  */
 
 import type { EnvelopePreset } from '../types/envelope';
-
-/** ID устаревших комбинированных пресетов «стена + ППС» — не показывать в UI. */
-export const LEGACY_COMBINED_WALL_PRESET_IDS = new Set(['wall_pps_50', 'wall_pps_100']);
+import { LEGACY_COMBINED_WALL_PRESET_IDS } from '../constants/compatLegacyIds';
 
 /** Только несущие стены (kind=wall), без утеплителя и без легаси. */
 export function filterStructuralWallPresets(presets: EnvelopePreset[]): EnvelopePreset[] {

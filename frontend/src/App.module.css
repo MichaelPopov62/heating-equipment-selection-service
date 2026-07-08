@@ -124,20 +124,6 @@
   font: 500 13px/1.2 var(--sans);
 }
 
-.roomsGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.roomCard {
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--surface-2);
-  padding: 12px;
-  min-height: 120px;
-}
-
 .calculationResults {
   flex: 1 1 auto;
   width: 100%;

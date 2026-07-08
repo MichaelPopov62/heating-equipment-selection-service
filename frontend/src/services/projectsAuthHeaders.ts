@@ -22,15 +22,3 @@ export function getProjectsAuthHeaders(): Record<string, string> {
   }
   return headers;
 }
-
-/**
- * @param {string | null} token — null удаляет сохранённый токен
- */
-export function setProjectsBearerToken(token: string | null): void {
-  if (typeof localStorage === 'undefined') return;
-  if (token?.trim()) {
-    localStorage.setItem(STORAGE_KEY, token.trim());
-  } else {
-    localStorage.removeItem(STORAGE_KEY);
-  }
-}

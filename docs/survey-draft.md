@@ -37,6 +37,24 @@
 
 Миграция v3→v4: `migrateSurveyDraft.ts` — дефолты для `hydraulicsForm` и `wiringLayoutV3`.
 
+## Compat-слой (НЕ dead code)
+
+До релиза и снятия freeze (**целевая дата review: +1 месяц после внедрения телеметрии**) следующие модули **обязательны** и **не удаляются** как «мёртвый код»:
+
+| Модуль | Назначение |
+|--------|------------|
+| `utils/migrateLegacyRoomTypes.ts` | `living`/`bathroom`/`tech` → канонические типы |
+| `utils/migrateLegacyExternalWalls.ts` | `wall_pps_*`, `insul_*` в `presetId` стены |
+| `utils/migrateRoomUnderfloorHeating.ts` | монолитный `presetId` ТП → `basePresetId` + `finishMaterialId` |
+| `utils/migrateSurveyDraft.ts` | единая точка загрузки snapshot |
+| `utils/migrateLegacyWallAreaM2` в `roomEnvelopeFields.ts` | `wallAreaM2` → `externalWall1/2` |
+| `constants/compatLegacyIds.ts` | ID устаревших пресетов стен |
+| `migrateDerivedState.ts` (ветка `DRAFT_LOADED`) | bootstrap `wiringLayoutV3` при загрузке |
+
+**Живая pipeline-логика (не compat):** `migrateDerivedState.ts` — синхронизация ТП и wiring на каждой мутации; **не удалять**.
+
+**Телеметрия freeze:** `utils/compatTelemetry.ts` — `console.warn('[survey-compat] …')` только в `import.meta.env.DEV`, при фактическом срабатывании миграции. Когда за месяц QA логи = 0 → спринт на Hard Reset (удаление compat, отказ `schemaVersion < 4`).
+
 ## Загрузка и сохранение
 
 | Операция | Функция |
@@ -61,7 +79,28 @@
 
 ```bash
 cd backend && npm run verify:survey-draft-migration
-cd frontend && npm run verify:survey-session
+cd frontend && npm run verify
 ```
+
+`npm run verify` во frontend = `lint` + `verify:survey-session` + `verify:dead-code` (knip).
+
+### Автоматизированная приёмка (frontend)
+
+Перед сдачей задачи на чистой кодовой базе:
+
+```bash
+cd frontend && npm run verify && npm run build
+```
+
+- **`npm run verify`** — exit `0` обязателен; ошибки ESLint, `verify:survey-session` или knip (вне `ignore`) блокируют приёмку.
+- **`npm run build`** — `tsc -b` + Vite без ошибок.
+
+**Knip (`knip.json`):** модули живой миграции черновиков в секции `ignore` (не анализируются, без ложных срабатываний):
+
+- `migrateLegacyRoomTypes.ts`
+- `migrateRoomUnderfloorHeating.ts`
+- `migrateLegacyExternalWalls.ts`
+- `migrateDerivedState.ts`
+- `migrateSurveyDraft.ts`
 
 См. также: [`water-heater-form.md`](water-heater-form.md), [`frontend-calc-runner.md`](frontend-calc-runner.md).

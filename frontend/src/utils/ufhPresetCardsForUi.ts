@@ -4,6 +4,7 @@
 
 import type { UfhModePresetCard, UfhModePresetId } from '../types/ufhModePreset';
 import { FALLBACK_UFH_MODE_PRESETS } from '../data/fallbackUfhModePresets';
+import { warnCompatMigration } from './compatTelemetry';
 
 /** Основные режимы в UI (явная карточка «ТП + радиаторы»). */
 export const PRIMARY_UFH_MODE_PRESET_IDS: readonly UfhModePresetId[] = [
@@ -60,6 +61,7 @@ export function ufhPresetCardsForUi(
   ) {
     const legacy = byId.get(selectedPresetId);
     if (legacy && !visible.some((c) => c.presetId === legacy.presetId)) {
+      warnCompatMigration('UfhModePresetUi', `показ legacy-карточки ${selectedPresetId}`);
       visible.push(legacy);
     }
   }

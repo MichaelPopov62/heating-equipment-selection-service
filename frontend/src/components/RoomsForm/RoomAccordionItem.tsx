@@ -4,6 +4,7 @@
  */
 
 import type { Dispatch, SetStateAction } from 'react';
+import { ROOM_TYPE_UI_OPTIONS } from '../../constants/roomTypes';
 import type { EnvelopePreset, ObjectType } from '../../types/envelope';
 import type {
   ExternalWallFormValue,
@@ -310,16 +311,11 @@ export function RoomAccordionItem({
                 updateRoom(patch);
               }}
             >
-              <option value="прихожая">Прихожая</option>
-              <option value="тамбур">Тамбур / входная зона</option>
-              <option value="гостиная">Гостиная</option>
-              <option value="коридор">Коридор</option>
-              <option value="спальня">Спальня</option>
-              <option value="кухня">Кухня</option>
-              <option value="санузел">Санузел</option>
-              <option value="тех">Техническое</option>
-              <option value="котельная">Котельная</option>
-              <option value="помещение">Помещение</option>
+              {ROOM_TYPE_UI_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
           </div>
 

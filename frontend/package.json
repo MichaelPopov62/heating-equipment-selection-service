@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "verify:survey-session": "node scripts/verifySurveySessionPipeline.mjs"
+    "verify:survey-session": "node scripts/verifySurveySessionPipeline.mjs",
+    "verify:dead-code": "knip",
+    "verify": "npm run lint && npm run verify:survey-session && npm run verify:dead-code"
   },
   "dependencies": {
     "@tabler/icons-react": "^3.41.1",
@@ -27,6 +29,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
+    "knip": "^5.50.0",
     "postcss-custom-media": "^12.0.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",

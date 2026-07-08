@@ -6,21 +6,6 @@ import type { UnderfloorHeatingBasePreset } from '../types/underfloorHeating';
 
 export const DEFAULT_UNDERFLOOR_HEATING_BASE_ID = 'ufh_base_interstory_screed_65';
 
-/** Миграция устаревших монолитных presetId → base + finish */
-export const LEGACY_MONOLITHIC_UFH_PRESET_MAP: Record<
-  string,
-  { basePresetId: string; finishMaterialId: string }
-> = {
-  underfloor_heating_glued_pvc_quartz_vinyl_interstory: {
-    basePresetId: DEFAULT_UNDERFLOOR_HEATING_BASE_ID,
-    finishMaterialId: 'pvc_glue',
-  },
-  underfloor_heating_floating_quartz_vinyl_interstory: {
-    basePresetId: DEFAULT_UNDERFLOOR_HEATING_BASE_ID,
-    finishMaterialId: 'pvc_click',
-  },
-};
-
 function baseStub(id: string, name: string): UnderfloorHeatingBasePreset {
   return {
     id,

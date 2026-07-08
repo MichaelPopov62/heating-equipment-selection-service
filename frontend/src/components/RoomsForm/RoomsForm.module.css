@@ -74,15 +74,6 @@
   color: var(--text-m);
 }
 
-.emptyState {
-  border: 1px dashed var(--border);
-  border-radius: 14px;
-  padding: 14px 12px;
-  background: var(--surface-2);
-  color: var(--text-m);
-  font: 500 13px/1.35 var(--sans);
-}
-
 .grid {
   display: flex;
   flex-wrap: wrap;

@@ -3,11 +3,10 @@
  * Описание: Преобразование комбинированных wall_pps_* в objectMeta.externalWalls.
  */
 
-import {
-  DEFAULT_SFTK_INSULATION_PRESET_ID,
-  LEGACY_COMBINED_WALL_PRESET_IDS,
-} from '../data/fallbackEnvelopePresets';
+import { LEGACY_COMBINED_WALL_PRESET_IDS } from '../constants/compatLegacyIds';
+import { DEFAULT_SFTK_INSULATION_PRESET_ID } from '../data/fallbackEnvelopePresets';
 import type { ObjectMetaValue } from '../types/envelope';
+import { warnCompatMigration } from './compatTelemetry';
 
 const DEFAULT_STRUCTURAL_WALL_PRESET_ID = 'wall_gas_concrete_d500';
 
@@ -23,6 +22,7 @@ export function migrateObjectMetaExternalWalls(
 
   if (LEGACY_COMBINED_WALL_PRESET_IDS.has(presetId)) {
     const insulationThicknessMm = presetId === 'wall_pps_50' ? 50 : 100;
+    warnCompatMigration('ExternalWalls', `combined preset ${presetId}`);
     return {
       ...externalWalls,
       presetId: DEFAULT_STRUCTURAL_WALL_PRESET_ID,
@@ -35,6 +35,7 @@ export function migrateObjectMetaExternalWalls(
 
   if (presetId.startsWith('insul_')) {
     const facadeSystem = presetId === DEFAULT_SFTK_INSULATION_PRESET_ID ? 'sftk' : 'ventilated';
+    warnCompatMigration('ExternalWalls', `insulation in wall presetId: ${presetId}`);
     return {
       ...externalWalls,
       presetId: DEFAULT_STRUCTURAL_WALL_PRESET_ID,

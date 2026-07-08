@@ -3,19 +3,35 @@
  * Описание: Миграция legacy presetId → basePresetId + finishMaterialId.
  */
 
-import {
-  DEFAULT_UNDERFLOOR_HEATING_BASE_ID,
-  LEGACY_MONOLITHIC_UFH_PRESET_MAP,
-} from '../data/fallbackUnderfloorHeatingPresets';
+import { DEFAULT_UNDERFLOOR_HEATING_BASE_ID } from '../data/fallbackUnderfloorHeatingPresets';
 import { DEFAULT_FLOORING_FINISH_ID } from '../data/fallbackFlooringFinishes';
 import type { RoomFormValue, UfhPipeSpacingMm } from '../types/rooms';
 import { DEFAULT_UFH_PIPE_SPACING_MM } from '../types/underfloorHeating';
+import { warnCompatMigration } from './compatTelemetry';
+
+/** Миграция устаревших монолитных presetId → base + finish (только compat). */
+const LEGACY_MONOLITHIC_UFH_PRESET_MAP: Record<
+  string,
+  { basePresetId: string; finishMaterialId: string }
+> = {
+  underfloor_heating_glued_pvc_quartz_vinyl_interstory: {
+    basePresetId: DEFAULT_UNDERFLOOR_HEATING_BASE_ID,
+    finishMaterialId: 'pvc_glue',
+  },
+  underfloor_heating_floating_quartz_vinyl_interstory: {
+    basePresetId: DEFAULT_UNDERFLOOR_HEATING_BASE_ID,
+    finishMaterialId: 'pvc_click',
+  },
+};
 
 export function migrateRoomUnderfloorHeating(rooms: RoomFormValue[]): RoomFormValue[] {
-  return rooms.map((room) => {
+  let changed = false;
+  const next = rooms.map((room) => {
     const ufh = room.underfloorHeating;
     if (!ufh) return room;
     if (!ufh.enabled) {
+      if (!('underfloorHeating' in room)) return room;
+      changed = true;
       const { underfloorHeating: _removed, ...rest } = room;
       return rest;
     }
@@ -32,6 +48,8 @@ export function migrateRoomUnderfloorHeating(rooms: RoomFormValue[]): RoomFormVa
       if (mapped) {
         basePresetId = mapped.basePresetId;
         finishMaterialId = mapped.finishMaterialId;
+        warnCompatMigration('RoomUfhPreset', `${legacyPresetId} → base+finish (roomId=${room.id})`);
+        changed = true;
       }
     }
 
@@ -44,9 +62,25 @@ export function migrateRoomUnderfloorHeating(rooms: RoomFormValue[]): RoomFormVa
         ? rawSpacing
         : DEFAULT_UFH_PIPE_SPACING_MM;
 
+    const normalized = {
+      enabled: true as const,
+      basePresetId,
+      finishMaterialId,
+      pipeSpacingMm,
+    };
+
+    if (
+      room.underfloorHeating?.basePresetId !== normalized.basePresetId ||
+      room.underfloorHeating?.finishMaterialId !== normalized.finishMaterialId ||
+      room.underfloorHeating?.pipeSpacingMm !== normalized.pipeSpacingMm
+    ) {
+      changed = true;
+    }
+
     return {
       ...room,
-      underfloorHeating: { enabled: true, basePresetId, finishMaterialId, pipeSpacingMm },
+      underfloorHeating: normalized,
     };
   });
+  return changed ? next : rooms;
 }

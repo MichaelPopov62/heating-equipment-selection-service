@@ -9,6 +9,8 @@
     "start": "npm run start --prefix backend",
     "server": "npm run server --prefix backend",
     "lint": "npm run lint --prefix backend",
+    "lint:frontend": "npm run lint --prefix frontend",
+    "verify:frontend": "npm run verify --prefix frontend",
     "seed": "npm run seed --prefix backend",
     "verify:seed-catalog": "npm run verify:seed-catalog --prefix backend"
   },
