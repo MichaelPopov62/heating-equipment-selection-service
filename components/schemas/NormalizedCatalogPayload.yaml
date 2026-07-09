@@ -27,3 +27,11 @@ properties:
     type: array
     items:
       $ref: IndirectWaterHeaterCatalogItem.yaml
+  manifolds:
+    type: array
+    items:
+      $ref: ManifoldCatalogItem.yaml
+  boilerManifolds:
+    type: array
+    items:
+      $ref: BoilerManifoldCatalogItem.yaml

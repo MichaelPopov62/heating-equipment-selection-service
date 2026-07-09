@@ -1,7 +1,23 @@
 /**
  * Назначение: Сервис каталога оборудования.
- * Описание: Загрузка снимка каталога с GET /api/v1/catalog для справочника в UI.
+ * Описание: Загрузка снимка каталога с GET /api/v1/catalog для справочника в UI и будущего подбора в смете.
  */
+
+import {
+  parseCatalogBoilerManifolds,
+  parseCatalogManifolds,
+} from './parseCatalogManifolds';
+import type {
+  CatalogBoilerManifoldItem,
+  CatalogManifoldItem,
+} from './catalogTypes';
+
+export type {
+  CatalogBoilerManifoldItem,
+  CatalogManifoldDimensions,
+  CatalogManifoldItem,
+  ManifoldApplication,
+} from './catalogTypes';
 
 /** Типичная подсказка при недоступном upstream в dev (см. frontend/vite.config.ts). */
 const CATALOG_BACKEND_HINT =
@@ -14,6 +30,10 @@ export type CatalogEquipmentSnapshot = {
   radiators: Record<string, unknown>[];
   waterHeaters: Record<string, unknown>[];
   pipes: Record<string, unknown>[];
+  /** Коллекторы ТП / радиаторов — номенклатура для подбора и сметы. */
+  manifolds: CatalogManifoldItem[];
+  /** Котельные распределительные коллекторы. */
+  boilerManifolds: CatalogBoilerManifoldItem[];
 };
 
 function catalogFailureMessage(status: number, raw: unknown): string {
@@ -80,5 +100,7 @@ async function loadCatalogEquipmentFromApi(): Promise<CatalogEquipmentSnapshot> 
       ? (cat.waterHeaters as Record<string, unknown>[])
       : [],
     pipes: Array.isArray(cat.pipes) ? (cat.pipes as Record<string, unknown>[]) : [],
+    manifolds: parseCatalogManifolds(cat.manifolds),
+    boilerManifolds: parseCatalogBoilerManifolds(cat.boilerManifolds),
   };
 }

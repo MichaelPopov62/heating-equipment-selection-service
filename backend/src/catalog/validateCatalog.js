@@ -14,6 +14,11 @@ import {
   normalizePumpModeQMaxToCurve,
   PUMP_CURVE_MIN_HEAD_AT_QMAX_M,
 } from '../utils/pumpCurveMath.js';
+import {
+  assertKnownManifoldSeriesGeometry,
+  normalizeInchLabel,
+} from './manifoldSeriesGeometry.js';
+import { assertKnownBoilerManifoldSeriesGeometry } from './boilerManifoldSeriesGeometry.js';
 
 function toFiniteNumber(x, { field, min = -Infinity, max = Infinity } = {}) {
   const n = Number(x);
@@ -881,6 +886,276 @@ function validateIndirectWaterHeater(item, idx) {
   }
 }
 
+/** Допустимые назначения коллектора в каталоге. */
+const MANIFOLD_APPLICATIONS_ALLOWED = Object.freeze(['radiator', 'underfloor']);
+
+/**
+ * Коллекторы: корень JSON или `products.manifold`.
+ *
+ * @param {Record<string, unknown>} json
+ * @returns {unknown[]}
+ */
+function collectManifolds(json) {
+  if (Array.isArray(json.manifold)) return json.manifold;
+  const p = json.products;
+  if (isPlainObject(p) && Array.isArray(p.manifold)) return p.manifold;
+  return [];
+}
+
+/**
+ * Котельные коллекторы: корень JSON или `products.boilerManifold`.
+ *
+ * @param {Record<string, unknown>} json
+ * @returns {unknown[]}
+ */
+function collectBoilerManifolds(json) {
+  if (Array.isArray(json.boilerManifold)) return json.boilerManifold;
+  const p = json.products;
+  if (isPlainObject(p) && Array.isArray(p.boilerManifold)) return p.boilerManifold;
+  return [];
+}
+
+/**
+ * @param {unknown} x
+ * @param {{ field: string, min?: number, max?: number }} opts
+ * @returns {number}
+ */
+function toFiniteInteger(x, { field, min = -Infinity, max = Infinity }) {
+  const n = toFiniteNumber(x, { field, min, max });
+  if (!Number.isInteger(n)) {
+    throw new Error(`Каталог: поле ${field} должно быть целым числом.`);
+  }
+  return n;
+}
+
+/**
+ * @param {Record<string, unknown>} item
+ * @param {string} ctx
+ */
+function validateManifoldDimensions(item, ctx) {
+  if (!isPlainObject(item.dimensions)) {
+    throw new Error(`Каталог: объект dimensions обязателен для коллектора (${ctx}).`);
+  }
+  const dim = /** @type {Record<string, unknown>} */ (item.dimensions);
+  dim.width = toFiniteNumber(dim.width, {
+    field: `${ctx}.dimensions.width`,
+    min: 50,
+    max: 2000,
+  });
+  dim.height = toFiniteNumber(dim.height, {
+    field: `${ctx}.dimensions.height`,
+    min: 50,
+    max: 1000,
+  });
+  dim.depth = toFiniteNumber(dim.depth, {
+    field: `${ctx}.dimensions.depth`,
+    min: 20,
+    max: 500,
+  });
+}
+
+/**
+ * @param {unknown} item
+ * @param {number} idx
+ */
+function validateManifold(item, idx) {
+  const ctx = `manifold[${idx}]`;
+  if (!isPlainObject(item)) {
+    throw new Error(`Каталог: manifold[${idx}] должен быть объектом.`);
+  }
+
+  delete item.kind;
+  delete item.catalogKey;
+
+  item.model = sanitizeTrimAngleBrackets(item.model);
+  if (!item.model) {
+    throw new Error(`Каталог: model обязателен (${ctx}).`);
+  }
+
+  item.brand = sanitizeTrimAngleBrackets(item.brand);
+  if (!item.brand) {
+    throw new Error(`Каталог: brand обязателен (${ctx}).`);
+  }
+
+  item.article = sanitizeTrimAngleBrackets(item.article);
+  if (!item.article) {
+    throw new Error(`Каталог: article обязателен (${ctx}).`);
+  }
+
+  item.price = toFiniteNumber(item.price, {
+    field: `${ctx}.price`,
+    min: 1,
+    max: 1_000_000_000,
+  });
+
+  item.outletsCount = toFiniteInteger(item.outletsCount, {
+    field: `${ctx}.outletsCount`,
+    min: 2,
+    max: 32,
+  });
+
+  const appRaw = sanitizeTrimAngleBrackets(item.manifoldApplication).trim().toLowerCase();
+  if (!MANIFOLD_APPLICATIONS_ALLOWED.includes(appRaw)) {
+    throw new Error(
+      `Каталог: ${ctx}.manifoldApplication недопустимо "${String(item.manifoldApplication)}"; ` +
+        `разрешено: ${MANIFOLD_APPLICATIONS_ALLOWED.join(' | ')}.`,
+    );
+  }
+  item.manifoldApplication = appRaw;
+
+  if (typeof item.hasFlowMeters !== 'boolean') {
+    throw new Error(`Каталог: ${ctx}.hasFlowMeters должен быть boolean.`);
+  }
+
+  if (item.manifoldApplication === 'underfloor' && item.hasFlowMeters !== true) {
+    throw new Error(`Каталог: ${ctx} — для underfloor ожидается hasFlowMeters=true.`);
+  }
+  if (item.manifoldApplication === 'radiator' && item.hasFlowMeters !== false) {
+    throw new Error(`Каталог: ${ctx} — для radiator в MVP ожидается hasFlowMeters=false.`);
+  }
+
+  item.material = sanitizeTrimAngleBrackets(item.material);
+  if (!item.material) {
+    throw new Error(`Каталог: material обязателен (${ctx}).`);
+  }
+
+  item.maxPressureBar = toFiniteNumber(item.maxPressureBar, {
+    field: `${ctx}.maxPressureBar`,
+    min: 0.1,
+    max: 25,
+  });
+  item.maxTemperatureC = toFiniteNumber(item.maxTemperatureC, {
+    field: `${ctx}.maxTemperatureC`,
+    min: 30,
+    max: 120,
+  });
+
+  item.connectionMainInch = normalizeInchLabel(item.connectionMainInch);
+  if (!item.connectionMainInch) {
+    throw new Error(`Каталог: connectionMainInch обязателен для коллектора (${ctx}).`);
+  }
+
+  item.connectionOutletsInch = normalizeInchLabel(item.connectionOutletsInch);
+  if (!item.connectionOutletsInch) {
+    throw new Error(`Каталог: connectionOutletsInch обязателен для коллектора (${ctx}).`);
+  }
+
+  validateManifoldDimensions(item, ctx);
+  assertKnownManifoldSeriesGeometry(item, ctx);
+}
+
+/**
+ * @param {Record<string, unknown>} item
+ * @param {string} ctx
+ */
+function validateBoilerManifoldDimensions(item, ctx) {
+  if (!isPlainObject(item.dimensions)) {
+    throw new Error(`Каталог: объект dimensions обязателен для котельного коллектора (${ctx}).`);
+  }
+  const dim = /** @type {Record<string, unknown>} */ (item.dimensions);
+  dim.width = toFiniteNumber(dim.width, {
+    field: `${ctx}.dimensions.width`,
+    min: 100,
+    max: 3000,
+  });
+  dim.height = toFiniteNumber(dim.height, {
+    field: `${ctx}.dimensions.height`,
+    min: 50,
+    max: 1000,
+  });
+  dim.depth = toFiniteNumber(dim.depth, {
+    field: `${ctx}.dimensions.depth`,
+    min: 20,
+    max: 500,
+  });
+}
+
+/**
+ * @param {unknown} item
+ * @param {number} idx
+ */
+function validateBoilerManifold(item, idx) {
+  const ctx = `boilerManifold[${idx}]`;
+  if (!isPlainObject(item)) {
+    throw new Error(`Каталог: boilerManifold[${idx}] должен быть объектом.`);
+  }
+
+  delete item.kind;
+  delete item.catalogKey;
+
+  item.model = sanitizeTrimAngleBrackets(item.model);
+  if (!item.model) {
+    throw new Error(`Каталог: model обязателен (${ctx}).`);
+  }
+
+  item.brand = sanitizeTrimAngleBrackets(item.brand);
+  if (!item.brand) {
+    throw new Error(`Каталог: brand обязателен (${ctx}).`);
+  }
+
+  item.article = sanitizeTrimAngleBrackets(item.article);
+  if (!item.article) {
+    throw new Error(`Каталог: article обязателен (${ctx}).`);
+  }
+
+  item.price = toFiniteNumber(item.price, {
+    field: `${ctx}.price`,
+    min: 1,
+    max: 1_000_000_000,
+  });
+
+  item.circuitsCount = toFiniteInteger(item.circuitsCount, {
+    field: `${ctx}.circuitsCount`,
+    min: 1,
+    max: 32,
+  });
+
+  item.maxPowerKw = toFiniteNumber(item.maxPowerKw, {
+    field: `${ctx}.maxPowerKw`,
+    min: 0.1,
+    max: 500,
+  });
+
+  item.material = sanitizeTrimAngleBrackets(item.material);
+  if (!item.material) {
+    throw new Error(`Каталог: material обязателен (${ctx}).`);
+  }
+
+  if (typeof item.hasInsulation !== 'boolean') {
+    throw new Error(`Каталог: ${ctx}.hasInsulation должен быть boolean.`);
+  }
+
+  item.interaxleDistanceMm = toFiniteNumber(item.interaxleDistanceMm, {
+    field: `${ctx}.interaxleDistanceMm`,
+    min: 50,
+    max: 300,
+  });
+
+  item.connectionBoilerInch = normalizeInchLabel(item.connectionBoilerInch);
+  if (!item.connectionBoilerInch) {
+    throw new Error(`Каталог: connectionBoilerInch обязателен (${ctx}).`);
+  }
+
+  item.connectionCircuitsInch = normalizeInchLabel(item.connectionCircuitsInch);
+  if (!item.connectionCircuitsInch) {
+    throw new Error(`Каталог: connectionCircuitsInch обязателен (${ctx}).`);
+  }
+
+  item.maxPressureBar = toFiniteNumber(item.maxPressureBar, {
+    field: `${ctx}.maxPressureBar`,
+    min: 0.1,
+    max: 25,
+  });
+  item.maxTemperatureC = toFiniteNumber(item.maxTemperatureC, {
+    field: `${ctx}.maxTemperatureC`,
+    min: 30,
+    max: 120,
+  });
+
+  validateBoilerManifoldDimensions(item, ctx);
+  assertKnownBoilerManifoldSeriesGeometry(item, ctx);
+}
+
 /**
  * Валидирует и (минимально) нормализует каталог.
  * Входной json не мутируется (клонирование как в validateAndNormalizeInput для calc).
@@ -919,6 +1194,14 @@ export function validateAndNormalizeCatalog(json) {
   const indirectWaterHeaters = indirectWaterHeatersRaw.filter(isPlainObject);
   indirectWaterHeaters.forEach((item, i) => validateIndirectWaterHeater(item, i));
 
+  const manifoldsRaw = collectManifolds(root);
+  const manifolds = manifoldsRaw.filter(isPlainObject);
+  manifolds.forEach((item, i) => validateManifold(item, i));
+
+  const boilerManifoldsRaw = collectBoilerManifolds(root);
+  const boilerManifolds = boilerManifoldsRaw.filter(isPlainObject);
+  boilerManifolds.forEach((item, i) => validateBoilerManifold(item, i));
+
   return {
     boilers: { doubleCircuit, singleCircuit },
     radiators,
@@ -926,6 +1209,8 @@ export function validateAndNormalizeCatalog(json) {
     pipes,
     pumps,
     indirectWaterHeaters,
+    manifolds,
+    boilerManifolds,
   };
 }
 

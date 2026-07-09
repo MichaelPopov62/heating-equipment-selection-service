@@ -1,7 +1,7 @@
 /**
  * Назначение: Mongoose-схемы каталога оборудования и их подтипов.
- * Описание: baseProductSchema и схемы boiler, radiator, waterHeater, pipe, pump, indirectWaterHeater
- * для seed (scripts/seed.js). Контракт номенклатуры (powerKw, priceBasis, specs.volumeLiters и др.)
+ * Описание: baseProductSchema и схемы boiler, radiator, waterHeater, pipe, pump, indirectWaterHeater,
+ * manifold, boilerManifold для seed (scripts/seed.js). Контракт номенклатуры (powerKw, priceBasis, specs.volumeLiters и др.)
  * — validateAndNormalizeCatalog в catalog/validateCatalog.js (SSOT на чтение и запись).
  * strict: false намеренно: не дублировать полный контракт в Mongoose; прямой insert/update в
  * products без validateAndNormalizeCatalog ломает loadCatalog() на runtime.
@@ -15,7 +15,7 @@ export const baseProductSchema = new Schema(
     kind: {
       type: String,
       required: true,
-      enum: ['boiler', 'radiator', 'waterHeater', 'pipe', 'pump', 'indirectWaterHeater'],
+      enum: ['boiler', 'radiator', 'waterHeater', 'pipe', 'pump', 'indirectWaterHeater', 'manifold', 'boilerManifold'],
     },
     /** Уникальный ключ строки каталога в seed (индекс + секция); не путать с «моделью для UI». */
     catalogKey: { type: String, required: true, trim: true },
@@ -122,4 +122,49 @@ export const pumpSchema = new Schema({
   segment: { type: String, required: false, trim: true },
   /** Ориентировочная цена (валюта — currency каталога); обязательна после validateCatalog. */
   price: { type: Number, required: false },
+});
+
+/** Коллектор распределительный (ТП / радиаторы). */
+export const manifoldSchema = new Schema({
+  brand: { type: String, required: true, trim: true },
+  article: { type: String, required: true, trim: true },
+  price: { type: Number, required: true, min: 1 },
+  outletsCount: { type: Number, required: true, min: 2, max: 32 },
+  manifoldApplication: {
+    type: String,
+    required: true,
+    enum: ['radiator', 'underfloor'],
+  },
+  hasFlowMeters: { type: Boolean, required: true },
+  material: { type: String, required: true, trim: true },
+  maxPressureBar: { type: Number, required: true },
+  maxTemperatureC: { type: Number, required: true },
+  connectionMainInch: { type: String, required: true, trim: true },
+  connectionOutletsInch: { type: String, required: true, trim: true },
+  dimensions: {
+    width: { type: Number, required: true },
+    height: { type: Number, required: true },
+    depth: { type: Number, required: true },
+  },
+});
+
+/** Котельный распределительный коллектор. */
+export const boilerManifoldSchema = new Schema({
+  brand: { type: String, required: true, trim: true },
+  article: { type: String, required: true, trim: true },
+  price: { type: Number, required: true, min: 1 },
+  circuitsCount: { type: Number, required: true, min: 1, max: 32 },
+  maxPowerKw: { type: Number, required: true, min: 0.1 },
+  hasInsulation: { type: Boolean, required: true },
+  interaxleDistanceMm: { type: Number, required: true },
+  connectionBoilerInch: { type: String, required: true, trim: true },
+  connectionCircuitsInch: { type: String, required: true, trim: true },
+  maxPressureBar: { type: Number, required: true },
+  maxTemperatureC: { type: Number, required: true },
+  material: { type: String, required: true, trim: true },
+  dimensions: {
+    width: { type: Number, required: true },
+    height: { type: Number, required: true },
+    depth: { type: Number, required: true },
+  },
 });

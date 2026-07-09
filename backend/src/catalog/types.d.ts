@@ -218,6 +218,56 @@ export interface PumpCatalogItemNormalized extends Record<string, unknown> {
   operatingModes: PumpOperatingModeNormalized[];
 }
 
+/** Назначение коллектора в каталоге. */
+export type ManifoldApplication = 'radiator' | 'underfloor';
+
+export interface ManifoldDimensionsNormalized {
+  width: number;
+  height: number;
+  depth: number;
+}
+
+/** Коллектор (ТП / радиаторы) после validateAndNormalizeCatalog. */
+export interface ManifoldCatalogItemNormalized extends Record<string, unknown> {
+  model: string;
+  brand: string;
+  article: string;
+  price: number;
+  outletsCount: number;
+  manifoldApplication: ManifoldApplication;
+  hasFlowMeters: boolean;
+  material: string;
+  maxPressureBar: number;
+  maxTemperatureC: number;
+  connectionMainInch: string;
+  connectionOutletsInch: string;
+  dimensions: ManifoldDimensionsNormalized;
+}
+
+export interface BoilerManifoldDimensionsNormalized {
+  width: number;
+  height: number;
+  depth: number;
+}
+
+/** Котельный коллектор после validateAndNormalizeCatalog. */
+export interface BoilerManifoldCatalogItemNormalized extends Record<string, unknown> {
+  model: string;
+  brand: string;
+  article: string;
+  price: number;
+  circuitsCount: number;
+  maxPowerKw: number;
+  hasInsulation: boolean;
+  interaxleDistanceMm: number;
+  connectionBoilerInch: string;
+  connectionCircuitsInch: string;
+  maxPressureBar: number;
+  maxTemperatureC: number;
+  material: string;
+  dimensions: BoilerManifoldDimensionsNormalized;
+}
+
 export interface NormalizedCatalog {
   boilers: {
     doubleCircuit: BoilerCatalogItemNormalized[];
@@ -231,5 +281,9 @@ export interface NormalizedCatalog {
   pumps?: PumpCatalogItemNormalized[];
   /** Бойлеры косвенного нагрева (БКН), после валидации. */
   indirectWaterHeaters?: IndirectWaterHeaterCatalogItemNormalized[];
+  /** Коллекторы ТП / радиаторов. */
+  manifolds?: ManifoldCatalogItemNormalized[];
+  /** Котельные распределительные коллекторы. */
+  boilerManifolds?: BoilerManifoldCatalogItemNormalized[];
 }
 

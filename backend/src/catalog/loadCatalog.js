@@ -60,7 +60,16 @@ function countProductRowsInEnvelope(json) {
     ? /** @type {unknown[]} */ ((/** @type {Record<string, unknown>} */ (json)).indirectWaterHeaters)
         .length
     : 0;
-  return boilers + radiators + waterHeaters + pipes + pumps + indirect;
+  const manifolds = Array.isArray(/** @type {Record<string, unknown>} */ (json).manifold)
+    ? /** @type {unknown[]} */ ((/** @type {Record<string, unknown>} */ (json)).manifold).length
+    : 0;
+  const boilerManifolds = Array.isArray(
+    /** @type {Record<string, unknown>} */ (json).boilerManifold,
+  )
+    ? /** @type {unknown[]} */ ((/** @type {Record<string, unknown>} */ (json)).boilerManifold)
+        .length
+    : 0;
+  return boilers + radiators + waterHeaters + pipes + pumps + indirect + manifolds + boilerManifolds;
 }
 
 /**
@@ -190,6 +199,12 @@ async function loadCatalogJsonFromMongo() {
   const indirectWaterHeaters = docs
     .filter((d) => d.kind === 'indirectWaterHeater')
     .map((d) => mongoDocToCatalogProductDoc(/** @type {Record<string, unknown>} */ (d)));
+  const manifolds = docs
+    .filter((d) => d.kind === 'manifold')
+    .map((d) => mongoDocToCatalogProductDoc(/** @type {Record<string, unknown>} */ (d)));
+  const boilerManifolds = docs
+    .filter((d) => d.kind === 'boilerManifold')
+    .map((d) => mongoDocToCatalogProductDoc(/** @type {Record<string, unknown>} */ (d)));
 
   /** @type {Array<Record<string, unknown> & { isDoubleCircuit?: boolean }>} */
   const doubleCircuit = [];
@@ -212,6 +227,8 @@ async function loadCatalogJsonFromMongo() {
     },
     pumps,
     indirectWaterHeaters,
+    manifold: manifolds,
+    boilerManifold: boilerManifolds,
   };
 
   if (countBoilersInProductsJson(envelope) < 1) {
@@ -250,6 +267,10 @@ function normalizeCatalogEnvelope(json, catalogSource) {
     indirectWaterHeaters: Array.isArray(normalized.indirectWaterHeaters)
       ? normalized.indirectWaterHeaters.length
       : 0,
+    manifolds: Array.isArray(normalized.manifolds) ? normalized.manifolds.length : 0,
+    boilerManifolds: Array.isArray(normalized.boilerManifolds)
+      ? normalized.boilerManifolds.length
+      : 0,
   });
 
   return {
@@ -264,6 +285,10 @@ function normalizeCatalogEnvelope(json, catalogSource) {
       pumps: Array.isArray(normalized.pumps) ? [...normalized.pumps] : [],
       indirectWaterHeaters: Array.isArray(normalized.indirectWaterHeaters)
         ? [...normalized.indirectWaterHeaters]
+        : [],
+      manifolds: Array.isArray(normalized.manifolds) ? [...normalized.manifolds] : [],
+      boilerManifolds: Array.isArray(normalized.boilerManifolds)
+        ? [...normalized.boilerManifolds]
         : [],
     },
     catalogSource,

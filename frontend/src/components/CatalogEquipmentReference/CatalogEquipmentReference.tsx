@@ -1,9 +1,15 @@
 /**
  * Назначение: Справочник каталога оборудования.
- * Описание: Счётчики номенклатуры, радиаторы и таблица труб из GET /api/v1/catalog.
+ * Описание: Счётчики номенклатуры, радиаторы, трубы и коллекторы из GET /api/v1/catalog.
  */
 
-import type { CatalogEquipmentSnapshot } from '../../services/catalog';
+import type {
+  CatalogBoilerManifoldItem,
+  CatalogEquipmentSnapshot,
+  CatalogManifoldItem,
+} from '../../services/catalog';
+import { formatCatalogDimensionsMm } from '../../utils/formatCatalogDimensions';
+import { manifoldApplicationLabel } from '../../utils/manifoldApplicationLabel';
 import styles from './CatalogEquipmentReference.module.css';
 
 function str(v: unknown): string {
@@ -20,8 +26,17 @@ function pipeCell(p: Record<string, unknown>, key: string): string {
   return s || '—';
 }
 
+function formatPriceUah(price: number): string {
+  if (!Number.isFinite(price)) return '—';
+  return `${Math.round(price).toLocaleString('uk-UA')} ₴`;
+}
+
+function formatBool(value: boolean): string {
+  return value ? 'да' : 'нет';
+}
+
 /**
- * Справочник позиций каталога API: счётчики, список радиаторов (тип/конструкция), таблица труб.
+ * Справочник позиций каталога API: счётчики, радиаторы, трубы, коллекторы.
  */
 export function CatalogEquipmentReference({
   snapshot,
@@ -67,7 +82,15 @@ export function CatalogEquipmentReference({
 
   if (!snapshot) return null;
 
-  const { catalogSource, boilersTotal, radiators, waterHeaters, pipes } = snapshot;
+  const {
+    catalogSource,
+    boilersTotal,
+    radiators,
+    waterHeaters,
+    pipes,
+    manifolds,
+    boilerManifolds,
+  } = snapshot;
   const srcLabel =
     catalogSource === 'mongo'
       ? 'MongoDB (+ недостающие позиции из файла при слиянии)'
@@ -77,18 +100,35 @@ export function CatalogEquipmentReference({
     <div className={styles.wrap}>
       <h3 className={styles.title}>Справочник каталога</h3>
       <p className={styles.meta}>
-        Источник: <strong>{srcLabel}</strong>. Полный перечень используется сервером для подбора.
+        Источник: <strong>{srcLabel}</strong>. Полный перечень используется сервером для подбора;
+        коллекторы — номенклатура для будущего автоподбора и строк сметы.
       </p>
-      <dl className={styles.counts}>
-        <dt>Котлы</dt>
-        <dd>{boilersTotal}</dd>
-        <dt>Радиаторы</dt>
-        <dd>{radiators.length}</dd>
-        <dt>Водонагреватели</dt>
-        <dd>{waterHeaters.length}</dd>
-        <dt>Трубы</dt>
-        <dd>{pipes.length}</dd>
-      </dl>
+      <ul className={styles.counts}>
+        <li className={styles.countItem}>
+          <span className={styles.countLabel}>Котлы</span>
+          <span className={styles.countValue}>{boilersTotal}</span>
+        </li>
+        <li className={styles.countItem}>
+          <span className={styles.countLabel}>Радиаторы</span>
+          <span className={styles.countValue}>{radiators.length}</span>
+        </li>
+        <li className={styles.countItem}>
+          <span className={styles.countLabel}>Водонагреватели</span>
+          <span className={styles.countValue}>{waterHeaters.length}</span>
+        </li>
+        <li className={styles.countItem}>
+          <span className={styles.countLabel}>Трубы</span>
+          <span className={styles.countValue}>{pipes.length}</span>
+        </li>
+        <li className={styles.countItem}>
+          <span className={styles.countLabel}>Коллекторы</span>
+          <span className={styles.countValue}>{manifolds.length}</span>
+        </li>
+        <li className={styles.countItem}>
+          <span className={styles.countLabel}>Котельные коллекторы</span>
+          <span className={styles.countValue}>{boilerManifolds.length}</span>
+        </li>
+      </ul>
 
       <details className={styles.block} open={radiators.length > 0 && radiators.length <= 12}>
         <summary>
@@ -120,6 +160,90 @@ export function CatalogEquipmentReference({
             );
           })}
         </ul>
+      </details>
+
+      <details className={styles.block} open={manifolds.length > 0 && manifolds.length <= 8}>
+        <summary>
+          Коллекторы ТП / радиаторов ({manifolds.length}) — для подбора и сметы
+        </summary>
+        {manifolds.length === 0 ? (
+          <p className={styles.meta}>В каталоге нет коллекторов.</p>
+        ) : (
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Бренд</th>
+                  <th>Артикул</th>
+                  <th>Выходы</th>
+                  <th>Назначение</th>
+                  <th>Расходомеры</th>
+                  <th>Подключение</th>
+                  <th>Габариты</th>
+                  <th>Цена</th>
+                </tr>
+              </thead>
+              <tbody>
+                {manifolds.map((m: CatalogManifoldItem) => (
+                  <tr key={`manifold-${m.article}`}>
+                    <td>{m.brand}</td>
+                    <td>{m.article}</td>
+                    <td>{m.outletsCount}</td>
+                    <td>{manifoldApplicationLabel(m.manifoldApplication)}</td>
+                    <td>{formatBool(m.hasFlowMeters)}</td>
+                    <td>
+                      {m.connectionMainInch}&quot; → {m.connectionOutletsInch}&quot;
+                    </td>
+                    <td>{formatCatalogDimensionsMm(m.dimensions)}</td>
+                    <td>{formatPriceUah(m.price)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </details>
+
+      <details className={styles.block} open={boilerManifolds.length > 0}>
+        <summary>
+          Котельные коллекторы ({boilerManifolds.length}) — для подбора и сметы
+        </summary>
+        {boilerManifolds.length === 0 ? (
+          <p className={styles.meta}>В каталоге нет котельных коллекторов.</p>
+        ) : (
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Бренд</th>
+                  <th>Артикул</th>
+                  <th>Контуры</th>
+                  <th>Макс. кВт</th>
+                  <th>Изоляция</th>
+                  <th>Подключение</th>
+                  <th>Габариты</th>
+                  <th>Цена</th>
+                </tr>
+              </thead>
+              <tbody>
+                {boilerManifolds.map((m: CatalogBoilerManifoldItem) => (
+                  <tr key={`boiler-manifold-${m.article}`}>
+                    <td>{m.brand}</td>
+                    <td>{m.article}</td>
+                    <td>{m.circuitsCount}</td>
+                    <td>{m.maxPowerKw}</td>
+                    <td>{formatBool(m.hasInsulation)}</td>
+                    <td>
+                      {m.connectionBoilerInch}&quot; / {m.connectionCircuitsInch}&quot;
+                    </td>
+                    <td>{formatCatalogDimensionsMm(m.dimensions)}</td>
+                    <td>{formatPriceUah(m.price)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </details>
 
       <details className={styles.block} open={pipes.length > 0}>

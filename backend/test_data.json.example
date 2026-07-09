@@ -17,7 +17,10 @@
           "gasConsumptionM3PerHour": 2.4,
           "price": 48500,
           "mountingType": "wall",
-          "connectionDiameters": ["3/4 дюйма (отопление)", "1/2 дюйма (ГВС)"],
+          "connectionDiameters": [
+            "3/4 дюйма (отопление)",
+            "1/2 дюйма (ГВС)"
+          ],
           "circuitsCount": 2,
           "type": "condensing",
           "circulationPump": {
@@ -26,7 +29,11 @@
                 "modeName": "Встроенный насос — скорость 3",
                 "speedIndex": 3,
                 "powerWatts": 40,
-                "coefficients": { "a": -0.45, "b": 0.12, "c": 6.0 },
+                "coefficients": {
+                  "a": -0.45,
+                  "b": 0.12,
+                  "c": 6
+                },
                 "qMinM3h": 0.1,
                 "qMaxM3h": 4.5
               },
@@ -34,15 +41,23 @@
                 "modeName": "Встроенный насос — скорость 2",
                 "speedIndex": 2,
                 "powerWatts": 35,
-                "coefficients": { "a": -0.15, "b": -0.02, "c": 5.4 },
+                "coefficients": {
+                  "a": -0.15,
+                  "b": -0.02,
+                  "c": 5.4
+                },
                 "qMinM3h": 0.2,
-                "qMaxM3h": 4.0
+                "qMaxM3h": 4
               },
               {
                 "modeName": "Встроенный насос — скорость 1",
                 "speedIndex": 1,
                 "powerWatts": 30,
-                "coefficients": { "a": -0.35, "b": -0.01, "c": 2.2 },
+                "coefficients": {
+                  "a": -0.35,
+                  "b": -0.01,
+                  "c": 2.2
+                },
                 "qMinM3h": 0.2,
                 "qMaxM3h": 1.7
               }
@@ -76,7 +91,10 @@
           "gasConsumptionM3PerHour": 2.73,
           "price": 35000,
           "mountingType": "wall",
-          "connectionDiameters": ["3/4″ (отопление)", "1/2″ (ГВС)"],
+          "connectionDiameters": [
+            "3/4″ (отопление)",
+            "1/2″ (ГВС)"
+          ],
           "circuitsCount": 2,
           "type": "traditional",
           "circulationPump": {
@@ -85,7 +103,11 @@
                 "modeName": "Baxi встроенный — скорость 1",
                 "speedIndex": 1,
                 "powerWatts": 30,
-                "coefficients": { "a": -1.667, "b": 0.167, "c": 2.0 },
+                "coefficients": {
+                  "a": -1.667,
+                  "b": 0.167,
+                  "c": 2
+                },
                 "qMinM3h": 0.4,
                 "qMaxM3h": 0.6
               },
@@ -93,15 +115,23 @@
                 "modeName": "Baxi встроенный — скорость 2",
                 "speedIndex": 2,
                 "powerWatts": 40,
-                "coefficients": { "a": -0.833, "b": -0.667, "c": 3.5 },
+                "coefficients": {
+                  "a": -0.833,
+                  "b": -0.667,
+                  "c": 3.5
+                },
                 "qMinM3h": 0.4,
-                "qMaxM3h": 1.0
+                "qMaxM3h": 1
               },
               {
                 "modeName": "Baxi встроенный — скорость 3",
                 "speedIndex": 3,
                 "powerWatts": 45,
-                "coefficients": { "a": -1.429, "b": -0.571, "c": 4.0 },
+                "coefficients": {
+                  "a": -1.429,
+                  "b": -0.571,
+                  "c": 4
+                },
                 "qMinM3h": 0.4,
                 "qMaxM3h": 1.4
               }
@@ -209,7 +239,11 @@
               "weight_kg": 34
             }
           },
-          "tags": ["wall-mounted", "double-circuit", "condensing"],
+          "tags": [
+            "wall-mounted",
+            "double-circuit",
+            "condensing"
+          ],
           "price": 39200,
           "isDoubleCircuit": true
         },
@@ -245,7 +279,12 @@
               "weight_kg": 28.5
             }
           },
-          "tags": ["wall-mounted", "double-circuit", "condensing", "compact"],
+          "tags": [
+            "wall-mounted",
+            "double-circuit",
+            "condensing",
+            "compact"
+          ],
           "price": 37200,
           "circuitsCount": 2,
           "isDoubleCircuit": true
@@ -335,14 +374,21 @@
           "price": 56500,
           "isDoubleCircuit": true,
           "mountingType": "wall",
-          "connectionDiameters": ["3/4″ (отопление)", "1/2″ (ГВС)"],
+          "connectionDiameters": [
+            "3/4″ (отопление)",
+            "1/2″ (ГВС)"
+          ],
           "circulationPump": {
             "operatingModes": [
               {
                 "modeName": "Baxi встроенный — скорость 1 (20%)",
                 "speedIndex": 1,
                 "powerWatts": 25,
-                "coefficients": { "a": -1.667, "b": 0.167, "c": 1.3 },
+                "coefficients": {
+                  "a": -1.667,
+                  "b": 0.167,
+                  "c": 1.3
+                },
                 "qMinM3h": 0.5,
                 "qMaxM3h": 0.6
               },
@@ -350,7 +396,11 @@
                 "modeName": "Baxi встроенный — скорость 2 (40%)",
                 "speedIndex": 2,
                 "powerWatts": 35,
-                "coefficients": { "a": -0.833, "b": -0.667, "c": 2.6 },
+                "coefficients": {
+                  "a": -0.833,
+                  "b": -0.667,
+                  "c": 2.6
+                },
                 "qMinM3h": 0.5,
                 "qMaxM3h": 1.2
               },
@@ -358,9 +408,13 @@
                 "modeName": "Baxi встроенный — скорость 3 (100%)",
                 "speedIndex": 3,
                 "powerWatts": 45,
-                "coefficients": { "a": -0.85, "b": -1.15, "c": 6.5 },
+                "coefficients": {
+                  "a": -0.85,
+                  "b": -1.15,
+                  "c": 6.5
+                },
                 "qMinM3h": 0.5,
-                "qMaxM3h": 2.0
+                "qMaxM3h": 2
               }
             ]
           }
@@ -504,8 +558,8 @@
           "specs": {
             "power": {
               "min_kw": 2.2,
-              "max_heating_kw": 12.0,
-              "max_dhw_kw": 24.0
+              "max_heating_kw": 12,
+              "max_dhw_kw": 24
             },
             "efficiency": {
               "nominal_80_60": 98.2,
@@ -524,7 +578,7 @@
               "height": 700,
               "width": 400,
               "depth": 250,
-              "weight_kg": 30.0
+              "weight_kg": 30
             }
           },
           "tags": [
@@ -558,7 +612,11 @@
                 "modeName": "Встроенный насос — скорость 3",
                 "speedIndex": 3,
                 "powerWatts": 40,
-                "coefficients": { "a": -0.45, "b": 0.12, "c": 6.0 },
+                "coefficients": {
+                  "a": -0.45,
+                  "b": 0.12,
+                  "c": 6
+                },
                 "qMinM3h": 0.1,
                 "qMaxM3h": 4.5
               },
@@ -566,9 +624,13 @@
                 "modeName": "Встроенный насос — скорость 2",
                 "speedIndex": 2,
                 "powerWatts": 35,
-                "coefficients": { "a": -0.15, "b": -0.02, "c": 5.4 },
+                "coefficients": {
+                  "a": -0.15,
+                  "b": -0.02,
+                  "c": 5.4
+                },
                 "qMinM3h": 0.2,
-                "qMaxM3h": 4.0
+                "qMaxM3h": 4
               }
             ]
           }
@@ -634,7 +696,12 @@
               "weight_kg": 30
             }
           },
-          "tags": ["wall-mounted", "single-circuit", "condensing", "compact"],
+          "tags": [
+            "wall-mounted",
+            "single-circuit",
+            "condensing",
+            "compact"
+          ],
           "price": 42800,
           "isDoubleCircuit": false
         },
@@ -778,8 +845,8 @@
           "specs": {
             "power": {
               "min_kw": 2.2,
-              "max_heating_kw": 12.0,
-              "max_dhw_kw": 12.0
+              "max_heating_kw": 12,
+              "max_dhw_kw": 12
             },
             "efficiency": {
               "nominal_80_60": 98.2,
@@ -823,11 +890,11 @@
             "power": {
               "min_kw": 2.7,
               "max_heating_kw": 10.9,
-              "max_dhw_kw": 14.0
+              "max_dhw_kw": 14
             },
             "efficiency": {
-              "nominal_80_60": 98.0,
-              "condensing_50_30": 108.0
+              "nominal_80_60": 98,
+              "condensing_50_30": 108
             },
             "modulation_ratio": "1:5",
             "gas_consumption": {
@@ -842,7 +909,7 @@
               "height": 720,
               "width": 440,
               "depth": 348,
-              "weight_kg": 34.0
+              "weight_kg": 34
             }
           },
           "tags": [
@@ -865,13 +932,13 @@
           "circuitsCount": 1,
           "specs": {
             "power": {
-              "min_kw": 3.0,
-              "max_heating_kw": 12.0,
-              "max_dhw_kw": 12.0
+              "min_kw": 3,
+              "max_heating_kw": 12,
+              "max_dhw_kw": 12
             },
             "efficiency": {
               "nominal_80_60": 97.5,
-              "condensing_50_30": 103.0
+              "condensing_50_30": 103
             },
             "modulation_ratio": "1:4",
             "gas_consumption": {
@@ -886,10 +953,15 @@
               "height": 845,
               "width": 450,
               "depth": 530,
-              "weight_kg": 46.0
+              "weight_kg": 46
             }
           },
-          "tags": ["floor-standing", "single-circuit", "condensing", "medium"],
+          "tags": [
+            "floor-standing",
+            "single-circuit",
+            "condensing",
+            "medium"
+          ],
           "price": 35880,
           "isDoubleCircuit": false
         },
@@ -903,12 +975,12 @@
           "circuitsCount": 1,
           "specs": {
             "power": {
-              "min_kw": 12.0,
-              "max_heating_kw": 12.0,
+              "min_kw": 12,
+              "max_heating_kw": 12,
               "max_dhw_kw": null
             },
             "efficiency": {
-              "nominal_80_60": 90.0,
+              "nominal_80_60": 90,
               "condensing_50_30": null
             },
             "modulation_ratio": "none",
@@ -924,7 +996,7 @@
               "height": 746,
               "width": 324,
               "depth": 530,
-              "weight_kg": 45.0
+              "weight_kg": 45
             }
           },
           "tags": [
@@ -1016,7 +1088,11 @@
           "volume_l_section": 0.2,
           "weight_kg_section": 1.02
         },
-        "tags": ["high-efficiency", "made-in-italy", "low-inertia"],
+        "tags": [
+          "high-efficiency",
+          "made-in-italy",
+          "low-inertia"
+        ],
         "description": "Литой алюминиевый радиатор с высокой теплоотдачей и антикоррозийным покрытием.",
         "price": 590,
         "priceBasis": "section"
@@ -1129,7 +1205,11 @@
           "volume_l_total": 5.8,
           "weight_kg_total": 26.2
         },
-        "tags": ["european-standard", "side-connection", "high-reliability"],
+        "tags": [
+          "european-standard",
+          "side-connection",
+          "high-reliability"
+        ],
         "description": "Стальной панельный радиатор с боковым подключением. Оптимален для систем с принудительной циркуляцией.",
         "price": 4350,
         "priceBasis": "panel"
@@ -1164,7 +1244,11 @@
           "volume_l_total": 5.4,
           "weight_kg_total": 24.8
         },
-        "tags": ["bottom-connection", "built-in-valve", "modern-look"],
+        "tags": [
+          "bottom-connection",
+          "built-in-valve",
+          "modern-look"
+        ],
         "description": "Стальной панельный радиатор с нижним подключением и встроенным термоклапаном. Идеален для скрытой разводки труб.",
         "price": 4580,
         "priceBasis": "panel"
@@ -1197,7 +1281,11 @@
           "volume_l_total": 16.2,
           "weight_kg_total": 74.4
         },
-        "tags": ["side-connection", "high-length", "maximum-area"],
+        "tags": [
+          "side-connection",
+          "high-length",
+          "maximum-area"
+        ],
         "description": "Длинный стальной панельный радиатор с боковым подключением. Идеально подходит для больших помещений с панорамными или низкими окнами.",
         "price": 15322,
         "priceBasis": "panel"
@@ -1230,7 +1318,11 @@
           "volume_l_total": 14.5,
           "weight_kg_total": 68.2
         },
-        "tags": ["side-connection", "triple-panel", "high-density-power"],
+        "tags": [
+          "side-connection",
+          "triple-panel",
+          "high-density-power"
+        ],
         "description": "Сверхмощный трехпанельный радиатор (Тип 33) повышенной глубины. Выдает максимальный тепловой поток при относительно небольшой длине.",
         "price": 15239,
         "priceBasis": "panel"
@@ -1265,7 +1357,11 @@
           "volume_l_total": 13.3,
           "weight_kg_total": 61.6
         },
-        "tags": ["bottom-connection", "built-in-valve", "modern-look"],
+        "tags": [
+          "bottom-connection",
+          "built-in-valve",
+          "modern-look"
+        ],
         "description": "Стальной панельный радиатор увеличенной высоты с нижним подключением. Прекрасно интегрируется в современные интерьеры со скрытой разводкой.",
         "price": 14921,
         "priceBasis": "panel"
@@ -1298,7 +1394,11 @@
           "volume_l_total": 14.8,
           "weight_kg_total": 65.4
         },
-        "tags": ["side-connection", "triple-panel", "low-profile-heavy"],
+        "tags": [
+          "side-connection",
+          "triple-panel",
+          "low-profile-heavy"
+        ],
         "description": "Трехпанельный радиатор стандартной высоты 500 мм. Оптимальное решение для эффективного съема низкотемпературного тепла от конденсационных котлов.",
         "price": 14692,
         "priceBasis": "panel"
@@ -1331,7 +1431,11 @@
           "volume_l_total": 15.1,
           "weight_kg_total": 69.7
         },
-        "tags": ["side-connection", "high-length", "classic-dimension"],
+        "tags": [
+          "side-connection",
+          "high-length",
+          "classic-dimension"
+        ],
         "description": "Панельный радиатор высотой 600 мм с боковым подключением. Традиционная геометрия в сочетании с внушительной тепловой мощностью.",
         "price": 14561,
         "priceBasis": "panel"
@@ -1342,7 +1446,9 @@
         "model": "Atlantic Steatite Elite",
         "type": "electric_storage",
         "heatingElementType": "Сухой (стеатит)",
-        "features": ["Лучший для жесткой воды"],
+        "features": [
+          "Лучший для жесткой воды"
+        ],
         "variants": [
           {
             "volumeLiters": 80,
@@ -1350,17 +1456,32 @@
             "powerKw": 2.1,
             "heatingTimeMinutes": 165
           },
-          { "volumeLiters": 100, "price": 9499, "powerKw": 2.1 }
+          {
+            "volumeLiters": 100,
+            "price": 9499,
+            "powerKw": 2.1
+          }
         ]
       },
       {
         "model": "Ariston Velis EVO",
         "type": "electric_storage",
         "heatingElementType": "Мокрый",
-        "features": ["Плоский дизайн", "Два бака"],
+        "features": [
+          "Плоский дизайн",
+          "Два бака"
+        ],
         "variants": [
-          { "volumeLiters": 50, "price": 13100, "powerKw": 1.5 },
-          { "volumeLiters": 80, "price": 17888, "powerKw": 1.5 }
+          {
+            "volumeLiters": 50,
+            "price": 13100,
+            "powerKw": 1.5
+          },
+          {
+            "volumeLiters": 80,
+            "price": 17888,
+            "powerKw": 1.5
+          }
         ]
       },
       {
@@ -1369,21 +1490,43 @@
         "heatingElementType": "Сухой",
         "powerDetails": "2×1.2 кВт",
         "features": [],
-        "variants": [{ "volumeLiters": 80, "price": 6490, "powerKw": 2.4 }]
+        "variants": [
+          {
+            "volumeLiters": 80,
+            "price": 6490,
+            "powerKw": 2.4
+          }
+        ]
       },
       {
         "model": "Gorenje GBFU 100 SIMB6",
         "type": "electric_storage",
         "heatingElementType": "Сухой",
-        "features": ["Узкий корпус"],
-        "variants": [{ "volumeLiters": 100, "price": 8790, "powerKw": 2 }]
+        "features": [
+          "Узкий корпус"
+        ],
+        "variants": [
+          {
+            "volumeLiters": 100,
+            "price": 8790,
+            "powerKw": 2
+          }
+        ]
       },
       {
         "model": "Atlantic O'Pro 300",
         "type": "electric_storage",
         "heatingElementType": "Мокрый",
-        "features": ["Дом с несколькими точками водоразбора"],
-        "variants": [{ "volumeLiters": 300, "price": 22490, "powerKw": 2.4 }]
+        "features": [
+          "Дом с несколькими точками водоразбора"
+        ],
+        "variants": [
+          {
+            "volumeLiters": 300,
+            "price": 22490,
+            "powerKw": 2.4
+          }
+        ]
       }
     ],
     "pipes": [
@@ -1769,7 +1912,6 @@
       }
     ]
   },
-
   "indirectWaterHeaters": [
     {
       "kind": "indirectWaterHeater",
@@ -1781,14 +1923,18 @@
       "type": "indirect_wall",
       "specs": {
         "volumeLiters": 100,
-        "powerKw": 30.0,
+        "powerKw": 30,
         "surfaceAreaM2": 0.79,
         "maxTempC": 65,
         "heatingTimeMinutes": 15,
         "standingLossKwh24h": 1.1,
         "minSourcePowerKw": 24
       },
-      "dimensions": { "height": 800, "diameter": 552, "weight": 31 }
+      "dimensions": {
+        "height": 800,
+        "diameter": 552,
+        "weight": 31
+      }
     },
     {
       "kind": "indirectWaterHeater",
@@ -1800,14 +1946,18 @@
       "type": "indirect_wall",
       "specs": {
         "volumeLiters": 120,
-        "powerKw": 25.0,
+        "powerKw": 25,
         "surfaceAreaM2": 0.7,
         "maxTempC": 90,
         "heatingTimeMinutes": 21,
         "standingLossKwh24h": 1.25,
         "minSourcePowerKw": 24
       },
-      "dimensions": { "height": 924, "diameter": 560, "weight": 45 }
+      "dimensions": {
+        "height": 924,
+        "diameter": 560,
+        "weight": 45
+      }
     },
     {
       "kind": "indirectWaterHeater",
@@ -1819,14 +1969,18 @@
       "type": "indirect_wall",
       "specs": {
         "volumeLiters": 160,
-        "powerKw": 25.0,
+        "powerKw": 25,
         "surfaceAreaM2": 0.7,
         "maxTempC": 90,
         "heatingTimeMinutes": 29,
         "standingLossKwh24h": 1.48,
         "minSourcePowerKw": 24
       },
-      "dimensions": { "height": 1174, "diameter": 560, "weight": 53 }
+      "dimensions": {
+        "height": 1174,
+        "diameter": 560,
+        "weight": 53
+      }
     },
     {
       "kind": "indirectWaterHeater",
@@ -1838,14 +1992,18 @@
       "type": "indirect_wall",
       "specs": {
         "volumeLiters": 200,
-        "powerKw": 31.0,
+        "powerKw": 31,
         "surfaceAreaM2": 0.85,
         "maxTempC": 90,
         "heatingTimeMinutes": 32,
         "standingLossKwh24h": 1.75,
         "minSourcePowerKw": 28
       },
-      "dimensions": { "height": 1424, "diameter": 560, "weight": 62 }
+      "dimensions": {
+        "height": 1424,
+        "diameter": 560,
+        "weight": 62
+      }
     },
     {
       "kind": "indirectWaterHeater",
@@ -1857,14 +2015,18 @@
       "type": "indirect_floor",
       "specs": {
         "volumeLiters": 120,
-        "powerKw": 25.0,
+        "powerKw": 25,
         "surfaceAreaM2": 0.7,
         "maxTempC": 90,
         "heatingTimeMinutes": 21,
         "standingLossKwh24h": 1.3,
         "minSourcePowerKw": 20
       },
-      "dimensions": { "height": 924, "diameter": 560, "weight": 45 }
+      "dimensions": {
+        "height": 924,
+        "diameter": 560,
+        "weight": 45
+      }
     },
     {
       "kind": "indirectWaterHeater",
@@ -1876,14 +2038,18 @@
       "type": "indirect_floor",
       "specs": {
         "volumeLiters": 200,
-        "powerKw": 32.0,
+        "powerKw": 32,
         "surfaceAreaM2": 0.96,
         "maxTempC": 95,
         "heatingTimeMinutes": 38,
         "standingLossKwh24h": 1.6,
         "minSourcePowerKw": 26
       },
-      "dimensions": { "height": 1200, "diameter": 600, "weight": 70 }
+      "dimensions": {
+        "height": 1200,
+        "diameter": 600,
+        "weight": 70
+      }
     },
     {
       "kind": "indirectWaterHeater",
@@ -1895,14 +2061,18 @@
       "type": "indirect_floor",
       "specs": {
         "volumeLiters": 117,
-        "powerKw": 25.0,
+        "powerKw": 25,
         "surfaceAreaM2": 0.7,
         "maxTempC": 85,
         "heatingTimeMinutes": 20,
         "standingLossKwh24h": 1.15,
         "minSourcePowerKw": 20
       },
-      "dimensions": { "height": 820, "diameter": 590, "weight": 68 }
+      "dimensions": {
+        "height": 820,
+        "diameter": 590,
+        "weight": 68
+      }
     },
     {
       "kind": "indirectWaterHeater",
@@ -1914,14 +2084,18 @@
       "type": "indirect_floor",
       "specs": {
         "volumeLiters": 200,
-        "powerKw": 34.0,
-        "surfaceAreaM2": 1.0,
+        "powerKw": 34,
+        "surfaceAreaM2": 1,
         "maxTempC": 85,
         "heatingTimeMinutes": 30,
         "standingLossKwh24h": 1.41,
         "minSourcePowerKw": 28
       },
-      "dimensions": { "height": 1206, "diameter": 590, "weight": 97 }
+      "dimensions": {
+        "height": 1206,
+        "diameter": 590,
+        "weight": 97
+      }
     },
     {
       "kind": "indirectWaterHeater",
@@ -1938,7 +2112,11 @@
         "surfaceAreaM2": 1.5,
         "maxTempC": 90
       },
-      "dimensions": { "height": 1486, "diameter": 650, "weight": 83 }
+      "dimensions": {
+        "height": 1486,
+        "diameter": 650,
+        "weight": 83
+      }
     },
     {
       "kind": "indirectWaterHeater",
@@ -1955,7 +2133,11 @@
         "surfaceAreaM2": 0.9,
         "maxTempC": 95
       },
-      "dimensions": { "height": 1530, "diameter": 550, "weight": 84 }
+      "dimensions": {
+        "height": 1530,
+        "diameter": 550,
+        "weight": 84
+      }
     },
     {
       "kind": "indirectWaterHeater",
@@ -1967,14 +2149,19 @@
       "type": "indirect_floor",
       "specs": {
         "volumeLiters": 95,
-        "powerKw": 24.0,
+        "powerKw": 24,
         "surfaceAreaM2": 1.08,
         "maxTempC": 80,
         "heatingTimeMinutes": 14,
         "standingLossKwh24h": 0.9,
         "minSourcePowerKw": 20
       },
-      "dimensions": { "height": 887, "width": 520, "depth": 520, "weight": 56 }
+      "dimensions": {
+        "height": 887,
+        "width": 520,
+        "depth": 520,
+        "weight": 56
+      }
     },
     {
       "kind": "indirectWaterHeater",
@@ -1991,7 +2178,12 @@
         "surfaceAreaM2": 1.08,
         "maxTempC": 80
       },
-      "dimensions": { "height": 1052, "width": 520, "depth": 520, "weight": 64 }
+      "dimensions": {
+        "height": 1052,
+        "width": 520,
+        "depth": 520,
+        "weight": 64
+      }
     },
     {
       "kind": "indirectWaterHeater",
@@ -2008,7 +2200,11 @@
         "surfaceAreaM2": 1.45,
         "maxTempC": 80
       },
-      "dimensions": { "height": 1287, "diameter": 584, "weight": 93 }
+      "dimensions": {
+        "height": 1287,
+        "diameter": 584,
+        "weight": 93
+      }
     }
   ],
   "pumps": [
@@ -2031,7 +2227,11 @@
           "modeName": "Пропорциональное давление PP2",
           "speedIndex": 1,
           "powerWatts": 45,
-          "coefficients": { "a": -0.45, "b": 0.12, "c": 6.0 },
+          "coefficients": {
+            "a": -0.45,
+            "b": 0.12,
+            "c": 6
+          },
           "qMinM3h": 0.1,
           "qMaxM3h": 4.5
         },
@@ -2039,9 +2239,13 @@
           "modeName": "Постоянное давление CP2",
           "speedIndex": 2,
           "powerWatts": 50,
-          "coefficients": { "a": -0.15, "b": -0.02, "c": 5.4 },
+          "coefficients": {
+            "a": -0.15,
+            "b": -0.02,
+            "c": 5.4
+          },
           "qMinM3h": 0.2,
-          "qMaxM3h": 4.0
+          "qMaxM3h": 4
         }
       ]
     },
@@ -2064,7 +2268,11 @@
           "modeName": "Скорость 3",
           "speedIndex": 3,
           "powerWatts": 45,
-          "coefficients": { "a": -0.45, "b": -0.06, "c": 4.0 },
+          "coefficients": {
+            "a": -0.45,
+            "b": -0.06,
+            "c": 4
+          },
           "qMinM3h": 0.4,
           "qMaxM3h": 3.5
         },
@@ -2072,7 +2280,11 @@
           "modeName": "Скорость 2",
           "speedIndex": 2,
           "powerWatts": 35,
-          "coefficients": { "a": -0.4, "b": -0.05, "c": 3.2 },
+          "coefficients": {
+            "a": -0.4,
+            "b": -0.05,
+            "c": 3.2
+          },
           "qMinM3h": 0.3,
           "qMaxM3h": 2.6
         },
@@ -2080,11 +2292,307 @@
           "modeName": "Скорость 1",
           "speedIndex": 1,
           "powerWatts": 25,
-          "coefficients": { "a": -0.35, "b": -0.01, "c": 2.2 },
+          "coefficients": {
+            "a": -0.35,
+            "b": -0.01,
+            "c": 2.2
+          },
           "qMinM3h": 0.2,
           "qMaxM3h": 1.7
         }
       ]
+    }
+  ],
+  "manifold": [
+    {
+      "model": "Збірний колектор Giacomini 1\" X18 /3 (R553Y003)",
+      "brand": "Giacomini",
+      "article": "R553Y003",
+      "price": 6879,
+      "outletsCount": 3,
+      "manifoldApplication": "radiator",
+      "hasFlowMeters": false,
+      "material": "Латунь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 110,
+      "dimensions": {
+        "depth": 116.6,
+        "width": 427,
+        "height": 473
+      },
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4"
+    },
+    {
+      "model": "Збірний колектор Giacomini з витратомірами 1\" X18 /8 (R553FY008)",
+      "brand": "Giacomini",
+      "article": "R553FY008",
+      "price": 28882,
+      "outletsCount": 8,
+      "manifoldApplication": "underfloor",
+      "hasFlowMeters": true,
+      "material": "Латунь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 110,
+      "dimensions": {
+        "depth": 116.6,
+        "width": 677,
+        "height": 473
+      },
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4"
+    },
+    {
+      "model": "Збірний колектор Giacomini 1\" X18 /4 (R553Y004)",
+      "brand": "Giacomini",
+      "article": "R553Y004",
+      "price": 9173,
+      "outletsCount": 4,
+      "manifoldApplication": "radiator",
+      "hasFlowMeters": false,
+      "material": "Латунь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 110,
+      "dimensions": {
+        "depth": 116.6,
+        "width": 477,
+        "height": 473
+      },
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4"
+    },
+    {
+      "model": "Збірний колектор Giacomini з витратомірами 1\" X18 /9 (R553FY009)",
+      "brand": "Giacomini",
+      "article": "R553FY009",
+      "price": 31149,
+      "outletsCount": 9,
+      "manifoldApplication": "underfloor",
+      "hasFlowMeters": true,
+      "material": "Латунь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 110,
+      "dimensions": {
+        "depth": 116.6,
+        "width": 727,
+        "height": 473
+      },
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4"
+    },
+    {
+      "model": "Збірний колектор Giacomini 1\" X18 /5 (R553Y005)",
+      "brand": "Giacomini",
+      "article": "R553Y005",
+      "price": 11463,
+      "outletsCount": 5,
+      "manifoldApplication": "radiator",
+      "hasFlowMeters": false,
+      "material": "Латунь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 110,
+      "dimensions": {
+        "depth": 116.6,
+        "width": 527,
+        "height": 473
+      },
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4"
+    },
+    {
+      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 4 виходи (VTc.589.EMNX.0604)",
+      "brand": "VALTEC",
+      "article": "VTc.589.EMNX.0604",
+      "price": 5129.16,
+      "outletsCount": 4,
+      "manifoldApplication": "underfloor",
+      "hasFlowMeters": true,
+      "material": "Нержавіюча сталь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 90,
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4",
+      "dimensions": {
+        "depth": 82,
+        "height": 313,
+        "width": 245
+      }
+    },
+    {
+      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 5 виходів (VTc.589.EMNX.0605)",
+      "brand": "VALTEC",
+      "article": "VTc.589.EMNX.0605",
+      "price": 5930.69,
+      "outletsCount": 5,
+      "manifoldApplication": "underfloor",
+      "hasFlowMeters": true,
+      "material": "Нержавіюча сталь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 90,
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4",
+      "dimensions": {
+        "depth": 82,
+        "height": 313,
+        "width": 295
+      }
+    },
+    {
+      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 6 виходів (VTc.589.EMNX.0606)",
+      "brand": "VALTEC",
+      "article": "VTc.589.EMNX.0606",
+      "price": 6997.3,
+      "outletsCount": 6,
+      "manifoldApplication": "underfloor",
+      "hasFlowMeters": true,
+      "material": "Нержавіюча сталь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 90,
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4",
+      "dimensions": {
+        "depth": 82,
+        "height": 313,
+        "width": 345
+      }
+    },
+    {
+      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 7 виходів (VTc.589.EMNX.0607)",
+      "brand": "VALTEC",
+      "article": "VTc.589.EMNX.0607",
+      "price": 7897.79,
+      "outletsCount": 7,
+      "manifoldApplication": "underfloor",
+      "hasFlowMeters": true,
+      "material": "Нержавіюча сталь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 90,
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4",
+      "dimensions": {
+        "depth": 82,
+        "height": 313,
+        "width": 395
+      }
+    },
+    {
+      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 8 виходів (VTc.589.EMNX.0608)",
+      "brand": "VALTEC",
+      "article": "VTc.589.EMNX.0608",
+      "price": 8840.23,
+      "outletsCount": 8,
+      "manifoldApplication": "underfloor",
+      "hasFlowMeters": true,
+      "material": "Нержавіюча сталь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 90,
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4",
+      "dimensions": {
+        "depth": 82,
+        "height": 313,
+        "width": 445
+      }
+    },
+    {
+      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 9 виходів (VTc.589.EMNX.0609)",
+      "brand": "VALTEC",
+      "article": "VTc.589.EMNX.0609",
+      "price": 9761.93,
+      "outletsCount": 9,
+      "manifoldApplication": "underfloor",
+      "hasFlowMeters": true,
+      "material": "Нержавіюча сталь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 90,
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4",
+      "dimensions": {
+        "depth": 82,
+        "height": 313,
+        "width": 495
+      }
+    },
+    {
+      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 10 виходів (VTc.589.EMNX.06010)",
+      "brand": "VALTEC",
+      "article": "VTc.589.EMNX.06010",
+      "price": 10726.37,
+      "outletsCount": 10,
+      "manifoldApplication": "underfloor",
+      "hasFlowMeters": true,
+      "material": "Нержавіюча сталь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 90,
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4",
+      "dimensions": {
+        "depth": 82,
+        "height": 313,
+        "width": 545
+      }
+    }
+  ],
+  "boilerManifold": [
+    {
+      "model": "Колектор розподільний Fado x4 (KGZ01)",
+      "brand": "FADO",
+      "article": "KGZ01",
+      "price": 12516,
+      "circuitsCount": 3,
+      "maxPowerKw": 85,
+      "material": "Сталь",
+      "hasInsulation": true,
+      "interaxleDistanceMm": 125,
+      "connectionBoilerInch": "1 1/2",
+      "connectionCircuitsInch": "1 1/2",
+      "maxPressureBar": 6,
+      "maxTemperatureC": 100,
+      "dimensions": {
+        "width": 500,
+        "height": 178,
+        "depth": 135
+      }
+    },
+    {
+      "model": "Колектор розподільний Fado x6 (KGZ02)",
+      "brand": "FADO",
+      "article": "KGZ02",
+      "price": 16763,
+      "circuitsCount": 5,
+      "maxPowerKw": 85,
+      "material": "Сталь",
+      "hasInsulation": true,
+      "interaxleDistanceMm": 125,
+      "connectionBoilerInch": "1 1/2",
+      "connectionCircuitsInch": "1 1/2",
+      "maxPressureBar": 6,
+      "maxTemperatureC": 100,
+      "dimensions": {
+        "width": 750,
+        "height": 178,
+        "depth": 135
+      }
+    },
+    {
+      "model": "Колектор розподільний Fado x8 (KGZ03)",
+      "brand": "FADO",
+      "article": "KGZ03",
+      "price": 20964,
+      "circuitsCount": 7,
+      "maxPowerKw": 85,
+      "material": "Сталь",
+      "hasInsulation": true,
+      "interaxleDistanceMm": 125,
+      "connectionBoilerInch": "1 1/2",
+      "connectionCircuitsInch": "1 1/2",
+      "maxPressureBar": 6,
+      "maxTemperatureC": 100,
+      "dimensions": {
+        "width": 1000,
+        "height": 178,
+        "depth": 135
+      }
     }
   ]
 }

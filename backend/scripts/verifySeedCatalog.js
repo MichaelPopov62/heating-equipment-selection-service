@@ -136,7 +136,8 @@ try {
     `verify:seed-catalog OK — ${docs.length} документов products ` +
       `(boiler ${summary.boilerDouble + summary.boilerSingle}, ` +
       `radiator ${summary.radiators}, waterHeater ${summary.waterHeaters}, ` +
-      `pipe ${summary.pipes}, pump ${summary.pumps}, indirect ${summary.indirectWaterHeaters})\n`,
+      `pipe ${summary.pipes}, pump ${summary.pumps}, indirect ${summary.indirectWaterHeaters}, ` +
+      `manifold ${summary.manifolds}, boilerManifold ${summary.boilerManifolds})\n`,
   );
 } catch (err) {
   console.error('verify:seed-catalog FAILED: каталог не прошёл validateAndNormalizeCatalog');

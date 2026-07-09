@@ -77,7 +77,9 @@ paths:
             boilers `{ doubleCircuit, singleCircuit }`, radiators, waterHeaters (накопительные электрические, `type` electric_storage по умолчанию; варианты с объёмом, ценой, опционально heatingTimeMinutes),
             pipes (PipeCatalogItem: id, brand, material, diameter, wallThickness, price, model),
             pumps (PumpCatalogItem: id, brand, model, type, segment, price, connections, operatingModes),
-            indirectWaterHeaters (БКН, если заданы в источнике). Порядок элементов в массивах — как у источника;
+            indirectWaterHeaters (БКН, если заданы в источнике),
+            manifolds (коллекторы ТП/радиаторов, ManifoldCatalogItem),
+            boilerManifolds (котельные коллекторы, BoilerManifoldCatalogItem). Порядок элементов в массивах — как у источника;
             сортировка для подбора — matchingSortPools (котлы, водонагреватели) и sortRadiatorsForMatching
             (радиаторы) на сервере, не в этом ответе.
           content:
@@ -716,6 +718,10 @@ components:
       $ref: ./components/schemas/PipeCatalogItem.yaml
     PumpCatalogItem:
       $ref: ./components/schemas/PumpCatalogItem.yaml
+    ManifoldCatalogItem:
+      $ref: ./components/schemas/ManifoldCatalogItem.yaml
+    BoilerManifoldCatalogItem:
+      $ref: ./components/schemas/BoilerManifoldCatalogItem.yaml
     BoilerEquipmentProposal:
       $ref: ./components/schemas/BoilerEquipmentProposal.yaml
     BoilerMatchingReport:

@@ -1,0 +1,70 @@
+type: object
+description: >
+  Коллектор распределительный (ТП или радиаторный контур) после validateCatalog.
+additionalProperties: true
+required:
+  - model
+  - brand
+  - article
+  - price
+  - outletsCount
+  - manifoldApplication
+  - hasFlowMeters
+  - material
+  - maxPressureBar
+  - maxTemperatureC
+  - connectionMainInch
+  - connectionOutletsInch
+  - dimensions
+properties:
+  model:
+    type: string
+  brand:
+    type: string
+  article:
+    type: string
+  price:
+    type: number
+    minimum: 1
+  outletsCount:
+    type: integer
+    minimum: 2
+    maximum: 32
+  manifoldApplication:
+    type: string
+    enum: [radiator, underfloor]
+  hasFlowMeters:
+    type: boolean
+  material:
+    type: string
+  maxPressureBar:
+    type: number
+    minimum: 0.1
+    maximum: 25
+  maxTemperatureC:
+    type: number
+    minimum: 30
+    maximum: 120
+  connectionMainInch:
+    type: string
+    description: Магистральное подключение (дюймовая резьба).
+  connectionOutletsInch:
+    type: string
+    description: Подключение отводов (дюймовая резьба).
+  dimensions:
+    type: object
+    additionalProperties: false
+    required: [width, height, depth]
+    properties:
+      width:
+        type: number
+        minimum: 50
+        maximum: 2000
+      height:
+        type: number
+        minimum: 50
+        maximum: 1000
+      depth:
+        type: number
+        minimum: 20
+        maximum: 500

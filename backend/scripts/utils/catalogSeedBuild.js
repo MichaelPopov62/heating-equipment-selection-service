@@ -16,6 +16,27 @@ function cloneJsonSerializable(x) {
 }
 
 /**
+ * Стабильный catalogKey для Mongo из артикула номенклатуры.
+ *
+ * @param {string} prefix
+ * @param {Record<string, unknown>} raw
+ * @param {number} index
+ * @returns {string}
+ */
+function resolveProductCatalogKey(prefix, raw, index) {
+  const article = raw?.article;
+  if (typeof article === 'string' && article.trim()) {
+    const slug = article
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    if (slug) return `${prefix}-${slug}`;
+  }
+  return `${prefix}-${index}`;
+}
+
+/**
  * Валидация JSON-каталога тем же контрактом, что и runtime loadCatalog().
  *
  * @param {unknown} parsed — распарсенный test_data.json
@@ -40,6 +61,8 @@ export function summarizeNormalizedCatalog(norm) {
     pipes: (norm.pipes ?? []).length,
     pumps: (norm.pumps ?? []).length,
     indirectWaterHeaters: (norm.indirectWaterHeaters ?? []).length,
+    manifolds: (norm.manifolds ?? []).length,
+    boilerManifolds: (norm.boilerManifolds ?? []).length,
   };
 }
 
@@ -103,7 +126,34 @@ export function buildProductDocumentsFromNormalized(norm) {
     };
   });
 
-  return [...boilers, ...radiators, ...waterHeaters, ...pipes, ...pumps, ...indirectWaterHeaters];
+  const manifolds = (norm.manifolds ?? []).map((x, i) => {
+    const raw = cloneJsonSerializable(x);
+    return {
+      ...raw,
+      kind: 'manifold',
+      catalogKey: resolveProductCatalogKey('manifold', raw, i),
+    };
+  });
+
+  const boilerManifolds = (norm.boilerManifolds ?? []).map((x, i) => {
+    const raw = cloneJsonSerializable(x);
+    return {
+      ...raw,
+      kind: 'boilerManifold',
+      catalogKey: resolveProductCatalogKey('boiler-manifold', raw, i),
+    };
+  });
+
+  return [
+    ...boilers,
+    ...radiators,
+    ...waterHeaters,
+    ...pipes,
+    ...pumps,
+    ...indirectWaterHeaters,
+    ...manifolds,
+    ...boilerManifolds,
+  ];
 }
 
 /**

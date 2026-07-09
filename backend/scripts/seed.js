@@ -17,6 +17,8 @@ import { WaterHeater } from '../src/models/WaterHeater.js';
 import { Pipe } from '../src/models/Pipe.js';
 import { Pump } from '../src/models/Pump.js';
 import { IndirectWaterHeater } from '../src/models/IndirectWaterHeater.js';
+import { Manifold } from '../src/models/Manifold.js';
+import { BoilerManifold } from '../src/models/BoilerManifold.js';
 import { resolveCatalogJsonFilePath } from './utils/catalogPaths.js';
 import {
   summarizeNormalizedCatalog,
@@ -103,7 +105,8 @@ async function loadValidatedCatalogDocuments(catalogPath) {
       `(boiler ${summary.boilerDouble + summary.boilerSingle}, radiator ${summary.radiators}, ` +
       `waterHeater ${summary.waterHeaters}, pipe ${summary.pipes}, ` +
       `pump ${summary.pumps}, ` +
-      `indirect ${summary.indirectWaterHeaters})\n`,
+      `indirect ${summary.indirectWaterHeaters}, ` +
+      `manifold ${summary.manifolds}, boilerManifold ${summary.boilerManifolds})\n`,
   );
 
   return { docs };
@@ -123,7 +126,9 @@ function countCatalogSummaryItems(summary) {
     summary.waterHeaters +
     summary.pipes +
     summary.pumps +
-    summary.indirectWaterHeaters
+    summary.indirectWaterHeaters +
+    summary.manifolds +
+    summary.boilerManifolds
   );
 }
 
@@ -319,20 +324,34 @@ async function main() {
     const pipeDocs = docs.filter((d) => d.kind === 'pipe');
     const pumpDocs = docs.filter((d) => d.kind === 'pump');
     const indirectDocs = docs.filter((d) => d.kind === 'indirectWaterHeater');
+    const manifoldDocs = docs.filter((d) => d.kind === 'manifold');
+    const boilerManifoldDocs = docs.filter((d) => d.kind === 'boilerManifold');
 
     let inserted;
     try {
       // Вставка через дискриминаторы: при Product.insertMany() Mongoose может неверно
       // назначить схему части документов, тогда в БД нет kind: "pipe" и фильтр в Compass пустой.
-      const [insBoilers, insRad, insWh, insPipes, insPumps, insIndirect] = await Promise.all([
+      const [insBoilers, insRad, insWh, insPipes, insPumps, insIndirect, insManifolds, insBoilerManifolds] =
+        await Promise.all([
         Boiler.insertMany(boilerDocs, { ordered: false }),
         Radiator.insertMany(radiatorDocs, { ordered: false }),
         WaterHeater.insertMany(waterHeaterDocs, { ordered: false }),
         Pipe.insertMany(pipeDocs, { ordered: false }),
         Pump.insertMany(pumpDocs, { ordered: false }),
         IndirectWaterHeater.insertMany(indirectDocs, { ordered: false }),
+        Manifold.insertMany(manifoldDocs, { ordered: false }),
+        BoilerManifold.insertMany(boilerManifoldDocs, { ordered: false }),
       ]);
-      inserted = [...insBoilers, ...insRad, ...insWh, ...insPipes, ...insPumps, ...insIndirect];
+      inserted = [
+        ...insBoilers,
+        ...insRad,
+        ...insWh,
+        ...insPipes,
+        ...insPumps,
+        ...insIndirect,
+        ...insManifolds,
+        ...insBoilerManifolds,
+      ];
     } catch (err) {
       const bulk = err && typeof err === 'object' ? err : null;
       const insertedCount =
@@ -413,6 +432,8 @@ async function main() {
             pipe: docs.filter((d) => d.kind === 'pipe').length,
             pump: docs.filter((d) => d.kind === 'pump').length,
             indirectWaterHeater: docs.filter((d) => d.kind === 'indirectWaterHeater').length,
+            manifold: docs.filter((d) => d.kind === 'manifold').length,
+            boilerManifold: docs.filter((d) => d.kind === 'boilerManifold').length,
           },
           referenceData: refSeed,
         },
