@@ -1,6 +1,7 @@
 /**
  * Назначение: сборка финального JSON-отчёта расчёта.
- * Описание: Оркестрирует пайплайн: климат, теплопотери, ГВС, гидравлика, подбор оборудования (matching/public.js) и рекомендации. Формирует meta, input, calculations, matching и warnings. Экспортирует buildReport(); вызывается из api/runCalculation.js.
+ * Описание: Оркестрирует пайплайн: климат, теплопотери, ГВС, подбор оборудования (matchEquipment),
+ * резолв схемы ТП, подбор коллекторов (pickManifolds), гидравлика и рекомендации.
  */
 
 import { getDesignOutsideTempC } from '../climate/index.js';
@@ -20,7 +21,7 @@ import {
 } from '../hydraulics/public.js';
 import { resolveUfhDistributionWithAppliances } from '../logic/ufhDistributionResolve.js';
 import { computeUfhMixingNodeSpec } from '../logic/ufhMixingNodeHydraulics.js';
-import { matchEquipment } from '../matching/public.js';
+import { matchEquipment, pickManifolds } from '../matching/public.js';
 import { pushRecommendation } from '../recommendations/recommendationResolver.js';
 import { assertCalcRuntimeContext } from '../reference/assertCalcRuntimeContext.js';
 import { logger } from '../utils/logger.js';
@@ -467,6 +468,16 @@ export async function buildReport({ input, ctx }) {
     );
   }
 
+  // 4b) Підбір колекторів — після резолву distributionPreset ТП, до гідравліки
+  matching.manifolds = pickManifolds({
+    catalog: ctx.catalog,
+    building: input.building,
+    underfloorHeating,
+    radiators: matching.radiators,
+    boiler: matching.boiler,
+    hydraulics: input.hydraulics,
+  });
+
   logger.info('report.matching.done', null, {
     boilerModel: matching?.boiler?.selected?.model ?? null,
     requiredBoilerKw: matching?.boiler?.requiredKw ?? null,
@@ -474,10 +485,16 @@ export async function buildReport({ input, ctx }) {
     waterHeaterModel: matching?.waterHeater?.selected?.model ?? null,
     indirectWaterHeaterModel: matching?.indirectWaterHeater?.selected?.model ?? null,
     waterHeaterVolumeLiters: matching?.waterHeater?.chosenVariant?.volumeLiters ?? null,
+    manifoldUnderfloorCount: matching?.manifolds?.underfloor?.length ?? 0,
+    manifoldUnderfloorUnits:
+      matching?.manifolds?.underfloor?.reduce((s, f) => s + (f.units?.length ?? 0), 0) ?? 0,
+    manifoldRadiatorModel: matching?.manifolds?.radiator?.selected?.model ?? null,
+    boilerManifoldModel: matching?.manifolds?.boilerManifold?.selected?.model ?? null,
     warnings: (matching?.boiler?.warnings?.length ?? 0)
       + (matching?.radiators?.warnings?.length ?? 0)
       + (matching?.waterHeater?.warnings?.length ?? 0)
-      + (matching?.indirectWaterHeater?.warnings?.length ?? 0),
+      + (matching?.indirectWaterHeater?.warnings?.length ?? 0)
+      + (matching?.manifolds?.warnings?.length ?? 0),
   });
 
   // 5) Гидравлика Pure Pipeline (после matching)
@@ -553,6 +570,7 @@ export async function buildReport({ input, ctx }) {
     ...(matching.radiators?.warnings ?? []),
     ...(matching.waterHeater?.warnings ?? []),
     ...(matching.indirectWaterHeater?.warnings ?? []),
+    ...(matching.manifolds?.warnings ?? []),
     ...(matching.hydraulics?.warnings ?? []),
   ];
 

@@ -722,6 +722,8 @@ components:
       $ref: ./components/schemas/ManifoldCatalogItem.yaml
     BoilerManifoldCatalogItem:
       $ref: ./components/schemas/BoilerManifoldCatalogItem.yaml
+    ManifoldsMatchingReport:
+      $ref: ./components/schemas/ManifoldsMatchingReport.yaml
     BoilerEquipmentProposal:
       $ref: ./components/schemas/BoilerEquipmentProposal.yaml
     BoilerMatchingReport:

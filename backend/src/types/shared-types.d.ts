@@ -909,11 +909,54 @@ export interface EnvelopePreset {
   uModel?: EnvelopePresetUModel;
 }
 
+/** Один пристрій у каскаді колекторів ТП на поверсі. */
+export interface ManifoldUnderfloorUnitPick {
+  /** 1-based індекс у каскаді. */
+  index: number;
+  requiredOutlets: number;
+  selected: import('../catalog/types').ManifoldCatalogItemNormalized | null;
+  warnings: string[];
+}
+
+/** Підбір колекторів ТП на один поверх (1…N units при каскаді > 12 петель). */
+export interface ManifoldUnderfloorPick {
+  floor: number;
+  /** Сума петель поверху. */
+  requiredOutlets: number;
+  units: ManifoldUnderfloorUnitPick[];
+  warnings: string[];
+}
+
+/** Підбір радіаторного колектора (схема wiring = manifold). */
+export interface ManifoldRadiatorPick {
+  requiredOutlets: number;
+  selected: import('../catalog/types').ManifoldCatalogItemNormalized | null;
+  warnings: string[];
+}
+
+/** Підбір котельного розподільного колектора. */
+export interface BoilerManifoldPick {
+  requiredCircuits: number;
+  requiredPowerKw: number;
+  selected: import('../catalog/types').BoilerManifoldCatalogItemNormalized | null;
+  warnings: string[];
+}
+
+/** report.matching.manifolds — SKU колекторів для смети. */
+export interface ManifoldsMatchingReport {
+  underfloor: ManifoldUnderfloorPick[];
+  radiator: ManifoldRadiatorPick | null;
+  boilerManifold: BoilerManifoldPick | null;
+  warnings: string[];
+}
+
 export interface MatchingReport {
   boiler?: BoilerMatchingReport;
   radiators?: RadiatorsMatchingReport;
   waterHeater?: WaterHeaterMatchingReport;
   indirectWaterHeater?: IndirectWaterHeaterMatchingReport;
+  /** Підбір колекторів (ТП / радіатори / котельний) після резолву distributionPreset. */
+  manifolds?: ManifoldsMatchingReport;
   hydraulics?: HydraulicsMatchingReport;
 }
 

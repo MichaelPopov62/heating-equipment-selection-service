@@ -58,8 +58,9 @@ export default defineConfig([
                 '**/matching/index.js',
                 '**/matching/boiler.js',
                 '**/matching/waterHeater.js',
+                '**/matching/manifold.js',
               ],
-              message: 'Подбор: import из matching/public.js (matchEquipment).',
+              message: 'Подбор: import из matching/public.js (matchEquipment / pickManifolds).',
             },
             {
               group: [

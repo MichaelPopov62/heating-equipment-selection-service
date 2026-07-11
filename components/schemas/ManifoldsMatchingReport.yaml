@@ -1,0 +1,97 @@
+type: object
+description: >
+  Подбор коллекторов из каталога (report.matching.manifolds) для сметы.
+  Выполняется после резолва underfloorHeating.distributionPreset, до гидравлического pipeline.
+  ТП: при >12 петель на этаж — каскад units[] (равномерный split).
+additionalProperties: false
+required:
+  - underfloor
+  - radiator
+  - boilerManifold
+  - warnings
+properties:
+  underfloor:
+    type: array
+    description: Коллекторы ТП — по одному элементу на этаж; внутри units[] (1 или каскад).
+    items:
+      type: object
+      additionalProperties: false
+      required: [floor, requiredOutlets, units, warnings]
+      properties:
+        floor:
+          type: integer
+          minimum: 1
+        requiredOutlets:
+          type: integer
+          minimum: 0
+          description: Сумма петель этажа.
+        units:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            additionalProperties: false
+            required: [index, requiredOutlets, selected, warnings]
+            properties:
+              index:
+                type: integer
+                minimum: 1
+                description: 1-based индекс в каскаде.
+              requiredOutlets:
+                type: integer
+                minimum: 1
+              selected:
+                type: object
+                nullable: true
+                allOf:
+                  - $ref: ManifoldCatalogItem.yaml
+              warnings:
+                type: array
+                items: { type: string }
+        warnings:
+          type: array
+          items: { type: string }
+  radiator:
+    nullable: true
+    description: Радиаторный коллектор — только при hydraulics.radiatorWiringSystemType=manifold.
+    type: object
+    additionalProperties: false
+    required: [requiredOutlets, selected, warnings]
+    properties:
+      requiredOutlets:
+        type: integer
+        minimum: 0
+      selected:
+        type: object
+        nullable: true
+        allOf:
+          - $ref: ManifoldCatalogItem.yaml
+      warnings:
+        type: array
+        items: { type: string }
+  boilerManifold:
+    nullable: true
+    description: >
+      Котельный распределительный коллектор. Для квартиры не подбирается.
+      Для дома — при hydraulic_separator или при двух зонах (радиаторы + ТП).
+    type: object
+    additionalProperties: false
+    required: [requiredCircuits, requiredPowerKw, selected, warnings]
+    properties:
+      requiredCircuits:
+        type: integer
+        minimum: 1
+      requiredPowerKw:
+        type: number
+        minimum: 0
+      selected:
+        type: object
+        nullable: true
+        allOf:
+          - $ref: BoilerManifoldCatalogItem.yaml
+      warnings:
+        type: array
+        items: { type: string }
+  warnings:
+    type: array
+    items: { type: string }

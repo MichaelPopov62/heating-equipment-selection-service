@@ -40,7 +40,7 @@ export const MANIFOLD_SERIES_GEOMETRY = Object.freeze({
     connectionMainInch: '1',
     connectionOutletsInch: '3/4',
     outletsMin: 4,
-    outletsMax: 10,
+    outletsMax: 12,
   }),
 });
 
@@ -77,12 +77,18 @@ export function expectedManifoldWidthMm(outletsCount, preset) {
  */
 export function resolveManifoldSeriesId(item) {
   const article = String(item.article ?? '').toUpperCase();
-  const brand = String(item.brand ?? '').trim().toLowerCase();
+  const brand = String(item.brand ?? '')
+    .trim()
+    .toLowerCase();
 
   if (article.startsWith('R553') || brand === 'giacomini') {
     return 'giacomini_r553';
   }
-  if (article.includes('VTC.589') || article.includes('VTc.589') || brand === 'valtec') {
+  if (
+    article.includes('VTC.589') ||
+    article.includes('VTc.589') ||
+    brand === 'valtec'
+  ) {
     return 'valtec_vtc589';
   }
   return null;
@@ -111,12 +117,17 @@ export function assertKnownManifoldSeriesGeometry(item, ctx) {
 
   const expectedW = expectedManifoldWidthMm(outletsCount, preset);
 
-  if (normalizeInchLabel(item.connectionMainInch) !== preset.connectionMainInch) {
+  if (
+    normalizeInchLabel(item.connectionMainInch) !== preset.connectionMainInch
+  ) {
     throw new Error(
       `Каталог: ${ctx} — connectionMainInch должен быть "${preset.connectionMainInch}" (серия ${seriesId}).`,
     );
   }
-  if (normalizeInchLabel(item.connectionOutletsInch) !== preset.connectionOutletsInch) {
+  if (
+    normalizeInchLabel(item.connectionOutletsInch) !==
+    preset.connectionOutletsInch
+  ) {
     throw new Error(
       `Каталог: ${ctx} — connectionOutletsInch должен быть "${preset.connectionOutletsInch}" (серия ${seriesId}).`,
     );
@@ -124,12 +135,20 @@ export function assertKnownManifoldSeriesGeometry(item, ctx) {
 
   const dimensions = item.dimensions;
   if (!dimensions || typeof dimensions !== 'object') {
-    throw new Error(`Каталог: ${ctx} — dimensions обязателен для серии ${seriesId}.`);
+    throw new Error(
+      `Каталог: ${ctx} — dimensions обязателен для серии ${seriesId}.`,
+    );
   }
 
-  const depth = Number(/** @type {Record<string, unknown>} */ (dimensions).depth);
-  const height = Number(/** @type {Record<string, unknown>} */ (dimensions).height);
-  const width = Number(/** @type {Record<string, unknown>} */ (dimensions).width);
+  const depth = Number(
+    /** @type {Record<string, unknown>} */ (dimensions).depth,
+  );
+  const height = Number(
+    /** @type {Record<string, unknown>} */ (dimensions).height,
+  );
+  const width = Number(
+    /** @type {Record<string, unknown>} */ (dimensions).width,
+  );
 
   if (Math.abs(depth - preset.depth) > MANIFOLD_GEOMETRY_TOLERANCE_MM) {
     throw new Error(

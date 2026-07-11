@@ -17,10 +17,7 @@
           "gasConsumptionM3PerHour": 2.4,
           "price": 48500,
           "mountingType": "wall",
-          "connectionDiameters": [
-            "3/4 дюйма (отопление)",
-            "1/2 дюйма (ГВС)"
-          ],
+          "connectionDiameters": ["3/4 дюйма (отопление)", "1/2 дюйма (ГВС)"],
           "circuitsCount": 2,
           "type": "condensing",
           "circulationPump": {
@@ -91,10 +88,7 @@
           "gasConsumptionM3PerHour": 2.73,
           "price": 35000,
           "mountingType": "wall",
-          "connectionDiameters": [
-            "3/4″ (отопление)",
-            "1/2″ (ГВС)"
-          ],
+          "connectionDiameters": ["3/4″ (отопление)", "1/2″ (ГВС)"],
           "circuitsCount": 2,
           "type": "traditional",
           "circulationPump": {
@@ -239,11 +233,7 @@
               "weight_kg": 34
             }
           },
-          "tags": [
-            "wall-mounted",
-            "double-circuit",
-            "condensing"
-          ],
+          "tags": ["wall-mounted", "double-circuit", "condensing"],
           "price": 39200,
           "isDoubleCircuit": true
         },
@@ -279,12 +269,7 @@
               "weight_kg": 28.5
             }
           },
-          "tags": [
-            "wall-mounted",
-            "double-circuit",
-            "condensing",
-            "compact"
-          ],
+          "tags": ["wall-mounted", "double-circuit", "condensing", "compact"],
           "price": 37200,
           "circuitsCount": 2,
           "isDoubleCircuit": true
@@ -374,10 +359,7 @@
           "price": 56500,
           "isDoubleCircuit": true,
           "mountingType": "wall",
-          "connectionDiameters": [
-            "3/4″ (отопление)",
-            "1/2″ (ГВС)"
-          ],
+          "connectionDiameters": ["3/4″ (отопление)", "1/2″ (ГВС)"],
           "circulationPump": {
             "operatingModes": [
               {
@@ -696,12 +678,7 @@
               "weight_kg": 30
             }
           },
-          "tags": [
-            "wall-mounted",
-            "single-circuit",
-            "condensing",
-            "compact"
-          ],
+          "tags": ["wall-mounted", "single-circuit", "condensing", "compact"],
           "price": 42800,
           "isDoubleCircuit": false
         },
@@ -956,12 +933,7 @@
               "weight_kg": 46
             }
           },
-          "tags": [
-            "floor-standing",
-            "single-circuit",
-            "condensing",
-            "medium"
-          ],
+          "tags": ["floor-standing", "single-circuit", "condensing", "medium"],
           "price": 35880,
           "isDoubleCircuit": false
         },
@@ -1088,11 +1060,7 @@
           "volume_l_section": 0.2,
           "weight_kg_section": 1.02
         },
-        "tags": [
-          "high-efficiency",
-          "made-in-italy",
-          "low-inertia"
-        ],
+        "tags": ["high-efficiency", "made-in-italy", "low-inertia"],
         "description": "Литой алюминиевый радиатор с высокой теплоотдачей и антикоррозийным покрытием.",
         "price": 590,
         "priceBasis": "section"
@@ -1205,11 +1173,7 @@
           "volume_l_total": 5.8,
           "weight_kg_total": 26.2
         },
-        "tags": [
-          "european-standard",
-          "side-connection",
-          "high-reliability"
-        ],
+        "tags": ["european-standard", "side-connection", "high-reliability"],
         "description": "Стальной панельный радиатор с боковым подключением. Оптимален для систем с принудительной циркуляцией.",
         "price": 4350,
         "priceBasis": "panel"
@@ -1244,11 +1208,7 @@
           "volume_l_total": 5.4,
           "weight_kg_total": 24.8
         },
-        "tags": [
-          "bottom-connection",
-          "built-in-valve",
-          "modern-look"
-        ],
+        "tags": ["bottom-connection", "built-in-valve", "modern-look"],
         "description": "Стальной панельный радиатор с нижним подключением и встроенным термоклапаном. Идеален для скрытой разводки труб.",
         "price": 4580,
         "priceBasis": "panel"
@@ -1281,11 +1241,7 @@
           "volume_l_total": 16.2,
           "weight_kg_total": 74.4
         },
-        "tags": [
-          "side-connection",
-          "high-length",
-          "maximum-area"
-        ],
+        "tags": ["side-connection", "high-length", "maximum-area"],
         "description": "Длинный стальной панельный радиатор с боковым подключением. Идеально подходит для больших помещений с панорамными или низкими окнами.",
         "price": 15322,
         "priceBasis": "panel"
@@ -1318,11 +1274,7 @@
           "volume_l_total": 14.5,
           "weight_kg_total": 68.2
         },
-        "tags": [
-          "side-connection",
-          "triple-panel",
-          "high-density-power"
-        ],
+        "tags": ["side-connection", "triple-panel", "high-density-power"],
         "description": "Сверхмощный трехпанельный радиатор (Тип 33) повышенной глубины. Выдает максимальный тепловой поток при относительно небольшой длине.",
         "price": 15239,
         "priceBasis": "panel"
@@ -1357,11 +1309,7 @@
           "volume_l_total": 13.3,
           "weight_kg_total": 61.6
         },
-        "tags": [
-          "bottom-connection",
-          "built-in-valve",
-          "modern-look"
-        ],
+        "tags": ["bottom-connection", "built-in-valve", "modern-look"],
         "description": "Стальной панельный радиатор увеличенной высоты с нижним подключением. Прекрасно интегрируется в современные интерьеры со скрытой разводкой.",
         "price": 14921,
         "priceBasis": "panel"
@@ -1394,11 +1342,7 @@
           "volume_l_total": 14.8,
           "weight_kg_total": 65.4
         },
-        "tags": [
-          "side-connection",
-          "triple-panel",
-          "low-profile-heavy"
-        ],
+        "tags": ["side-connection", "triple-panel", "low-profile-heavy"],
         "description": "Трехпанельный радиатор стандартной высоты 500 мм. Оптимальное решение для эффективного съема низкотемпературного тепла от конденсационных котлов.",
         "price": 14692,
         "priceBasis": "panel"
@@ -1431,11 +1375,7 @@
           "volume_l_total": 15.1,
           "weight_kg_total": 69.7
         },
-        "tags": [
-          "side-connection",
-          "high-length",
-          "classic-dimension"
-        ],
+        "tags": ["side-connection", "high-length", "classic-dimension"],
         "description": "Панельный радиатор высотой 600 мм с боковым подключением. Традиционная геометрия в сочетании с внушительной тепловой мощностью.",
         "price": 14561,
         "priceBasis": "panel"
@@ -1446,9 +1386,7 @@
         "model": "Atlantic Steatite Elite",
         "type": "electric_storage",
         "heatingElementType": "Сухой (стеатит)",
-        "features": [
-          "Лучший для жесткой воды"
-        ],
+        "features": ["Лучший для жесткой воды"],
         "variants": [
           {
             "volumeLiters": 80,
@@ -1467,10 +1405,7 @@
         "model": "Ariston Velis EVO",
         "type": "electric_storage",
         "heatingElementType": "Мокрый",
-        "features": [
-          "Плоский дизайн",
-          "Два бака"
-        ],
+        "features": ["Плоский дизайн", "Два бака"],
         "variants": [
           {
             "volumeLiters": 50,
@@ -1502,9 +1437,7 @@
         "model": "Gorenje GBFU 100 SIMB6",
         "type": "electric_storage",
         "heatingElementType": "Сухой",
-        "features": [
-          "Узкий корпус"
-        ],
+        "features": ["Узкий корпус"],
         "variants": [
           {
             "volumeLiters": 100,
@@ -1517,9 +1450,7 @@
         "model": "Atlantic O'Pro 300",
         "type": "electric_storage",
         "heatingElementType": "Мокрый",
-        "features": [
-          "Дом с несколькими точками водоразбора"
-        ],
+        "features": ["Дом с несколькими точками водоразбора"],
         "variants": [
           {
             "volumeLiters": 300,
@@ -2530,6 +2461,44 @@
         "depth": 82,
         "height": 313,
         "width": 545
+      }
+    },
+    {
+      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 11 виходів (VTc.589.EMNX.0611)",
+      "brand": "VALTEC",
+      "article": "VTc.589.EMNX.0611",
+      "price": 11650.0,
+      "outletsCount": 11,
+      "manifoldApplication": "underfloor",
+      "hasFlowMeters": true,
+      "material": "Нержавіюча сталь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 90,
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4",
+      "dimensions": {
+        "depth": 82,
+        "width": 595,
+        "height": 313
+      }
+    },
+    {
+      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 12 виходів (VTc.589.EMNX.0612)",
+      "brand": "VALTEC",
+      "article": "VTc.589.EMNX.0612",
+      "price": 12580.0,
+      "outletsCount": 12,
+      "manifoldApplication": "underfloor",
+      "hasFlowMeters": true,
+      "material": "Нержавіюча сталь",
+      "maxPressureBar": 10,
+      "maxTemperatureC": 90,
+      "connectionMainInch": "1",
+      "connectionOutletsInch": "3/4",
+      "dimensions": {
+        "depth": 82,
+        "width": 645,
+        "height": 313
       }
     }
   ],

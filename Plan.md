@@ -50,8 +50,8 @@
 | `src/hydraulics/` | Pure Pipeline: граф, трубы, насосы, `runHydraulicsPipeline.js` |
 | `src/matching/warmFloor.js` | Текстовые подсказки matching + цифры из `underfloorHeating` отчёта |
 | `src/climate/` | Геокодинг (Nominatim) и климат (Meteostat bulk API) |
-| `src/matching/` | Подбор котлов, радиаторов, БКН, бойлеров |
-| `src/catalog/` | Загрузка и валидация каталога `products` (MongoDB / JSON) |
+| `src/matching/` | Подбор котлов, радиаторов, БКН, бойлеров, **коллекторов** (`manifold.js`) |
+| `src/catalog/` | Загрузка и валидация каталога `products` (MongoDB / JSON; в т.ч. manifolds / boilerManifolds) |
 | `src/dhw/` | Нормы ГВС, правила техники (`appliances`), формулы водоснабжения |
 | `src/reference/` | TTL-кэш справочников (каталог + нормы + appliances + recommendations) |
 | `src/recommendations/` | Тексты рекомендаций по кодам `REC_*` / `WARN_*` |
@@ -69,6 +69,7 @@
 | `scripts/verifyPickPipe.js` | Guard Dвн + fallback min/max Ø |
 | `scripts/verifyBuiltinBoilerPump.js` | Baxi circulationPump, below_manufacturer_qmin |
 | `scripts/verifyFitPumpCurve.js` | Аппроксимация H(Q) из паспортных точек |
+| `scripts/verifyManifoldMatching.js` | Подбор manifolds / boilerManifolds (house vs apartment) |
 
 Сверка контракта: `openapi.yaml` ↔ `validate.js` ↔ `shared-types.d.ts`.
 
@@ -184,6 +185,7 @@ Compat-телеметрия: `utils/compatTelemetry.ts` (`[survey-compat]` в DE
 | H.11 | `circulationPump` Baxi ECO Home 24 F + Luna Duo-Tec E 33 (6 режимов, полезный H) | ✅ |
 | H.12 | Ф2: `below_manufacturer_qmin`, `curve_unavailable`, без catalog fallback для wall boiler | ✅ |
 | H.13 | Ф5 «Тамбур»: микронагрузка радиаторов (`resolveMicroLoadRadiatorStrategy`, тип `тамбур`) | ✅ |
+| H.15 | Подбор коллекторов из каталога: `matching/manifold.js` → `matching.manifolds`; house/apartment; каскад ТП при >12 петель (`units[]`, `splitOutletsForCascade`); verify `verify:manifold-matching`; док. [`docs/manifold-matching.md`](docs/manifold-matching.md) | ✅ |
 | **ТП — расчёт** | `logic/warmFloorCalc.js` | Rλ,B = база над контуром + финиш; q↑/q↓, Tповерх, `maxAllowableHeatFluxUpWm2`; warning при превышении лимита покрытия | Результат в `RecommendationsBlock` |
 | **ТП — matching** | `matching/warmFloor.js` | Подсказки в `radiatorSelectionNotes` + цифры из отчёта ТП | Шаг `warmFloor` + селекты в комнатах |
 | **ТП — heatloss** | `heatlossByRooms.js` + `floorPresetId` | Теплопотери через пол; при `bottomBoundary: heated` пол не считается | Поле «Пол (ограждение)» в комнате |

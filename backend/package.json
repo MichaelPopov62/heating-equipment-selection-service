@@ -9,7 +9,7 @@
     "start": "node src/index.js",
     "lint": "eslint \"{src,scripts}/**/*.js\"",
     "lint:fix": "eslint \"{src,scripts}/**/*.js\" --fix",
-    "verify": "npm run lint && npm run verify:calc-schema && npm run verify:calc-input-validation && npm run verify:seed-catalog && npm run verify:pipe-catalog && npm run verify:ufh-presets && npm run verify:radiator-sections && npm run verify:mixed-radiator-ufh && npm run verify:micro-load-radiator && npm run verify:reference-cache-invalidate && npm run verify:calc-runtime-context && npm run verify:project-calc-input && npm run verify:document-size-limits && npm run verify:extract-calculation-summary && npm run verify:projects-auth && npm run verify:water-heater-form && npm run verify:survey-draft-migration && npm run verify:hydraulics-pipeline && npm run verify:pick-pipe && npm run verify:pipe-catalog-pool-filter && npm run verify:circulation-flows && npm run verify:flow-delta-tk && npm run verify:builtin-boiler-pump && npm run verify:fit-pump-curve && npm run verify:pump-duty && npm run verify:ufh-loop-hydraulics && npm run verify:ufh-active-area && npm run verify:radiator-wiring-graph",
+    "verify": "npm run lint && npm run verify:calc-schema && npm run verify:calc-input-validation && npm run verify:seed-catalog && npm run verify:pipe-catalog && npm run verify:ufh-presets && npm run verify:radiator-sections && npm run verify:mixed-radiator-ufh && npm run verify:micro-load-radiator && npm run verify:reference-cache-invalidate && npm run verify:calc-runtime-context && npm run verify:project-calc-input && npm run verify:document-size-limits && npm run verify:extract-calculation-summary && npm run verify:projects-auth && npm run verify:water-heater-form && npm run verify:survey-draft-migration && npm run verify:hydraulics-pipeline && npm run verify:pick-pipe && npm run verify:pipe-catalog-pool-filter && npm run verify:circulation-flows && npm run verify:flow-delta-tk && npm run verify:builtin-boiler-pump && npm run verify:fit-pump-curve && npm run verify:pump-duty && npm run verify:ufh-loop-hydraulics && npm run verify:ufh-active-area && npm run verify:radiator-wiring-graph && npm run verify:manifold-matching",
     "verify:calc-schema": "node scripts/verifyCalcInputSchema.js",
     "verify:calc-input-validation": "node scripts/verifyCalcInputValidation.js",
     "verify:seed-catalog": "node scripts/verifySeedCatalog.js",
@@ -38,6 +38,7 @@
     "verify:ufh-loop-hydraulics": "node scripts/verifyUfhLoopHydraulics.js",
     "verify:ufh-active-area": "node scripts/verifyUfhActiveArea.js",
     "verify:radiator-wiring-graph": "node scripts/verifyRadiatorWiringGraph.js",
+    "verify:manifold-matching": "node scripts/verifyManifoldMatching.js",
     "seed": "node scripts/seed.js",
     "test:fuzz": "tsx scripts/fuzz-calc.ts"
   },

@@ -54,6 +54,8 @@ properties:
         type: object
         nullable: true
         additionalProperties: true
+      manifolds:
+        $ref: ManifoldsMatchingReport.yaml
       hydraulics:
         $ref: HydraulicsMatchingReport.yaml
   recommendations:
