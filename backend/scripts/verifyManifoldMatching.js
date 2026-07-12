@@ -8,8 +8,13 @@ import {
   pickBoilerManifold,
   pickDistributionManifold,
   pickManifolds,
+  pickManifoldsWithCore,
+  buildEmptyManifoldsFailure,
+  buildOkManifoldsReport,
   splitOutletsForCascade,
   UFH_MANIFOLD_MAX_OUTLETS_PER_NODE,
+  MANIFOLD_FAILURE_CODE_INTERNAL,
+  MANIFOLD_FAILURE_CODE_INPUT,
 } from '../src/matching/manifold.js';
 
 assert.equal(UFH_MANIFOLD_MAX_OUTLETS_PER_NODE, 12);
@@ -256,6 +261,8 @@ function ufhRoom(roomId, roomName, loopsCount) {
     boiler: { requiredKw: 12, warnings: [] },
     hydraulics: { radiatorWiringSystemType: 'auto' },
   });
+  assert.equal(report.ok, true);
+  assert.equal(report.failureCode, undefined);
   assert.equal(report.underfloor.length, 1);
   assert.equal(report.underfloor[0].requiredOutlets, 5);
   assert.equal(report.underfloor[0].units.length, 1);
@@ -304,6 +311,8 @@ function ufhRoom(roomId, roomName, loopsCount) {
     boiler: { requiredKw: 24, warnings: [] },
     hydraulics: { radiatorWiringSystemType: 'auto' },
   });
+  assert.equal(report.ok, true);
+  assert.equal(report.failureCode, undefined);
   assert.ok(report.boilerManifold);
   assert.equal(report.boilerManifold.requiredCircuits, 2);
   assert.equal(report.boilerManifold.requiredPowerKw, 24);
@@ -336,6 +345,7 @@ function ufhRoom(roomId, roomName, loopsCount) {
     boiler: { requiredKw: 10, warnings: [] },
     hydraulics: { radiatorWiringSystemType: 'manifold' },
   });
+  assert.equal(report.ok, true);
   assert.ok(report.radiator);
   assert.equal(report.radiator.requiredOutlets, 3);
   assert.equal(report.radiator.selected?.model, 'Rad-3');
@@ -398,6 +408,7 @@ function ufhRoom(roomId, roomName, loopsCount) {
     boiler: { requiredKw: 15, warnings: [] },
     hydraulics: {},
   });
+  assert.equal(report.ok, true);
   assert.equal(report.underfloor.length, 2);
   assert.equal(report.underfloor[0].floor, 1);
   assert.equal(report.underfloor[0].requiredOutlets, 3);
@@ -432,6 +443,7 @@ function ufhRoom(roomId, roomName, loopsCount) {
     boiler: { requiredKw: 20, warnings: [] },
     hydraulics: {},
   });
+  assert.equal(report.ok, true);
   assert.equal(report.underfloor[0].units.length, 1);
   assert.equal(report.underfloor[0].units[0].requiredOutlets, 12);
   assert.equal(report.underfloor[0].units[0].selected?.model, 'Ufh-12-FM');
@@ -463,6 +475,7 @@ function ufhRoom(roomId, roomName, loopsCount) {
     boiler: { requiredKw: 24, warnings: [] },
     hydraulics: {},
   });
+  assert.equal(report.ok, true);
   const floorPick = report.underfloor[0];
   assert.equal(floorPick.requiredOutlets, 14);
   assert.equal(floorPick.units.length, 2);
@@ -505,6 +518,7 @@ function ufhRoom(roomId, roomName, loopsCount) {
     boiler: { requiredKw: 30, warnings: [] },
     hydraulics: {},
   });
+  assert.equal(report.ok, true);
   const units = report.underfloor[0].units;
   assert.equal(units.length, 3);
   assert.deepEqual(
@@ -512,6 +526,97 @@ function ufhRoom(roomId, roomName, loopsCount) {
     [9, 8, 8],
   );
   assert.ok(report.warnings.some((w) => w.includes('на 3 коллектора') && w.includes('9+8+8')));
+}
+
+// 11) порожній каталог underfloor — штатний ok:true + selected null (не soft-fail)
+{
+  const empty = {
+    boilers: { doubleCircuit: [], singleCircuit: [] },
+    radiators: [],
+    waterHeaters: [],
+    manifolds: [],
+    boilerManifolds: [],
+  };
+  const report = pickManifolds({
+    catalog: empty,
+    building: {
+      objectMeta: { objectType: 'apartment', floors: 1, roomsCount: 1 },
+      rooms: [
+        { id: 'r1', name: 'Кімната', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 12, heightM: 2.7 },
+      ],
+    },
+    underfloorHeating: {
+      enabled: true,
+      circuitSupplyC: 40,
+      circuitReturnC: 30,
+      circuitMeanC: 35,
+      circuitSource: 'finish_preset',
+      distributionPreset: 'collector_mixing_valve',
+      rooms: [ufhRoom('r1', 'Кімната', 4)],
+      totalHeatFluxUpWatts: 1000,
+      totalHeatFluxDownWatts: 100,
+    },
+    radiators: { chosen: null, byRoom: [], warnings: [] },
+    boiler: { requiredKw: 12, warnings: [] },
+    hydraulics: {},
+  });
+  assert.equal(report.ok, true);
+  assert.equal(report.failureCode, undefined);
+  assert.equal(report.underfloor.length, 1);
+  assert.equal(report.underfloor[0].units[0].selected, null);
+  assert.ok(report.warnings.some((w) => w.includes('нет коллекторов')));
+}
+
+// 12) soft-fail builders
+{
+  const fail = buildEmptyManifoldsFailure({
+    failureCode: MANIFOLD_FAILURE_CODE_INTERNAL,
+    message: 'Смета коллекторов пуста; расчёт унибоксов и гидравлики продолжается.',
+    causeMessage: 'boom',
+  });
+  assert.equal(fail.ok, false);
+  assert.equal(fail.failureCode, MANIFOLD_FAILURE_CODE_INTERNAL);
+  assert.deepEqual(fail.underfloor, []);
+  assert.equal(fail.radiator, null);
+  assert.equal(fail.boilerManifold, null);
+  assert.ok(fail.warnings.length >= 2);
+  assert.ok(fail.warnings.some((w) => w.includes('MANIFOLD_INTERNAL')));
+  assert.ok(fail.warnings.some((w) => w.includes('boom')));
+
+  const ok = buildOkManifoldsReport({
+    underfloor: [],
+    radiator: null,
+    boilerManifold: null,
+    warnings: [],
+  });
+  assert.equal(ok.ok, true);
+  assert.equal(ok.failureCode, undefined);
+}
+
+// 13) pickManifoldsWithCore: throw → ok:false, без пробросу
+{
+  const report = pickManifoldsWithCore(() => {
+    throw new Error('simulated manifold crash');
+  }, {});
+  assert.equal(report.ok, false);
+  assert.equal(report.failureCode, MANIFOLD_FAILURE_CODE_INTERNAL);
+  assert.deepEqual(report.underfloor, []);
+  assert.equal(report.radiator, null);
+  assert.equal(report.boilerManifold, null);
+  assert.ok(report.warnings.some((w) => w.includes('MANIFOLD_INTERNAL')));
+  assert.ok(report.warnings.some((w) => w.includes('simulated manifold crash')));
+}
+
+// 14) INPUT_INVALID через err.code
+{
+  const err = new Error('bad floor map');
+  err.code = MANIFOLD_FAILURE_CODE_INPUT;
+  const report = pickManifoldsWithCore(() => {
+    throw err;
+  }, {});
+  assert.equal(report.ok, false);
+  assert.equal(report.failureCode, MANIFOLD_FAILURE_CODE_INPUT);
+  assert.deepEqual(report.underfloor, []);
 }
 
 console.log('verify:manifold-matching OK');

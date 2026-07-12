@@ -7,6 +7,7 @@ import * as fs from 'node:fs/promises';
 import { validateAndNormalizeCatalog } from './validateCatalog.js';
 import { resolvePipeCatalogId } from './pipeCatalogHelpers.js';
 import { resolvePumpCatalogId } from './pumpCatalogHelpers.js';
+import { resolveUniboxCatalogId } from './uniboxCatalogHelpers.js';
 import { Product } from '../models/public.js';
 import { logger } from '../utils/logger.js';
 import { ensureMongoReferenceConnection } from '../utils/mongoReferenceConnection.js';
@@ -147,6 +148,24 @@ function pumpMongoDocToCatalogRow(doc) {
 }
 
 /**
+ * Унибокс из Mongo → строка каталога (без kind, catalogKey, uniboxId).
+ * @param {Record<string, unknown>} doc
+ */
+function uniboxMongoDocToCatalogRow(doc) {
+  const plain = mongoDocToPlain(doc);
+  const { kind: _k, uniboxId: _u, ...rest } = plain;
+  void _k;
+  void _u;
+  /** @type {Record<string, unknown>} */
+  const row = { ...rest };
+  const catalogId = resolveUniboxCatalogId(plain);
+  if (catalogId) {
+    row.id = catalogId;
+  }
+  return row;
+}
+
+/**
  * @param {Record<string, unknown>} doc
  */
 function mongoDocToCatalogProductDoc(doc) {
@@ -222,7 +241,7 @@ async function loadCatalogJsonFromMongo() {
     .map((d) => mongoDocToCatalogProductDoc(/** @type {Record<string, unknown>} */ (d)));
   const uniboxes = docs
     .filter((d) => d.kind === 'unibox')
-    .map((d) => mongoDocToCatalogProductDoc(/** @type {Record<string, unknown>} */ (d)));
+    .map((d) => uniboxMongoDocToCatalogRow(/** @type {Record<string, unknown>} */ (d)));
 
   /** @type {Array<Record<string, unknown> & { isDoubleCircuit?: boolean }>} */
   const doubleCircuit = [];

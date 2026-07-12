@@ -21,6 +21,7 @@ import {
   ventilationReserveModeLabel,
 } from './ventilationReserve.js';
 import { logger } from '../utils/logger.js';
+import { resolveDesignRoomAirTempC } from '../../../shared/roomDesignAirTemp.js';
 
 /**
  * Расчёт теплопотерь с детализацией по комнатам.
@@ -60,15 +61,33 @@ function computeUFromThickness(model, thicknessMm) {
 export function calculateHeatLossForBuilding({ temps, building }) {
   const insideC = temps.insideC;
   const outsideC = temps.outsideC;
+  const bathroomAirTempC =
+    typeof temps.bathroomAirTempC === 'number' && Number.isFinite(temps.bathroomAirTempC)
+      ? temps.bathroomAirTempC
+      : typeof building?.temps?.bathroomAirTempC === 'number' &&
+          Number.isFinite(building.temps.bathroomAirTempC)
+        ? building.temps.bathroomAirTempC
+        : undefined;
 
   logger.debug('heatloss.building.start', null, {
     insideC,
     outsideC,
+    bathroomAirTempC: bathroomAirTempC ?? null,
     rooms: building?.rooms?.length ?? 0,
     elements: building?.envelopeElements?.length ?? 0,
   });
 
   const roomsById = new Map(building.rooms.map((r) => [r.id, r]));
+  /** @type {Map<string, { designAirTempC: number, source: import('../types/shared-types').DesignRoomAirTempSource }>} */
+  const roomAirById = new Map();
+  for (const room of building.rooms) {
+    const resolved = resolveDesignRoomAirTempC({
+      roomType: room.type,
+      insideC,
+      bathroomAirTempC,
+    });
+    if (resolved) roomAirById.set(room.id, resolved);
+  }
   const roomLayoutById = new Map(
     building.rooms.map((r) => [
       r.id,
@@ -164,8 +183,10 @@ export function calculateHeatLossForBuilding({ temps, building }) {
     outsideTempC: outsideC,
     elements: normalizedElements.map((e) => {
       const construction = e.construction;
+      const roomAir = roomAirById.get(e.roomId);
+      const roomInsideC = roomAir?.designAirTempC ?? insideC;
       const elementDeltaT = resolveElementDeltaT({
-        insideC,
+        insideC: roomInsideC,
         outsideC,
         construction,
       });
@@ -209,6 +230,7 @@ export function calculateHeatLossForBuilding({ temps, building }) {
     const els = elementsWithRoom.filter((x) => x.roomId === room.id);
     const envelopeWatts = sum(els.map((x) => x.qWatts));
     const designWatts = envelopeWatts * kVent;
+    const air = roomAirById.get(room.id);
     return {
       id: room.id,
       name: room.name,
@@ -216,6 +238,8 @@ export function calculateHeatLossForBuilding({ temps, building }) {
       areaM2: room.areaM2,
       heightM: room.heightM,
       volumeM3: room.areaM2 * room.heightM,
+      designAirTempC: air?.designAirTempC ?? insideC,
+      designAirTempSource: air?.source ?? 'survey',
       envelopeWatts,
       ventilationReserveFactor: kVent,
       designWatts,

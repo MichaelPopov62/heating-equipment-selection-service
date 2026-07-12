@@ -1242,6 +1242,12 @@ function validateUnibox(item, idx, seenIds) {
     }
   }
 
+  // Round-trip Mongo: id може прийти лише як uniboxId (Mongoose не зберігає id надійно).
+  if (!item.id && item.uniboxId != null) {
+    item.id = item.uniboxId;
+  }
+  delete item.uniboxId;
+
   item.id = sanitizeTrimAngleBrackets(item.id);
   if (!item.id) {
     throw new Error(`Каталог: id обязателен (${ctx}).`);

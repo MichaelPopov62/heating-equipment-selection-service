@@ -32,6 +32,15 @@ properties:
         designWatts:
           type: number
           description: envelopeWatts × ventilationReserveFactor, Вт.
+        designAirTempC:
+          type: number
+          description: >
+            Расчётная T воздуха комнаты, °C (не теплоноситель).
+            Санузел: max(bathroomAirTempC ?? insideC, 24).
+        designAirTempSource:
+          type: string
+          enum: [survey, bathroom_field, floor]
+          description: Источник designAirTempC.
         elements:
           type: array
           items:

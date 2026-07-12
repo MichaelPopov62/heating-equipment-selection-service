@@ -3,16 +3,31 @@ description: >
   Подбор коллекторов из каталога (report.matching.manifolds) для сметы.
   Выполняется после резолва underfloorHeating.distributionPreset, до гидравлического pipeline.
   ТП: при >12 петель на этаж — каскад units[] (равномерный split).
+  Soft-fail: ok=false → underfloor=[], radiator/boilerManifold=null; расчёт унибоксов и гидравлики продолжается.
+  Штатный дефицит SKU (selected=null) — это ok=true, не soft-fail.
 additionalProperties: false
 required:
+  - ok
   - underfloor
   - radiator
   - boilerManifold
   - warnings
 properties:
+  ok:
+    type: boolean
+    description: >
+      true — подбор выполнен штатно (в т.ч. при selected=null по позициям).
+      false — критический сбой: underfloor пустой, radiator и boilerManifold = null.
+  failureCode:
+    type: string
+    enum: [MANIFOLD_INTERNAL, MANIFOLD_INPUT_INVALID]
+    description: Машинный код сбоя; только при ok=false.
   underfloor:
     type: array
-    description: Коллекторы ТП — по одному элементу на этаж; внутри units[] (1 или каскад).
+    description: >
+      Коллекторы ТП — по одному элементу на этаж; внутри units[] (1 или каскад).
+      При ok=false — всегда []. Пустой массив валиден; minItems:1 у units относится
+      только к элементам, реально попавшим в underfloor.
     items:
       type: object
       additionalProperties: false

@@ -20,6 +20,13 @@ properties:
     properties:
       insideC: { type: number, minimum: 5, maximum: 35 }
       outsideC: { type: number, minimum: -60, maximum: 40 }
+      bathroomAirTempC:
+        type: number
+        minimum: 24
+        maximum: 35
+        description: >
+          Опциональная расчётная температура воздуха санузла, °C (не теплоноситель).
+          Не ниже 24. Если нет — для type=санузел: max(insideC, 24).
   building:
     type: object
     additionalProperties: false
@@ -32,6 +39,13 @@ properties:
         properties:
           insideC: { type: number, minimum: 5, maximum: 35 }
           outsideC: { type: number, minimum: -60, maximum: 40 }
+          bathroomAirTempC:
+            type: number
+            minimum: 24
+            maximum: 35
+            description: >
+              Опциональная расчётная температура воздуха санузла, °C (не теплоноситель).
+              Не ниже 24. Если нет — для type=санузел: max(insideC, 24).
       rooms:
         type: array
         minItems: 1

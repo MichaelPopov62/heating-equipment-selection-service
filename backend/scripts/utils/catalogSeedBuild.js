@@ -147,10 +147,12 @@ export function buildProductDocumentsFromNormalized(norm) {
 
   const uniboxes = (norm.uniboxes ?? []).map((x, i) => {
     const raw = cloneJsonSerializable(x);
+    const id = raw?.id != null ? String(raw.id).trim() : '';
     return {
       ...raw,
       kind: 'unibox',
       catalogKey: resolveProductCatalogKey('unibox', raw, i),
+      uniboxId: id || undefined,
     };
   });
 

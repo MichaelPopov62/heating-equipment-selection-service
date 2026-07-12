@@ -17,6 +17,7 @@ import { pickMinimumViableRadiatorSizing } from './pickMinimumViableRadiatorSizi
 import { resolveRecommendation } from '../../recommendations/recommendationResolver.js';
 import { isMixedRadiatorsUfhHeatingMode } from './mixedRadiatorsUfhMode.js';
 import { resolveKVent } from '../../logic/ventilationReserve.js';
+import { resolveDesignRoomAirTempC } from '../../../../shared/roomDesignAirTemp.js';
 import {
   adjustOutputWatts,
   adjustedRadiatorWatts,
@@ -346,6 +347,11 @@ export function pickRadiators({
   const supplyC = heatingSystem.supplyC ?? 75;
   const returnC = heatingSystem.returnC ?? 65;
   const insideC = heatingSystem.insideC ?? 20;
+  const bathroomAirTempC =
+    typeof building?.temps?.bathroomAirTempC === 'number' &&
+    Number.isFinite(building.temps.bathroomAirTempC)
+      ? building.temps.bathroomAirTempC
+      : undefined;
 
   const hasEfficientProposal =
     radiatorLineTier === 'efficient' ||
@@ -510,6 +516,28 @@ export function pickRadiators({
   const microRecCodes = new Set();
 
   const byRoom = (roomsHeatLoss?.rooms ?? []).map((room) => {
+    const roomType =
+      room.type ?? building?.rooms?.find((r) => r.id === room.id)?.type;
+    const air =
+      typeof room.designAirTempC === 'number' && Number.isFinite(room.designAirTempC)
+        ? {
+            designAirTempC: room.designAirTempC,
+            source: /** @type {import('../../../../shared/roomDesignAirTemp.js').DesignRoomAirTempSource} */ (
+              room.designAirTempSource ?? 'survey'
+            ),
+          }
+        : resolveDesignRoomAirTempC({
+            roomType,
+            insideC,
+            bathroomAirTempC,
+          });
+    const roomInsideC = air?.designAirTempC ?? insideC;
+    const roomTargetDeltaT = deltaTmeanK({
+      supplyC,
+      returnC,
+      insideC: roomInsideC,
+    });
+
     const qEnvelope = room.envelopeWatts ?? 0;
     const qDesignFull = room.designWatts ?? qEnvelope * ventilationReserveFactor;
     const mixedLoad = resolveMixedRadiatorRoomLoad({
@@ -524,6 +552,8 @@ export function pickRadiators({
       return {
         roomId: room.id,
         roomName: room.name,
+        designAirTempC: roomInsideC,
+        designAirTempSource: air?.source ?? 'survey',
         heatLossWatts: qEnvelope,
         radiatorDesignWatts: 0,
         flowRateM3PerHour: 0,
@@ -549,6 +579,8 @@ export function pickRadiators({
         return {
           roomId: room.id,
           roomName: room.name,
+          designAirTempC: roomInsideC,
+          designAirTempSource: air?.source ?? 'survey',
           heatLossWatts: qEnvelope,
           radiatorDesignWatts: 0,
           flowRateM3PerHour: 0,
@@ -565,7 +597,7 @@ export function pickRadiators({
           sectionalPool: sortedSectional,
           panelPoolFiltered,
           baseDeltaT,
-          targetDeltaT,
+          targetDeltaT: roomTargetDeltaT,
           radiatorConnection,
           windowOpeningWidthMm: maxWindowWidthByRoom.get(room.id) ?? null,
           openingHeightMm: maxWindowHeightByRoom.get(room.id) ?? null,
@@ -575,6 +607,8 @@ export function pickRadiators({
           return {
             roomId: room.id,
             roomName: room.name,
+            designAirTempC: roomInsideC,
+            designAirTempSource: air?.source ?? 'survey',
             heatLossWatts: qEnvelope,
             radiatorDesignWatts: Math.round(qRad),
             flowRateM3PerHour: radiatorFlowM3h(qRad),
@@ -607,6 +641,8 @@ export function pickRadiators({
         return {
           roomId: room.id,
           roomName: room.name,
+          designAirTempC: roomInsideC,
+          designAirTempSource: air?.source ?? 'survey',
           heatLossWatts: qEnvelope,
           radiatorDesignWatts: Math.round(hydraulicsWatts),
           flowRateM3PerHour: radiatorFlowM3h(hydraulicsWatts),
@@ -637,7 +673,7 @@ export function pickRadiators({
       sectionalPool: sortedSectional,
       panelPoolFiltered,
       baseDeltaT,
-      targetDeltaT,
+      targetDeltaT: roomTargetDeltaT,
       radiatorConnection,
       windowOpeningWidthMm: maxWindowWidthByRoom.get(room.id) ?? null,
       openingHeightMm: maxWindowHeightByRoom.get(room.id) ?? null,
@@ -648,6 +684,8 @@ export function pickRadiators({
       return {
         roomId: room.id,
         roomName: room.name,
+        designAirTempC: roomInsideC,
+        designAirTempSource: air?.source ?? 'survey',
         heatLossWatts: qEnvelope,
         radiatorDesignWatts: Math.round(qRad),
         flowRateM3PerHour: radiatorFlowM3h(qRad),
@@ -677,6 +715,8 @@ export function pickRadiators({
     return {
       roomId: room.id,
       roomName: room.name,
+      designAirTempC: roomInsideC,
+      designAirTempSource: air?.source ?? 'survey',
       heatLossWatts: qEnvelope,
       radiatorDesignWatts: Math.round(qRad),
       flowRateM3PerHour: radiatorFlowM3h(qRad),

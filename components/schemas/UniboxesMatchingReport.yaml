@@ -1,7 +1,8 @@
 type: object
 description: >
   Подбор унибоксов из каталога (report.matching.uniboxes) для сметы.
-  Только при 1…2 петлях ТП без каскада коллекторов; фильтр по всем паспортным полям.
+  Только при 1…2 петлях ТП без каскада коллекторов; строгие неравенства по паспорту.
+  roomAirTempC — расчётная температура воздуха помещения (не теплоноситель).
 additionalProperties: false
 required:
   - byLoop
@@ -48,14 +49,28 @@ properties:
               description: Длина петли, м (> 0; без fallback 0).
             circuitSupplyC:
               type: number
+              description: Температура подачи теплоносителя контура ТП, °C.
             circuitReturnC:
               type: number
+              description: Температура обратки теплоносителя контура ТП, °C.
             flowLph:
               type: number
               description: Расход петли, л/ч (из flowRateM3PerHour × 1000).
             roomAirTempC:
               type: number
-              description: temps.insideC — для фильтра min/maxAirTempC.
+              description: >
+                Расчётная температура воздуха помещения, °C (не теплоноситель).
+                Для type=санузел: max(bathroomAirTempC ?? insideC, 24);
+                иначе temps.insideC. Сравнивается только с minAirTempC / maxAirTempC.
+            roomAirTempSource:
+              type: string
+              enum: [preset, survey, bathroom_field]
+              description: >
+                Источник roomAirTempC: survey — анкета; preset — пол 24 °C для санузла;
+                bathroom_field — temps.bathroomAirTempC.
+            roomType:
+              type: string
+              description: Канонический building.rooms[].type (если известен).
             systemPressureBar:
               type: number
               description: Расчётный рабочий тиск системы (сравнение с maxPressureBar).

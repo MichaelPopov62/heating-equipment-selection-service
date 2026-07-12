@@ -171,6 +171,8 @@ export const boilerManifoldSchema = new Schema({
 
 /** Унибокс (локальный регулятор петли ТП). Полный контракт — validateCatalog. */
 export const uniboxSchema = new Schema({
+  /** Дубль id из каталога для round-trip Mongo → validateCatalog (id у Mongoose ненадёжен). */
+  uniboxId: { type: String, required: false, trim: true },
   brand: { type: String, required: true, trim: true },
   price: { type: Number, required: true, min: 1 },
   type: {

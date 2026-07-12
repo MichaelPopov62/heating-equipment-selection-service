@@ -20,11 +20,12 @@ Seed: discriminators `models/Manifold.js`, `models/BoilerManifold.js`.
 
 ## Модуль
 
-- `backend/src/matching/manifold.js` — `pickDistributionManifold`, `pickBoilerManifold`, `pickManifolds`, `splitOutletsForCascade`
+- `backend/src/matching/manifold.js` — `pickDistributionManifold`, `pickBoilerManifold`, `pickManifolds`, `pickManifoldsCore`, `pickManifoldsWithCore`, `splitOutletsForCascade`, `buildEmptyManifoldsFailure`, `buildOkManifoldsReport`
 - Константа: `UFH_MANIFOLD_MAX_OUTLETS_PER_NODE = 12`
-- Public API: `matching/public.js` → `pickManifolds`
-- Вызов в `buildReport` **после** резолва `underfloorHeating.distributionPreset`, **до** `runHydraulicsPipeline`
-- Отчёт: `report.matching.manifolds` (`ManifoldsMatchingReport`)
+- Коды soft-fail: `MANIFOLD_INTERNAL`, `MANIFOLD_INPUT_INVALID`
+- Public API: `matching/public.js` → `pickManifolds`, `buildEmptyManifoldsFailure`, `buildOkManifoldsReport`
+- Вызов в `buildReport` **после** резолва `underfloorHeating.distributionPreset`, **до** `pickUniboxes` / `runHydraulicsPipeline`
+- Отчёт: `report.matching.manifolds` (`ManifoldsMatchingReport`) с обязательным **`ok`**
 
 Порядок в `buildReport`:
 
@@ -33,6 +34,24 @@ matchEquipment → (резолв distributionPreset ТП) → pickManifolds → 
 ```
 
 Унибоксы (локальный регулятор петли, 1…2 петли без каскада коллекторов): см. [`unibox-matching.md`](unibox-matching.md).
+
+## Soft-fail / degraded
+
+`pickManifolds` **не бросает** наружу. Критический сбой → стабильный отчёт:
+
+| Поле | При `ok: true` | При `ok: false` |
+|------|----------------|-----------------|
+| `underfloor` | 0…N этажей (у каждого `units.length ≥ 1`) | **`[]`** |
+| `radiator` / `boilerManifold` | как по правилам | **`null`** |
+| `failureCode` | omit | `MANIFOLD_INTERNAL` \| `MANIFOLD_INPUT_INVALID` |
+| `warnings` | штатные (дефицит SKU, каскад) | текст soft-fail (+ причина) |
+
+- **Дефицит каталога** (`selected: null`) — это **`ok: true`**, не soft-fail.
+- **Каскад H.15** (`units.length > 1`) — **`ok: true`** + warning; унибоксы skip по сигналу каскада.
+- При `ok: false` оркестратор всё равно вызывает `pickUniboxes` и гидравлику; пустой `underfloor` **не** означает каскад.
+- Страховка в `buildReport`: try/catch + проверка `typeof report.ok === 'boolean'`.
+
+Verify soft-fail: `buildEmptyManifoldsFailure`, `pickManifoldsWithCore(() => { throw … })`.
 
 ## Алгоритм
 
@@ -82,7 +101,7 @@ underfloor[].units[]          — 1…N устройств сметы (index, re
 cd backend && npm run verify:manifold-matching
 ```
 
-Кейсы: 5→1 unit; 12→1 без cascade-warning; 14→2 units (7+7) + warning; 25→3 (9+8+8).
+Кейсы: 5→1 unit; 12→1 без cascade-warning; 14→2 units (7+7) + warning; 25→3 (9+8+8); пустой каталог → `ok: true` + `selected: null`; soft-fail throw → `ok: false`, `underfloor: []`.
 
 ## UI
 

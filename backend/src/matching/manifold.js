@@ -9,6 +9,99 @@ import { logger } from '../utils/logger.js';
 /** Макс. петель ТП на один колекторний вузол (бізнес-ліміт, не max каталогу). */
 export const UFH_MANIFOLD_MAX_OUTLETS_PER_NODE = 12;
 
+/** Критичний внутрішній збій підбору колекторів. */
+export const MANIFOLD_FAILURE_CODE_INTERNAL = /** @type {const} */ ('MANIFOLD_INTERNAL');
+
+/** Критичний збій через некоректні вхідні дані. */
+export const MANIFOLD_FAILURE_CODE_INPUT = /** @type {const} */ ('MANIFOLD_INPUT_INVALID');
+
+/**
+ * Порожній звіт колекторів при soft-fail (ok: false).
+ * Інваріант: underfloor=[], radiator/boilerManifold=null — унібокси не бачать каскад.
+ *
+ * @param {object} args
+ * @param {import('../types/shared-types').ManifoldsMatchingFailureCode} args.failureCode
+ * @param {string} args.message — людськочитабельний підсумок для warnings
+ * @param {string} [args.causeMessage] — коротка причина без stack
+ * @returns {import('../types/shared-types').ManifoldsMatchingReport}
+ */
+export function buildEmptyManifoldsFailure({ failureCode, message, causeMessage } = {}) {
+  const code =
+    failureCode === MANIFOLD_FAILURE_CODE_INPUT
+      ? MANIFOLD_FAILURE_CODE_INPUT
+      : MANIFOLD_FAILURE_CODE_INTERNAL;
+  const summary =
+    typeof message === 'string' && message.trim()
+      ? message.trim()
+      : 'Смета коллекторов пуста; расчёт унибоксов и гидравлики продолжается.';
+  /** @type {string[]} */
+  const warnings = [`Коллекторы: подбор не выполнен (${code}). ${summary}`];
+  if (typeof causeMessage === 'string' && causeMessage.trim()) {
+    warnings.push(`Причина: ${causeMessage.trim()}`);
+  }
+  return {
+    ok: false,
+    failureCode: code,
+    underfloor: [],
+    radiator: null,
+    boilerManifold: null,
+    warnings,
+  };
+}
+
+/**
+ * Штатний звіт колекторів (ok: true). Дефіцит SKU (selected=null) — не soft-fail.
+ *
+ * @param {object} args
+ * @param {import('../types/shared-types').ManifoldUnderfloorPick[]} args.underfloor
+ * @param {import('../types/shared-types').ManifoldRadiatorPick | null} args.radiator
+ * @param {import('../types/shared-types').BoilerManifoldPick | null} args.boilerManifold
+ * @param {string[]} args.warnings
+ * @returns {import('../types/shared-types').ManifoldsMatchingReport}
+ */
+export function buildOkManifoldsReport({
+  underfloor = [],
+  radiator = null,
+  boilerManifold = null,
+  warnings = [],
+} = {}) {
+  return {
+    ok: true,
+    underfloor,
+    radiator,
+    boilerManifold,
+    warnings,
+  };
+}
+
+/**
+ * Обгортка core→звіт з catch (для verify ін'єкції throw без публічного _testThrow).
+ *
+ * @param {(args: object) => import('../types/shared-types').ManifoldsMatchingReport} core
+ * @param {object} [args]
+ * @returns {import('../types/shared-types').ManifoldsMatchingReport}
+ */
+export function pickManifoldsWithCore(core, args = {}) {
+  try {
+    return core(args);
+  } catch (err) {
+    const failureCode =
+      err?.code === MANIFOLD_FAILURE_CODE_INPUT
+        ? MANIFOLD_FAILURE_CODE_INPUT
+        : MANIFOLD_FAILURE_CODE_INTERNAL;
+    logger.warn('matching.manifold.fail', err, {
+      code: failureCode,
+      message: err?.message ?? null,
+    });
+    return buildEmptyManifoldsFailure({
+      failureCode,
+      message:
+        'Смета коллекторов пуста; расчёт унибоксов и гидравлики продолжается.',
+      causeMessage: err?.message ? String(err.message) : undefined,
+    });
+  }
+}
+
 /**
  * Рівномірний поділ петель на частини ≤ maxPerNode (каскад колекторів).
  * Приклади: 14 → [7,7]; 13 → [7,6]; 25 → [9,8,8].
@@ -266,18 +359,19 @@ function needsBoilerManifold({
 }
 
 /**
- * Оркестратор підбору колекторів після резолву distributionPreset ТП.
+ * Ядро підбору колекторів (без catch). При критичній помилці може кинути;
+ * публічний pickManifolds завжди ловить і повертає ok: false.
  *
  * @param {object} args
- * @param {import('../catalog/types').NormalizedCatalog} args.catalog
- * @param {import('../types/shared-types').BuildingInput | undefined} args.building
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} args.underfloorHeating
- * @param {import('../types/shared-types').RadiatorsMatchingReport | undefined} args.radiators
- * @param {import('../types/shared-types').BoilerMatchingReport | undefined} args.boiler
- * @param {import('../types/shared-types').HydraulicsSurveyInput | undefined} args.hydraulics
+ * @param {import('../catalog/types').NormalizedCatalog} [args.catalog]
+ * @param {import('../types/shared-types').BuildingInput | undefined} [args.building]
+ * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} [args.underfloorHeating]
+ * @param {import('../types/shared-types').RadiatorsMatchingReport | undefined} [args.radiators]
+ * @param {import('../types/shared-types').BoilerMatchingReport | undefined} [args.boiler]
+ * @param {import('../types/shared-types').HydraulicsSurveyInput | undefined} [args.hydraulics]
  * @returns {import('../types/shared-types').ManifoldsMatchingReport}
  */
-export function pickManifolds({
+export function pickManifoldsCore({
   catalog,
   building,
   underfloorHeating = null,
@@ -389,6 +483,7 @@ export function pickManifolds({
   }
 
   logger.info('matching.manifold.done', null, {
+    ok: true,
     underfloorFloors: underfloor.length,
     underfloorUnits: underfloor.reduce((s, f) => s + f.units.length, 0),
     radiatorSelected: radiator?.selected?.model ?? null,
@@ -396,10 +491,27 @@ export function pickManifolds({
     warnings: warnings.length,
   });
 
-  return {
+  return buildOkManifoldsReport({
     underfloor,
     radiator,
     boilerManifold,
     warnings,
-  };
+  });
+}
+
+/**
+ * Оркестратор підбору колекторів після резолву distributionPreset ТП.
+ * Ніколи не кидає назовні: критичний збій → ok: false + порожні структури.
+ *
+ * @param {object} [args]
+ * @param {import('../catalog/types').NormalizedCatalog} [args.catalog]
+ * @param {import('../types/shared-types').BuildingInput | undefined} [args.building]
+ * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} [args.underfloorHeating]
+ * @param {import('../types/shared-types').RadiatorsMatchingReport | undefined} [args.radiators]
+ * @param {import('../types/shared-types').BoilerMatchingReport | undefined} [args.boiler]
+ * @param {import('../types/shared-types').HydraulicsSurveyInput | undefined} [args.hydraulics]
+ * @returns {import('../types/shared-types').ManifoldsMatchingReport}
+ */
+export function pickManifolds(args = {}) {
+  return pickManifoldsWithCore(pickManifoldsCore, args);
 }

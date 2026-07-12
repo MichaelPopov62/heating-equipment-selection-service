@@ -172,8 +172,10 @@ export function AppSurveyContent({
   const setTemps = useCallback(
     (
       next:
-        | { insideC: number; outsideC: number }
-        | ((prev: { insideC: number; outsideC: number }) => { insideC: number; outsideC: number }),
+        | { insideC: number; outsideC: number; bathroomAirTempC?: number }
+        | ((
+            prev: { insideC: number; outsideC: number; bathroomAirTempC?: number },
+          ) => { insideC: number; outsideC: number; bathroomAirTempC?: number }),
     ) => {
       const tempsNext =
         typeof next === 'function' ? next(draftRef.current.temps) : next;
@@ -601,7 +603,38 @@ export function AppSurveyContent({
                     }
                   />
                 </label>
+                <label className={styles.tempField}>
+                  Воздух в санузле, °C
+                  <input
+                    type="number"
+                    min={24}
+                    max={35}
+                    placeholder="≥24"
+                    value={temps.bathroomAirTempC ?? ''}
+                    onChange={(e) => {
+                      const raw = e.target.value.trim();
+                      setTemps((prev) => {
+                        if (raw === '') {
+                          const { bathroomAirTempC: _omit, ...rest } = prev;
+                          return rest;
+                        }
+                        const n = Number(raw);
+                        if (!Number.isFinite(n)) return prev;
+                        return {
+                          ...prev,
+                          bathroomAirTempC: Math.max(24, Math.min(35, n)),
+                        };
+                      });
+                    }}
+                  />
+                </label>
               </div>
+            )}
+            {currentStep === 'object' && (
+              <p className={styles.hint} style={{ marginTop: 8 }}>
+                «Воздух в санузле» — расчётная температура воздуха (не теплоноситель), не
+                ниже 24 °C. Пусто = max(внутри, 24). Можно задать выше (например 26–28).
+              </p>
             )}
           </section>
 

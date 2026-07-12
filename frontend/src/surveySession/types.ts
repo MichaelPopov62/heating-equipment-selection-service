@@ -22,7 +22,7 @@ export type SurveyDraftSnapshot = {
   currentStep: SurveyCurrentStep;
   objectMeta: ObjectMetaValue;
   rooms: RoomFormValue[];
-  temps: { insideC: number; outsideC: number };
+  temps: { insideC: number; outsideC: number; bathroomAirTempC?: number };
   hotWaterForm: HotWaterFormValue;
   waterHeaterForm: WaterHeaterFormValue;
   waterUnderfloorHeating: boolean;
@@ -37,7 +37,7 @@ export type SurveyMutation =
   | { type: 'SET_CURRENT_STEP'; step: SurveyCurrentStep }
   | { type: 'SET_OBJECT_META'; objectMeta: ObjectMetaValue }
   | { type: 'SET_ROOMS'; rooms: RoomFormValue[] }
-  | { type: 'SET_TEMPS'; temps: { insideC: number; outsideC: number } }
+  | { type: 'SET_TEMPS'; temps: { insideC: number; outsideC: number; bathroomAirTempC?: number } }
   | { type: 'SET_HOT_WATER_FORM'; hotWaterForm: HotWaterFormValue }
   | { type: 'SET_WATER_HEATER_FORM'; waterHeaterForm: WaterHeaterFormValue }
   | { type: 'HEATING_EMITTERS_MODE_SET'; presetId: UfhModePresetId | null }

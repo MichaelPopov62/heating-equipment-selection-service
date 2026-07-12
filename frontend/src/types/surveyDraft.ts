@@ -27,7 +27,7 @@ export type SurveyDraft = {
   currentStep: SurveyCurrentStep;
   objectMeta: ObjectMetaValue;
   rooms: RoomFormValue[];
-  temps: { insideC: number; outsideC: number };
+  temps: { insideC: number; outsideC: number; bathroomAirTempC?: number };
   hotWaterForm: HotWaterFormValue;
   waterHeaterForm: WaterHeaterFormValue;
   waterUnderfloorHeating: boolean;

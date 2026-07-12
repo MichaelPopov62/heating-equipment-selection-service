@@ -1,17 +1,21 @@
 /**
- * Назначение: verify подбора унибоксов (полный паспортный фильтр + бизнес-гейт) без HTTP.
+ * Назначение: verify подбора унибоксов (строгие неравенства, T воздуха, гейты) без HTTP.
  * Запуск: npm run verify:unibox-matching
  */
 import assert from 'node:assert/strict';
 import {
   UNIBOX_DESIGN_PRESSURE_BAR,
   UNIBOX_REQUIRED_FIT,
+  UNIBOX_ROOM_AIR_TEMP_PRESETS_C,
+  UNIBOX_VALVE_MAX_DP_BAR,
   collectUniboxLoopDemands,
   hasUnderfloorManifoldCascade,
   minKvM3hForFlowLph,
   pickUniboxForDemand,
   pickUniboxes,
+  resolveUniboxRoomAirTempC,
   uniboxFitsDemand,
+  validateUniboxLoopDemand,
 } from '../src/matching/unibox.js';
 
 /** @type {import('../src/catalog/types').UniboxCatalogItemNormalized[]} */
@@ -91,6 +95,25 @@ const UNIBOXES = [
     material: 'Латунь',
     price: 2000,
   },
+  {
+    id: 'UB-LOW-AIR',
+    brand: 'Test',
+    model: 'LowAirMax',
+    type: 'rtl_air',
+    loopsCount: 1,
+    maxAreaSqM: 20,
+    maxLoopLengthM: 80,
+    minAirTempC: 6,
+    maxAirTempC: 22,
+    minCoolantTempC: 10,
+    maxCoolantTempC: 50,
+    maxTemperatureC: 90,
+    maxPressureBar: 10,
+    kvM3h: 1.1,
+    connection: { thread: 'G3/4', fit: 'eurocone' },
+    material: 'Латунь',
+    price: 3500,
+  },
 ];
 
 const demandOk = {
@@ -105,17 +128,91 @@ const demandOk = {
   requiredFit: UNIBOX_REQUIRED_FIT,
 };
 
+// Kv: нульовий витрата / захист Δp=0 (fallback/floor, не Infinity)
+assert.equal(minKvM3hForFlowLph(0), 0);
+assert.ok(Number.isFinite(minKvM3hForFlowLph(80, 0)));
+assert.equal(minKvM3hForFlowLph(80, 0), minKvM3hForFlowLph(80));
+assert.ok(Number.isFinite(minKvM3hForFlowLph(80, Number.NaN)));
+assert.equal(
+  minKvM3hForFlowLph(80, 0.001),
+  0.08 / Math.sqrt(0.01),
+);
+assert.equal(UNIBOX_VALVE_MAX_DP_BAR, 0.25);
+
 assert.equal(uniboxFitsDemand(UNIBOXES[0], demandOk), true);
 assert.equal(uniboxFitsDemand(UNIBOXES[2], { ...demandOk, circuitSupplyC: 50 }), false);
-assert.equal(uniboxFitsDemand(UNIBOXES[1], { ...demandOk, flowLph: 250, minKvM3h: minKvM3hForFlowLph(250) }), false);
+assert.equal(
+  uniboxFitsDemand(UNIBOXES[1], {
+    ...demandOk,
+    flowLph: 250,
+    minKvM3h: minKvM3hForFlowLph(250),
+  }),
+  false,
+);
 assert.equal(uniboxFitsDemand(UNIBOXES[0], { ...demandOk, roomAirTempC: 35 }), false);
 assert.equal(uniboxFitsDemand(UNIBOXES[0], { ...demandOk, systemPressureBar: 16 }), false);
 assert.equal(uniboxFitsDemand(UNIBOXES[3], demandOk), false); // fit !== eurocone
 assert.equal(uniboxFitsDemand(UNIBOXES[0], { ...demandOk, loopLengthM: 0 }), false);
 
-const picked = pickUniboxForDemand(UNIBOXES, demandOk);
+// Строгие границы паспорта (равенство → reject)
+assert.equal(uniboxFitsDemand(UNIBOXES[0], { ...demandOk, areaSqM: 20 }), false);
+assert.equal(uniboxFitsDemand(UNIBOXES[0], { ...demandOk, loopLengthM: 80 }), false);
+assert.equal(uniboxFitsDemand(UNIBOXES[0], { ...demandOk, circuitSupplyC: 90 }), false);
+assert.equal(uniboxFitsDemand(UNIBOXES[0], { ...demandOk, systemPressureBar: 10 }), false);
+assert.equal(uniboxFitsDemand(UNIBOXES[0], { ...demandOk, minKvM3h: 1.1 }), false);
+assert.equal(uniboxFitsDemand(UNIBOXES[0], { ...demandOk, roomAirTempC: 28 }), false);
+assert.equal(uniboxFitsDemand(UNIBOXES[0], { ...demandOk, roomAirTempC: 6 }), false);
+assert.equal(uniboxFitsDemand(UNIBOXES[0], { ...demandOk, circuitReturnC: 50 }), false);
+assert.equal(uniboxFitsDemand(UNIBOXES[0], { ...demandOk, circuitReturnC: 10 }), false);
+assert.equal(uniboxFitsDemand(UNIBOXES[1], { ...demandOk, flowLph: 200 }), false);
+assert.equal(uniboxFitsDemand(UNIBOXES[1], { ...demandOk, flowLph: 30 }), false);
+assert.equal(uniboxFitsDemand(UNIBOXES[2], { ...demandOk, circuitSupplyC: 45 }), false);
+
+const picked = pickUniboxForDemand(UNIBOXES.slice(0, 4), demandOk);
 assert.ok(picked);
 assert.equal(picked.id, 'UB-RTL-AIR');
+
+// --- resolve T воздуха ---
+assert.equal(UNIBOX_ROOM_AIR_TEMP_PRESETS_C.санузел, 24);
+const airBath = resolveUniboxRoomAirTempC('санузел', 20);
+assert.ok(airBath);
+assert.equal(airBath.roomAirTempC, 24);
+assert.equal(airBath.roomAirTempSource, 'preset');
+const airBathHigh = resolveUniboxRoomAirTempC('санузел', 26);
+assert.ok(airBathHigh);
+assert.equal(airBathHigh.roomAirTempC, 26);
+assert.equal(airBathHigh.roomAirTempSource, 'survey');
+const airBathField = resolveUniboxRoomAirTempC('санузел', 20, 27);
+assert.ok(airBathField);
+assert.equal(airBathField.roomAirTempC, 27);
+assert.equal(airBathField.roomAirTempSource, 'bathroom_field');
+const airCorridor = resolveUniboxRoomAirTempC('коридор', 20);
+assert.ok(airCorridor);
+assert.equal(airCorridor.roomAirTempC, 20);
+assert.equal(airCorridor.roomAirTempSource, 'survey');
+const airHall = resolveUniboxRoomAirTempC('прихожая', 20);
+assert.ok(airHall);
+assert.equal(airHall.roomAirTempC, 20);
+assert.equal(airHall.roomAirTempSource, 'survey');
+const airTambour = resolveUniboxRoomAirTempC('тамбур', 20);
+assert.ok(airTambour);
+assert.equal(airTambour.roomAirTempC, 20);
+assert.equal(airTambour.roomAirTempSource, 'survey');
+const airLiving = resolveUniboxRoomAirTempC('гостиная', 20);
+assert.ok(airLiving);
+assert.equal(airLiving.roomAirTempC, 20);
+assert.equal(airLiving.roomAirTempSource, 'survey');
+assert.equal(resolveUniboxRoomAirTempC('санузел', Number.NaN), null);
+
+// --- validate demand ---
+assert.equal(validateUniboxLoopDemand(demandOk).ok, true);
+const badDt = validateUniboxLoopDemand({
+  ...demandOk,
+  circuitReturnC: 40,
+  circuitSupplyC: 40,
+});
+assert.equal(badDt.ok, false);
+if (!badDt.ok) assert.equal(badDt.code, 'UNIBOX_DT');
 
 const underfloorHeating = {
   enabled: true,
@@ -171,16 +268,44 @@ const underfloorHeating = {
   warnings: [],
 };
 
-const demands = collectUniboxLoopDemands(underfloorHeating, { roomAirTempC: 20 });
+const demands = collectUniboxLoopDemands(underfloorHeating, {
+  surveyInsideC: 20,
+  rooms: [{ id: 'r1', type: 'гостиная' }],
+});
 assert.equal(demands.length, 1);
 assert.equal(demands[0].required.flowLph, 80);
 assert.equal(demands[0].required.requiredFit, 'eurocone');
+assert.equal(demands[0].required.roomAirTempC, 20);
+assert.equal(demands[0].required.roomAirTempSource, 'survey');
+assert.equal(demands[0].required.roomType, 'гостиная');
 assert.ok(demands[0].required.minKvM3h > 0);
+
+// Санузел: T воздуха = 24 при анкете 20
+const bathDemands = collectUniboxLoopDemands(underfloorHeating, {
+  surveyInsideC: 20,
+  rooms: [{ id: 'r1', type: 'санузел' }],
+});
+assert.equal(bathDemands[0].required.roomAirTempC, 24);
+assert.equal(bathDemands[0].required.roomAirTempSource, 'preset');
+assert.equal(bathDemands[0].required.roomType, 'санузел');
+
+// Коридор / прихожая / тамбур: T воздуха = анкета
+for (const type of ['коридор', 'прихожая', 'тамбур']) {
+  const d = collectUniboxLoopDemands(underfloorHeating, {
+    surveyInsideC: 20,
+    rooms: [{ id: 'r1', type }],
+  });
+  assert.equal(d[0].required.roomAirTempC, 20, type);
+  assert.equal(d[0].required.roomAirTempSource, 'survey', type);
+}
 
 // Без loops[] — порожньо (немає fallback length=0)
 const noLoops = collectUniboxLoopDemands(
-  { ...underfloorHeating, rooms: [{ ...underfloorHeating.rooms[0], loops: undefined, loopsCount: 2 }] },
-  { roomAirTempC: 20 },
+  {
+    ...underfloorHeating,
+    rooms: [{ ...underfloorHeating.rooms[0], loops: undefined, loopsCount: 2 }],
+  },
+  { surveyInsideC: 20 },
 );
 assert.equal(noLoops.length, 0);
 
@@ -195,10 +320,33 @@ const report = pickUniboxes({
   catalog,
   underfloorHeating,
   roomAirTempC: 20,
+  rooms: [{ id: 'r1', type: 'гостиная' }],
 });
 assert.equal(report.byLoop.length, 1);
 assert.equal(report.byLoop[0].selected?.id, 'UB-RTL-AIR');
 assert.equal(report.warnings.length, 0);
+
+// Санузел + UB-LOW-AIR (maxAirTempC=22): при T воздуха 24 не подходит;
+// pick берёт UB-RTL-AIR (maxAir 28). Если только LOW-AIR — selected null.
+const onlyLowAir = pickUniboxes({
+  catalog: { ...catalog, uniboxes: [UNIBOXES[4]] },
+  underfloorHeating,
+  roomAirTempC: 20,
+  rooms: [{ id: 'r1', type: 'санузел' }],
+});
+assert.equal(onlyLowAir.byLoop[0].required.roomAirTempC, 24);
+assert.equal(onlyLowAir.byLoop[0].selected, null);
+assert.ok(onlyLowAir.warnings.length > 0);
+
+// При анкете 20 и гостиной LOW-AIR подошёл бы (20 < 22)
+const livingLowAir = pickUniboxes({
+  catalog: { ...catalog, uniboxes: [UNIBOXES[4]] },
+  underfloorHeating,
+  roomAirTempC: 20,
+  rooms: [{ id: 'r1', type: 'гостиная' }],
+});
+assert.equal(livingLowAir.byLoop[0].required.roomAirTempC, 20);
+assert.equal(livingLowAir.byLoop[0].selected?.id, 'UB-LOW-AIR');
 
 const empty = pickUniboxes({
   catalog: { ...catalog, uniboxes: [] },
@@ -210,6 +358,27 @@ assert.ok(empty.warnings.length > 0);
 
 const noAir = pickUniboxes({ catalog, underfloorHeating });
 assert.deepEqual(noAir, { byLoop: [], warnings: [] });
+
+// Invalid DT → selected null + warning
+const badCircuitUfh = {
+  ...underfloorHeating,
+  rooms: [
+    {
+      ...underfloorHeating.rooms[0],
+      circuitSupplyC: 30,
+      circuitReturnC: 40,
+    },
+  ],
+};
+const badDtReport = pickUniboxes({
+  catalog,
+  underfloorHeating: badCircuitUfh,
+  roomAirTempC: 20,
+  rooms: [{ id: 'r1', type: 'гостиная' }],
+});
+assert.equal(badDtReport.byLoop.length, 1);
+assert.equal(badDtReport.byLoop[0].selected, null);
+assert.ok(badDtReport.warnings.some((w) => w.includes('обратка') || w.includes('UNIBOX') || w.includes('<')));
 
 // >2 петель → skip
 const manyLoopsRoom = {
@@ -225,13 +394,18 @@ const manyLoopsRoom = {
     },
   ],
 };
-const tooMany = pickUniboxes({ catalog, underfloorHeating: manyLoopsRoom, roomAirTempC: 20 });
+const tooMany = pickUniboxes({
+  catalog,
+  underfloorHeating: manyLoopsRoom,
+  roomAirTempC: 20,
+});
 assert.equal(tooMany.byLoop.length, 0);
 assert.ok(tooMany.warnings.some((w) => w.includes('петель')));
 
-// Каскад коллекторов → skip
+// Каскад коллекторов (H.15) → skip
 assert.equal(
   hasUnderfloorManifoldCascade({
+    ok: true,
     underfloor: [
       {
         floor: 1,
@@ -254,6 +428,7 @@ const cascadeSkip = pickUniboxes({
   underfloorHeating,
   roomAirTempC: 20,
   manifolds: {
+    ok: true,
     underfloor: [
       {
         floor: 1,
@@ -272,5 +447,89 @@ const cascadeSkip = pickUniboxes({
 });
 assert.equal(cascadeSkip.byLoop.length, 0);
 assert.ok(cascadeSkip.warnings.some((w) => w.includes('каскад')));
+
+// Soft-fail коллекторов / битые manifolds — не TypeError, не cascade-skip
+assert.equal(hasUnderfloorManifoldCascade(null), false);
+assert.equal(hasUnderfloorManifoldCascade(undefined), false);
+assert.equal(
+  hasUnderfloorManifoldCascade({
+    ok: true,
+    underfloor: [null],
+    radiator: null,
+    boilerManifold: null,
+    warnings: [],
+  }),
+  false,
+);
+assert.equal(
+  hasUnderfloorManifoldCascade({
+    ok: true,
+    underfloor: [{ floor: 1, requiredOutlets: 2, units: undefined, warnings: [] }],
+    radiator: null,
+    boilerManifold: null,
+    warnings: [],
+  }),
+  false,
+);
+
+const degraded = {
+  ok: false,
+  failureCode: 'MANIFOLD_INTERNAL',
+  underfloor: [],
+  radiator: null,
+  boilerManifold: null,
+  warnings: ['Коллекторы: подбор не выполнен (MANIFOLD_INTERNAL).'],
+};
+assert.equal(hasUnderfloorManifoldCascade(degraded), false);
+
+const degradedPick = pickUniboxes({
+  catalog,
+  underfloorHeating,
+  roomAirTempC: 20,
+  manifolds: degraded,
+  rooms: [{ id: 'r1', type: 'living' }],
+});
+assert.ok(degradedPick.byLoop.length >= 1);
+assert.ok(!degradedPick.warnings.some((w) => w.includes('Унибоксы не подбираются: каскад')));
+assert.ok(degradedPick.warnings.some((w) => w.includes('manifolds.ok=false')));
+assert.ok(degradedPick.byLoop[0].selected);
+
+const nullManifoldsPick = pickUniboxes({
+  catalog,
+  underfloorHeating,
+  roomAirTempC: 20,
+  manifolds: null,
+  rooms: [{ id: 'r1', type: 'living' }],
+});
+assert.ok(nullManifoldsPick.byLoop.length >= 1);
+
+// Нульовий витрата петлі (теплопотери/flow=0) → selected null + UNIBOX_FLOW
+const zeroFlowUfh = {
+  ...underfloorHeating,
+  rooms: [
+    {
+      ...underfloorHeating.rooms[0],
+      loops: [
+        {
+          loopId: 'r1-L0',
+          loopLengthM: 40,
+          heatLoadWatts: 0,
+          flowRateM3PerHour: 0,
+        },
+      ],
+    },
+  ],
+};
+const zeroFlowPick = pickUniboxes({
+  catalog,
+  underfloorHeating: zeroFlowUfh,
+  roomAirTempC: 20,
+  rooms: [{ id: 'r1', type: 'living' }],
+});
+assert.equal(zeroFlowPick.byLoop.length, 1);
+assert.equal(zeroFlowPick.byLoop[0].selected, null);
+assert.ok(
+  zeroFlowPick.byLoop[0].warnings.some((w) => w.includes('расход') || w.includes('л/ч')),
+);
 
 console.log('verify:unibox-matching OK');

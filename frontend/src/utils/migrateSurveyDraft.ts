@@ -119,6 +119,11 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
     temps: {
       insideC: Number(raw.temps.insideC) || 20,
       outsideC: Number(raw.temps.outsideC) || -5,
+      ...(typeof raw.temps.bathroomAirTempC === 'number' &&
+      Number.isFinite(raw.temps.bathroomAirTempC) &&
+      raw.temps.bathroomAirTempC >= 24
+        ? { bathroomAirTempC: raw.temps.bathroomAirTempC }
+        : {}),
     },
     hotWaterForm: (isRecord(raw.hotWaterForm)
       ? raw.hotWaterForm

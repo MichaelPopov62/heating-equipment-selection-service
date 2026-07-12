@@ -20,7 +20,10 @@ export function buildSurveyTextSummary(
   const lines: string[] = [
     `Клиент: ${draft.clientName}`,
     `Объект: ${draft.objectMeta.objectType}, этажей ${draft.objectMeta.floors}, помещений ${draft.rooms.length}`,
-    `Температуры: внутри ${draft.temps.insideC} °C, снаружи ${draft.temps.outsideC} °C`,
+    `Температуры: внутри ${draft.temps.insideC} °C, снаружи ${draft.temps.outsideC} °C` +
+      (typeof draft.temps.bathroomAirTempC === 'number'
+        ? `, воздух санузла ${draft.temps.bathroomAirTempC} °C`
+        : ''),
     `Сохранено: ${draft.savedAt}`,
   ];
   const calculations = report && isRecord(report.calculations) ? report.calculations : null;

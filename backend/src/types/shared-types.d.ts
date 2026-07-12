@@ -187,6 +187,11 @@ export interface LocationInput {
 export interface TempsInput {
   insideC: number;
   outsideC?: number;
+  /**
+   * Опційна розрахункова T повітря санузла, °C (≥ 24).
+   * Якщо немає — для type=санузел: max(insideC, 24).
+   */
+  bathroomAirTempC?: number;
 }
 
 export type RoomType =
@@ -561,6 +566,12 @@ export interface UnderfloorHeatingRoomReport {
   finishMaterialId: string;
   basePresetName?: string;
   finishMaterialName?: string;
+  /**
+   * Розрахункова T повітря приміщення, °C (не теплоносій).
+   * Санузел: max(bathroomAirTempC ?? insideC, 24).
+   */
+  designAirTempC?: number;
+  designAirTempSource?: DesignRoomAirTempSource;
   /** Полная площадь комнаты (теплопотери). */
   roomAreaM2: number;
   /** S_meb — площадь под мебелью без ТП. */
@@ -717,6 +728,13 @@ export interface HeatLossRoomReport {
   areaM2: number;
   heightM: number;
   volumeM3: number;
+  /**
+   * Розрахункова T повітря приміщення, °C (не теплоносій).
+   * Санузел: max(bathroomAirTempC ?? insideC, 24).
+   */
+  designAirTempC?: number;
+  /** Джерело designAirTempC. */
+  designAirTempSource?: DesignRoomAirTempSource;
   /** Потери через ограждения комнаты без kVent, Вт. */
   envelopeWatts: number;
   /** Множитель вентиляции (1.3 или 1.1) — единый на объект. */
@@ -942,13 +960,34 @@ export interface BoilerManifoldPick {
   warnings: string[];
 }
 
-/** report.matching.manifolds — SKU колекторів для смети. */
+/** Код критичного збою підбору колекторів (лише при ok: false). */
+export type ManifoldsMatchingFailureCode =
+  | 'MANIFOLD_INTERNAL'
+  | 'MANIFOLD_INPUT_INVALID';
+
+/**
+ * report.matching.manifolds — SKU колекторів для смети.
+ * ok: false — soft-fail: underfloor=[], radiator/boilerManifold=null; calc/unibox продовжуються.
+ */
 export interface ManifoldsMatchingReport {
+  /**
+   * true — алгоритм відпрацював штатно (навіть якщо selected=null по позиціях).
+   * false — критичний збій: underfloor=[], radiator/boilerManifold=null.
+   */
+  ok: boolean;
+  /** Машинний код лише при ok: false. */
+  failureCode?: ManifoldsMatchingFailureCode;
   underfloor: ManifoldUnderfloorPick[];
   radiator: ManifoldRadiatorPick | null;
   boilerManifold: BoilerManifoldPick | null;
   warnings: string[];
 }
+
+/** Джерело розрахункової T повітря для підбору унібокса. */
+export type UniboxRoomAirTempSource = 'preset' | 'survey' | 'bathroom_field';
+
+/** Джерело розрахункової T повітря кімнати (heatloss / ТП / радіатори). */
+export type DesignRoomAirTempSource = 'survey' | 'bathroom_field' | 'floor';
 
 /** Потреба петлі ТП для підбору унібокса. */
 export interface UniboxLoopDemand {
@@ -957,8 +996,15 @@ export interface UniboxLoopDemand {
   circuitSupplyC: number;
   circuitReturnC: number;
   flowLph: number;
-  /** Розрахункова T повітря приміщення (temps.insideC). */
+  /**
+   * Розрахункова T повітря приміщення, °C (не теплоносій).
+   * Санузел: max(bathroomAirTempC ?? insideC, 24); інші — temps.insideC.
+   */
   roomAirTempC: number;
+  /** Звідки взято roomAirTempC. */
+  roomAirTempSource?: UniboxRoomAirTempSource;
+  /** Канонічний room.type (якщо відомий). */
+  roomType?: string;
   /** Розрахунковий робочий тиск системи, бар. */
   systemPressureBar: number;
   /** Мін. Kv клапана для витрати петлі при допустимому Δp. */
@@ -989,7 +1035,7 @@ export interface MatchingReport {
   indirectWaterHeater?: IndirectWaterHeaterMatchingReport;
   /** Підбір колекторів (ТП / радіатори / котельний) після резолву distributionPreset. */
   manifolds?: ManifoldsMatchingReport;
-  /** Підбір унібоксів по петлях ТП (паспортні min/max). */
+  /** Підбір унібоксів по петлях ТП (строгі нерівності + T повітря). */
   uniboxes?: UniboxesMatchingReport;
   hydraulics?: HydraulicsMatchingReport;
 }
@@ -997,6 +1043,9 @@ export interface MatchingReport {
 export interface RadiatorsByRoomItem {
   roomId: string;
   roomName: string;
+  /** Розрахункова T повітря кімнати для ΔT радиатора, °C. */
+  designAirTempC?: number;
+  designAirTempSource?: DesignRoomAirTempSource;
   /** Тепловтрати контуру приміщення (без запасу на інфільтрацію). */
   heatLossWatts: number;
   /** Нагрузка на подбор радиатора (Вт): designWatts − heatFluxUpWatts ТП в mixed или designWatts. */

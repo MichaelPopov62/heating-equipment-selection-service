@@ -22,6 +22,7 @@ import {
   resolveRoomDesignHeatLossWatts,
 } from './ufhRoomCoverageCheck.js';
 import { round } from '../utils/math.js';
+import { resolveDesignRoomAirTempC } from '../../../shared/roomDesignAirTemp.js';
 
 /**
  * @param {object} args
@@ -62,7 +63,14 @@ export function calculateUnderfloorHeating(args) {
 
   const rooms = building?.rooms ?? [];
   const boilerSupplyC = heatingSystem.supplyC;
-  const insideC = temps.insideC;
+  const surveyInsideC = temps.insideC;
+  const bathroomAirTempC =
+    typeof temps.bathroomAirTempC === 'number' && Number.isFinite(temps.bathroomAirTempC)
+      ? temps.bathroomAirTempC
+      : typeof building?.temps?.bathroomAirTempC === 'number' &&
+          Number.isFinite(building.temps.bathroomAirTempC)
+        ? building.temps.bathroomAirTempC
+        : undefined;
   const isUfhOnly = heatingSystem?.heatingEmittersMode === 'ufh_only';
 
   /** @type {import('../types/shared-types').UnderfloorHeatingRoomReport[]} */
@@ -122,6 +130,13 @@ export function calculateUnderfloorHeating(args) {
 
     const presetMaxSurfaceT = modePreset?.technical?.maxSurfaceTemperatureC;
     const roomHeatLossWatts = resolveRoomDesignHeatLossWatts(heatLoss, room.id);
+    const airResolved = resolveDesignRoomAirTempC({
+      roomType: room.type,
+      insideC: surveyInsideC,
+      bathroomAirTempC,
+    });
+    const insideC = airResolved?.designAirTempC ?? surveyInsideC;
+
     const requiredHeatFluxUpWm2 = computeUfhRequiredHeatFluxUpWm2({
       roomHeatLossWatts,
       heatedAreaM2,
@@ -183,6 +198,8 @@ export function calculateUnderfloorHeating(args) {
       basePresetName: base.name,
       finishMaterialName: finish.name,
       ufhCircuitPresetId: preset.id,
+      designAirTempC: insideC,
+      designAirTempSource: airResolved?.source ?? 'survey',
       roomAreaM2,
       furnitureOccupiedAreaM2,
       heatedAreaM2,

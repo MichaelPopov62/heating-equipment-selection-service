@@ -21,7 +21,7 @@ import { inferRoomExteriorLayout, wallEnvelopeEntriesForRoom } from '../utils/ro
  */
 export function buildCalcRequestPayload(params: {
   rooms: RoomFormValue[];
-  temps: { insideC: number; outsideC: number };
+  temps: { insideC: number; outsideC: number; bathroomAirTempC?: number };
   objectMeta: ObjectMetaValue;
   hotWaterForm: HotWaterFormValue;
   waterHeaterForm: WaterHeaterFormValue;
@@ -169,9 +169,25 @@ export function buildCalcRequestPayload(params: {
 
   const objectMetaResolved = objectMetaForCalcPayload(objectMeta, waterHeaterForm);
 
+  const buildingTemps: {
+    insideC: number;
+    outsideC: number;
+    bathroomAirTempC?: number;
+  } = {
+    insideC: temps.insideC,
+    outsideC: temps.outsideC,
+  };
+  if (
+    typeof temps.bathroomAirTempC === 'number' &&
+    Number.isFinite(temps.bathroomAirTempC) &&
+    temps.bathroomAirTempC >= 24
+  ) {
+    buildingTemps.bathroomAirTempC = temps.bathroomAirTempC;
+  }
+
   return {
     building: {
-      temps,
+      temps: buildingTemps,
       objectMeta: objectMetaResolved,
       rooms: buildingRooms,
       envelopeElements,

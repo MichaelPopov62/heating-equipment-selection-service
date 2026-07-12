@@ -16,7 +16,7 @@ import { objectMetaForCalcPayload } from './objectMetaForCalcPayload';
  * Стабильный ключ входа для автопересчёта (как прежде в App: JSON.stringify ключевого объекта).
  */
 export function buildSurveyCalcInputKey(params: {
-  temps: { insideC: number; outsideC: number };
+  temps: { insideC: number; outsideC: number; bathroomAirTempC?: number };
   objectMeta: ObjectMetaValue;
   waterHeaterForm: WaterHeaterFormValue;
   hotWaterForm: HotWaterFormValue;

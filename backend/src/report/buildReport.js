@@ -21,7 +21,12 @@ import {
 } from '../hydraulics/public.js';
 import { resolveUfhDistributionWithAppliances } from '../logic/ufhDistributionResolve.js';
 import { computeUfhMixingNodeSpec } from '../logic/ufhMixingNodeHydraulics.js';
-import { matchEquipment, pickManifolds, pickUniboxes } from '../matching/public.js';
+import {
+  matchEquipment,
+  pickManifolds,
+  pickUniboxes,
+  buildEmptyManifoldsFailure,
+} from '../matching/public.js';
 import { pushRecommendation } from '../recommendations/recommendationResolver.js';
 import { assertCalcRuntimeContext } from '../reference/assertCalcRuntimeContext.js';
 import { logger } from '../utils/logger.js';
@@ -231,6 +236,10 @@ export async function buildReport({ input, ctx }) {
   const temps = {
     insideC: inputTemps?.insideC,
     outsideC: inputTemps?.outsideC ?? climate?.designOutsideTempC,
+    ...(typeof inputTemps?.bathroomAirTempC === 'number' &&
+    Number.isFinite(inputTemps.bathroomAirTempC)
+      ? { bathroomAirTempC: inputTemps.bathroomAirTempC }
+      : {}),
   };
   if (temps.insideC == null) {
     const err = new Error('Не задана внутренняя температура building.temps.insideC.');
@@ -243,6 +252,16 @@ export async function buildReport({ input, ctx }) {
     err.statusCode = 400;
     err.code = 'OUTSIDE_TEMP_REQUIRED';
     throw err;
+  }
+
+  // Прокинути bathroomAirTempC у building.temps (радіатори / shared resolve).
+  if (input.building && typeof temps.bathroomAirTempC === 'number') {
+    const bt = input.building.temps ?? { insideC: temps.insideC };
+    input.building.temps = {
+      ...bt,
+      insideC: bt.insideC ?? temps.insideC,
+      bathroomAirTempC: temps.bathroomAirTempC,
+    };
   }
 
   // 2) Теплопотери (по комнатам/элементам)
@@ -468,17 +487,49 @@ export async function buildReport({ input, ctx }) {
     );
   }
 
-  // 4b) Підбір колекторів — після резолву distributionPreset ТП, до гідравліки
-  matching.manifolds = pickManifolds({
-    catalog: ctx.catalog,
-    building: input.building,
-    underfloorHeating,
-    radiators: matching.radiators,
-    boiler: matching.boiler,
-    hydraulics: input.hydraulics,
-  });
+  // 4b) Підбір колекторів — soft-fail: не валимо весь report
+  /** @type {import('../types/shared-types').ManifoldsMatchingReport} */
+  let manifoldsReport;
+  try {
+    manifoldsReport = pickManifolds({
+      catalog: ctx.catalog,
+      building: input.building,
+      underfloorHeating,
+      radiators: matching.radiators,
+      boiler: matching.boiler,
+      hydraulics: input.hydraulics,
+    });
+  } catch (err) {
+    // Страховка, якщо контракт модуля порушено (pickManifolds не повинен кидати)
+    logger.warn('matching.manifold.throw', err, { code: 'MANIFOLD_INTERNAL' });
+    manifoldsReport = buildEmptyManifoldsFailure({
+      failureCode: 'MANIFOLD_INTERNAL',
+      message:
+        'Смета коллекторов пуста; расчёт унибоксов и гидравлики продолжается.',
+      causeMessage: err?.message ? String(err.message) : undefined,
+    });
+  }
 
-  // 4c) Підбір унібоксів — паспортні min/max; лише 1…2 петлі без каскаду колекторів
+  if (!manifoldsReport || typeof manifoldsReport.ok !== 'boolean') {
+    logger.warn('matching.manifold.invalid_shape', null, {
+      shape: manifoldsReport == null ? 'null' : typeof manifoldsReport,
+    });
+    manifoldsReport = buildEmptyManifoldsFailure({
+      failureCode: 'MANIFOLD_INTERNAL',
+      message: 'Некорректный ответ подбора коллекторов.',
+    });
+  }
+
+  matching.manifolds = manifoldsReport;
+
+  if (manifoldsReport.ok === false) {
+    logger.info('report.matching.manifolds.degraded', null, {
+      failureCode: manifoldsReport.failureCode ?? null,
+      warnings: manifoldsReport.warnings?.length ?? 0,
+    });
+  }
+
+  // 4c) Підбір унібоксів — завжди після колекторів (навіть при ok: false)
   const roomAirTempC =
     typeof input.temps?.insideC === 'number'
       ? input.temps.insideC
@@ -489,7 +540,10 @@ export async function buildReport({ input, ctx }) {
     catalog: ctx.catalog,
     underfloorHeating,
     roomAirTempC,
+    bathroomAirTempC:
+      typeof temps.bathroomAirTempC === 'number' ? temps.bathroomAirTempC : undefined,
     manifolds: matching.manifolds,
+    rooms: input.building?.rooms,
   });
 
   logger.info('report.matching.done', null, {
@@ -499,6 +553,8 @@ export async function buildReport({ input, ctx }) {
     waterHeaterModel: matching?.waterHeater?.selected?.model ?? null,
     indirectWaterHeaterModel: matching?.indirectWaterHeater?.selected?.model ?? null,
     waterHeaterVolumeLiters: matching?.waterHeater?.chosenVariant?.volumeLiters ?? null,
+    manifoldsOk: matching?.manifolds?.ok ?? null,
+    manifoldsFailureCode: matching?.manifolds?.failureCode ?? null,
     manifoldUnderfloorCount: matching?.manifolds?.underfloor?.length ?? 0,
     manifoldUnderfloorUnits:
       matching?.manifolds?.underfloor?.reduce((s, f) => s + (f.units?.length ?? 0), 0) ?? 0,

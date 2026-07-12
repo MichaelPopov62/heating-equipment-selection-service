@@ -187,6 +187,8 @@ Compat-телеметрия: `utils/compatTelemetry.ts` (`[survey-compat]` в DE
 | H.13 | Ф5 «Тамбур»: микронагрузка радиаторов (`resolveMicroLoadRadiatorStrategy`, тип `тамбур`) | ✅ |
 | H.15 | Подбор коллекторов из каталога: `matching/manifold.js` → `matching.manifolds`; house/apartment; каскад ТП при >12 петель (`units[]`, `splitOutletsForCascade`); verify `verify:manifold-matching`; док. [`docs/manifold-matching.md`](docs/manifold-matching.md) | ✅ |
 | H.16 | Подбор унибоксов: `matching/unibox.js` → `matching.uniboxes`; паспортные min/max; JSON `uniboxes` / Mongo `kind=unibox`; verify `verify:unibox-matching`; док. [`docs/unibox-matching.md`](docs/unibox-matching.md) | ✅ |
+| H.16b | Унибокс шаг 2: строгие неравенства; `validateUniboxLoopDemand`; smart fallback **T воздуха** (`санузел` → 24 °C, иначе `temps.insideC`); малые зоны `санузел`/`коридор`/`прихожая`/`тамбур`; гейт каскада H.15; verify + док. | ✅ |
+| H.16c | Фаза B: общий `resolveDesignRoomAirTempC` (heatloss + ТП + радиаторы + unibox); пол санузла `max(…, 24)`; поле `temps.bathroomAirTempC`; UI анкеты; verify `verify:room-design-air-temp`; док. [`docs/room-design-air-temp.md`](docs/room-design-air-temp.md) | ✅ |
 | **ТП — расчёт** | `logic/warmFloorCalc.js` | Rλ,B = база над контуром + финиш; q↑/q↓, Tповерх, `maxAllowableHeatFluxUpWm2`; warning при превышении лимита покрытия | Результат в `RecommendationsBlock` |
 | **ТП — matching** | `matching/warmFloor.js` | Подсказки в `radiatorSelectionNotes` + цифры из отчёта ТП | Шаг `warmFloor` + селекты в комнатах |
 | **ТП — heatloss** | `heatlossByRooms.js` + `floorPresetId` | Теплопотери через пол; при `bottomBoundary: heated` пол не считается | Поле «Пол (ограждение)» в комнате |
