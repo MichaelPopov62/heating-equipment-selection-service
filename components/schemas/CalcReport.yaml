@@ -56,8 +56,11 @@ properties:
         additionalProperties: true
       manifolds:
         $ref: ManifoldsMatchingReport.yaml
+      uniboxes:
+        $ref: UniboxesMatchingReport.yaml
       hydraulics:
         $ref: HydraulicsMatchingReport.yaml
+
   recommendations:
     type: array
     description: Структурированные сообщения из коллекции recommendations (по code).

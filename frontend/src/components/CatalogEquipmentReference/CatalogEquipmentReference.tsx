@@ -90,6 +90,7 @@ export function CatalogEquipmentReference({
     pipes,
     manifolds,
     boilerManifolds,
+    uniboxes,
   } = snapshot;
   const srcLabel =
     catalogSource === 'mongo'
@@ -127,6 +128,10 @@ export function CatalogEquipmentReference({
         <li className={styles.countItem}>
           <span className={styles.countLabel}>Котельные коллекторы</span>
           <span className={styles.countValue}>{boilerManifolds.length}</span>
+        </li>
+        <li className={styles.countItem}>
+          <span className={styles.countLabel}>Унибоксы</span>
+          <span className={styles.countValue}>{uniboxes.length}</span>
         </li>
       </ul>
 
@@ -238,6 +243,50 @@ export function CatalogEquipmentReference({
                     </td>
                     <td>{formatCatalogDimensionsMm(m.dimensions)}</td>
                     <td>{formatPriceUah(m.price)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </details>
+
+      <details className={styles.block} open={uniboxes.length > 0 && uniboxes.length <= 12}>
+        <summary>
+          Унибоксы ({uniboxes.length}) — локальные регуляторы петли ТП
+        </summary>
+        {uniboxes.length === 0 ? (
+          <p className={styles.meta}>В каталоге нет унибоксов.</p>
+        ) : (
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Бренд</th>
+                  <th>Модель</th>
+                  <th>Тип</th>
+                  <th>Площадь</th>
+                  <th>Петля</th>
+                  <th>Подключение</th>
+                  <th>Kv</th>
+                  <th>Цена</th>
+                </tr>
+              </thead>
+              <tbody>
+                {uniboxes.map((u) => (
+                  <tr key={`unibox-${u.id}`}>
+                    <td>{u.id}</td>
+                    <td>{u.brand}</td>
+                    <td>{u.model}</td>
+                    <td>{u.type}</td>
+                    <td>{u.maxAreaSqM} м²</td>
+                    <td>{u.maxLoopLengthM} м</td>
+                    <td>
+                      {u.connection.thread} / {u.connection.fit}
+                    </td>
+                    <td>{u.kvM3h}</td>
+                    <td>{formatPriceUah(u.price)}</td>
                   </tr>
                 ))}
               </tbody>

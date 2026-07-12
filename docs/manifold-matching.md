@@ -29,8 +29,10 @@ Seed: discriminators `models/Manifold.js`, `models/BoilerManifold.js`.
 Порядок в `buildReport`:
 
 ```
-matchEquipment → (резолв distributionPreset ТП) → pickManifolds → hydraulics pipeline
+matchEquipment → (резолв distributionPreset ТП) → pickManifolds → pickUniboxes → hydraulics pipeline
 ```
+
+Унибоксы (локальный регулятор петли, 1…2 петли без каскада коллекторов): см. [`unibox-matching.md`](unibox-matching.md).
 
 ## Алгоритм
 

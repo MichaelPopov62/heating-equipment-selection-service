@@ -950,6 +950,38 @@ export interface ManifoldsMatchingReport {
   warnings: string[];
 }
 
+/** Потреба петлі ТП для підбору унібокса. */
+export interface UniboxLoopDemand {
+  areaSqM: number;
+  loopLengthM: number;
+  circuitSupplyC: number;
+  circuitReturnC: number;
+  flowLph: number;
+  /** Розрахункова T повітря приміщення (temps.insideC). */
+  roomAirTempC: number;
+  /** Розрахунковий робочий тиск системи, бар. */
+  systemPressureBar: number;
+  /** Мін. Kv клапана для витрати петлі при допустимому Δp. */
+  minKvM3h: number;
+  /** Потрібний тип фітинга (ТП PEX → eurocone). */
+  requiredFit: import('../catalog/types').UniboxConnectionFit;
+}
+
+/** Підбір унібокса на одну петлю. */
+export interface UniboxLoopPick {
+  roomId: string;
+  loopId: string;
+  required: UniboxLoopDemand;
+  selected: import('../catalog/types').UniboxCatalogItemNormalized | null;
+  warnings: string[];
+}
+
+/** report.matching.uniboxes — SKU унібоксів для смети. */
+export interface UniboxesMatchingReport {
+  byLoop: UniboxLoopPick[];
+  warnings: string[];
+}
+
 export interface MatchingReport {
   boiler?: BoilerMatchingReport;
   radiators?: RadiatorsMatchingReport;
@@ -957,6 +989,8 @@ export interface MatchingReport {
   indirectWaterHeater?: IndirectWaterHeaterMatchingReport;
   /** Підбір колекторів (ТП / радіатори / котельний) після резолву distributionPreset. */
   manifolds?: ManifoldsMatchingReport;
+  /** Підбір унібоксів по петлях ТП (паспортні min/max). */
+  uniboxes?: UniboxesMatchingReport;
   hydraulics?: HydraulicsMatchingReport;
 }
 

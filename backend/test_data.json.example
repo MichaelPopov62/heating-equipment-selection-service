@@ -17,7 +17,10 @@
           "gasConsumptionM3PerHour": 2.4,
           "price": 48500,
           "mountingType": "wall",
-          "connectionDiameters": ["3/4 дюйма (отопление)", "1/2 дюйма (ГВС)"],
+          "connectionDiameters": [
+            "3/4 дюйма (отопление)",
+            "1/2 дюйма (ГВС)"
+          ],
           "circuitsCount": 2,
           "type": "condensing",
           "circulationPump": {
@@ -88,7 +91,10 @@
           "gasConsumptionM3PerHour": 2.73,
           "price": 35000,
           "mountingType": "wall",
-          "connectionDiameters": ["3/4″ (отопление)", "1/2″ (ГВС)"],
+          "connectionDiameters": [
+            "3/4″ (отопление)",
+            "1/2″ (ГВС)"
+          ],
           "circuitsCount": 2,
           "type": "traditional",
           "circulationPump": {
@@ -233,7 +239,11 @@
               "weight_kg": 34
             }
           },
-          "tags": ["wall-mounted", "double-circuit", "condensing"],
+          "tags": [
+            "wall-mounted",
+            "double-circuit",
+            "condensing"
+          ],
           "price": 39200,
           "isDoubleCircuit": true
         },
@@ -269,7 +279,12 @@
               "weight_kg": 28.5
             }
           },
-          "tags": ["wall-mounted", "double-circuit", "condensing", "compact"],
+          "tags": [
+            "wall-mounted",
+            "double-circuit",
+            "condensing",
+            "compact"
+          ],
           "price": 37200,
           "circuitsCount": 2,
           "isDoubleCircuit": true
@@ -359,7 +374,10 @@
           "price": 56500,
           "isDoubleCircuit": true,
           "mountingType": "wall",
-          "connectionDiameters": ["3/4″ (отопление)", "1/2″ (ГВС)"],
+          "connectionDiameters": [
+            "3/4″ (отопление)",
+            "1/2″ (ГВС)"
+          ],
           "circulationPump": {
             "operatingModes": [
               {
@@ -678,7 +696,12 @@
               "weight_kg": 30
             }
           },
-          "tags": ["wall-mounted", "single-circuit", "condensing", "compact"],
+          "tags": [
+            "wall-mounted",
+            "single-circuit",
+            "condensing",
+            "compact"
+          ],
           "price": 42800,
           "isDoubleCircuit": false
         },
@@ -933,7 +956,12 @@
               "weight_kg": 46
             }
           },
-          "tags": ["floor-standing", "single-circuit", "condensing", "medium"],
+          "tags": [
+            "floor-standing",
+            "single-circuit",
+            "condensing",
+            "medium"
+          ],
           "price": 35880,
           "isDoubleCircuit": false
         },
@@ -1060,7 +1088,11 @@
           "volume_l_section": 0.2,
           "weight_kg_section": 1.02
         },
-        "tags": ["high-efficiency", "made-in-italy", "low-inertia"],
+        "tags": [
+          "high-efficiency",
+          "made-in-italy",
+          "low-inertia"
+        ],
         "description": "Литой алюминиевый радиатор с высокой теплоотдачей и антикоррозийным покрытием.",
         "price": 590,
         "priceBasis": "section"
@@ -1173,7 +1205,11 @@
           "volume_l_total": 5.8,
           "weight_kg_total": 26.2
         },
-        "tags": ["european-standard", "side-connection", "high-reliability"],
+        "tags": [
+          "european-standard",
+          "side-connection",
+          "high-reliability"
+        ],
         "description": "Стальной панельный радиатор с боковым подключением. Оптимален для систем с принудительной циркуляцией.",
         "price": 4350,
         "priceBasis": "panel"
@@ -1208,7 +1244,11 @@
           "volume_l_total": 5.4,
           "weight_kg_total": 24.8
         },
-        "tags": ["bottom-connection", "built-in-valve", "modern-look"],
+        "tags": [
+          "bottom-connection",
+          "built-in-valve",
+          "modern-look"
+        ],
         "description": "Стальной панельный радиатор с нижним подключением и встроенным термоклапаном. Идеален для скрытой разводки труб.",
         "price": 4580,
         "priceBasis": "panel"
@@ -1241,7 +1281,11 @@
           "volume_l_total": 16.2,
           "weight_kg_total": 74.4
         },
-        "tags": ["side-connection", "high-length", "maximum-area"],
+        "tags": [
+          "side-connection",
+          "high-length",
+          "maximum-area"
+        ],
         "description": "Длинный стальной панельный радиатор с боковым подключением. Идеально подходит для больших помещений с панорамными или низкими окнами.",
         "price": 15322,
         "priceBasis": "panel"
@@ -1274,7 +1318,11 @@
           "volume_l_total": 14.5,
           "weight_kg_total": 68.2
         },
-        "tags": ["side-connection", "triple-panel", "high-density-power"],
+        "tags": [
+          "side-connection",
+          "triple-panel",
+          "high-density-power"
+        ],
         "description": "Сверхмощный трехпанельный радиатор (Тип 33) повышенной глубины. Выдает максимальный тепловой поток при относительно небольшой длине.",
         "price": 15239,
         "priceBasis": "panel"
@@ -1309,7 +1357,11 @@
           "volume_l_total": 13.3,
           "weight_kg_total": 61.6
         },
-        "tags": ["bottom-connection", "built-in-valve", "modern-look"],
+        "tags": [
+          "bottom-connection",
+          "built-in-valve",
+          "modern-look"
+        ],
         "description": "Стальной панельный радиатор увеличенной высоты с нижним подключением. Прекрасно интегрируется в современные интерьеры со скрытой разводкой.",
         "price": 14921,
         "priceBasis": "panel"
@@ -1342,7 +1394,11 @@
           "volume_l_total": 14.8,
           "weight_kg_total": 65.4
         },
-        "tags": ["side-connection", "triple-panel", "low-profile-heavy"],
+        "tags": [
+          "side-connection",
+          "triple-panel",
+          "low-profile-heavy"
+        ],
         "description": "Трехпанельный радиатор стандартной высоты 500 мм. Оптимальное решение для эффективного съема низкотемпературного тепла от конденсационных котлов.",
         "price": 14692,
         "priceBasis": "panel"
@@ -1375,7 +1431,11 @@
           "volume_l_total": 15.1,
           "weight_kg_total": 69.7
         },
-        "tags": ["side-connection", "high-length", "classic-dimension"],
+        "tags": [
+          "side-connection",
+          "high-length",
+          "classic-dimension"
+        ],
         "description": "Панельный радиатор высотой 600 мм с боковым подключением. Традиционная геометрия в сочетании с внушительной тепловой мощностью.",
         "price": 14561,
         "priceBasis": "panel"
@@ -1386,7 +1446,9 @@
         "model": "Atlantic Steatite Elite",
         "type": "electric_storage",
         "heatingElementType": "Сухой (стеатит)",
-        "features": ["Лучший для жесткой воды"],
+        "features": [
+          "Лучший для жесткой воды"
+        ],
         "variants": [
           {
             "volumeLiters": 80,
@@ -1405,7 +1467,10 @@
         "model": "Ariston Velis EVO",
         "type": "electric_storage",
         "heatingElementType": "Мокрый",
-        "features": ["Плоский дизайн", "Два бака"],
+        "features": [
+          "Плоский дизайн",
+          "Два бака"
+        ],
         "variants": [
           {
             "volumeLiters": 50,
@@ -1437,7 +1502,9 @@
         "model": "Gorenje GBFU 100 SIMB6",
         "type": "electric_storage",
         "heatingElementType": "Сухой",
-        "features": ["Узкий корпус"],
+        "features": [
+          "Узкий корпус"
+        ],
         "variants": [
           {
             "volumeLiters": 100,
@@ -1450,7 +1517,9 @@
         "model": "Atlantic O'Pro 300",
         "type": "electric_storage",
         "heatingElementType": "Мокрый",
-        "features": ["Дом с несколькими точками водоразбора"],
+        "features": [
+          "Дом с несколькими точками водоразбора"
+        ],
         "variants": [
           {
             "volumeLiters": 300,
@@ -2467,7 +2536,7 @@
       "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 11 виходів (VTc.589.EMNX.0611)",
       "brand": "VALTEC",
       "article": "VTc.589.EMNX.0611",
-      "price": 11650.0,
+      "price": 11650,
       "outletsCount": 11,
       "manifoldApplication": "underfloor",
       "hasFlowMeters": true,
@@ -2486,7 +2555,7 @@
       "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 12 виходів (VTc.589.EMNX.0612)",
       "brand": "VALTEC",
       "article": "VTc.589.EMNX.0612",
-      "price": 12580.0,
+      "price": 12580,
       "outletsCount": 12,
       "manifoldApplication": "underfloor",
       "hasFlowMeters": true,
@@ -2562,6 +2631,236 @@
         "height": 178,
         "depth": 135
       }
+    }
+  ],
+  "uniboxes": [
+    {
+      "id": "321022",
+      "brand": "Tervix",
+      "model": "Pro Line Control Box R2",
+      "type": "rtl_air",
+      "loopsCount": 1,
+      "maxAreaSqM": 20,
+      "maxLoopLengthM": 80,
+      "minAirTempC": 6,
+      "maxAirTempC": 28,
+      "minCoolantTempC": 10,
+      "maxCoolantTempC": 50,
+      "maxTemperatureC": 90,
+      "maxPressureBar": 10,
+      "kvM3h": 1.35,
+      "connection": {
+        "thread": "G3/4",
+        "fit": "eurocone"
+      },
+      "material": "Бронза, plastic",
+      "dimensions": {
+        "height": 175,
+        "width": 220,
+        "depth": 62
+      },
+      "price": 3013,
+      "description": "Водяна тепла підлога, комбіновані системи, настінне опалення"
+    },
+    {
+      "id": "9319-00.800",
+      "brand": "IMI Heimeier",
+      "model": "Multibox AFC RTL (9319-00.800)",
+      "type": "rtl_afc",
+      "loopsCount": 1,
+      "maxAreaSqM": 20,
+      "maxLoopLengthM": 90,
+      "minCoolantTempC": 0,
+      "maxCoolantTempC": 50,
+      "minFlowLph": 30,
+      "maxFlowLph": 200,
+      "maxTemperatureC": 90,
+      "maxPressureBar": 10,
+      "kvM3h": 1.1,
+      "connection": {
+        "thread": "G3/4",
+        "fit": "eurocone"
+      },
+      "material": "Корозійностійка лита бронза",
+      "price": 9885,
+      "description": "Регулювання теплої підлоги площею до 20 м² з автовідбором витрати"
+    },
+    {
+      "id": "JL-UB-K-RTL",
+      "brand": "JL",
+      "model": "UNIBOX K-RTL білий 1/2\"",
+      "type": "rtl_air",
+      "loopsCount": 1,
+      "maxAreaSqM": 15,
+      "maxLoopLengthM": 80,
+      "minAirTempC": 6,
+      "maxAirTempC": 28,
+      "minCoolantTempC": 10,
+      "maxCoolantTempC": 50,
+      "maxTemperatureC": 90,
+      "maxPressureBar": 10,
+      "kvM3h": 1.05,
+      "connection": {
+        "thread": "G1/2",
+        "fit": "internal_thread"
+      },
+      "material": "Латунь",
+      "dimensions": {
+        "height": 180,
+        "width": 125,
+        "depth": 60
+      },
+      "price": 2341,
+      "description": "Регулювання одного контуру водяної теплої підлоги / стін"
+    },
+    {
+      "id": "VT.ICBOX.2",
+      "brand": "VALTEC",
+      "model": "VT.ICBOX.2",
+      "type": "rtl",
+      "loopsCount": 1,
+      "maxAreaSqM": 15,
+      "maxLoopLengthM": 80,
+      "minCoolantTempC": 15,
+      "maxCoolantTempC": 45,
+      "maxTemperatureC": 90,
+      "maxPressureBar": 10,
+      "kvM3h": 0.85,
+      "connection": {
+        "thread": "G3/4",
+        "fit": "eurocone"
+      },
+      "material": "Латунь марки CW617N",
+      "dimensions": {
+        "height": 202,
+        "width": 155,
+        "depth": 58.5
+      },
+      "price": 6677.77,
+      "description": "Окремі зони теплої підлоги, теплих стін чи радіаторів"
+    },
+    {
+      "id": "VT.ICBOX.5",
+      "brand": "VALTEC",
+      "model": "VT.ICBOX.5",
+      "type": "balancing_valve",
+      "loopsCount": 1,
+      "maxAreaSqM": 15,
+      "maxLoopLengthM": 80,
+      "maxTemperatureC": 100,
+      "maxPressureBar": 10,
+      "kvM3h": 1.2,
+      "connection": {
+        "thread": "G3/4",
+        "fit": "eurocone"
+      },
+      "material": "Сантехнічна латунь марки CW617N",
+      "dimensions": {
+        "height": 202,
+        "width": 155,
+        "depth": 58
+      },
+      "price": 4838.88,
+      "description": "Петлі теплої підлоги / стін, радіатори прихованого монтажу"
+    },
+    {
+      "id": "KLR01",
+      "brand": "FLOOR",
+      "model": "KLR01",
+      "type": "rtl_air",
+      "loopsCount": 1,
+      "maxAreaSqM": 15,
+      "maxLoopLengthM": 80,
+      "minAirTempC": 6,
+      "maxAirTempC": 28,
+      "minCoolantTempC": 20,
+      "maxCoolantTempC": 60,
+      "maxTemperatureC": 90,
+      "maxPressureBar": 10,
+      "kvM3h": 1.06,
+      "connection": {
+        "thread": "G3/4",
+        "fit": "eurocone"
+      },
+      "material": "Латунь",
+      "dimensions": {
+        "height": 175,
+        "width": 220,
+        "depth": 62
+      },
+      "price": 4506.3,
+      "description": "Системи водяної теплої підлоги / теплих стін"
+    },
+    {
+      "id": "IT42-H1034",
+      "brand": "ITAL",
+      "model": "ITAL RTL+T 3/4″ латунь (IT42-H1034)",
+      "type": "rtl_air",
+      "loopsCount": 1,
+      "maxAreaSqM": 20,
+      "maxLoopLengthM": 80,
+      "minAirTempC": 6,
+      "maxAirTempC": 28,
+      "minCoolantTempC": 10,
+      "maxCoolantTempC": 50,
+      "maxTemperatureC": 90,
+      "maxPressureBar": 10,
+      "kvM3h": 1.1,
+      "connection": {
+        "thread": "G3/4",
+        "fit": "eurocone"
+      },
+      "material": "Високоякісна сантехнічна латунь",
+      "dimensions": {
+        "height": 178.5,
+        "width": 129,
+        "depth": 60
+      },
+      "price": 2292,
+      "description": "Регулювання одного контуру водяної теплої підлоги"
+    },
+    {
+      "id": "KR2885",
+      "brand": "Koer",
+      "model": "KR.3002 3/4″ латунь (KR2885)",
+      "type": "rtl",
+      "loopsCount": 1,
+      "maxAreaSqM": 20,
+      "maxLoopLengthM": 100,
+      "minCoolantTempC": 0,
+      "maxCoolantTempC": 50,
+      "maxTemperatureC": 90,
+      "maxPressureBar": 10,
+      "kvM3h": 0.85,
+      "connection": {
+        "thread": "G3/4",
+        "fit": "eurocone"
+      },
+      "material": "Високоякісна сантехнічна латунь",
+      "price": 1735,
+      "description": "Обмеження температури теплоносія (RTL)"
+    },
+    {
+      "id": "KR2886",
+      "brand": "Koer",
+      "model": "KR.3003 3/4″ латунь (KR2886)",
+      "type": "air_only",
+      "loopsCount": 1,
+      "maxAreaSqM": 20,
+      "maxLoopLengthM": 100,
+      "minAirTempC": 6,
+      "maxAirTempC": 28,
+      "maxSupplyTempC": 45,
+      "maxTemperatureC": 90,
+      "maxPressureBar": 10,
+      "kvM3h": 1,
+      "connection": {
+        "thread": "G3/4",
+        "fit": "eurocone"
+      },
+      "material": "Латунь",
+      "price": 1528,
+      "description": "Низькотемпературна система опалення"
     }
   ]
 }

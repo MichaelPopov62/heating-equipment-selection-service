@@ -1,0 +1,79 @@
+type: object
+description: >
+  Подбор унибоксов из каталога (report.matching.uniboxes) для сметы.
+  Только при 1…2 петлях ТП без каскада коллекторов; фильтр по всем паспортным полям.
+additionalProperties: false
+required:
+  - byLoop
+  - warnings
+properties:
+  byLoop:
+    type: array
+    description: Подбор по петлям underfloorHeating.rooms[].loops[] (loopLengthM > 0).
+    items:
+      type: object
+      additionalProperties: false
+      required:
+        - roomId
+        - loopId
+        - required
+        - selected
+        - warnings
+      properties:
+        roomId:
+          type: string
+        loopId:
+          type: string
+        required:
+          type: object
+          additionalProperties: false
+          required:
+            - areaSqM
+            - loopLengthM
+            - circuitSupplyC
+            - circuitReturnC
+            - flowLph
+            - roomAirTempC
+            - systemPressureBar
+            - minKvM3h
+            - requiredFit
+          properties:
+            areaSqM:
+              type: number
+              description: Активная площадь зоны (heatedAreaM2 комнаты), м².
+            loopLengthM:
+              type: number
+              minimum: 0
+              exclusiveMinimum: true
+              description: Длина петли, м (> 0; без fallback 0).
+            circuitSupplyC:
+              type: number
+            circuitReturnC:
+              type: number
+            flowLph:
+              type: number
+              description: Расход петли, л/ч (из flowRateM3PerHour × 1000).
+            roomAirTempC:
+              type: number
+              description: temps.insideC — для фильтра min/maxAirTempC.
+            systemPressureBar:
+              type: number
+              description: Расчётный рабочий тиск системы (сравнение с maxPressureBar).
+            minKvM3h:
+              type: number
+              description: Мин. Kv для расхода петли при допустимом Δp на клапане.
+            requiredFit:
+              type: string
+              enum: [eurocone, internal_thread]
+              description: Для ТП PEX в сервисе — eurocone.
+        selected:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: UniboxCatalogItem.yaml
+        warnings:
+          type: array
+          items: { type: string }
+  warnings:
+    type: array
+    items: { type: string }

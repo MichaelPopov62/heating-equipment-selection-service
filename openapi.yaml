@@ -79,7 +79,8 @@ paths:
             pumps (PumpCatalogItem: id, brand, model, type, segment, price, connections, operatingModes),
             indirectWaterHeaters (БКН, если заданы в источнике),
             manifolds (коллекторы ТП/радиаторов, ManifoldCatalogItem),
-            boilerManifolds (котельные коллекторы, BoilerManifoldCatalogItem). Порядок элементов в массивах — как у источника;
+            boilerManifolds (котельные коллекторы, BoilerManifoldCatalogItem),
+            uniboxes (унибоксы / локальные регуляторы петли ТП, UniboxCatalogItem). Порядок элементов в массивах — как у источника;
             сортировка для подбора — matchingSortPools (котлы, водонагреватели) и sortRadiatorsForMatching
             (радиаторы) на сервере, не в этом ответе.
           content:
@@ -722,8 +723,12 @@ components:
       $ref: ./components/schemas/ManifoldCatalogItem.yaml
     BoilerManifoldCatalogItem:
       $ref: ./components/schemas/BoilerManifoldCatalogItem.yaml
+    UniboxCatalogItem:
+      $ref: ./components/schemas/UniboxCatalogItem.yaml
     ManifoldsMatchingReport:
       $ref: ./components/schemas/ManifoldsMatchingReport.yaml
+    UniboxesMatchingReport:
+      $ref: ./components/schemas/UniboxesMatchingReport.yaml
     BoilerEquipmentProposal:
       $ref: ./components/schemas/BoilerEquipmentProposal.yaml
     BoilerMatchingReport:

@@ -69,7 +69,22 @@ function countProductRowsInEnvelope(json) {
     ? /** @type {unknown[]} */ ((/** @type {Record<string, unknown>} */ (json)).boilerManifold)
         .length
     : 0;
-  return boilers + radiators + waterHeaters + pipes + pumps + indirect + manifolds + boilerManifolds;
+  const uniboxes = Array.isArray(/** @type {Record<string, unknown>} */ (json).uniboxes)
+    ? /** @type {unknown[]} */ ((/** @type {Record<string, unknown>} */ (json)).uniboxes).length
+    : Array.isArray(products.uniboxes)
+      ? products.uniboxes.length
+      : 0;
+  return (
+    boilers +
+    radiators +
+    waterHeaters +
+    pipes +
+    pumps +
+    indirect +
+    manifolds +
+    boilerManifolds +
+    uniboxes
+  );
 }
 
 /**
@@ -205,6 +220,9 @@ async function loadCatalogJsonFromMongo() {
   const boilerManifolds = docs
     .filter((d) => d.kind === 'boilerManifold')
     .map((d) => mongoDocToCatalogProductDoc(/** @type {Record<string, unknown>} */ (d)));
+  const uniboxes = docs
+    .filter((d) => d.kind === 'unibox')
+    .map((d) => mongoDocToCatalogProductDoc(/** @type {Record<string, unknown>} */ (d)));
 
   /** @type {Array<Record<string, unknown> & { isDoubleCircuit?: boolean }>} */
   const doubleCircuit = [];
@@ -229,6 +247,7 @@ async function loadCatalogJsonFromMongo() {
     indirectWaterHeaters,
     manifold: manifolds,
     boilerManifold: boilerManifolds,
+    uniboxes,
   };
 
   if (countBoilersInProductsJson(envelope) < 1) {
@@ -271,6 +290,7 @@ function normalizeCatalogEnvelope(json, catalogSource) {
     boilerManifolds: Array.isArray(normalized.boilerManifolds)
       ? normalized.boilerManifolds.length
       : 0,
+    uniboxes: Array.isArray(normalized.uniboxes) ? normalized.uniboxes.length : 0,
   });
 
   return {
@@ -290,6 +310,7 @@ function normalizeCatalogEnvelope(json, catalogSource) {
       boilerManifolds: Array.isArray(normalized.boilerManifolds)
         ? [...normalized.boilerManifolds]
         : [],
+      uniboxes: Array.isArray(normalized.uniboxes) ? [...normalized.uniboxes] : [],
     },
     catalogSource,
   };

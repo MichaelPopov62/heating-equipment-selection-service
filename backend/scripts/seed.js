@@ -19,6 +19,7 @@ import { Pump } from '../src/models/Pump.js';
 import { IndirectWaterHeater } from '../src/models/IndirectWaterHeater.js';
 import { Manifold } from '../src/models/Manifold.js';
 import { BoilerManifold } from '../src/models/BoilerManifold.js';
+import { Unibox } from '../src/models/Unibox.js';
 import { resolveCatalogJsonFilePath } from './utils/catalogPaths.js';
 import {
   summarizeNormalizedCatalog,
@@ -106,7 +107,8 @@ async function loadValidatedCatalogDocuments(catalogPath) {
       `waterHeater ${summary.waterHeaters}, pipe ${summary.pipes}, ` +
       `pump ${summary.pumps}, ` +
       `indirect ${summary.indirectWaterHeaters}, ` +
-      `manifold ${summary.manifolds}, boilerManifold ${summary.boilerManifolds})\n`,
+      `manifold ${summary.manifolds}, boilerManifold ${summary.boilerManifolds}, ` +
+      `unibox ${summary.uniboxes})\n`,
   );
 
   return { docs };
@@ -128,7 +130,8 @@ function countCatalogSummaryItems(summary) {
     summary.pumps +
     summary.indirectWaterHeaters +
     summary.manifolds +
-    summary.boilerManifolds
+    summary.boilerManifolds +
+    summary.uniboxes
   );
 }
 
@@ -326,12 +329,23 @@ async function main() {
     const indirectDocs = docs.filter((d) => d.kind === 'indirectWaterHeater');
     const manifoldDocs = docs.filter((d) => d.kind === 'manifold');
     const boilerManifoldDocs = docs.filter((d) => d.kind === 'boilerManifold');
+    const uniboxDocs = docs.filter((d) => d.kind === 'unibox');
 
     let inserted;
     try {
       // Вставка через дискриминаторы: при Product.insertMany() Mongoose может неверно
       // назначить схему части документов, тогда в БД нет kind: "pipe" и фильтр в Compass пустой.
-      const [insBoilers, insRad, insWh, insPipes, insPumps, insIndirect, insManifolds, insBoilerManifolds] =
+      const [
+        insBoilers,
+        insRad,
+        insWh,
+        insPipes,
+        insPumps,
+        insIndirect,
+        insManifolds,
+        insBoilerManifolds,
+        insUniboxes,
+      ] =
         await Promise.all([
         Boiler.insertMany(boilerDocs, { ordered: false }),
         Radiator.insertMany(radiatorDocs, { ordered: false }),
@@ -341,6 +355,7 @@ async function main() {
         IndirectWaterHeater.insertMany(indirectDocs, { ordered: false }),
         Manifold.insertMany(manifoldDocs, { ordered: false }),
         BoilerManifold.insertMany(boilerManifoldDocs, { ordered: false }),
+        Unibox.insertMany(uniboxDocs, { ordered: false }),
       ]);
       inserted = [
         ...insBoilers,
@@ -351,6 +366,7 @@ async function main() {
         ...insIndirect,
         ...insManifolds,
         ...insBoilerManifolds,
+        ...insUniboxes,
       ];
     } catch (err) {
       const bulk = err && typeof err === 'object' ? err : null;
@@ -434,6 +450,7 @@ async function main() {
             indirectWaterHeater: docs.filter((d) => d.kind === 'indirectWaterHeater').length,
             manifold: docs.filter((d) => d.kind === 'manifold').length,
             boilerManifold: docs.filter((d) => d.kind === 'boilerManifold').length,
+            unibox: docs.filter((d) => d.kind === 'unibox').length,
           },
           referenceData: refSeed,
         },

@@ -22,6 +22,7 @@ import { WaterHeaterMatchingPreview } from '../WaterHeaterMatchingPreview/WaterH
 import { CatalogEquipmentReference } from '../CatalogEquipmentReference/CatalogEquipmentReference';
 import { UfhMixingNodeSpecCard } from '../UnderfloorHeatingReport/UfhMixingNodeSpecCard';
 import { UfhLoopHydraulicsTable } from '../UnderfloorHeatingReport/UfhLoopHydraulicsTable';
+import { UniboxMatchingSection } from '../UnderfloorHeatingReport/UniboxMatchingSection';
 import { HydraulicsProposalSection } from '../HydraulicsProposal/HydraulicsProposalSection';
 import styles from './RecommendationsBlock.module.css';
 
@@ -36,6 +37,7 @@ export function RecommendationsBlock({
   apiIndirectWhFromReport,
   apiElectricWhFromReport,
   apiUnderfloorHeatingFromReport,
+  apiUniboxesFromReport = null,
   displayedRadiatorSectionsTotal,
   apiCatalogSource,
   apiAutomationHints,
@@ -316,6 +318,12 @@ export function RecommendationsBlock({
               )}
             </div>
           )}
+
+        {apiUniboxesFromReport != null && (
+          <div className={styles.summaryGroup} aria-labelledby="unibox-matching-title">
+            <UniboxMatchingSection matching={apiUniboxesFromReport} />
+          </div>
+        )}
 
         <div className={styles.summaryGroup} aria-labelledby="hydraulics-proposal-title">
           <HydraulicsProposalSection

@@ -1,0 +1,134 @@
+type: object
+description: >
+  Унибокс (локальный регулятор петли ТП / зоны) после validateCatalog.
+  Identity — id (как PumpCatalogItem). Валюта только в корне каталога, не на позиции.
+  Поля min/max для match — только если есть в паспорте; null запрещён (ключ omit).
+additionalProperties: true
+required:
+  - id
+  - brand
+  - model
+  - type
+  - loopsCount
+  - maxAreaSqM
+  - maxLoopLengthM
+  - maxTemperatureC
+  - maxPressureBar
+  - kvM3h
+  - connection
+  - material
+  - price
+properties:
+  id:
+    type: string
+    description: Уникальный идентификатор строки каталога (в Mongo — catalogKey от id).
+  brand:
+    type: string
+  model:
+    type: string
+  type:
+    type: string
+    enum: [rtl_air, rtl, rtl_afc, balancing_valve, air_only]
+    description: >
+      Конструкция: rtl_air — воздух+RTL; rtl — только RTL; rtl_afc — RTL+AFC;
+      balancing_valve — без RTL/воздуха; air_only — только воздух (+ maxSupplyTempC).
+  loopsCount:
+    type: integer
+    minimum: 1
+    maximum: 8
+  maxAreaSqM:
+    type: number
+    minimum: 0
+    exclusiveMinimum: true
+    maximum: 500
+  maxLoopLengthM:
+    type: number
+    minimum: 0
+    exclusiveMinimum: true
+    maximum: 500
+  minAirTempC:
+    type: number
+    minimum: -20
+    maximum: 60
+  maxAirTempC:
+    type: number
+    minimum: -20
+    maximum: 60
+  minCoolantTempC:
+    type: number
+    minimum: -20
+    maximum: 120
+  maxCoolantTempC:
+    type: number
+    minimum: -20
+    maximum: 120
+  minFlowLph:
+    type: number
+    minimum: 0
+    exclusiveMinimum: true
+    maximum: 5000
+    description: Мин. расход AFC (л/ч); обязательно при type=rtl_afc.
+  maxFlowLph:
+    type: number
+    minimum: 0
+    exclusiveMinimum: true
+    maximum: 5000
+    description: Макс. расход AFC (л/ч); обязательно при type=rtl_afc.
+  maxSupplyTempC:
+    type: number
+    minimum: 20
+    maximum: 120
+    description: Макс. T подачи на входе (паспорт); обязательно при type=air_only.
+  maxTemperatureC:
+    type: number
+    minimum: 30
+    maximum: 120
+  maxPressureBar:
+    type: number
+    minimum: 0.1
+    maximum: 25
+  kvM3h:
+    type: number
+    minimum: 0
+    exclusiveMinimum: true
+    maximum: 50
+    description: Kv, м³/ч при Δp = 1 bar.
+  connection:
+    type: object
+    additionalProperties: false
+    required: [thread, fit]
+    properties:
+      thread:
+        type: string
+        enum: [G1/2, G3/4]
+      fit:
+        type: string
+        enum: [eurocone, internal_thread]
+  material:
+    type: string
+  dimensions:
+    type: object
+    additionalProperties: false
+    required: [height, width, depth]
+    properties:
+      height:
+        type: number
+        minimum: 0
+        exclusiveMinimum: true
+        maximum: 2000
+      width:
+        type: number
+        minimum: 0
+        exclusiveMinimum: true
+        maximum: 2000
+      depth:
+        type: number
+        minimum: 0
+        exclusiveMinimum: true
+        maximum: 500
+  price:
+    type: number
+    minimum: 1
+  description:
+    type: string
+    description: Текстовое описание; не используется в числовых сравнениях match.

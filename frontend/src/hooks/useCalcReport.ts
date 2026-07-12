@@ -14,6 +14,7 @@ import { parseRadiatorsMatchingFromReport } from '../utils/parseRadiatorsMatchin
 import { parseWaterHeaterMatchingFromReport } from '../utils/parseWaterHeaterMatchingFromReport';
 import { parseUnderfloorHeatingFromReport } from '../utils/parseUnderfloorHeatingFromReport';
 import { parseHydraulicsFromReport } from '../utils/parseHydraulicsFromReport';
+import { parseUniboxesMatchingFromReport } from '../utils/parseUniboxesMatchingFromReport';
 
 type IsCalcMatchingScheme = (v: string) => v is HotWaterBoilerPowerMatchingScheme;
 
@@ -134,6 +135,11 @@ export function useCalcReport(
     [calcReport],
   );
 
+  const apiUniboxesFromReport = useMemo(
+    () => parseUniboxesMatchingFromReport(calcReport),
+    [calcReport],
+  );
+
   const apiHydraulicsFromReport = useMemo(
     () => parseHydraulicsFromReport(calcReport),
     [calcReport],
@@ -148,6 +154,7 @@ export function useCalcReport(
     apiIndirectWhFromReport,
     apiElectricWhFromReport,
     apiUnderfloorHeatingFromReport,
+    apiUniboxesFromReport,
     apiHydraulicsFromReport,
     displayedRadiatorSectionsTotal,
     apiCatalogSource,

@@ -7,16 +7,20 @@ import {
   parseCatalogBoilerManifolds,
   parseCatalogManifolds,
 } from './parseCatalogManifolds';
+import { parseCatalogUniboxes } from './parseCatalogUniboxes';
 import type {
   CatalogBoilerManifoldItem,
   CatalogManifoldItem,
+  CatalogUniboxItem,
 } from './catalogTypes';
 
 export type {
   CatalogBoilerManifoldItem,
   CatalogManifoldDimensions,
   CatalogManifoldItem,
+  CatalogUniboxItem,
   ManifoldApplication,
+  UniboxType,
 } from './catalogTypes';
 
 /** Типичная подсказка при недоступном upstream в dev (см. frontend/vite.config.ts). */
@@ -34,6 +38,8 @@ export type CatalogEquipmentSnapshot = {
   manifolds: CatalogManifoldItem[];
   /** Котельные распределительные коллекторы. */
   boilerManifolds: CatalogBoilerManifoldItem[];
+  /** Унибоксы — локальные регуляторы петли ТП. */
+  uniboxes: CatalogUniboxItem[];
 };
 
 function catalogFailureMessage(status: number, raw: unknown): string {
@@ -102,5 +108,6 @@ async function loadCatalogEquipmentFromApi(): Promise<CatalogEquipmentSnapshot> 
     pipes: Array.isArray(cat.pipes) ? (cat.pipes as Record<string, unknown>[]) : [],
     manifolds: parseCatalogManifolds(cat.manifolds),
     boilerManifolds: parseCatalogBoilerManifolds(cat.boilerManifolds),
+    uniboxes: parseCatalogUniboxes(cat.uniboxes),
   };
 }

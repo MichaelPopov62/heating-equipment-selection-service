@@ -137,7 +137,8 @@ try {
       `(boiler ${summary.boilerDouble + summary.boilerSingle}, ` +
       `radiator ${summary.radiators}, waterHeater ${summary.waterHeaters}, ` +
       `pipe ${summary.pipes}, pump ${summary.pumps}, indirect ${summary.indirectWaterHeaters}, ` +
-      `manifold ${summary.manifolds}, boilerManifold ${summary.boilerManifolds})\n`,
+      `manifold ${summary.manifolds}, boilerManifold ${summary.boilerManifolds}, ` +
+      `unibox ${summary.uniboxes})\n`,
   );
 } catch (err) {
   console.error('verify:seed-catalog FAILED: каталог не прошёл validateAndNormalizeCatalog');

@@ -316,6 +316,7 @@ export function AppSurveyContent({
     apiIndirectWhFromReport,
     apiElectricWhFromReport,
     apiUnderfloorHeatingFromReport,
+    apiUniboxesFromReport,
     apiHydraulicsFromReport,
     displayedRadiatorSectionsTotal,
     apiCatalogSource,
@@ -786,6 +787,7 @@ export function AppSurveyContent({
           apiIndirectWhFromReport={apiIndirectWhFromReport}
           apiElectricWhFromReport={apiElectricWhFromReport}
           apiUnderfloorHeatingFromReport={apiUnderfloorHeatingFromReport}
+          apiUniboxesFromReport={apiUniboxesFromReport}
           displayedRadiatorSectionsTotal={displayedRadiatorSectionsTotal}
           apiCatalogSource={apiCatalogSource}
           apiAutomationHints={apiAutomationHints}

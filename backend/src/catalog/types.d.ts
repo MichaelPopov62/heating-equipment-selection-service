@@ -268,6 +268,54 @@ export interface BoilerManifoldCatalogItemNormalized extends Record<string, unkn
   dimensions: BoilerManifoldDimensionsNormalized;
 }
 
+/** Конструкция унибокса в каталоге. */
+export type UniboxType =
+  | 'rtl_air'
+  | 'rtl'
+  | 'rtl_afc'
+  | 'balancing_valve'
+  | 'air_only';
+
+export type UniboxConnectionThread = 'G1/2' | 'G3/4';
+export type UniboxConnectionFit = 'eurocone' | 'internal_thread';
+
+export interface UniboxConnectionNormalized {
+  thread: UniboxConnectionThread;
+  fit: UniboxConnectionFit;
+}
+
+export interface UniboxDimensionsNormalized {
+  height: number;
+  width: number;
+  depth: number;
+}
+
+/** Унибокс после validateAndNormalizeCatalog (контракт — UniboxCatalogItem). */
+export interface UniboxCatalogItemNormalized extends Record<string, unknown> {
+  id: string;
+  brand: string;
+  model: string;
+  type: UniboxType;
+  loopsCount: number;
+  maxAreaSqM: number;
+  maxLoopLengthM: number;
+  maxTemperatureC: number;
+  maxPressureBar: number;
+  kvM3h: number;
+  connection: UniboxConnectionNormalized;
+  material: string;
+  price: number;
+  minAirTempC?: number;
+  maxAirTempC?: number;
+  minCoolantTempC?: number;
+  maxCoolantTempC?: number;
+  minFlowLph?: number;
+  maxFlowLph?: number;
+  maxSupplyTempC?: number;
+  dimensions?: UniboxDimensionsNormalized;
+  description?: string;
+}
+
 export interface NormalizedCatalog {
   boilers: {
     doubleCircuit: BoilerCatalogItemNormalized[];
@@ -285,5 +333,7 @@ export interface NormalizedCatalog {
   manifolds?: ManifoldCatalogItemNormalized[];
   /** Котельные распределительные коллекторы. */
   boilerManifolds?: BoilerManifoldCatalogItemNormalized[];
+  /** Унибоксы (локальные регуляторы петли ТП). */
+  uniboxes?: UniboxCatalogItemNormalized[];
 }
 

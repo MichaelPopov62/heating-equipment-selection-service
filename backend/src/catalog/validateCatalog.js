@@ -1156,6 +1156,288 @@ function validateBoilerManifold(item, idx) {
   assertKnownBoilerManifoldSeriesGeometry(item, ctx);
 }
 
+/** Допустимые конструкции унибокса. */
+const UNIBOX_TYPES_ALLOWED = Object.freeze([
+  'rtl_air',
+  'rtl',
+  'rtl_afc',
+  'balancing_valve',
+  'air_only',
+]);
+
+/** Резьба подключения унибокса. */
+const UNIBOX_THREADS_ALLOWED = Object.freeze(['G1/2', 'G3/4']);
+
+/** Тип фитинга унибокса. */
+const UNIBOX_FITS_ALLOWED = Object.freeze(['eurocone', 'internal_thread']);
+
+/**
+ * Унибоксы: корень JSON или `products.uniboxes`.
+ *
+ * @param {Record<string, unknown>} json
+ * @returns {unknown[]}
+ */
+function collectUniboxes(json) {
+  if (Array.isArray(json.uniboxes)) return json.uniboxes;
+  const p = json.products;
+  if (isPlainObject(p) && Array.isArray(p.uniboxes)) return p.uniboxes;
+  return [];
+}
+
+/**
+ * @param {Record<string, unknown>} item
+ * @param {string} ctx
+ * @param {string} minKey
+ * @param {string} maxKey
+ */
+function assertOptionalMinMaxPair(item, ctx, minKey, maxKey) {
+  const hasMin = item[minKey] != null;
+  const hasMax = item[maxKey] != null;
+  if (hasMin && !hasMax) {
+    throw new Error(`Каталог: ${ctx}.${maxKey} обязателен, если задан ${minKey}.`);
+  }
+  if (hasMax && !hasMin) {
+    throw new Error(`Каталог: ${ctx}.${minKey} обязателен, если задан ${maxKey}.`);
+  }
+  if (!hasMin || !hasMax) return;
+  const min = /** @type {number} */ (item[minKey]);
+  const max = /** @type {number} */ (item[maxKey]);
+  if (min > max) {
+    throw new Error(`Каталог: ${ctx}.${minKey} (${min}) не может быть больше ${maxKey} (${max}).`);
+  }
+}
+
+/**
+ * @param {unknown} item
+ * @param {number} idx
+ * @param {Set<string>} seenIds
+ */
+function validateUnibox(item, idx, seenIds) {
+  const ctx = `uniboxes[${idx}]`;
+  if (!isPlainObject(item)) {
+    throw new Error(`Каталог: uniboxes[${idx}] должен быть объектом.`);
+  }
+
+  delete item.kind;
+  delete item.catalogKey;
+  delete item.currency;
+  delete item.sku;
+  delete item.article;
+  delete item.maxWorkingPressureBar;
+  delete item.kvs;
+  delete item.kvValueM3h;
+  delete item.maxPipeLengthM;
+  delete item.maxTempC;
+  delete item.mountDepthMm;
+  delete item.purpose;
+  delete item.headsCount;
+  delete item.controlType;
+  delete item.connectionDiameter;
+  delete item.connectionType;
+
+  // Запрет явных null в match-полях (omit вместо null).
+  for (const key of Object.keys(item)) {
+    if (item[key] === null) {
+      throw new Error(`Каталог: ${ctx}.${key} не может быть null (уберите ключ).`);
+    }
+  }
+
+  item.id = sanitizeTrimAngleBrackets(item.id);
+  if (!item.id) {
+    throw new Error(`Каталог: id обязателен (${ctx}).`);
+  }
+  if (seenIds.has(item.id)) {
+    throw new Error(`Каталог: дублирующий id унибокса "${item.id}" (${ctx}).`);
+  }
+  seenIds.add(item.id);
+
+  item.brand = sanitizeTrimAngleBrackets(item.brand);
+  if (!item.brand) {
+    throw new Error(`Каталог: brand обязателен (${ctx}).`);
+  }
+
+  item.model = sanitizeTrimAngleBrackets(item.model);
+  if (!item.model) {
+    throw new Error(`Каталог: model обязателен (${ctx}).`);
+  }
+
+  const typeRaw = sanitizeTrimAngleBrackets(item.type).trim().toLowerCase();
+  if (!UNIBOX_TYPES_ALLOWED.includes(typeRaw)) {
+    throw new Error(
+      `Каталог: ${ctx}.type недопустимо "${String(item.type)}"; ` +
+        `разрешено: ${UNIBOX_TYPES_ALLOWED.join(' | ')}.`,
+    );
+  }
+  item.type = typeRaw;
+
+  item.loopsCount = toFiniteInteger(item.loopsCount, {
+    field: `${ctx}.loopsCount`,
+    min: 1,
+    max: 8,
+  });
+
+  item.maxAreaSqM = toFiniteNumber(item.maxAreaSqM, {
+    field: `${ctx}.maxAreaSqM`,
+    min: 0.1,
+    max: 500,
+  });
+  item.maxLoopLengthM = toFiniteNumber(item.maxLoopLengthM, {
+    field: `${ctx}.maxLoopLengthM`,
+    min: 0.1,
+    max: 500,
+  });
+  item.maxTemperatureC = toFiniteNumber(item.maxTemperatureC, {
+    field: `${ctx}.maxTemperatureC`,
+    min: 30,
+    max: 120,
+  });
+  item.maxPressureBar = toFiniteNumber(item.maxPressureBar, {
+    field: `${ctx}.maxPressureBar`,
+    min: 0.1,
+    max: 25,
+  });
+  item.kvM3h = toFiniteNumber(item.kvM3h, {
+    field: `${ctx}.kvM3h`,
+    min: 0.01,
+    max: 50,
+  });
+
+  item.price = toFiniteNumber(item.price, {
+    field: `${ctx}.price`,
+    min: 1,
+    max: 1_000_000_000,
+  });
+
+  item.material = sanitizeTrimAngleBrackets(item.material);
+  if (!item.material) {
+    throw new Error(`Каталог: material обязателен (${ctx}).`);
+  }
+
+  if (!isPlainObject(item.connection)) {
+    throw new Error(`Каталог: объект connection обязателен (${ctx}).`);
+  }
+  /** @type {Record<string, unknown>} */
+  const conn = item.connection;
+  const thread = sanitizeTrimAngleBrackets(conn.thread).trim().replace(/\s+/g, '');
+  const threadNorm = thread === 'G½' || thread === 'G1/2"' ? 'G1/2' : thread === 'G¾' || thread === 'G3/4"' ? 'G3/4' : thread;
+  if (!UNIBOX_THREADS_ALLOWED.includes(threadNorm)) {
+    throw new Error(
+      `Каталог: ${ctx}.connection.thread недопустимо "${String(conn.thread)}"; ` +
+        `разрешено: ${UNIBOX_THREADS_ALLOWED.join(' | ')}.`,
+    );
+  }
+  conn.thread = threadNorm;
+
+  const fit = sanitizeTrimAngleBrackets(conn.fit).trim().toLowerCase();
+  if (!UNIBOX_FITS_ALLOWED.includes(fit)) {
+    throw new Error(
+      `Каталог: ${ctx}.connection.fit недопустимо "${String(conn.fit)}"; ` +
+        `разрешено: ${UNIBOX_FITS_ALLOWED.join(' | ')}.`,
+    );
+  }
+  conn.fit = fit;
+
+  if (item.description != null) {
+    item.description = sanitizeTrimAngleBrackets(item.description);
+    if (!item.description) delete item.description;
+  }
+
+  /** @type {string[]} */
+  const optionalNumberKeys = [
+    'minAirTempC',
+    'maxAirTempC',
+    'minCoolantTempC',
+    'maxCoolantTempC',
+    'minFlowLph',
+    'maxFlowLph',
+    'maxSupplyTempC',
+  ];
+  for (const key of optionalNumberKeys) {
+    if (item[key] === undefined) continue;
+    const min = key.startsWith('min') || key === 'maxSupplyTempC' ? -20 : -20;
+    const max = key.includes('Flow') ? 5000 : 120;
+    item[key] = toFiniteNumber(item[key], {
+      field: `${ctx}.${key}`,
+      min: key.includes('Flow') || key === 'maxSupplyTempC' ? (key.includes('Flow') ? 0.01 : 20) : min,
+      max,
+    });
+  }
+
+  assertOptionalMinMaxPair(item, ctx, 'minAirTempC', 'maxAirTempC');
+  assertOptionalMinMaxPair(item, ctx, 'minCoolantTempC', 'maxCoolantTempC');
+  assertOptionalMinMaxPair(item, ctx, 'minFlowLph', 'maxFlowLph');
+
+  if (item.type === 'rtl_air') {
+    for (const key of ['minAirTempC', 'maxAirTempC', 'minCoolantTempC', 'maxCoolantTempC']) {
+      if (item[key] == null) {
+        throw new Error(`Каталог: ${ctx}.${key} обязателен при type=rtl_air.`);
+      }
+    }
+  } else if (item.type === 'rtl') {
+    for (const key of ['minCoolantTempC', 'maxCoolantTempC']) {
+      if (item[key] == null) {
+        throw new Error(`Каталог: ${ctx}.${key} обязателен при type=rtl.`);
+      }
+    }
+  } else if (item.type === 'rtl_afc') {
+    for (const key of [
+      'minCoolantTempC',
+      'maxCoolantTempC',
+      'minFlowLph',
+      'maxFlowLph',
+    ]) {
+      if (item[key] == null) {
+        throw new Error(`Каталог: ${ctx}.${key} обязателен при type=rtl_afc.`);
+      }
+    }
+  } else if (item.type === 'air_only') {
+    for (const key of ['minAirTempC', 'maxAirTempC', 'maxSupplyTempC']) {
+      if (item[key] == null) {
+        throw new Error(`Каталог: ${ctx}.${key} обязателен при type=air_only.`);
+      }
+    }
+  } else if (item.type === 'balancing_valve') {
+    for (const key of [
+      'minAirTempC',
+      'maxAirTempC',
+      'minCoolantTempC',
+      'maxCoolantTempC',
+      'minFlowLph',
+      'maxFlowLph',
+      'maxSupplyTempC',
+    ]) {
+      if (item[key] != null) {
+        throw new Error(
+          `Каталог: ${ctx}.${key} недопустим при type=balancing_valve (в паспорте нет этих диапазонов).`,
+        );
+      }
+    }
+  }
+
+  if (item.dimensions !== undefined) {
+    if (!isPlainObject(item.dimensions)) {
+      throw new Error(`Каталог: ${ctx}.dimensions должен быть объектом.`);
+    }
+    /** @type {Record<string, unknown>} */
+    const dim = item.dimensions;
+    dim.height = toFiniteNumber(dim.height, {
+      field: `${ctx}.dimensions.height`,
+      min: 0.1,
+      max: 2000,
+    });
+    dim.width = toFiniteNumber(dim.width, {
+      field: `${ctx}.dimensions.width`,
+      min: 0.1,
+      max: 2000,
+    });
+    dim.depth = toFiniteNumber(dim.depth, {
+      field: `${ctx}.dimensions.depth`,
+      min: 0.1,
+      max: 500,
+    });
+  }
+}
+
 /**
  * Валидирует и (минимально) нормализует каталог.
  * Входной json не мутируется (клонирование как в validateAndNormalizeInput для calc).
@@ -1202,6 +1484,11 @@ export function validateAndNormalizeCatalog(json) {
   const boilerManifolds = boilerManifoldsRaw.filter(isPlainObject);
   boilerManifolds.forEach((item, i) => validateBoilerManifold(item, i));
 
+  const uniboxesRaw = collectUniboxes(root);
+  const uniboxes = uniboxesRaw.filter(isPlainObject);
+  const seenUniboxIds = new Set();
+  uniboxes.forEach((item, i) => validateUnibox(item, i, seenUniboxIds));
+
   return {
     boilers: { doubleCircuit, singleCircuit },
     radiators,
@@ -1211,6 +1498,7 @@ export function validateAndNormalizeCatalog(json) {
     indirectWaterHeaters,
     manifolds,
     boilerManifolds,
+    uniboxes,
   };
 }
 

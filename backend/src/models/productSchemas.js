@@ -1,7 +1,7 @@
 /**
  * Назначение: Mongoose-схемы каталога оборудования и их подтипов.
  * Описание: baseProductSchema и схемы boiler, radiator, waterHeater, pipe, pump, indirectWaterHeater,
- * manifold, boilerManifold для seed (scripts/seed.js). Контракт номенклатуры (powerKw, priceBasis, specs.volumeLiters и др.)
+ * manifold, boilerManifold, unibox для seed (scripts/seed.js). Контракт номенклатуры (powerKw, priceBasis, specs.volumeLiters и др.)
  * — validateAndNormalizeCatalog в catalog/validateCatalog.js (SSOT на чтение и запись).
  * strict: false намеренно: не дублировать полный контракт в Mongoose; прямой insert/update в
  * products без validateAndNormalizeCatalog ломает loadCatalog() на runtime.
@@ -15,7 +15,7 @@ export const baseProductSchema = new Schema(
     kind: {
       type: String,
       required: true,
-      enum: ['boiler', 'radiator', 'waterHeater', 'pipe', 'pump', 'indirectWaterHeater', 'manifold', 'boilerManifold'],
+      enum: ['boiler', 'radiator', 'waterHeater', 'pipe', 'pump', 'indirectWaterHeater', 'manifold', 'boilerManifold', 'unibox'],
     },
     /** Уникальный ключ строки каталога в seed (индекс + секция); не путать с «моделью для UI». */
     catalogKey: { type: String, required: true, trim: true },
@@ -167,4 +167,23 @@ export const boilerManifoldSchema = new Schema({
     height: { type: Number, required: true },
     depth: { type: Number, required: true },
   },
+});
+
+/** Унибокс (локальный регулятор петли ТП). Полный контракт — validateCatalog. */
+export const uniboxSchema = new Schema({
+  brand: { type: String, required: true, trim: true },
+  price: { type: Number, required: true, min: 1 },
+  type: {
+    type: String,
+    required: true,
+    trim: true,
+    enum: ['rtl_air', 'rtl', 'rtl_afc', 'balancing_valve', 'air_only'],
+  },
+  loopsCount: { type: Number, required: true, min: 1, max: 8 },
+  maxAreaSqM: { type: Number, required: true },
+  maxLoopLengthM: { type: Number, required: true },
+  maxTemperatureC: { type: Number, required: true },
+  maxPressureBar: { type: Number, required: true },
+  kvM3h: { type: Number, required: true },
+  material: { type: String, required: true, trim: true },
 });

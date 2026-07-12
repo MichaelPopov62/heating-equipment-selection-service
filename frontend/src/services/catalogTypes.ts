@@ -47,3 +47,40 @@ export type CatalogBoilerManifoldItem = {
   material: string;
   dimensions: CatalogManifoldDimensions;
 };
+
+/** Конструкция унибокса. */
+export type UniboxType =
+  | 'rtl_air'
+  | 'rtl'
+  | 'rtl_afc'
+  | 'balancing_valve'
+  | 'air_only';
+
+export type UniboxConnectionThread = 'G1/2' | 'G3/4';
+export type UniboxConnectionFit = 'eurocone' | 'internal_thread';
+
+/** Унибокс из GET /api/v1/catalog → catalog.uniboxes. */
+export type CatalogUniboxItem = {
+  id: string;
+  brand: string;
+  model: string;
+  type: UniboxType;
+  loopsCount: number;
+  maxAreaSqM: number;
+  maxLoopLengthM: number;
+  maxTemperatureC: number;
+  maxPressureBar: number;
+  kvM3h: number;
+  connection: { thread: UniboxConnectionThread; fit: UniboxConnectionFit };
+  material: string;
+  price: number;
+  minAirTempC?: number;
+  maxAirTempC?: number;
+  minCoolantTempC?: number;
+  maxCoolantTempC?: number;
+  minFlowLph?: number;
+  maxFlowLph?: number;
+  maxSupplyTempC?: number;
+  dimensions?: CatalogManifoldDimensions;
+  description?: string;
+};

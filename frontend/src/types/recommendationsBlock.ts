@@ -12,6 +12,7 @@ import type { ObjectType } from './envelope';
 import type { CatalogEquipmentSnapshot } from '../services/catalog';
 import type { ParsedUnderfloorHeating } from './underfloorHeating';
 import type { ParsedHydraulicsView } from './hydraulics';
+import type { ParsedUniboxesMatching } from '../utils/parseUniboxesMatchingFromReport';
 import type { SurveyUiPhase } from '../surveySession/types';
 
 export type QuickEstimate = {
@@ -58,6 +59,7 @@ export type RecommendationsBlockProps = {
   apiIndirectWhFromReport: ParsedIndirectWaterHeaterMatching | null;
   apiElectricWhFromReport: ParsedWaterHeaterMatching | null;
   apiUnderfloorHeatingFromReport: ParsedUnderfloorHeating | null;
+  apiUniboxesFromReport?: ParsedUniboxesMatching | null;
   displayedRadiatorSectionsTotal: string;
   apiCatalogSource: 'file' | 'mongo' | null;
   apiAutomationHints: AutomationHint[];

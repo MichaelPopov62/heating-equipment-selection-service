@@ -21,7 +21,7 @@ import {
 } from '../hydraulics/public.js';
 import { resolveUfhDistributionWithAppliances } from '../logic/ufhDistributionResolve.js';
 import { computeUfhMixingNodeSpec } from '../logic/ufhMixingNodeHydraulics.js';
-import { matchEquipment, pickManifolds } from '../matching/public.js';
+import { matchEquipment, pickManifolds, pickUniboxes } from '../matching/public.js';
 import { pushRecommendation } from '../recommendations/recommendationResolver.js';
 import { assertCalcRuntimeContext } from '../reference/assertCalcRuntimeContext.js';
 import { logger } from '../utils/logger.js';
@@ -478,6 +478,20 @@ export async function buildReport({ input, ctx }) {
     hydraulics: input.hydraulics,
   });
 
+  // 4c) Підбір унібоксів — паспортні min/max; лише 1…2 петлі без каскаду колекторів
+  const roomAirTempC =
+    typeof input.temps?.insideC === 'number'
+      ? input.temps.insideC
+      : typeof input.building?.temps?.insideC === 'number'
+        ? input.building.temps.insideC
+        : undefined;
+  matching.uniboxes = pickUniboxes({
+    catalog: ctx.catalog,
+    underfloorHeating,
+    roomAirTempC,
+    manifolds: matching.manifolds,
+  });
+
   logger.info('report.matching.done', null, {
     boilerModel: matching?.boiler?.selected?.model ?? null,
     requiredBoilerKw: matching?.boiler?.requiredKw ?? null,
@@ -490,11 +504,15 @@ export async function buildReport({ input, ctx }) {
       matching?.manifolds?.underfloor?.reduce((s, f) => s + (f.units?.length ?? 0), 0) ?? 0,
     manifoldRadiatorModel: matching?.manifolds?.radiator?.selected?.model ?? null,
     boilerManifoldModel: matching?.manifolds?.boilerManifold?.selected?.model ?? null,
+    uniboxLoopCount: matching?.uniboxes?.byLoop?.length ?? 0,
+    uniboxSelectedCount:
+      matching?.uniboxes?.byLoop?.filter((row) => row.selected)?.length ?? 0,
     warnings: (matching?.boiler?.warnings?.length ?? 0)
       + (matching?.radiators?.warnings?.length ?? 0)
       + (matching?.waterHeater?.warnings?.length ?? 0)
       + (matching?.indirectWaterHeater?.warnings?.length ?? 0)
-      + (matching?.manifolds?.warnings?.length ?? 0),
+      + (matching?.manifolds?.warnings?.length ?? 0)
+      + (matching?.uniboxes?.warnings?.length ?? 0),
   });
 
   // 5) Гидравлика Pure Pipeline (после matching)
@@ -571,6 +589,7 @@ export async function buildReport({ input, ctx }) {
     ...(matching.waterHeater?.warnings ?? []),
     ...(matching.indirectWaterHeater?.warnings ?? []),
     ...(matching.manifolds?.warnings ?? []),
+    ...(matching.uniboxes?.warnings ?? []),
     ...(matching.hydraulics?.warnings ?? []),
   ];
 

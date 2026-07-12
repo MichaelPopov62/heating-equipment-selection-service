@@ -7,7 +7,7 @@
 1. **SSOT по теплу** — ТП, радиаторы и ГВС считают мощности и расходы; гидравлика только агрегирует.
 2. **Два уровня входа** — `HydraulicsSurveyInput` (анкета) и `HydraulicsPipelineInput` (сервер после matching).
 3. **Диаметры только в matching** — `matching.hydraulics.pipes[]` и `matching.hydraulics.proposal` (brand, model, price).
-4. **Порядок в buildReport** — `matchEquipment` → резолв `distributionPreset` ТП → **`pickManifolds`** (`matching.manifolds`, см. [`manifold-matching.md`](manifold-matching.md)) → `buildHydraulicsSnapshots` → `validateHydraulicsPipelineInput` → `runHydraulicsPipeline`.
+4. **Порядок в buildReport** — `matchEquipment` → резолв `distributionPreset` ТП → **`pickManifolds`** (`matching.manifolds`, см. [`manifold-matching.md`](manifold-matching.md)) → **`pickUniboxes`** (`matching.uniboxes`, см. [`unibox-matching.md`](unibox-matching.md)) → `buildHydraulicsSnapshots` → `validateHydraulicsPipelineInput` → `runHydraulicsPipeline`.
 5. **Зоны циркуляции** — Q и насосы по топологии (`resolveCirculationFlows` → `resolveSystemPumps`), не одной формулой `Math.max`.
 6. **Коллектор в графе ≠ SKU** — узлы `ufh_collector` / `radiator_distribution_manifold` задают топологию и длины; позиция каталога для сметы — `matching.manifolds`. Каскад ТП при >12 петлях на этаж (`units[]`) увеличивает число SKU в смете, **не** число узлов графа (один `ufh_collector_floor_N` на этаж).
 

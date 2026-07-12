@@ -35,3 +35,8 @@ properties:
     type: array
     items:
       $ref: BoilerManifoldCatalogItem.yaml
+  uniboxes:
+    type: array
+    items:
+      $ref: UniboxCatalogItem.yaml
+

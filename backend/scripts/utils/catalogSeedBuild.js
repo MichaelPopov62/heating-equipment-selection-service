@@ -24,9 +24,9 @@ function cloneJsonSerializable(x) {
  * @returns {string}
  */
 function resolveProductCatalogKey(prefix, raw, index) {
-  const article = raw?.article;
-  if (typeof article === 'string' && article.trim()) {
-    const slug = article
+  const idOrArticle = raw?.id ?? raw?.article;
+  if (typeof idOrArticle === 'string' && idOrArticle.trim()) {
+    const slug = idOrArticle
       .trim()
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
@@ -63,6 +63,7 @@ export function summarizeNormalizedCatalog(norm) {
     indirectWaterHeaters: (norm.indirectWaterHeaters ?? []).length,
     manifolds: (norm.manifolds ?? []).length,
     boilerManifolds: (norm.boilerManifolds ?? []).length,
+    uniboxes: (norm.uniboxes ?? []).length,
   };
 }
 
@@ -144,6 +145,15 @@ export function buildProductDocumentsFromNormalized(norm) {
     };
   });
 
+  const uniboxes = (norm.uniboxes ?? []).map((x, i) => {
+    const raw = cloneJsonSerializable(x);
+    return {
+      ...raw,
+      kind: 'unibox',
+      catalogKey: resolveProductCatalogKey('unibox', raw, i),
+    };
+  });
+
   return [
     ...boilers,
     ...radiators,
@@ -153,6 +163,7 @@ export function buildProductDocumentsFromNormalized(norm) {
     ...indirectWaterHeaters,
     ...manifolds,
     ...boilerManifolds,
+    ...uniboxes,
   ];
 }
 
