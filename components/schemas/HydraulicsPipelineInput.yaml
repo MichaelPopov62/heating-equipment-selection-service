@@ -139,6 +139,11 @@ properties:
           radiatorBranch: { type: number }
           ufhCollectorBranch: { type: number }
       maxUfhLoopLengthM: { type: number }
+      ufhLoopLengthLayoutFactor:
+        type: number
+        minimum: 1
+        maximum: 1.3
+        description: Коэффициент укладки петли ТП (L = S/a × factor; классика 1.1).
       ufhLoopDeltaTK: { type: number }
       ufhLoopVelocityMinMps: { type: number }
       ufhLoopVelocityMaxMps: { type: number }
@@ -262,6 +267,11 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/UfhLoop'
+      ufhTerminalControl:
+        type: string
+        enum: [collector, unibox]
+        description: >
+          Терминал петли из анкеты. unibox — петля не через коллектор этажа в графе.
   UnderfloorCircuit:
     type: object
     additionalProperties: false

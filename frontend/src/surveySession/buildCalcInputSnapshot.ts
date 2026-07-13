@@ -22,6 +22,8 @@ export function buildCalcInputKeyFromDraft(draft: SurveyDraftSnapshot): string {
     waterUnderfloorHeating: draft.waterUnderfloorHeating,
     underfloorDistributionPreset: draft.underfloorDistributionPreset,
     thermalRegimePreset: draft.thermalRegimePreset,
+    radiatorConnection: draft.radiatorConnection,
+    radiatorEmitterPreference: draft.radiatorEmitterPreference,
     ufhPresetId: draft.ufhPresetId,
     hydraulicsForm: draft.hydraulicsForm,
   });
@@ -83,6 +85,8 @@ export function buildCalcPayloadFromDraft(
     waterUnderfloorHeating: draft.waterUnderfloorHeating,
     underfloorDistributionPreset: draft.underfloorDistributionPreset,
     thermalRegimePreset: draft.thermalRegimePreset,
+    radiatorConnection: draft.radiatorConnection,
+    radiatorEmitterPreference: draft.radiatorEmitterPreference,
     ufhPresetId: draft.ufhPresetId,
     hydraulicsForm: draft.hydraulicsForm,
     wiringLayoutV3: draft.wiringLayoutV3,

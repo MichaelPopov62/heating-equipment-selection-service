@@ -5,6 +5,14 @@
 
 import type { ObjectMetaValue } from '../types/envelope';
 import type { HeatingThermalRegimePreset } from '../types/heatingThermalRegime';
+import {
+  DEFAULT_RADIATOR_CONNECTION,
+  type RadiatorConnection,
+} from '../types/radiatorConnection';
+import {
+  DEFAULT_RADIATOR_EMITTER_PREFERENCE,
+  type RadiatorEmitterPreference,
+} from '../types/radiatorEmitterPreference';
 import type { UfhModePresetId } from '../types/ufhModePreset';
 import type { UfhDistributionPreset } from '../types/ufhDistribution';
 import type { HotWaterFormValue } from '../types/hotWater';
@@ -24,6 +32,8 @@ export function buildSurveyCalcInputKey(params: {
   waterUnderfloorHeating: boolean;
   underfloorDistributionPreset: UfhDistributionPreset;
   thermalRegimePreset: HeatingThermalRegimePreset;
+  radiatorConnection?: RadiatorConnection;
+  radiatorEmitterPreference?: RadiatorEmitterPreference;
   ufhPresetId?: UfhModePresetId | null;
   hydraulicsForm?: import('../types/hydraulics').HydraulicsFormValue;
 }) {
@@ -36,6 +46,8 @@ export function buildSurveyCalcInputKey(params: {
     waterUnderfloorHeating,
     underfloorDistributionPreset,
     thermalRegimePreset,
+    radiatorConnection = DEFAULT_RADIATOR_CONNECTION,
+    radiatorEmitterPreference = DEFAULT_RADIATOR_EMITTER_PREFERENCE,
     ufhPresetId = null,
     hydraulicsForm,
   } = params;
@@ -56,6 +68,8 @@ export function buildSurveyCalcInputKey(params: {
     waterUnderfloorHeating,
     underfloorDistributionPreset,
     thermalRegimePreset,
+    radiatorConnection,
+    radiatorEmitterPreference,
     ufhPresetId,
     hotWater: hotWaterForm,
     hydraulics: hydraulicsForm,
@@ -96,6 +110,7 @@ export function buildSurveyCalcInputKey(params: {
                 ? r.underfloorHeating.pipeSpacingMm
                 : 150,
             furnitureOccupiedAreaM2: r.underfloorHeating.furnitureOccupiedAreaM2,
+            ufhTerminalControl: r.underfloorHeating.ufhTerminalControl,
           }
         : undefined,
     })),

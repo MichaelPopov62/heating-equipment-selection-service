@@ -126,14 +126,27 @@ check(
   'с мебелью: requiredHeatFluxUpWm2 > 0',
 );
 
+const layoutFactor =
+  typeof roomFurniture?.loopLengthLayoutFactor === 'number'
+    ? roomFurniture.loopLengthLayoutFactor
+    : 1.1;
 const expectedLoopLen =
   roomFurniture != null
-    ? roomFurniture.heatedAreaM2 / (roomFurniture.resolvedPipeSpacingMm / 1000)
+    ? (roomFurniture.heatedAreaM2 / (roomFurniture.resolvedPipeSpacingMm / 1000))
+      * layoutFactor
     : 0;
 const actualLoopLen = roomFurniture?.loops?.[0]?.loopLengthM ?? 0;
 check(
   Math.abs(actualLoopLen - expectedLoopLen) < 0.2,
-  `длина петли ТП ≈ S_акт/шаг (${actualLoopLen} ≈ ${expectedLoopLen.toFixed(1)})`,
+  `длина петли ТП ≈ S_акт/шаг×${layoutFactor} (${actualLoopLen} ≈ ${expectedLoopLen.toFixed(1)})`,
+);
+check(
+  typeof roomFurniture?.pipeMetersPerSqM === 'number'
+    && Math.abs(
+      roomFurniture.pipeMetersPerSqM
+        - layoutFactor / (roomFurniture.resolvedPipeSpacingMm / 1000),
+    ) < 0.01,
+  'pipeMetersPerSqM = layoutFactor / шаг',
 );
 
 check(

@@ -7,6 +7,7 @@ required:
   - chosen
   - byRoom
   - warnings
+  - emittersSummary
 properties:
   chosen:
     type: object
@@ -20,6 +21,21 @@ properties:
   warnings:
     type: array
     items: { type: string }
+  emittersSummary:
+    $ref: RadiatorsEmittersSummary.yaml
+    description: Агрегат основної лінії підбору (графік з анкети).
+  totalSections:
+    type: integer
+    nullable: true
+    description: >-
+      Alias emittersSummary.sectionalSections (без панелей). Зручність для legacy UI.
+  roomEmitterDiffs:
+    type: array
+    items:
+      $ref: RadiatorsRoomEmitterDiff.yaml
+    description: >-
+      Порівняння приладів по кімнатах між lineEconomy і lineEfficient
+      (equipmentKindChanged тощо).
   lineEconomy:
     $ref: RadiatorsProposalLineReport.yaml
     description: >-
@@ -57,7 +73,23 @@ properties:
       radiatorConnection:
         type: string
         enum: [side, bottom]
+      radiatorEmitterPreference:
+        type: string
+        enum: [auto, sectional, panel]
       thermalRegimePreset: { type: string }
   radiatorSelectionNotes:
+    type: array
+    items: { type: string }
+  resolvedEmitterKind:
+    type: string
+    nullable: true
+    enum: [sectional, panel]
+    description: Єдиний тип приладів на об'єкт після Two-Pass Orchestrator.
+  emitterKindVotes:
+    type: object
+    properties:
+      sectional: { type: integer, minimum: 0 }
+      panel: { type: integer, minimum: 0 }
+  emitterKindDecisionNotes:
     type: array
     items: { type: string }

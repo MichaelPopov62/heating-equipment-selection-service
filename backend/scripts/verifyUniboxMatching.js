@@ -3,6 +3,7 @@
  * Запуск: npm run verify:unibox-matching
  */
 import assert from 'node:assert/strict';
+import { validateAndNormalizeCatalog } from '../src/catalog/validateCatalog.js';
 import {
   UNIBOX_DESIGN_PRESSURE_BAR,
   UNIBOX_REQUIRED_FIT,
@@ -17,6 +18,25 @@ import {
   uniboxFitsDemand,
   validateUniboxLoopDemand,
 } from '../src/matching/unibox.js';
+
+/**
+ * Мінімальний envelope каталогу лише з uniboxes (як у runtime після loadCatalog).
+ *
+ * @param {Record<string, unknown>[]} uniboxes
+ * @returns {Record<string, unknown>}
+ */
+function catalogEnvelopeWithUniboxes(uniboxes) {
+  return {
+    schemaVersion: 1,
+    products: {
+      boilers: { doubleCircuit: [], singleCircuit: [] },
+      radiators: [],
+      waterHeaters: [],
+      pipes: [],
+    },
+    uniboxes,
+  };
+}
 
 /** @type {import('../src/catalog/types').UniboxCatalogItemNormalized[]} */
 const UNIBOXES = [
@@ -253,6 +273,7 @@ const underfloorHeating = {
       bottomBoundary: 'heated',
       neighborTempC: 20,
       warnings: [],
+      ufhTerminalControl: 'unibox',
       loops: [
         {
           loopId: 'r1-L1',
@@ -380,7 +401,7 @@ assert.equal(badDtReport.byLoop.length, 1);
 assert.equal(badDtReport.byLoop[0].selected, null);
 assert.ok(badDtReport.warnings.some((w) => w.includes('обратка') || w.includes('UNIBOX') || w.includes('<')));
 
-// >2 петель → skip
+// >2 петель з явним unibox — підбір триває, м'яке попередження
 const manyLoopsRoom = {
   ...underfloorHeating,
   rooms: [
@@ -399,10 +420,10 @@ const tooMany = pickUniboxes({
   underfloorHeating: manyLoopsRoom,
   roomAirTempC: 20,
 });
-assert.equal(tooMany.byLoop.length, 0);
-assert.ok(tooMany.warnings.some((w) => w.includes('петель')));
+assert.equal(tooMany.byLoop.length, 3);
+assert.ok(tooMany.warnings.some((w) => w.includes('унибоксом')));
 
-// Каскад коллекторов (H.15) → skip
+// Каскад коллекторов не блокує явні unibox-зони
 assert.equal(
   hasUnderfloorManifoldCascade({
     ok: true,
@@ -423,10 +444,11 @@ assert.equal(
   }),
   true,
 );
-const cascadeSkip = pickUniboxes({
+const cascadeStillMatches = pickUniboxes({
   catalog,
   underfloorHeating,
   roomAirTempC: 20,
+  rooms: [{ id: 'r1', type: 'гостиная' }],
   manifolds: {
     ok: true,
     underfloor: [
@@ -445,8 +467,56 @@ const cascadeSkip = pickUniboxes({
     warnings: [],
   },
 });
-assert.equal(cascadeSkip.byLoop.length, 0);
-assert.ok(cascadeSkip.warnings.some((w) => w.includes('каскад')));
+assert.equal(cascadeStillMatches.byLoop.length, 1);
+assert.ok(cascadeStillMatches.byLoop[0].selected);
+
+// collector-термінал → demands порожні
+const collectorOnly = {
+  ...underfloorHeating,
+  rooms: [{ ...underfloorHeating.rooms[0], ufhTerminalControl: 'collector' }],
+};
+assert.equal(
+  collectUniboxLoopDemands(collectorOnly, {
+    surveyInsideC: 20,
+    rooms: [{ id: 'r1', type: 'гостиная' }],
+  }).length,
+  0,
+);
+
+// Змішаний об'єкт: лише санузел з unibox
+const mixedUfh = {
+  ...underfloorHeating,
+  rooms: [
+    { ...underfloorHeating.rooms[0], roomId: 'r2', ufhTerminalControl: 'collector' },
+    {
+      ...underfloorHeating.rooms[0],
+      roomId: 'r4',
+      heatedAreaM2: 3.8,
+      areaM2: 3.8,
+      ufhTerminalControl: 'unibox',
+      loops: [
+        {
+          loopId: 'r4-L1',
+          loopLengthM: 38,
+          heatLoadWatts: 200,
+          flowRateM3PerHour: 0.02,
+        },
+      ],
+    },
+  ],
+};
+const mixedPick = pickUniboxes({
+  catalog,
+  underfloorHeating: mixedUfh,
+  roomAirTempC: 20,
+  rooms: [
+    { id: 'r2', type: 'гостиная' },
+    { id: 'r4', type: 'санузел' },
+  ],
+});
+assert.equal(mixedPick.byLoop.length, 1);
+assert.equal(mixedPick.byLoop[0].roomId, 'r4');
+assert.ok(mixedPick.byLoop[0].selected);
 
 // Soft-fail коллекторов / битые manifolds — не TypeError, не cascade-skip
 assert.equal(hasUnderfloorManifoldCascade(null), false);
@@ -491,7 +561,17 @@ const degradedPick = pickUniboxes({
 });
 assert.ok(degradedPick.byLoop.length >= 1);
 assert.ok(!degradedPick.warnings.some((w) => w.includes('Унибоксы не подбираются: каскад')));
-assert.ok(degradedPick.warnings.some((w) => w.includes('manifolds.ok=false')));
+const degradedInfo = degradedPick.warnings.find((w) =>
+  w.includes('Подбор унибоксов выполняется без сигнала каскада коллекторов'),
+);
+assert.ok(degradedInfo, 'блок-рівень warning про soft-fail колекторів');
+assert.ok(degradedInfo.includes('manifolds.ok=false'));
+assert.ok(degradedInfo.includes('MANIFOLD_INTERNAL'));
+const byLoopWarnFlat = degradedPick.byLoop.flatMap((r) => r.warnings);
+assert.ok(
+  !byLoopWarnFlat.some((w) => w.includes('без сигнала каскада')),
+  'degraded-warning лише в matching.uniboxes.warnings, не в byLoop',
+);
 assert.ok(degradedPick.byLoop[0].selected);
 
 const nullManifoldsPick = pickUniboxes({
@@ -531,5 +611,79 @@ assert.equal(zeroFlowPick.byLoop[0].selected, null);
 assert.ok(
   zeroFlowPick.byLoop[0].warnings.some((w) => w.includes('расход') || w.includes('л/ч')),
 );
+
+// --- Пул лише з validated catalog.uniboxes (omit опціональних полів, без NaN) ---
+const rawUniboxEnvelope = catalogEnvelopeWithUniboxes([
+  {
+    id: 'UB-BAL',
+    brand: 'Test',
+    model: 'BalOnly',
+    type: 'balancing_valve',
+    loopsCount: 1,
+    maxAreaSqM: 20,
+    maxLoopLengthM: 100,
+    maxTemperatureC: 90,
+    maxPressureBar: 10,
+    kvM3h: 1.2,
+    connection: { thread: 'G3/4', fit: 'eurocone' },
+    material: 'Латунь',
+    price: 2500,
+    // omit: min/maxAir, coolant, flow, maxSupply — паспорт balancing_valve
+  },
+  {
+    id: 'UB-RTL-LEGACY',
+    brand: 'Test',
+    model: 'RtlLegacyKeys',
+    type: 'rtl_air',
+    loopsCount: 1,
+    maxAreaSqM: 20,
+    maxLoopLengthM: 80,
+    minAirTempC: 6,
+    maxAirTempC: 28,
+    minCoolantTempC: 10,
+    maxCoolantTempC: 50,
+    maxTemperatureC: 90,
+    maxPressureBar: 10,
+    kvM3h: 1.1,
+    kvs: 1.1, // legacy — validateUnibox видаляє
+    connection: { thread: 'G3/4', fit: 'eurocone' },
+    material: 'Латунь',
+    price: 4000,
+  },
+]);
+const normalizedPool = validateAndNormalizeCatalog(rawUniboxEnvelope);
+assert.equal(normalizedPool.uniboxes.length, 2);
+const bal = normalizedPool.uniboxes.find((u) => u.id === 'UB-BAL');
+const rtlLegacy = normalizedPool.uniboxes.find((u) => u.id === 'UB-RTL-LEGACY');
+assert.ok(bal);
+assert.ok(rtlLegacy);
+assert.equal(Object.hasOwn(bal, 'minAirTempC'), false);
+assert.equal(Object.hasOwn(bal, 'maxAirTempC'), false);
+assert.equal(Object.hasOwn(bal, 'minCoolantTempC'), false);
+assert.equal(Object.hasOwn(bal, 'minFlowLph'), false);
+assert.equal(Object.hasOwn(bal, 'maxSupplyTempC'), false);
+assert.equal(Object.hasOwn(rtlLegacy, 'kvs'), false);
+assert.equal(uniboxFitsDemand(bal, demandOk), true);
+assert.equal(uniboxFitsDemand(rtlLegacy, demandOk), true);
+
+const normalizedOnlyCatalog = { uniboxes: normalizedPool.uniboxes };
+const fromValidated = pickUniboxes({
+  catalog: normalizedOnlyCatalog,
+  underfloorHeating,
+  roomAirTempC: 20,
+  rooms: [{ id: 'r1', type: 'living' }],
+});
+assert.equal(fromValidated.byLoop.length, 1);
+assert.ok(fromValidated.byLoop[0].selected);
+assert.equal(fromValidated.byLoop[0].selected.id, 'UB-RTL-LEGACY');
+
+const balOnlyPick = pickUniboxes({
+  catalog: { uniboxes: [bal] },
+  underfloorHeating,
+  roomAirTempC: 20,
+  rooms: [{ id: 'r1', type: 'living' }],
+});
+assert.ok(balOnlyPick.byLoop[0].selected);
+assert.equal(balOnlyPick.byLoop[0].selected.id, 'UB-BAL');
 
 console.log('verify:unibox-matching OK');

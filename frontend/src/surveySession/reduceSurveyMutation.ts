@@ -94,6 +94,10 @@ export function reduceSurveyMutation(
     }
     case 'SET_THERMAL_REGIME_PRESET':
       return { ...draft, thermalRegimePreset: mutation.preset };
+    case 'SET_RADIATOR_CONNECTION':
+      return { ...draft, radiatorConnection: mutation.connection };
+    case 'SET_RADIATOR_EMITTER_PREFERENCE':
+      return { ...draft, radiatorEmitterPreference: mutation.preference };
     case 'SET_HYDRAULICS_FORM':
       return { ...draft, hydraulicsForm: mutation.hydraulicsForm };
     case 'DRAFT_LOADED':

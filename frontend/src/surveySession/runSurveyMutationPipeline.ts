@@ -140,3 +140,17 @@ export function applyCalcResponseFail(
     calcError: message,
   };
 }
+
+/**
+ * Dedup payload: POST не нужен — снимаем recalculating, отчёт без изменений.
+ *
+ * @param state
+ * @returns {SurveySessionState}
+ */
+export function applyCalcSkippedDedup(state: SurveySessionState): SurveySessionState {
+  return {
+    ...state,
+    uiPhase: state.report != null ? 'stable' : 'idle',
+    calcError: null,
+  };
+}

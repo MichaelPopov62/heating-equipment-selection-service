@@ -234,6 +234,9 @@ export function buildHydraulicsSnapshots({
       ...(room.loops?.length
         ? { loops: room.loops.map(toPipelineUfhLoop) }
         : {}),
+      ...(room.ufhTerminalControl === 'unibox'
+        ? { ufhTerminalControl: /** @type {const} */ ('unibox') }
+        : { ufhTerminalControl: /** @type {const} */ ('collector') }),
     }));
 
     /** @type {import('./types').HydraulicsMixingNodeSnapshot | undefined} */

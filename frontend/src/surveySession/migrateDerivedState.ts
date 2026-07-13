@@ -5,6 +5,8 @@
 
 import type { RoomFormValue } from '../types/rooms';
 import type { SurveyDraftSnapshot, SurveyMutation } from './types';
+import { DEFAULT_RADIATOR_CONNECTION } from '../types/radiatorConnection';
+import { DEFAULT_RADIATOR_EMITTER_PREFERENCE } from '../types/radiatorEmitterPreference';
 import type { WiringLayoutV3 } from './wiringLayoutV3';
 import {
   adaptFlatRoomsToWiringLayout,
@@ -164,6 +166,9 @@ export function createInitialDraftSnapshot(
     underfloorDistributionPreset:
       partial.underfloorDistributionPreset ?? 'auto',
     thermalRegimePreset: partial.thermalRegimePreset!,
+    radiatorConnection: partial.radiatorConnection ?? DEFAULT_RADIATOR_CONNECTION,
+    radiatorEmitterPreference:
+      partial.radiatorEmitterPreference ?? DEFAULT_RADIATOR_EMITTER_PREFERENCE,
     ufhPresetId: partial.ufhPresetId ?? null,
     hydraulicsForm: partial.hydraulicsForm!,
     wiringLayoutV3: partial.wiringLayoutV3 ?? createDefaultWiringLayout(),

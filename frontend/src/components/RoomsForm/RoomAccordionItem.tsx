@@ -12,9 +12,11 @@ import type {
   RoomFormValue,
   BottomBoundaryType,
   TopBoundaryType,
+  UfhTerminalControl,
   WindowFormValue,
   WindowOrientation,
 } from '../../types/rooms';
+import { UFH_TERMINAL_CONTROL_MAX_AREA_SQM } from '../../types/rooms';
 import type {
   FlooringFinishMaterial,
   UnderfloorHeatingBasePreset,
@@ -142,6 +144,15 @@ export function RoomAccordionItem({
       : DEFAULT_UFH_PIPE_SPACING_MM;
 
   const resolvedFurnitureArea = room.underfloorHeating?.furnitureOccupiedAreaM2 ?? '';
+  const roomAreaNum = typeof room.areaM2 === 'number' ? room.areaM2 : Number(room.areaM2);
+  const showUfhTerminalControl =
+    Number.isFinite(roomAreaNum)
+    && roomAreaNum > 0
+    && roomAreaNum <= UFH_TERMINAL_CONTROL_MAX_AREA_SQM;
+  const resolvedTerminalControl: UfhTerminalControl =
+    showUfhTerminalControl && room.underfloorHeating?.ufhTerminalControl === 'unibox'
+      ? 'unibox'
+      : 'collector';
 
   const setUnderfloorEnabled = (enabled: boolean) => {
     if (!enabled) {
@@ -152,6 +163,9 @@ export function RoomAccordionItem({
           finishMaterialId: resolvedFinishId,
           pipeSpacingMm: resolvedPipeSpacing,
           furnitureOccupiedAreaM2: resolvedFurnitureArea,
+          ...(resolvedTerminalControl === 'unibox'
+            ? { ufhTerminalControl: 'unibox' as const }
+            : {}),
         },
       });
       return;
@@ -163,6 +177,9 @@ export function RoomAccordionItem({
         finishMaterialId: resolvedFinishId || defaultFinishId,
         pipeSpacingMm: resolvedPipeSpacing,
         furnitureOccupiedAreaM2: resolvedFurnitureArea,
+        ...(resolvedTerminalControl === 'unibox'
+          ? { ufhTerminalControl: 'unibox' as const }
+          : {}),
       },
     });
   };
@@ -172,7 +189,12 @@ export function RoomAccordionItem({
     finishMaterialId?: string;
     pipeSpacingMm?: UfhPipeSpacingMm;
     furnitureOccupiedAreaM2?: number | '';
+    ufhTerminalControl?: UfhTerminalControl;
   }) => {
+    const nextTerminal =
+      patch.ufhTerminalControl !== undefined
+        ? patch.ufhTerminalControl
+        : resolvedTerminalControl;
     updateRoom({
       underfloorHeating: {
         enabled: true,
@@ -183,6 +205,7 @@ export function RoomAccordionItem({
           patch.furnitureOccupiedAreaM2 !== undefined
             ? patch.furnitureOccupiedAreaM2
             : resolvedFurnitureArea,
+        ...(nextTerminal === 'unibox' ? { ufhTerminalControl: 'unibox' as const } : {}),
       },
     });
   };
@@ -594,6 +617,44 @@ export function RoomAccordionItem({
                       }
                     />
                   </div>
+                  {showUfhTerminalControl && (
+                    <div className={`${styles.field} ${styles.fullWidth}`}>
+                      <span className={styles.label} id={`ufh-terminal-${room.id}-label`}>
+                        Регулирование контура ТП (площадь ≤ {UFH_TERMINAL_CONTROL_MAX_AREA_SQM} м²)
+                      </span>
+                      <div
+                        className={styles.control}
+                        role="radiogroup"
+                        aria-labelledby={`ufh-terminal-${room.id}-label`}
+                      >
+                        <label>
+                          <input
+                            type="radio"
+                            name={`ufh-terminal-${room.id}`}
+                            checked={resolvedTerminalControl === 'collector'}
+                            onChange={() =>
+                              patchUnderfloor({ ufhTerminalControl: 'collector' })
+                            }
+                          />{' '}
+                          Коллектор тёплого пола
+                        </label>
+                        <label>
+                          <input
+                            type="radio"
+                            name={`ufh-terminal-${room.id}`}
+                            checked={resolvedTerminalControl === 'unibox'}
+                            onChange={() =>
+                              patchUnderfloor({ ufhTerminalControl: 'unibox' })
+                            }
+                          />{' '}
+                          Унибокс (локальный регулятор)
+                        </label>
+                      </div>
+                      <div className={styles.hint}>
+                        Унибокс — для одной петли малой зоны; не занимает выход коллектора ТП.
+                      </div>
+                    </div>
+                  )}
                   <div className={`${styles.hint} ${styles.fullWidth}`}>
                     Укажите площадь большой мебели, под которой не будет укладываться тёплый пол.
                     Это защитит мебель от перегрева и позволит точнее рассчитать шаг трубы.

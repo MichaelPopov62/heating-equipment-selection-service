@@ -283,6 +283,8 @@ export async function buildReport({ input, ctx }) {
     heatLoss,
     ufhPresets,
     maxUfhLoopLengthM: appliances.byKind.hydraulics.maxUfhLoopLengthM,
+    ufhLoopLengthLayoutFactor:
+      appliances.byKind.hydraulics.ufhLoopLengthLayoutFactor,
   });
   if (underfloorHeating?.rooms?.length) {
     enrichUnderfloorHeatingLoopHydraulics(underfloorHeating, {

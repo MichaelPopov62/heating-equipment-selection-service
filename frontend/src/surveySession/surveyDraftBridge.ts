@@ -3,6 +3,8 @@
  */
 
 import { DEFAULT_HYDRAULICS_FORM } from '../types/hydraulics';
+import { normalizeRadiatorConnection } from '../types/radiatorConnection';
+import { normalizeRadiatorEmitterPreference } from '../types/radiatorEmitterPreference';
 import type { SurveyDraft } from '../types/surveyDraft';
 import { adaptFlatRoomsToWiringLayout } from './wiringLayoutV3';
 import type { SurveyDraftSnapshot } from './types';
@@ -26,6 +28,10 @@ export function surveyDraftToSessionSnapshot(draft: SurveyDraft): SurveyDraftSna
     waterUnderfloorHeating: draft.waterUnderfloorHeating,
     underfloorDistributionPreset: draft.underfloorDistributionPreset ?? 'auto',
     thermalRegimePreset: draft.thermalRegimePreset,
+    radiatorConnection: normalizeRadiatorConnection(draft.radiatorConnection),
+    radiatorEmitterPreference: normalizeRadiatorEmitterPreference(
+      draft.radiatorEmitterPreference,
+    ),
     ufhPresetId: draft.ufhPresetId ?? null,
     hydraulicsForm: structuredClone(hydraulicsForm),
     wiringLayoutV3: structuredClone(wiringLayoutV3),

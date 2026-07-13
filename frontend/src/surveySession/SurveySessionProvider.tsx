@@ -19,6 +19,7 @@ import { buildCalcPayloadFromDraft, canAutoCalcFromDraft } from './buildCalcInpu
 import {
   applyCalcResponseFail,
   applyCalcResponseOk,
+  applyCalcSkippedDedup,
   endDraftInitializationPhase,
   runSurveyMutationPipeline,
 } from './runSurveyMutationPipeline';
@@ -68,6 +69,10 @@ export function SurveySessionProvider({
     setSession((prev) => applyCalcResponseFail(prev, message));
   }, []);
 
+  const onCalcSkippedDedup = useCallback(() => {
+    setSession((prev) => applyCalcSkippedDedup(prev));
+  }, []);
+
   const buildCalcPayload = useCallback(
     () => buildCalcPayloadFromDraft(sessionRef.current.draft, windowPresetsRef.current),
     [],
@@ -87,6 +92,7 @@ export function SurveySessionProvider({
     calcInputKey: session.calcInputKey,
     onCalcSuccess,
     onCalcError,
+    onCalcSkippedDedup,
     draftInitializing: session.draftInitializing,
   });
 

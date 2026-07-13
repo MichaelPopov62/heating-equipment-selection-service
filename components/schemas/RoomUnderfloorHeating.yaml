@@ -27,6 +27,15 @@ properties:
     description: |
       Желаемый шаг укладки трубы, мм (requestedPipeSpacingMm).
       Сервер может подобрать меньший шаг (resolvedPipeSpacingMm) для покрытия q_треб.
+  ufhTerminalControl:
+    type: string
+    enum: [collector, unibox]
+    default: collector
+    description: |
+      Терминал петли ТП для зон площадью ≤ 20 м²:
+      collector — выход на коллектор ТП;
+      unibox — локальный регулятор (не занимает выход коллектора).
+      Для areaM2 > 20 сервер принудительно collector.
   presetId:
     type: string
     description: Устаревшее монолитное поле; мигрируется на сервере в basePresetId + finishMaterialId

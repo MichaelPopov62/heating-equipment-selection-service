@@ -10,6 +10,7 @@ required:
   - byRoom
   - warnings
   - totalSections
+  - emittersSummary
 properties:
   tier:
     type: string
@@ -33,7 +34,11 @@ properties:
   totalSections:
     type: integer
     nullable: true
-    description: Сума sections по byRoom; null — немає числових даних.
+    description: >-
+      Сума секцій лише по секційних кімнатах (= emittersSummary.sectionalSections);
+      панелі не входять. null — лінія недоступна / немає секційних даних.
+  emittersSummary:
+    $ref: RadiatorsEmittersSummary.yaml
   unavailableReason:
     type: string
     description: >-
@@ -60,6 +65,9 @@ properties:
       radiatorConnection:
         type: string
         enum: [side, bottom]
+      radiatorEmitterPreference:
+        type: string
+        enum: [auto, sectional, panel]
       thermalRegimePreset:
         type: string
         description: Застосований пресет графіка (traditional_dt50_75_65 / condensing_dt30_55_45).
@@ -67,3 +75,15 @@ properties:
     type: array
     items: { type: string }
     description: Пояснення щодо сімейства радіаторів, панельних моделей, конденсаційного графіка.
+  resolvedEmitterKind:
+    type: string
+    nullable: true
+    enum: [sectional, panel]
+  emitterKindVotes:
+    type: object
+    properties:
+      sectional: { type: integer, minimum: 0 }
+      panel: { type: integer, minimum: 0 }
+  emitterKindDecisionNotes:
+    type: array
+    items: { type: string }

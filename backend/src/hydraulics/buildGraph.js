@@ -150,34 +150,68 @@ export function buildHydraulicsGraph(dto) {
 
     for (const floor of [...roomsByFloor.keys()].sort((a, b) => a - b)) {
       const floorRooms = roomsByFloor.get(floor) ?? [];
-      const collectorId = ufhCollectorNodeId(floor);
-      if (!nodes.some((n) => n.id === collectorId)) {
-        pushNode(collectorId, 'ufh_collector', `Коллектор ТП, этаж ${floor}`, {
-          floor,
+      const collectorRooms = floorRooms.filter(
+        (r) => r.ufhTerminalControl !== 'unibox',
+      );
+      const uniboxRooms = floorRooms.filter(
+        (r) => r.ufhTerminalControl === 'unibox',
+      );
+
+      if (collectorRooms.length > 0) {
+        const collectorId = ufhCollectorNodeId(floor);
+        if (!nodes.some((n) => n.id === collectorId)) {
+          pushNode(collectorId, 'ufh_collector', `Коллектор ТП, этаж ${floor}`, {
+            floor,
+          });
+        }
+
+        const floorFlow = round(
+          collectorRooms.reduce((s, r) => s + (r.flowRateM3PerHour ?? 0), 0),
+          3,
+        );
+        const transitLengthM =
+          transitByFloor.get(floor)
+          ?? dto.rules.defaultLengthsM.ufhCollectorBranch;
+
+        edges.push({
+          id: `e_${ufhUpstreamId}_to_${collectorId}`,
+          from: ufhUpstreamId,
+          to: collectorId,
+          lengthM: transitLengthM,
+          fluid: 'heating',
+          designFlowM3PerHour: floorFlow,
+          supplyC: collectorRooms[0]?.circuitSupplyC,
+          returnC: collectorRooms[0]?.circuitReturnC,
+          segmentRole: 'ufh_collector_transit',
         });
+
+        for (const room of collectorRooms) {
+          const loops = resolveRoomLoopsForGraph(room);
+          for (const loop of loops) {
+            const loopNodeId = `ufh_loop_${loop.loopId}`;
+            pushNode(loopNodeId, 'ufh_loop', `${room.roomName} — ${loop.loopId}`, {
+              roomId: room.roomId,
+              loopId: loop.loopId,
+            });
+            edges.push({
+              id: `e_${collectorId}_to_${loop.loopId}`,
+              from: collectorId,
+              to: loopNodeId,
+              lengthM: loop.loopLengthM,
+              fluid: 'heating',
+              designFlowM3PerHour: loop.flowRateM3PerHour,
+              supplyC: room.circuitSupplyC,
+              returnC: room.circuitReturnC,
+              segmentRole: 'ufh_loop',
+              ...(loop.catalogPipeId
+                ? { preferredCatalogPipeId: loop.catalogPipeId }
+                : {}),
+            });
+          }
+        }
       }
 
-      const floorFlow = round(
-        floorRooms.reduce((s, r) => s + (r.flowRateM3PerHour ?? 0), 0),
-        3,
-      );
-      const transitLengthM =
-        transitByFloor.get(floor)
-        ?? dto.rules.defaultLengthsM.ufhCollectorBranch;
-
-      edges.push({
-        id: `e_${ufhUpstreamId}_to_${collectorId}`,
-        from: ufhUpstreamId,
-        to: collectorId,
-        lengthM: transitLengthM,
-        fluid: 'heating',
-        designFlowM3PerHour: floorFlow,
-        supplyC: floorRooms[0]?.circuitSupplyC,
-        returnC: floorRooms[0]?.circuitReturnC,
-        segmentRole: 'ufh_collector_transit',
-      });
-
-      for (const room of floorRooms) {
+      for (const room of uniboxRooms) {
         const loops = resolveRoomLoopsForGraph(room);
         for (const loop of loops) {
           const loopNodeId = `ufh_loop_${loop.loopId}`;
@@ -186,8 +220,8 @@ export function buildHydraulicsGraph(dto) {
             loopId: loop.loopId,
           });
           edges.push({
-            id: `e_${collectorId}_to_${loop.loopId}`,
-            from: collectorId,
+            id: `e_${ufhUpstreamId}_to_${loop.loopId}`,
+            from: ufhUpstreamId,
             to: loopNodeId,
             lengthM: loop.loopLengthM,
             fluid: 'heating',
@@ -195,7 +229,9 @@ export function buildHydraulicsGraph(dto) {
             supplyC: room.circuitSupplyC,
             returnC: room.circuitReturnC,
             segmentRole: 'ufh_loop',
-            ...(loop.catalogPipeId ? { preferredCatalogPipeId: loop.catalogPipeId } : {}),
+            ...(loop.catalogPipeId
+              ? { preferredCatalogPipeId: loop.catalogPipeId }
+              : {}),
           });
         }
       }

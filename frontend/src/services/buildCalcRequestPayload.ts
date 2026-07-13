@@ -7,6 +7,14 @@ import { DEFAULT_WINDOW_PRESET_ID } from '../data/fallbackEnvelopePresets';
 import type { EnvelopePreset, ObjectMetaValue } from '../types/envelope';
 import type { UfhModePresetId } from '../types/ufhModePreset';
 import type { HeatingThermalRegimePreset } from '../types/heatingThermalRegime';
+import {
+  DEFAULT_RADIATOR_CONNECTION,
+  type RadiatorConnection,
+} from '../types/radiatorConnection';
+import {
+  DEFAULT_RADIATOR_EMITTER_PREFERENCE,
+  type RadiatorEmitterPreference,
+} from '../types/radiatorEmitterPreference';
 import type { UfhDistributionPreset } from '../types/ufhDistribution';
 import type { HotWaterFormValue } from '../types/hotWater';
 import type { WaterHeaterFormValue } from '../types/waterHeater';
@@ -29,6 +37,8 @@ export function buildCalcRequestPayload(params: {
   waterUnderfloorHeating?: boolean;
   underfloorDistributionPreset?: UfhDistributionPreset;
   thermalRegimePreset: HeatingThermalRegimePreset;
+  radiatorConnection?: RadiatorConnection;
+  radiatorEmitterPreference?: RadiatorEmitterPreference;
   ufhPresetId?: UfhModePresetId | null;
   hydraulicsForm?: HydraulicsFormValue;
   wiringLayoutV3?: WiringLayoutV3;
@@ -43,6 +53,8 @@ export function buildCalcRequestPayload(params: {
     waterUnderfloorHeating = false,
     underfloorDistributionPreset = 'auto',
     thermalRegimePreset,
+    radiatorConnection = DEFAULT_RADIATOR_CONNECTION,
+    radiatorEmitterPreference = DEFAULT_RADIATOR_EMITTER_PREFERENCE,
     ufhPresetId = null,
     hydraulicsForm,
     wiringLayoutV3,
@@ -70,12 +82,18 @@ export function buildCalcRequestPayload(params: {
         const furnitureRaw = r.underfloorHeating.furnitureOccupiedAreaM2;
         const furnitureOccupiedAreaM2 =
           typeof furnitureRaw === 'number' && furnitureRaw > 0 ? furnitureRaw : undefined;
+        const terminal = r.underfloorHeating.ufhTerminalControl;
+        const ufhTerminalControl =
+          terminal === 'unibox' && Number(r.areaM2) > 0 && Number(r.areaM2) <= 20
+            ? ('unibox' as const)
+            : undefined;
         room.underfloorHeating = {
           enabled: true,
           basePresetId,
           finishMaterialId,
           pipeSpacingMm,
           ...(furnitureOccupiedAreaM2 != null ? { furnitureOccupiedAreaM2 } : {}),
+          ...(ufhTerminalControl ? { ufhTerminalControl } : {}),
         };
       }
     }
@@ -196,6 +214,8 @@ export function buildCalcRequestPayload(params: {
       hotWaterBoilerPowerMatchingScheme:
         waterHeaterForm.hotWaterBoilerPowerMatchingScheme,
       thermalRegimePreset,
+      radiatorConnection,
+      radiatorEmitterPreference,
       ...(ufhPresetId || waterUnderfloorHeating
         ? {
             waterUnderfloorHeating: true,

@@ -47,6 +47,9 @@ flowchart LR
 | `recalculating` | Запланирован или идёт POST calc |
 | `error` | Ошибка calc; предыдущий отчёт **не** сбрасывается |
 
+После `schedule` → `uiPhase=recalculating`. Если автозапрос пропустил POST из‑за dedup payload —
+`applyCalcSkippedDedup` возвращает `stable` (есть report) или `idle`.
+
 ### Смена режима отопления (`HEATING_EMITTERS_MODE_SET`)
 
 При переходе на «Классика» (`presetId: null`):
@@ -58,6 +61,7 @@ flowchart LR
 - после успешного POST отчёт **заменяется целиком** (`applyCalcResponseOk`), без domain-merge и без `null` между ответами.
 
 Пока идёт пересчёт, в UI может отображаться **предыдущий** отчёт с индикатором загрузки — это ожидаемо.
+При dedup payload индикатор снимается через `applyCalcSkippedDedup` (без нового POST).
 
 ### `wiringLayoutV3`
 
@@ -90,8 +94,16 @@ const {
 
 - `SURVEY_CALC_DEBOUNCE_MS = 700` (`useDebouncedValue` + `useQuery`)
 - Перед POST сравнивается `JSON.stringify(payload)` с последним успешным — дубликаты не уходят
+- При dedup (`CALC_SKIP_DEDUP`) вызывается `applyCalcSkippedDedup` → `uiPhase` снова `stable`/`idle`
+  (иначе баннер «Обновление расчёта…» зависал бы при неизменном payload)
 - `runApiCalc` (кнопка «Рассчитать») — `useMutation`, сброс dedup и немедленный POST
 - `abortInFlightCalc` — `queryClient.cancelQueries({ queryKey: ['calc'] })`
+
+### UI блока «Тёплый пол»
+
+`RecommendationsBlock` показывает секцию ТП, если в отчёте есть комнаты **или** глобальные
+`calculations.underfloorHeating.warnings` (например ТП включён в анкете, но ни в одной комнате
+не заданы base/finish). Пустой `rooms[]` без warnings — секция скрыта.
 
 ### Загрузка черновика
 

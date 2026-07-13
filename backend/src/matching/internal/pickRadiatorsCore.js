@@ -1,47 +1,98 @@
 /**
- * Назначение: ядро подбора радиаторов.
- * Описание: расчёт секций по комнатам, сортировка и выбор моделей из каталога, учёт вентиляции,
- * панельных SKU и предупреждений; внутренняя реализация pickRadiators.
+ * Назначение: ядро подбора радиаторов (Two-Pass Orchestrator).
+ * Описание: Pass 1 — голоса kind; Pass 2 — forced kind + эскалация; единый тип на объект.
  */
 import { round } from '../../utils/math.js';
 import { resolveFlowDeltaTK } from '../../hydraulics/resolveFlowDeltaTK.js';
 import { thermalLoadToFlow } from '../../hydraulics/thermalLoadToFlow.js';
 import { logger } from '../../utils/logger.js';
 import { buildWarmFloorMatchingNotes } from '../warmFloor.js';
+import { buildRadiatorConnectionSelectionNotes } from './radiatorConnectionNotes.js';
 import {
   buildUfhHeatFluxUpWattsByRoomId,
   resolveMixedRadiatorRoomLoad,
 } from './resolveMixedRadiatorRoomLoad.js';
 import { resolveMicroLoadRadiatorStrategy } from './resolveMicroLoadRadiatorStrategy.js';
-import { pickMinimumViableRadiatorSizing } from './pickMinimumViableRadiatorSizing.js';
+import { summarizeRadiatorEmitters } from './summarizeRadiatorEmitters.js';
 import { resolveRecommendation } from '../../recommendations/recommendationResolver.js';
 import { isMixedRadiatorsUfhHeatingMode } from './mixedRadiatorsUfhMode.js';
 import { resolveKVent } from '../../logic/ventilationReserve.js';
 import { resolveDesignRoomAirTempC } from '../../../../shared/roomDesignAirTemp.js';
 import {
+  normalizeRadiatorEmitterPreference,
+  radiatorEmitterPreferenceLabel,
+} from '../../../../shared/radiatorEmitterPreference.js';
+import {
   adjustOutputWatts,
-  adjustedRadiatorWatts,
   filterPanelsByConnection,
   isPanelRadiator,
   isSectionalRadiator,
-  parsePanelHeightMm,
-  pickPanelSkuForRoom,
-  underwindowHeightWarning,
 } from '../radiatorSizingHelpers.js';
+import { decideObjectEmitterKind } from './decideObjectEmitterKind.js';
+import { exploreRoomEmitterKindVote } from './exploreRoomEmitterKind.js';
+import {
+  pickMinimumViableForcedKind,
+  sizeForcedRoomEmitter,
+} from './sizeForcedRoomEmitter.js';
 
-const MAX_SECTIONS_HEURISTIC = 80;
-/** Сколько секционных моделей перебирать per room для минимума секций. */
-const SECTIONAL_CANDIDATES_PER_ROOM = 16;
+/** @type {import('../../dhw/types').RadiatorEmitterKindRules} */
+const DEFAULT_EMITTER_KIND_RULES = Object.freeze({
+  maxSectionsBeforeMultiUnit: 24,
+  maxUnitsPerRoom: 4,
+  maxSectionsHeuristic: 80,
+  sectionalCandidatesPerRoom: 16,
+  tieBreakKind: 'sectional',
+});
 
 /**
- * ΔT за EN442: (Ts + Tr)/2 - Ti
+ * @param {'panel' | 'section'} kind
+ * @param {number} adjustedWatts
+ * @param {number | null | undefined} sections
+ * @param {number} [unitsCount]
  */
-function deltaTmeanK({ supplyC, returnC, insideC }) {
-  return ((supplyC + returnC) / 2) - insideC;
+function emitterFieldsFromSized(kind, adjustedWatts, sections, unitsCount = 1) {
+  const units = Math.max(1, Math.trunc(unitsCount) || 1);
+  if (kind === 'panel') {
+    return {
+      outputPerSectionWatts: 0,
+      deliverableWatts: Math.max(0, Math.round(adjustedWatts * units)),
+      unitsCount: units,
+      displayKind: /** @type {'panel'} */ ('panel'),
+      priceBasis: /** @type {'panel'} */ ('panel'),
+    };
+  }
+  const sec = typeof sections === 'number' && Number.isFinite(sections) ? sections : 1;
+  const perSection = Math.max(1, Math.round(adjustedWatts));
+  return {
+    outputPerSectionWatts: perSection,
+    deliverableWatts: Math.round(perSection * sec * units),
+    unitsCount: units,
+    displayKind: /** @type {'sectional'} */ ('sectional'),
+    priceBasis: /** @type {'section'} */ ('section'),
+  };
 }
 
 /**
- * Паспортна потужність секції при базовій ΔT50/ΔT70.
+ * @param {object} base
+ * @returns {import('../../types/shared-types').RadiatorsByRoomItem}
+ */
+function skippedRoomEmitter(base) {
+  return {
+    ...base,
+    radiatorModel: base.radiatorModel ?? '—',
+    outputPerSectionWatts: 0,
+    sections: null,
+    unitsCount: undefined,
+    deliverableWatts: 0,
+    displayKind: /** @type {'none'} */ ('none'),
+  };
+}
+
+function deltaTmeanK({ supplyC, returnC, insideC }) {
+  return (supplyC + returnC) / 2 - insideC;
+}
+
+/**
  * @param {import('../catalog/types').RadiatorCatalogItemNormalized} r
  * @param {50 | 70} baseDeltaT
  */
@@ -50,7 +101,6 @@ function sectionOutputPassport(r, baseDeltaT) {
 }
 
 /**
- * Пріоритет брендів/сімейств під джерело тепла та підводку (Fondital / Mirado / Korado як Radik тощо).
  * @param {import('../catalog/types').RadiatorCatalogItemNormalized} r
  * @param {'individual' | 'central'} heatingDistribution
  * @param {'side' | 'bottom' | undefined} connection
@@ -68,7 +118,6 @@ function radiatorBrandPreferenceScore(r, heatingDistribution, connection) {
     if (m.includes('korado')) score += 100;
     if (m.includes('global')) score += 70;
     if (m.includes('exclusivo') || m.includes('blitz')) score += 50;
-    // Mirado та біметал — типово для ЦТ із жорстким теплоносієм; для ІТП знижуємо пріоритет відносно Fondital/Korado.
     if (m.includes('mirado') || mat.includes('бимет')) score -= 40;
   }
   if (connection === 'bottom') {
@@ -81,7 +130,10 @@ function radiatorBrandPreferenceScore(r, heatingDistribution, connection) {
 }
 
 /**
- * Поєднує паспортну потужність секції та брендовий пріоритет (ЦТ ↔ ІТП, підводка VK/VKP).
+ * @param {import('../catalog/types').RadiatorCatalogItemNormalized} r
+ * @param {50 | 70} baseDeltaT
+ * @param {'individual' | 'central'} heatingDistribution
+ * @param {'side' | 'bottom' | undefined} connection
  */
 function radiatorCompositeRank(r, baseDeltaT, heatingDistribution, connection) {
   const w = sectionOutputPassport(r, baseDeltaT);
@@ -91,7 +143,6 @@ function radiatorCompositeRank(r, baseDeltaT, heatingDistribution, connection) {
 }
 
 /**
- * Сортування радіаторів для підбору (не через catalog/matchingSortPools — лише inline у pickRadiators).
  * @param {import('../catalog/types').RadiatorCatalogItemNormalized[]} radiators
  * @param {50 | 70} baseDeltaT
  * @param {'individual' | 'central'} heatingDistribution
@@ -107,215 +158,15 @@ function sortRadiatorsForMatching(radiators, baseDeltaT, heatingDistribution, co
 }
 
 /**
- * Секционный подбор по комнате (перебор топ-кандидатов).
- * @returns {{ kind: 'section', radiator: import('../catalog/types').RadiatorCatalogItemNormalized, sections: number, adjustedWatts: number, sectionsThermalMin: number } | null}
+ * @param {import('../../dhw/types').RadiatorApplianceRules | null | undefined} radiatorRules
+ * @returns {import('../../dhw/types').RadiatorEmitterKindRules}
  */
-function sizeRoomSectional(qRad, sectionalPool, baseDeltaT, targetDeltaT) {
-  if (!sectionalPool.length || qRad <= 0) return null;
-  const candidates = sectionalPool.slice(0, SECTIONAL_CANDIDATES_PER_ROOM);
-  /** @type {{ kind: 'section', radiator: import('../catalog/types').RadiatorCatalogItemNormalized, sections: number, adjustedWatts: number, sectionsThermalMin: number } | null} */
-  let best = null;
-  for (const r of candidates) {
-    const adjustedWatts = adjustedRadiatorWatts(r, baseDeltaT, targetDeltaT);
-    if (adjustedWatts <= 0) continue;
-    const sectionsThermalMin = Math.ceil(qRad / adjustedWatts);
-    // При рівній кількості секцій обираємо секцію меншої потужності (менший перезапас).
-    const isBetter =
-      !best ||
-      sectionsThermalMin < best.sections ||
-      (sectionsThermalMin === best.sections && adjustedWatts < best.adjustedWatts);
-    if (isBetter) {
-      best = {
-        kind: 'section',
-        radiator: r,
-        sections: sectionsThermalMin,
-        adjustedWatts,
-        sectionsThermalMin,
-      };
-    }
-  }
-  return best;
+function resolveEmitterKindRules(radiatorRules) {
+  return radiatorRules?.emitterKind ?? DEFAULT_EMITTER_KIND_RULES;
 }
 
 /**
- * @param {object} roomCtx
- */
-function applyWindowWidthRulesSectional(roomCtx) {
-  const {
-    sections: initialSections,
-    sectionWidthMm,
-    windowOpeningWidthMm,
-    ventilationReserveFactor,
-  } = roomCtx;
-  let sections = initialSections;
-  const sizingNotes = [];
-  const minSectionsForWindow =
-    windowOpeningWidthMm != null && sectionWidthMm != null && sectionWidthMm > 0
-      ? Math.ceil((0.7 * windowOpeningWidthMm) / sectionWidthMm)
-      : null;
-
-  if (sections != null && minSectionsForWindow != null && sections < minSectionsForWindow) {
-    const prev = sections;
-    sections = Math.min(Math.max(minSectionsForWindow, prev), MAX_SECTIONS_HEURISTIC);
-    if (sections > prev) {
-      sizingNotes.push(
-        `Для правила ≥70% ширины окна число секций увеличено с ${prev} до ${sections} (тепловая нагрузка с kVent=${ventilationReserveFactor} уже была покрыта меньшим числом).`,
-      );
-    }
-  }
-
-  let radiatorWidthMm =
-    sections != null && sectionWidthMm != null ? sections * sectionWidthMm : null;
-  let widthCoverageRatio =
-    radiatorWidthMm != null && windowOpeningWidthMm != null
-      ? radiatorWidthMm / windowOpeningWidthMm
-      : null;
-  let widthOk = widthCoverageRatio != null ? widthCoverageRatio >= 0.7 : null;
-
-  if (
-    sections != null
-    && sectionWidthMm != null
-    && windowOpeningWidthMm != null
-    && widthOk === false
-  ) {
-    let s = sections;
-    while (s < MAX_SECTIONS_HEURISTIC && sectionWidthMm * s < 0.7 * windowOpeningWidthMm) {
-      s += 1;
-    }
-    if (s > sections) {
-      sizingNotes.push(
-        `Дополнительно увеличено число секций до ${s} для подхода к покрытию ≥70% ширины окна.`,
-      );
-      sections = s;
-      radiatorWidthMm = sections * sectionWidthMm;
-      widthCoverageRatio = radiatorWidthMm / windowOpeningWidthMm;
-      widthOk = widthCoverageRatio >= 0.7;
-    }
-  }
-
-  return { sections, radiatorWidthMm, widthCoverageRatio, widthOk, sizingNotes };
-}
-
-/**
- * Выбор между панелью и секционным вариантом для комнаты.
- * @param {object} args
- */
-function pickRoomRadiatorSizing(args) {
-  const {
-    qRad,
-    sectionalPool,
-    panelPoolFiltered,
-    baseDeltaT,
-    targetDeltaT,
-    radiatorConnection,
-    windowOpeningWidthMm,
-    openingHeightMm,
-    ventilationReserveFactor,
-  } = args;
-
-  const sectional = sizeRoomSectional(qRad, sectionalPool, baseDeltaT, targetDeltaT);
-  const panelPick =
-    panelPoolFiltered.length > 0
-      ? pickPanelSkuForRoom(qRad, panelPoolFiltered, baseDeltaT, targetDeltaT)
-      : null;
-
-  /** @type {'section' | 'panel'} */
-  let useKind = 'section';
-  if (radiatorConnection === 'bottom' && panelPick) {
-    useKind = 'panel';
-  } else if (sectional && panelPick) {
-    const panelLen = panelPick.panelLengthMm;
-    const panelWidthOk =
-      windowOpeningWidthMm != null && panelLen != null
-        ? panelLen / windowOpeningWidthMm >= 0.7
-        : null;
-    const secWidth = sectional.radiator.sectionWidthMm ?? sectional.radiator.dimensions?.width;
-    const secSections = sectional.sections;
-    const secWidthOk =
-      windowOpeningWidthMm != null && secWidth != null && secSections != null
-        ? (secWidth * secSections) / windowOpeningWidthMm >= 0.7
-        : null;
-    if (panelWidthOk === true && secWidthOk === false) useKind = 'panel';
-    else if (sectional.sections > 24 && panelPick.adjustedWatts >= qRad) useKind = 'panel';
-  } else if (!sectional && panelPick) {
-    useKind = 'panel';
-  }
-
-  if (useKind === 'panel' && panelPick) {
-    const panelLengthMm = panelPick.panelLengthMm;
-    const radiatorHeightMm =
-      parsePanelHeightMm(panelPick.radiator.model)
-      ?? panelPick.radiator.dimensions?.height
-      ?? null;
-    const widthCoverageRatio =
-      windowOpeningWidthMm != null && panelLengthMm != null
-        ? panelLengthMm / windowOpeningWidthMm
-        : null;
-    const widthOk = widthCoverageRatio != null ? widthCoverageRatio >= 0.7 : null;
-    /** @type {string[]} */
-    const sizingNotes = [];
-    if (windowOpeningWidthMm == null) {
-      sizingNotes.push('Глухая комната (нет оконного проёма) — правило ≥70% ширины окна не применяется.');
-    }
-    if (panelPick.underpowered) {
-      sizingNotes.push(
-        'Ни одна панель из каталога не покрывает расчётную нагрузку — выбрана самая мощная по длине.',
-      );
-    }
-    const hWarn = underwindowHeightWarning(openingHeightMm, radiatorHeightMm);
-    if (hWarn) sizingNotes.push(hWarn);
-
-    return {
-      kind: 'panel',
-      radiator: panelPick.radiator,
-      sections: null,
-      sectionsThermalMin: null,
-      adjustedWatts: panelPick.adjustedWatts,
-      radiatorWidthMm: panelLengthMm,
-      widthCoverageRatio,
-      widthOk,
-      sizingNotes,
-      panelLengthMm,
-    };
-  }
-
-  if (!sectional) return null;
-
-  const sectionWidthMm =
-    sectional.radiator.sectionWidthMm ?? sectional.radiator.dimensions?.width ?? null;
-  const win = applyWindowWidthRulesSectional({
-    sections: sectional.sections,
-    sectionsThermalMin: sectional.sectionsThermalMin,
-    sectionWidthMm,
-    windowOpeningWidthMm,
-    ventilationReserveFactor,
-  });
-  const radiatorHeightMm =
-    sectional.radiator.dimensions?.height ?? null;
-  const hWarn = underwindowHeightWarning(openingHeightMm, radiatorHeightMm);
-  const sizingNotes = [...win.sizingNotes];
-  if (windowOpeningWidthMm == null) {
-    sizingNotes.push('Глухая комната (нет оконного проёма) — правило ≥70% ширины окна не применяется.');
-  }
-  if (hWarn) sizingNotes.push(hWarn);
-
-  return {
-    kind: 'section',
-    radiator: sectional.radiator,
-    sections: win.sections,
-    sectionsThermalMin: sectional.sectionsThermalMin,
-    adjustedWatts: sectional.adjustedWatts,
-    radiatorWidthMm: win.radiatorWidthMm,
-    widthCoverageRatio: win.widthCoverageRatio,
-    widthOk: win.widthOk,
-    sizingNotes,
-    panelLengthMm: null,
-  };
-}
-
-/**
- * Підбір радіаторів по кімнатах із запасом на інфільтрацію, узгодження бази ΔT з конденсаційною
- * або економлінією котла, пріоритетом брендів під ЦТ/ІТП та донабором секцій під ширину вікна.
+ * Підбір радіаторів: Two-Pass — голоса kind → глобальный lock → sizing с эскалацией.
  *
  * @param {object} args
  * @param {import('../types/shared-types').HeatLossReport} args.roomsHeatLoss
@@ -324,11 +175,12 @@ function pickRoomRadiatorSizing(args) {
  * @param {string|null} [args.radiatorModel]
  * @param {import('../types/shared-types').BuildingInput | null} [args.building]
  * @param {import('../types/boiler-types').BoilerMatchingReport | null} [args.boilerMatching]
- * @param {'economy' | 'efficient' | null} [args.radiatorLineTier] лінія «Економ» / «Ефективний» (фіксований графік)
+ * @param {'economy' | 'efficient' | null} [args.radiatorLineTier]
  * @param {import('../types/shared-types').UnderfloorHeatingReport | null} [args.underfloorHeating]
- * @param {number | undefined} [args.deltaTSystemK] — input.hydraulics.deltaTSystemK для расхода Q
+ * @param {number | undefined} [args.deltaTSystemK]
  * @param {import('../../dhw/types').RadiatorApplianceRules} [args.radiatorRules]
  * @param {import('../../types/shared-types').RecommendationCatalogItem[]} [args.recommendations]
+ * @param {'sectional' | 'panel' | null} [args.forcedEmitterKind] — от primary для eco/eff
  * @returns {import('../types/shared-types').RadiatorsMatchingReport}
  */
 export function pickRadiators({
@@ -343,20 +195,20 @@ export function pickRadiators({
   deltaTSystemK,
   radiatorRules = null,
   recommendations = null,
+  forcedEmitterKind = null,
 } = {}) {
   const supplyC = heatingSystem.supplyC ?? 75;
   const returnC = heatingSystem.returnC ?? 65;
   const insideC = heatingSystem.insideC ?? 20;
   const bathroomAirTempC =
-    typeof building?.temps?.bathroomAirTempC === 'number' &&
-    Number.isFinite(building.temps.bathroomAirTempC)
+    typeof building?.temps?.bathroomAirTempC === 'number'
+    && Number.isFinite(building.temps.bathroomAirTempC)
       ? building.temps.bathroomAirTempC
       : undefined;
 
   const hasEfficientProposal =
-    radiatorLineTier === 'efficient' ||
-    (radiatorLineTier == null && Boolean(boilerMatching?.proposalEfficient));
-  /** Для конденсаційної лінії котла узгоджуємо «низьку» базу ΔT каталогу радіатора за замовчуванням */
+    radiatorLineTier === 'efficient'
+    || (radiatorLineTier == null && Boolean(boilerMatching?.proposalEfficient));
   let baseDeltaT = /** @type {50 | 70 | undefined} */ (heatingSystem.radiatorReferenceDeltaT);
   if (baseDeltaT == null) {
     if (radiatorLineTier === 'economy') {
@@ -371,9 +223,13 @@ export function pickRadiators({
   const heatingDistribution =
     building?.objectMeta?.heatingDistribution === 'central' ? 'central' : 'individual';
   const radiatorConnection = heatingSystem.radiatorConnection;
+  const radiatorEmitterPreference = normalizeRadiatorEmitterPreference(
+    heatingSystem.radiatorEmitterPreference,
+  );
   const ventilationReserveFactor = resolveKVent(
     building?.objectMeta?.ventilationReserveMode,
   );
+  const emitterKindRules = resolveEmitterKindRules(radiatorRules);
 
   const targetDeltaT = deltaTmeanK({ supplyC, returnC, insideC });
   const flowDeltaTK = resolveFlowDeltaTK({ deltaTSystemK, supplyC, returnC });
@@ -394,6 +250,8 @@ export function pickRadiators({
     radiatorModel,
     heatingDistribution,
     radiatorConnection: radiatorConnection ?? null,
+    radiatorEmitterPreference,
+    forcedEmitterKind,
     hasEfficientProposal,
     waterUnderfloorHeating: Boolean(heatingSystem.waterUnderfloorHeating),
     thermalRegimePreset: heatingSystem.thermalRegimePreset ?? null,
@@ -409,12 +267,18 @@ export function pickRadiators({
   const radiatorSelectionNotes = [];
   if (panelPoolRaw.length > 0) {
     radiatorSelectionNotes.push(
-      `В каталоге ${panelPoolRaw.length} панельных позиций (priceBasis=panel): подбор по длине SKU и мощности на прибор; секции в отчёте не применяются.`,
+      `В каталоге ${panelPoolRaw.length} панельных позиций (priceBasis=panel): `
+        + 'подбор по длине SKU и мощности на прибор; секции в отчёте не применяются.',
     );
   }
-  if (radiatorConnection === 'bottom' && panelPoolFiltered.length === 0 && panelPoolRaw.length > 0) {
+  if (
+    radiatorConnection === 'bottom'
+    && panelPoolFiltered.length === 0
+    && panelPoolRaw.length > 0
+  ) {
     radiatorSelectionNotes.push(
-      'Для нижней подводки в каталоге нет панелей VKP/нижнего подключения — рассмотрите секционные модели или дополните каталог.',
+      'Для нижней подводки в каталоге нет панелей VKP/нижнего подключения — '
+        + 'рассмотрите секционные модели или дополните каталог.',
     );
   }
   if (radiatorConnection === 'bottom' && panelPoolRaw.length === 0) {
@@ -422,6 +286,11 @@ export function pickRadiators({
       'Запрошена нижняя подводка, но панельных моделей в каталоге нет.',
     );
   }
+
+  radiatorSelectionNotes.push(
+    `Предпочтение типа приборов: ${radiatorEmitterPreferenceLabel(radiatorEmitterPreference)} `
+      + `(heatingSystem.radiatorEmitterPreference=${radiatorEmitterPreference}).`,
+  );
 
   if (hasEfficientProposal && radiatorLineTier !== 'economy') {
     const passportHighDeltaT = 70;
@@ -441,17 +310,24 @@ export function pickRadiators({
     const relOut = atLow / refWatts;
     const sectionScale = relOut > 0 ? 1 / relOut : 0;
     radiatorSelectionNotes.push(
-      `Конденсационный контур: при ориентировочном графике ${lowSupplyC}/${lowReturnC} °C и ${insideC} °C в помещении средний температурный напор радиатора ≈ ${round(lowTargetDeltaT, 1)} К (для сравнения — типичный паспорт ΔT≈70 К при ~90/70 °C). По степенной модели (n≈1,3) удельная теплоотдача падает ≈в ${relOut > 0 ? (1 / relOut).toFixed(1) : '—'} раз — ориентировочно требуется ≈в ${sectionScale > 0 ? sectionScale.toFixed(1) : '—'} раз больше секций/поверхности прибора, чем в высокотемпературной системе.`,
+      `Конденсационный контур: при ориентировочном графике ${lowSupplyC}/${lowReturnC} °C и ${insideC} °C `
+        + `в помещении средний температурный напор радиатора ≈ ${round(lowTargetDeltaT, 1)} К `
+        + `(для сравнения — типичный паспорт ΔT≈70 К при ~90/70 °C). По степенной модели (n≈1,3) `
+        + `удельная теплоотдача падает ≈в ${relOut > 0 ? (1 / relOut).toFixed(1) : '—'} раз — `
+        + `ориентировочно требуется ≈в ${sectionScale > 0 ? sectionScale.toFixed(1) : '—'} раз `
+        + 'больше секций/поверхности прибора, чем в высокотемпературной системе.',
     );
   }
 
+  radiatorSelectionNotes.push(...buildRadiatorConnectionSelectionNotes(radiatorConnection));
   radiatorSelectionNotes.push(...buildWarmFloorMatchingNotes(heatingSystem));
 
   const ufhHeatFluxByRoomId = buildUfhHeatFluxUpWattsByRoomId(underfloorHeating);
   const applyUfhRadiatorOffset = isMixedRadiatorsUfhHeatingMode(heatingSystem);
   if (applyUfhRadiatorOffset && ufhHeatFluxByRoomId.size > 0) {
     radiatorSelectionNotes.push(
-      'Смешанный режим (радиаторы + ТП): нагрузка на радиатор уменьшается на отдачу тёплого пола вверх (heatFluxUpWatts) по каждой комнате с ТП — без двойного учёта мощности.',
+      'Смешанный режим (радиаторы + ТП): нагрузка на радиатор уменьшается на отдачу тёплого пола '
+        + 'вверх (heatFluxUpWatts) по каждой комнате с ТП — без двойного учёта мощности.',
     );
   }
 
@@ -464,25 +340,33 @@ export function pickRadiators({
     radiatorConnection,
   );
 
+  const emptyInputs = {
+    supplyC,
+    returnC,
+    insideC,
+    baseDeltaT,
+    targetDeltaT: round(targetDeltaT, 1),
+    ventilationReserveFactor,
+    radiatorSizingAlignedWithCondensing: hasEfficientProposal,
+    heatingDistribution,
+    radiatorConnection,
+    radiatorEmitterPreference,
+    thermalRegimePreset: heatingSystem.thermalRegimePreset,
+  };
+
   if (sectionalPool.length === 0 && panelPoolRaw.length === 0) {
     logger.warn('matching.radiators.emptyCatalog', null);
     return {
       chosen: null,
       byRoom: [],
+      emittersSummary: summarizeRadiatorEmitters([]),
+      totalSections: null,
       warnings: ['В каталоге нет радиаторов.'],
-      inputs: {
-        supplyC,
-        returnC,
-        insideC,
-        baseDeltaT,
-        targetDeltaT: round(targetDeltaT, 1),
-        ventilationReserveFactor,
-        radiatorSizingAlignedWithCondensing: hasEfficientProposal,
-        heatingDistribution,
-        radiatorConnection,
-        thermalRegimePreset: heatingSystem.thermalRegimePreset,
-      },
+      inputs: emptyInputs,
       radiatorSelectionNotes,
+      resolvedEmitterKind: null,
+      emitterKindVotes: { sectional: 0, panel: 0 },
+      emitterKindDecisionNotes: [],
     };
   }
 
@@ -512,10 +396,26 @@ export function pickRadiators({
 
   const minRoomWattsForWindowWidthRule = 800;
 
+  /**
+   * @typedef {object} RoomPrep
+   * @property {string} roomId
+   * @property {string} roomName
+   * @property {number} roomInsideC
+   * @property {import('../../../../shared/roomDesignAirTemp.js').DesignRoomAirTempSource | 'survey'} airSource
+   * @property {number} roomTargetDeltaT
+   * @property {number} qEnvelope
+   * @property {number} qRad
+   * @property {string[]} mixedNotes
+   * @property {'skip' | 'minimum_viable' | 'normal'} action
+   * @property {string[]} microNotes
+   */
+
+  /** @type {RoomPrep[]} */
+  const roomPreps = [];
   /** @type {Set<string>} */
   const microRecCodes = new Set();
 
-  const byRoom = (roomsHeatLoss?.rooms ?? []).map((room) => {
+  for (const room of roomsHeatLoss?.rooms ?? []) {
     const roomType =
       room.type ?? building?.rooms?.find((r) => r.id === room.id)?.type;
     const air =
@@ -549,23 +449,27 @@ export function pickRadiators({
     const qRad = mixedLoad.qRad;
 
     if (mixedLoad.skipRadiator) {
-      return {
+      roomPreps.push({
         roomId: room.id,
         roomName: room.name,
-        designAirTempC: roomInsideC,
-        designAirTempSource: air?.source ?? 'survey',
-        heatLossWatts: qEnvelope,
-        radiatorDesignWatts: 0,
-        flowRateM3PerHour: 0,
-        radiatorModel: '—',
-        outputPerSectionWatts: 0,
-        sections: null,
-        warnings: [],
-        sizingNotes: mixedLoad.sizingNotes,
-      };
+        roomInsideC,
+        airSource: air?.source ?? 'survey',
+        roomTargetDeltaT,
+        qEnvelope,
+        qRad: 0,
+        mixedNotes: mixedLoad.sizingNotes,
+        action: 'skip',
+        microNotes: [],
+      });
+      continue;
     }
 
     const microRules = radiatorRules?.microLoad ?? null;
+    /** @type {'skip' | 'minimum_viable' | 'normal'} */
+    let action = 'normal';
+    /** @type {string[]} */
+    let microNotes = [];
+
     if (microRules) {
       const microStrategy = resolveMicroLoadRadiatorStrategy({
         rules: microRules,
@@ -573,158 +477,255 @@ export function pickRadiators({
         building,
         qRad,
       });
-
       if (microStrategy.action === 'skip') {
         microRecCodes.add('REC_RADIATOR_MICRO_LOAD_SKIP');
-        return {
-          roomId: room.id,
-          roomName: room.name,
-          designAirTempC: roomInsideC,
-          designAirTempSource: air?.source ?? 'survey',
-          heatLossWatts: qEnvelope,
+        action = 'skip';
+        microNotes = microStrategy.sizingNotes;
+      } else if (microStrategy.action === 'minimum_viable') {
+        microRecCodes.add('REC_RADIATOR_ENTRY_ZONE_MINIMUM');
+        action = 'minimum_viable';
+        microNotes = microStrategy.sizingNotes;
+      }
+    }
+
+    roomPreps.push({
+      roomId: room.id,
+      roomName: room.name,
+      roomInsideC,
+      airSource: air?.source ?? 'survey',
+      roomTargetDeltaT,
+      qEnvelope,
+      qRad,
+      mixedNotes: mixedLoad.sizingNotes,
+      action,
+      microNotes,
+    });
+  }
+
+  // ——— Pass 1: голоса (только при auto и без forced override) ———
+  /** @type {import('./decideObjectEmitterKind.js').EmitterKindVote[]} */
+  const votes = [];
+  const needExplore =
+    forcedEmitterKind == null
+    && radiatorEmitterPreference === 'auto';
+
+  if (needExplore) {
+    for (const prep of roomPreps) {
+      if (prep.action === 'skip' || prep.qRad <= 0) continue;
+      const vote = exploreRoomEmitterKindVote({
+        qRad: prep.qRad,
+        sectionalPool: sortedSectional,
+        panelPoolFiltered,
+        baseDeltaT,
+        targetDeltaT: prep.roomTargetDeltaT,
+        radiatorConnection,
+        windowOpeningWidthMm: maxWindowWidthByRoom.get(prep.roomId) ?? null,
+        maxSectionsBeforeMultiUnit: emitterKindRules.maxSectionsBeforeMultiUnit,
+        maxSectionsHeuristic: emitterKindRules.maxSectionsHeuristic,
+        sectionalCandidatesPerRoom: emitterKindRules.sectionalCandidatesPerRoom,
+        ventilationReserveFactor,
+      });
+      if (!vote) continue;
+      votes.push({
+        roomId: prep.roomId,
+        roomName: prep.roomName,
+        preferredKind: vote.preferredKind,
+        reason: vote.reason,
+      });
+    }
+  }
+
+  const decision = decideObjectEmitterKind({
+    preference: radiatorEmitterPreference,
+    votes,
+    forcedOverride: forcedEmitterKind,
+    tieBreakKind: emitterKindRules.tieBreakKind,
+  });
+
+  const resolvedKind = decision.resolvedEmitterKind;
+  radiatorSelectionNotes.push(...decision.emitterKindDecisionNotes);
+
+  // ——— Pass 2: финальный sizing ———
+  /** @type {import('../../types/shared-types').RadiatorsByRoomItem[]} */
+  const byRoom = [];
+  let anyMultiUnit = false;
+  /** @type {Set<string>} */
+  const underpoweredRoomIds = new Set();
+
+  for (const prep of roomPreps) {
+    if (prep.action === 'skip') {
+      byRoom.push(
+        skippedRoomEmitter({
+          roomId: prep.roomId,
+          roomName: prep.roomName,
+          designAirTempC: prep.roomInsideC,
+          designAirTempSource: prep.airSource,
+          heatLossWatts: prep.qEnvelope,
           radiatorDesignWatts: 0,
           flowRateM3PerHour: 0,
           radiatorModel: '—',
-          outputPerSectionWatts: 0,
-          sections: null,
           warnings: [],
-          sizingNotes: [...mixedLoad.sizingNotes, ...microStrategy.sizingNotes],
-        };
-      }
-
-      if (microStrategy.action === 'minimum_viable') {
-        const minSized = pickMinimumViableRadiatorSizing({
-          sectionalPool: sortedSectional,
-          panelPoolFiltered,
-          baseDeltaT,
-          targetDeltaT: roomTargetDeltaT,
-          radiatorConnection,
-          windowOpeningWidthMm: maxWindowWidthByRoom.get(room.id) ?? null,
-          openingHeightMm: maxWindowHeightByRoom.get(room.id) ?? null,
-        });
-
-        if (!minSized) {
-          return {
-            roomId: room.id,
-            roomName: room.name,
-            designAirTempC: roomInsideC,
-            designAirTempSource: air?.source ?? 'survey',
-            heatLossWatts: qEnvelope,
-            radiatorDesignWatts: Math.round(qRad),
-            flowRateM3PerHour: radiatorFlowM3h(qRad),
-            radiatorModel: '—',
-            outputPerSectionWatts: 0,
-            sections: null,
-            warnings: ['Не удалось подобрать минимальный радиатор для входной зоны.'],
-            sizingNotes: [...mixedLoad.sizingNotes, ...microStrategy.sizingNotes],
-          };
-        }
-
-        microRecCodes.add('REC_RADIATOR_ENTRY_ZONE_MINIMUM');
-
-        const deliverableWatts = Math.round(
-          minSized.kind === 'panel'
-            ? minSized.adjustedWatts
-            : minSized.adjustedWatts * (minSized.sections ?? 1),
-        );
-        const hydraulicsWatts = Math.max(
-          qRad,
-          deliverableWatts,
-          microRules.minDesignWattsThreshold,
-        );
-
-        const outputLabel =
-          minSized.kind === 'panel'
-            ? Math.max(1, Math.round(minSized.adjustedWatts))
-            : Math.max(1, Math.round(minSized.adjustedWatts));
-
-        return {
-          roomId: room.id,
-          roomName: room.name,
-          designAirTempC: roomInsideC,
-          designAirTempSource: air?.source ?? 'survey',
-          heatLossWatts: qEnvelope,
-          radiatorDesignWatts: Math.round(hydraulicsWatts),
-          flowRateM3PerHour: radiatorFlowM3h(hydraulicsWatts),
-          radiatorModel: minSized.radiator.model,
-          outputPerSectionWatts: outputLabel,
-          sections: minSized.sections,
-          sectionsThermalMin: minSized.sectionsThermalMin ?? minSized.sections,
-          windowOpeningWidthMm: maxWindowWidthByRoom.get(room.id) ?? null,
-          radiatorWidthMm: minSized.radiatorWidthMm,
-          widthCoverageRatio:
-            minSized.widthCoverageRatio != null
-              ? Math.round(minSized.widthCoverageRatio * 1000) / 1000
-              : null,
-          widthOk: minSized.widthOk,
-          warnings: [],
-          sizingNotes: [
-            ...mixedLoad.sizingNotes,
-            ...microStrategy.sizingNotes,
-            ...(minSized.sizingNotes ?? []),
-          ],
-          priceBasis: minSized.kind === 'panel' ? 'panel' : 'section',
-        };
-      }
+          sizingNotes: [...prep.mixedNotes, ...prep.microNotes],
+        }),
+      );
+      continue;
     }
 
-    const sized = pickRoomRadiatorSizing({
-      qRad,
+    if (prep.action === 'minimum_viable') {
+      const minSized = pickMinimumViableForcedKind({
+        forcedKind: resolvedKind,
+        sectionalPool: sortedSectional,
+        panelPoolFiltered,
+        baseDeltaT,
+        targetDeltaT: prep.roomTargetDeltaT,
+        windowOpeningWidthMm: maxWindowWidthByRoom.get(prep.roomId) ?? null,
+        openingHeightMm: maxWindowHeightByRoom.get(prep.roomId) ?? null,
+      });
+
+      if (!minSized) {
+        byRoom.push(
+          skippedRoomEmitter({
+            roomId: prep.roomId,
+            roomName: prep.roomName,
+            designAirTempC: prep.roomInsideC,
+            designAirTempSource: prep.airSource,
+            heatLossWatts: prep.qEnvelope,
+            radiatorDesignWatts: Math.round(prep.qRad),
+            flowRateM3PerHour: radiatorFlowM3h(prep.qRad),
+            radiatorModel: '—',
+            warnings: [
+              `Не удалось подобрать минимальный ${resolvedKind} радиатор для входной зоны.`,
+            ],
+            sizingNotes: [...prep.mixedNotes, ...prep.microNotes],
+          }),
+        );
+        continue;
+      }
+
+      const emitter = emitterFieldsFromSized(
+        minSized.kind === 'panel' ? 'panel' : 'section',
+        minSized.adjustedWatts,
+        minSized.sections,
+        minSized.unitsCount,
+      );
+      const microThreshold =
+        radiatorRules?.microLoad?.minDesignWattsThreshold ?? 150;
+      const hydraulicsWatts = Math.max(
+        prep.qRad,
+        emitter.deliverableWatts,
+        microThreshold,
+      );
+
+      byRoom.push({
+        roomId: prep.roomId,
+        roomName: prep.roomName,
+        designAirTempC: prep.roomInsideC,
+        designAirTempSource: prep.airSource,
+        heatLossWatts: prep.qEnvelope,
+        radiatorDesignWatts: Math.round(hydraulicsWatts),
+        flowRateM3PerHour: radiatorFlowM3h(hydraulicsWatts),
+        radiatorModel: minSized.radiator.model,
+        outputPerSectionWatts: emitter.outputPerSectionWatts,
+        sections: minSized.sections,
+        sectionsThermalMin: minSized.sectionsThermalMin ?? minSized.sections,
+        unitsCount: emitter.unitsCount,
+        deliverableWatts: emitter.deliverableWatts,
+        displayKind: emitter.displayKind,
+        windowOpeningWidthMm: maxWindowWidthByRoom.get(prep.roomId) ?? null,
+        radiatorWidthMm: minSized.radiatorWidthMm,
+        widthCoverageRatio:
+          minSized.widthCoverageRatio != null
+            ? Math.round(minSized.widthCoverageRatio * 1000) / 1000
+            : null,
+        widthOk: minSized.widthOk,
+        warnings: [],
+        sizingNotes: [
+          ...prep.mixedNotes,
+          ...prep.microNotes,
+          ...(minSized.sizingNotes ?? []),
+        ],
+        priceBasis: emitter.priceBasis,
+        panelLengthMm: minSized.panelLengthMm ?? undefined,
+      });
+      continue;
+    }
+
+    const sized = sizeForcedRoomEmitter({
+      qRad: prep.qRad,
+      forcedKind: resolvedKind,
       sectionalPool: sortedSectional,
       panelPoolFiltered,
       baseDeltaT,
-      targetDeltaT: roomTargetDeltaT,
-      radiatorConnection,
-      windowOpeningWidthMm: maxWindowWidthByRoom.get(room.id) ?? null,
-      openingHeightMm: maxWindowHeightByRoom.get(room.id) ?? null,
+      targetDeltaT: prep.roomTargetDeltaT,
+      windowOpeningWidthMm: maxWindowWidthByRoom.get(prep.roomId) ?? null,
+      openingHeightMm: maxWindowHeightByRoom.get(prep.roomId) ?? null,
       ventilationReserveFactor,
+      emitterKindRules,
     });
 
     if (!sized) {
-      return {
-        roomId: room.id,
-        roomName: room.name,
-        designAirTempC: roomInsideC,
-        designAirTempSource: air?.source ?? 'survey',
-        heatLossWatts: qEnvelope,
-        radiatorDesignWatts: Math.round(qRad),
-        flowRateM3PerHour: radiatorFlowM3h(qRad),
-        radiatorModel: '—',
-        outputPerSectionWatts: 0,
-        sections: null,
-        warnings: ['Не удалось подобрать радиатор из каталога.'],
-        sizingNotes: mixedLoad.sizingNotes,
-      };
+      byRoom.push(
+        skippedRoomEmitter({
+          roomId: prep.roomId,
+          roomName: prep.roomName,
+          designAirTempC: prep.roomInsideC,
+          designAirTempSource: prep.airSource,
+          heatLossWatts: prep.qEnvelope,
+          radiatorDesignWatts: Math.round(prep.qRad),
+          flowRateM3PerHour: radiatorFlowM3h(prep.qRad),
+          radiatorModel: '—',
+          warnings: [
+            `Не удалось подобрать ${resolvedKind} радиатор из каталога (forced kind).`,
+          ],
+          sizingNotes: prep.mixedNotes,
+        }),
+      );
+      continue;
     }
 
-    const outputLabel =
-      sized.kind === 'panel'
-        ? Math.max(1, Math.round(sized.adjustedWatts))
-        : Math.max(1, Math.round(sized.adjustedWatts));
+    if (sized.unitsCount > 1) anyMultiUnit = true;
+
+    const emitter = emitterFieldsFromSized(
+      sized.kind === 'panel' ? 'panel' : 'section',
+      sized.adjustedWatts,
+      sized.sections,
+      sized.unitsCount,
+    );
 
     /** @type {string[]} */
     const roomWarnings = [];
-    if (sized.widthOk === false && qEnvelope >= minRoomWattsForWindowWidthRule) {
+    if (sized.widthOk === false && prep.qEnvelope >= minRoomWattsForWindowWidthRule) {
       roomWarnings.push(
         `Радиатор перекрывает менее 70% ширины окна (${Math.round(
           (sized.widthCoverageRatio ?? 0) * 100,
         )}%). Рассмотрите другую длину/модель или перенос прибора.`,
       );
     }
+    if (sized.underpowered) {
+      underpoweredRoomIds.add(prep.roomId);
+      roomWarnings.push(
+        `В помещении «${prep.roomName}» секционный/панельный прибор типа «${resolvedKind}» `
+          + `не покрывает 100% теплопотерь. Нехватка: ${sized.deficitWatts} Вт `
+          + `(нагрузка ${Math.round(prep.qRad)} Вт, отдача ${emitter.deliverableWatts} Вт).`,
+      );
+    }
 
-    return {
-      roomId: room.id,
-      roomName: room.name,
-      designAirTempC: roomInsideC,
-      designAirTempSource: air?.source ?? 'survey',
-      heatLossWatts: qEnvelope,
-      radiatorDesignWatts: Math.round(qRad),
-      flowRateM3PerHour: radiatorFlowM3h(qRad),
+    byRoom.push({
+      roomId: prep.roomId,
+      roomName: prep.roomName,
+      designAirTempC: prep.roomInsideC,
+      designAirTempSource: prep.airSource,
+      heatLossWatts: prep.qEnvelope,
+      radiatorDesignWatts: Math.round(prep.qRad),
+      flowRateM3PerHour: radiatorFlowM3h(prep.qRad),
       radiatorModel: sized.radiator.model,
-      outputPerSectionWatts: outputLabel,
+      outputPerSectionWatts: emitter.outputPerSectionWatts,
       sections: sized.sections,
       sectionsThermalMin: sized.sectionsThermalMin ?? sized.sections,
-      windowOpeningWidthMm: maxWindowWidthByRoom.get(room.id) ?? null,
+      unitsCount: emitter.unitsCount,
+      deliverableWatts: emitter.deliverableWatts,
+      displayKind: emitter.displayKind,
+      windowOpeningWidthMm: maxWindowWidthByRoom.get(prep.roomId) ?? null,
       radiatorWidthMm: sized.radiatorWidthMm,
       widthCoverageRatio:
         sized.widthCoverageRatio != null
@@ -732,11 +733,24 @@ export function pickRadiators({
           : null,
       widthOk: sized.widthOk,
       warnings: roomWarnings,
-      sizingNotes: [...mixedLoad.sizingNotes, ...(sized.sizingNotes ?? [])],
-      priceBasis: sized.kind === 'panel' ? 'panel' : 'section',
+      sizingNotes: [...prep.mixedNotes, ...(sized.sizingNotes ?? [])],
+      priceBasis: emitter.priceBasis,
       panelLengthMm: sized.panelLengthMm ?? undefined,
-    };
-  });
+    });
+  }
+
+  // Инвариант: один displayKind на все подобранные комнаты
+  const kindsOnObject = new Set(
+    byRoom
+      .filter((r) => r.displayKind === 'sectional' || r.displayKind === 'panel')
+      .map((r) => r.displayKind),
+  );
+  if (kindsOnObject.size > 1) {
+    logger.error('matching.radiators.mixedKindsOnObject', null, {
+      kinds: [...kindsOnObject],
+      resolvedKind,
+    });
+  }
 
   const firstSized = byRoom.find((r) => r.radiatorModel && r.radiatorModel !== '—');
   const chosenRadiator =
@@ -761,8 +775,8 @@ export function pickRadiators({
   const graphAutoAdjusted =
     heatingSystem
     && typeof heatingSystem === 'object'
-    && /** @type {Record<string, unknown>} */ (heatingSystem)._thermalRegimeAutoAdjusted ===
-      true;
+    && /** @type {Record<string, unknown>} */ (heatingSystem)._thermalRegimeAutoAdjusted
+      === true;
 
   if (
     radiatorLineTier == null
@@ -772,7 +786,8 @@ export function pickRadiators({
     && returnC >= 55
   ) {
     warnings.push(
-      'Для извлечения КПД конденсационного котла рекомендуется более низкий график теплоносителя (например 55/45°C или тёплый пол) — при текущих supply/return расчёт радиаторов консервативен.',
+      'Для извлечения КПД конденсационного котла рекомендуется более низкий график теплоносителя '
+        + '(например 55/45°C или тёплый пол) — при текущих supply/return расчёт радиаторов консервативен.',
     );
   }
 
@@ -797,7 +812,44 @@ export function pickRadiators({
       const resolved = resolveRecommendation(recommendations, code);
       if (resolved) resolvedRecommendations.push(resolved);
     }
+    if (decision.decisionSource === 'majority' || decision.decisionSource === 'tie_break') {
+      const resolved = resolveRecommendation(
+        recommendations,
+        'REC_RADIATOR_EMITTER_KIND_MAJORITY',
+        {
+          resolvedEmitterKind: resolvedKind,
+          sectionalVotes: decision.emitterKindVotes.sectional,
+          panelVotes: decision.emitterKindVotes.panel,
+          decisionSource: decision.decisionSource,
+        },
+      );
+      if (resolved) resolvedRecommendations.push(resolved);
+    }
+    if (anyMultiUnit) {
+      const resolved = resolveRecommendation(recommendations, 'REC_RADIATOR_MULTI_UNIT');
+      if (resolved) resolvedRecommendations.push(resolved);
+    }
+    for (const row of byRoom) {
+      if (!underpoweredRoomIds.has(row.roomId)) continue;
+      const resolved = resolveRecommendation(
+        recommendations,
+        'WARN_RADIATOR_KIND_LOCKED_UNDERPOWERED',
+        {
+          roomName: row.roomName,
+          resolvedEmitterKind: resolvedKind,
+          deficitWatts: Math.max(
+            0,
+            Math.round((row.radiatorDesignWatts ?? 0) - (row.deliverableWatts ?? 0)),
+          ),
+          radiatorDesignWatts: Math.round(row.radiatorDesignWatts ?? 0),
+          deliverableWatts: Math.round(row.deliverableWatts ?? 0),
+        },
+      );
+      if (resolved) resolvedRecommendations.push(resolved);
+    }
   }
+
+  const emittersSummary = summarizeRadiatorEmitters(byRoom);
 
   return {
     chosen: chosen
@@ -814,6 +866,11 @@ export function pickRadiators({
         }
       : null,
     byRoom,
+    emittersSummary,
+    totalSections:
+      emittersSummary.sectionalUnits > 0 || emittersSummary.panelUnits > 0
+        ? emittersSummary.sectionalSections
+        : null,
     warnings,
     inputs: {
       supplyC,
@@ -829,8 +886,12 @@ export function pickRadiators({
       radiatorSizingAlignedWithCondensing: hasEfficientProposal,
       heatingDistribution,
       radiatorConnection,
+      radiatorEmitterPreference,
       thermalRegimePreset: heatingSystem.thermalRegimePreset,
     },
+    resolvedEmitterKind: resolvedKind,
+    emitterKindVotes: decision.emitterKindVotes,
+    emitterKindDecisionNotes: decision.emitterKindDecisionNotes,
     radiatorSelectionNotes,
     ...(resolvedRecommendations.length > 0 ? { resolvedRecommendations } : {}),
   };

@@ -41,6 +41,12 @@ export type WindowFormValue = {
 /** Тёплый пол: база + финиш (GET /api/v1/presets/underfloor-heating). */
 export type UfhPipeSpacingMm = 100 | 150 | 200;
 
+/** Терминал петли ТП для зон ≤ 20 м². */
+export type UfhTerminalControl = 'collector' | 'unibox';
+
+/** Макс. площадь комнаты (м²) для выбора унибокса. */
+export const UFH_TERMINAL_CONTROL_MAX_AREA_SQM = 20;
+
 export type RoomUnderfloorHeatingFormValue = {
   enabled: boolean;
   basePresetId: string;
@@ -49,6 +55,11 @@ export type RoomUnderfloorHeatingFormValue = {
   pipeSpacingMm?: UfhPipeSpacingMm;
   /** Площадь под мебелью без укладки ТП, м² (S_meb). */
   furnitureOccupiedAreaM2?: number | '';
+  /**
+   * Терминал петли: collector | unibox (только при areaM2 ≤ 20).
+   * Omit / collector — выход на коллектор ТП.
+   */
+  ufhTerminalControl?: UfhTerminalControl;
   /** @deprecated Монолитный пресет; мигрируется в migrateRoomUnderfloorHeating */
   presetId?: string;
 };

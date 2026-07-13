@@ -5,6 +5,8 @@
 import type { CalcReportJson } from '../types/calcApi';
 import type { ObjectMetaValue } from '../types/envelope';
 import type { HeatingThermalRegimePreset } from '../types/heatingThermalRegime';
+import type { RadiatorConnection } from '../types/radiatorConnection';
+import type { RadiatorEmitterPreference } from '../types/radiatorEmitterPreference';
 import type { UfhModePresetId } from '../types/ufhModePreset';
 import type { UfhDistributionPreset } from '../types/ufhDistribution';
 import type { HotWaterFormValue } from '../types/hotWater';
@@ -28,6 +30,8 @@ export type SurveyDraftSnapshot = {
   waterUnderfloorHeating: boolean;
   underfloorDistributionPreset: UfhDistributionPreset;
   thermalRegimePreset: HeatingThermalRegimePreset;
+  radiatorConnection: RadiatorConnection;
+  radiatorEmitterPreference: RadiatorEmitterPreference;
   ufhPresetId: UfhModePresetId | null;
   hydraulicsForm: HydraulicsFormValue;
   wiringLayoutV3: WiringLayoutV3;
@@ -48,6 +52,8 @@ export type SurveyMutation =
   | { type: 'WIRING_BRANCH_LENGTH_SET'; roomId: string; pipeLengthToEquipmentM: number }
   | { type: 'WIRING_BRANCH_REORDER'; roomId: string; direction: 'up' | 'down' }
   | { type: 'SET_THERMAL_REGIME_PRESET'; preset: HeatingThermalRegimePreset; touched?: boolean }
+  | { type: 'SET_RADIATOR_CONNECTION'; connection: RadiatorConnection }
+  | { type: 'SET_RADIATOR_EMITTER_PREFERENCE'; preference: RadiatorEmitterPreference }
   | { type: 'SET_HYDRAULICS_FORM'; hydraulicsForm: HydraulicsFormValue }
   | { type: 'DRAFT_LOADED'; draft: SurveyDraftSnapshot; lastCalcReport?: CalcReportJson | null }
   | { type: 'RUN_CALC_MANUAL' };

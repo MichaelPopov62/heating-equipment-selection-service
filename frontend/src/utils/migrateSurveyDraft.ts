@@ -8,6 +8,11 @@ import type { CalcReportJson } from '../types/calcApi';
 import type { ObjectMetaValue } from '../types/envelope';
 import type { HeatingThermalRegimePreset } from '../types/heatingThermalRegime';
 import { isDeprecatedHeatingThermalRegimePreset } from '../types/heatingThermalRegime';
+import {
+  normalizeRadiatorConnection,
+  type RadiatorConnection,
+} from '../types/radiatorConnection';
+import { normalizeRadiatorEmitterPreference } from '../types/radiatorEmitterPreference';
 import type { LegacyWiringBranch } from '../types/surveyDraftCompat';
 import {
   SURVEY_DRAFT_SCHEMA_VERSION,
@@ -135,6 +140,12 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
       return isUfhDistributionPreset(v) ? v : ('auto' satisfies UfhDistributionPreset);
     })(),
     thermalRegimePreset,
+    radiatorConnection: normalizeRadiatorConnection(
+      raw.radiatorConnection,
+    ) as RadiatorConnection,
+    radiatorEmitterPreference: normalizeRadiatorEmitterPreference(
+      raw.radiatorEmitterPreference,
+    ),
     ufhPresetId: (() => {
       const id = String(raw.ufhPresetId ?? '').trim();
       if (!id) return null;

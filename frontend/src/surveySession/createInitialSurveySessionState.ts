@@ -11,6 +11,8 @@ import {
 } from '../utils/roomEnvelopeFields';
 import { createDefaultWindowFormValue } from '../utils/roomWindowDefaults';
 import { recommendedThermalRegimePresetForScheme } from '../types/heatingThermalRegime';
+import { DEFAULT_RADIATOR_CONNECTION } from '../types/radiatorConnection';
+import { DEFAULT_RADIATOR_EMITTER_PREFERENCE } from '../types/radiatorEmitterPreference';
 import { buildCalcInputKeyFromDraft } from './buildCalcInputSnapshot';
 import { createInitialDraftSnapshot } from './migrateDerivedState';
 import { adaptFlatRoomsToWiringLayout } from './wiringLayoutV3';
@@ -84,6 +86,8 @@ export function createInitialSurveySessionState(): SurveySessionState {
     },
     waterHeaterForm,
     thermalRegimePreset,
+    radiatorConnection: DEFAULT_RADIATOR_CONNECTION,
+    radiatorEmitterPreference: DEFAULT_RADIATOR_EMITTER_PREFERENCE,
     hydraulicsForm: { ...DEFAULT_HYDRAULICS_FORM },
     wiringLayoutV3: adaptFlatRoomsToWiringLayout(initialRooms, 'auto'),
   });

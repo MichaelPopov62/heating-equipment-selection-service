@@ -209,6 +209,9 @@ export type RoomType =
 /** Зона планируемой установки котла (только для objectType house). */
 export type BoilerPlacementZone = 'kitchen' | 'living_zone' | 'boiler_room';
 
+/** Терминал регулирования одной петли ТП (анкета). */
+export type UfhTerminalControl = 'collector' | 'unibox';
+
 /** Тёплый пол в комнате: база + финиш (не envelopePresets). */
 export interface RoomUnderfloorHeatingInput {
   enabled: boolean;
@@ -218,6 +221,11 @@ export interface RoomUnderfloorHeatingInput {
   pipeSpacingMm?: 100 | 150 | 200;
   /** Площадь пола под мебелью без укладки ТП, м² (S_meb). */
   furnitureOccupiedAreaM2?: number;
+  /**
+   * Терминал петли для зон ≤ 20 м²: collector (выход коллектора) | unibox.
+   * По умолчанию / omit — collector.
+   */
+  ufhTerminalControl?: UfhTerminalControl;
   /** @deprecated Миграция монолитных пресетов; не задавать в новых анкетах */
   presetId?: string;
 }
@@ -438,9 +446,15 @@ export interface HeatingSystemInput {
    */
   boilerCombustionType?: BoilerCombustionType;
   /**
-   * Схема подводки к радиатору (для подсказок по панельным сериям K / VK / VKP).
+   * Схема подводки к радиатору (side — боковая, bottom — нижняя).
+   * Если не задано — normalizeRadiatorConnection → side.
    */
   radiatorConnection?: 'side' | 'bottom';
+  /**
+   * Глобальный тип приборов на объект: auto (Two-Pass) | sectional | panel.
+   * Ортогонально radiatorConnection. Default — auto.
+   */
+  radiatorEmitterPreference?: 'auto' | 'sectional' | 'panel';
   /**
    * Связка «котёл — горячая вода» для расчёта требуемой мощности котла.
    * Если не задано — применяется сценарий maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw.
@@ -589,6 +603,12 @@ export interface UnderfloorHeatingRoomReport {
   areaM2: number;
   /** Фактический шаг (= resolvedPipeSpacingMm); обратная совместимость. */
   pipeSpacingMm: number;
+  /** Норма укладки трубы, м.п. на 1 м² (layoutFactor / шаг). */
+  pipeMetersPerSqM?: number;
+  /** Коэффициент укладки (классика 1.1). */
+  loopLengthLayoutFactor?: number;
+  /** Терминал петли из анкеты (collector | unibox). */
+  ufhTerminalControl?: UfhTerminalControl;
   pipeEmbedmentResistanceM2KW: number;
   baseCoveringResistanceM2KW: number;
   finishCoveringResistanceM2KW: number;
@@ -1040,6 +1060,36 @@ export interface MatchingReport {
   hydraulics?: HydraulicsMatchingReport;
 }
 
+/** Тип приладу в звіті радіаторів (UI / смета / порівняння ліній). */
+export type RadiatorDisplayKind = 'sectional' | 'panel' | 'none';
+
+/** Агрегат панелей і секцій (не змішує в одній цифрі). */
+export interface RadiatorsEmittersSummary {
+  panelUnits: number;
+  sectionalUnits: number;
+  sectionalSections: number;
+  totalDeliverableWatts: number;
+  roomsWithEmitter: number;
+  roomsSkipped: number;
+}
+
+/** Diff приладу кімнати між lineEconomy і lineEfficient. */
+export interface RadiatorsRoomEmitterDiff {
+  roomId: string;
+  roomName: string;
+  equipmentKindChanged: boolean;
+  economyDisplayKind?: RadiatorDisplayKind | null;
+  efficientDisplayKind?: RadiatorDisplayKind | null;
+  economyModel?: string | null;
+  efficientModel?: string | null;
+  economySections?: number | null;
+  efficientSections?: number | null;
+  economyPanelLengthMm?: number | null;
+  efficientPanelLengthMm?: number | null;
+  economyDeliverableWatts?: number | null;
+  efficientDeliverableWatts?: number | null;
+}
+
 export interface RadiatorsByRoomItem {
   roomId: string;
   roomName: string;
@@ -1053,9 +1103,18 @@ export interface RadiatorsByRoomItem {
   /** Расход теплоносителя по комнате, м³/ч (upstream thermalLoadToFlow). */
   flowRateM3PerHour?: number;
   radiatorModel: string;
+  /**
+   * Потужність однієї секції під графік, Вт.
+   * Для priceBasis=panel — завжди 0 (потужність панелі в deliverableWatts).
+   */
   outputPerSectionWatts: number;
   sections: number | null;
   sectionsThermalMin?: number | null;
+  /** Кількість приладів у кімнаті (≥1 при підборі; ескалація multi-unit). */
+  unitsCount?: number;
+  /** Фактична віддача підібраного приладу, Вт. */
+  deliverableWatts?: number;
+  displayKind?: RadiatorDisplayKind;
   windowOpeningWidthMm?: number | null;
   radiatorWidthMm?: number | null;
   widthCoverageRatio?: number | null;
@@ -1087,8 +1146,12 @@ export interface RadiatorsProposalLineReport {
   chosen: RadiatorsChosenSummary | null;
   byRoom: RadiatorsByRoomItem[];
   warnings: string[];
-  /** Сума секцій по приміщеннях; null — немає даних. */
+  /**
+   * Сума секцій лише по секційних кімнатах (= emittersSummary.sectionalSections).
+   * Панелі не входять; null — лінія недоступна / немає секційних даних.
+   */
   totalSections: number | null;
+  emittersSummary?: RadiatorsEmittersSummary;
   unavailableReason?: string;
   inputs?: {
     supplyC: number;
@@ -1105,15 +1168,24 @@ export interface RadiatorsProposalLineReport {
     radiatorSizingAlignedWithCondensing?: boolean;
     heatingDistribution?: 'individual' | 'central';
     radiatorConnection?: 'side' | 'bottom';
+    radiatorEmitterPreference?: 'auto' | 'sectional' | 'panel';
     thermalRegimePreset?: HeatingThermalRegimePreset;
   };
   radiatorSelectionNotes?: string[];
+  resolvedEmitterKind?: 'sectional' | 'panel' | null;
+  emitterKindVotes?: { sectional: number; panel: number };
+  emitterKindDecisionNotes?: string[];
 }
 
 export interface RadiatorsMatchingReport {
   chosen: RadiatorsChosenSummary | null;
   byRoom: RadiatorsByRoomItem[];
   warnings: string[];
+  emittersSummary?: RadiatorsEmittersSummary;
+  /** Alias emittersSummary.sectionalSections (без панелей). */
+  totalSections?: number | null;
+  /** Порівняння приладів economy vs efficient по кімнатах. */
+  roomEmitterDiffs?: RadiatorsRoomEmitterDiff[];
   /** Лінія «Економ»: графік 75/65, секції під proposalEconomy. */
   lineEconomy?: RadiatorsProposalLineReport;
   /** Лінія «Еффективный»: графік 55/45, секції під proposalEfficient. */
@@ -1129,14 +1201,19 @@ export interface RadiatorsMatchingReport {
     radiatorSizingAlignedWithCondensing?: boolean;
     heatingDistribution?: 'individual' | 'central';
     radiatorConnection?: 'side' | 'bottom';
+    radiatorEmitterPreference?: 'auto' | 'sectional' | 'panel';
     /** Фактично застосований пресет графіка (якщо був у запиті). */
     thermalRegimePreset?: HeatingThermalRegimePreset;
     flowDeltaTK?: number;
     deltaTSystemK?: number;
   };
+  /** Єдиний тип приладів на об'єкт після Two-Pass. */
+  resolvedEmitterKind?: 'sectional' | 'panel' | null;
+  emitterKindVotes?: { sectional: number; panel: number };
+  emitterKindDecisionNotes?: string[];
   /** Пояснення щодо сімейства радіаторів / панельних моделей. */
   radiatorSelectionNotes?: string[];
-  /** REC_* по микронагрузке / входным зонам (Ф5). */
+  /** REC_* / WARN_* (мікронавантаження, emitter kind, multi-unit). */
   resolvedRecommendations?: import('../recommendations/types').ResolvedRecommendation[];
 }
 

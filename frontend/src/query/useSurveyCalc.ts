@@ -22,6 +22,8 @@ export type UseSurveyCalcParams = {
   calcInputKey: string;
   onCalcSuccess?: (report: CalcReportJson) => void;
   onCalcError?: (message: string) => void;
+  /** Payload совпал с последним успешным — снять uiPhase=recalculating. */
+  onCalcSkippedDedup?: () => void;
   draftInitializing?: boolean;
 };
 
@@ -34,12 +36,14 @@ export function useSurveyCalc({
   calcInputKey,
   onCalcSuccess,
   onCalcError,
+  onCalcSkippedDedup,
   draftInitializing = false,
 }: UseSurveyCalcParams) {
   const queryClient = useQueryClient();
   const buildCalcPayloadRef = useRef(buildCalcPayload);
   const onCalcSuccessRef = useRef(onCalcSuccess);
   const onCalcErrorRef = useRef(onCalcError);
+  const onCalcSkippedDedupRef = useRef(onCalcSkippedDedup);
   const lastSuccessPayloadKeyRef = useRef<string | null>(null);
   const [freshCalcToken, setFreshCalcToken] = useState(0);
 
@@ -47,7 +51,8 @@ export function useSurveyCalc({
     buildCalcPayloadRef.current = buildCalcPayload;
     onCalcSuccessRef.current = onCalcSuccess;
     onCalcErrorRef.current = onCalcError;
-  }, [buildCalcPayload, onCalcSuccess, onCalcError]);
+    onCalcSkippedDedupRef.current = onCalcSkippedDedup;
+  }, [buildCalcPayload, onCalcSuccess, onCalcError, onCalcSkippedDedup]);
 
   const debouncedKey = useDebouncedValue(calcInputKey, SURVEY_CALC_DEBOUNCE_MS);
 
@@ -83,6 +88,7 @@ export function useSurveyCalc({
   useEffect(() => {
     if (!autoQuery.error || autoQuery.isFetching) return;
     if (autoQuery.error instanceof Error && autoQuery.error.message === CALC_SKIP_DEDUP) {
+      onCalcSkippedDedupRef.current?.();
       return;
     }
     const message =

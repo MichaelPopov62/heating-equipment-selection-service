@@ -166,6 +166,7 @@ const underfloorHeating = {
           flowRateM3PerHour: 0.04,
         },
       ],
+      ufhTerminalControl: 'unibox',
     },
   ],
   totalHeatFluxUpWatts: 400,

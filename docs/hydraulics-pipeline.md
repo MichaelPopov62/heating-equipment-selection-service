@@ -20,7 +20,7 @@
 | `thermalRegime.deltaTK` | Перепад **номинального графика** `supplyC − returnC` | 75/65 → 10 K |
 | `flowDeltaTK` | ΔT для **расчёта расхода** Q = P/(c·ΔT) | анкета `deltaTSystemK: 20` |
 
-`input.hydraulics.deltaTSystemK` может отличаться от ΔT графика — это нормально для проектного расчёта гидравлики. Резолвер — `resolveFlowDeltaTK.js`; расходы по комнатам считаются в `pickRadiatorsCore` и попадают в pipeline через `matching.radiators.byRoom[].flowRateM3PerHour`.
+`input.hydraulics.deltaTSystemK` может отличаться от ΔT графика — это нормально для проектного расчёта гидравлики. Резолвер — `resolveFlowDeltaTK.js`; расходы по комнатам считаются в `pickRadiatorsCore` и попадают в pipeline через `matching.radiators.byRoom[].flowRateM3PerHour`. При `unitsCount > 1` в комнате расход считается по суммарной нагрузке комнаты (`radiatorDesignWatts`); тип приборов на объект — [`radiator-emitter-kind.md`](radiator-emitter-kind.md).
 
 ## SurveySession (единый pipeline анкеты)
 
@@ -172,12 +172,12 @@
 
 | Участок | Формула | Зависит от S_meb |
 |---------|---------|------------------|
-| Петля в стяжке (`loopLengthM`) | `heatedAreaM2 / pipeSpacingMm / loopsCount` | **да** |
+| Петля в стяжке (`loopLengthM`) | `S_акт / шаг × ufhLoopLengthLayoutFactor / loopsCount` (max петли **80** м) | **да** |
 | Транзит до коллектора ТП (`ufh_collector_transit`) | `estimateBranchLengthM(этаж, ufhCollectorBranch)` — одно ребро на этаж | нет |
 | Подвод радиатора | `radiatorBranchOverrides[].pipeLengthToEquipmentM` или дефолт из rules | нет |
 | Магистраль котёл → распределитель | `hydraulics.mainLineLengthM` (анкета) | нет |
 
-Топология ТП в `buildGraph.js`: узел `ufh_collector_floor_{F}` на каждый этаж; ребро `ufh_collector_transit` от upstream (mixing_node / main) до коллектора; петли `ufh_loop` параллельно от коллектора, `edge.lengthM = loop.loopLengthM` **без** транзита.
+Топология ТП в `buildGraph.js`: узел `ufh_collector_floor_{F}` на каждый этаж **с коллекторными** комнатами; ребро `ufh_collector_transit` от upstream (mixing_node / main) до коллектора; петли `ufh_loop` от коллектора. Комнаты с `ufhTerminalControl=unibox` — петли напрямую от mixing/main (без outlet коллектора), `edge.lengthM = loop.loopLengthM` **без** транзита.
 
 См. [`ufh-furniture-active-area.md`](ufh-furniture-active-area.md).
 
@@ -194,7 +194,7 @@
 | `ufhLoopMinNominalDiameterMm` | 16 | Мин. номинал трубы ТП в каталоге |
 | `ufhParasiticDownTriggerWm2`, `ufhParasiticDownToUpRatio` | 5 / 0.15 | Триггер оптимизации Ø при q↓ в перекрытие |
 | `ufhLoopPipeResizeEnabled`, `ufhLoopPressureUtilizationForResize` | true / 0.85 | Совместный подбор Ø и числа петель |
-| `velocityLimitsMps`, `defaultLengthsM`, `roughnessMmByMaterial`, `localLossZeta`, `maxUfhLoopLengthM` | см. JSON | Трубы, петли ТП, граф |
+| `velocityLimitsMps`, `defaultLengthsM`, `roughnessMmByMaterial`, `localLossZeta`, `maxUfhLoopLengthM` (80 м), `ufhLoopLengthLayoutFactor` (1.1) | см. JSON | Трубы, петли ТП, граф |
 
 ## Кривая насоса в каталоге
 

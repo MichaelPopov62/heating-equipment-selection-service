@@ -103,14 +103,28 @@ export function adjustedRadiatorWatts(r, baseDeltaT, targetDeltaT) {
 
 /**
  * Минимальная панель из каталога (по длине), покрывающая нагрузку.
+ * При заданном окне сначала ищет панели с length ≥ 70% openingWidth, затем fallback без этого фильтра.
  *
  * @param {number} qRad
  * @param {import('../catalog/types').RadiatorCatalogItemNormalized[]} panelPool
  * @param {50 | 70} baseDeltaT
  * @param {number} targetDeltaT
- * @returns {{ radiator: import('../catalog/types').RadiatorCatalogItemNormalized, adjustedWatts: number, panelLengthMm: number } | null}
+ * @param {number | null} [windowOpeningWidthMm]
+ * @returns {{
+ *   radiator: import('../catalog/types').RadiatorCatalogItemNormalized,
+ *   adjustedWatts: number,
+ *   panelLengthMm: number,
+ *   underpowered?: boolean,
+ *   windowLengthFilterApplied?: boolean,
+ * } | null}
  */
-export function pickPanelSkuForRoom(qRad, panelPool, baseDeltaT, targetDeltaT) {
+export function pickPanelSkuForRoom(
+  qRad,
+  panelPool,
+  baseDeltaT,
+  targetDeltaT,
+  windowOpeningWidthMm = null,
+) {
   if (!panelPool.length || qRad <= 0) return null;
 
   const withLength = panelPool
@@ -122,22 +136,51 @@ export function pickPanelSkuForRoom(qRad, panelPool, baseDeltaT, targetDeltaT) {
     .filter((x) => x.panelLengthMm != null && x.adjustedWatts > 0)
     .sort((a, b) => a.panelLengthMm - b.panelLengthMm);
 
-  const fit = withLength.find((x) => x.adjustedWatts >= qRad);
+  if (!withLength.length) return null;
+
+  const minLengthMm =
+    typeof windowOpeningWidthMm === 'number'
+    && Number.isFinite(windowOpeningWidthMm)
+    && windowOpeningWidthMm > 0
+      ? 0.7 * windowOpeningWidthMm
+      : null;
+
+  /**
+   * @param {typeof withLength} pool
+   * @returns {(typeof withLength)[number] | undefined}
+   */
+  const firstCovering = (pool) => pool.find((x) => x.adjustedWatts >= qRad);
+
+  if (minLengthMm != null) {
+    const windowOkPool = withLength.filter((x) => x.panelLengthMm >= minLengthMm);
+    const fitWindow = firstCovering(windowOkPool);
+    if (fitWindow) {
+      return {
+        radiator: fitWindow.r,
+        adjustedWatts: fitWindow.adjustedWatts,
+        panelLengthMm: fitWindow.panelLengthMm,
+        windowLengthFilterApplied: true,
+      };
+    }
+  }
+
+  const fit = firstCovering(withLength);
   if (fit) {
     return {
       radiator: fit.r,
       adjustedWatts: fit.adjustedWatts,
       panelLengthMm: fit.panelLengthMm,
+      windowLengthFilterApplied: false,
     };
   }
 
   const largest = withLength[withLength.length - 1];
-  if (!largest) return null;
   return {
     radiator: largest.r,
     adjustedWatts: largest.adjustedWatts,
     panelLengthMm: largest.panelLengthMm,
     underpowered: true,
+    windowLengthFilterApplied: false,
   };
 }
 

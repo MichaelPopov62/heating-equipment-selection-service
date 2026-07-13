@@ -5,7 +5,11 @@
 
 import { DEFAULT_UNDERFLOOR_HEATING_BASE_ID } from '../data/fallbackUnderfloorHeatingPresets';
 import { DEFAULT_FLOORING_FINISH_ID } from '../data/fallbackFlooringFinishes';
-import type { RoomFormValue, UfhPipeSpacingMm } from '../types/rooms';
+import type {
+  RoomFormValue,
+  UfhPipeSpacingMm,
+  UfhTerminalControl,
+} from '../types/rooms';
 import { DEFAULT_UFH_PIPE_SPACING_MM } from '../types/underfloorHeating';
 import { warnCompatMigration } from './compatTelemetry';
 
@@ -62,17 +66,30 @@ export function migrateRoomUnderfloorHeating(rooms: RoomFormValue[]): RoomFormVa
         ? rawSpacing
         : DEFAULT_UFH_PIPE_SPACING_MM;
 
+    const terminalRaw = ufh.ufhTerminalControl;
+    const ufhTerminalControl: UfhTerminalControl | undefined =
+      terminalRaw === 'unibox' ? 'unibox' : undefined;
+
+    const furnitureOccupiedAreaM2 = ufh.furnitureOccupiedAreaM2;
+
     const normalized = {
       enabled: true as const,
       basePresetId,
       finishMaterialId,
       pipeSpacingMm,
+      ...(furnitureOccupiedAreaM2 !== undefined
+        ? { furnitureOccupiedAreaM2 }
+        : {}),
+      ...(ufhTerminalControl ? { ufhTerminalControl } : {}),
     };
 
     if (
       room.underfloorHeating?.basePresetId !== normalized.basePresetId ||
       room.underfloorHeating?.finishMaterialId !== normalized.finishMaterialId ||
-      room.underfloorHeating?.pipeSpacingMm !== normalized.pipeSpacingMm
+      room.underfloorHeating?.pipeSpacingMm !== normalized.pipeSpacingMm ||
+      room.underfloorHeating?.ufhTerminalControl !== normalized.ufhTerminalControl ||
+      room.underfloorHeating?.furnitureOccupiedAreaM2 !==
+        normalized.furnitureOccupiedAreaM2
     ) {
       changed = true;
     }

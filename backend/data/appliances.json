@@ -61,9 +61,9 @@
   },
   {
     "applianceKind": "radiator",
-    "schemaVersion": 2,
+    "schemaVersion": 3,
     "isActive": true,
-    "label": "Радиаторы — микронагрузка и входные зоны",
+    "label": "Радиаторы — микронагрузка, тип прибора, эскалация",
     "panelLengthRangeMm": {
       "min": 400,
       "max": 3000
@@ -71,6 +71,13 @@
     "microLoad": {
       "minDesignWattsThreshold": 150,
       "entryRoomTypes": ["прихожая", "коридор", "тамбур"]
+    },
+    "emitterKind": {
+      "maxSectionsBeforeMultiUnit": 24,
+      "maxUnitsPerRoom": 4,
+      "maxSectionsHeuristic": 80,
+      "sectionalCandidatesPerRoom": 16,
+      "tieBreakKind": "sectional"
     }
   },
   {
@@ -91,7 +98,7 @@
   },
   {
     "applianceKind": "hydraulics",
-    "schemaVersion": 4,
+    "schemaVersion": 5,
     "isActive": true,
     "label": "Гидравлика — пороги расчёта и дефолты длин",
     "mainTransitMinInternalDiameterMm": 20,
@@ -113,7 +120,8 @@
       "radiatorBranch": 4,
       "ufhCollectorBranch": 3
     },
-    "maxUfhLoopLengthM": 100,
+    "maxUfhLoopLengthM": 80,
+    "ufhLoopLengthLayoutFactor": 1.1,
     "ufhLoopDeltaTK": 10,
     "ufhLoopVelocityMinMps": 0.2,
     "ufhLoopVelocityMaxMps": 0.7,

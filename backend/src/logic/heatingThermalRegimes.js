@@ -10,6 +10,8 @@ import {
   defaultThermalRegimePresetForMatchingScheme,
   isLowTemperatureThermalRegimePreset,
 } from '../../../shared/heatingThermalRegimePresets.js';
+import { normalizeRadiatorConnection } from '../../../shared/radiatorConnection.js';
+import { normalizeRadiatorEmitterPreference } from '../../../shared/radiatorEmitterPreference.js';
 import { isCondensingBoiler } from '../utils/boilerMatchingByType.js';
 
 export {
@@ -69,11 +71,15 @@ export function normalizeHeatingSystemThermalRegime(body) {
     if (hs.radiatorReferenceDeltaT == null) {
       hs.radiatorReferenceDeltaT = p.defaultRadiatorReferenceDeltaT;
     }
-    return;
+  } else {
+    if (hs.supplyC == null) hs.supplyC = 75;
+    if (hs.returnC == null) hs.returnC = 65;
   }
 
-  if (hs.supplyC == null) hs.supplyC = 75;
-  if (hs.returnC == null) hs.returnC = 65;
+  hs.radiatorConnection = normalizeRadiatorConnection(hs.radiatorConnection);
+  hs.radiatorEmitterPreference = normalizeRadiatorEmitterPreference(
+    hs.radiatorEmitterPreference,
+  );
 }
 
 /** @returns {string} Человекочитаемая метка текущего графика для сообщений. */

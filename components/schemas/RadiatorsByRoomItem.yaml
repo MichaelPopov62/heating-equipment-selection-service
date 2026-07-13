@@ -26,11 +26,28 @@ properties:
   radiatorModel: { type: string }
   outputPerSectionWatts:
     type: number
-    description: Перерахована потужність секції під фактичний графік, Вт.
+    description: >-
+      Перерахована потужність однієї секції під фактичний графік, Вт.
+      Для priceBasis=panel завжди 0 (потужність панелі — у deliverableWatts).
   sections:
     type: integer
     nullable: true
-    description: Рекомендована кількість секцій; null — неможливо порахувати.
+    description: >-
+      Число секцій; null якщо priceBasis=panel або прилад не підібрано.
+  unitsCount:
+    type: integer
+    minimum: 1
+    description: Кількість приладів у кімнаті (≥1; ескалація multi-unit при lock типу).
+  deliverableWatts:
+    type: number
+    minimum: 0
+    description: >-
+      Фактична віддача підібраного приладу, Вт: секції — sections×outputPerSectionWatts;
+      панель — adjustedWatts панелі цілком.
+  displayKind:
+    type: string
+    enum: [sectional, panel, none]
+    description: Стабільний тип для UI / смети / порівняння ліній.
   sectionsThermalMin:
     type: integer
     nullable: true
@@ -59,3 +76,11 @@ properties:
     type: array
     items: { type: string }
     description: Пояснення коригування числа секцій (правило вікна, досбор).
+  priceBasis:
+    type: string
+    enum: [section, panel]
+    description: Базис ціни / типу приладу з каталогу.
+  panelLengthMm:
+    type: number
+    nullable: true
+    description: Довжина панелі, мм (лише priceBasis=panel).

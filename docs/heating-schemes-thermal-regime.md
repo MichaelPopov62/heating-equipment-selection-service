@@ -46,6 +46,16 @@
 
 Расчёт **всегда** идёт по выбранному пользователем графику. Подсказки попадают в `_normalizationWarnings` → `matching.boiler.warnings`.
 
+### Подводка радиаторов
+
+`heatingSystem.radiatorConnection`: `side` (дефолт) | `bottom`.  
+Анкета — шаг «Котёл»; детали — [`radiator-connection.md`](radiator-connection.md).
+
+### Тип радиаторов на объект
+
+`heatingSystem.radiatorEmitterPreference`: `auto` | `sectional` | `panel` (дефолт `auto`).  
+Единый тип приборов на все помещения (Two-Pass Orchestrator) — [`radiator-emitter-kind.md`](radiator-emitter-kind.md).
+
 ### Конденсационный котёл + высокий график
 
 `alignHeatingGraphForCondensingBoiler` в `heatingThermalRegimes.js` — **только warning** после подбора, без мутации `input.heatingSystem`. Для `heatingEmittersMode=ufh_only` предупреждение не выводится.

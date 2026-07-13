@@ -89,6 +89,8 @@ export interface HydraulicsApplianceRulesDoc {
     ufhCollectorBranch: number;
   };
   maxUfhLoopLengthM: number;
+  /** Коэффициент укладки L = S/a × factor (классика 1.1 — повороты/подводы). */
+  ufhLoopLengthLayoutFactor: number;
   ufhLoopDeltaTK: number;
   ufhLoopVelocityMinMps: number;
   ufhLoopVelocityMaxMps: number;
@@ -194,6 +196,19 @@ export interface ElectricStorageApplianceRules {
   matching: Record<string, never>;
 }
 
+export interface RadiatorEmitterKindRules {
+  /** Порог секций, после которого пробуем unitsCount≥2 при forced sectional. */
+  maxSectionsBeforeMultiUnit: number;
+  /** Макс. приборов в одной комнате при эскалации. */
+  maxUnitsPerRoom: number;
+  /** Жёсткий потолок секций на один прибор. */
+  maxSectionsHeuristic: number;
+  /** Сколько секционных SKU перебирать per room. */
+  sectionalCandidatesPerRoom: number;
+  /** Ничья голосов Pass 1. */
+  tieBreakKind: 'sectional' | 'panel';
+}
+
 export interface RadiatorApplianceRules {
   applianceKind: 'radiator';
   schemaVersion: number;
@@ -204,6 +219,8 @@ export interface RadiatorApplianceRules {
     minDesignWattsThreshold: number;
     entryRoomTypes: string[];
   };
+  /** Two-pass kind + эскалация (production). */
+  emitterKind: RadiatorEmitterKindRules;
 }
 
 export type NormalizedApplianceRules =

@@ -1,10 +1,14 @@
 /**
  * Назначение: Таблица подбора радиаторов по комнатам.
- * Описание: Секции и модели для линии Economy или Efficient с unavailableReason.
+ * Описание: Секции / панели для линии Economy или Efficient с явным типом прибора.
  */
 
 import styles from './RadiatorProposalLineTable.module.css';
-import type { RadiatorsProposalLineView } from '../../utils/parseRadiatorsMatchingFromReport';
+import {
+  formatRadiatorRoomQuantityLabel,
+  formatRadiatorsEmittersSummaryLabel,
+  type RadiatorsProposalLineView,
+} from '../../utils/parseRadiatorsMatchingFromReport';
 
 type RadiatorProposalLineTableProps = {
   line: RadiatorsProposalLineView | null;
@@ -12,7 +16,7 @@ type RadiatorProposalLineTableProps = {
   tableId: string;
 };
 
-/** Таблиця секцій радіаторів по приміщеннях для лінії «Економ» або «Ефективний». */
+/** Таблиця секцій / панелей радіаторів по приміщеннях. */
 export function RadiatorProposalLineTable({
   line,
   caption,
@@ -34,13 +38,14 @@ export function RadiatorProposalLineTable({
     line.supplyC != null && line.returnC != null
       ? `${line.supplyC}/${line.returnC} °C`
       : null;
+  const emittersLabel = formatRadiatorsEmittersSummaryLabel(line.emittersSummary);
 
   return (
     <div className={styles.wrap}>
       <p className={styles.caption} id={`${tableId}-caption`}>
         {caption}
         {graphLabel != null ? ` · график ${graphLabel}` : ''}
-        {line.totalSections != null ? ` · всего ${line.totalSections} сек.` : ''}
+        {emittersLabel != null ? ` · ${emittersLabel}` : ''}
       </p>
       {line.byRoom.length > 0 ? (
         <table
@@ -50,16 +55,51 @@ export function RadiatorProposalLineTable({
           <thead>
             <tr>
               <th scope="col">Помещение</th>
-              <th scope="col">Секций</th>
+              <th scope="col">Прибор</th>
+              <th scope="col">Кол-во</th>
+              <th scope="col">Отдача, Вт</th>
             </tr>
           </thead>
           <tbody>
-            {line.byRoom.map((row) => (
-              <tr key={row.roomId || row.roomName}>
-                <td>{row.roomName}</td>
-                <td>{row.sections ?? '—'}</td>
-              </tr>
-            ))}
+            {line.byRoom.map((row) => {
+              const qty = formatRadiatorRoomQuantityLabel(row);
+              const model =
+                row.radiatorModel && row.radiatorModel !== '—'
+                  ? row.radiatorModel
+                  : '—';
+              const deliverable =
+                row.deliverableWatts != null && row.deliverableWatts > 0
+                  ? String(Math.round(row.deliverableWatts))
+                  : '—';
+              return (
+                <tr
+                  key={row.roomId || row.roomName}
+                  className={
+                    row.equipmentKindChangedVsEconomy
+                      ? styles.kindChanged
+                      : undefined
+                  }
+                  title={
+                    row.equipmentKindChangedVsEconomy
+                      ? 'Тип прибора отличается от варианта «Эконом»'
+                      : undefined
+                  }
+                >
+                  <td>
+                    {row.roomName}
+                    {row.equipmentKindChangedVsEconomy ? (
+                      <span className={styles.kindChangedMark} aria-label="Тип прибора отличается от варианта Эконом">
+                        {' '}
+                        ≠эконом
+                      </span>
+                    ) : null}
+                  </td>
+                  <td>{model}</td>
+                  <td>{qty}</td>
+                  <td>{deliverable}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       ) : (

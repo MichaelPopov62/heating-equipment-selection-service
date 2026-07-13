@@ -232,7 +232,8 @@ function buildRoomTypeById(rooms) {
 }
 
 /**
- * Збирає потреби лише з реальних петель (loopLengthM > 0). Без fallback loopLengthM=0.
+ * Збирає потреби лише з реальних петель (loopLengthM > 0) кімнат з
+ * ufhTerminalControl=unibox. Без fallback loopLengthM=0.
  * T повітря: пресет за room.type (санузел → 24 °C) або temps.insideC з анкети.
  *
  * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} underfloorHeating
@@ -260,6 +261,8 @@ export function collectUniboxLoopDemands(underfloorHeating, ctx) {
   if (!Number.isFinite(surveyInsideC)) return out;
 
   for (const room of underfloorHeating?.rooms ?? []) {
+    if (room.ufhTerminalControl !== 'unibox') continue;
+
     const roomId = String(room.roomId ?? '');
     const roomType = roomTypeById.get(roomId) || '';
     const airResolved = resolveUniboxRoomAirTempC(
@@ -415,23 +418,13 @@ export function pickUniboxes({
     );
   }
 
-  if (hasUnderfloorManifoldCascade(manifolds)) {
-    const msg =
-      'Унибоксы не подбираются: каскад коллекторов ТП (units > 1) — управление через коллектор.';
-    warnings.push(msg);
-    logger.info('matching.unibox.skip', null, { reason: 'manifold_cascade' });
-    return { byLoop: [], warnings };
-  }
-
+  // Каскад колекторів стосується лише колекторної схеми; явні unibox-зони не блокуємо.
+  // Ліміт UNIBOX_MAX_LOOPS_FOR_MATCHING — м'яке попередження (не skip), бо вибір в анкеті явний.
   if (demands.length > UNIBOX_MAX_LOOPS_FOR_MATCHING) {
-    const msg =
-      `Унибоксы не подбираются: ${demands.length} петель ТП (лимит ${UNIBOX_MAX_LOOPS_FOR_MATCHING}) — используйте коллекторную схему.`;
-    warnings.push(msg);
-    logger.info('matching.unibox.skip', null, {
-      reason: 'too_many_loops',
-      loopDemands: demands.length,
-    });
-    return { byLoop: [], warnings };
+    warnings.push(
+      `Выбрано ${demands.length} зон с унибоксом (ориентир до ${UNIBOX_MAX_LOOPS_FOR_MATCHING}); ` +
+        'проверьте гидравлику и целесообразность локальных регуляторов.',
+    );
   }
 
   if (!pool.length) {

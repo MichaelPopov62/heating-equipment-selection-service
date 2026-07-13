@@ -33,3 +33,13 @@
   font: 13px/1.4 var(--sans);
   color: var(--text-m);
 }
+
+.kindChanged td {
+  background: color-mix(in srgb, var(--surface) 88%, #c45c26);
+}
+
+.kindChangedMark {
+  font: 600 11px/1.2 var(--sans);
+  color: #a3481c;
+  white-space: nowrap;
+}

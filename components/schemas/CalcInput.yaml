@@ -134,7 +134,20 @@ properties:
       radiatorConnection:
         type: string
         enum: [side, bottom]
-        description: Схема подводки радиатору (учёт серий K / VK / VKP в приоритете каталога).
+        default: side
+        description: >
+          Схема подводки к радиатору (серии K/Klasik — side, VK/VKP — bottom).
+          Если не задано — нормализуется в side на сервере (validateAndNormalizeInput).
+          Фильтрует панельный пул по подводке; тип прибора (секция/панель) задаётся
+          отдельно radiatorEmitterPreference (не локальный flip в комнате).
+      radiatorEmitterPreference:
+        type: string
+        enum: [auto, sectional, panel]
+        default: auto
+        description: >
+          Глобальный тип приборов на объект: auto — Two-Pass (голоса → один kind);
+          sectional / panel — жёсткий lock. Ортогонально radiatorConnection.
+          См. docs/radiator-emitter-kind.md.
       hotWaterBoilerPowerMatchingScheme:
         type: string
         enum:

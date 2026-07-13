@@ -1,0 +1,37 @@
+type: object
+description: >-
+  Агрегат подобранных отопительных приборов (не смешивает панели и секции в одной цифре).
+  Шапка отчёта и сравнение lineEconomy / lineEfficient строятся из этого объекта.
+  totalSections на линии = sectionalSections (панели не входят).
+required:
+  - panelUnits
+  - sectionalUnits
+  - sectionalSections
+  - totalDeliverableWatts
+  - roomsWithEmitter
+  - roomsSkipped
+properties:
+  panelUnits:
+    type: integer
+    minimum: 0
+    description: Число панельных приборов (priceBasis=panel).
+  sectionalUnits:
+    type: integer
+    minimum: 0
+    description: Число секционных приборов (комнат с priceBasis=section).
+  sectionalSections:
+    type: integer
+    minimum: 0
+    description: Сумма sections по секционным комнатам (без панелей).
+  totalDeliverableWatts:
+    type: number
+    minimum: 0
+    description: Сумма deliverableWatts по комнатам с прибором, Вт.
+  roomsWithEmitter:
+    type: integer
+    minimum: 0
+    description: Комнаты, где подобран прибор (section или panel).
+  roomsSkipped:
+    type: integer
+    minimum: 0
+    description: Комнаты без радиатора (ТП покрыла / micro skip / ufh_only).

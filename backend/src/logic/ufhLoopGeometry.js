@@ -1,10 +1,16 @@
 /**
  * Назначение: геометрия петель ТП (количество и длина).
  * Описание: Вызывается из warmFloorCalc; гидравлика только читает loops[].
+ * Длина: L = S/a × layoutFactor (SSOT — ufhLoopLength.js).
  */
 
 import { thermalLoadToFlow } from '../hydraulics/thermalLoadToFlow.js';
 import { round } from '../utils/math.js';
+import {
+  UFH_LOOP_LENGTH_LAYOUT_FACTOR_DEFAULT,
+  computeUfhLoopTotalLengthM,
+  ufhPipeMetersPerSqM,
+} from './ufhLoopLength.js';
 
 /**
  * @param {object} args
@@ -13,8 +19,16 @@ import { round } from '../utils/math.js';
  * @param {number} args.heatLoadWatts
  * @param {number} args.deltaTK
  * @param {number} args.maxLoopLengthM
+ * @param {number} [args.layoutFactor]
  * @param {string} args.roomId
- * @returns {{ loopsCount: number; loops: import('../hydraulics/types').HydraulicsUfhLoop[]; flowRateM3PerHour: number }}
+ * @returns {{
+ *   loopsCount: number;
+ *   loops: import('../hydraulics/types').HydraulicsUfhLoop[];
+ *   flowRateM3PerHour: number;
+ *   totalLengthM: number;
+ *   pipeMetersPerSqM: number;
+ *   layoutFactor: number;
+ * }}
  */
 export function computeUfhLoopGeometry({
   areaM2,
@@ -22,13 +36,24 @@ export function computeUfhLoopGeometry({
   heatLoadWatts,
   deltaTK,
   maxLoopLengthM,
+  layoutFactor = UFH_LOOP_LENGTH_LAYOUT_FACTOR_DEFAULT,
   roomId,
 }) {
   const area = Math.max(0, Number(areaM2) || 0);
-  const spacingM = Math.max(0.05, (Number(pipeSpacingMm) || 150) / 1000);
-  const maxLen = Math.max(20, Number(maxLoopLengthM) || 100);
+  const maxLen = Math.max(20, Number(maxLoopLengthM) || 80);
+  const factor = Number(layoutFactor);
+  const resolvedFactor =
+    Number.isFinite(factor) && factor >= 1
+      ? factor
+      : UFH_LOOP_LENGTH_LAYOUT_FACTOR_DEFAULT;
 
-  const estimatedTotalLengthM = area > 0 ? area / spacingM : 0;
+  const estimatedTotalLengthM = computeUfhLoopTotalLengthM({
+    areaM2: area,
+    pipeSpacingMm,
+    layoutFactor: resolvedFactor,
+  });
+  const metersPerSqM = area > 0 ? ufhPipeMetersPerSqM(pipeSpacingMm, resolvedFactor) : 0;
+
   let loopsCount = 1;
   if (estimatedTotalLengthM > maxLen) {
     loopsCount = Math.ceil(estimatedTotalLengthM / maxLen);
@@ -57,5 +82,8 @@ export function computeUfhLoopGeometry({
     loopsCount,
     loops,
     flowRateM3PerHour: roomFlow.flowRateM3PerHour,
+    totalLengthM: round(estimatedTotalLengthM, 1),
+    pipeMetersPerSqM: round(metersPerSqM, 3),
+    layoutFactor: resolvedFactor,
   };
 }

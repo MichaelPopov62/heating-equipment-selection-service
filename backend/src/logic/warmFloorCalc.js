@@ -32,10 +32,19 @@ import { resolveDesignRoomAirTempC } from '../../../shared/roomDesignAirTemp.js'
  * @param {import('../types/shared-types').HeatLossReport | undefined | null} [args.heatLoss]
  * @param {import('../ufh/types').UnderfloorHeatingPresetsBundle} args.ufhPresets
  * @param {number} [args.maxUfhLoopLengthM]
+ * @param {number} [args.ufhLoopLengthLayoutFactor]
  * @returns {import('../types/shared-types').UnderfloorHeatingReport | null}
  */
 export function calculateUnderfloorHeating(args) {
-  const { temps, building, heatingSystem, heatLoss, ufhPresets, maxUfhLoopLengthM = 100 } = args;
+  const {
+    temps,
+    building,
+    heatingSystem,
+    heatLoss,
+    ufhPresets,
+    maxUfhLoopLengthM = 80,
+    ufhLoopLengthLayoutFactor = 1.1,
+  } = args;
 
   if (!ufhPresets?.byPresetId) {
     throw new Error('Расчёт ТП: ufhPresets обязательны.');
@@ -54,7 +63,9 @@ export function calculateUnderfloorHeating(args) {
   if (ufhPresetId) {
     modePreset = ufhPresets.byPresetId[ufhPresetId] ?? null;
     if (!modePreset) {
-      const err = new Error(`Неизвестный ufhPresetId "${ufhPresetId}" в расчёте ТП.`);
+      const err = new Error(
+        `Неизвестный ufhPresetId "${ufhPresetId}" в расчёте ТП.`,
+      );
       err.statusCode = 400;
       err.code = 'UFH_PRESET_INVALID';
       throw err;
@@ -65,7 +76,8 @@ export function calculateUnderfloorHeating(args) {
   const boilerSupplyC = heatingSystem.supplyC;
   const surveyInsideC = temps.insideC;
   const bathroomAirTempC =
-    typeof temps.bathroomAirTempC === 'number' && Number.isFinite(temps.bathroomAirTempC)
+    typeof temps.bathroomAirTempC === 'number' &&
+    Number.isFinite(temps.bathroomAirTempC)
       ? temps.bathroomAirTempC
       : typeof building?.temps?.bathroomAirTempC === 'number' &&
           Number.isFinite(building.temps.bathroomAirTempC)
@@ -87,9 +99,9 @@ export function calculateUnderfloorHeating(args) {
     const { basePresetId, finishMaterialId, base, finish } = composed;
     let circuitResolved = resolveUfhCircuitForFinish(finishMaterialId);
     if (
-      isUfhOnly
-      && typeof heatingSystem.supplyC === 'number'
-      && typeof heatingSystem.returnC === 'number'
+      isUfhOnly &&
+      typeof heatingSystem.supplyC === 'number' &&
+      typeof heatingSystem.returnC === 'number'
     ) {
       circuitResolved = {
         preset: {
@@ -183,12 +195,18 @@ export function calculateUnderfloorHeating(args) {
       heatLoadWatts: flux.heatFluxUpWatts,
       deltaTK: 10,
       maxLoopLengthM: maxUfhLoopLengthM,
+      layoutFactor: ufhLoopLengthLayoutFactor,
       roomId: room.id,
     });
 
     const roomWarnings = flux.roomWarnings.map(
       (w) => `Комната «${room.name}»: ${w}`,
     );
+
+    /** @type {import('../types/shared-types').UfhTerminalControl} */
+    const terminalRaw = room.underfloorHeating?.ufhTerminalControl;
+    const ufhTerminalControl =
+      terminalRaw === 'unibox' ? 'unibox' : 'collector';
 
     roomReports.push({
       roomId: room.id,
@@ -209,6 +227,9 @@ export function calculateUnderfloorHeating(args) {
       pipeSpacingResolution: spacingResolved.pipeSpacingResolution,
       areaM2: heatedAreaM2,
       pipeSpacingMm: spacingResolved.resolvedPipeSpacingMm,
+      pipeMetersPerSqM: loopGeom.pipeMetersPerSqM,
+      loopLengthLayoutFactor: loopGeom.layoutFactor,
+      ufhTerminalControl,
       pipeEmbedmentResistanceM2KW: flux.pipeEmbedmentResistanceM2KW,
       baseCoveringResistanceM2KW: flux.baseCoveringResistanceM2KW,
       finishCoveringResistanceM2KW: flux.finishCoveringResistanceM2KW,
@@ -235,9 +256,13 @@ export function calculateUnderfloorHeating(args) {
       maxSurfaceTemperatureCelsius: flux.maxSurfaceTemperatureCelsius,
       comfortMaxSurfaceTemperatureCelsius:
         flux.comfortMaxSurfaceTemperatureCelsius,
-      finishMaxSurfaceTemperatureCelsius: flux.finishMaxSurfaceTemperatureCelsius,
+      finishMaxSurfaceTemperatureCelsius:
+        flux.finishMaxSurfaceTemperatureCelsius,
       ...(flux.presetMaxSurfaceTemperatureCelsius != null
-        ? { presetMaxSurfaceTemperatureCelsius: flux.presetMaxSurfaceTemperatureCelsius }
+        ? {
+            presetMaxSurfaceTemperatureCelsius:
+              flux.presetMaxSurfaceTemperatureCelsius,
+          }
         : {}),
       bottomBoundary: flux.bottomBoundary,
       neighborTempC: flux.neighborTempC,
@@ -260,10 +285,7 @@ export function calculateUnderfloorHeating(args) {
       );
     }
   } else {
-    mixingRequired = isMixingNodeRequiredForProject(
-      boilerSupplyC,
-      roomReports,
-    );
+    mixingRequired = isMixingNodeRequiredForProject(boilerSupplyC, roomReports);
   }
 
   const objectType = building?.objectMeta?.objectType;
@@ -276,8 +298,8 @@ export function calculateUnderfloorHeating(args) {
 
   if (mixingRequired) {
     globalWarnings.push(
-      `Требуется насосно-смесительный узел: подача котла ${boilerSupplyC ?? '—'} °C выше температуры контура ТП `
-        + `(по комнатам ${roomReports.map((r) => `${r.circuitSupplyC}/${r.circuitReturnC}`).join(', ')} °C).`,
+      `Требуется насосно-смесительный узел: подача котла ${boilerSupplyC ?? '—'} °C выше температуры контура ТП ` +
+        `(по комнатам ${roomReports.map((r) => `${r.circuitSupplyC}/${r.circuitReturnC}`).join(', ')} °C).`,
     );
   } else if (roomReports.length > 0 && typeof boilerSupplyC === 'number') {
     globalWarnings.push(

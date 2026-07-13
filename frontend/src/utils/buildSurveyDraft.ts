@@ -6,6 +6,8 @@
 import type { CalcReportJson } from '../types/calcApi';
 import type { ObjectMetaValue } from '../types/envelope';
 import type { HeatingThermalRegimePreset } from '../types/heatingThermalRegime';
+import type { RadiatorConnection } from '../types/radiatorConnection';
+import type { RadiatorEmitterPreference } from '../types/radiatorEmitterPreference';
 import type { UfhModePresetId } from '../types/ufhModePreset';
 import type { UfhDistributionPreset } from '../types/ufhDistribution';
 import type { HotWaterFormValue } from '../types/hotWater';
@@ -32,6 +34,8 @@ export function buildSurveyDraft(params: {
   waterUnderfloorHeating: boolean;
   underfloorDistributionPreset: UfhDistributionPreset;
   thermalRegimePreset: HeatingThermalRegimePreset;
+  radiatorConnection: RadiatorConnection;
+  radiatorEmitterPreference: RadiatorEmitterPreference;
   ufhPresetId?: UfhModePresetId | null;
   hydraulicsForm?: HydraulicsFormValue;
   wiringLayoutV3?: WiringLayoutV3;
@@ -52,6 +56,8 @@ export function buildSurveyDraft(params: {
     waterUnderfloorHeating: params.waterUnderfloorHeating,
     underfloorDistributionPreset: params.underfloorDistributionPreset,
     thermalRegimePreset: params.thermalRegimePreset,
+    radiatorConnection: params.radiatorConnection,
+    radiatorEmitterPreference: params.radiatorEmitterPreference,
     ufhPresetId: params.ufhPresetId ?? null,
     hydraulicsForm: structuredClone(params.hydraulicsForm ?? DEFAULT_HYDRAULICS_FORM),
     ...(params.wiringLayoutV3

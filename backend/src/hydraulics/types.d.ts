@@ -64,6 +64,8 @@ export interface HydraulicsApplianceRules {
   radiatorBranchGrouping: HydraulicsRadiatorBranchGrouping;
   defaultLengthsM: HydraulicsDefaultLengthsM;
   maxUfhLoopLengthM: number;
+  /** Коэффициент укладки L = S/a × factor (классика 1.1). */
+  ufhLoopLengthLayoutFactor: number;
   ufhLoopDeltaTK: number;
   ufhLoopVelocityMinMps: number;
   ufhLoopVelocityMaxMps: number;
@@ -139,6 +141,8 @@ export interface HydraulicsUfhRoom {
   flowRateM3PerHour: number;
   loopsCount?: number;
   loops?: HydraulicsUfhLoop[];
+  /** Терминал петли: unibox — не через коллектор этажа. */
+  ufhTerminalControl?: 'collector' | 'unibox';
 }
 
 export interface HydraulicsMixingNodeSnapshot {

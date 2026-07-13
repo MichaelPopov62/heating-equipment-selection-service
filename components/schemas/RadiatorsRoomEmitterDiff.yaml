@@ -1,0 +1,48 @@
+type: object
+description: >-
+  Сравнение прибора одной комнаты между линиями «Эконом» и «Эффективный»
+  (matching.radiators.roomEmitterDiffs[]).
+required:
+  - roomId
+  - roomName
+  - equipmentKindChanged
+properties:
+  roomId:
+    type: string
+  roomName:
+    type: string
+  equipmentKindChanged:
+    type: boolean
+    description: true, если displayKind / priceBasis различаются между линиями.
+  economyDisplayKind:
+    type: string
+    enum: [sectional, panel, none]
+    nullable: true
+  efficientDisplayKind:
+    type: string
+    enum: [sectional, panel, none]
+    nullable: true
+  economyModel:
+    type: string
+    nullable: true
+  efficientModel:
+    type: string
+    nullable: true
+  economySections:
+    type: integer
+    nullable: true
+  efficientSections:
+    type: integer
+    nullable: true
+  economyPanelLengthMm:
+    type: number
+    nullable: true
+  efficientPanelLengthMm:
+    type: number
+    nullable: true
+  economyDeliverableWatts:
+    type: number
+    nullable: true
+  efficientDeliverableWatts:
+    type: number
+    nullable: true

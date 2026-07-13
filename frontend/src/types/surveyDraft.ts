@@ -6,6 +6,8 @@
 import type { CalcReportJson } from './calcApi';
 import type { ObjectMetaValue } from './envelope';
 import type { HeatingThermalRegimePreset } from './heatingThermalRegime';
+import type { RadiatorConnection } from './radiatorConnection';
+import type { RadiatorEmitterPreference } from './radiatorEmitterPreference';
 import type { UfhModePresetId } from './ufhModePreset';
 import type { UfhDistributionPreset } from './ufhDistribution';
 import type { HotWaterFormValue } from './hotWater';
@@ -33,6 +35,10 @@ export type SurveyDraft = {
   waterUnderfloorHeating: boolean;
   underfloorDistributionPreset: UfhDistributionPreset;
   thermalRegimePreset: HeatingThermalRegimePreset;
+  /** Подводка радиаторов: side (боковая) | bottom (нижняя). */
+  radiatorConnection: RadiatorConnection;
+  /** Глобальный тип приборов: auto | sectional | panel. */
+  radiatorEmitterPreference: RadiatorEmitterPreference;
   ufhPresetId?: UfhModePresetId | null;
   /** Шаг «Гидравлика» (ΔT расхода, длина магистрали, материал). */
   hydraulicsForm?: HydraulicsFormValue;

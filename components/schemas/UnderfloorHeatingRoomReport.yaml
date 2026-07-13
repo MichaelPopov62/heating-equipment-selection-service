@@ -34,6 +34,16 @@ properties:
   ufhCircuitPresetId:
     $ref: ./UfhCircuitPresetId.yaml
   pipeSpacingMm: { type: integer }
+  pipeMetersPerSqM:
+    type: number
+    description: Норма укладки трубы, м.п. на 1 м² (layoutFactor / шаг).
+  loopLengthLayoutFactor:
+    type: number
+    description: Коэффициент укладки L = S/a × factor (классика 1.1).
+  ufhTerminalControl:
+    type: string
+    enum: [collector, unibox]
+    description: Терминал петли из анкеты (collector | unibox).
   pipeEmbedmentResistanceM2KW: { type: number }
   finishCoveringResistanceM2KW: { type: number }
   circuitSupplyC: { type: number }

@@ -19,9 +19,14 @@ const DUTY_RULES = {
 const BASE_RULES = {
   velocityLimitsMps: { mainMax: 0.8, branchMax: 0.5, mainMin: 0.2 },
   defaultLengthsM: { mainLine: 8, radiatorBranch: 4, ufhCollectorBranch: 3 },
-  maxUfhLoopLengthM: 100,
+  maxUfhLoopLengthM: 80,
   roughnessMmByMaterial: { pex: 0.007 },
-  localLossZeta: { elbow90: 0.9, teeBranch: 1.2, mixingNode: 2.5, collector: 1.5 },
+  localLossZeta: {
+    elbow90: 0.9,
+    teeBranch: 1.2,
+    mixingNode: 2.5,
+    collector: 1.5,
+  },
   ...DUTY_RULES,
   pumpMinHeadAtQMaxM: 0.5,
   primaryFlowMarginPercent: 12,
@@ -95,7 +100,8 @@ function runCase(boilerModel, operatingModes, designFlow) {
     meta: {
       heatingEmittersMode: 'radiators_only',
       objectType: 'apartment',
-      dhwMatchingScheme: 'maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw',
+      dhwMatchingScheme:
+        'maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw',
     },
     source: {
       catalogBoilerId: boilerModel,
@@ -109,13 +115,15 @@ function runCase(boilerModel, operatingModes, designFlow) {
       radiators: {
         thermalRegime: { supplyC: 75, returnC: 65, deltaTK: 20 },
         connectionType: 'side',
-        consumers: [{
-          roomId: 'r1',
-          roomName: 'Комната',
-          floor: 1,
-          heatLoadWatts: 10000,
-          flowRateM3PerHour: designFlow,
-        }],
+        consumers: [
+          {
+            roomId: 'r1',
+            roomName: 'Комната',
+            floor: 1,
+            heatLoadWatts: 10000,
+            flowRateM3PerHour: designFlow,
+          },
+        ],
         totalFlowRateM3PerHour: designFlow,
       },
     },
@@ -137,38 +145,48 @@ function runCase(boilerModel, operatingModes, designFlow) {
   /** @type {import('../src/catalog/types').NormalizedCatalog} */
   const catalog = {
     boilers: {
-      doubleCircuit: [{
-        model: boilerModel,
-        brand: 'Baxi',
-        mountingType: 'wall',
-        powerKw: { min: 4.7, max: 28 },
-        price: 56500,
-        circuitsCount: 2,
-        isDoubleCircuit: true,
-        type: 'condensing',
-        circulationPump: { operatingModes },
-      }],
+      doubleCircuit: [
+        {
+          model: boilerModel,
+          brand: 'Baxi',
+          mountingType: 'wall',
+          powerKw: { min: 4.7, max: 28 },
+          price: 56500,
+          circuitsCount: 2,
+          isDoubleCircuit: true,
+          type: 'condensing',
+          circulationPump: { operatingModes },
+        },
+      ],
       singleCircuit: [],
     },
     radiators: [],
     waterHeaters: [],
-    pumps: [{
-      id: 'pump-grundfos-ups-25-40-180',
-      brand: 'Grundfos',
-      model: 'UPS 25-40 180',
-      type: 'three_speed',
-      segment: 'premium',
-      price: 1250,
-      connections: { mountingLengthMm: 180, threadInch: '1 1/2', nominalDiameterMm: 25 },
-      operatingModes: [{
-        modeName: 'Скорость 3',
-        speedIndex: 3,
-        powerWatts: 45,
-        coefficients: { a: -0.45, b: -0.06, c: 4.0 },
-        qMinM3h: 0.4,
-        qMaxM3h: 3.5,
-      }],
-    }],
+    pumps: [
+      {
+        id: 'pump-grundfos-ups-25-40-180',
+        brand: 'Grundfos',
+        model: 'UPS 25-40 180',
+        type: 'three_speed',
+        segment: 'premium',
+        price: 1250,
+        connections: {
+          mountingLengthMm: 180,
+          threadInch: '1 1/2',
+          nominalDiameterMm: 25,
+        },
+        operatingModes: [
+          {
+            modeName: 'Скорость 3',
+            speedIndex: 3,
+            powerWatts: 45,
+            coefficients: { a: -0.45, b: -0.06, c: 4.0 },
+            qMinM3h: 0.4,
+            qMaxM3h: 3.5,
+          },
+        ],
+      },
+    ],
   };
 
   return resolveSystemPumps({ dto, pressure, catalog });
@@ -184,25 +202,29 @@ function runCase(boilerModel, operatingModes, designFlow) {
 
   const catalogVaillant = {
     boilers: {
-      doubleCircuit: [{
-        model: 'Vaillant ecoTEC pro VUW 246/5-3',
-        mountingType: 'wall',
-        powerKw: { min: 6.2, max: 24 },
-        price: 48500,
-        circuitsCount: 2,
-        isDoubleCircuit: true,
-        type: 'condensing',
-        circulationPump: {
-          operatingModes: [{
-            modeName: 'Встроенный насос — скорость 3',
-            speedIndex: 3,
-            powerWatts: 40,
-            coefficients: { a: -0.45, b: 0.12, c: 6.0 },
-            qMinM3h: 0.1,
-            qMaxM3h: 4.5,
-          }],
+      doubleCircuit: [
+        {
+          model: 'Vaillant ecoTEC pro VUW 246/5-3',
+          mountingType: 'wall',
+          powerKw: { min: 6.2, max: 24 },
+          price: 48500,
+          circuitsCount: 2,
+          isDoubleCircuit: true,
+          type: 'condensing',
+          circulationPump: {
+            operatingModes: [
+              {
+                modeName: 'Встроенный насос — скорость 3',
+                speedIndex: 3,
+                powerWatts: 40,
+                coefficients: { a: -0.45, b: 0.12, c: 6.0 },
+                qMinM3h: 0.1,
+                qMaxM3h: 4.5,
+              },
+            ],
+          },
         },
-      }],
+      ],
       singleCircuit: [],
     },
     radiators: [],
@@ -216,7 +238,8 @@ function runCase(boilerModel, operatingModes, designFlow) {
       meta: {
         heatingEmittersMode: 'radiators_only',
         objectType: 'house',
-        dhwMatchingScheme: 'maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw',
+        dhwMatchingScheme:
+          'maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw',
       },
       source: {
         catalogBoilerId: 'Vaillant ecoTEC pro VUW 246/5-3',
@@ -230,17 +253,23 @@ function runCase(boilerModel, operatingModes, designFlow) {
         radiators: {
           thermalRegime: { supplyC: 75, returnC: 65, deltaTK: 20 },
           connectionType: 'side',
-          consumers: [{
-            roomId: 'r1',
-            roomName: 'Комната',
-            floor: 1,
-            heatLoadWatts: 10000,
-            flowRateM3PerHour: 1.0,
-          }],
+          consumers: [
+            {
+              roomId: 'r1',
+              roomName: 'Комната',
+              floor: 1,
+              heatLoadWatts: 10000,
+              flowRateM3PerHour: 1.0,
+            },
+          ],
           totalFlowRateM3PerHour: 1.0,
         },
       },
-      layout: { mainLineLengthM: 8, radiatorBranches: [], ufhCollectorTransit: [] },
+      layout: {
+        mainLineLengthM: 8,
+        radiatorBranches: [],
+        ufhCollectorTransit: [],
+      },
       rules: BASE_RULES,
     },
     pressure: pressureHigh,

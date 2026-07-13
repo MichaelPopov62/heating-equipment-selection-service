@@ -313,11 +313,30 @@ function roomLoopsCount(room) {
  * @param {import('../types/shared-types').BuildingInput | undefined} building
  * @returns {Map<number, number>}
  */
+/**
+ * Терминал петли комнаты ТП (из отчёта или анкеты building).
+ * @param {import('../types/shared-types').UnderfloorHeatingRoomReport} room
+ * @param {import('../types/shared-types').BuildingInput | undefined} building
+ * @returns {'collector' | 'unibox'}
+ */
+function roomUfhTerminalControl(room, building) {
+  if (room.ufhTerminalControl === 'unibox') return 'unibox';
+  if (room.ufhTerminalControl === 'collector') return 'collector';
+  const id = String(room.roomId ?? '');
+  for (const r of building?.rooms ?? []) {
+    if (String(r?.id) !== id) continue;
+    if (r.underfloorHeating?.ufhTerminalControl === 'unibox') return 'unibox';
+    break;
+  }
+  return 'collector';
+}
+
 function underfloorOutletsByFloor(underfloorHeating, building) {
   /** @type {Map<number, number>} */
   const byFloor = new Map();
   const floors = roomFloorById(building);
   for (const room of underfloorHeating?.rooms ?? []) {
+    if (roomUfhTerminalControl(room, building) === 'unibox') continue;
     const loops = roomLoopsCount(room);
     if (loops <= 0) continue;
     const floor = floors.get(room.roomId) ?? 1;

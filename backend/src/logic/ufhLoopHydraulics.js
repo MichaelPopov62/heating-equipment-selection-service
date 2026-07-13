@@ -13,6 +13,10 @@ import {
 import { thermalLoadToFlow } from '../hydraulics/thermalLoadToFlow.js';
 import { pushRecommendation } from '../recommendations/recommendationResolver.js';
 import { round } from '../utils/math.js';
+import {
+  UFH_LOOP_LENGTH_LAYOUT_FACTOR_DEFAULT,
+  computeUfhLoopTotalLengthM,
+} from './ufhLoopLength.js';
 
 const MAX_LOOPS_HEURISTIC = 32;
 
@@ -688,8 +692,16 @@ export function resolveUfhRoomLoopsHydraulics({
   /** @type {string[]} */
   const warnings = [];
   const thresholds = ufhLoopHydraulicsThresholds(hydraulicsRules);
-  const spacingM = Math.max(0.05, (Number(pipeSpacingMm) || 150) / 1000);
-  const totalLengthM = areaM2 > 0 ? areaM2 / spacingM : 0;
+  const layoutFactor =
+    typeof hydraulicsRules.ufhLoopLengthLayoutFactor === 'number' &&
+    Number.isFinite(hydraulicsRules.ufhLoopLengthLayoutFactor)
+      ? hydraulicsRules.ufhLoopLengthLayoutFactor
+      : UFH_LOOP_LENGTH_LAYOUT_FACTOR_DEFAULT;
+  const totalLengthM = computeUfhLoopTotalLengthM({
+    areaM2,
+    pipeSpacingMm,
+    layoutFactor,
+  });
   const maxLen = Math.max(20, hydraulicsRules.maxUfhLoopLengthM);
   const minLoopsGeom = Math.max(1, Math.ceil(totalLengthM / maxLen));
 

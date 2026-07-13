@@ -33,7 +33,8 @@ Seed: discriminators `models/Manifold.js`, `models/BoilerManifold.js`.
 matchEquipment → (резолв distributionPreset ТП) → pickManifolds → pickUniboxes → hydraulics pipeline
 ```
 
-Унибоксы (локальный регулятор петли, 1…2 петли без каскада коллекторов): см. [`unibox-matching.md`](unibox-matching.md).
+Унибоксы (локальный регулятор петли по `ufhTerminalControl=unibox`, зоны ≤ 20 м²): см. [`unibox-matching.md`](unibox-matching.md).  
+Выходы коллектора ТП **не** включают петли комнат с `ufhTerminalControl=unibox`.
 
 ## Soft-fail / degraded
 

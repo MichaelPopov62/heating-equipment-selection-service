@@ -47,6 +47,14 @@ import {
   thermalRegimeRecommendationHint,
   type HeatingThermalRegimePreset,
 } from './types/heatingThermalRegime';
+import {
+  isRadiatorConnection,
+  RADIATOR_CONNECTION_SURVEY_UI_OPTIONS,
+} from './types/radiatorConnection';
+import {
+  isRadiatorEmitterPreference,
+  RADIATOR_EMITTER_PREFERENCE_SURVEY_UI_OPTIONS,
+} from './types/radiatorEmitterPreference';
 import { WarmFloorSection } from './components/WarmFloorSection/WarmFloorSection';
 import { useRoomsOrchestration } from './hooks/useRoomsOrchestration';
 import { useSurveyEstimates } from './hooks/useSurveyEstimates';
@@ -128,6 +136,8 @@ export function AppSurveyContent({
     waterUnderfloorHeating,
     underfloorDistributionPreset,
     thermalRegimePreset,
+    radiatorConnection,
+    radiatorEmitterPreference,
     ufhPresetId,
     hydraulicsForm,
     wiringLayoutV3,
@@ -385,6 +395,8 @@ export function AppSurveyContent({
       waterUnderfloorHeating: draft.waterUnderfloorHeating,
       underfloorDistributionPreset: draft.underfloorDistributionPreset,
       thermalRegimePreset: draft.thermalRegimePreset,
+      radiatorConnection: draft.radiatorConnection,
+      radiatorEmitterPreference: draft.radiatorEmitterPreference,
       ufhPresetId: draft.ufhPresetId,
       hydraulicsForm: draft.hydraulicsForm,
       wiringLayoutV3: draft.wiringLayoutV3,
@@ -703,6 +715,72 @@ export function AppSurveyContent({
                   покрытия на шаге «Помещения». В API:{' '}
                   <code className={styles.inlineCode}>
                     heatingSystem.thermalRegimePreset
+                  </code>
+                  .
+                </p>
+                <label
+                  className={styles.thermalRegimeLabel}
+                  htmlFor="radiator-connection"
+                  style={{ marginTop: 16, display: 'block' }}
+                >
+                  Подводка радиаторов
+                </label>
+                <select
+                  id="radiator-connection"
+                  className={styles.thermalRegimeSelect}
+                  value={radiatorConnection}
+                  onChange={(e) => {
+                    if (!isRadiatorConnection(e.target.value)) return;
+                    dispatch({
+                      type: 'SET_RADIATOR_CONNECTION',
+                      connection: e.target.value,
+                    });
+                  }}
+                >
+                  {RADIATOR_CONNECTION_SURVEY_UI_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+                <p className={styles.hint} style={{ marginTop: 8 }}>
+                  Боковая — серии K/Klasik; нижняя — VK/VKP. Фильтрует панельный
+                  пул. Тип прибора на весь объект задаётся отдельно. В API:{' '}
+                  <code className={styles.inlineCode}>
+                    heatingSystem.radiatorConnection
+                  </code>
+                  .
+                </p>
+                <label
+                  className={styles.thermalRegimeLabel}
+                  htmlFor="radiator-emitter-preference"
+                  style={{ marginTop: 16, display: 'block' }}
+                >
+                  Тип радиаторов на объект
+                </label>
+                <select
+                  id="radiator-emitter-preference"
+                  className={styles.thermalRegimeSelect}
+                  value={radiatorEmitterPreference}
+                  onChange={(e) => {
+                    if (!isRadiatorEmitterPreference(e.target.value)) return;
+                    dispatch({
+                      type: 'SET_RADIATOR_EMITTER_PREFERENCE',
+                      preference: e.target.value,
+                    });
+                  }}
+                >
+                  {RADIATOR_EMITTER_PREFERENCE_SURVEY_UI_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+                <p className={styles.hint} style={{ marginTop: 8 }}>
+                  Один тип приборов на все помещения (секции или панели). Авто —
+                  Two-Pass по объекту. В API:{' '}
+                  <code className={styles.inlineCode}>
+                    heatingSystem.radiatorEmitterPreference
                   </code>
                   .
                 </p>

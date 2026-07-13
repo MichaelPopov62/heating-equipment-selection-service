@@ -16,6 +16,10 @@ import {
   SCHEME_BOILER_SINGLE_INDIRECT_SUM,
 } from '../../../shared/heatingMatchingSchemes.js';
 import {
+  isUfhTerminalControl,
+  resolveUfhTerminalControl,
+} from '../../../shared/ufhTerminalControl.js';
+import {
   assertRoomExteriorLayoutWalls,
   normalizeRoomExteriorLayouts,
 } from '../logic/roomExteriorLayoutHeatLoss.js';
@@ -455,12 +459,31 @@ function normalizeUnderfloorHeatingBeforeValidate(input) {
       throw err;
     }
 
+    const rawTerminal = ufh.ufhTerminalControl;
+    if (
+      rawTerminal !== undefined
+      && rawTerminal !== null
+      && !isUfhTerminalControl(rawTerminal)
+    ) {
+      const err = new Error(
+        `ufhTerminalControl: ожидается "collector" или "unibox" (roomId="${room.id}").`,
+      );
+      err.statusCode = 400;
+      err.code = 'UNDERFLOOR_HEATING_TERMINAL_INVALID';
+      throw err;
+    }
+    const ufhTerminalControl = resolveUfhTerminalControl(
+      rawTerminal,
+      roomAreaM2,
+    );
+
     room.underfloorHeating = {
       enabled: true,
       basePresetId,
       finishMaterialId,
       pipeSpacingMm,
       ...(furnitureOccupiedAreaM2 > 0 ? { furnitureOccupiedAreaM2 } : {}),
+      ...(ufhTerminalControl === 'unibox' ? { ufhTerminalControl: 'unibox' } : {}),
     };
   }
 }

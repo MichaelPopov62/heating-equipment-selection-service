@@ -122,25 +122,35 @@ export function RecommendationsBlock({
           </dl>
         </div>
 
-        {apiUnderfloorHeatingFromReport != null &&
-          apiUnderfloorHeatingFromReport.rooms.length > 0 && (
+        {apiUnderfloorHeatingFromReport != null
+          && (apiUnderfloorHeatingFromReport.rooms.length > 0
+            || apiUnderfloorHeatingFromReport.warnings.length > 0) && (
             <div className={styles.summaryGroup} aria-labelledby="underfloor-heating-title">
               <h3 id="underfloor-heating-title">Тёплый пол</h3>
-              <div className={styles.hint} style={{ marginBottom: 8 }}>
-                Источник: расчёт API (warmFloorCalc) · контур{' '}
-                {apiUnderfloorHeatingFromReport.circuitSupplyC}/
-                {apiUnderfloorHeatingFromReport.circuitReturnC} °C
-                {apiUnderfloorHeatingFromReport.circuitSource === 'mixed_default'
-                  ? ' (типичный смесительный узел)'
-                  : apiUnderfloorHeatingFromReport.circuitSource === 'finish_preset'
-                    ? ' (по финишу покрытия)'
-                    : apiUnderfloorHeatingFromReport.circuitSource === 'ufh_mode_preset'
-                      ? ' (пресет режима ТП)'
-                      : ''}
-                {apiUnderfloorHeatingFromReport.isMixingNodeRequired
-                  ? ' · требуется смесительный узел'
-                  : ''}
-              </div>
+              {apiUnderfloorHeatingFromReport.rooms.length === 0 ? (
+                <div className={styles.hint} style={{ marginBottom: 8 }}>
+                  Режим ТП включён в анкете, но нет комнат с включённым тёплым полом.
+                  На шаге «Помещения» отметьте «Тёплый пол в этом помещении» и задайте основу + финиш.
+                </div>
+              ) : (
+                <div className={styles.hint} style={{ marginBottom: 8 }}>
+                  Источник: расчёт API (warmFloorCalc) · контур{' '}
+                  {apiUnderfloorHeatingFromReport.circuitSupplyC}/
+                  {apiUnderfloorHeatingFromReport.circuitReturnC} °C
+                  {apiUnderfloorHeatingFromReport.circuitSource === 'mixed_default'
+                    ? ' (типичный смесительный узел)'
+                    : apiUnderfloorHeatingFromReport.circuitSource === 'finish_preset'
+                      ? ' (по финишу покрытия)'
+                      : apiUnderfloorHeatingFromReport.circuitSource === 'ufh_mode_preset'
+                        ? ' (пресет режима ТП)'
+                        : ''}
+                  {apiUnderfloorHeatingFromReport.isMixingNodeRequired
+                    ? ' · требуется смесительный узел'
+                    : ''}
+                </div>
+              )}
+              {apiUnderfloorHeatingFromReport.rooms.length > 0 && (
+                <>
               {apiUnderfloorHeatingFromReport.mixingNode != null && (
                 <UfhMixingNodeSpecCard mixingNode={apiUnderfloorHeatingFromReport.mixingNode} />
               )}
@@ -309,6 +319,8 @@ export function RecommendationsBlock({
                   )}
                 </div>
               ))}
+                </>
+              )}
               {apiUnderfloorHeatingFromReport.warnings.length > 0 && (
                 <ul className={styles.radiatorsWarningsList}>
                   {apiUnderfloorHeatingFromReport.warnings.map((w, i) => (
@@ -412,13 +424,14 @@ export function RecommendationsBlock({
             <dd>
               {displayedRadiatorSectionsTotal} <span>шт.</span>
               <span className={styles.radiatorsTotalSource}>
-                {apiRadiatorsFromReport?.lineEconomy?.totalSections != null &&
-                apiRadiatorsFromReport?.lineEfficient?.totalSections != null
-                  ? ' — эконом / эффективный (сумма по помещениям из API)'
+                {apiRadiatorsFromReport?.lineEconomy?.emittersSummary != null &&
+                apiRadiatorsFromReport?.lineEfficient?.emittersSummary != null
+                  ? ' — эконом / эффективный (панели и секции раздельно, из API)'
                   : apiRadiatorsFromReport != null &&
                       apiRadiatorsFromReport.byRoom.length > 0 &&
-                      apiRadiatorsFromReport.totalSections != null
-                    ? ' — сумма по помещениям из расчёта API'
+                      (apiRadiatorsFromReport.emittersSummary != null ||
+                        apiRadiatorsFromReport.totalSections != null)
+                    ? ' — агрегаты приборов из расчёта API'
                     : ' — черновая оценка до ответа сервера'}
               </span>
             </dd>
@@ -440,10 +453,28 @@ export function RecommendationsBlock({
                     && apiRadiatorsFromReport.inputs.returnC != null
                     ? `${apiRadiatorsFromReport.inputs.supplyC}/${apiRadiatorsFromReport.inputs.returnC} °C`
                     : '—'}
-                  {apiRadiatorsFromReport.inputs.thermalRegimeDeltaTK != null && (
+                  {apiRadiatorsFromReport.inputs.targetDeltaT != null && (
                     <span className={styles.radiatorsTotalSource}>
                       {' '}
-                      · Δt графика {apiRadiatorsFromReport.inputs.thermalRegimeDeltaTK} K
+                      · ΔT_mean {apiRadiatorsFromReport.inputs.targetDeltaT} K
+                    </span>
+                  )}
+                  {apiRadiatorsFromReport.inputs.radiatorConnection != null && (
+                    <span className={styles.radiatorsTotalSource}>
+                      {' '}
+                      · подводка{' '}
+                      {apiRadiatorsFromReport.inputs.radiatorConnection === 'bottom'
+                        ? 'нижняя'
+                        : 'боковая'}
+                    </span>
+                  )}
+                  {apiRadiatorsFromReport.resolvedEmitterKind != null && (
+                    <span className={styles.radiatorsTotalSource}>
+                      {' '}
+                      · тип{' '}
+                      {apiRadiatorsFromReport.resolvedEmitterKind === 'panel'
+                        ? 'панельные'
+                        : 'секционные'}
                     </span>
                   )}
                   {apiRadiatorsFromReport.inputs.flowDeltaTK != null && (

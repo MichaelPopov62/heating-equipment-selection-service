@@ -10,7 +10,7 @@ import { heatLossReserveKw, heatLossTotalKw, wattsToKilowatts } from '../utils/c
 import { isRecord, readRecordField } from '../utils/jsonGuards';
 import { parseBoilerFromReport } from '../utils/parsers/parseBoilerFromReport';
 import { parseIndirectWaterHeaterMatchingFromReport } from '../utils/parseIndirectWaterHeaterMatchingFromReport';
-import { parseRadiatorsMatchingFromReport } from '../utils/parseRadiatorsMatchingFromReport';
+import { parseRadiatorsMatchingFromReport, formatRadiatorsEmittersSummaryLabel } from '../utils/parseRadiatorsMatchingFromReport';
 import { parseWaterHeaterMatchingFromReport } from '../utils/parseWaterHeaterMatchingFromReport';
 import { parseUnderfloorHeatingFromReport } from '../utils/parseUnderfloorHeatingFromReport';
 import { parseHydraulicsFromReport } from '../utils/parseHydraulicsFromReport';
@@ -91,11 +91,24 @@ export function useCalcReport(
   );
 
   const displayedRadiatorSectionsTotal = useMemo(() => {
-    const eco = apiRadiatorsFromReport?.lineEconomy?.totalSections;
-    const eff = apiRadiatorsFromReport?.lineEfficient?.totalSections;
-    if (eco != null && eff != null) return `${eco} / ${eff}`;
-    if (apiRadiatorsFromReport?.totalSections != null && apiRadiatorsFromReport.byRoom.length > 0) {
-      return String(apiRadiatorsFromReport.totalSections);
+    const ecoLabel = formatRadiatorsEmittersSummaryLabel(
+      apiRadiatorsFromReport?.lineEconomy?.emittersSummary,
+    );
+    const effLabel = formatRadiatorsEmittersSummaryLabel(
+      apiRadiatorsFromReport?.lineEfficient?.emittersSummary,
+    );
+    if (ecoLabel != null && effLabel != null) {
+      return `эконом: ${ecoLabel} / эффективный: ${effLabel}`;
+    }
+    const primaryLabel = formatRadiatorsEmittersSummaryLabel(
+      apiRadiatorsFromReport?.emittersSummary,
+    );
+    if (primaryLabel != null) return primaryLabel;
+    if (
+      apiRadiatorsFromReport?.totalSections != null
+      && apiRadiatorsFromReport.byRoom.length > 0
+    ) {
+      return `${apiRadiatorsFromReport.totalSections} сек.`;
     }
     return String(quickEstimateRadiatorsSections);
   }, [apiRadiatorsFromReport, quickEstimateRadiatorsSections]);

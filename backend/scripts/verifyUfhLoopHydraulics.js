@@ -24,6 +24,14 @@ if (!pipes.length) {
 if (rules.ufhLoopMinNominalDiameterMm !== 16) {
   throw new Error(`ufhLoopMinNominalDiameterMm: ожидалось 16, получено ${rules.ufhLoopMinNominalDiameterMm}`);
 }
+if (rules.maxUfhLoopLengthM !== 80) {
+  throw new Error(`maxUfhLoopLengthM: ожидалось 80, получено ${rules.maxUfhLoopLengthM}`);
+}
+if (rules.ufhLoopLengthLayoutFactor !== 1.1) {
+  throw new Error(
+    `ufhLoopLengthLayoutFactor: ожидалось 1.1, получено ${rules.ufhLoopLengthLayoutFactor}`,
+  );
+}
 
 const elbow85 = estimateUfhLoopElbowCount(85, 150);
 if (elbow85 < 2) {

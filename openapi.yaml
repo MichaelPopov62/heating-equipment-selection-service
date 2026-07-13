@@ -737,6 +737,10 @@ components:
       $ref: ./components/schemas/RadiatorsByRoomItem.yaml
     RadiatorsChosenSummary:
       $ref: ./components/schemas/RadiatorsChosenSummary.yaml
+    RadiatorsEmittersSummary:
+      $ref: ./components/schemas/RadiatorsEmittersSummary.yaml
+    RadiatorsRoomEmitterDiff:
+      $ref: ./components/schemas/RadiatorsRoomEmitterDiff.yaml
     RadiatorsProposalLineReport:
       $ref: ./components/schemas/RadiatorsProposalLineReport.yaml
     RadiatorsMatchingReport:

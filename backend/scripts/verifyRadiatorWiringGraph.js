@@ -16,16 +16,39 @@ function buildGraphForDto(dto) {
 
 /** @type {import('../src/hydraulics/types').HydraulicsRadiatorConsumer[]} */
 const consumers = [
-  { roomId: 'r1', roomName: 'R1', floor: 1, heatLoadWatts: 1200, flowRateM3PerHour: 0.052 },
-  { roomId: 'r2', roomName: 'R2', floor: 1, heatLoadWatts: 900, flowRateM3PerHour: 0.039 },
-  { roomId: 'r3', roomName: 'R3', floor: 1, heatLoadWatts: 700, flowRateM3PerHour: 0.03 },
+  {
+    roomId: 'r1',
+    roomName: 'R1',
+    floor: 1,
+    heatLoadWatts: 1200,
+    flowRateM3PerHour: 0.052,
+  },
+  {
+    roomId: 'r2',
+    roomName: 'R2',
+    floor: 1,
+    heatLoadWatts: 900,
+    flowRateM3PerHour: 0.039,
+  },
+  {
+    roomId: 'r3',
+    roomName: 'R3',
+    floor: 1,
+    heatLoadWatts: 700,
+    flowRateM3PerHour: 0.03,
+  },
 ];
 
 /** @type {import('../src/hydraulics/types').HydraulicsRules} */
 const rules = {
   mainTransitMinInternalDiameterMm: 20,
   branchMinInternalDiameterMm: 12,
-  velocityLimitsMps: { mainMax: 0.8, branchMax: 0.5, mainMin: 0.2, branchMin: 0 },
+  velocityLimitsMps: {
+    mainMax: 0.8,
+    branchMax: 0.5,
+    mainMin: 0.2,
+    branchMin: 0,
+  },
   radiatorBranchGrouping: {
     minFlowM3PerHourForIndividualBranch: 0.019,
     minHeatLoadWattsForIndividualBranch: 150,
@@ -33,7 +56,7 @@ const rules = {
     localZetaManifold: 1.5,
   },
   defaultLengthsM: { mainLine: 8, radiatorBranch: 4, ufhCollectorBranch: 3 },
-  maxUfhLoopLengthM: 100,
+  maxUfhLoopLengthM: 80,
   roughnessMmByMaterial: { pex: 0.007 },
   localLossZeta: {
     elbow90: 0.9,
@@ -62,7 +85,8 @@ function baseDto(wiringType) {
     meta: {
       heatingEmittersMode: 'radiators_only',
       objectType: 'house',
-      dhwMatchingScheme: 'maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw',
+      dhwMatchingScheme:
+        'maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw',
     },
     source: {
       supplyC: 75,
@@ -97,16 +121,22 @@ function baseDto(wiringType) {
 const deadEnd = buildGraphForDto(baseDto('two-pipe-dead-end'));
 const deadEndTrunks = deadEnd.edges.filter((e) => e.segmentRole === 'trunk');
 if (deadEndTrunks.length !== 2) {
-  throw new Error(`dead-end: ожидалось 2 trunk, получено ${deadEndTrunks.length}`);
+  throw new Error(
+    `dead-end: ожидалось 2 trunk, получено ${deadEndTrunks.length}`,
+  );
 }
-if (deadEndTrunks[0].designFlowM3PerHour < deadEndTrunks[1].designFlowM3PerHour) {
+if (
+  deadEndTrunks[0].designFlowM3PerHour < deadEndTrunks[1].designFlowM3PerHour
+) {
   throw new Error('dead-end: Q на trunk должен убывать вдоль магистрали');
 }
 
 const passGraph = buildGraphForDto(baseDto('two-pipe-pass'));
 for (const edge of passGraph.edges.filter((e) => e.segmentRole === 'trunk')) {
   if (Math.abs(edge.designFlowM3PerHour - 0.121) > 0.001) {
-    throw new Error(`pass: trunk ${edge.id} Q=${edge.designFlowM3PerHour} ≠ 0.121`);
+    throw new Error(
+      `pass: trunk ${edge.id} Q=${edge.designFlowM3PerHour} ≠ 0.121`,
+    );
   }
 }
 
@@ -121,7 +151,9 @@ const manifoldBranches = manifoldGraph.edges.filter(
   (e) => e.from === RAD_DISTRIBUTION_MANIFOLD_NODE_ID,
 );
 if (manifoldBranches.length !== 3) {
-  throw new Error(`manifold: ожидалось 3 ветки, получено ${manifoldBranches.length}`);
+  throw new Error(
+    `manifold: ожидалось 3 ветки, получено ${manifoldBranches.length}`,
+  );
 }
 
 const autoGraph = buildGraphForDto(baseDto('auto'));

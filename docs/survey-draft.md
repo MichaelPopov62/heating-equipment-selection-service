@@ -13,6 +13,19 @@
 | `hydraulicsForm` | Шаг «Гидравлика»: `mainLineLengthM` (котёл → коллектор), `deltaTSystemK`, `pipeMaterialPreference` |
 | `wiringLayoutV3` | Схема разводки v3: `systemType` (`auto` \| `two-pipe-dead-end` \| …), `branches[]` (длина коллектор → радиатор); на calc уходит `hydraulics.radiatorWiringSystemType` + `radiatorBranchOverrides` |
 | `ufhPresetId` | Режим emitters (`ufh_only`, `ufh_mixed_radiators`, …); `null` — классика без ТП |
+| `radiatorConnection` | Подводка радиаторов: `side` \| `bottom` (дефолт `side`); UI — шаг «Котёл»; в calc → `heatingSystem.radiatorConnection`. SSOT — `shared/radiatorConnection.js`, см. [`radiator-connection.md`](radiator-connection.md). Старые draft без поля → `side` в `migrateSurveyDraft` |
+| `radiatorEmitterPreference` | Тип приборов на объект: `auto` \| `sectional` \| `panel` (дефолт `auto`); UI — шаг «Котёл»; в calc → `heatingSystem.radiatorEmitterPreference`. SSOT — `shared/radiatorEmitterPreference.js`, см. [`radiator-emitter-kind.md`](radiator-emitter-kind.md). Старые draft без поля → `auto` |
+
+### ТП в комнате: `ufhTerminalControl`
+
+В `rooms[].underfloorHeating` (compat через `migrateRoomUnderfloorHeating`):
+
+| Значение | Смысл |
+|----------|--------|
+| omit / `collector` | Петля на коллекторе ТП (default) |
+| `unibox` | Локальный регулятор; только при `areaM2 ≤ 20` |
+
+Старые черновики без поля → `collector`.
 
 ### UI шага «Гидравлика»
 

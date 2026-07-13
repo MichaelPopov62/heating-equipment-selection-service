@@ -222,6 +222,49 @@ function validateAndNormalizeApplianceDoc(doc) {
       }
       return s;
     });
+    const ek = requireObject(d, 'emitterKind', `${basePath}.emitterKind`);
+    const maxSectionsBeforeMultiUnit = Math.max(
+      1,
+      Math.trunc(
+        requireFiniteNum(
+          ek,
+          'maxSectionsBeforeMultiUnit',
+          `${basePath}.emitterKind`,
+        ),
+      ),
+    );
+    const maxUnitsPerRoom = Math.max(
+      1,
+      Math.trunc(
+        requireFiniteNum(ek, 'maxUnitsPerRoom', `${basePath}.emitterKind`),
+      ),
+    );
+    const maxSectionsHeuristic = Math.max(
+      maxSectionsBeforeMultiUnit,
+      Math.trunc(
+        requireFiniteNum(
+          ek,
+          'maxSectionsHeuristic',
+          `${basePath}.emitterKind`,
+        ),
+      ),
+    );
+    const sectionalCandidatesPerRoom = Math.max(
+      1,
+      Math.trunc(
+        requireFiniteNum(
+          ek,
+          'sectionalCandidatesPerRoom',
+          `${basePath}.emitterKind`,
+        ),
+      ),
+    );
+    const tieRaw = String(ek.tieBreakKind ?? '').trim();
+    if (tieRaw !== 'sectional' && tieRaw !== 'panel') {
+      throw new Error(
+        `${basePath}.emitterKind.tieBreakKind: ожидается sectional|panel`,
+      );
+    }
     return {
       applianceKind: 'radiator',
       schemaVersion,
@@ -230,6 +273,13 @@ function validateAndNormalizeApplianceDoc(doc) {
       microLoad: {
         minDesignWattsThreshold: threshold,
         entryRoomTypes,
+      },
+      emitterKind: {
+        maxSectionsBeforeMultiUnit,
+        maxUnitsPerRoom,
+        maxSectionsHeuristic,
+        sectionalCandidatesPerRoom,
+        tieBreakKind: /** @type {'sectional' | 'panel'} */ (tieRaw),
       },
     };
   }
@@ -352,6 +402,15 @@ function validateAndNormalizeApplianceDoc(doc) {
         ),
       },
       maxUfhLoopLengthM: requirePosNum(d, 'maxUfhLoopLengthM', basePath),
+      ufhLoopLengthLayoutFactor: (() => {
+        const n = requirePosNum(d, 'ufhLoopLengthLayoutFactor', basePath);
+        if (n < 1 || n > 1.3) {
+          throw new Error(
+            `${basePath}.ufhLoopLengthLayoutFactor: ожидается число в диапазоне 1…1.3`,
+          );
+        }
+        return n;
+      })(),
       ufhLoopDeltaTK: requirePosNum(d, 'ufhLoopDeltaTK', basePath),
       ufhLoopVelocityMinMps: requirePosNum(d, 'ufhLoopVelocityMinMps', basePath),
       ufhLoopVelocityMaxMps: requirePosNum(d, 'ufhLoopVelocityMaxMps', basePath),

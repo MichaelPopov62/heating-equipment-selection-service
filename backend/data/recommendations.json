@@ -270,6 +270,33 @@
     "text": "Во внутренних помещениях с остаточной нагрузкой на радиатор ниже порога прибор не ставится — тепло обеспечивается перетоком; гидравлика учитывает микроколлектор при необходимости."
   },
   {
+    "code": "REC_RADIATOR_EMITTER_KIND_MAJORITY",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "automationHints",
+    "equipmentType": "radiator",
+    "title": "Единый тип радиаторов по объекту",
+    "text": "На объекте зафиксирован единый тип приборов «{{resolvedEmitterKind}}» (голоса Pass 1: секции {{sectionalVotes}}, панели {{panelVotes}}; источник решения: {{decisionSource}})."
+  },
+  {
+    "code": "REC_RADIATOR_MULTI_UNIT",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "automationHints",
+    "equipmentType": "radiator",
+    "title": "Несколько радиаторов в помещении",
+    "text": "В одном или нескольких помещениях установлено более одного прибора того же типа (эскалация при глобальном lock типа) — см. unitsCount в byRoom."
+  },
+  {
+    "code": "WARN_RADIATOR_KIND_LOCKED_UNDERPOWERED",
+    "schemaVersion": 1,
+    "isActive": true,
+    "category": "warnings",
+    "equipmentType": "radiator",
+    "title": "Дефицит мощности при фиксированном типе",
+    "text": "В помещении «{{roomName}}» прибор типа «{{resolvedEmitterKind}}» не покрывает 100% теплопотерь из-за ограничений каталога/геометрии. Нехватка: {{deficitWatts}} Вт (нагрузка {{radiatorDesignWatts}} Вт, отдача {{deliverableWatts}} Вт)."
+  },
+  {
     "code": "WARN_BOILER_HEATING_FLOW_BELOW_MIN",
     "schemaVersion": 1,
     "isActive": true,

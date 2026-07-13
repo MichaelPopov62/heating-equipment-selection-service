@@ -1,25 +1,16 @@
 /**
  * Назначение: подбор радиаторов с линиями proposal.
- * Описание: обёртка pickRadiators в lineEconomy/lineEfficient с фиксированными графиками
- * traditional_dt50_75_65 и condensing_dt30_55_45; публичный API — pickRadiatorsWithProposalLines.
+ * Описание: primary Two-Pass → единый resolvedEmitterKind для economy/efficient.
  */
 import { applyThermalRegimePresetToHeatingSystem } from '../logic/heatingThermalRegimes.js';
 import { pickRadiators } from './internal/pickRadiatorsCore.js';
+import {
+  buildRadiatorRoomEmitterDiffs,
+  emptyRadiatorsEmittersSummary,
+  summarizeRadiatorEmitters,
+} from './internal/summarizeRadiatorEmitters.js';
 
 /**
- * Сума секцій по приміщеннях.
- * @param {import('../types/shared-types').RadiatorsByRoomItem[]} byRoom
- * @returns {number | null}
- */
-function totalSectionsFromByRoom(byRoom) {
-  const nums = (byRoom ?? [])
-    .map((r) => r.sections)
-    .filter((s) => typeof s === 'number' && Number.isFinite(s));
-  return nums.length > 0 ? nums.reduce((a, b) => a + b, 0) : null;
-}
-
-/**
- * Знімок heatingSystem під лінію підбору радіаторів (фіксований пресет графіка).
  * @param {import('../types/shared-types').HeatingSystemInput} baseHeatingSystem
  * @param {'economy' | 'efficient'} tier
  * @returns {import('../types/shared-types').HeatingSystemInput}
@@ -34,13 +25,14 @@ function heatingSystemSnapshotForRadiatorTier(baseHeatingSystem, tier) {
 }
 
 /**
- * Обгортка звіту підбору радіаторів у лінію «Економ» / «Ефективний».
  * @param {import('../types/shared-types').RadiatorsMatchingReport} tierReport
  * @param {'economy' | 'efficient'} tier
  * @param {import('../types/boiler-types').BoilerEquipmentProposal} boilerProposal
  * @returns {import('../types/shared-types').RadiatorsProposalLineReport}
  */
 function wrapRadiatorProposalLine(tierReport, tier, boilerProposal) {
+  const emittersSummary =
+    tierReport.emittersSummary ?? summarizeRadiatorEmitters(tierReport.byRoom);
   return {
     tier,
     boilerModel: boilerProposal.model ?? null,
@@ -49,13 +41,38 @@ function wrapRadiatorProposalLine(tierReport, tier, boilerProposal) {
     inputs: tierReport.inputs,
     warnings: tierReport.warnings,
     radiatorSelectionNotes: tierReport.radiatorSelectionNotes,
-    totalSections: totalSectionsFromByRoom(tierReport.byRoom),
+    emittersSummary,
+    totalSections:
+      emittersSummary.sectionalUnits > 0 || emittersSummary.panelUnits > 0
+        ? emittersSummary.sectionalSections
+        : null,
+    resolvedEmitterKind: tierReport.resolvedEmitterKind ?? null,
+    emitterKindVotes: tierReport.emitterKindVotes,
+    emitterKindDecisionNotes: tierReport.emitterKindDecisionNotes,
   };
 }
 
 /**
- * Підбір радіаторів: основна лінія (графік з анкети) + рядки «Економ» / «Ефективний»
- * під картки proposalEconomy / proposalEfficient.
+ * @param {'economy' | 'efficient'} tier
+ * @param {string} unavailableReason
+ * @returns {import('../types/shared-types').RadiatorsProposalLineReport}
+ */
+function unavailableRadiatorProposalLine(tier, unavailableReason) {
+  return {
+    tier,
+    boilerModel: null,
+    chosen: null,
+    byRoom: [],
+    warnings: unavailableReason ? [unavailableReason] : [],
+    unavailableReason,
+    emittersSummary: emptyRadiatorsEmittersSummary(),
+    totalSections: null,
+    resolvedEmitterKind: null,
+  };
+}
+
+/**
+ * Підбір радіаторів: основна лінія + «Економ» / «Ефективний» з одним kind на объект.
  *
  * @param {object} args
  * @param {import('../types/shared-types').HeatLossReport} args.roomsHeatLoss
@@ -66,7 +83,7 @@ function wrapRadiatorProposalLine(tierReport, tier, boilerProposal) {
  * @param {import('../types/shared-types').UnderfloorHeatingReport | null} [args.underfloorHeating]
  * @param {import('../types/shared-types').HydraulicsSurveyInput | undefined} [args.hydraulics]
  * @param {import('../../dhw/types').RadiatorApplianceRules} [args.radiatorRules]
- * @param {import('../types/shared-types').RecommendationCatalogItem[]} [args.recommendations]
+ * @param {import('../recommendations/types').RecommendationsBundle} [args.recommendations]
  * @returns {import('../types/shared-types').RadiatorsMatchingReport}
  */
 export function pickRadiatorsWithProposalLines({
@@ -87,95 +104,17 @@ export function pickRadiatorsWithProposalLines({
     return {
       chosen: null,
       byRoom: [],
+      emittersSummary: emptyRadiatorsEmittersSummary(),
+      totalSections: null,
+      roomEmitterDiffs: [],
       warnings: [skipMsg],
       radiatorSelectionNotes: [],
       inputs: {},
-      lineEconomy: {
-        tier: 'economy',
-        boilerModel: null,
-        chosen: null,
-        byRoom: [],
-        warnings: [skipMsg],
-        unavailableReason: skipMsg,
-        totalSections: null,
-      },
-      lineEfficient: {
-        tier: 'efficient',
-        boilerModel: null,
-        chosen: null,
-        byRoom: [],
-        warnings: [skipMsg],
-        unavailableReason: skipMsg,
-        totalSections: null,
-      },
-    };
-  }
-
-  /** @type {import('../types/shared-types').RadiatorsProposalLineReport | undefined} */
-  let lineEconomy;
-  if (boiler?.proposalEconomy) {
-    const hsEco = heatingSystemSnapshotForRadiatorTier(heatingSystem, 'economy');
-    const ecoReport = pickRadiators({
-      roomsHeatLoss,
-      heatingSystem: hsEco,
-      catalog,
-      building,
-      boilerMatching: null,
-      radiatorLineTier: 'economy',
-      underfloorHeating,
-      deltaTSystemK,
-      radiatorRules,
-      recommendations,
-    });
-    lineEconomy = wrapRadiatorProposalLine(
-      ecoReport,
-      'economy',
-      boiler.proposalEconomy,
-    );
-  } else {
-    lineEconomy = {
-      tier: 'economy',
-      boilerModel: null,
-      chosen: null,
-      byRoom: [],
-      warnings: [],
-      unavailableReason:
-        'Линия «Эконом» недоступна: в каталоге нет традиционных котлов для этой схемы.',
-      totalSections: null,
-    };
-  }
-
-  /** @type {import('../types/shared-types').RadiatorsProposalLineReport | undefined} */
-  let lineEfficient;
-  if (boiler?.proposalEfficient) {
-    const hsEff = heatingSystemSnapshotForRadiatorTier(heatingSystem, 'efficient');
-    const effReport = pickRadiators({
-      roomsHeatLoss,
-      heatingSystem: hsEff,
-      catalog,
-      building,
-      boilerMatching: null,
-      radiatorLineTier: 'efficient',
-      underfloorHeating,
-      deltaTSystemK,
-      radiatorRules,
-      recommendations,
-    });
-    lineEfficient = wrapRadiatorProposalLine(
-      effReport,
-      'efficient',
-      boiler.proposalEfficient,
-    );
-  } else {
-    lineEfficient = {
-      tier: 'efficient',
-      boilerModel: null,
-      chosen: null,
-      byRoom: [],
-      warnings: [],
-      unavailableReason:
-        'Линия «Эффективный» недоступна: в каталоге нет конденсационных котлов для этой схемы.',
-      totalSections: null,
+      resolvedEmitterKind: null,
+      emitterKindVotes: { sectional: 0, panel: 0 },
+      emitterKindDecisionNotes: [],
+      lineEconomy: unavailableRadiatorProposalLine('economy', skipMsg),
+      lineEfficient: unavailableRadiatorProposalLine('efficient', skipMsg),
     };
   }
 
@@ -191,8 +130,88 @@ export function pickRadiatorsWithProposalLines({
     recommendations,
   });
 
+  const objectKind =
+    primary.resolvedEmitterKind === 'sectional' || primary.resolvedEmitterKind === 'panel'
+      ? primary.resolvedEmitterKind
+      : null;
+
+  /** @type {import('../types/shared-types').RadiatorsProposalLineReport} */
+  let lineEconomy;
+  if (boiler?.proposalEconomy) {
+    const hsEco = heatingSystemSnapshotForRadiatorTier(heatingSystem, 'economy');
+    const ecoReport = pickRadiators({
+      roomsHeatLoss,
+      heatingSystem: hsEco,
+      catalog,
+      building,
+      boilerMatching: null,
+      radiatorLineTier: 'economy',
+      underfloorHeating,
+      deltaTSystemK,
+      radiatorRules,
+      recommendations,
+      forcedEmitterKind: objectKind,
+    });
+    lineEconomy = wrapRadiatorProposalLine(
+      ecoReport,
+      'economy',
+      boiler.proposalEconomy,
+    );
+  } else {
+    lineEconomy = unavailableRadiatorProposalLine(
+      'economy',
+      'Линия «Эконом» недоступна: в каталоге нет традиционных котлов для этой схемы.',
+    );
+  }
+
+  /** @type {import('../types/shared-types').RadiatorsProposalLineReport} */
+  let lineEfficient;
+  if (boiler?.proposalEfficient) {
+    const hsEff = heatingSystemSnapshotForRadiatorTier(heatingSystem, 'efficient');
+    const effReport = pickRadiators({
+      roomsHeatLoss,
+      heatingSystem: hsEff,
+      catalog,
+      building,
+      boilerMatching: null,
+      radiatorLineTier: 'efficient',
+      underfloorHeating,
+      deltaTSystemK,
+      radiatorRules,
+      recommendations,
+      forcedEmitterKind: objectKind,
+    });
+    lineEfficient = wrapRadiatorProposalLine(
+      effReport,
+      'efficient',
+      boiler.proposalEfficient,
+    );
+  } else {
+    lineEfficient = unavailableRadiatorProposalLine(
+      'efficient',
+      'Линия «Эффективный» недоступна: в каталоге нет конденсационных котлов для этой схемы.',
+    );
+  }
+
+  const roomEmitterDiffs = buildRadiatorRoomEmitterDiffs(
+    lineEconomy.byRoom,
+    lineEfficient.byRoom,
+  );
+
+  /** @type {string[]} */
+  const kindChangeWarnings = [];
+  for (const diff of roomEmitterDiffs) {
+    if (!diff.equipmentKindChanged) continue;
+    kindChangeWarnings.push(
+      `[${diff.roomName}] Тип прибора различается между линиями «Эконом» (${diff.economyDisplayKind}) `
+        + `и «Эффективный» (${diff.efficientDisplayKind}) — нарушение инварианта единого kind.`,
+    );
+  }
+
   return {
     ...primary,
+    roomEmitterDiffs,
+    warnings: [...(primary.warnings ?? []), ...kindChangeWarnings],
     lineEconomy,
     lineEfficient,
   };
