@@ -18,7 +18,7 @@
     "verify:frontend": "npm run verify --prefix frontend",
     "verify:backend": "npm run verify --prefix backend",
     "build:frontend": "npm run build --prefix frontend",
-    "verify": "npm run verify:type-bypass && npm run verify:shared && npm run verify:backend && npm run verify:frontend && npm run build:frontend",
+    "verify": "npm run verify:type-bypass && npm run verify:shared && npm run verify:backend && npm run verify:frontend",
     "seed": "npm run seed --prefix backend",
     "verify:seed-catalog": "npm run verify:seed-catalog --prefix backend"
   },

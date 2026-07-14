@@ -152,12 +152,11 @@ const {
 Перед сдачей на чистой кодовой базе:
 
 ```bash
-cd frontend && npm run verify && npm run build
+cd frontend && npm run verify
 ```
 
-- **`npm run verify`** — exit `0` обязателен (`lint` + **`typecheck`** + `verify:survey-session` + `verify:dead-code`/knip).
-- **`npm run build`** — `typecheck` + Vite без ошибок.
-- **`npm run typecheck`** — `tsc -b` с `tsconfig.strict-base` (`exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`).
+- **`npm run verify`** — exit `0` обязателен (`lint` + **`typecheck`** + `verify:dead-code`/knip + **`build`** + `verify:survey-session`).
+- `verify:survey-session` читает `dist/assets` (поэтому build входит в `verify`).
 - ESLint: `strictTypeChecked` + `no-unsafe-*` (см. [`type-safety.md`](type-safety.md)).
 
 Из корня репозитория: `npm run verify:frontend`, `npm run lint:frontend`, `npm run verify` (полный gate).

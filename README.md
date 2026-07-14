@@ -6,7 +6,8 @@ REST API и фронтенд для подбора теплового обору
 | -------------------------------------------------------------- | ------------------------------------------------------------------- |
 | [`openapi.yaml`](openapi.yaml)                                 | Контракт REST API                                                   |
 | [`.cursorrules`](.cursorrules)                                 | Правила backend/frontend, бизнес-логика, env, модули                |
-| [`Plan.md`](Plan.md)                                           | Статус MVP, структура сервиса по папкам                             |
+| [`Plan.md`](Plan.md)                                           | Статус MVP, детальные таблицы модулей, roadmap                      |
+| [`docs/project-structure.md`](docs/project-structure.md)       | Карта папок и entrypoints (навигатор по репозиторию)               |
 | [`docs/type-safety.md`](docs/type-safety.md)                   | Строгая типобезопасность: tsc/checkJs, ESLint, CI gate              |
 | [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md) | Frontend: SurveySession, React Query, calc, справочники             |
 | [`docs/survey-draft.md`](docs/survey-draft.md)                 | Черновик анкеты (schema v4), загрузка и миграция                    |
@@ -36,7 +37,7 @@ Calc-пайплайн HTTP: `runCalculation(body)` (`api/runCalculation.js`); в
 
 React + Vite + TypeScript + **React Query** (`@tanstack/react-query`, слой `frontend/src/query/`). Запуск: `cd frontend && npm install && npm run dev`.
 
-Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md). Структура папок: [`Plan.md`](Plan.md) § `frontend/`.
+Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md). Карта папок: [`docs/project-structure.md`](docs/project-structure.md). Детальные таблицы frontend — [`Plan.md`](Plan.md) § `frontend/`.
 
 В анкете для каждого помещения задаётся **положение относительно наружного контура** (`roomExteriorLayout`: угловое, на фасаде, внутреннее со стеной в коридор) — см. [`docs/room-exterior-layout.md`](docs/room-exterior-layout.md).
 
@@ -54,8 +55,7 @@ npm run verify
 node scripts/verifyNoTypeBypass.mjs   # запрет any / @ts-ignore / unsafe eslint-disable
 cd shared && npm run typecheck
 cd backend && npm run verify          # lint + typecheck (checkJs) + domain verify:*
-cd frontend && npm run verify         # lint (strictTypeChecked) + typecheck + survey-session + knip
-cd frontend && npm run build
+cd frontend && npm run verify         # lint + typecheck + knip + build + survey-session (нужен dist)
 ```
 
 Отдельно:

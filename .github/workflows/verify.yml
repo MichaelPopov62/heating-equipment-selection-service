@@ -54,7 +54,4 @@ jobs:
       - name: Frontend verify
         working-directory: frontend
         run: npm run verify
-
-      - name: Frontend build
-        working-directory: frontend
-        run: npm run build
+        # lint + typecheck + knip + build + verify:survey-session (последний читает dist/)

@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "verify:survey-session": "node scripts/verifySurveySessionPipeline.mjs",
     "verify:dead-code": "knip",
-    "verify": "npm run lint && npm run typecheck && npm run verify:survey-session && npm run verify:dead-code"
+    "verify": "npm run lint && npm run typecheck && npm run verify:dead-code && npm run build && npm run verify:survey-session"
   },
   "dependencies": {
     "@tabler/icons-react": "^3.41.1",
