@@ -40,6 +40,13 @@ jobs:
         working-directory: shared
         run: npm run typecheck
 
+      - name: Prepare catalog fixture
+        working-directory: backend
+        run: |
+          if [ ! -f test_data.json ]; then
+            cp test_data.json.example test_data.json
+          fi
+
       - name: Backend verify
         working-directory: backend
         run: npm run verify

@@ -328,6 +328,55 @@ interface FuzzStats {
   serverCrashed: number;
 }
 
+interface CalcErrorDetail {
+  message?: string;
+  code?: string;
+}
+
+/** Чи це plain-object для звуження unknown. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+/** Попередження ТП з тіла calc-звіту. */
+function readUfhWarnings(data: unknown): string[] {
+  if (!isRecord(data) || !isRecord(data.calculations)) return [];
+  const underfloor = data.calculations.underfloorHeating;
+  if (!isRecord(underfloor) || !Array.isArray(underfloor.rooms)) return [];
+  const out: string[] = [];
+  for (const room of underfloor.rooms) {
+    if (!isRecord(room) || !Array.isArray(room.warnings)) continue;
+    for (const w of room.warnings) {
+      if (typeof w === 'string') out.push(w);
+    }
+  }
+  return out;
+}
+
+/** Нотатки гідравліки з тіла calc-звіту. */
+function readHydraulicNotes(data: unknown): string[] {
+  if (!isRecord(data) || !isRecord(data.calculations)) return [];
+  const hydraulics = data.calculations.hydraulics;
+  if (!isRecord(hydraulics) || !Array.isArray(hydraulics.notes)) return [];
+  return hydraulics.notes.filter((n): n is string => typeof n === 'string');
+}
+
+/** Деталі валідації з error envelope. */
+function parseCalcErrorDetails(data: unknown): CalcErrorDetail[] {
+  if (!isRecord(data)) return [];
+  const errNode = data.error;
+  if (!isRecord(errNode) || !Array.isArray(errNode.details)) return [];
+  const out: CalcErrorDetail[] = [];
+  for (const item of errNode.details) {
+    if (!isRecord(item)) continue;
+    out.push({
+      ...(typeof item.message === 'string' ? { message: item.message } : {}),
+      ...(typeof item.code === 'string' ? { code: item.code } : {}),
+    });
+  }
+  return out;
+}
+
 /** Головний раннер фаззінг-тесту calc API. */
 async function runFuzzTests(iterations = 50): Promise<void> {
   const SERVER_URL = 'http://localhost:3001/api/v1/calc';
@@ -359,22 +408,9 @@ async function runFuzzTests(iterations = 50): Promise<void> {
     profileCounts[profile] += 1;
 
     try {
-      const response = await axios.post(SERVER_URL, payload);
-      const data = response.data as {
-        ok?: boolean;
-        calculations?: {
-          underfloorHeating?: {
-            rooms?: Array<{ warnings?: string[] }>;
-          };
-          hydraulics?: { notes?: string[] };
-        };
-      };
-
-      const ufhWarnings =
-        data.calculations?.underfloorHeating?.rooms?.flatMap(
-          (r) => r.warnings ?? [],
-        ) ?? [];
-      const hydraulicNotes = data.calculations?.hydraulics?.notes ?? [];
+      const response = await axios.post<unknown>(SERVER_URL, payload);
+      const ufhWarnings = readUfhWarnings(response.data);
+      const hydraulicNotes = readHydraulicNotes(response.data);
 
       const hasUnresolvedConflict = ufhWarnings.some(
         (w) => w.includes('низкая скорость') || w.includes('высокий риск'),
@@ -395,11 +431,7 @@ async function runFuzzTests(iterations = 50): Promise<void> {
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
-        const details = (
-          error.response?.data as {
-            error?: { details?: Array<{ message?: string; code?: string }> };
-          }
-        )?.error?.details;
+        const details = parseCalcErrorDetails(error.response?.data);
 
         if (status === 400) {
           stats.validationFailed += 1;
@@ -407,9 +439,10 @@ async function runFuzzTests(iterations = 50): Promise<void> {
             console.error(
               `⚠️ Ітерація №${i} [${profile}]: HTTP 400 (валідація)`,
             );
-            if (details?.length) {
+            if (details.length > 0) {
+              const first = details[0];
               console.error(
-                `   ${details[0]?.code ?? ''}: ${details[0]?.message ?? ''}`,
+                `   ${first?.code ?? ''}: ${first?.message ?? ''}`,
               );
             }
           }
@@ -418,7 +451,7 @@ async function runFuzzTests(iterations = 50): Promise<void> {
           console.error(
             `❌ Ітерація №${i} [${profile}]: HTTP ${status ?? 'немає відповіді'}`,
           );
-          if (details?.length) {
+          if (details.length > 0) {
             console.error(JSON.stringify(details.slice(0, 2), null, 2));
           }
         }
