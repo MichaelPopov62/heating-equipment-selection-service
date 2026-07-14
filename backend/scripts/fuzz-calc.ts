@@ -399,9 +399,7 @@ async function runFuzzTests(iterations = 50): Promise<void> {
     warnings: string[];
   }> = [];
 
-  console.log(
-    `🚀 Запуск фаззінг-тесту ядра HeatCalc Pro на ${iterations} ітерацій...\n`,
-  );
+  console.log(`Fuzz calc: ${iterations} iterations...\n`);
 
   for (let i = 1; i <= iterations; i++) {
     const { profile, payload } = generateRandomInput();
@@ -467,26 +465,64 @@ async function runFuzzTests(iterations = 50): Promise<void> {
     }
   }
 
-  console.log('--- 📊 ПІДСУМОК ТЕСТУВАННЯ ---');
-  console.log(`✅ Успішні розрахунки (без попереджень): ${stats.successful}`);
-  console.log(`⚠️ Розрахунки з попередженнями: ${stats.withWarnings}`);
-  console.log(`🚫 Відхилено валідацією (HTTP 400): ${stats.validationFailed}`);
-  console.log(`💥 Крах ядра (HTTP 5xx / мережа): ${stats.serverCrashed}`);
-  console.log(
-    `📋 Профілі: квартира=${profileCounts.apartment_mixed_ufh}, будинок=${profileCounts.house_radiators_ufh}`,
-  );
-  console.log('-------------------------------\n');
+  printFuzzSummary({
+    iterations,
+    stats,
+    profileCounts,
+    deadlockCount: deadlockScenarios.length,
+  });
 
   const firstDeadlock = deadlockScenarios[0];
   if (firstDeadlock) {
     console.log(
-      `🔍 Виявлено ${deadlockScenarios.length} випадків гідравлічного тупика (v < 0.2 або p > 20).`,
-    );
-    console.log(
-      `Приклад [${firstDeadlock.profile}], ітерація №${firstDeadlock.iteration}:`,
+      `Deadlock sample [${firstDeadlock.profile}] #${firstDeadlock.iteration}:`,
     );
     console.log(firstDeadlock.warnings.join('\n'));
   }
+
+  // Жорсткі збої API — fail; WARN/400 залишаються інформативними для ручного огляду.
+  if (stats.serverCrashed > 0) {
+    process.exitCode = 1;
+  }
 }
 
-void runFuzzTests(50);
+/**
+ * Компактна таблична сводка — без довгих рядків і emoji,
+ * щоб Git Bash / вузький термінал не ламав переноси посередині слів.
+ */
+function printFuzzSummary(args: {
+  iterations: number;
+  stats: FuzzStats;
+  profileCounts: Record<FuzzProfile, number>;
+  deadlockCount: number;
+}): void {
+  const { iterations, stats, profileCounts, deadlockCount } = args;
+  const n = (value: number): string => String(value).padStart(4, ' ');
+  const row = (label: string, value: number): string =>
+    `${label.padEnd(18, ' ')}${n(value)}`;
+
+  console.log('');
+  console.log(`--- FUZZ SUMMARY (${iterations}) ---`);
+  console.log(row('ok_clean', stats.successful));
+  console.log(row('ok_warnings', stats.withWarnings));
+  console.log(row('http_400', stats.validationFailed));
+  console.log(row('http_5xx_net', stats.serverCrashed));
+  console.log(
+    `profiles          apt=${profileCounts.apartment_mixed_ufh} house=${profileCounts.house_radiators_ufh}`,
+  );
+  if (deadlockCount > 0) {
+    console.log(row('deadlocks', deadlockCount));
+  }
+  console.log('-----------------------------');
+  console.log('');
+}
+
+const iterationsArg = Number.parseInt(process.argv[2] ?? '50', 10);
+const iterations =
+  Number.isFinite(iterationsArg) && iterationsArg > 0 ? iterationsArg : 50;
+
+runFuzzTests(iterations).catch((error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`Fuzz runner failed: ${message}`);
+  process.exitCode = 1;
+});
