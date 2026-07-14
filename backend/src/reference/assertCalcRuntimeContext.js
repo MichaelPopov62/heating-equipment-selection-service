@@ -5,7 +5,7 @@
 
 /**
  * @param {unknown} ctx
- * @returns {asserts ctx is import('../types/shared-types').CalcRuntimeContext}
+ * @returns {asserts ctx is import('../types/shared-types.js').CalcRuntimeContext}
  */
 export function assertCalcRuntimeContext(ctx) {
   if (!ctx || typeof ctx !== 'object') {

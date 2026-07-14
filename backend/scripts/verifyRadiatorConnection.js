@@ -12,6 +12,8 @@ import { normalizeHeatingSystemThermalRegime } from '../src/logic/heatingThermal
 import { buildRadiatorConnectionSelectionNotes } from '../src/matching/internal/radiatorConnectionNotes.js';
 import { filterPanelsByConnection } from '../src/matching/radiatorSizingHelpers.js';
 import { warmupReferenceCache, getReferenceBundle, toCalcRuntimeContext } from '../src/reference/public.js';
+import { assertAt } from './fixtures/scriptAssert.js';
+import { buildObjectMeta } from './fixtures/verifyFixtures.js';
 
 /** @param {boolean} ok @param {string} label */
 function check(ok, label) {
@@ -27,11 +29,11 @@ async function main() {
   ok = check(normalizeRadiatorConnection('x') === DEFAULT_RADIATOR_CONNECTION, 'junk → side') && ok;
   ok = check(radiatorConnectionLabel('bottom') === 'нижняя', 'label bottom') && ok;
 
-  /** @type {import('../src/types/shared-types').CalcRequestBody} */
+  /** @type {import('../src/types/shared-types.js').CalcRequestBody} */
   const body = {
     building: {
       temps: { insideC: 20, outsideC: -5 },
-      objectMeta: { objectType: 'apartment', floors: 1, roomsCount: 1 },
+      objectMeta: buildObjectMeta({ objectType: 'apartment', roomsCount: 1 }),
       rooms: [],
       envelopeElements: [],
     },
@@ -47,12 +49,15 @@ async function main() {
     ) && ok;
 
   const notesBottom = buildRadiatorConnectionSelectionNotes('bottom');
-  ok = check(notesBottom.length === 1 && /нижняя/i.test(notesBottom[0]), 'notes bottom') && ok;
+  ok = check(notesBottom.length === 1 && /нижняя/i.test(assertAt(notesBottom, 0, 'notesBottom[0]')), 'notes bottom') && ok;
   ok = check(buildRadiatorConnectionSelectionNotes(null).length === 0, 'notes empty if unset') && ok;
 
   await warmupReferenceCache();
   const ctx = toCalcRuntimeContext(await getReferenceBundle());
-  const panels = (ctx.catalog?.radiators ?? []).filter((r) => r.priceBasis === 'panel');
+  const panels = (ctx.catalog?.radiators ?? []).filter(
+    /** @param {import('../src/catalog/types.js').RadiatorCatalogItemNormalized} r */
+    (r) => r.priceBasis === 'panel',
+  );
   const sidePool = filterPanelsByConnection(panels, 'side');
   const bottomPool = filterPanelsByConnection(panels, 'bottom');
   ok = check(sidePool.length > 0, `side panel pool ${sidePool.length}`) && ok;

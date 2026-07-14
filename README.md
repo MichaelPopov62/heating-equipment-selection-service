@@ -2,15 +2,16 @@
 
 REST API и фронтенд для подбора теплового оборудования (дом/квартира).
 
-| Документ | Назначение |
-|----------|------------|
-| [`openapi.yaml`](openapi.yaml) | Контракт REST API |
-| [`.cursorrules`](.cursorrules) | Правила backend/frontend, бизнес-логика, env, модули |
-| [`Plan.md`](Plan.md) | Статус MVP, структура сервиса по папкам |
-| [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md) | Frontend: SurveySession, React Query, calc, справочники |
-| [`docs/survey-draft.md`](docs/survey-draft.md) | Черновик анкеты (schema v4), загрузка и миграция |
-| [`docs/projects-api.md`](docs/projects-api.md) | REST API проектов и сохранённых расчётов |
-| [`docs/calc-runtime-context.md`](docs/calc-runtime-context.md) | CalcRuntimeContext: DI справочников в calc-пайплайне |
+| Документ                                                       | Назначение                                                          |
+| -------------------------------------------------------------- | ------------------------------------------------------------------- |
+| [`openapi.yaml`](openapi.yaml)                                 | Контракт REST API                                                   |
+| [`.cursorrules`](.cursorrules)                                 | Правила backend/frontend, бизнес-логика, env, модули                |
+| [`Plan.md`](Plan.md)                                           | Статус MVP, структура сервиса по папкам                             |
+| [`docs/type-safety.md`](docs/type-safety.md)                   | Строгая типобезопасность: tsc/checkJs, ESLint, CI gate              |
+| [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md) | Frontend: SurveySession, React Query, calc, справочники             |
+| [`docs/survey-draft.md`](docs/survey-draft.md)                 | Черновик анкеты (schema v4), загрузка и миграция                    |
+| [`docs/projects-api.md`](docs/projects-api.md)                 | REST API проектов и сохранённых расчётов                            |
+| [`docs/calc-runtime-context.md`](docs/calc-runtime-context.md) | CalcRuntimeContext: DI справочников в calc-пайплайне                |
 | [`docs/room-exterior-layout.md`](docs/room-exterior-layout.md) | Положение помещения: угловое / фасад / внутреннее (стена в коридор) |
 
 ## Backend — быстрый старт
@@ -22,9 +23,11 @@ npm run start          # http://localhost:3001
 ```
 
 - Seed MongoDB: `cd backend && npm run seed` (нужен `test_data.json` — см. `test_data.json.example`). Чтобы API сразу подхватил новые данные без рестарта: задайте **`SYSTEM_INTERNAL_TOKEN`**, включите **`AUTO_INVALIDATE_CACHE=true`** (или `NODE_ENV=production`) — см. [`docs/calc-runtime-context.md`](docs/calc-runtime-context.md).
+- Seed MongoDB / справки: `cd backend && npm run seed`
 - Проверка схемы calc: `cd backend && npm run verify:calc-schema`
-- Проверка invalidate кэша: `cd backend && npm run verify:reference-cache-invalidate`
+- Типы (checkJs): `cd backend && npm run typecheck`
 - Линт: `cd backend && npm run lint`
+- Полный backend gate: `cd backend && npm run verify` (lint + **typecheck** + все `verify:*`)
 
 Calc-пайплайн HTTP: `runCalculation(body)` (`api/runCalculation.js`); внутри — `getReferenceBundle()` → `toCalcRuntimeContext()` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })` → `matchEquipment({ …, ctx })`. On-demand сброс кэша: `POST /api/v1/system/invalidate-reference-cache` (см. docs).
 
@@ -37,3 +40,31 @@ React + Vite + TypeScript + **React Query** (`@tanstack/react-query`, слой `
 Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md). Структура папок: [`Plan.md`](Plan.md) § `frontend/`.
 
 В анкете для каждого помещения задаётся **положение относительно наружного контура** (`roomExteriorLayout`: угловое, на фасаде, внутреннее со стеной в коридор) — см. [`docs/room-exterior-layout.md`](docs/room-exterior-layout.md).
+
+## Приёмка (production gate)
+
+Полная проверка из корня репозитория:
+
+```bash
+npm run verify
+```
+
+Эквивалент по шагам:
+
+```bash
+node scripts/verifyNoTypeBypass.mjs   # запрет any / @ts-ignore / unsafe eslint-disable
+cd shared && npm run typecheck
+cd backend && npm run verify          # lint + typecheck (checkJs) + domain verify:*
+cd frontend && npm run verify         # lint (strictTypeChecked) + typecheck + survey-session + knip
+cd frontend && npm run build
+```
+
+Отдельно:
+
+```bash
+cd frontend && npm run lint       # явный any + no-unsafe-* + type-aware правила
+cd frontend && npm run typecheck  # неявный any: strict + noImplicitAny + EOPT + NUI
+cd backend && npm run typecheck   # checkJs на src/ и scripts/
+```
+
+Подробности: [`docs/type-safety.md`](docs/type-safety.md). CI: `.github/workflows/verify.yml`.

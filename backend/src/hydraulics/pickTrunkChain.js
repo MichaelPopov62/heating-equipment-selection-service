@@ -27,8 +27,8 @@ function trunkJunctionIndex(nodeId) {
 /**
  * Упорядочивает trunk-рёбра магистрали от upstream к downstream (j0→j1→…).
  *
- * @param {import('./types').HydraulicsGraph} graph
- * @returns {import('./types').HydraulicsGraphEdge[]}
+ * @param {import('./types.js').HydraulicsGraph} graph
+ * @returns {import('./types.js').HydraulicsGraphEdge[]}
  */
 export function orderTrunkChainEdges(graph) {
   return graph.edges
@@ -45,9 +45,9 @@ export function orderTrunkChainEdges(graph) {
 }
 
 /**
- * @param {import('../catalog/types').PipeCatalogItemNormalized[]} materialPool
+ * @param {import('../catalog/types.js').PipeCatalogItemNormalized[]} materialPool
  * @param {number} floorMm
- * @returns {import('../catalog/types').PipeCatalogItemNormalized[]}
+ * @returns {import('../catalog/types.js').PipeCatalogItemNormalized[]}
  */
 function poolAtOrAboveDiameter(materialPool, floorMm) {
   return materialPool.filter(
@@ -59,12 +59,12 @@ function poolAtOrAboveDiameter(materialPool, floorMm) {
  * Подбор одного trunk-участка с нижней границей Ø от downstream-сегмента.
  *
  * @param {object} args
- * @param {import('./types').HydraulicsGraphEdge} args.edge
- * @param {import('../catalog/types').PipeCatalogItemNormalized[]} args.materialPool
- * @param {import('./types').HydraulicsRules} args.rules
+ * @param {import('./types.js').HydraulicsGraphEdge} args.edge
+ * @param {import('../catalog/types.js').PipeCatalogItemNormalized[]} args.materialPool
+ * @param {import('./types.js').HydraulicsRules} args.rules
  * @param {number} args.minInternalMmFromDownstream — Ø downstream; 0 на последнем участке цепочки
  * @param {number} args.localZeta
- * @returns {import('./types').HydraulicsPipeMatchItem | null}
+ * @returns {import('./types.js').HydraulicsPipeMatchItem | null}
  */
 export function pickTrunkEdgeWithTaper({
   edge,
@@ -117,6 +117,8 @@ export function pickTrunkEdgeWithTaper({
     }
   }
 
+  if (!chosen) return null;
+
   const internalMm = pipeInternalDiameterMm(chosen);
   const roughness = resolveRoughnessMm(
     chosen.material,
@@ -148,13 +150,16 @@ export function pickTrunkEdgeWithTaper({
  * Каскадный подбор цепочки trunk: от downstream к upstream, монотонное заужение.
  *
  * @param {object} args
- * @param {import('./types').HydraulicsGraphEdge[]} args.chain — upstream→downstream
- * @param {import('../catalog/types').NormalizedCatalog['pipes']} args.pipes
- * @param {import('./types').HydraulicsRules} args.rules
- * @param {import('./types').HydraulicsSurveyInput['pipeMaterialPreference']} [args.materialPreference]
- * @param {(edge: import('./types').HydraulicsGraphEdge) => number} args.resolveLocalZeta
- * @param {(pipe: import('../catalog/types').PipeCatalogItemNormalized[]) => import('../catalog/types').PipeCatalogItemNormalized[]} args.filterMaterialPool
- * @returns {Map<string, import('./types').HydraulicsPipeMatchItem | null>}
+ * @param {import('./types.js').HydraulicsGraphEdge[]} args.chain — upstream→downstream
+ * @param {import('../catalog/types.js').NormalizedCatalog['pipes']} args.pipes
+ * @param {import('./types.js').HydraulicsRules} args.rules
+ * @param {import('./types.js').HydraulicsSurveyInput['pipeMaterialPreference']} [args.materialPreference]
+ * @param {(edge: import('./types.js').HydraulicsGraphEdge) => number} args.resolveLocalZeta
+ * @param {(
+ *   pipes: import('../catalog/types.js').PipeCatalogItemNormalized[],
+ *   materialPreference?: import('./types.js').HydraulicsSurveyInput['pipeMaterialPreference']
+ * ) => import('../catalog/types.js').PipeCatalogItemNormalized[]} args.filterMaterialPool
+ * @returns {Map<string, import('./types.js').HydraulicsPipeMatchItem | null>}
  */
 export function pickTrunkChainWithTaper({
   chain,
@@ -164,15 +169,16 @@ export function pickTrunkChainWithTaper({
   resolveLocalZeta,
   filterMaterialPool,
 }) {
-  /** @type {Map<string, import('./types').HydraulicsPipeMatchItem | null>} */
+  /** @type {Map<string, import('./types.js').HydraulicsPipeMatchItem | null>} */
   const matches = new Map();
   if (!chain.length || !pipes?.length) return matches;
 
-  const materialPool = filterMaterialPool(pipes ?? [], materialPreference);
+  const materialPool = filterMaterialPool(pipes, materialPreference);
   let downstreamFloorMm = 0;
 
   for (let i = chain.length - 1; i >= 0; i -= 1) {
     const edge = chain[i];
+    if (!edge) continue;
     const match = pickTrunkEdgeWithTaper({
       edge,
       materialPool,
@@ -190,7 +196,7 @@ export function pickTrunkChainWithTaper({
 }
 
 /**
- * @param {import('./types').RadiatorWiringSystemType | undefined} wiringType
+ * @param {import('./types.js').RadiatorWiringSystemType | undefined} wiringType
  * @returns {boolean}
  */
 export function usesTrunkTaperPick(wiringType) {

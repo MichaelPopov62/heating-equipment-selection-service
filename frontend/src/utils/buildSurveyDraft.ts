@@ -46,7 +46,7 @@ export function buildSurveyDraft(params: {
     schemaVersion: SURVEY_DRAFT_SCHEMA_VERSION,
     savedAt: new Date().toISOString(),
     clientName: name,
-    projectId: params.projectId ?? undefined,
+    ...(typeof params.projectId === 'string' ? { projectId: params.projectId } : {}),
     currentStep: params.currentStep,
     objectMeta: structuredClone(params.objectMeta),
     rooms: structuredClone(params.rooms),

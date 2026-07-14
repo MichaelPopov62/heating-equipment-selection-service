@@ -43,7 +43,7 @@ function isFacadeExteriorWallConstruction(construction) {
 /**
  * Подсчёт фасадных и корidorных стен комнаты во входе API.
  *
- * @param {import('../types/shared-types').EnvelopeElementInput[]} elements
+ * @param {import('../types/shared-types.js').EnvelopeElementInput[]} elements
  * @param {string} roomId
  * @returns {{ facadeWallCount: number, internalWallCount: number }}
  */
@@ -78,8 +78,8 @@ export function inferRoomExteriorLayoutFromWallCounts(counts) {
 }
 
 /**
- * @param {import('../types/shared-types').RoomInput} room
- * @param {import('../types/shared-types').EnvelopeElementInput[]} elements
+ * @param {import('../types/shared-types.js').RoomInput} room
+ * @param {import('../types/shared-types.js').EnvelopeElementInput[]} elements
  * @returns {'corner' | 'facade' | 'internal'}
  */
 export function resolveRoomExteriorLayout(room, elements) {
@@ -158,7 +158,7 @@ export function resolveElementHeatLossFactors({
 /**
  * Валидация согласованности layout и числа стен.
  *
- * @param {import('../types/shared-types').BuildingInput} building
+ * @param {import('../types/shared-types.js').BuildingInput} building
  */
 export function assertRoomExteriorLayoutWalls(building) {
   const rooms = building?.rooms ?? [];
@@ -196,9 +196,11 @@ export function assertRoomExteriorLayoutWalls(building) {
 
     if (message) {
       const err = new Error(message);
-      err.statusCode = 400;
-      err.code = 'ROOM_EXTERIOR_LAYOUT_WALLS';
-      throw err;
+      /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
+      const appErr = err;
+      appErr.statusCode = 400;
+      appErr.code = 'ROOM_EXTERIOR_LAYOUT_WALLS';
+      throw appErr;
     }
   }
 }
@@ -206,7 +208,7 @@ export function assertRoomExteriorLayoutWalls(building) {
 /**
  * Нормализация roomExteriorLayout на комнатах (если не задан — infer).
  *
- * @param {import('../types/shared-types').BuildingInput | undefined} building
+ * @param {import('../types/shared-types.js').BuildingInput | undefined} building
  */
 export function normalizeRoomExteriorLayouts(building) {
   if (!building?.rooms) return;

@@ -10,6 +10,7 @@ import {
   buildUfhHeatFluxUpWattsByRoomId,
   resolveMixedRadiatorRoomLoad,
 } from '../src/matching/internal/resolveMixedRadiatorRoomLoad.js';
+import { buildObjectMeta, buildRoom } from './fixtures/verifyFixtures.js';
 
 await warmupReferenceCache();
 const ctx = toCalcRuntimeContext(await getReferenceBundle());
@@ -17,9 +18,8 @@ const ctx = toCalcRuntimeContext(await getReferenceBundle());
 const body = {
   building: {
     temps: { insideC: 20, outsideC: -5 },
-    objectMeta: {
+    objectMeta: buildObjectMeta({
       objectType: 'apartment',
-      floors: 1,
       roomsCount: 2,
       ventilationReserveMode: 'natural',
       externalWalls: {
@@ -29,26 +29,19 @@ const body = {
         insulationPresetId: 'insul_sftk_pps16f',
         insulationThicknessMm: 100,
       },
-    },
+    }),
     rooms: [
-      {
+      buildRoom({
         id: 'r1',
         name: 'Комната 1',
-        type: 'гостиная',
-        floor: 1,
-        topBoundary: 'heated',
         areaM2: 20,
-        heightM: 2.7,
         roomExteriorLayout: 'facade',
-      },
-      {
+      }),
+      buildRoom({
         id: 'r2',
         name: 'Комната 2',
-        type: 'kitchen',
-        floor: 1,
-        topBoundary: 'heated',
+        type: 'кухня',
         areaM2: 12,
-        heightM: 2.7,
         roomExteriorLayout: 'facade',
         underfloorHeating: {
           enabled: true,
@@ -56,7 +49,7 @@ const body = {
           finishMaterialId: 'ceramic_tile',
           pipeSpacingMm: 150,
         },
-      },
+      }),
     ],
     envelopeElements: [
       {
@@ -119,7 +112,8 @@ const body = {
 const input = validateAndNormalizeInput(body, ctx);
 const report = await buildReport({ input, ctx });
 
-const r2hl = report.calculations.heatLoss.rooms.find((r) => r.id === 'r2');
+const heatLossRooms = report.calculations.heatLoss.rooms ?? [];
+const r2hl = heatLossRooms.find((r) => r.id === 'r2');
 const r2ufh = report.calculations.underfloorHeating?.rooms?.find((r) => r.roomId === 'r2');
 const r2rad = report.matching.radiators?.byRoom?.find((r) => r.roomId === 'r2');
 

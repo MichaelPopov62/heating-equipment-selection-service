@@ -11,12 +11,15 @@ const LABELS: Record<ManifoldApplication, string> = {
 };
 
 /**
- * @param {ManifoldApplication | string | null | undefined} application
- * @returns {string}
+ * @param application — назначение коллектора из каталога
+ * @returns подпись для UI
  */
-export function manifoldApplicationLabel(application: ManifoldApplication | string | null | undefined): string {
+export function manifoldApplicationLabel(application: string | null | undefined): string {
   if (application === 'radiator' || application === 'underfloor') {
     return LABELS[application];
   }
-  return application != null && String(application).trim() ? String(application) : '—';
+  if (typeof application === 'string' && application.trim()) {
+    return application;
+  }
+  return '—';
 }

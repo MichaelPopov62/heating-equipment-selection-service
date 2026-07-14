@@ -77,7 +77,9 @@ export function reduceSurveyMutation(
       const swapIdx = mutation.direction === 'up' ? idx - 1 : idx + 1;
       if (swapIdx < 0 || swapIdx >= branches.length) return draft;
       const tmp = branches[idx];
-      branches[idx] = branches[swapIdx];
+      const swapBranch = branches[swapIdx];
+      if (tmp === undefined || swapBranch === undefined) return draft;
+      branches[idx] = swapBranch;
       branches[swapIdx] = tmp;
       return {
         ...draft,

@@ -88,7 +88,7 @@ export function parseHydraulicsFromReport(calcReport: unknown): ParsedHydraulics
     : [];
 
   const proposal = parseHydraulicsProposalFromReport(
-    matchingHydraulics as Record<string, unknown> | null | undefined,
+    matchingHydraulics,
   );
 
   let flowContext: ParsedHydraulicsFlowContext | null = null;

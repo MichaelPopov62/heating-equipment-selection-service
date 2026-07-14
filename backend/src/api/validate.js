@@ -5,7 +5,7 @@
  * Экспортирует validateAndNormalizeInput().
  */
 
-import Ajv from 'ajv';
+import AjvImport from 'ajv';
 import {
   CANONICAL_ROOM_TYPES,
   ROOM_TYPE_SYNONYMS,
@@ -59,6 +59,11 @@ import {
 import { getFlooringFinishMaterialById } from '../data/flooringFinishMaterials.js';
 import { loadCalcInputSchemaForAjv } from './calcInputSchemaLoader.js';
 
+/** @type {typeof import('ajv').default} */
+const Ajv = /** @type {typeof import('ajv').default} */ (
+  /** @type {unknown} */ (AjvImport)
+);
+
 const UNDERFLOOR_HEATING_BASE_PRESET_IDS = new Set(
   UNDERFLOOR_HEATING_BASE_PRESETS.map((p) => p.id),
 );
@@ -73,6 +78,26 @@ const ajv = new Ajv({
   coerceTypes: false,
   removeAdditional: true,
 });
+
+/**
+ * Бросает Error с полями AppErrorLike (statusCode/code/details) для HTTP error handler.
+ *
+ * @param {string} message
+ * @param {string} code
+ * @param {import('../types/shared-types.js').ErrorDetailsAjvItem[]} [details]
+ * @returns {never}
+ */
+function throwAppError(message, code, details) {
+  const err = new Error(message);
+  /** @type {import('../types/shared-types.js').AppErrorLike} */
+  const appErr = err;
+  appErr.statusCode = 400;
+  appErr.code = code;
+  if (details !== undefined) {
+    appErr.details = details;
+  }
+  throw err;
+}
 
 const CANONICAL_ROOM_TYPE_SET = new Set(CANONICAL_ROOM_TYPES);
 
@@ -145,11 +170,12 @@ function normalizeRoomTypesBeforeValidate(building) {
   const compatWarnings = [];
 
   if (!building || typeof building !== 'object') return compatWarnings;
-  const rooms = building.rooms;
+  const buildingRec = /** @type {Record<string, unknown>} */ (building);
+  const rooms = buildingRec.rooms;
   if (!Array.isArray(rooms)) return compatWarnings;
 
   for (const r of rooms) {
-    if (!r || typeof r !== 'object' || r.type == null) continue;
+    if (!isPlainObject(r) || r.type == null) continue;
     const raw = sanitizeRoomTypeString(r.type);
     const lower = raw.toLowerCase();
     const roomId = typeof r.id === 'string' && r.id.trim() ? r.id.trim() : '?';
@@ -160,22 +186,21 @@ function normalizeRoomTypesBeforeValidate(building) {
     let compatSource = null;
 
     if (Object.prototype.hasOwnProperty.call(ROOM_TYPE_SYNONYMS, raw)) {
-      next = ROOM_TYPE_SYNONYMS[raw];
+      const mapped = ROOM_TYPE_SYNONYMS[/** @type {keyof typeof ROOM_TYPE_SYNONYMS} */ (raw)];
+      next = mapped ?? null;
       compatSource = raw;
     } else if (ROOM_TYPE_SYNONYM_BY_LOWER[lower] != null) {
-      next = ROOM_TYPE_SYNONYM_BY_LOWER[lower];
+      next = ROOM_TYPE_SYNONYM_BY_LOWER[lower] ?? null;
       compatSource = raw;
     } else {
       next = matchCanonicalRoomType(raw);
     }
 
     if (next == null) {
-      const err = new Error(
+      throwAppError(
         `Неизвестный тип комнаты «${raw}» (room id=${roomId}). Допустимые значения — enum room.type в CalcInput.`,
+        'ROOM_TYPE_INVALID',
       );
-      err.statusCode = 400;
-      err.code = 'ROOM_TYPE_INVALID';
-      throw err;
     }
 
     if (compatSource != null) {
@@ -194,26 +219,23 @@ function normalizeRoomTypesBeforeValidate(building) {
  * @param {unknown} body — распакованное тело запроса
  */
 function rejectLegacyHotWaterFields(body) {
-  const hw = body?.hotWater;
-  if (!hw || typeof hw !== 'object') return;
+  if (!isPlainObject(body)) return;
+  const hw = body.hotWater;
+  if (!isPlainObject(hw)) return;
 
   if (Object.prototype.hasOwnProperty.call(hw, 'coldWaterC')) {
-    const err = new Error(
+    throwAppError(
       'Поле hotWater.coldWaterC удалено. Задайте hotWater.coldWaterDesignSeason: «winter» (+5 °C) или «summer» (+15 °C).',
+      'HOT_WATER_LEGACY_FIELD',
     );
-    err.statusCode = 400;
-    err.code = 'HOT_WATER_LEGACY_FIELD';
-    throw err;
   }
 
   const fx = hw.fixtures;
   if (isPlainObject(fx) && Object.prototype.hasOwnProperty.call(fx, 'kitchen')) {
-    const err = new Error(
+    throwAppError(
       'Поле hotWater.fixtures.kitchen удалено. Используйте только kitchenSink.',
+      'HOT_WATER_LEGACY_FIELD',
     );
-    err.statusCode = 400;
-    err.code = 'HOT_WATER_LEGACY_FIELD';
-    throw err;
   }
 }
 
@@ -231,20 +253,21 @@ logger.info('validate.schema', null, {
 
 /**
  * @param {unknown} input
- * @param {import('../types/shared-types').CalcRuntimeContext} ctx
- * @returns {import('../types/shared-types').CalcRequestBody}
+ * @param {import('../types/shared-types.js').CalcRuntimeContext} ctx
+ * @returns {import('../types/shared-types.js').CalcRequestBody}
  */
 export function validateAndNormalizeInput(input, ctx) {
   assertCalcRuntimeContext(ctx);
-  const clone = structuredClone(input ?? {});
-  rejectLegacyHotWaterFields(clone);
-  const roomTypeCompatWarnings = normalizeRoomTypesBeforeValidate(clone.building);
-  normalizeRoomBoundariesBeforeValidate(clone.building);
+  const rawClone = structuredClone(input ?? {});
+  rejectLegacyHotWaterFields(rawClone);
+  const draft = isPlainObject(rawClone) ? rawClone : {};
+  const roomTypeCompatWarnings = normalizeRoomTypesBeforeValidate(draft.building);
+  normalizeRoomBoundariesBeforeValidate(draft.building);
   // ТП комнаты: конструкция base+finish из data/ (статический слой, до AJV).
-  normalizeUnderfloorHeatingBeforeValidate(clone);
-  const ok = validateInput(clone);
+  normalizeUnderfloorHeatingBeforeValidate(rawClone);
+  const ok = validateInput(rawClone);
   if (!ok) {
-    /** @type {import('../types/shared-types').ErrorDetailsAjvItem[]} */
+    /** @type {import('../types/shared-types.js').ErrorDetailsAjvItem[]} */
     const details = validateInput.errors ?? [];
     const short = details.slice(0, 5).map((e) => ({
       instancePath: e.instancePath,
@@ -255,12 +278,11 @@ export function validateAndNormalizeInput(input, ctx) {
       code: 'VALIDATION_ERROR',
       errors: short,
     });
-    const err = new Error('Некорректные входные данные');
-    err.statusCode = 400;
-    err.code = 'VALIDATION_ERROR';
-    err.details = details;
-    throw err;
+    throwAppError('Некорректные входные данные', 'VALIDATION_ERROR', details);
   }
+
+  /** @type {import('../types/shared-types.js').CalcRequestBody} */
+  const clone = /** @type {import('../types/shared-types.js').CalcRequestBody} */ (rawClone);
 
   for (const message of roomTypeCompatWarnings) {
     pushNormalizationWarning(clone, message);
@@ -294,7 +316,11 @@ export function validateAndNormalizeInput(input, ctx) {
   for (const r of clone.building?.rooms ?? []) {
     if (r.id != null) r.id = sanitizeTrimAngleBrackets(r.id);
     if (r.name != null) r.name = sanitizeTrimAngleBrackets(r.name);
-    if (r.type != null) r.type = sanitizeTrimAngleBrackets(r.type);
+    if (r.type != null) {
+      r.type = /** @type {import('../types/shared-types.js').RoomType} */ (
+        sanitizeTrimAngleBrackets(r.type)
+      );
+    }
   }
 
   for (const e of clone.building?.envelopeElements ?? []) {
@@ -312,12 +338,10 @@ export function validateAndNormalizeInput(input, ctx) {
     clone.heatingSystem?.returnC != null
   ) {
     if (!(clone.heatingSystem.returnC < clone.heatingSystem.supplyC)) {
-      const err = new Error(
+      throwAppError(
         'Некорректный heatingSystem: returnC должен быть меньше supplyC.',
+        'HEATING_SYSTEM_INVALID',
       );
-      err.statusCode = 400;
-      err.code = 'HEATING_SYSTEM_INVALID';
-      throw err;
     }
   }
 
@@ -326,12 +350,10 @@ export function validateAndNormalizeInput(input, ctx) {
       clone.hotWater.coldWaterDesignSeason === 'summer' ? 'summer' : 'winter';
     const effectiveColdC = season === 'summer' ? 15 : 5;
     if (!(effectiveColdC < clone.hotWater.hotWaterC)) {
-      const err = new Error(
+      throwAppError(
         'Некорректный hotWater: расчётная ХВ по сезону должна быть ниже hotWaterC.',
+        'HOT_WATER_TEMPS_INVALID',
       );
-      err.statusCode = 400;
-      err.code = 'HOT_WATER_TEMPS_INVALID';
-      throw err;
     }
   }
 
@@ -363,7 +385,7 @@ export function validateAndNormalizeInput(input, ctx) {
  */
 function normalizeUnderfloorHeatingBeforeValidate(input) {
   if (!input || typeof input !== 'object') return;
-  const body = /** @type {import('../types/shared-types').CalcRequestBody} */ (input);
+  const body = /** @type {import('../types/shared-types.js').CalcRequestBody} */ (input);
   const rooms = body.building?.rooms;
   if (!Array.isArray(rooms)) return;
 
@@ -390,43 +412,36 @@ function normalizeUnderfloorHeatingBeforeValidate(input) {
 
     const { basePresetId, finishMaterialId } = composed;
     if (!getUnderfloorHeatingBasePresetById(basePresetId)) {
-      const err = new Error(
+      throwAppError(
         `Неизвестная база ТП "${basePresetId}" (roomId="${room.id}").`,
+        'UNDERFLOOR_HEATING_BASE_INVALID',
       );
-      err.statusCode = 400;
-      err.code = 'UNDERFLOOR_HEATING_BASE_INVALID';
-      throw err;
     }
     if (!getFlooringFinishMaterialById(finishMaterialId)) {
-      const err = new Error(
+      throwAppError(
         `Неизвестное финишное покрытие "${finishMaterialId}" (roomId="${room.id}").`,
+        'UNDERFLOOR_HEATING_FINISH_INVALID',
       );
-      err.statusCode = 400;
-      err.code = 'UNDERFLOOR_HEATING_FINISH_INVALID';
-      throw err;
     }
 
     const rawSpacing = ufh.pipeSpacingMm;
+    /** @type {100 | 150 | 200} */
     let pipeSpacingMm = 150;
     if (rawSpacing !== undefined && rawSpacing !== null) {
       const spacingNum = Number(rawSpacing);
       if (!Number.isFinite(spacingNum) || !Number.isInteger(spacingNum)) {
-        const err = new Error(
+        throwAppError(
           `pipeSpacingMm: ожидается целое 100, 150 или 200 (roomId="${room.id}").`,
+          'UNDERFLOOR_HEATING_PIPE_SPACING_INVALID',
         );
-        err.statusCode = 400;
-        err.code = 'UNDERFLOOR_HEATING_PIPE_SPACING_INVALID';
-        throw err;
       }
       if (spacingNum !== 100 && spacingNum !== 150 && spacingNum !== 200) {
-        const err = new Error(
+        throwAppError(
           `pipeSpacingMm=${spacingNum}: допустимы только 100, 150 или 200 мм (roomId="${room.id}").`,
+          'UNDERFLOOR_HEATING_PIPE_SPACING_INVALID',
         );
-        err.statusCode = 400;
-        err.code = 'UNDERFLOOR_HEATING_PIPE_SPACING_INVALID';
-        throw err;
       }
-      pipeSpacingMm = spacingNum;
+      pipeSpacingMm = /** @type {100 | 150 | 200} */ (spacingNum);
     }
 
     let furnitureOccupiedAreaM2 = 0;
@@ -436,12 +451,10 @@ function normalizeUnderfloorHeatingBeforeValidate(input) {
     ) {
       const furnitureNum = Number(ufh.furnitureOccupiedAreaM2);
       if (!Number.isFinite(furnitureNum) || furnitureNum < 0) {
-        const err = new Error(
+        throwAppError(
           `furnitureOccupiedAreaM2: ожидается число ≥ 0 (roomId="${room.id}").`,
+          'UNDERFLOOR_HEATING_FURNITURE_AREA_INVALID',
         );
-        err.statusCode = 400;
-        err.code = 'UNDERFLOOR_HEATING_FURNITURE_AREA_INVALID';
-        throw err;
       }
       furnitureOccupiedAreaM2 = furnitureNum;
     }
@@ -451,12 +464,10 @@ function normalizeUnderfloorHeatingBeforeValidate(input) {
       Number.isFinite(roomAreaM2)
       && furnitureOccupiedAreaM2 >= roomAreaM2
     ) {
-      const err = new Error(
+      throwAppError(
         `furnitureOccupiedAreaM2=${furnitureOccupiedAreaM2} м²: должно быть строго меньше площади комнаты ${roomAreaM2} м² (roomId="${room.id}").`,
+        'UNDERFLOOR_HEATING_FURNITURE_AREA_INVALID',
       );
-      err.statusCode = 400;
-      err.code = 'UNDERFLOOR_HEATING_FURNITURE_AREA_INVALID';
-      throw err;
     }
 
     const rawTerminal = ufh.ufhTerminalControl;
@@ -465,12 +476,10 @@ function normalizeUnderfloorHeatingBeforeValidate(input) {
       && rawTerminal !== null
       && !isUfhTerminalControl(rawTerminal)
     ) {
-      const err = new Error(
+      throwAppError(
         `ufhTerminalControl: ожидается "collector" или "unibox" (roomId="${room.id}").`,
+        'UNDERFLOOR_HEATING_TERMINAL_INVALID',
       );
-      err.statusCode = 400;
-      err.code = 'UNDERFLOOR_HEATING_TERMINAL_INVALID';
-      throw err;
     }
     const ufhTerminalControl = resolveUfhTerminalControl(
       rawTerminal,
@@ -495,7 +504,7 @@ function normalizeUnderfloorHeatingBeforeValidate(input) {
  */
 function assertEnvelopeFloorPresetsNotUnderfloorHeating(building) {
   if (!building || typeof building !== 'object') return;
-  const elements = /** @type {import('../types/shared-types').BuildingInput} */ (building)
+  const elements = /** @type {import('../types/shared-types.js').BuildingInput} */ (building)
     .envelopeElements;
   if (!Array.isArray(elements)) return;
 
@@ -503,12 +512,10 @@ function assertEnvelopeFloorPresetsNotUnderfloorHeating(building) {
     if (el.kind !== 'floor') continue;
     const pid = typeof el.presetId === 'string' ? el.presetId.trim() : '';
     if (pid && ENVELOPE_FORBIDDEN_UFH_FLOOR_IDS.has(pid)) {
-      const err = new Error(
+      throwAppError(
         `presetId "${pid}" — пресет сборки ТП; для теплопотерь используйте envelopePresets (kind=floor), для ТП — room.underfloorHeating.`,
+        'ENVELOPE_FLOOR_PRESET_MIXED_WITH_UFH',
       );
-      err.statusCode = 400;
-      err.code = 'ENVELOPE_FLOOR_PRESET_MIXED_WITH_UFH';
-      throw err;
     }
   }
 }
@@ -520,7 +527,7 @@ function assertEnvelopeFloorPresetsNotUnderfloorHeating(building) {
  */
 function normalizeRoomBoundariesBeforeValidate(building) {
   if (!building || typeof building !== 'object') return;
-  const b = /** @type {import('../types/shared-types').BuildingInput} */ (building);
+  const b = /** @type {import('../types/shared-types.js').BuildingInput} */ (building);
   const rooms = b.rooms;
   if (!Array.isArray(rooms)) return;
 
@@ -563,10 +570,11 @@ function normalizeRoomBoundariesBeforeValidate(building) {
  * @param {unknown} clone
  */
 function collectApartmentEnvelopeWarnings(clone) {
-  if (!clone || typeof clone !== 'object') return;
-  const building = /** @type {import('../types/shared-types').BuildingInput | undefined} */ (
-    /** @type {{ building?: import('../types/shared-types').BuildingInput }} */ (clone).building
+  if (!isPlainObject(clone)) return;
+  const body = /** @type {import('../types/shared-types.js').CalcRequestBody} */ (
+    /** @type {unknown} */ (clone)
   );
+  const building = body.building;
   if (building?.objectMeta?.objectType !== 'apartment') return;
 
   /** @type {string[]} */
@@ -584,10 +592,10 @@ function collectApartmentEnvelopeWarnings(clone) {
   }
 
   if (warns.length === 0) return;
-  if (!clone.heatingSystem || typeof clone.heatingSystem !== 'object') {
-    clone.heatingSystem = {};
+  if (!body.heatingSystem || typeof body.heatingSystem !== 'object') {
+    body.heatingSystem = {};
   }
-  const hs = /** @type {Record<string, unknown>} */ (clone.heatingSystem);
+  const hs = /** @type {Record<string, unknown>} */ (body.heatingSystem);
   const prev = Array.isArray(hs._normalizationWarnings) ? hs._normalizationWarnings : [];
   hs._normalizationWarnings = [...prev, ...warns];
 }
@@ -599,7 +607,7 @@ function collectApartmentEnvelopeWarnings(clone) {
  */
 function normalizeObjectMetaVentilationReserve(clone) {
   if (!clone || typeof clone !== 'object') return;
-  const building = /** @type {{ building?: import('../types/shared-types').BuildingInput }} */ (
+  const building = /** @type {{ building?: import('../types/shared-types.js').BuildingInput }} */ (
     clone
   ).building;
   if (!building?.objectMeta || typeof building.objectMeta !== 'object') return;
@@ -615,7 +623,7 @@ function normalizeObjectMetaVentilationReserve(clone) {
  */
 function assertVentilationLegacyFieldsDisabled(clone) {
   if (!clone || typeof clone !== 'object') return;
-  const building = /** @type {{ building?: import('../types/shared-types').BuildingInput }} */ (
+  const building = /** @type {{ building?: import('../types/shared-types.js').BuildingInput }} */ (
     clone
   ).building;
   const v = building?.ventilation;
@@ -627,33 +635,33 @@ function assertVentilationLegacyFieldsDisabled(clone) {
   const hasN = Number.isFinite(n) && n > 0;
   if (!hasFlow && !hasN) return;
 
-  const err = new Error(
+  throwAppError(
     'Поля building.ventilation.flowM3PerHour и airChangesPerHour в MVP не используются. ' +
       'Задайте building.objectMeta.ventilationReserveMode: natural (kVent 1.3) или recuperation (kVent 1.1).',
+    'VENTILATION_LEGACY_FIELD',
   );
-  err.statusCode = 400;
-  err.code = 'VENTILATION_LEGACY_FIELD';
-  throw err;
 }
 
 /**
  * Cross-validation: зона установки котла и объём котельной (дом).
  *
  * @param {unknown} clone
- * @param {import('../dhw/types').AppliancesBundle} appliances
+ * @param {import('../dhw/types.js').AppliancesBundle} appliances
  */
 function assertBoilerPlacementAndBoilerRoom(clone, appliances) {
   if (!clone || typeof clone !== 'object') return;
-  const building = /** @type {import('../types/shared-types').BuildingInput | undefined} */ (
-    /** @type {{ building?: import('../types/shared-types').BuildingInput }} */ (clone).building
+  const building = /** @type {import('../types/shared-types.js').BuildingInput | undefined} */ (
+    /** @type {{ building?: import('../types/shared-types.js').BuildingInput }} */ (clone).building
   );
   if (!building?.objectMeta || typeof building.objectMeta !== 'object') return;
 
   const om = /** @type {Record<string, unknown>} */ (
-    /** @type {import('../types/shared-types').BuildingObjectMeta} */ (building.objectMeta)
+    /** @type {unknown} */ (building.objectMeta)
   );
   const objectType = resolveObjectType(
-    /** @type {import('../types/shared-types').BuildingObjectMeta} */ (om),
+    /** @type {import('../types/shared-types.js').BuildingObjectMeta} */ (
+      /** @type {unknown} */ (om)
+    ),
   );
 
   if (objectType === 'apartment') {
@@ -678,12 +686,10 @@ function assertBoilerPlacementAndBoilerRoom(clone, appliances) {
     typeof zone !== 'string' ||
     !['kitchen', 'living_zone', 'boiler_room'].includes(zone)
   ) {
-    const err = new Error(
+    throwAppError(
       'Для дома укажите building.objectMeta.boilerPlacementZone: kitchen, living_zone или boiler_room.',
+      'BOILER_PLACEMENT_REQUIRED',
     );
-    err.statusCode = 400;
-    err.code = 'BOILER_PLACEMENT_REQUIRED';
-    throw err;
   }
 
   if (zone !== 'boiler_room') {
@@ -693,29 +699,27 @@ function assertBoilerPlacementAndBoilerRoom(clone, appliances) {
   const hasMetaArea = om.boilerRoomAreaM2 != null;
   const hasMetaHeight = om.ceilingHeightM != null;
   if (hasMetaArea !== hasMetaHeight) {
-    const err = new Error(
+    throwAppError(
       'Укажите оба поля boilerRoomAreaM2 и ceilingHeightM либо добавьте комнату type=котельная в building.rooms.',
+      'BOILER_ROOM_METRICS_INCOMPLETE',
     );
-    err.statusCode = 400;
-    err.code = 'BOILER_ROOM_METRICS_INCOMPLETE';
-    throw err;
   }
 
   const mounting = appliances.byKind.boiler.mounting;
 
   const metrics = resolveBoilerRoomMetrics(
     building,
-    /** @type {import('../types/shared-types').BuildingObjectMeta} */ (om),
+    /** @type {import('../types/shared-types.js').BuildingObjectMeta} */ (
+      /** @type {unknown} */ (om)
+    ),
     mounting,
   );
 
   if (!isBoilerRoomVolumeCompliant(metrics, mounting)) {
-    const err = new Error(
+    throwAppError(
       `Для напольного котла в выделенной котельной нужен объём не менее ${mounting.minBoilerRoomVolumeM3} м³ и высота не менее ${mounting.minBoilerRoomHeightM} м (комната type=${getBoilerRoomType(mounting)} в rooms или boilerRoomAreaM2×ceilingHeightM).`,
+      'BOILER_ROOM_VOLUME_INVALID',
     );
-    err.statusCode = 400;
-    err.code = 'BOILER_ROOM_VOLUME_INVALID';
-    throw err;
   }
 }
 
@@ -723,17 +727,17 @@ function assertBoilerPlacementAndBoilerRoom(clone, appliances) {
  * Нормализация связки котёл/ГВС и тип объекта после AJV (без 400 там, где достаточно авто-поправки).
  *
  * @param {unknown} clone — нормализованное тело запроса calc
- * @param {import('../dhw/types').AppliancesBundle} appliances
+ * @param {import('../dhw/types.js').AppliancesBundle} appliances
  */
 function assertBoilerDhwSchemeCompatibility(clone, appliances) {
-  if (!clone || typeof clone !== 'object') return;
-  const ot = /** @type {{ building?: { objectMeta?: { objectType?: string } } }} */ (
-    clone
-  ).building?.objectMeta?.objectType;
+  if (!isPlainObject(clone)) return;
+  const body = /** @type {import('../types/shared-types.js').CalcRequestBody} */ (
+    /** @type {unknown} */ (clone)
+  );
+  const ot = body.building?.objectMeta?.objectType;
   const objectType = ot === 'apartment' ? 'apartment' : 'house';
 
-  const hsEarly =
-    /** @type {{ heatingSystem?: Record<string, unknown> }} */ (clone).heatingSystem;
+  const hsEarly = body.heatingSystem;
   const scheme =
     isPlainObject(hsEarly) &&
     typeof hsEarly.hotWaterBoilerPowerMatchingScheme === 'string'
@@ -742,16 +746,12 @@ function assertBoilerDhwSchemeCompatibility(clone, appliances) {
 
   // Квартира + одноконтурный с БКН: для малых — max-combi; для больших с местом под БКН — разрешено.
   if (scheme === SCHEME_BOILER_SINGLE_INDIRECT_SUM && objectType === 'apartment') {
-    if (!clone.heatingSystem || typeof clone.heatingSystem !== 'object') {
-      clone.heatingSystem = {};
+    if (!body.heatingSystem || typeof body.heatingSystem !== 'object') {
+      body.heatingSystem = {};
     }
 
-    const building = /** @type {{ building?: import('../types/shared-types').BuildingInput }} */ (
-      clone
-    ).building;
-    const fixtures = /** @type {{ hotWater?: { fixtures?: import('../types/shared-types').HotWaterFixturesInput } }} */ (
-      clone
-    ).hotWater?.fixtures;
+    const building = body.building;
+    const fixtures = body.hotWater?.fixtures;
     const isLarge = isLargeApartmentByInput(
       building,
       fixtures,
@@ -760,26 +760,25 @@ function assertBoilerDhwSchemeCompatibility(clone, appliances) {
     const hasSpace =
       building?.objectMeta?.indirectDhwSpaceAvailable === true;
 
+    const hs = /** @type {Record<string, unknown>} */ (body.heatingSystem);
+
     if (!isLarge) {
-      clone.heatingSystem.hotWaterBoilerPowerMatchingScheme =
-        SCHEME_BOILER_MAX_COMBI;
-      clone.heatingSystem._normalizationWarnings = [
+      hs.hotWaterBoilerPowerMatchingScheme = SCHEME_BOILER_MAX_COMBI;
+      hs._normalizationWarnings = [
         'Связка «Одноконтурный котёл + БКН» изменена на двухконтурную: для малых квартир БКН избыточен по габаритам.',
       ];
       return;
     }
 
     if (!hasSpace) {
-      clone.heatingSystem.hotWaterBoilerPowerMatchingScheme =
-        SCHEME_BOILER_MAX_COMBI;
-      clone.heatingSystem._normalizationWarnings = [
+      hs.hotWaterBoilerPowerMatchingScheme = SCHEME_BOILER_MAX_COMBI;
+      hs._normalizationWarnings = [
         'Связка «1К + БКН» изменена на двухконтурную: укажите наличие места под бойлер (objectMeta.indirectDhwSpaceAvailable).',
       ];
       return;
     }
 
-    /** @type {Record<string, unknown>} */ (clone.heatingSystem)._apartmentIndirectDhwStorage =
-      true;
+    hs._apartmentIndirectDhwStorage = true;
     return;
   }
 }

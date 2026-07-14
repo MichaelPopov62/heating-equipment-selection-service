@@ -20,8 +20,8 @@ function ufhCollectorNodeId(floor) {
 }
 
 /**
- * @param {import('./types').HydraulicsUfhRoom} room
- * @returns {import('./types').HydraulicsUfhLoop[]}
+ * @param {import('./types.js').HydraulicsUfhRoom} room
+ * @returns {import('./types.js').HydraulicsUfhLoop[]}
  */
 function resolveRoomLoopsForGraph(room) {
   if (room.loops?.length) return room.loops;
@@ -37,17 +37,23 @@ function resolveRoomLoopsForGraph(room) {
 }
 
 /**
- * @param {import('./types').HydraulicsPipelineInput} dto
- * @returns {import('./types').HydraulicsGraph}
+ * @param {import('./types.js').HydraulicsPipelineInput} dto
+ * @returns {import('./types.js').HydraulicsGraph}
  */
 export function buildHydraulicsGraph(dto) {
   const flowCtx = resolveCirculationFlows(dto);
 
-  /** @type {import('./types').HydraulicsGraphNode[]} */
+  /** @type {import('./types.js').HydraulicsGraphNode[]} */
   const nodes = [];
-  /** @type {import('./types').HydraulicsGraphEdge[]} */
+  /** @type {import('./types.js').HydraulicsGraphEdge[]} */
   const edges = [];
 
+  /**
+   * @param {string} id
+   * @param {import('./types.js').HydraulicsNodeKind} kind
+   * @param {string} label
+   * @param {Partial<Omit<import('./types.js').HydraulicsGraphNode, 'id' | 'kind' | 'label'>>} [extra]
+   */
   const pushNode = (id, kind, label, extra = {}) => {
     nodes.push({ id, kind, label, ...extra });
   };
@@ -139,7 +145,7 @@ export function buildHydraulicsGraph(dto) {
       (dto.layout.ufhCollectorTransit ?? []).map((t) => [t.floor, t.transitLengthM]),
     );
 
-    /** @type {Map<number, import('./types').HydraulicsUfhRoom[]>} */
+    /** @type {Map<number, import('./types.js').HydraulicsUfhRoom[]>} */
     const roomsByFloor = new Map();
     for (const room of ufh.rooms) {
       const floor = room.floor ?? 1;
@@ -173,6 +179,7 @@ export function buildHydraulicsGraph(dto) {
           transitByFloor.get(floor)
           ?? dto.rules.defaultLengthsM.ufhCollectorBranch;
 
+        const firstRoom = collectorRooms[0];
         edges.push({
           id: `e_${ufhUpstreamId}_to_${collectorId}`,
           from: ufhUpstreamId,
@@ -180,8 +187,12 @@ export function buildHydraulicsGraph(dto) {
           lengthM: transitLengthM,
           fluid: 'heating',
           designFlowM3PerHour: floorFlow,
-          supplyC: collectorRooms[0]?.circuitSupplyC,
-          returnC: collectorRooms[0]?.circuitReturnC,
+          ...(firstRoom?.circuitSupplyC !== undefined
+            ? { supplyC: firstRoom.circuitSupplyC }
+            : {}),
+          ...(firstRoom?.circuitReturnC !== undefined
+            ? { returnC: firstRoom.circuitReturnC }
+            : {}),
           segmentRole: 'ufh_collector_transit',
         });
 

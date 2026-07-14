@@ -15,10 +15,10 @@ import {
 /**
  * Пересчёт блока ГВС после выбора конкретного БКН (объём и мощность для котла).
  *
- * @param {import('../types/shared-types').HotWaterReport | undefined} hotWater
- * @param {import('../catalog/types').IndirectWaterHeaterCatalogItemNormalized | null} indirectItem
- * @param {import('../dhw/types').NormalizedWaterNorms} waterNorms
- * @returns {import('../types/shared-types').HotWaterReport | undefined}
+ * @param {import('../types/shared-types.js').HotWaterReport | undefined} hotWater
+ * @param {import('../catalog/types.js').IndirectWaterHeaterCatalogItemNormalized | null} indirectItem
+ * @param {import('../dhw/types.js').NormalizedWaterNorms} waterNorms
+ * @returns {import('../types/shared-types.js').HotWaterReport | undefined}
  */
 export function applyIndirectTankToHotWaterReport(hotWater, indirectItem, waterNorms) {
   if (!hotWater || hotWater.dhwSupplyScenario !== 'storage') return hotWater;
@@ -50,9 +50,9 @@ export function applyIndirectTankToHotWaterReport(hotWater, indirectItem, waterN
 /**
  * Список БКН с учётом типа объекта: в квартире — только настенные (indirect_wall).
  *
- * @param {import('../catalog/types').IndirectWaterHeaterCatalogItemNormalized[]} list
+ * @param {import('../catalog/types.js').IndirectWaterHeaterCatalogItemNormalized[]} list
  * @param {'apartment' | 'house'} objectType
- * @returns {{ pool: import('../catalog/types').IndirectWaterHeaterCatalogItemNormalized[]; wallFallbackWarning: string | null }}
+ * @returns {{ pool: import('../catalog/types.js').IndirectWaterHeaterCatalogItemNormalized[]; wallFallbackWarning: string | null }}
  */
 function indirectPoolForObjectType(list, objectType) {
   if (objectType !== 'apartment') {
@@ -74,19 +74,19 @@ function indirectPoolForObjectType(list, objectType) {
 
 /**
  * @param {object} args
- * @param {import('../types/shared-types').HotWaterReport | undefined} args.hotWater
- * @param {import('../catalog/types').NormalizedCatalog} args.catalog
- * @param {boolean} args.useIndirectDhw — дом + накопитель + схема двухконтурного котла
+ * @param {import('../types/shared-types.js').HotWaterReport | undefined} args.hotWater
+ * @param {import('../catalog/types.js').NormalizedCatalog} args.catalog
+ * @param {boolean} args.useIndirectDhw - дом + накопитель + схема двухконтурного котла
  * @param {'apartment' | 'house'} [args.objectType]
- * @returns {import('../types/shared-types').IndirectWaterHeaterMatchingReport}
+ * @returns {import('../types/shared-types.js').IndirectWaterHeaterMatchingReport}
  */
 export function pickIndirectWaterHeater({
   hotWater,
   catalog,
   useIndirectDhw,
   objectType = 'house',
-} = {}) {
-  /** @type {import('../types/shared-types').IndirectWaterHeaterMatchingReport} */
+}) {
+  /** @type {import('../types/shared-types.js').IndirectWaterHeaterMatchingReport} */
   const empty = {
     selected: null,
     requiredTankLiters: Number(hotWater?.recommendedTankLiters) || 0,
@@ -128,21 +128,21 @@ export function pickIndirectWaterHeater({
     (a, b) => indirectTankVolumeLiters(a) - indirectTankVolumeLiters(b),
   );
 
-  /** @type {import('../catalog/types').IndirectWaterHeaterCatalogItemNormalized | null} */
+  /** @type {import('../catalog/types.js').IndirectWaterHeaterCatalogItemNormalized | null} */
   let selected =
     need > 0
       ? sorted.find((h) => indirectTankVolumeLiters(h) >= need) ?? null
       : sorted[0] ?? null;
 
   if (!selected && sorted.length) {
-    selected = sorted[sorted.length - 1];
+    selected = sorted[sorted.length - 1] ?? null;
   }
 
   const warnings = [];
   if (wallFallbackWarning) {
     warnings.push(wallFallbackWarning);
   }
-  /** @type {import('../recommendations/types').ResolvedRecommendation[]} */
+  /** @type {import('../recommendations/types.js').ResolvedRecommendation[]} */
   const resolvedRecommendations = [];
   if (selected && need > 0 && indirectTankVolumeLiters(selected) < need) {
     warnings.push(
@@ -173,10 +173,10 @@ export function pickIndirectWaterHeater({
 /**
  * Дополняет отчёт по БКН: время нагрева, согласование с котлом, подсказки по приоритету ГВС.
  *
- * @param {import('../types/shared-types').IndirectWaterHeaterMatchingReport | undefined} indirectReport
- * @param {import('../types/boiler-types').BoilerMatchingReport | undefined} boilerReport
- * @param {import('../types/shared-types').HotWaterReport | undefined} hotWater
- * @param {import('../types/shared-types').CalcRuntimeContext} ctx
+ * @param {import('../types/shared-types.js').IndirectWaterHeaterMatchingReport | undefined} indirectReport
+ * @param {import('../types/boiler-types.js').BoilerMatchingReport | undefined} boilerReport
+ * @param {import('../types/shared-types.js').HotWaterReport | undefined} hotWater
+ * @param {import('../types/shared-types.js').CalcRuntimeContext} ctx
  */
 export function attachIndirectBoilerCoupling(
   indirectReport,
@@ -196,13 +196,13 @@ export function attachIndirectBoilerCoupling(
   const rules = appliances.byKind.indirect_water_heater.coupling;
 
   const vol = indirectTankVolumeLiters(
-    /** @type {import('../catalog/types').IndirectWaterHeaterCatalogItemNormalized} */ (
+    /** @type {import('../catalog/types.js').IndirectWaterHeaterCatalogItemNormalized} */ (
       indirectReport.selected
     ),
   );
   const deltaTK = Number(hotWater.deltaTK) || 0;
   const coilKw = indirectCoilPowerKw(
-    /** @type {import('../catalog/types').IndirectWaterHeaterCatalogItemNormalized} */ (
+    /** @type {import('../catalog/types.js').IndirectWaterHeaterCatalogItemNormalized} */ (
       indirectReport.selected
     ),
   );
@@ -213,7 +213,7 @@ export function attachIndirectBoilerCoupling(
       : null;
 
   const minSourceKw = indirectMinSourcePowerKw(
-    /** @type {import('../catalog/types').IndirectWaterHeaterCatalogItemNormalized} */ (
+    /** @type {import('../catalog/types.js').IndirectWaterHeaterCatalogItemNormalized} */ (
       indirectReport.selected
     ),
   );

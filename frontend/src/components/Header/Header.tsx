@@ -47,7 +47,7 @@ export function Header({
   const [openMenu, setOpenMenu] = useState<HeaderMenuId | null>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
 
-  const closeMenus = useCallback(() => setOpenMenu(null), []);
+  const closeMenus = useCallback(() => { setOpenMenu(null); }, []);
 
   const toggleMenu = useCallback((id: HeaderMenuId) => {
     setOpenMenu((prev) => (prev === id ? null : id));
@@ -117,7 +117,7 @@ export function Header({
           type="text"
           className={styles.clientInput}
           value={clientName}
-          onChange={(e) => onClientNameChange(e.target.value)}
+          onChange={(e) => { onClientNameChange(e.target.value); }}
           placeholder="Имя клиента"
           maxLength={200}
           autoComplete="off"
@@ -141,22 +141,22 @@ export function Header({
             className={`${styles.secondaryButton} ${openMenu === 'save' ? styles.menuTriggerActive : ''}`}
             aria-expanded={openMenu === 'save'}
             aria-haspopup="menu"
-            onClick={() => toggleMenu('save')}
+            onClick={() => { toggleMenu('save'); }}
           >
             Сохранить
           </button>
           {openMenu === 'save' ? (
             <div className={styles.menuPanel} role="menu">
-              <button type="button" role="menuitem" onClick={() => runMenuAction(onSaveFile)}>
+              <button type="button" role="menuitem" onClick={() => { runMenuAction(onSaveFile); }}>
                 В файл (JSON)
               </button>
-              <button type="button" role="menuitem" onClick={() => runMenuAction(onSaveServer)}>
+              <button type="button" role="menuitem" onClick={() => { runMenuAction(onSaveServer); }}>
                 На сервер
               </button>
               <button
                 type="button"
                 role="menuitem"
-                onClick={() => runMenuAction(onSaveServerWithCalc)}
+                onClick={() => { runMenuAction(onSaveServerWithCalc); }}
               >
                 На сервер + расчёт
               </button>
@@ -174,19 +174,19 @@ export function Header({
             }
             aria-expanded={openMenu === 'export'}
             aria-haspopup="menu"
-            onClick={() => toggleMenu('export')}
+            onClick={() => { toggleMenu('export'); }}
           >
             Экспорт
           </button>
           {openMenu === 'export' ? (
             <div className={styles.menuPanel} role="menu">
-              <button type="button" role="menuitem" onClick={() => runMenuAction(onExportText)}>
+              <button type="button" role="menuitem" onClick={() => { runMenuAction(onExportText); }}>
                 Текстовый файл
               </button>
-              <button type="button" role="menuitem" onClick={() => runMenuAction(onExportShare)}>
+              <button type="button" role="menuitem" onClick={() => { runMenuAction(onExportShare); }}>
                 Поделиться…
               </button>
-              <button type="button" role="menuitem" onClick={() => runMenuAction(onExportLink)}>
+              <button type="button" role="menuitem" onClick={() => { runMenuAction(onExportLink); }}>
                 Ссылка (копировать)
               </button>
             </div>

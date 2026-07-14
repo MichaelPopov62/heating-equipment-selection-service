@@ -28,7 +28,7 @@ async function readJsonFile(filePath) {
 /**
  * Загружает согласованный CalcRuntimeContext из файлов backend/data и test_data.json.example.
  *
- * @returns {Promise<import('../../src/types/shared-types').CalcRuntimeContext>}
+ * @returns {Promise<import('../../src/types/shared-types.js').CalcRuntimeContext>}
  */
 export async function loadCalcRuntimeContextFromFiles() {
   const [

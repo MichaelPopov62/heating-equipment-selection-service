@@ -6,8 +6,8 @@
 import { round } from '../utils/math.js';
 
 /**
- * @param {import('./types').HydraulicsCirculationLoopBranch[]} loops
- * @param {import('./types').HydraulicsCirculationCircuitKind} circuit
+ * @param {import('./types.js').HydraulicsCirculationLoopBranch[]} loops
+ * @param {import('./types.js').HydraulicsCirculationCircuitKind} circuit
  * @returns {number}
  */
 function maxHeadMForCircuit(loops, circuit) {
@@ -19,8 +19,8 @@ function maxHeadMForCircuit(loops, circuit) {
 
 /**
  * @param {string} zoneId
- * @param {import('./types').HydraulicsPressureReport} pressure
- * @param {import('./types').HydraulicsPipelineInput} dto
+ * @param {import('./types.js').HydraulicsPressureReport} pressure
+ * @param {import('./types.js').HydraulicsPipelineInput} dto
  * @returns {number}
  */
 export function resolveHeadForZone(zoneId, pressure, dto) {

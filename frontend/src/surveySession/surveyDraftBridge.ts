@@ -26,7 +26,7 @@ export function surveyDraftToSessionSnapshot(draft: SurveyDraft): SurveyDraftSna
     hotWaterForm: structuredClone(draft.hotWaterForm),
     waterHeaterForm: structuredClone(draft.waterHeaterForm),
     waterUnderfloorHeating: draft.waterUnderfloorHeating,
-    underfloorDistributionPreset: draft.underfloorDistributionPreset ?? 'auto',
+    underfloorDistributionPreset: draft.underfloorDistributionPreset,
     thermalRegimePreset: draft.thermalRegimePreset,
     radiatorConnection: normalizeRadiatorConnection(draft.radiatorConnection),
     radiatorEmitterPreference: normalizeRadiatorEmitterPreference(

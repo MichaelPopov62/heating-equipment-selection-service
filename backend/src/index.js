@@ -142,13 +142,13 @@ if (blockStartupWarmup) {
 
 // Централізований обробник помилок у форматі ErrorEnvelope (ok=false)
 /**
- * @param {import('./types/shared-types').AppErrorLike} err
+ * @param {import('./types/shared-types.js').AppErrorLike} err
  * @param {import('express').Request} req
- * @param {import('express').Response<import('./types/shared-types').ErrorEnvelope>} res
+ * @param {import('express').Response<import('./types/shared-types.js').ErrorEnvelope>} res
  * @param {import('express').NextFunction} _next
  */
-app.use((err, req, res, _next) => {
-  const requestId = req.requestId ?? null;
+function handleApiError(err, req, res, _next) {
+  const requestId = req.requestId;
   const method = String(req.method ?? 'GET').toUpperCase();
   const path = req.path ?? '/';
 
@@ -156,7 +156,7 @@ app.use((err, req, res, _next) => {
   let code = err?.code ?? 'ERR';
   let clientMessage =
     statusCode >= 500 ? 'Внутренняя ошибка сервера' : err?.message ?? 'Ошибка запроса';
-  /** @type {import('./types/shared-types').ErrorDetailsAjvItem[] | undefined} */
+  /** @type {import('./types/shared-types.js').ErrorDetailsAjvItem[] | undefined} */
   const details =
     statusCode >= 500
       ? undefined
@@ -188,13 +188,25 @@ app.use((err, req, res, _next) => {
     errorLog.message = clientMessage;
   }
 
-  logger.error('api.error', { requestId }, errorLog);
+  if (requestId !== undefined) {
+    logger.error('api.error', { requestId }, errorLog);
+  } else {
+    logger.error('api.error', undefined, errorLog);
+  }
+
+  /** @type {import('./types/shared-types.js').ErrorEnvelope['error']} */
+  const errorBody = { message: clientMessage, code, statusCode };
+  if (details !== undefined) {
+    errorBody.details = details;
+  }
 
   res.status(statusCode).json({
     ok: false,
-    error: { message: clientMessage, code, statusCode, details },
+    error: errorBody,
   });
-});
+}
+
+app.use(handleApiError);
 
 const server = app.listen(PORT, () => {
   process.stdout.write(`API запущен на порту ${PORT}\n`);
@@ -205,7 +217,10 @@ const server = app.listen(PORT, () => {
 });
 
 server.on('error', (err) => {
-  if (err?.code === 'EADDRINUSE') {
+  const nodeErr = err && typeof err === 'object'
+    ? /** @type {NodeJS.ErrnoException} */ (err)
+    : null;
+  if (nodeErr?.code === 'EADDRINUSE') {
     process.stderr.write(`Порт ${PORT} уже занят. Освободите порт и перезапустите.\n`);
     process.exitCode = 1;
     return;

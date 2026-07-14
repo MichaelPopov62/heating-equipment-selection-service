@@ -43,7 +43,7 @@ async function loadWaterNormsJsonFromMongo() {
 }
 
 /**
- * @returns {Promise<{ waterNorms: import('./types').NormalizedWaterNorms, waterNormsSource: 'file' | 'mongo' }>}
+ * @returns {Promise<{ waterNorms: import('./types.js').NormalizedWaterNorms, waterNormsSource: 'file' | 'mongo' }>}
  */
 export async function loadWaterNorms() {
   const mode = resolveReferenceSourceMode('WATER_NORMS_SOURCE', 'auto');

@@ -9,7 +9,7 @@ const RHO_KG_M3 = 1000;
 const NU_M2_S = 1.004e-6;
 
 /**
- * @param {import('../catalog/types').PipeCatalogItemNormalized} pipe
+ * @param {import('../catalog/types.js').PipeCatalogItemNormalized} pipe
  * @returns {number}
  */
 export function pipeInternalDiameterMm(pipe) {
@@ -89,7 +89,7 @@ export function resolveRoughnessMm(material, roughnessMap) {
 }
 
 /**
- * @param {import('../catalog/types').PipeCatalogItemNormalized} pipe
+ * @param {import('../catalog/types.js').PipeCatalogItemNormalized} pipe
  * @param {number} flowM3PerHour
  * @returns {number}
  */
@@ -99,7 +99,7 @@ export function pipeVelocityMps(pipe, flowM3PerHour) {
 
 /**
  * @param {'main' | 'trunk' | 'branch' | 'ufh_loop' | 'ufh_collector_transit' | 'dhw'} segmentRole
- * @param {import('./types').HydraulicsRules} rules
+ * @param {import('./types.js').HydraulicsRules} rules
  * @returns {number}
  */
 export function resolveVelocityMinMps(segmentRole, rules) {
@@ -112,29 +112,29 @@ export function resolveVelocityMinMps(segmentRole, rules) {
 }
 
 /**
- * @param {import('../catalog/types').PipeCatalogItemNormalized[]} pool — отсортирован по Ø↑
- * @returns {import('../catalog/types').PipeCatalogItemNormalized | null}
+ * @param {import('../catalog/types.js').PipeCatalogItemNormalized[]} pool — отсортирован по Ø↑
+ * @returns {import('../catalog/types.js').PipeCatalogItemNormalized | null}
  */
 export function pickSmallestPipe(pool) {
-  return pool.length ? pool[0] : null;
+  return pool.length ? (pool[0] ?? null) : null;
 }
 
 /**
- * @param {import('../catalog/types').PipeCatalogItemNormalized[]} pool — отсортирован по Ø↑
- * @returns {import('../catalog/types').PipeCatalogItemNormalized | null}
+ * @param {import('../catalog/types.js').PipeCatalogItemNormalized[]} pool — отсортирован по Ø↑
+ * @returns {import('../catalog/types.js').PipeCatalogItemNormalized | null}
  */
 export function pickLargestPipe(pool) {
-  return pool.length ? pool[pool.length - 1] : null;
+  return pool.length ? (pool[pool.length - 1] ?? null) : null;
 }
 
 /**
  * Минимальный Ø при vMin ≤ v ≤ vMax.
  *
- * @param {import('../catalog/types').PipeCatalogItemNormalized[]} pool — отсортирован по Ø↑
+ * @param {import('../catalog/types.js').PipeCatalogItemNormalized[]} pool — отсортирован по Ø↑
  * @param {number} flowM3PerHour
  * @param {number} minVelocityMps
  * @param {number} maxVelocityMps
- * @returns {import('../catalog/types').PipeCatalogItemNormalized | null}
+ * @returns {import('../catalog/types.js').PipeCatalogItemNormalized | null}
  */
 export function pickSmallestPipeWithinVelocityRange(
   pool,

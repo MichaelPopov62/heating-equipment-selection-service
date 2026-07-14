@@ -117,7 +117,7 @@ async function loadValidatedCatalogDocuments(catalogPath) {
 /**
  * Сумма позиций нормализованного каталога.
  *
- * @param {Record<string, number>} summary
+ * @param {ReturnType<typeof summarizeNormalizedCatalog>} summary
  * @returns {number}
  */
 function countCatalogSummaryItems(summary) {
@@ -369,7 +369,10 @@ async function main() {
         ...insUniboxes,
       ];
     } catch (err) {
-      const bulk = err && typeof err === 'object' ? err : null;
+      /** @type {{ insertedDocs?: unknown[]; result?: { insertedCount?: number }; writeErrors?: unknown[]; mongoose?: { validationErrors?: unknown[] }; message?: string } | null} */
+      const bulk = err && typeof err === 'object'
+        ? /** @type {{ insertedDocs?: unknown[]; result?: { insertedCount?: number }; writeErrors?: unknown[]; mongoose?: { validationErrors?: unknown[] }; message?: string }} */ (err)
+        : null;
       const insertedCount =
         bulk?.insertedDocs?.length ?? bulk?.result?.insertedCount ?? null;
       const writeErrors = bulk?.writeErrors ?? bulk?.mongoose?.validationErrors ?? null;
@@ -393,8 +396,12 @@ async function main() {
     }
 
     const collName = Product.collection.collectionName;
-    const dbName = mongoose.connection.db?.databaseName ?? '?';
-    const verifyAgg = await mongoose.connection.db
+    const db = mongoose.connection.db;
+    if (!db) {
+      throw new Error('MongoDB connection.db недоступен после insertMany');
+    }
+    const dbName = db.databaseName ?? '?';
+    const verifyAgg = await db
       .collection(collName)
       .aggregate([{ $group: { _id: '$kind', n: { $sum: 1 } } }, { $sort: { _id: 1 } }])
       .toArray();

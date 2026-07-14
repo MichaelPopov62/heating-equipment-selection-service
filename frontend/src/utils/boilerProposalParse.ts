@@ -85,9 +85,11 @@ export function parseBoilerProposalPayload(raw: unknown): BoilerProposalView | n
       indirectWaterHeaterPrice != null
     ) {
       equipmentBundlePriceBreakdown = {
-        boilerPrice,
-        waterHeaterPrice,
-        indirectWaterHeaterPrice,
+        ...(boilerPrice !== undefined ? { boilerPrice } : {}),
+        ...(waterHeaterPrice !== undefined ? { waterHeaterPrice } : {}),
+        ...(indirectWaterHeaterPrice !== undefined
+          ? { indirectWaterHeaterPrice }
+          : {}),
       };
     }
   }
@@ -118,7 +120,13 @@ export function parseBoilerProposalPayload(raw: unknown): BoilerProposalView | n
         typeof item.price === 'number' && Number.isFinite(item.price)
           ? item.price
           : undefined;
-      parsed.push({ role, model, brand, volumeLiters, price });
+      parsed.push({
+        role,
+        model,
+        ...(brand !== undefined ? { brand } : {}),
+        ...(volumeLiters !== undefined ? { volumeLiters } : {}),
+        ...(price !== undefined ? { price } : {}),
+      });
     }
     if (parsed.length) equipmentBundleCompanions = parsed;
   }
@@ -136,15 +144,20 @@ export function parseBoilerProposalPayload(raw: unknown): BoilerProposalView | n
       hotWaterPowerKw: breakdownDhw,
     },
     nominalReservePercent,
-    estimatedTotalPrice,
-    equipmentBundleTotalPrice,
-    equipmentBundlePriceBreakdown,
-    equipmentBundleCompanions,
-    mountingType,
-    connectionDiameters:
-      connectionDiameters && connectionDiameters.length > 0 ? connectionDiameters : undefined,
+    ...(estimatedTotalPrice !== undefined ? { estimatedTotalPrice } : {}),
+    ...(equipmentBundleTotalPrice !== undefined ? { equipmentBundleTotalPrice } : {}),
+    ...(equipmentBundlePriceBreakdown !== undefined
+      ? { equipmentBundlePriceBreakdown }
+      : {}),
+    ...(equipmentBundleCompanions !== undefined
+      ? { equipmentBundleCompanions }
+      : {}),
+    ...(mountingType !== undefined ? { mountingType } : {}),
+    ...(connectionDiameters && connectionDiameters.length > 0
+      ? { connectionDiameters }
+      : {}),
     advantages,
     notes,
-    tier,
+    ...(tier !== undefined ? { tier } : {}),
   };
 }

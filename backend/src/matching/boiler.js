@@ -43,12 +43,12 @@ import { isHighTemperatureHeatingGraph } from '../logic/heatingThermalRegimes.js
 
 /**
  * Значение по умолчанию: двухконтурный котёл, при открытии крана — полная отдача на горячую воду (max по мощностям).
- * @type {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme}
+ * @type {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme}
  */
 const DEFAULT_HOT_WATER_BOILER_POWER_MATCHING_SCHEME = SCHEME_BOILER_MAX_COMBI;
 
 /**
- * @param {import('../catalog/types').BoilerCatalogItemNormalized} boiler
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized} boiler
  * @param {number} requiredKw
  * @returns {{ count: number, totalNominalKw: number }}
  */
@@ -60,12 +60,12 @@ function cascadeForBoiler(boiler, requiredKw) {
 }
 
 /**
- * @param {import('../catalog/types').BoilerCatalogItemNormalized[]} boilers
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized[]} boilers
  * @param {number} requiredKw
- * @returns {{ boiler: import('../catalog/types').BoilerCatalogItemNormalized, count: number, totalNominalKw: number } | null}
+ * @returns {{ boiler: import('../catalog/types.js').BoilerCatalogItemNormalized, count: number, totalNominalKw: number } | null}
  */
 function pickBestCascade(boilers, requiredKw) {
-  /** @type {{ boiler: import('../catalog/types').BoilerCatalogItemNormalized, count: number, totalNominalKw: number } | null} */
+  /** @type {{ boiler: import('../catalog/types.js').BoilerCatalogItemNormalized, count: number, totalNominalKw: number } | null} */
   let best = null;
   for (const b of boilers) {
     const { count, totalNominalKw } = cascadeForBoiler(b, requiredKw);
@@ -83,12 +83,12 @@ function pickBestCascade(boilers, requiredKw) {
 
 /**
  * Самый мощный котёл в пуле по powerKw.max (один аппарат без каскада).
- * @param {import('../catalog/types').BoilerCatalogItemNormalized[]} boilers
- * @returns {import('../catalog/types').BoilerCatalogItemNormalized | null}
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized[]} boilers
+ * @returns {import('../catalog/types.js').BoilerCatalogItemNormalized | null}
  */
 function pickStrongestBoilerFromPool(boilers) {
   if (!boilers?.length) return null;
-  /** @type {import('../catalog/types').BoilerCatalogItemNormalized | null} */
+  /** @type {import('../catalog/types.js').BoilerCatalogItemNormalized | null} */
   let best = null;
   let bestMax = -Infinity;
   for (const b of boilers) {
@@ -105,7 +105,7 @@ function pickStrongestBoilerFromPool(boilers) {
  * Разбивка для карточки proposal (поле powerRequirementBreakdown).
  * @param {number} heatingKw отопление×запас для линии карточки
  * @param {number} hwKw расчётная мощность ГВС из отчёта
- * @returns {import('../types/boiler-types').BoilerEquipmentProposalPowerBreakdown}
+ * @returns {import('../types/boiler-types.js').BoilerEquipmentProposalPowerBreakdown}
  */
 function buildPowerRequirementBreakdown(heatingKw, hwKw) {
   return {
@@ -119,7 +119,7 @@ function buildPowerRequirementBreakdown(heatingKw, hwKw) {
  *
  * @param {boolean} electricSeparate
  * @param {'apartment' | 'house'} resolvedObjectType
- * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} scheme
+ * @param {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme} scheme
  * @returns {string}
  */
 function efficientProposalHeadlineSuffix(
@@ -143,23 +143,23 @@ function efficientProposalHeadlineSuffix(
 }
 
 /**
- * @param {import('../catalog/types').BoilerCatalogItemNormalized[]} boilers
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized[]} boilers
  * @param {number} requiredKw
  * @param {'economy' | 'efficient'} tier
  * @param {string} tierHeadlineSuffix
- * @param {object} [extra]
+ * @param {object} extra
  * @param {boolean} [extra.forceSingleUnit] без каскада
  * @param {number} [extra.heatingLoadKwForReserve] база для nominalReservePercent по отоплению
- * @param {import('../types/boiler-types').BoilerEquipmentProposalPowerBreakdown} extra.powerRequirementBreakdown
- * @param {import('../dhw/types').BoilerApplianceRules} extra.boilerRules
- * @returns {import('../types/boiler-types').BoilerEquipmentProposal | null}
+ * @param {import('../types/boiler-types.js').BoilerEquipmentProposalPowerBreakdown} extra.powerRequirementBreakdown
+ * @param {import('../dhw/types.js').BoilerApplianceRules} extra.boilerRules
+ * @returns {import('../types/boiler-types.js').BoilerEquipmentProposal | null}
  */
 function pickSingleOrCascadeProposal(
   boilers,
   requiredKw,
   tier,
   tierHeadlineSuffix,
-  extra = {},
+  extra,
 ) {
   const forceSingleUnit = extra.forceSingleUnit === true;
   const heatingLoadKwForReserve = extra.heatingLoadKwForReserve;
@@ -219,14 +219,14 @@ function pickSingleOrCascadeProposal(
 
 /**
  * Пояснения по сценариям горячей воды (дополнение к расчёту по расходам с точек разбора).
- * @param {import('../types/shared-types').HotWaterFixturesInput | undefined} fixtures
+ * @param {import('../types/shared-types.js').HotWaterFixturesInput | undefined} fixtures
  * @param {number} hotWaterPowerKw
  * @param {number} heatLossKw потери отопления, кВт
  * @param {number} reserveFactor
- * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} hotWaterBoilerPowerMatchingScheme
+ * @param {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme} hotWaterBoilerPowerMatchingScheme
  * @param {'flowThrough' | 'storage' | undefined} dhwSupplyScenario
- * @param {import('../dhw/types').BoilerApplianceRules} boilerRules
- * @returns {import('../types/boiler-types').BoilerMatchingRecommendation[]}
+ * @param {import('../dhw/types.js').BoilerApplianceRules} boilerRules
+ * @returns {import('../types/boiler-types.js').BoilerMatchingRecommendation[]}
  */
 function buildHotWaterScenarioRecommendations(
   fixtures,
@@ -237,7 +237,7 @@ function buildHotWaterScenarioRecommendations(
   dhwSupplyScenario,
   boilerRules,
 ) {
-  /** @type {import('../types/boiler-types').BoilerMatchingRecommendation[]} */
+  /** @type {import('../types/boiler-types.js').BoilerMatchingRecommendation[]} */
   const out = [];
   const sh = fixtures?.shower ?? 0;
   const bath = fixtures?.bath ?? 0;
@@ -309,19 +309,19 @@ function buildHotWaterScenarioRecommendations(
 }
 
 /**
- * @param {import('../catalog/types').BoilerCatalogItemNormalized} boiler
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized} boiler
  * @param {'single' | 'cascade'} kind
  * @param {number} unitsCount
  * @param {number} totalNominalKw
  * @param {number} requiredKw
- * @param {object} [opts]
+ * @param {object} opts
  * @param {'economy' | 'efficient'} [opts.tier]
  * @param {boolean} [opts.condensingDrainNote]
  * @param {string} [opts.tierHeadlineSuffix]
  * @param {number} [opts.heatingLoadKwForReserve] база процента запаса для одиночного котла: отопление×запас (или конденсационная база), сравнение с powerKw.min
- * @param {import('../types/boiler-types').BoilerEquipmentProposalPowerBreakdown} opts.powerRequirementBreakdown составляющие для UI («из них на отопление / ГВС»)
- * @param {import('../dhw/types').BoilerApplianceRules} [opts.boilerRules]
- * @returns {import('../types/boiler-types').BoilerEquipmentProposal}
+ * @param {import('../types/boiler-types.js').BoilerEquipmentProposalPowerBreakdown} opts.powerRequirementBreakdown составляющие для UI («из них на отопление / ГВС»)
+ * @param {import('../dhw/types.js').BoilerApplianceRules} [opts.boilerRules]
+ * @returns {import('../types/boiler-types.js').BoilerEquipmentProposal}
  */
 function buildProposalObject(
   boiler,
@@ -329,7 +329,7 @@ function buildProposalObject(
   unitsCount,
   totalNominalKw,
   requiredKw,
-  opts = {},
+  opts,
 ) {
   const req = Math.max(0, Number(requiredKw) || 0);
   const heatingBasis = opts.heatingLoadKwForReserve;
@@ -338,7 +338,7 @@ function buildProposalObject(
   if (kind === 'single' && heatingBasis != null && Number(heatingBasis) > 0) {
     const boilerMin = Number(boiler.powerKw?.min ?? boiler.powerKw?.max ?? 0);
     const hl = Number(heatingBasis);
-    const cap = opts.boilerRules.matching.nominalReservePercentCap;
+    const cap = opts.boilerRules?.matching.nominalReservePercentCap ?? 150;
     nominalReservePercent = Math.min(
       Math.round(((boilerMin - hl) / hl) * 100),
       cap,
@@ -391,7 +391,7 @@ function buildProposalObject(
   }
   notes.push(...chimneyNotesForBoilerCombustionType(boiler));
 
-  /** @type {import('../types/boiler-types').BoilerEquipmentProposal} */
+  /** @type {import('../types/boiler-types.js').BoilerEquipmentProposal} */
   const proposal = {
     kind,
     headline,
@@ -428,16 +428,17 @@ function buildProposalObject(
  * @param {number} [args.hotWaterPowerKw]
  * @param {number} [args.peakThermalPowerKw] пик проточной ГВС, кВт — для max-combi при storage-сценарии (1К + электробойлер)
  * @param {number} [args.reserveFactor]
- * @param {import('../types/boiler-types').BoilerCombustionType} [args.boilerCombustionType]
- * @param {import('../types/shared-types').HotWaterFixturesInput} [args.hotWaterFixtures]
- * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} [args.hotWaterBoilerPowerMatchingScheme]
+ * @param {import('../types/boiler-types.js').BoilerCombustionType} [args.boilerCombustionType]
+ * @param {import('../types/shared-types.js').HotWaterFixturesInput} [args.hotWaterFixtures]
+ * @param {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme} [args.hotWaterBoilerPowerMatchingScheme]
  * @param {'flowThrough' | 'storage'} [args.dhwSupplyScenario] из расчёта hotWater (тип объекта)
  * @param {'double' | 'single' | null} [args.boilerCircuitFilterMode] фильтр каталога по контурам; из matchEquipment — всегда resolveBoilerCircuitFilterMode (single | double, без null)
- * @param {import('../catalog/types').IndirectWaterHeaterCatalogItemNormalized | null} [args.selectedWaterHeater] выбранный БКН (для схемы «1К + БКН» — учёт specs.minSourcePowerKw при подборе и в альтернативной линии «Эффективный»)
+ * @param {import('../catalog/types.js').IndirectWaterHeaterCatalogItemNormalized | null} [args.selectedWaterHeater] выбранный БКН (для схемы «1К + БКН» — учёт specs.minSourcePowerKw при подборе и в альтернативной линии «Эффективный»)
  * @param {'apartment' | 'house'} [args.objectType] квартира или двухконтурная схема — без каскада (один котёл)
- * @param {import('../types/shared-types').BuildingInput} [args.building] анкета (objectMeta, rooms) — фильтр монтажа
- * @param {import('../types/shared-types').CalcRuntimeContext} args.ctx
- * @returns {import('../types/boiler-types').BoilerMatchingReport}
+ * @param {import('../types/shared-types.js').BuildingInput} [args.building] анкета (objectMeta, rooms) - фильтр монтажа
+ * @param {import('../types/shared-types.js').HeatingSystemInput} [args.heatingSystem]
+ * @param {import('../types/shared-types.js').CalcRuntimeContext} args.ctx
+ * @returns {import('../types/boiler-types.js').BoilerMatchingReport}
  */
 export function pickBoiler({
   heatLossWatts,
@@ -454,7 +455,7 @@ export function pickBoiler({
   building = undefined,
   heatingSystem = undefined,
   ctx,
-} = {}) {
+}) {
   assertCalcRuntimeContext(ctx);
   const { catalog, appliances, recommendations: recommendationsBundle } = ctx;
   const boilerRules = appliances.byKind.boiler;
@@ -474,14 +475,14 @@ export function pickBoiler({
   );
   const hwKw = Number(hotWaterPowerKw) || 0;
   const peakHwKw = Number(peakThermalPowerKw) || 0;
-  /** @type {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} */
+  /** @type {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme} */
   const scheme =
     hotWaterBoilerPowerMatchingScheme ??
     DEFAULT_HOT_WATER_BOILER_POWER_MATCHING_SCHEME;
 
-  /** @type {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} */
+  /** @type {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme} */
   let effectiveScheme = scheme;
-  /** @type {import('../types/boiler-types').BoilerCircuitFallbackReport | null} */
+  /** @type {import('../types/boiler-types.js').BoilerCircuitFallbackReport | null} */
   let circuitFallback = null;
 
   const forceSingleBoiler =
@@ -538,18 +539,18 @@ export function pickBoiler({
     (b) => (Number(b?.powerKw?.max) || 0) > 0,
   );
 
-  /** @type {import('../catalog/types').BoilerCatalogItemNormalized[]} */
+  /** @type {import('../catalog/types.js').BoilerCatalogItemNormalized[]} */
   let boilersFiltered = boilersPositive.filter((b) =>
     matchesCombustionTypePreference(
       boilerCombustionType,
-      /** @type {Record<string, unknown>} */ (b),
+      /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (b)),
     ),
   );
-  /** @type {import('../types/boiler-types').BoilerCombustionType | null} */
+  /** @type {import('../types/boiler-types.js').BoilerCombustionType | null} */
   let combustionTypeFilterApplied = boilerCombustionType ?? null;
 
   const warnings = [];
-  /** @type {import('../recommendations/types').ResolvedRecommendation[]} */
+  /** @type {import('../recommendations/types.js').ResolvedRecommendation[]} */
   const resolvedRecommendations = [];
   let boilerUnderpoweredFromCatalog = false;
   if (
@@ -706,7 +707,7 @@ export function pickBoiler({
   const selectedSingle =
     boilersFiltered.find((b) => (b?.powerKw?.max ?? 0) >= requiredKw) ?? null;
 
-  /** @type {import('../types/boiler-types').BoilerMatchingRecommendation[]} */
+  /** @type {import('../types/boiler-types.js').BoilerMatchingRecommendation[]} */
   const recommendations = [];
 
   if (effectiveScheme === SCHEME_BOILER_MAX_COMBI) {
@@ -787,10 +788,10 @@ export function pickBoiler({
     }
   }
 
-  /** @type {import('../catalog/types').BoilerCatalogItemNormalized | null} */
+  /** @type {import('../catalog/types.js').BoilerCatalogItemNormalized | null} */
   let selected = selectedSingle;
 
-  /** @type {import('../types/boiler-types').BoilerEquipmentProposal | null} */
+  /** @type {import('../types/boiler-types.js').BoilerEquipmentProposal | null} */
   let proposal = null;
 
   if (!boilersFiltered.length) {
@@ -801,23 +802,28 @@ export function pickBoiler({
     );
   } else if (requiredKw <= 0) {
     const fallback = boilersFiltered[0];
-    selected = fallback;
-    proposal = buildProposalObject(
-      fallback,
-      'single',
-      1,
-      fallback.powerKw.max,
-      0,
-      {
-        condensingDrainNote: isCondensingBoiler(fallback),
-        heatingLoadKwForReserve: heatingLoadKw,
-        powerRequirementBreakdown: buildPowerRequirementBreakdown(
-          heatingLoadKw,
-          hwKwForBreakdown,
-        ),
-        boilerRules,
-      },
-    );
+    if (!fallback) {
+      selected = null;
+      proposal = null;
+    } else {
+      selected = fallback;
+      proposal = buildProposalObject(
+        fallback,
+        'single',
+        1,
+        fallback.powerKw.max,
+        0,
+        {
+          condensingDrainNote: isCondensingBoiler(fallback),
+          heatingLoadKwForReserve: heatingLoadKw,
+          powerRequirementBreakdown: buildPowerRequirementBreakdown(
+            heatingLoadKw,
+            hwKwForBreakdown,
+          ),
+          boilerRules,
+        },
+      );
+    }
   } else if (selectedSingle) {
     proposal = buildProposalObject(
       selectedSingle,
@@ -938,9 +944,9 @@ export function pickBoiler({
     );
   }
 
-  /** @type {import('../types/boiler-types').BoilerEquipmentProposal | null} */
+  /** @type {import('../types/boiler-types.js').BoilerEquipmentProposal | null} */
   let proposalEconomy = null;
-  /** @type {import('../types/boiler-types').BoilerEquipmentProposal | null} */
+  /** @type {import('../types/boiler-types.js').BoilerEquipmentProposal | null} */
   let proposalEfficient = null;
 
   /** Мощность для подсказки каскада по альтернативе «Эффективный» (та же база, что и proposalEfficient.requiredKw при успешном подборе). */

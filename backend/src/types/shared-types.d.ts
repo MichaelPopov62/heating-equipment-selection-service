@@ -864,6 +864,7 @@ export interface HydraulicsReport {
       fluid: 'heating' | 'water';
       designFlowM3PerHour: number;
       segmentRole: string;
+      isMainLine?: boolean;
     }>;
   };
   pressure?: {
@@ -934,6 +935,7 @@ export interface HydraulicsMatchingReport {
   pumps?: import('../hydraulics/types').HydraulicsPumpMatch[];
   proposal?: import('../hydraulics/types').HydraulicsProposalReport;
   warnings: string[];
+  resolvedRecommendations?: import('../recommendations/types').ResolvedRecommendation[];
 }
 
 export interface EnvelopePreset {
@@ -1271,6 +1273,7 @@ export interface CalcReport {
   temps: {
     insideC: number;
     outsideC: number;
+    bathroomAirTempC?: number;
   };
   calculations: {
     heatLoss: HeatLossReport;

@@ -6,8 +6,14 @@
 import assert from 'node:assert/strict';
 import { evaluatePumpModeAtDuty } from '../src/hydraulics/pickPump.js';
 import { resolveSystemPumps } from '../src/hydraulics/resolveSystemPumps.js';
+import { assertAt } from './fixtures/scriptAssert.js';
+import {
+  DEFAULT_LOCAL_LOSS_ZETA,
+  buildHydraulicsPressureReport,
+  buildHydraulicsRadiatorsCircuit,
+} from './fixtures/verifyFixtures.js';
 
-/** @type {import('../src/hydraulics/types').HydraulicsPumpDutyRules} */
+/** @type {import('../src/hydraulics/types.js').HydraulicsPumpDutyRules} */
 const DUTY_RULES = {
   pumpHeadMarginPercent: 12,
   pumpDutyQMaxUtilizationPercent: 85,
@@ -15,13 +21,22 @@ const DUTY_RULES = {
   pumpMaxHeadMarginPercent: 60,
 };
 
-/** @type {import('../src/hydraulics/types').HydraulicsPipelineInput['rules']} */
+/** @type {import('../src/hydraulics/types.js').HydraulicsPipelineInput['rules']} */
 const BASE_RULES = {
+  mainTransitMinInternalDiameterMm: 20,
+  branchMinInternalDiameterMm: 12,
   velocityLimitsMps: { mainMax: 0.8, branchMax: 0.5, mainMin: 0.2 },
+  radiatorBranchGrouping: {
+    minFlowM3PerHourForIndividualBranch: 0.019,
+    minHeatLoadWattsForIndividualBranch: 150,
+    manifoldTrunkLengthM: 2,
+    localZetaManifold: 1.5,
+  },
   defaultLengthsM: { mainLine: 8, radiatorBranch: 4, ufhCollectorBranch: 3 },
   maxUfhLoopLengthM: 80,
   roughnessMmByMaterial: { pex: 0.007 },
   localLossZeta: {
+    ...DEFAULT_LOCAL_LOSS_ZETA,
     elbow90: 0.9,
     teeBranch: 1.2,
     mixingNode: 2.5,
@@ -33,6 +48,7 @@ const BASE_RULES = {
   balancingValveKPaPerTurn: 3,
 };
 
+/** @type {import('../src/catalog/types.js').PumpOperatingModeNormalized[]} */
 const LUNA_MODES = [
   {
     modeName: 'Baxi встроенный — скорость 1 (20%)',
@@ -60,6 +76,7 @@ const LUNA_MODES = [
   },
 ];
 
+/** @type {import('../src/catalog/types.js').PumpOperatingModeNormalized[]} */
 const ECO_MODES = [
   {
     modeName: 'Baxi встроенный — скорость 1',
@@ -89,12 +106,12 @@ const ECO_MODES = [
 
 /**
  * @param {string} boilerModel
- * @param {object[]} operatingModes
+ * @param {import('../src/catalog/types.js').PumpOperatingModeNormalized[]} operatingModes
  * @param {number} designFlow
- * @returns {import('../src/hydraulics/types').HydraulicsSystemPumpsResult}
+ * @returns {import('../src/hydraulics/types.js').HydraulicsSystemPumpsResult}
  */
 function runCase(boilerModel, operatingModes, designFlow) {
-  /** @type {import('../src/hydraulics/types').HydraulicsPipelineInput} */
+  /** @type {import('../src/hydraulics/types.js').HydraulicsPipelineInput} */
   const dto = {
     schemaVersion: 1,
     meta: {
@@ -112,8 +129,9 @@ function runCase(boilerModel, operatingModes, designFlow) {
       connectionNominalMm: [25],
     },
     circuits: {
-      radiators: {
+      radiators: buildHydraulicsRadiatorsCircuit({
         thermalRegime: { supplyC: 75, returnC: 65, deltaTK: 20 },
+        flowDeltaTK: 20,
         connectionType: 'side',
         consumers: [
           {
@@ -125,7 +143,7 @@ function runCase(boilerModel, operatingModes, designFlow) {
           },
         ],
         totalFlowRateM3PerHour: designFlow,
-      },
+      }),
     },
     layout: {
       mainLineLengthM: 8,
@@ -135,20 +153,17 @@ function runCase(boilerModel, operatingModes, designFlow) {
     rules: BASE_RULES,
   };
 
-  /** @type {import('../src/hydraulics/types').HydraulicsPressureReport} */
-  const pressure = {
+  const pressure = buildHydraulicsPressureReport({
     headRequiredM: 0.22,
     criticalPressureDropKPa: 2,
-    circulationLoops: [],
-  };
+  });
 
-  /** @type {import('../src/catalog/types').NormalizedCatalog} */
+  /** @type {import('../src/catalog/types.js').NormalizedCatalog} */
   const catalog = {
     boilers: {
       doubleCircuit: [
         {
           model: boilerModel,
-          brand: 'Baxi',
           mountingType: 'wall',
           powerKw: { min: 4.7, max: 28 },
           price: 56500,
@@ -194,12 +209,12 @@ function runCase(boilerModel, operatingModes, designFlow) {
 
 // Vaillant legacy smoke (регрессия)
 {
-  const pressureHigh = {
+  const pressureHigh = buildHydraulicsPressureReport({
     headRequiredM: 3.6,
     criticalPressureDropKPa: 30,
-    circulationLoops: [],
-  };
+  });
 
+  /** @type {import('../src/catalog/types.js').NormalizedCatalog} */
   const catalogVaillant = {
     boilers: {
       doubleCircuit: [
@@ -250,8 +265,9 @@ function runCase(boilerModel, operatingModes, designFlow) {
         connectionNominalMm: [25],
       },
       circuits: {
-        radiators: {
+        radiators: buildHydraulicsRadiatorsCircuit({
           thermalRegime: { supplyC: 75, returnC: 65, deltaTK: 20 },
+          flowDeltaTK: 20,
           connectionType: 'side',
           consumers: [
             {
@@ -263,7 +279,7 @@ function runCase(boilerModel, operatingModes, designFlow) {
             },
           ],
           totalFlowRateM3PerHour: 1.0,
-        },
+        }),
       },
       layout: {
         mainLineLengthM: 8,
@@ -307,8 +323,9 @@ function runCase(boilerModel, operatingModes, designFlow) {
 // 3. Luna Q=0.65 → speed 1 curve_unavailable, speed 2+ OK
 {
   const headTarget = 0.22 * 1.12;
+  const lunaMode1 = assertAt(LUNA_MODES, 0, 'LUNA_MODES[0]');
   const s1 = evaluatePumpModeAtDuty({
-    mode: LUNA_MODES[0],
+    mode: lunaMode1,
     q: 0.65,
     headRequiredM: 0.22,
     headTarget,
@@ -320,7 +337,7 @@ function runCase(boilerModel, operatingModes, designFlow) {
   const r = runCase('Luna Duo-Tec E 33', LUNA_MODES, 0.65);
   const main = r.pumps.find((p) => p.zoneId === 'boiler_primary');
   assert.ok(main?.pumpSource === 'boiler_builtin');
-  assert.notEqual(main?.modeName, LUNA_MODES[0].modeName);
+  assert.notEqual(main?.modeName, lunaMode1.modeName);
   console.log(`OK case 3: Luna Q=0.65 → ${main?.modeName}`);
 }
 
@@ -342,8 +359,9 @@ function runCase(boilerModel, operatingModes, designFlow) {
 
 // 6. ECO Q=0.65 → speed 1 curve_unavailable, speed 2+ OK
 {
+  const ecoMode1 = assertAt(ECO_MODES, 0, 'ECO_MODES[0]');
   const s1 = evaluatePumpModeAtDuty({
-    mode: ECO_MODES[0],
+    mode: ecoMode1,
     q: 0.65,
     headRequiredM: 0.22,
     headTarget: 0.22 * 1.12,
@@ -355,7 +373,7 @@ function runCase(boilerModel, operatingModes, designFlow) {
   const r = runCase('Baxi ECO Home 24 F', ECO_MODES, 0.65);
   const main = r.pumps.find((p) => p.zoneId === 'boiler_primary');
   assert.ok(main?.pumpSource === 'boiler_builtin');
-  assert.notEqual(main?.modeName, ECO_MODES[0].modeName);
+  assert.notEqual(main?.modeName, ecoMode1.modeName);
   console.log(`OK case 6: ECO Q=0.65 → ${main?.modeName}`);
 }
 

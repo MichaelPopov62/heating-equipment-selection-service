@@ -6,9 +6,10 @@
 import { round } from '../utils/math.js';
 
 /**
- * @param {object} args
- * @param {number} args.roomAreaM2 — полная площадь комнаты
- * @param {number} [args.furnitureOccupiedAreaM2] — S_meb, м²
+ * @param {{
+ *   roomAreaM2: number;
+ *   furnitureOccupiedAreaM2?: number;
+ * }} args
  * @returns {{
  *   roomAreaM2: number,
  *   furnitureOccupiedAreaM2: number,

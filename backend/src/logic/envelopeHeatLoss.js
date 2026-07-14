@@ -25,9 +25,9 @@ function toNumber(value, fieldName) {
 /**
  * Расчёт теплопотерь одного элемента ограждения.
  *
- * @param {import('../types/shared-types').HeatLossCalcElementInput} element
+ * @param {import('../types/shared-types.js').HeatLossCalcElementInput} element
  * @param {number} defaultDeltaT - ΔT по умолчанию (K или °C)
- * @returns {import('../types/shared-types').HeatLossElementReport}
+ * @returns {import('../types/shared-types.js').HeatLossElementReport}
  */
 function calculateElementLoss(element, defaultDeltaT) {
   if (!element || typeof element !== 'object') {
@@ -80,16 +80,20 @@ function calculateElementLoss(element, defaultDeltaT) {
     orientation: element.orientation ?? null,
     openingWidthMm: element.openingWidthMm ?? null,
     openingHeightMm: element.openingHeightMm ?? null,
-    cornerRoomFactor: element.cornerRoomFactor ?? undefined,
-    adjacentTempC: element.adjacentTempC ?? undefined,
+    ...(element.cornerRoomFactor != null
+      ? { cornerRoomFactor: element.cornerRoomFactor }
+      : {}),
+    ...(element.adjacentTempC !== undefined
+      ? { adjacentTempC: element.adjacentTempC }
+      : {}),
   };
 }
 
 /**
  * Суммарные теплопотери по массиву элементов ограждения.
  *
- * @param {import('../types/shared-types').HeatLossCalcInput} input
- * @returns {import('../types/shared-types').HeatLossCalcResult}
+ * @param {import('../types/shared-types.js').HeatLossCalcInput} input
+ * @returns {import('../types/shared-types.js').HeatLossCalcResult}
  */
 export function calculateHeatLoss(input) {
   if (!input || typeof input !== 'object') {

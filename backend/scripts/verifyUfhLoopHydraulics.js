@@ -11,6 +11,7 @@ import {
   shouldTriggerUfhPipeResize,
   validateUfhLoopHydraulics,
 } from '../src/logic/ufhLoopHydraulics.js';
+import { assertAt } from './fixtures/scriptAssert.js';
 
 const bundle = await getReferenceBundle();
 const ctx = toCalcRuntimeContext(bundle);
@@ -90,7 +91,7 @@ for (const h of room.loopHydraulics) {
 }
 
 console.log(
-  `OK room 20m²: loops=${room.loopsCount}, status=${room.resolutionStatus}, L1=${room.loops[0].loopLengthM} m, Δp=${room.loopHydraulics[0].pressureDropKPa} kPa`,
+  `OK room 20m²: loops=${room.loopsCount}, status=${room.resolutionStatus}, L1=${assertAt(room.loops, 0).loopLengthM} m, Δp=${assertAt(room.loopHydraulics, 0).pressureDropKPa} kPa`,
 );
 
 const parasitic = shouldTriggerUfhPipeResize({
@@ -119,7 +120,7 @@ const parasiticRoom = resolveUfhRoomLoopsHydraulics({
 if (!parasiticRoom.loops.length) {
   throw new Error('parasitic room: пустой массив loops');
 }
-const h0 = parasiticRoom.loopHydraulics[0];
+const h0 = assertAt(parasiticRoom.loopHydraulics, 0, 'parasitic loopHydraulics[0]');
 console.log(
   `OK parasitic 24m² heated: loops=${parasiticRoom.loopsCount}, status=${parasiticRoom.resolutionStatus}, `
   + `v=${h0.velocityMps} m/s, resize=${h0.pipeResizeAction}, pipe=${h0.catalogPipeId}`,

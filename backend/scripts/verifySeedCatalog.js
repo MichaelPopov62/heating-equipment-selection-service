@@ -10,6 +10,7 @@ import {
   summarizeNormalizedCatalog,
   validateAndBuildProductDocuments,
 } from './utils/catalogSeedBuild.js';
+import { assertAt } from './fixtures/scriptAssert.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const examplePath = path.join(__dirname, '..', 'test_data.json.example');
@@ -33,7 +34,7 @@ function isNonEmptyString(value) {
 }
 
 /**
- * @param {import('../src/catalog/types').PumpCatalogItemNormalized} pump
+ * @param {import('../src/catalog/types.js').PumpCatalogItemNormalized} pump
  * @param {number} idx
  */
 function assertPumpContract(pump, idx) {
@@ -58,7 +59,7 @@ function assertPumpContract(pump, idx) {
 }
 
 /**
- * @param {import('../src/catalog/types').PipeCatalogItemNormalized} pipe
+ * @param {import('../src/catalog/types.js').PipeCatalogItemNormalized} pipe
  * @param {number} idx
  */
 function assertPipeContract(pipe, idx) {
@@ -107,17 +108,17 @@ try {
 
   const pipesNorm = normalized.pipes ?? [];
   for (let i = 0; i < pipesNorm.length; i += 1) {
-    assertPipeContract(pipesNorm[i], i);
+    assertPipeContract(assertAt(pipesNorm, i, `pipesNorm[${i}]`), i);
   }
 
   const pumpsNorm = normalized.pumps ?? [];
   for (let i = 0; i < pumpsNorm.length; i += 1) {
-    assertPumpContract(pumpsNorm[i], i);
+    assertPumpContract(assertAt(pumpsNorm, i, `pumpsNorm[${i}]`), i);
   }
 
   const pipeDocs = docs.filter((d) => d.kind === 'pipe');
   for (let i = 0; i < pipeDocs.length; i += 1) {
-    const doc = pipeDocs[i];
+    const doc = assertAt(pipeDocs, i, `pipeDocs[${i}]`);
     if (Object.prototype.hasOwnProperty.call(doc, 'data')) {
       throw new Error(`verify: pipe-документ [${i}] содержит legacy-поле data (нужен flat seed)`);
     }

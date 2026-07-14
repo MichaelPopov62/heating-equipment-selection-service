@@ -51,7 +51,7 @@ export function assessUfhActiveAreaHeatFlux(args) {
 }
 
 /**
- * @param {import('../types/shared-types').HeatLossReport | undefined | null} heatLoss
+ * @param {import('../types/shared-types.js').HeatLossReport | undefined | null} heatLoss
  * @param {string} roomId
  * @returns {number | null}
  */

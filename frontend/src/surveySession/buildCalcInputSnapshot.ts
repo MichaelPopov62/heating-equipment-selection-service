@@ -59,7 +59,7 @@ export function canAutoCalcFromDraft(draft: SurveyDraftSnapshot): boolean {
         typeof r.ceilingAreaM2 === 'number' ? r.ceilingAreaM2 : 0;
       if (ceilingArea > 0) return true;
     }
-    return (r.windows ?? []).some((w) => {
+    return r.windows.some((w) => {
       const wMm = typeof w.openingWidthMm === 'number' ? w.openingWidthMm : 0;
       const hMm = typeof w.openingHeightMm === 'number' ? w.openingHeightMm : 0;
       return wMm > 0 && hMm > 0;

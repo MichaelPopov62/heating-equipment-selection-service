@@ -17,6 +17,12 @@ import {
   getReferenceBundle,
   toCalcRuntimeContext,
 } from '../src/reference/public.js';
+import {
+  buildMinimalBoilerMatchingReport,
+  buildObjectMeta,
+  buildRoom,
+} from './fixtures/verifyFixtures.js';
+import { assertDefined } from './fixtures/scriptAssert.js';
 
 /** @param {boolean} ok @param {string} label */
 function check(ok, label) {
@@ -27,29 +33,28 @@ function check(ok, label) {
 /**
  * @param {number} n
  * @param {number} watts
+ * @returns {import('../src/types/shared-types.js').HeatLossReport}
  */
 function makeRoomsHeatLoss(n, watts) {
-  /** @type {import('../src/types/shared-types').HeatLossRoomReport[]} */
+  /** @type {import('../src/types/shared-types.js').HeatLossRoomReport[]} */
   const rooms = [];
   for (let i = 1; i <= n; i += 1) {
     rooms.push({
       id: `r${i}`,
       name: `Комната ${i}`,
-      type: 'living',
+      type: 'гостиная',
       areaM2: 15,
       heightM: 2.7,
       volumeM3: 40.5,
       envelopeWatts: watts,
       designWatts: watts,
-      ventilationWatts: 0,
       elements: [],
     });
   }
   return {
     totalWatts: watts * n,
     rooms,
-    elements: [],
-    ventilation: { totalWatts: 0 },
+    ventilation: { watts: 0, method: null },
   };
 }
 
@@ -72,11 +77,11 @@ async function main() {
       'junk → auto',
     ) && ok;
 
-  /** @type {import('../src/types/shared-types').CalcRequestBody} */
+  /** @type {import('../src/types/shared-types.js').CalcRequestBody} */
   const body = {
     building: {
       temps: { insideC: 20, outsideC: -5 },
-      objectMeta: { objectType: 'house', floors: 1, roomsCount: 1 },
+      objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 1 }),
       rooms: [],
       envelopeElements: [],
     },
@@ -131,30 +136,19 @@ async function main() {
     ) && ok;
 
   const roomsHeatLoss = makeRoomsHeatLoss(5, 900);
-  /** @type {import('../src/types/shared-types').BuildingInput} */
+  const heatLossRooms = assertDefined(roomsHeatLoss.rooms, 'roomsHeatLoss.rooms');
+  /** @type {import('../src/types/shared-types.js').BuildingInput} */
   const building = {
     temps: { insideC: 20, outsideC: -5 },
-    objectMeta: {
-      objectType: 'house',
-      floors: 1,
-      roomsCount: 5,
-      externalWalls: {
-        presetId: 'wall_gas_concrete_d500',
-        thicknessMm: 375,
-        facadeSystem: 'none',
-      },
-    },
-    rooms: roomsHeatLoss.rooms.map((r) => ({
+    objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 5 }),
+    rooms: heatLossRooms.map((r) => buildRoom({
       id: r.id,
       name: r.name,
-      type: 'living',
-      floor: 1,
-      topBoundary: 'heated',
+      type: 'гостиная',
       areaM2: 15,
       heightM: 2.7,
     })),
-    envelopeElements: [
-      // Широкое окно только в r5 — локальный голос мог бы уйти в panel
+    envelopeElements: /** @type {import('../src/types/shared-types.js').EnvelopeElementInput[]} */ ([
       {
         kind: 'window',
         roomId: 'r5',
@@ -175,7 +169,7 @@ async function main() {
         orientation: 'S',
         presetId: 'window_double',
       })),
-    ],
+    ]),
   };
 
   const heatingSystem = {
@@ -191,8 +185,14 @@ async function main() {
   };
 
   // Pass 1: убеждаемся, что у r5 может быть panel-голос при широком окне
-  const sectionalPool = (catalog?.radiators ?? []).filter((r) => r.priceBasis !== 'panel');
-  const panelPool = (catalog?.radiators ?? []).filter((r) => r.priceBasis === 'panel');
+  const sectionalPool = (catalog?.radiators ?? []).filter(
+    /** @param {import('../src/catalog/types.js').RadiatorCatalogItemNormalized} r */
+    (r) => r.priceBasis !== 'panel',
+  );
+  const panelPool = (catalog?.radiators ?? []).filter(
+    /** @param {import('../src/catalog/types.js').RadiatorCatalogItemNormalized} r */
+    (r) => r.priceBasis === 'panel',
+  );
   const voteWide = exploreRoomEmitterKindVote({
     qRad: 900,
     sectionalPool,
@@ -277,39 +277,41 @@ async function main() {
     ) && ok;
 
   // Линии proposal с единым kind
-  const fakeBoiler = {
-    requiredKw: 24,
-    selected: null,
-    proposal: null,
+  const fakeBoiler = buildMinimalBoilerMatchingReport({
     proposalEconomy: {
       model: 'Eco',
       kind: 'single',
+      headline: 'Eco',
       unitsCount: 1,
       unitMaxPowerKw: 24,
-      totalMaxPowerKw: 24,
+      totalNominalKw: 24,
+      requiredKw: 24,
+      powerRequirementBreakdown: { heatingLoadKw: 9.2, hotWaterPowerKw: 0 },
       nominalReservePercent: 100,
-      recommendations: [],
-      warnings: [],
+      advantages: [],
+      notes: [],
     },
     proposalEfficient: {
       model: 'Eff',
       kind: 'single',
+      headline: 'Eff',
       unitsCount: 1,
       unitMaxPowerKw: 24,
-      totalMaxPowerKw: 24,
+      totalNominalKw: 24,
+      requiredKw: 24,
+      powerRequirementBreakdown: { heatingLoadKw: 9.2, hotWaterPowerKw: 0 },
       nominalReservePercent: 100,
-      recommendations: [],
-      warnings: [],
+      advantages: [],
+      notes: [],
     },
-    warnings: [],
-  };
+  });
 
   const withLines = pickRadiatorsWithProposalLines({
     roomsHeatLoss,
     heatingSystem,
     catalog,
     building,
-    boiler: /** @type {any} */ (fakeBoiler),
+    boiler: fakeBoiler,
     radiatorRules,
     recommendations,
   });
@@ -341,18 +343,18 @@ async function main() {
 
   // Multi-unit: высокая нагрузка + sectional lock
   const heavy = makeRoomsHeatLoss(1, 8000);
+  /** @type {import('../src/types/shared-types.js').BuildingInput} */
   const heavyBuilding = {
-    ...building,
+    temps: { insideC: 20, outsideC: -5 },
+    objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 1 }),
     rooms: [
-      {
+      buildRoom({
         id: 'r1',
         name: 'Зал',
-        type: 'living',
-        floor: 1,
-        topBoundary: 'heated',
+        type: 'гостиная',
         areaM2: 40,
         heightM: 2.7,
-      },
+      }),
     ],
     envelopeElements: [
       {
@@ -366,7 +368,6 @@ async function main() {
         presetId: 'window_double',
       },
     ],
-    objectMeta: { ...building.objectMeta, roomsCount: 1 },
   };
   const multi = pickRadiators({
     roomsHeatLoss: heavy,

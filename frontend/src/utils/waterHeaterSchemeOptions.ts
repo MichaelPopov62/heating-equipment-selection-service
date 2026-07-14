@@ -23,10 +23,10 @@ export function isApartmentLargeForIndirectScheme(
   if (objectType !== 'apartment') return false;
   const totalArea = rooms.reduce((s, r) => s + (Number(r.areaM2) || 0), 0);
   const bathRooms = rooms.filter((r) => {
-    const t = String(r.type ?? '').toLowerCase();
+    const t = r.type.toLowerCase();
     return t === 'bathroom' || t.includes('сануз');
   }).length;
-  const bathPoints = (fixtures.bath ?? 0) + (fixtures.shower ?? 0);
+  const bathPoints = fixtures.bath + fixtures.shower;
   return totalArea > 50 || Math.max(bathRooms, bathPoints) >= 2;
 }
 

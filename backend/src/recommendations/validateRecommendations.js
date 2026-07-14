@@ -6,14 +6,15 @@
 
 /**
  * @param {unknown} json — массив документов
- * @returns {import('./types').RecommendationsBundle}
+ * @param {'file' | 'mongo'} [source]
+ * @returns {import('./types.js').RecommendationsBundle}
  */
 export function validateAndNormalizeRecommendationsBundle(json, source = 'file') {
   if (!Array.isArray(json)) {
     throw new Error('recommendations: ожидается массив документов');
   }
 
-  /** @type {Record<string, import('./types').NormalizedRecommendation>} */
+  /** @type {Record<string, import('./types.js').NormalizedRecommendation>} */
   const byCode = {};
 
   for (let i = 0; i < json.length; i++) {
@@ -55,7 +56,7 @@ export function validateAndNormalizeRecommendationsBundle(json, source = 'file')
     byCode[code] = {
       code,
       schemaVersion: Math.trunc(schemaVersionRaw),
-      category: /** @type {import('./types').RecommendationCategory} */ (category),
+      category: /** @type {import('./types.js').RecommendationCategory} */ (category),
       equipmentType,
       title,
       text,
@@ -73,5 +74,6 @@ export function validateAndNormalizeRecommendationsBundle(json, source = 'file')
     }
   }
 
-  return { byCode, source };
+  const resolvedSource = source === 'mongo' ? 'mongo' : 'file';
+  return { byCode, source: resolvedSource };
 }

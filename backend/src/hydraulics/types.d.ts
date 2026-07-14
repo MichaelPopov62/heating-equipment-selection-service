@@ -187,6 +187,9 @@ export interface HydraulicsRadiatorBranchLayout {
   pipeLengthToEquipmentM: number;
 }
 
+/** Alias для layout веток радиаторов в builders графа. */
+export type HydraulicsBranchLayout = HydraulicsRadiatorBranchLayout;
+
 export interface HydraulicsUfhCollectorTransit {
   floor: number;
   transitLengthM: number;
@@ -404,6 +407,16 @@ export interface HydraulicsCirculationLoopBranch {
   isCritical: boolean;
 }
 
+/** Результат computeCirculationLoops (кольца + балансировка). */
+export interface HydraulicsCirculationLoopsReport {
+  branches: HydraulicsCirculationLoopBranch[];
+  criticalLoop: HydraulicsCirculationLoopBranch | null;
+  criticalLoopEdgeIds: string[];
+  criticalPressureDropKPa: number;
+  headRequiredM: number;
+  balancingRecommendations: HydraulicsBalancingRecommendation[];
+}
+
 export interface HydraulicsBalancingRecommendation {
   branchId: string;
   label: string;
@@ -552,6 +565,8 @@ export interface HydraulicsMatchingReport {
   builtinPumpDuty?: BuiltinPumpDutyReport;
   proposal?: HydraulicsProposalReport;
   warnings: string[];
+  /** Структурированные WARN_* / REC_* по подбору труб. */
+  resolvedRecommendations?: import('../recommendations/types').ResolvedRecommendation[];
 }
 
 export interface HydraulicsReport {

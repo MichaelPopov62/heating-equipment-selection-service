@@ -73,7 +73,7 @@ function toNumberOrEmpty(raw: string): number | '' {
 }
 
 function nextWindowId(roomId: string, windows: WindowFormValue[]): string {
-  const existing = new Set((windows ?? []).map((w) => w.id));
+  const existing = new Set(windows.map((w) => w.id));
   let n = 1;
   let candidate = `win-${roomId}-${n}`;
   while (existing.has(candidate)) {
@@ -216,7 +216,7 @@ export function RoomAccordionItem({
         r.id === room.id
           ? {
               ...r,
-              windows: (r.windows ?? []).map((w, i) =>
+              windows: r.windows.map((w, i) =>
                 i === index ? { ...w, ...patch } : w,
               ),
             }
@@ -229,7 +229,7 @@ export function RoomAccordionItem({
     onChange((prev) =>
       prev.map((r) =>
         r.id === room.id
-          ? { ...r, windows: (r.windows ?? []).filter((_, i) => i !== index) }
+          ? { ...r, windows: r.windows.filter((_, i) => i !== index) }
           : r,
       ),
     );
@@ -250,7 +250,7 @@ export function RoomAccordionItem({
     onChange((prev) =>
       prev.map((r) => {
         if (r.id !== room.id) return r;
-        const wins = r.windows ?? [];
+        const wins = r.windows;
         const defaultPresetId =
           windowPresets.find((p) => p.id === DEFAULT_WINDOW_PRESET_ID)?.id ??
           windowPresets[0]?.id ??
@@ -275,7 +275,7 @@ export function RoomAccordionItem({
         <div className={styles.accHeaderLeft}>
           <div className={styles.cardTitle}>
             Помещение {index + 1}
-            {room.name?.trim() ? ` — ${room.name.trim()}` : ''}
+            {room.name.trim() ? ` — ${room.name.trim()}` : ''}
           </div>
           <div className={styles.cardMeta}>
             Тип: {room.type} ·{' '}
@@ -306,7 +306,7 @@ export function RoomAccordionItem({
               id={`name-${room.id}`}
               className={styles.control}
               value={room.name}
-              onChange={(e) => updateRoom({ name: e.target.value })}
+              onChange={(e) => { updateRoom({ name: e.target.value }); }}
               placeholder={`Комната ${index + 1}`}
             />
           </div>
@@ -351,7 +351,7 @@ export function RoomAccordionItem({
               id={`floor-${room.id}`}
               className={styles.control}
               value={room.floor}
-              onChange={(e) => updateRoom({ floor: Number(e.target.value) as 1 | 2 | 3 })}
+              onChange={(e) => { updateRoom({ floor: Number(e.target.value) as 1 | 2 | 3 }); }}
             >
               {([1, 2, 3] as const)
                 .filter((f) => f <= maxFloors)
@@ -384,7 +384,7 @@ export function RoomAccordionItem({
                   className={styles.control}
                   value={room.bottomBoundaryType}
                   onChange={(e) =>
-                    updateRoom({ bottomBoundaryType: e.target.value as BottomBoundaryType })
+                    { updateRoom({ bottomBoundaryType: e.target.value as BottomBoundaryType }); }
                   }
                 >
                   <option value="heated">Снизу тёплое (пол не считать)</option>
@@ -400,7 +400,7 @@ export function RoomAccordionItem({
                   className={styles.control}
                   value={room.topBoundaryType}
                   onChange={(e) =>
-                    updateRoom({ topBoundaryType: e.target.value as TopBoundaryType })
+                    { updateRoom({ topBoundaryType: e.target.value as TopBoundaryType }); }
                   }
                 >
                   <option value="heated">Сверху тёплое помещение (не считать потолок)</option>
@@ -424,7 +424,7 @@ export function RoomAccordionItem({
               step={0.1}
               value={room.areaM2}
               onChange={(e) =>
-                updateRoom({ areaM2: toNumberOrEmpty(e.target.value) })
+                { updateRoom({ areaM2: toNumberOrEmpty(e.target.value) }); }
               }
             />
           </div>
@@ -442,7 +442,7 @@ export function RoomAccordionItem({
               step={0.05}
               value={room.heightM}
               onChange={(e) =>
-                updateRoom({ heightM: toNumberOrEmpty(e.target.value) })
+                { updateRoom({ heightM: toNumberOrEmpty(e.target.value) }); }
               }
             />
           </div>
@@ -489,7 +489,7 @@ export function RoomAccordionItem({
               id={`floorPresetId-${room.id}`}
               className={styles.control}
               value={floorPresets.length === 0 ? '' : room.floorPresetId}
-              onChange={(e) => updateRoom({ floorPresetId: e.target.value })}
+              onChange={(e) => { updateRoom({ floorPresetId: e.target.value }); }}
               disabled={floorPresets.length === 0}
             >
               {floorPresets.length === 0 ? (
@@ -512,7 +512,7 @@ export function RoomAccordionItem({
                   id={`ufh-enabled-${room.id}`}
                   type="checkbox"
                   checked={ufhEnabled}
-                  onChange={(e) => setUnderfloorEnabled(e.target.checked)}
+                  onChange={(e) => { setUnderfloorEnabled(e.target.checked); }}
                 />
                 <span>Тёплый пол в этом помещении</span>
               </label>
@@ -530,7 +530,7 @@ export function RoomAccordionItem({
                           ? ''
                           : resolvedBaseId
                       }
-                      onChange={(e) => patchUnderfloor({ basePresetId: e.target.value })}
+                      onChange={(e) => { patchUnderfloor({ basePresetId: e.target.value }); }}
                       disabled={underfloorPresetsLoading || underfloorHeatingBases.length === 0}
                     >
                       {underfloorPresetsLoading ? (
@@ -558,7 +558,7 @@ export function RoomAccordionItem({
                           ? ''
                           : resolvedFinishId
                       }
-                      onChange={(e) => patchUnderfloor({ finishMaterialId: e.target.value })}
+                      onChange={(e) => { patchUnderfloor({ finishMaterialId: e.target.value }); }}
                       disabled={underfloorPresetsLoading || flooringFinishes.length === 0}
                     >
                       {underfloorPresetsLoading ? (
@@ -583,9 +583,9 @@ export function RoomAccordionItem({
                       className={styles.control}
                       value={resolvedPipeSpacing}
                       onChange={(e) =>
-                        patchUnderfloor({
+                        { patchUnderfloor({
                           pipeSpacingMm: Number(e.target.value) as UfhPipeSpacingMm,
-                        })
+                        }); }
                       }
                     >
                       {UFH_PIPE_SPACING_OPTIONS.map((mm) => (
@@ -611,9 +611,9 @@ export function RoomAccordionItem({
                       step={0.1}
                       value={resolvedFurnitureArea}
                       onChange={(e) =>
-                        patchUnderfloor({
+                        { patchUnderfloor({
                           furnitureOccupiedAreaM2: toNumberOrEmpty(e.target.value),
-                        })
+                        }); }
                       }
                     />
                   </div>
@@ -633,7 +633,7 @@ export function RoomAccordionItem({
                             name={`ufh-terminal-${room.id}`}
                             checked={resolvedTerminalControl === 'collector'}
                             onChange={() =>
-                              patchUnderfloor({ ufhTerminalControl: 'collector' })
+                              { patchUnderfloor({ ufhTerminalControl: 'collector' }); }
                             }
                           />{' '}
                           Коллектор тёплого пола
@@ -644,7 +644,7 @@ export function RoomAccordionItem({
                             name={`ufh-terminal-${room.id}`}
                             checked={resolvedTerminalControl === 'unibox'}
                             onChange={() =>
-                              patchUnderfloor({ ufhTerminalControl: 'unibox' })
+                              { patchUnderfloor({ ufhTerminalControl: 'unibox' }); }
                             }
                           />{' '}
                           Унибокс (локальный регулятор)
@@ -678,7 +678,7 @@ export function RoomAccordionItem({
                 id={`ceilingPresetId-${room.id}`}
                 className={styles.control}
                 value={ceilingPresets.length === 0 ? '' : room.ceilingPresetId}
-                onChange={(e) => updateRoom({ ceilingPresetId: e.target.value })}
+                onChange={(e) => { updateRoom({ ceilingPresetId: e.target.value }); }}
                 disabled={ceilingPresets.length === 0}
               >
                 {ceilingPresets.length === 0 ? (
@@ -704,7 +704,7 @@ export function RoomAccordionItem({
                 id={`roofPresetId-${room.id}`}
                 className={styles.control}
                 value={roofPresets.length === 0 ? '' : room.roofPresetId}
-                onChange={(e) => updateRoom({ roofPresetId: e.target.value })}
+                onChange={(e) => { updateRoom({ roofPresetId: e.target.value }); }}
                 disabled={roofPresets.length === 0}
               >
                 {roofPresets.length === 0 ? (
@@ -740,7 +740,7 @@ export function RoomAccordionItem({
                     step={0.1}
                     value={room[slot].areaM2}
                     onChange={(e) =>
-                      updateExternalWall(slot, { areaM2: toNumberOrEmpty(e.target.value) })
+                      { updateExternalWall(slot, { areaM2: toNumberOrEmpty(e.target.value) }); }
                     }
                     placeholder={placeholder}
                   />
@@ -754,9 +754,9 @@ export function RoomAccordionItem({
                     className={styles.control}
                     value={room[slot].orientation}
                     onChange={(e) =>
-                      updateExternalWall(slot, {
+                      { updateExternalWall(slot, {
                         orientation: e.target.value as WindowOrientation,
-                      })
+                      }); }
                     }
                   >
                     {ORIENTATION_OPTIONS.map((o) => (
@@ -783,7 +783,7 @@ export function RoomAccordionItem({
                 min={0}
                 step={0.1}
                 value={room.ceilingAreaM2}
-                onChange={(e) => updateRoom({ ceilingAreaM2: toNumberOrEmpty(e.target.value) })}
+                onChange={(e) => { updateRoom({ ceilingAreaM2: toNumberOrEmpty(e.target.value) }); }}
                 placeholder="например, 20"
               />
               <div className={styles.hint}>
@@ -804,7 +804,7 @@ export function RoomAccordionItem({
                 min={0}
                 step={0.1}
                 value={room.roofAreaM2}
-                onChange={(e) => updateRoom({ roofAreaM2: toNumberOrEmpty(e.target.value) })}
+                onChange={(e) => { updateRoom({ roofAreaM2: toNumberOrEmpty(e.target.value) }); }}
                 placeholder="например, 18.5"
               />
               <div className={styles.hint}>
@@ -826,12 +826,12 @@ export function RoomAccordionItem({
               Добавить окно
             </button>
           </div>
-          {(room.windows ?? []).length === 0 ? (
+          {room.windows.length === 0 ? (
             <div className={styles.hint} style={{ gridColumn: '1 / -1' }}>
               Окна не добавлены.
             </div>
           ) : (
-            (room.windows ?? []).map((w, wi) => {
+            room.windows.map((w, wi) => {
               const resolvedWindowPresetId = windowPresets.some((p) => p.id === w.presetId)
                 ? w.presetId
                 : (windowPresets[0]?.id ?? DEFAULT_WINDOW_PRESET_ID);
@@ -856,7 +856,7 @@ export function RoomAccordionItem({
                       id={`win-preset-${room.id}-${wi}`}
                       className={styles.control}
                       value={resolvedWindowPresetId}
-                      onChange={(e) => updateWindowAt(wi, { presetId: e.target.value })}
+                      onChange={(e) => { updateWindowAt(wi, { presetId: e.target.value }); }}
                     >
                       {windowPresets.length === 0 ? (
                         <option value={DEFAULT_WINDOW_PRESET_ID}>
@@ -884,7 +884,7 @@ export function RoomAccordionItem({
                       step={1}
                       value={w.openingWidthMm}
                       onChange={(e) =>
-                        updateWindowAt(wi, { openingWidthMm: toNumberOrEmpty(e.target.value) })
+                        { updateWindowAt(wi, { openingWidthMm: toNumberOrEmpty(e.target.value) }); }
                       }
                     />
                   </div>
@@ -901,7 +901,7 @@ export function RoomAccordionItem({
                       step={1}
                       value={w.openingHeightMm}
                       onChange={(e) =>
-                        updateWindowAt(wi, { openingHeightMm: toNumberOrEmpty(e.target.value) })
+                        { updateWindowAt(wi, { openingHeightMm: toNumberOrEmpty(e.target.value) }); }
                       }
                     />
                   </div>
@@ -915,7 +915,7 @@ export function RoomAccordionItem({
                       className={styles.control}
                       value={w.orientation}
                       onChange={(e) =>
-                        updateWindowAt(wi, { orientation: e.target.value as WindowOrientation })
+                        { updateWindowAt(wi, { orientation: e.target.value as WindowOrientation }); }
                       }
                     >
                       {ORIENTATION_OPTIONS.map((o) => (
@@ -937,7 +937,7 @@ export function RoomAccordionItem({
                       min={1}
                       step={1}
                       value={w.count}
-                      onChange={(e) => updateWindowAt(wi, { count: toNumberOrEmpty(e.target.value) })}
+                      onChange={(e) => { updateWindowAt(wi, { count: toNumberOrEmpty(e.target.value) }); }}
                     />
                     {windowCount != null && (
                       <p className={styles.windowCountHint}>
@@ -954,7 +954,7 @@ export function RoomAccordionItem({
                       id={`win-remove-${room.id}-${wi}`}
                       type="button"
                       className={styles.control}
-                      onClick={() => removeWindowAt(wi)}
+                      onClick={() => { removeWindowAt(wi); }}
                     >
                       Удалить окно
                     </button>

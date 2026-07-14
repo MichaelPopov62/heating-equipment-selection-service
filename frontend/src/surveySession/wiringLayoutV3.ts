@@ -57,8 +57,11 @@ export function createDefaultWiringLayout(): WiringLayoutV3 {
 function branchesEqual(a: WiringBranchV3[], b: WiringBranchV3[]): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i += 1) {
-    if (a[i].roomId !== b[i].roomId) return false;
-    if (a[i].pipeLengthToEquipmentM !== b[i].pipeLengthToEquipmentM) return false;
+    const left = a[i];
+    const right = b[i];
+    if (left === undefined || right === undefined) return false;
+    if (left.roomId !== right.roomId) return false;
+    if (left.pipeLengthToEquipmentM !== right.pipeLengthToEquipmentM) return false;
   }
   return true;
 }

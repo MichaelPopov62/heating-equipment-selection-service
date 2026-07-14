@@ -4,7 +4,7 @@
  * лимит температуры поверхности задаётся материалом (27 °C винил/ламинат, до 35 °C керамика).
  */
 
-/** @typedef {import('../types/shared-types').FlooringFinishMaterial} FlooringFinishMaterial */
+/** @typedef {import('../types/shared-types.js').FlooringFinishMaterial} FlooringFinishMaterial */
 
 /** @type {FlooringFinishMaterial[]} */
 export const FLOORING_FINISH_MATERIALS = [

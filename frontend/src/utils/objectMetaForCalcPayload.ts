@@ -17,5 +17,5 @@ export function objectMetaForCalcPayload(
   return objectMetaForCalcPayloadShared(
     objectMeta,
     waterHeaterForm,
-  ) as ObjectMetaValue;
+  );
 }

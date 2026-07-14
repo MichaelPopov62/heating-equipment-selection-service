@@ -6,13 +6,11 @@
 import { thermalLoadToFlow } from '../hydraulics/thermalLoadToFlow.js';
 
 /**
- * @param {object} args
- * @param {number} args.heatLoadWatts — totalHeatFluxUpWatts
- * @param {number} [args.deltaTK=10]
+ * @param {{ heatLoadWatts?: number; deltaTK?: number }} [args]
  * @returns {{ deltaTK: number; massFlowKgPerSec: number; flowRateM3PerHour: number }}
  */
 export function computeUnderfloorHydraulicsCircuit({
-  heatLoadWatts,
+  heatLoadWatts = 0,
   deltaTK = 10,
 } = {}) {
   const dt = Number(deltaTK) || 10;

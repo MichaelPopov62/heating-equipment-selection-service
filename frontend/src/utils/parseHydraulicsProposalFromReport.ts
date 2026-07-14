@@ -46,6 +46,14 @@ function parsePump(raw: unknown): ParsedHydraulicsPumpProposal | null {
   if (pumpSource === 'catalog' && !catalogPumpId) return null;
   if (!str(p.modeName)) return null;
 
+  const segment =
+    p.segment === 'premium' || p.segment === 'medium' || p.segment === 'budget'
+      ? p.segment
+      : undefined;
+  const connectionNominalMm =
+    typeof p.connectionNominalMm === 'number' ? p.connectionNominalMm : undefined;
+  const note = typeof p.note === 'string' ? p.note : undefined;
+
   return {
     zoneId: str(p.zoneId) || 'boiler_primary',
     zoneLabel: str(p.zoneLabel) || 'Циркуляционный насос',
@@ -55,19 +63,15 @@ function parsePump(raw: unknown): ParsedHydraulicsPumpProposal | null {
     ...(typeof p.catalogBoilerId === 'string' ? { catalogBoilerId: p.catalogBoilerId } : {}),
     brand: str(p.brand),
     model: str(p.model) || catalogPumpId || str(p.zoneLabel),
-    segment:
-      p.segment === 'premium' || p.segment === 'medium' || p.segment === 'budget'
-        ? p.segment
-        : undefined,
+    ...(segment !== undefined ? { segment } : {}),
     price: num(p.price),
     modeName: str(p.modeName),
     headAtDesignM: num(p.headAtDesignM),
     headRequiredM: num(p.headRequiredM),
     designFlowM3PerHour: num(p.designFlowM3PerHour),
     headMarginPercent: num(p.headMarginPercent),
-    connectionNominalMm:
-      typeof p.connectionNominalMm === 'number' ? p.connectionNominalMm : undefined,
-    note: typeof p.note === 'string' ? p.note : undefined,
+    ...(connectionNominalMm !== undefined ? { connectionNominalMm } : {}),
+    ...(note !== undefined ? { note } : {}),
   };
 }
 
@@ -278,10 +282,12 @@ export function parseHydraulicsProposalFromReport(
 
   const hasPipeSelection = pipeLines.length > 0 || pipeLineGroups.length > 0;
 
+  const topology = parseTopology(proposal.topology);
+
   return {
     designFlowM3PerHour: num(proposal.designFlowM3PerHour),
     headRequiredM: num(proposal.headRequiredM),
-    topology: parseTopology(proposal.topology),
+    ...(topology !== undefined ? { topology } : {}),
     pipeLines,
     pipeLineGroups,
     pipeSegments,

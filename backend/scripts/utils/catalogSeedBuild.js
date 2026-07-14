@@ -40,17 +40,31 @@ function resolveProductCatalogKey(prefix, raw, index) {
  * Валидация JSON-каталога тем же контрактом, что и runtime loadCatalog().
  *
  * @param {unknown} parsed — распарсенный test_data.json
- * @returns {import('../../src/catalog/types').NormalizedCatalog}
+ * @returns {import('../../src/catalog/types.js').NormalizedCatalog}
  */
 export function validateCatalogForSeed(parsed) {
   return validateAndNormalizeCatalog(parsed);
 }
 
 /**
+ * @typedef {Object} CatalogSeedSummary
+ * @property {number} boilerDouble
+ * @property {number} boilerSingle
+ * @property {number} radiators
+ * @property {number} waterHeaters
+ * @property {number} pipes
+ * @property {number} pumps
+ * @property {number} indirectWaterHeaters
+ * @property {number} manifolds
+ * @property {number} boilerManifolds
+ * @property {number} uniboxes
+ */
+
+/**
  * Сводка по нормализованному каталогу (логи seed / verify).
  *
- * @param {import('../../src/catalog/types').NormalizedCatalog} norm
- * @returns {Record<string, number>}
+ * @param {import('../../src/catalog/types.js').NormalizedCatalog} norm
+ * @returns {CatalogSeedSummary}
  */
 export function summarizeNormalizedCatalog(norm) {
   return {
@@ -70,7 +84,7 @@ export function summarizeNormalizedCatalog(norm) {
 /**
  * Плоские документы MongoDB products из уже провалидированного каталога.
  *
- * @param {import('../../src/catalog/types').NormalizedCatalog} norm
+ * @param {import('../../src/catalog/types.js').NormalizedCatalog} norm
  * @returns {Record<string, unknown>[]}
  */
 export function buildProductDocumentsFromNormalized(norm) {
@@ -100,8 +114,8 @@ export function buildProductDocumentsFromNormalized(norm) {
   }));
 
   const pipes = (norm.pipes ?? []).map((x, i) => {
-    const raw = cloneJsonSerializable(x);
-    const id = raw?.id != null ? String(raw.id).trim() : '';
+    const raw = /** @type {Record<string, unknown>} */ (cloneJsonSerializable(x));
+    const id = raw.id != null ? String(raw.id).trim() : '';
     return {
       ...raw,
       kind: 'pipe',
@@ -111,14 +125,14 @@ export function buildProductDocumentsFromNormalized(norm) {
   });
 
   const indirectWaterHeaters = (norm.indirectWaterHeaters ?? []).map((x, i) => ({
-    ...cloneJsonSerializable(x),
+    .../** @type {Record<string, unknown>} */ (cloneJsonSerializable(x)),
     kind: 'indirectWaterHeater',
     catalogKey: `indirectWaterHeater-${i}`,
   }));
 
   const pumps = (norm.pumps ?? []).map((x, i) => {
-    const raw = cloneJsonSerializable(x);
-    const id = raw?.id != null ? String(raw.id).trim() : '';
+    const raw = /** @type {Record<string, unknown>} */ (cloneJsonSerializable(x));
+    const id = raw.id != null ? String(raw.id).trim() : '';
     return {
       ...raw,
       kind: 'pump',
@@ -128,7 +142,7 @@ export function buildProductDocumentsFromNormalized(norm) {
   });
 
   const manifolds = (norm.manifolds ?? []).map((x, i) => {
-    const raw = cloneJsonSerializable(x);
+    const raw = /** @type {Record<string, unknown>} */ (cloneJsonSerializable(x));
     return {
       ...raw,
       kind: 'manifold',
@@ -137,7 +151,7 @@ export function buildProductDocumentsFromNormalized(norm) {
   });
 
   const boilerManifolds = (norm.boilerManifolds ?? []).map((x, i) => {
-    const raw = cloneJsonSerializable(x);
+    const raw = /** @type {Record<string, unknown>} */ (cloneJsonSerializable(x));
     return {
       ...raw,
       kind: 'boilerManifold',
@@ -146,8 +160,8 @@ export function buildProductDocumentsFromNormalized(norm) {
   });
 
   const uniboxes = (norm.uniboxes ?? []).map((x, i) => {
-    const raw = cloneJsonSerializable(x);
-    const id = raw?.id != null ? String(raw.id).trim() : '';
+    const raw = /** @type {Record<string, unknown>} */ (cloneJsonSerializable(x));
+    const id = raw.id != null ? String(raw.id).trim() : '';
     return {
       ...raw,
       kind: 'unibox',
@@ -173,7 +187,7 @@ export function buildProductDocumentsFromNormalized(norm) {
  * Валидация + сборка документов для seed (блокирует запись в Mongo при ошибке контракта).
  *
  * @param {unknown} parsed
- * @returns {{ normalized: import('../../src/catalog/types').NormalizedCatalog, docs: Record<string, unknown>[] }}
+ * @returns {{ normalized: import('../../src/catalog/types.js').NormalizedCatalog, docs: Record<string, unknown>[] }}
  */
 export function validateAndBuildProductDocuments(parsed) {
   const normalized = validateCatalogForSeed(parsed);

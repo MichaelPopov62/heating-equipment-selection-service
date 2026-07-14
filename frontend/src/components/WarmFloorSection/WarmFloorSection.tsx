@@ -59,7 +59,7 @@ export function WarmFloorSection({
         <input
           type="checkbox"
           checked={waterUnderfloorHeating}
-          onChange={(e) => onWaterUnderfloorChange(e.target.checked)}
+          onChange={(e) => { onWaterUnderfloorChange(e.target.checked); }}
         />
         <span>В проекте предусмотрен водяной тёплый пол (комнаты на шаге «Помещения»)</span>
       </label>

@@ -39,7 +39,7 @@ async function loadAppliancesJsonFromMongo() {
 }
 
 /**
- * @returns {Promise<{ appliances: import('./types').AppliancesBundle, appliancesSource: 'file' | 'mongo' }>}
+ * @returns {Promise<{ appliances: import('./types.js').AppliancesBundle, appliancesSource: 'file' | 'mongo' }>}
  */
 export async function loadAppliances() {
   const { data, source } = await loadReferenceCollection({

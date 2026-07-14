@@ -68,7 +68,7 @@ export async function postCalc(payload: unknown): Promise<CalcOkPayload> {
         msg =
           typeof m === 'string'
             ? m
-            : m != null && typeof m !== 'object'
+            : typeof m === 'number' || typeof m === 'boolean'
               ? String(m)
               : msg;
       }

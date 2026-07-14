@@ -7,8 +7,8 @@
 /**
  * Подключаем типы из отдельного файла.
  * (Это типизация для редактора/TS Server; на рантайм не влияет.)
- * @typedef {import('./types.d.ts').BoilerCatalogItem} BoilerCatalogItem
- * @typedef {import('./types.d.ts').WaterHeaterCatalogItemNormalized} WaterHeaterCatalogItemNormalized
+ * @typedef {import('./types.js').BoilerCatalogItem} BoilerCatalogItem
+ * @typedef {import('./types.js').WaterHeaterCatalogItemNormalized} WaterHeaterCatalogItemNormalized
  */
 
 /**
@@ -24,7 +24,7 @@ function asNumber(x, fallback = 0) {
 
 /**
  * Берём минимальный объём среди вариантов водонагревателя (литры).
- * @param {import('./types').WaterHeaterCatalogItemNormalized | Record<string, unknown> | null | undefined} item
+ * @param {import('./types.js').WaterHeaterCatalogItemNormalized | Record<string, unknown> | null | undefined} item
  * @returns {number}
  */
 function waterHeaterMinVolumeLiters(item) {
@@ -40,7 +40,7 @@ function waterHeaterMinVolumeLiters(item) {
 
 /**
  * Максимальный объём среди вариантов (для проверки покрытия расчётного бака).
- * @param {import('./types').WaterHeaterCatalogItemNormalized | Record<string, unknown> | null | undefined} item
+ * @param {import('./types.js').WaterHeaterCatalogItemNormalized | Record<string, unknown> | null | undefined} item
  * @returns {number}
  */
 export function waterHeaterMaxVolumeLiters(item) {

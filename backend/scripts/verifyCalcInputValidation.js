@@ -4,6 +4,8 @@
  */
 import { validateAndNormalizeInput } from '../src/api/validate.js';
 import { loadCalcRuntimeContextFromFiles } from './fixtures/calcRuntimeContextFromFiles.js';
+import { buildObjectMeta, buildRoom } from './fixtures/verifyFixtures.js';
+import { assertDefined } from './fixtures/scriptAssert.js';
 
 /** @param {boolean} ok @param {string} label */
 function logCheck(ok, label) {
@@ -28,38 +30,24 @@ function assertThrowsCode(fn, expectedCode, label) {
     fn();
     tally(logCheck(false, label));
   } catch (err) {
-    const code = /** @type {{ code?: string }} */ (err).code;
+    const code = /** @type {import('./fixtures/scriptAssert.js').ErrorWithCode} */ (err).code;
     tally(logCheck(code === expectedCode, label));
   }
 }
 
-/** @returns {import('../src/types/shared-types').CalcRequestBody} */
+/** @param {Partial<import('../src/types/shared-types.js').RoomInput>} [roomsPatch] @returns {import('../src/types/shared-types.js').CalcRequestBody} */
 function minimalBody(roomsPatch) {
-  return {
+  return /** @type {import('../src/types/shared-types.js').CalcRequestBody} */ ({
     building: {
       temps: { insideC: 20, outsideC: -5 },
-      objectMeta: {
-        objectType: 'house',
-        floors: 1,
-        roomsCount: 1,
-        externalWalls: {
-          presetId: 'wall_gas_concrete_d500',
-          thicknessMm: 375,
-          facadeSystem: 'none',
-        },
-      },
+      objectMeta: buildObjectMeta({ objectType: 'house' }),
       rooms: [
-        {
+        buildRoom({
           id: 'r1',
           name: 'Комната',
-          type: 'гостиная',
-          floor: 1,
-          topBoundary: 'heated',
-          bottomBoundary: 'unheated',
           areaM2: 10,
-          heightM: 2.7,
-          ...(roomsPatch ?? {}),
-        },
+          ...roomsPatch,
+        }),
       ],
       envelopeElements: [
         {
@@ -72,7 +60,7 @@ function minimalBody(roomsPatch) {
         },
       ],
     },
-  };
+  });
 }
 
 const ctx = await loadCalcRuntimeContextFromFiles();
@@ -82,7 +70,11 @@ console.log('=== room.type strict ===');
 assertThrowsCode(
   () =>
     validateAndNormalizeInput(
-      minimalBody({ type: 'офис' }),
+      minimalBody({
+        type: /** @type {import('../src/types/shared-types.js').RoomType} */ (
+          /** @type {unknown} */ ('офис')
+        ),
+      }),
       ctx,
     ),
   'ROOM_TYPE_INVALID',
@@ -90,7 +82,14 @@ assertThrowsCode(
 );
 
 assertThrowsCode(
-  () => validateAndNormalizeInput(minimalBody({ type: 'living' }), ctx),
+  () => validateAndNormalizeInput(
+    minimalBody({
+      type: /** @type {import('../src/types/shared-types.js').RoomType} */ (
+        /** @type {unknown} */ ('living')
+      ),
+    }),
+    ctx,
+  ),
   'ROOM_TYPE_INVALID',
   'legacy living больше не поддерживается → ROOM_TYPE_INVALID',
 );
@@ -114,14 +113,15 @@ assertThrowsCode(
 );
 
 const ok = validateAndNormalizeInput(minimalBody(), ctx);
-tally(logCheck(ok.building?.rooms?.[0]?.type === 'гостиная', 'канонический type → OK'));
+const firstRoom = assertDefined(ok.building?.rooms?.[0], 'ok.building.rooms[0]');
+tally(logCheck(firstRoom.type === 'гостиная', 'канонический type → OK'));
 
 console.log('\n=== UFH mode preset ===');
 
 /**
  * @param {string} finishMaterialId
  * @param {string} ufhPresetId
- * @returns {import('../src/types/shared-types').CalcRequestBody}
+ * @returns {import('../src/types/shared-types.js').CalcRequestBody}
  */
 function ufhBody(finishMaterialId, ufhPresetId) {
   const body = minimalBody({
@@ -131,16 +131,18 @@ function ufhBody(finishMaterialId, ufhPresetId) {
       finishMaterialId,
     },
   });
-  body.heatingSystem = {
-    waterUnderfloorHeating: true,
-    ufhPresetId,
-    thermalRegimePreset: 'condensing_dt30_55_45',
-    supplyC: 55,
-    returnC: 45,
-    radiatorReferenceDeltaT: 50,
-    radiatorConnection: 'side',
-    hotWaterBoilerPowerMatchingScheme: 'maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw',
-  };
+  body.heatingSystem = /** @type {import('../src/types/shared-types.js').HeatingSystemInput} */ (
+    /** @type {unknown} */ ({
+      waterUnderfloorHeating: true,
+      ufhPresetId,
+      thermalRegimePreset: 'condensing_dt30_55_45',
+      supplyC: 55,
+      returnC: 45,
+      radiatorReferenceDeltaT: 50,
+      radiatorConnection: 'side',
+      hotWaterBoilerPowerMatchingScheme: 'maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw',
+    })
+  );
   return body;
 }
 

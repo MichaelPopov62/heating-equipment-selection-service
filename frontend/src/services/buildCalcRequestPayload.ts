@@ -73,8 +73,8 @@ export function buildCalcRequestPayload(params: {
       roomExteriorLayout: inferRoomExteriorLayout(r),
     };
     if (waterUnderfloorHeating && r.underfloorHeating?.enabled) {
-      const basePresetId = r.underfloorHeating.basePresetId?.trim() ?? '';
-      const finishMaterialId = r.underfloorHeating.finishMaterialId?.trim() ?? '';
+      const basePresetId = r.underfloorHeating.basePresetId.trim();
+      const finishMaterialId = r.underfloorHeating.finishMaterialId.trim();
       if (basePresetId && finishMaterialId) {
         const spacing = r.underfloorHeating.pipeSpacingMm;
         const pipeSpacingMm =
@@ -156,7 +156,7 @@ export function buildCalcRequestPayload(params: {
       }
     }
 
-    for (const w of r.windows ?? []) {
+    for (const w of r.windows) {
       const wMm = typeof w.openingWidthMm === 'number' ? w.openingWidthMm : null;
       const hMm = typeof w.openingHeightMm === 'number' ? w.openingHeightMm : null;
       if (!wMm || !hMm) continue;
@@ -250,7 +250,7 @@ export function buildCalcRequestPayload(params: {
             ...(hydraulicsForm.pipeMaterialPreference
               ? { pipeMaterialPreference: hydraulicsForm.pipeMaterialPreference }
               : {}),
-            ...(wiringLayoutV3?.branches?.length
+            ...(wiringLayoutV3 != null && wiringLayoutV3.branches.length > 0
               ? {
                   radiatorBranchOverrides: wiringLayoutV3.branches
                     .filter((b) => rooms.some((r) => r.id === b.roomId))

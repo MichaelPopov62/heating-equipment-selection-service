@@ -332,9 +332,9 @@ function ProposalContent({
           <PipeLinesTable
             title="Трубы (сводка по позициям каталога)"
             pipeLines={proposal.pipeLines}
-            footerPrice={
-              proposal.estimatedPipesPrice > 0 ? proposal.estimatedPipesPrice : undefined
-            }
+            {...(proposal.estimatedPipesPrice > 0
+              ? { footerPrice: proposal.estimatedPipesPrice }
+              : {})}
           />
         )}
 
@@ -485,7 +485,10 @@ export function HydraulicsProposalSection({
       )}
 
       {proposal ? (
-        <ProposalContent proposal={proposal} catalogSource={catalogSource} />
+        <ProposalContent
+          proposal={proposal}
+          {...(catalogSource !== undefined ? { catalogSource } : {})}
+        />
       ) : (
         calculations != null && (
           <p className={styles.hint}>

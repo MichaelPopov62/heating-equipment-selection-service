@@ -6,8 +6,6 @@
 import type {
   CatalogManifoldDimensions,
   CatalogUniboxItem,
-  UniboxConnectionFit,
-  UniboxConnectionThread,
   UniboxType,
 } from './catalogTypes';
 
@@ -88,8 +86,8 @@ export function parseCatalogUniboxItem(row: unknown): CatalogUniboxItem | null {
   const fitRaw = typeof c.fit === 'string' ? c.fit.trim() : '';
   if (threadRaw !== 'G1/2' && threadRaw !== 'G3/4') return null;
   if (fitRaw !== 'eurocone' && fitRaw !== 'internal_thread') return null;
-  const thread = threadRaw as UniboxConnectionThread;
-  const fit = fitRaw as UniboxConnectionFit;
+  const thread = threadRaw;
+  const fit = fitRaw;
 
   /** @type {CatalogUniboxItem} */
   const item: CatalogUniboxItem = {

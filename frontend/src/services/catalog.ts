@@ -49,7 +49,7 @@ function catalogFailureMessage(status: number, raw: unknown): string {
     && 'error' in raw
     && typeof (raw as { error?: { message?: unknown } }).error?.message === 'string'
   ) {
-    const m = String((raw as { error: { message: string } }).error.message).trim();
+    const m = (raw as { error: { message: string } }).error.message.trim();
     if (m) return m;
   }
   if (status === 502 || status === 503 || status === 504) {

@@ -8,7 +8,7 @@ import {
 } from '../../../shared/ufhDistributionPresets.js';
 
 /**
- * @param {import('../types/shared-types').CalcRequestBody} body
+ * @param {import('../types/shared-types.js').CalcRequestBody} body
  */
 export function normalizeUnderfloorDistributionPreset(body) {
   const hs = body.heatingSystem;

@@ -3,6 +3,7 @@
  * Запуск: cd backend && npm run verify:project-calc-input
  */
 import { resolveProjectCalcInput } from '../src/projects/resolveProjectCalcInput.js';
+import { assertDefined } from './fixtures/scriptAssert.js';
 
 /** @param {boolean} ok @param {string} label */
 function logCheck(ok, label) {
@@ -17,7 +18,7 @@ function tally(ok) {
   if (!ok) failed += 1;
 }
 
-/** @returns {import('../src/types/shared-types').CalcRequestBody} */
+/** @returns {import('../src/types/shared-types.js').CalcRequestBody} */
 function sampleCalcInput() {
   return {
     building: {
@@ -63,14 +64,15 @@ function assertThrowsCode(fn, expectedCode, label) {
     fn();
     tally(logCheck(false, label));
   } catch (err) {
-    const code = /** @type {{ code?: string }} */ (err).code;
+    const code = /** @type {import('./fixtures/scriptAssert.js').ErrorWithCode} */ (err).code;
     tally(logCheck(code === expectedCode, label));
   }
 }
 
 const calc = sampleCalcInput();
 const last = sampleCalcInput();
-last.building.temps.outsideC = -10;
+const lastTemps = assertDefined(last.building.temps, 'last.building.temps');
+lastTemps.outsideC = -10;
 
 console.log('=== resolveProjectCalcInput ===');
 
@@ -84,10 +86,11 @@ tally(
 );
 
 const fromBody = resolveProjectCalcInput({ ...calc, survey: { draft: true } }, null);
+const bodyPayload = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (fromBody.payload));
 tally(
   logCheck(
     fromBody.source === 'body'
-      && fromBody.payload.survey === undefined
+      && bodyPayload.survey === undefined
       && fromBody.payload.building?.temps?.outsideC === -5,
     'корневой CalcInput + survey → body без survey',
   ),

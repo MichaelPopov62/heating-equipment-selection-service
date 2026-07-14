@@ -16,6 +16,15 @@ import {
   MANIFOLD_FAILURE_CODE_INTERNAL,
   MANIFOLD_FAILURE_CODE_INPUT,
 } from '../src/matching/manifold.js';
+import { assertAt } from './fixtures/scriptAssert.js';
+import {
+  buildObjectMeta,
+  buildPartialCatalog,
+  buildBuildingInput,
+  buildRoom,
+  buildUfhReport,
+  buildUfhRoom,
+} from './fixtures/verifyFixtures.js';
 
 assert.equal(UFH_MANIFOLD_MAX_OUTLETS_PER_NODE, 12);
 assert.deepEqual(splitOutletsForCascade(5), [5]);
@@ -24,7 +33,7 @@ assert.deepEqual(splitOutletsForCascade(13), [7, 6]);
 assert.deepEqual(splitOutletsForCascade(14), [7, 7]);
 assert.deepEqual(splitOutletsForCascade(25), [9, 8, 8]);
 
-/** @type {import('../src/catalog/types').ManifoldCatalogItemNormalized[]} */
+/** @type {import('../src/catalog/types.js').ManifoldCatalogItemNormalized[]} */
 const MANIFOLDS = [
   {
     model: 'Rad-3',
@@ -133,7 +142,7 @@ const MANIFOLDS = [
   },
 ];
 
-/** @type {import('../src/catalog/types').BoilerManifoldCatalogItemNormalized[]} */
+/** @type {import('../src/catalog/types.js').BoilerManifoldCatalogItemNormalized[]} */
 const BOILER_MANIFOLDS = [
   {
     model: 'BM-3',
@@ -169,49 +178,20 @@ const BOILER_MANIFOLDS = [
   },
 ];
 
-/** @type {import('../src/catalog/types').NormalizedCatalog} */
-const catalog = {
-  boilers: { doubleCircuit: [], singleCircuit: [] },
-  radiators: [],
-  waterHeaters: [],
+/** @type {import('../src/catalog/types.js').NormalizedCatalog} */
+const catalog = buildPartialCatalog({
   manifolds: MANIFOLDS,
   boilerManifolds: BOILER_MANIFOLDS,
-};
+});
 
 /**
  * @param {string} roomId
  * @param {string} roomName
  * @param {number} loopsCount
- * @returns {import('../src/types/shared-types').UnderfloorHeatingRoomReport}
+ * @returns {import('../src/types/shared-types.js').UnderfloorHeatingRoomReport}
  */
 function ufhRoom(roomId, roomName, loopsCount) {
-  return {
-    roomId,
-    roomName,
-    loopsCount,
-    heatFluxUpWatts: 1000,
-    heatFluxDownWatts: 100,
-    heatFluxUpWm2: 80,
-    heatFluxDownWm2: 8,
-    maxAllowableHeatFluxUpWm2: 100,
-    surfaceTempC: 26,
-    maxSurfaceTemperatureCelsius: 29,
-    pipeSpacingMm: 150,
-    pipeEmbedmentResistanceM2KW: 0.05,
-    baseCoveringResistanceM2KW: 0,
-    finishCoveringResistanceM2KW: 0.05,
-    coveringResistanceM2KW: 0.05,
-    resistanceUpM2KW: 0.1,
-    resistanceDownM2KW: 0.5,
-    circuitSupplyC: 40,
-    circuitReturnC: 30,
-    circuitMeanC: 35,
-    bottomBoundary: 'heated',
-    neighborTempC: 20,
-    warnings: [],
-    heatedAreaM2: 12,
-    areaM2: 12,
-  };
+  return buildUfhRoom(roomId, roomName, loopsCount);
 }
 
 // 1) ТП: 5 петель → мінімальний underfloor з ≥5 і hasFlowMeters
@@ -240,23 +220,18 @@ function ufhRoom(roomId, roomName, loopsCount) {
 {
   const report = pickManifolds({
     catalog,
-    building: {
-      objectMeta: { objectType: 'apartment', floors: 1, roomsCount: 2 },
+    building: buildBuildingInput({
+      objectMeta: buildObjectMeta({ objectType: 'apartment', roomsCount: 2 }),
       rooms: [
-        { id: 'r1', name: 'Кімната', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 12, heightM: 2.7 },
+        buildRoom({ id: 'r1', name: 'Кімната', areaM2: 12 }),
       ],
-    },
-    underfloorHeating: {
-      enabled: true,
-      circuitSupplyC: 40,
-      circuitReturnC: 30,
-      circuitMeanC: 35,
-      circuitSource: 'finish_preset',
+    }),
+    underfloorHeating: buildUfhReport({
       distributionPreset: 'collector_mixing_valve',
       rooms: [ufhRoom('r1', 'Кімната', 5)],
       totalHeatFluxUpWatts: 1000,
       totalHeatFluxDownWatts: 100,
-    },
+    }),
     radiators: { chosen: null, byRoom: [], warnings: [] },
     boiler: { requiredKw: 12, warnings: [] },
     hydraulics: { radiatorWiringSystemType: 'auto' },
@@ -264,9 +239,10 @@ function ufhRoom(roomId, roomName, loopsCount) {
   assert.equal(report.ok, true);
   assert.equal(report.failureCode, undefined);
   assert.equal(report.underfloor.length, 1);
-  assert.equal(report.underfloor[0].requiredOutlets, 5);
-  assert.equal(report.underfloor[0].units.length, 1);
-  assert.equal(report.underfloor[0].units[0].selected?.model, 'Ufh-5-FM');
+  const ufhFloor0 = assertAt(report.underfloor, 0, 'underfloor[0]');
+  assert.equal(ufhFloor0.requiredOutlets, 5);
+  assert.equal(ufhFloor0.units.length, 1);
+  assert.equal(assertAt(ufhFloor0.units, 0, 'underfloor[0].units[0]').selected?.model, 'Ufh-5-FM');
   assert.equal(report.boilerManifold, null);
   assert.equal(report.radiator, null);
 }
@@ -275,24 +251,19 @@ function ufhRoom(roomId, roomName, loopsCount) {
 {
   const report = pickManifolds({
     catalog,
-    building: {
-      objectMeta: { objectType: 'house', floors: 1, roomsCount: 2 },
+    building: buildBuildingInput({
+      objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 2 }),
       rooms: [
-        { id: 'r1', name: 'Зал', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 20, heightM: 2.7 },
-        { id: 'r2', name: 'Спальня', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 15, heightM: 2.7 },
+        buildRoom({ id: 'r1', name: 'Зал', areaM2: 20 }),
+        buildRoom({ id: 'r2', name: 'Спальня', areaM2: 15 }),
       ],
-    },
-    underfloorHeating: {
-      enabled: true,
-      circuitSupplyC: 40,
-      circuitReturnC: 30,
-      circuitMeanC: 35,
-      circuitSource: 'finish_preset',
+    }),
+    underfloorHeating: buildUfhReport({
       distributionPreset: 'hydraulic_separator',
       rooms: [ufhRoom('r1', 'Зал', 4)],
       totalHeatFluxUpWatts: 2000,
       totalHeatFluxDownWatts: 200,
-    },
+    }),
     radiators: {
       chosen: null,
       byRoom: [
@@ -317,21 +288,21 @@ function ufhRoom(roomId, roomName, loopsCount) {
   assert.equal(report.boilerManifold.requiredCircuits, 2);
   assert.equal(report.boilerManifold.requiredPowerKw, 24);
   assert.equal(report.boilerManifold.selected?.model, 'BM-3');
-  assert.equal(report.underfloor[0].units[0].selected?.model, 'Ufh-5-FM');
+  assert.equal(assertAt(assertAt(report.underfloor, 0).units, 0).selected?.model, 'Ufh-5-FM');
 }
 
 // 5) radiator wiring = manifold
 {
   const report = pickManifolds({
     catalog,
-    building: {
-      objectMeta: { objectType: 'house', floors: 1, roomsCount: 3 },
+    building: buildBuildingInput({
+      objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 3 }),
       rooms: [
-        { id: 'a', name: 'A', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 10, heightM: 2.7 },
-        { id: 'b', name: 'B', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 10, heightM: 2.7 },
-        { id: 'c', name: 'C', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 10, heightM: 2.7 },
+        buildRoom({ id: 'a', name: 'A', areaM2: 10 }),
+        buildRoom({ id: 'b', name: 'B', areaM2: 10 }),
+        buildRoom({ id: 'c', name: 'C', areaM2: 10 }),
       ],
-    },
+    }),
     underfloorHeating: null,
     radiators: {
       chosen: null,
@@ -355,13 +326,7 @@ function ufhRoom(roomId, roomName, loopsCount) {
 
 // 6) порожній пул → warning, selected null
 {
-  const empty = {
-    boilers: { doubleCircuit: [], singleCircuit: [] },
-    radiators: [],
-    waterHeaters: [],
-    manifolds: [],
-    boilerManifolds: [],
-  };
+  const empty = buildPartialCatalog({});
   const d = pickDistributionManifold({
     catalog: empty,
     application: 'underfloor',
@@ -383,19 +348,14 @@ function ufhRoom(roomId, roomName, loopsCount) {
 {
   const report = pickManifolds({
     catalog,
-    building: {
-      objectMeta: { objectType: 'house', floors: 2, roomsCount: 2 },
+    building: buildBuildingInput({
+      objectMeta: buildObjectMeta({ objectType: 'house', floors: 2, roomsCount: 2 }),
       rooms: [
-        { id: 'f1', name: '1п', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 15, heightM: 2.7 },
-        { id: 'f2', name: '2п', type: 'living', floor: 2, topBoundary: 'roof', areaM2: 15, heightM: 2.7 },
+        buildRoom({ id: 'f1', name: '1п', floor: 1, areaM2: 15 }),
+        buildRoom({ id: 'f2', name: '2п', floor: 2, topBoundary: 'roof', areaM2: 15 }),
       ],
-    },
-    underfloorHeating: {
-      enabled: true,
-      circuitSupplyC: 40,
-      circuitReturnC: 30,
-      circuitMeanC: 35,
-      circuitSource: 'finish_preset',
+    }),
+    underfloorHeating: buildUfhReport({
       distributionPreset: 'collector_mixing_valve',
       rooms: [
         ufhRoom('f1', '1п', 3),
@@ -403,50 +363,48 @@ function ufhRoom(roomId, roomName, loopsCount) {
       ],
       totalHeatFluxUpWatts: 2000,
       totalHeatFluxDownWatts: 200,
-    },
+    }),
     radiators: { chosen: null, byRoom: [], warnings: [] },
     boiler: { requiredKw: 15, warnings: [] },
     hydraulics: {},
   });
   assert.equal(report.ok, true);
   assert.equal(report.underfloor.length, 2);
-  assert.equal(report.underfloor[0].floor, 1);
-  assert.equal(report.underfloor[0].requiredOutlets, 3);
-  assert.equal(report.underfloor[0].units.length, 1);
-  assert.equal(report.underfloor[1].floor, 2);
-  assert.equal(report.underfloor[1].requiredOutlets, 5);
-  assert.equal(report.underfloor[1].units[0].selected?.model, 'Ufh-5-FM');
+  const ufhFloor0Multi = assertAt(report.underfloor, 0, 'underfloor[0]');
+  const ufhFloor1Multi = assertAt(report.underfloor, 1, 'underfloor[1]');
+  assert.equal(ufhFloor0Multi.floor, 1);
+  assert.equal(ufhFloor0Multi.requiredOutlets, 3);
+  assert.equal(ufhFloor0Multi.units.length, 1);
+  assert.equal(ufhFloor1Multi.floor, 2);
+  assert.equal(ufhFloor1Multi.requiredOutlets, 5);
+  assert.equal(assertAt(ufhFloor1Multi.units, 0).selected?.model, 'Ufh-5-FM');
 }
 
 // 8) 12 петель → 1 unit, без cascade warning
 {
   const report = pickManifolds({
     catalog,
-    building: {
-      objectMeta: { objectType: 'house', floors: 1, roomsCount: 1 },
+    building: buildBuildingInput({
+      objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 1 }),
       rooms: [
-        { id: 'r1', name: 'Зал', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 40, heightM: 2.7 },
+        buildRoom({ id: 'r1', name: 'Зал', areaM2: 40 }),
       ],
-    },
-    underfloorHeating: {
-      enabled: true,
-      circuitSupplyC: 40,
-      circuitReturnC: 30,
-      circuitMeanC: 35,
-      circuitSource: 'finish_preset',
+    }),
+    underfloorHeating: buildUfhReport({
       distributionPreset: 'collector_mixing_valve',
       rooms: [ufhRoom('r1', 'Зал', 12)],
       totalHeatFluxUpWatts: 3000,
       totalHeatFluxDownWatts: 300,
-    },
+    }),
     radiators: { chosen: null, byRoom: [], warnings: [] },
     boiler: { requiredKw: 20, warnings: [] },
     hydraulics: {},
   });
   assert.equal(report.ok, true);
-  assert.equal(report.underfloor[0].units.length, 1);
-  assert.equal(report.underfloor[0].units[0].requiredOutlets, 12);
-  assert.equal(report.underfloor[0].units[0].selected?.model, 'Ufh-12-FM');
+  const ufh12 = assertAt(report.underfloor, 0);
+  assert.equal(ufh12.units.length, 1);
+  assert.equal(assertAt(ufh12.units, 0).requiredOutlets, 12);
+  assert.equal(assertAt(ufh12.units, 0).selected?.model, 'Ufh-12-FM');
   assert.ok(!report.warnings.some((w) => w.includes('Превышен лимит петель')));
 }
 
@@ -454,35 +412,30 @@ function ufhRoom(roomId, roomName, loopsCount) {
 {
   const report = pickManifolds({
     catalog,
-    building: {
-      objectMeta: { objectType: 'house', floors: 1, roomsCount: 1 },
+    building: buildBuildingInput({
+      objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 1 }),
       rooms: [
-        { id: 'r1', name: 'Зал', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 50, heightM: 2.7 },
+        buildRoom({ id: 'r1', name: 'Зал', areaM2: 50 }),
       ],
-    },
-    underfloorHeating: {
-      enabled: true,
-      circuitSupplyC: 40,
-      circuitReturnC: 30,
-      circuitMeanC: 35,
-      circuitSource: 'finish_preset',
+    }),
+    underfloorHeating: buildUfhReport({
       distributionPreset: 'collector_mixing_valve',
       rooms: [ufhRoom('r1', 'Зал', 14)],
       totalHeatFluxUpWatts: 4000,
       totalHeatFluxDownWatts: 400,
-    },
+    }),
     radiators: { chosen: null, byRoom: [], warnings: [] },
     boiler: { requiredKw: 24, warnings: [] },
     hydraulics: {},
   });
   assert.equal(report.ok, true);
-  const floorPick = report.underfloor[0];
+  const floorPick = assertAt(report.underfloor, 0, 'underfloor[0] cascade 14');
   assert.equal(floorPick.requiredOutlets, 14);
   assert.equal(floorPick.units.length, 2);
-  assert.equal(floorPick.units[0].requiredOutlets, 7);
-  assert.equal(floorPick.units[1].requiredOutlets, 7);
-  assert.equal(floorPick.units[0].selected?.model, 'Ufh-7-FM');
-  assert.equal(floorPick.units[1].selected?.model, 'Ufh-7-FM');
+  assert.equal(assertAt(floorPick.units, 0).requiredOutlets, 7);
+  assert.equal(assertAt(floorPick.units, 1).requiredOutlets, 7);
+  assert.equal(assertAt(floorPick.units, 0).selected?.model, 'Ufh-7-FM');
+  assert.equal(assertAt(floorPick.units, 1).selected?.model, 'Ufh-7-FM');
   assert.ok(
     report.warnings.some(
       (w) =>
@@ -497,29 +450,24 @@ function ufhRoom(roomId, roomName, loopsCount) {
 {
   const report = pickManifolds({
     catalog,
-    building: {
-      objectMeta: { objectType: 'house', floors: 1, roomsCount: 1 },
+    building: buildBuildingInput({
+      objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 1 }),
       rooms: [
-        { id: 'r1', name: 'Зал', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 80, heightM: 2.7 },
+        buildRoom({ id: 'r1', name: 'Зал', areaM2: 80 }),
       ],
-    },
-    underfloorHeating: {
-      enabled: true,
-      circuitSupplyC: 40,
-      circuitReturnC: 30,
-      circuitMeanC: 35,
-      circuitSource: 'finish_preset',
+    }),
+    underfloorHeating: buildUfhReport({
       distributionPreset: 'collector_mixing_valve',
       rooms: [ufhRoom('r1', 'Зал', 25)],
       totalHeatFluxUpWatts: 6000,
       totalHeatFluxDownWatts: 600,
-    },
+    }),
     radiators: { chosen: null, byRoom: [], warnings: [] },
     boiler: { requiredKw: 30, warnings: [] },
     hydraulics: {},
   });
   assert.equal(report.ok, true);
-  const units = report.underfloor[0].units;
+  const units = assertAt(report.underfloor, 0).units;
   assert.equal(units.length, 3);
   assert.deepEqual(
     units.map((u) => u.requiredOutlets),
@@ -530,32 +478,21 @@ function ufhRoom(roomId, roomName, loopsCount) {
 
 // 11) порожній каталог underfloor — штатний ok:true + selected null (не soft-fail)
 {
-  const empty = {
-    boilers: { doubleCircuit: [], singleCircuit: [] },
-    radiators: [],
-    waterHeaters: [],
-    manifolds: [],
-    boilerManifolds: [],
-  };
+  const empty = buildPartialCatalog({});
   const report = pickManifolds({
     catalog: empty,
-    building: {
-      objectMeta: { objectType: 'apartment', floors: 1, roomsCount: 1 },
+    building: buildBuildingInput({
+      objectMeta: buildObjectMeta({ objectType: 'apartment', roomsCount: 1 }),
       rooms: [
-        { id: 'r1', name: 'Кімната', type: 'living', floor: 1, topBoundary: 'heated', areaM2: 12, heightM: 2.7 },
+        buildRoom({ id: 'r1', name: 'Кімната', areaM2: 12 }),
       ],
-    },
-    underfloorHeating: {
-      enabled: true,
-      circuitSupplyC: 40,
-      circuitReturnC: 30,
-      circuitMeanC: 35,
-      circuitSource: 'finish_preset',
+    }),
+    underfloorHeating: buildUfhReport({
       distributionPreset: 'collector_mixing_valve',
       rooms: [ufhRoom('r1', 'Кімната', 4)],
       totalHeatFluxUpWatts: 1000,
       totalHeatFluxDownWatts: 100,
-    },
+    }),
     radiators: { chosen: null, byRoom: [], warnings: [] },
     boiler: { requiredKw: 12, warnings: [] },
     hydraulics: {},
@@ -563,7 +500,7 @@ function ufhRoom(roomId, roomName, loopsCount) {
   assert.equal(report.ok, true);
   assert.equal(report.failureCode, undefined);
   assert.equal(report.underfloor.length, 1);
-  assert.equal(report.underfloor[0].units[0].selected, null);
+  assert.equal(assertAt(assertAt(report.underfloor, 0).units, 0).selected, null);
   assert.ok(report.warnings.some((w) => w.includes('нет коллекторов')));
 }
 
@@ -609,6 +546,7 @@ function ufhRoom(roomId, roomName, loopsCount) {
 
 // 14) INPUT_INVALID через err.code
 {
+  /** @type {Error & { code?: string }} */
   const err = new Error('bad floor map');
   err.code = MANIFOLD_FAILURE_CODE_INPUT;
   const report = pickManifoldsWithCore(() => {

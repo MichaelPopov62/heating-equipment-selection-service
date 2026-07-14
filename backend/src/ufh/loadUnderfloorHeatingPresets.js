@@ -42,7 +42,7 @@ async function loadUfhPresetsJsonFromMongo() {
 }
 
 /**
- * @returns {Promise<{ ufhPresets: import('./types').UnderfloorHeatingPresetsBundle, ufhPresetsSource: 'file' | 'mongo' }>}
+ * @returns {Promise<{ ufhPresets: import('./types.js').UnderfloorHeatingPresetsBundle, ufhPresetsSource: 'file' | 'mongo' }>}
  */
 export async function loadUnderfloorHeatingPresets() {
   const mode = resolveReferenceSourceMode('UFH_PRESETS_SOURCE', 'auto');

@@ -23,7 +23,7 @@ export const UNIBOX_ROOM_AIR_TEMP_PRESETS_C = Object.freeze({
 });
 
 /**
- * @typedef {'preset' | 'survey' | 'bathroom_field' | 'floor'} UniboxRoomAirTempSource
+ * @typedef {import('../../types/shared-types.js').UniboxRoomAirTempSource} UniboxRoomAirTempSource
  */
 
 /**
@@ -42,13 +42,13 @@ export const UNIBOX_ROOM_AIR_TEMP_PRESETS_C = Object.freeze({
  */
 export function resolveUniboxRoomAirTempC(roomType, surveyInsideC, bathroomAirTempC) {
   const resolved = resolveDesignRoomAirTempC({
-    roomType,
+    ...(roomType !== undefined ? { roomType } : {}),
     insideC: surveyInsideC,
-    bathroomAirTempC,
+    ...(bathroomAirTempC !== undefined ? { bathroomAirTempC } : {}),
   });
   if (!resolved) return null;
 
-  /** @type {UniboxRoomAirTempSource} */
+  /** @type {'preset' | 'survey' | 'bathroom_field' | 'floor'} */
   let roomAirTempSource = 'survey';
   if (resolved.source === 'floor' || resolved.source === 'bathroom_field') {
     roomAirTempSource = resolved.source;

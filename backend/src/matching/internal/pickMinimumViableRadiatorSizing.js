@@ -15,8 +15,8 @@ import {
 
 /**
  * @param {object} args
- * @param {import('../../catalog/types').RadiatorCatalogItemNormalized[]} args.sectionalPool
- * @param {import('../../catalog/types').RadiatorCatalogItemNormalized[]} args.panelPoolFiltered
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized[]} args.sectionalPool
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized[]} args.panelPoolFiltered
  * @param {50 | 70} args.baseDeltaT
  * @param {number} args.targetDeltaT
  * @param {'side' | 'bottom' | undefined} args.radiatorConnection
@@ -55,11 +55,11 @@ export function pickMinimumViableRadiatorSizing(args) {
 }
 
 /**
- * @param {import('../../catalog/types').NormalizedCatalog} catalog
+ * @param {import('../../catalog/types.js').NormalizedCatalog} catalog
  * @param {'side' | 'bottom' | undefined} radiatorConnection
  * @returns {{
- *   sectionalPool: import('../../catalog/types').RadiatorCatalogItemNormalized[];
- *   panelPoolFiltered: import('../../catalog/types').RadiatorCatalogItemNormalized[];
+ *   sectionalPool: import('../../catalog/types.js').RadiatorCatalogItemNormalized[];
+ *   panelPoolFiltered: import('../../catalog/types.js').RadiatorCatalogItemNormalized[];
  * }}
  */
 export function buildRadiatorPoolsForSizing(catalog, radiatorConnection) {

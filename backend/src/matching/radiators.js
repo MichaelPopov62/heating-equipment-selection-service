@@ -11,12 +11,12 @@ import {
 } from './internal/summarizeRadiatorEmitters.js';
 
 /**
- * @param {import('../types/shared-types').HeatingSystemInput} baseHeatingSystem
+ * @param {import('../types/shared-types.js').HeatingSystemInput} baseHeatingSystem
  * @param {'economy' | 'efficient'} tier
- * @returns {import('../types/shared-types').HeatingSystemInput}
+ * @returns {import('../types/shared-types.js').HeatingSystemInput}
  */
 function heatingSystemSnapshotForRadiatorTier(baseHeatingSystem, tier) {
-  /** @type {import('../types/shared-types').HeatingThermalRegimePreset} */
+  /** @type {import('../types/shared-types.js').HeatingThermalRegimePreset} */
   const preset =
     tier === 'economy' ? 'traditional_dt50_75_65' : 'condensing_dt30_55_45';
   const hs = structuredClone(baseHeatingSystem ?? {});
@@ -25,10 +25,10 @@ function heatingSystemSnapshotForRadiatorTier(baseHeatingSystem, tier) {
 }
 
 /**
- * @param {import('../types/shared-types').RadiatorsMatchingReport} tierReport
+ * @param {import('../types/shared-types.js').RadiatorsMatchingReport} tierReport
  * @param {'economy' | 'efficient'} tier
- * @param {import('../types/boiler-types').BoilerEquipmentProposal} boilerProposal
- * @returns {import('../types/shared-types').RadiatorsProposalLineReport}
+ * @param {import('../types/boiler-types.js').BoilerEquipmentProposal} boilerProposal
+ * @returns {import('../types/shared-types.js').RadiatorsProposalLineReport}
  */
 function wrapRadiatorProposalLine(tierReport, tier, boilerProposal) {
   const emittersSummary =
@@ -38,24 +38,30 @@ function wrapRadiatorProposalLine(tierReport, tier, boilerProposal) {
     boilerModel: boilerProposal.model ?? null,
     chosen: tierReport.chosen,
     byRoom: tierReport.byRoom,
-    inputs: tierReport.inputs,
+    ...(tierReport.inputs != null ? { inputs: tierReport.inputs } : {}),
     warnings: tierReport.warnings,
-    radiatorSelectionNotes: tierReport.radiatorSelectionNotes,
+    ...(tierReport.radiatorSelectionNotes != null
+      ? { radiatorSelectionNotes: tierReport.radiatorSelectionNotes }
+      : {}),
     emittersSummary,
     totalSections:
       emittersSummary.sectionalUnits > 0 || emittersSummary.panelUnits > 0
         ? emittersSummary.sectionalSections
         : null,
     resolvedEmitterKind: tierReport.resolvedEmitterKind ?? null,
-    emitterKindVotes: tierReport.emitterKindVotes,
-    emitterKindDecisionNotes: tierReport.emitterKindDecisionNotes,
+    ...(tierReport.emitterKindVotes != null
+      ? { emitterKindVotes: tierReport.emitterKindVotes }
+      : {}),
+    ...(tierReport.emitterKindDecisionNotes != null
+      ? { emitterKindDecisionNotes: tierReport.emitterKindDecisionNotes }
+      : {}),
   };
 }
 
 /**
  * @param {'economy' | 'efficient'} tier
  * @param {string} unavailableReason
- * @returns {import('../types/shared-types').RadiatorsProposalLineReport}
+ * @returns {import('../types/shared-types.js').RadiatorsProposalLineReport}
  */
 function unavailableRadiatorProposalLine(tier, unavailableReason) {
   return {
@@ -75,16 +81,16 @@ function unavailableRadiatorProposalLine(tier, unavailableReason) {
  * Підбір радіаторів: основна лінія + «Економ» / «Ефективний» з одним kind на объект.
  *
  * @param {object} args
- * @param {import('../types/shared-types').HeatLossReport} args.roomsHeatLoss
- * @param {import('../types/shared-types').HeatingSystemInput} [args.heatingSystem]
- * @param {import('../catalog/types').NormalizedCatalog} args.catalog
- * @param {import('../types/shared-types').BuildingInput | null} [args.building]
- * @param {import('../types/boiler-types').BoilerMatchingReport} args.boiler
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null} [args.underfloorHeating]
- * @param {import('../types/shared-types').HydraulicsSurveyInput | undefined} [args.hydraulics]
- * @param {import('../../dhw/types').RadiatorApplianceRules} [args.radiatorRules]
- * @param {import('../recommendations/types').RecommendationsBundle} [args.recommendations]
- * @returns {import('../types/shared-types').RadiatorsMatchingReport}
+ * @param {import('../types/shared-types.js').HeatLossReport} args.roomsHeatLoss
+ * @param {import('../types/shared-types.js').HeatingSystemInput} [args.heatingSystem]
+ * @param {import('../catalog/types.js').NormalizedCatalog} args.catalog
+ * @param {import('../types/shared-types.js').BuildingInput | null} [args.building]
+ * @param {import('../types/boiler-types.js').BoilerMatchingReport} args.boiler
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null} [args.underfloorHeating]
+ * @param {import('../types/shared-types.js').HydraulicsSurveyInput | undefined} [args.hydraulics]
+ * @param {import('../dhw/types.js').RadiatorApplianceRules | null | undefined} [args.radiatorRules]
+ * @param {import('../recommendations/types.js').RecommendationsBundle | null | undefined} [args.recommendations]
+ * @returns {import('../types/shared-types.js').RadiatorsMatchingReport}
  */
 export function pickRadiatorsWithProposalLines({
   roomsHeatLoss,
@@ -96,7 +102,7 @@ export function pickRadiatorsWithProposalLines({
   hydraulics,
   radiatorRules = null,
   recommendations = null,
-} = {}) {
+}) {
   const deltaTSystemK = hydraulics?.deltaTSystemK;
   if (heatingSystem?.heatingEmittersMode === 'ufh_only') {
     const skipMsg =
@@ -109,7 +115,6 @@ export function pickRadiatorsWithProposalLines({
       roomEmitterDiffs: [],
       warnings: [skipMsg],
       radiatorSelectionNotes: [],
-      inputs: {},
       resolvedEmitterKind: null,
       emitterKindVotes: { sectional: 0, panel: 0 },
       emitterKindDecisionNotes: [],
@@ -135,7 +140,7 @@ export function pickRadiatorsWithProposalLines({
       ? primary.resolvedEmitterKind
       : null;
 
-  /** @type {import('../types/shared-types').RadiatorsProposalLineReport} */
+  /** @type {import('../types/shared-types.js').RadiatorsProposalLineReport} */
   let lineEconomy;
   if (boiler?.proposalEconomy) {
     const hsEco = heatingSystemSnapshotForRadiatorTier(heatingSystem, 'economy');
@@ -164,7 +169,7 @@ export function pickRadiatorsWithProposalLines({
     );
   }
 
-  /** @type {import('../types/shared-types').RadiatorsProposalLineReport} */
+  /** @type {import('../types/shared-types.js').RadiatorsProposalLineReport} */
   let lineEfficient;
   if (boiler?.proposalEfficient) {
     const hsEff = heatingSystemSnapshotForRadiatorTier(heatingSystem, 'efficient');

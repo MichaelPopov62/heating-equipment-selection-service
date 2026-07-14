@@ -153,7 +153,7 @@ export function AppSurveyContent({
     useCatalogEquipmentQuery();
 
   const setCurrentStep = useCallback(
-    (step: SurveyCurrentStep) => dispatch({ type: 'SET_CURRENT_STEP', step }),
+    (step: SurveyCurrentStep) => { dispatch({ type: 'SET_CURRENT_STEP', step }); },
     [dispatch],
   );
 
@@ -500,7 +500,7 @@ export function AppSurveyContent({
         projects={projectList}
         calculations={calculations}
         activeProjectId={projectId}
-        onClose={() => setProjectsOpen(false)}
+        onClose={() => { setProjectsOpen(false); }}
         onRefresh={() => void refreshProjectList()}
         onNewProject={startNewProject}
         onSelectProject={(id) => void loadProjectById(id)}
@@ -516,7 +516,7 @@ export function AppSurveyContent({
                 <li key={step}>
                   <button
                     type="button"
-                    onClick={() => setCurrentStep(step)}
+                    onClick={() => { setCurrentStep(step); }}
                     aria-current={currentStep === step ? 'step' : undefined}
                     className={styles.stepButton}
                   >
@@ -595,10 +595,10 @@ export function AppSurveyContent({
                     type="number"
                     value={temps.insideC}
                     onChange={(e) =>
-                      setTemps((prev) => ({
+                      { setTemps((prev) => ({
                         ...prev,
                         insideC: Number(e.target.value),
-                      }))
+                      })); }
                     }
                   />
                 </label>
@@ -608,10 +608,10 @@ export function AppSurveyContent({
                     type="number"
                     value={temps.outsideC}
                     onChange={(e) =>
-                      setTemps((prev) => ({
+                      { setTemps((prev) => ({
                         ...prev,
                         outsideC: Number(e.target.value),
-                      }))
+                      })); }
                     }
                   />
                 </label>
@@ -888,7 +888,7 @@ export function AppSurveyContent({
         </main>
 
         <RecommendationsBlock
-          className={styles.calculationResults}
+          {...(styles.calculationResults ? { className: styles.calculationResults } : {})}
           quickEstimate={quickEstimate}
           apiHeatLoss={apiHeatLoss}
           apiHotWaterFromReport={apiHotWaterFromReport}

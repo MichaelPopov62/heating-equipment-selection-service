@@ -5,7 +5,7 @@
 
 /**
  * @param {import('./configCache.js').ReferenceBundle} bundle
- * @returns {import('../types/shared-types').CalcRuntimeContext}
+ * @returns {import('../types/shared-types.js').CalcRuntimeContext}
  */
 export function toCalcRuntimeContext(bundle) {
   return Object.freeze({

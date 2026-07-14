@@ -35,7 +35,7 @@ import {
   sizeForcedRoomEmitter,
 } from './sizeForcedRoomEmitter.js';
 
-/** @type {import('../../dhw/types').RadiatorEmitterKindRules} */
+/** @type {import('../../dhw/types.js').RadiatorEmitterKindRules} */
 const DEFAULT_EMITTER_KIND_RULES = Object.freeze({
   maxSectionsBeforeMultiUnit: 24,
   maxUnitsPerRoom: 4,
@@ -73,27 +73,49 @@ function emitterFieldsFromSized(kind, adjustedWatts, sections, unitsCount = 1) {
 }
 
 /**
- * @param {object} base
- * @returns {import('../../types/shared-types').RadiatorsByRoomItem}
+ * @param {Pick<import('../../types/shared-types.js').RadiatorsByRoomItem, 'roomId' | 'roomName' | 'heatLossWatts' | 'radiatorDesignWatts'> & {
+ *   designAirTempC?: number;
+ *   designAirTempSource?: import('../../types/shared-types.js').DesignRoomAirTempSource;
+ *   flowRateM3PerHour?: number;
+ *   radiatorModel?: string;
+ *   warnings?: string[];
+ *   sizingNotes?: string[];
+ * }} base
+ * @returns {import('../../types/shared-types.js').RadiatorsByRoomItem}
  */
 function skippedRoomEmitter(base) {
   return {
-    ...base,
+    roomId: base.roomId,
+    roomName: base.roomName,
+    heatLossWatts: base.heatLossWatts,
+    radiatorDesignWatts: base.radiatorDesignWatts,
+    ...(base.designAirTempC != null ? { designAirTempC: base.designAirTempC } : {}),
+    ...(base.designAirTempSource != null
+      ? { designAirTempSource: base.designAirTempSource }
+      : {}),
+    ...(base.flowRateM3PerHour != null
+      ? { flowRateM3PerHour: base.flowRateM3PerHour }
+      : {}),
     radiatorModel: base.radiatorModel ?? '—',
     outputPerSectionWatts: 0,
     sections: null,
-    unitsCount: undefined,
     deliverableWatts: 0,
     displayKind: /** @type {'none'} */ ('none'),
+    ...(base.warnings ? { warnings: base.warnings } : {}),
+    ...(base.sizingNotes ? { sizingNotes: base.sizingNotes } : {}),
   };
 }
 
+/**
+ * @param {{ supplyC: number, returnC: number, insideC: number }} args
+ * @returns {number}
+ */
 function deltaTmeanK({ supplyC, returnC, insideC }) {
   return (supplyC + returnC) / 2 - insideC;
 }
 
 /**
- * @param {import('../catalog/types').RadiatorCatalogItemNormalized} r
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized} r
  * @param {50 | 70} baseDeltaT
  */
 function sectionOutputPassport(r, baseDeltaT) {
@@ -101,7 +123,7 @@ function sectionOutputPassport(r, baseDeltaT) {
 }
 
 /**
- * @param {import('../catalog/types').RadiatorCatalogItemNormalized} r
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized} r
  * @param {'individual' | 'central'} heatingDistribution
  * @param {'side' | 'bottom' | undefined} connection
  */
@@ -130,7 +152,7 @@ function radiatorBrandPreferenceScore(r, heatingDistribution, connection) {
 }
 
 /**
- * @param {import('../catalog/types').RadiatorCatalogItemNormalized} r
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized} r
  * @param {50 | 70} baseDeltaT
  * @param {'individual' | 'central'} heatingDistribution
  * @param {'side' | 'bottom' | undefined} connection
@@ -143,7 +165,7 @@ function radiatorCompositeRank(r, baseDeltaT, heatingDistribution, connection) {
 }
 
 /**
- * @param {import('../catalog/types').RadiatorCatalogItemNormalized[]} radiators
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized[]} radiators
  * @param {50 | 70} baseDeltaT
  * @param {'individual' | 'central'} heatingDistribution
  * @param {'side' | 'bottom' | undefined} connection
@@ -158,8 +180,8 @@ function sortRadiatorsForMatching(radiators, baseDeltaT, heatingDistribution, co
 }
 
 /**
- * @param {import('../../dhw/types').RadiatorApplianceRules | null | undefined} radiatorRules
- * @returns {import('../../dhw/types').RadiatorEmitterKindRules}
+ * @param {import('../../dhw/types.js').RadiatorApplianceRules | null | undefined} radiatorRules
+ * @returns {import('../../dhw/types.js').RadiatorEmitterKindRules}
  */
 function resolveEmitterKindRules(radiatorRules) {
   return radiatorRules?.emitterKind ?? DEFAULT_EMITTER_KIND_RULES;
@@ -169,19 +191,19 @@ function resolveEmitterKindRules(radiatorRules) {
  * Підбір радіаторів: Two-Pass — голоса kind → глобальный lock → sizing с эскалацией.
  *
  * @param {object} args
- * @param {import('../types/shared-types').HeatLossReport} args.roomsHeatLoss
- * @param {import('../types/shared-types').HeatingSystemInput} [args.heatingSystem]
- * @param {import('../catalog/types').NormalizedCatalog} args.catalog
+ * @param {import('../../types/shared-types.js').HeatLossReport} args.roomsHeatLoss
+ * @param {import('../../types/shared-types.js').HeatingSystemInput} [args.heatingSystem]
+ * @param {import('../../catalog/types.js').NormalizedCatalog} args.catalog
  * @param {string|null} [args.radiatorModel]
- * @param {import('../types/shared-types').BuildingInput | null} [args.building]
- * @param {import('../types/boiler-types').BoilerMatchingReport | null} [args.boilerMatching]
+ * @param {import('../../types/shared-types.js').BuildingInput | null} [args.building]
+ * @param {import('../../types/boiler-types.js').BoilerMatchingReport | null} [args.boilerMatching]
  * @param {'economy' | 'efficient' | null} [args.radiatorLineTier]
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null} [args.underfloorHeating]
+ * @param {import('../../types/shared-types.js').UnderfloorHeatingReport | null} [args.underfloorHeating]
  * @param {number | undefined} [args.deltaTSystemK]
- * @param {import('../../dhw/types').RadiatorApplianceRules} [args.radiatorRules]
- * @param {import('../../types/shared-types').RecommendationCatalogItem[]} [args.recommendations]
- * @param {'sectional' | 'panel' | null} [args.forcedEmitterKind] — от primary для eco/eff
- * @returns {import('../types/shared-types').RadiatorsMatchingReport}
+ * @param {import('../../dhw/types.js').RadiatorApplianceRules | null | undefined} [args.radiatorRules]
+ * @param {import('../../recommendations/types.js').RecommendationsBundle | null | undefined} [args.recommendations]
+ * @param {'sectional' | 'panel' | null} [args.forcedEmitterKind] - от primary для eco/eff
+ * @returns {import('../../types/shared-types.js').RadiatorsMatchingReport}
  */
 export function pickRadiators({
   roomsHeatLoss,
@@ -196,7 +218,7 @@ export function pickRadiators({
   radiatorRules = null,
   recommendations = null,
   forcedEmitterKind = null,
-} = {}) {
+}) {
   const supplyC = heatingSystem.supplyC ?? 75;
   const returnC = heatingSystem.returnC ?? 65;
   const insideC = heatingSystem.insideC ?? 20;
@@ -292,7 +314,7 @@ export function pickRadiators({
       + `(heatingSystem.radiatorEmitterPreference=${radiatorEmitterPreference}).`,
   );
 
-  if (hasEfficientProposal && radiatorLineTier !== 'economy') {
+  if (hasEfficientProposal) {
     const passportHighDeltaT = 70;
     const lowSupplyC = 55;
     const lowReturnC = 45;
@@ -340,6 +362,7 @@ export function pickRadiators({
     radiatorConnection,
   );
 
+  /** @type {NonNullable<import('../../types/shared-types.js').RadiatorsMatchingReport['inputs']>} */
   const emptyInputs = {
     supplyC,
     returnC,
@@ -349,9 +372,11 @@ export function pickRadiators({
     ventilationReserveFactor,
     radiatorSizingAlignedWithCondensing: hasEfficientProposal,
     heatingDistribution,
-    radiatorConnection,
+    ...(radiatorConnection != null ? { radiatorConnection } : {}),
     radiatorEmitterPreference,
-    thermalRegimePreset: heatingSystem.thermalRegimePreset,
+    ...(heatingSystem.thermalRegimePreset != null
+      ? { thermalRegimePreset: heatingSystem.thermalRegimePreset }
+      : {}),
   };
 
   if (sectionalPool.length === 0 && panelPoolRaw.length === 0) {
@@ -427,9 +452,9 @@ export function pickRadiators({
             ),
           }
         : resolveDesignRoomAirTempC({
-            roomType,
+            ...(roomType !== undefined ? { roomType } : {}),
             insideC,
-            bathroomAirTempC,
+            ...(bathroomAirTempC !== undefined ? { bathroomAirTempC } : {}),
           });
     const roomInsideC = air?.designAirTempC ?? insideC;
     const roomTargetDeltaT = deltaTmeanK({
@@ -546,7 +571,7 @@ export function pickRadiators({
   radiatorSelectionNotes.push(...decision.emitterKindDecisionNotes);
 
   // ——— Pass 2: финальный sizing ———
-  /** @type {import('../../types/shared-types').RadiatorsByRoomItem[]} */
+  /** @type {import('../../types/shared-types.js').RadiatorsByRoomItem[]} */
   const byRoom = [];
   let anyMultiUnit = false;
   /** @type {Set<string>} */
@@ -645,7 +670,9 @@ export function pickRadiators({
           ...(minSized.sizingNotes ?? []),
         ],
         priceBasis: emitter.priceBasis,
-        panelLengthMm: minSized.panelLengthMm ?? undefined,
+        ...(minSized.panelLengthMm != null
+          ? { panelLengthMm: minSized.panelLengthMm }
+          : {}),
       });
       continue;
     }
@@ -735,7 +762,7 @@ export function pickRadiators({
       warnings: roomWarnings,
       sizingNotes: [...prep.mixedNotes, ...(sized.sizingNotes ?? [])],
       priceBasis: emitter.priceBasis,
-      panelLengthMm: sized.panelLengthMm ?? undefined,
+      ...(sized.panelLengthMm != null ? { panelLengthMm: sized.panelLengthMm } : {}),
     });
   }
 
@@ -805,7 +832,7 @@ export function pickRadiators({
     for (const w of item.warnings ?? []) warnings.push(`[${item.roomName}] ${w}`);
   }
 
-  /** @type {import('../../recommendations/types').ResolvedRecommendation[]} */
+  /** @type {import('../../recommendations/types.js').ResolvedRecommendation[]} */
   const resolvedRecommendations = [];
   if (recommendations) {
     for (const code of microRecCodes) {
@@ -855,14 +882,16 @@ export function pickRadiators({
     chosen: chosen
       ? {
           model: chosen.model,
-          material: chosen.material,
-          volumeLitersPerSection: chosen.volumeLiters,
+          ...(chosen.material != null ? { material: chosen.material } : {}),
+          ...(chosen.volumeLiters != null
+            ? { volumeLitersPerSection: chosen.volumeLiters }
+            : {}),
           baseOutputWatts: baseWatts,
           baseDeltaT,
           adjustedOutputWatts: Math.round(adjustedWatts),
           targetDeltaT: round(targetDeltaT, 1),
-          sectionWidthMm: sectionWidthMm ?? undefined,
-          priceBasis: chosen.priceBasis,
+          ...(sectionWidthMm != null ? { sectionWidthMm } : {}),
+          ...(chosen.priceBasis != null ? { priceBasis: chosen.priceBasis } : {}),
         }
       : null,
     byRoom,
@@ -885,9 +914,11 @@ export function pickRadiators({
       ventilationReserveFactor,
       radiatorSizingAlignedWithCondensing: hasEfficientProposal,
       heatingDistribution,
-      radiatorConnection,
+      ...(radiatorConnection != null ? { radiatorConnection } : {}),
       radiatorEmitterPreference,
-      thermalRegimePreset: heatingSystem.thermalRegimePreset,
+      ...(heatingSystem.thermalRegimePreset != null
+        ? { thermalRegimePreset: heatingSystem.thermalRegimePreset }
+        : {}),
     },
     resolvedEmitterKind: resolvedKind,
     emitterKindVotes: decision.emitterKindVotes,

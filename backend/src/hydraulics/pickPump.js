@@ -17,8 +17,8 @@ export { pumpHeadM };
  */
 
 /**
- * @param {import('./types').HydraulicsRules} rules
- * @returns {import('./types').HydraulicsPumpDutyRules}
+ * @param {import('./types.js').HydraulicsRules} rules
+ * @returns {import('./types.js').HydraulicsPumpDutyRules}
  */
 export function pumpDutyRulesFromHydraulicsRules(rules) {
   return {
@@ -34,9 +34,14 @@ export function pumpDutyRulesFromHydraulicsRules(rules) {
  * @returns {number}
  */
 export function resolveHeatingCircuitMinFlowM3h(modes) {
-  const mins = modes
-    .map((m) => m.qMinM3h)
-    .filter((v) => typeof v === 'number' && Number.isFinite(v) && v > 0);
+  /** @type {number[]} */
+  const mins = [];
+  for (const m of modes) {
+    const v = m.qMinM3h;
+    if (typeof v === 'number' && Number.isFinite(v) && v > 0) {
+      mins.push(v);
+    }
+  }
   return mins.length ? Math.min(...mins) : 0;
 }
 
@@ -46,7 +51,7 @@ export function resolveHeatingCircuitMinFlowM3h(modes) {
  * @param {number} args.q
  * @param {number} args.headRequiredM
  * @param {number} args.headTarget
- * @param {import('./types').HydraulicsPumpDutyRules} args.dutyRules
+ * @param {import('./types.js').HydraulicsPumpDutyRules} args.dutyRules
  * @param {boolean} [args.skipHeadOversizedCheck]
  * @returns {{ ok: boolean; headAtQ?: number; marginPercent?: number; issue?: PumpDutyIssue }}
  */
@@ -93,9 +98,9 @@ export function evaluatePumpModeAtDuty({
  * @param {object} args
  * @param {number} args.designFlowM3PerHour
  * @param {number} args.headRequiredM
- * @param {import('../catalog/types').NormalizedCatalog['pumps']} args.pumps
- * @param {import('./types').HydraulicsPumpDutyRules} args.dutyRules
- * @returns {{ pump: import('./types').HydraulicsPumpMatch | null; warnings: string[] }}
+ * @param {import('../catalog/types.js').NormalizedCatalog['pumps']} args.pumps
+ * @param {import('./types.js').HydraulicsPumpDutyRules} args.dutyRules
+ * @returns {{ pump: import('./types.js').HydraulicsPumpMatch | null; warnings: string[] }}
  */
 export function pickPumpForSystem({
   designFlowM3PerHour,
@@ -116,7 +121,7 @@ export function pickPumpForSystem({
     return { pump: null, warnings: ['Каталог насосов пуст — подбор невозможен.'] };
   }
 
-  /** @type {import('./types').HydraulicsPumpMatch | null} */
+  /** @type {import('./types.js').HydraulicsPumpMatch | null} */
   let best = null;
 
   for (const pump of pumps) {
@@ -172,8 +177,8 @@ export function pickPumpForSystem({
  * @param {Array<{ modeName: string; qMinM3h?: number; qMaxM3h?: number; coefficients: object }>} args.operatingModes
  * @param {number} args.designFlowM3PerHour
  * @param {number} args.headRequiredM
- * @param {import('./types').HydraulicsPumpDutyRules} args.dutyRules
- * @returns {import('./types').BuiltinPumpCurveEvaluation}
+ * @param {import('./types.js').HydraulicsPumpDutyRules} args.dutyRules
+ * @returns {import('./types.js').BuiltinPumpCurveEvaluation}
  */
 export function evaluatePumpCurveAtDuty({
   operatingModes,

@@ -87,13 +87,8 @@ export function useRoomsOrchestration(params: {
   useEffect(() => {
     const maxF = objectMeta.floors;
     setRooms((prev) => {
-      let changed = false;
-      const next = prev.map((r) => {
-        if (r.floor <= maxF) return r;
-        changed = true;
-        return { ...r, floor: maxF };
-      });
-      return changed ? next : prev;
+      const next = prev.map((r) => (r.floor <= maxF ? r : { ...r, floor: maxF }));
+      return next.some((r, i) => r !== prev[i]) ? next : prev;
     });
   }, [objectMeta.floors, setRooms]);
 
@@ -116,7 +111,6 @@ export function useRoomsOrchestration(params: {
       return prev;
     });
     setRooms((prev) => {
-      let changed = false;
       const next = prev.map((r) => {
         const patch: Partial<RoomFormValue> = {};
         if (floorDefault && (!r.floorPresetId || !hasFloor(r.floorPresetId)))
@@ -126,15 +120,14 @@ export function useRoomsOrchestration(params: {
         if (roofDefault && (!r.roofPresetId || !hasRoof(r.roofPresetId)))
           patch.roofPresetId = roofDefault;
         if (Object.keys(patch).length === 0) return r;
-        changed = true;
         return { ...r, ...patch };
       });
-      return changed ? next : prev;
+      return next.some((r, i) => r !== prev[i]) ? next : prev;
     });
   }, [ceilingPresets, floorPresets, roofPresets, setObjectMeta, setRooms]);
 
   useEffect(() => {
-    const targetCount = objectMeta.roomsCount ?? 1;
+    const targetCount = objectMeta.roomsCount;
     const d = newRoomTemplateRef.current;
     setRooms((prev) => {
       if (prev.length === targetCount) return prev;
@@ -170,10 +163,11 @@ export function useRoomsOrchestration(params: {
   }, [objectMeta.roomsCount, setRooms]);
 
   useEffect(() => {
-    if (!objectMeta.externalWalls.presetId && wallPresets.length > 0) {
+    const firstWallPreset = wallPresets[0];
+    if (!objectMeta.externalWalls.presetId && firstWallPreset) {
       setObjectMeta((prev) => ({
         ...prev,
-        externalWalls: { ...prev.externalWalls, presetId: wallPresets[0].id },
+        externalWalls: { ...prev.externalWalls, presetId: firstWallPreset.id },
       }));
     }
   }, [objectMeta.externalWalls.presetId, setObjectMeta, wallPresets]);
@@ -223,7 +217,6 @@ export function useRoomsOrchestration(params: {
     const hasCeiling = (id: string) => ceilingPresets.some((p) => p.id === id);
 
     setRooms((prev) => {
-      let changed = false;
       const next = prev.map((r) => {
         const bounds = resolveApartmentRoomBoundaries(stack, r.floor, maxF);
         const presets = recommendedApartmentEnvelopePresets(
@@ -246,7 +239,6 @@ export function useRoomsOrchestration(params: {
         ) {
           return r;
         }
-        changed = true;
         return {
           ...r,
           bottomBoundaryType: bounds.bottomBoundary,
@@ -255,7 +247,7 @@ export function useRoomsOrchestration(params: {
           ceilingPresetId,
         };
       });
-      return changed ? next : prev;
+      return next.some((r, i) => r !== prev[i]) ? next : prev;
     });
   }, [
     objectMeta.objectType,
@@ -270,14 +262,12 @@ export function useRoomsOrchestration(params: {
   useEffect(() => {
     if (objectMeta.objectType === 'apartment') return;
     setRooms((prev) => {
-      let changed = false;
       const next = prev.map((r) => {
         const bb = defaultHouseBottomBoundary(r.floor);
         if (r.bottomBoundaryType === bb) return r;
-        changed = true;
         return { ...r, bottomBoundaryType: bb };
       });
-      return changed ? next : prev;
+      return next.some((r, i) => r !== prev[i]) ? next : prev;
     });
   }, [objectMeta.objectType, setRooms]);
 }

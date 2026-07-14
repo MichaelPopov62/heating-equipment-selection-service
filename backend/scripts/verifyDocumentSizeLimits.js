@@ -46,7 +46,7 @@ function assertThrowsCode(fn, expectedCode, label) {
   }
 }
 
-/** @returns {import('../src/types/shared-types').CalcRequestBody} */
+/** @returns {import('../src/types/shared-types.js').CalcRequestBody} */
 function tinyCalcInput() {
   return {
     building: {

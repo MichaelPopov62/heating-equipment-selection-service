@@ -17,9 +17,9 @@ import { thermalLoadToFlow } from './thermalLoadToFlow.js';
 
 /**
  * @param {object} args
- * @param {import('./types').HydraulicsPipelineInput} args.dto
- * @param {import('../catalog/types').NormalizedCatalog} args.catalog
- * @returns {import('./types').HydraulicsPipelineResult}
+ * @param {import('./types.js').HydraulicsPipelineInput} args.dto
+ * @param {import('../catalog/types.js').NormalizedCatalog} args.catalog
+ * @returns {import('./types.js').HydraulicsPipelineResult}
  */
 export function runHydraulicsPipeline({ dto, catalog }) {
   /** @type {string[]} */
@@ -96,7 +96,7 @@ export function runHydraulicsPipeline({ dto, catalog }) {
     notes.push(rec.hint);
   }
 
-  /** @type {import('./types').HydraulicsReport} */
+  /** @type {import('./types.js').HydraulicsReport} */
   const hydraulics = {
     schemaVersion: 1,
     inputs: {
@@ -119,7 +119,7 @@ export function runHydraulicsPipeline({ dto, catalog }) {
     notes,
   };
 
-  /** @type {import('./types').HydraulicsMatchingReport} */
+  /** @type {import('./types.js').HydraulicsMatchingReport} */
   const hydraulicsMatching = {
     pipes,
     topology: pumpResult.topology,

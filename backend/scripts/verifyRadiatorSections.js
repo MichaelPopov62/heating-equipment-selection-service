@@ -17,11 +17,46 @@ import { resolveKVent } from '../src/logic/ventilationReserve.js';
 import { buildReport } from '../src/report/buildReport.js';
 import { HEATING_THERMAL_REGIME_PRESET_ENUM } from '../src/logic/heatingThermalRegimes.js';
 import { adjustOutputWatts } from '../src/matching/radiatorSizingHelpers.js';
+import { assertAt, assertDefined } from './fixtures/scriptAssert.js';
+
+/** @typedef {import('../src/types/shared-types.js').HeatLossReport} HeatLossReport */
+/** @typedef {import('../src/types/shared-types.js').HotWaterReport} HotWaterReport */
+/** @typedef {import('../src/types/shared-types.js').HeatingSystemInput} HeatingSystemInput */
+/** @typedef {import('../src/types/shared-types.js').BuildingInput} BuildingInput */
+/** @typedef {import('../src/types/shared-types.js').CalcRuntimeContext} CalcRuntimeContext */
+/** @typedef {import('../src/types/shared-types.js').CalcRequestBody} CalcRequestBody */
+
+/** Typed wrapper: JSDoc matchEquipment объявлен как `{ object }`, ломая вывод аргументов. */
+const matchEquipmentTyped = /** @type {(args: {
+ *   heatLoss: HeatLossReport,
+ *   hotWater: HotWaterReport,
+ *   heatingSystem: HeatingSystemInput,
+ *   building?: BuildingInput,
+ *   ctx: CalcRuntimeContext,
+ * }) => ReturnType<typeof matchEquipment>} */ (matchEquipment);
+
+/**
+ * @param {CalcRequestBody} body
+ * @returns {import('../src/types/shared-types.js').HotWaterInput & { objectType?: string }}
+ */
+function hotWaterInputFromCalcBody(body) {
+  /** @type {import('../src/types/shared-types.js').HotWaterInput & { objectType?: string }} */
+  const hwInput = { ...(body.hotWater ?? {}) };
+  const objectType = body.building?.objectMeta?.objectType;
+  if (objectType === 'apartment' || objectType === 'house') {
+    hwInput.objectType = objectType;
+  }
+  return hwInput;
+}
 
 /** Ожидаемые секции для фикстуры r1 при file-каталоге (75/65 и 55/45). */
 const FIXTURE_SECTIONS_TRADITIONAL = 3;
 const FIXTURE_SECTIONS_CONDENSING = 6;
 
+/**
+ * @param {{ supplyC: number; returnC: number; insideC: number }} args
+ * @returns {number}
+ */
 function deltaTmeanK({ supplyC, returnC, insideC }) {
   return (supplyC + returnC) / 2 - insideC;
 }
@@ -31,6 +66,9 @@ function deltaTmeanK({ supplyC, returnC, insideC }) {
  * @param {import('../src/logic/ventilationReserve.js').VentilationReserveMode | undefined} ventilationMode
  * @param {number} baseWatts
  * @param {50 | 70} baseDeltaT
+ * @param {number} supplyC
+ * @param {number} returnC
+ * @param {number} [insideC]
  */
 function expectedSections(
   qEnvelope,
@@ -54,7 +92,7 @@ function expectedSections(
   };
 }
 
-/** @param {boolean} ok @param {string} label */
+/** @param {boolean} ok @param {string} label @param {string} [detail] */
 function logCheck(ok, label, detail = '') {
   const suffix = detail ? ` ${detail}` : '';
   console.log(ok ? 'OK' : 'FAIL', '—', label + suffix);
@@ -104,6 +142,11 @@ function minimalCalcBody(overrides = {}) {
   });
 }
 
+/**
+ * @param {() => void} fn
+ * @param {string} label
+ * @returns {boolean}
+ */
 function assertThrowsValidation(fn, label) {
   return assertThrowsValidationCode(fn, 'VALIDATION_ERROR', label);
 }
@@ -129,7 +172,10 @@ function assertThrowsValidationCode(fn, expectedCode, label) {
   }
 }
 
-/** @returns {boolean} */
+/**
+ * @param {import('../src/types/shared-types.js').CalcRuntimeContext} ctx
+ * @returns {boolean}
+ */
 function runValidationChecks(ctx) {
   console.log('=== Валидация thermalRegimePreset ===');
 
@@ -229,7 +275,7 @@ function runValidationChecks(ctx) {
 }
 
 /**
- * @param {import('../src/types/shared-types').BoilerMatchingReport | undefined} boiler
+ * @param {import('../src/types/shared-types.js').BoilerMatchingReport | undefined} boiler
  * @returns {boolean}
  */
 function isCondensingBoilerSelected(boiler) {
@@ -237,7 +283,10 @@ function isCondensingBoilerSelected(boiler) {
   if (!selected) return false;
   return (
     String(selected.type ?? '').includes('condens') ||
-    (selected.tags ?? []).some((t) => String(t).toLowerCase().includes('condens'))
+    (selected.tags ?? []).some(
+      /** @param {string} t */
+      (t) => String(t).toLowerCase().includes('condens'),
+    )
   );
 }
 
@@ -255,7 +304,7 @@ function hasCondensingHighGraphWarning(warnings) {
 }
 
 /**
- * @param {import('../src/types/shared-types').CalcReport} report
+ * @param {import('../src/types/shared-types.js').CalcReport} report
  * @returns {boolean}
  */
 function reportHasCondensingHighGraphMismatchWarning(report) {
@@ -267,7 +316,7 @@ function reportHasCondensingHighGraphMismatchWarning(report) {
 /**
  * П.1 + П.3: traditional_dt50_75_65 в input → primary 3 сек; warning в report.
  *
- * @param {import('../src/types/shared-types').CalcRuntimeContext} ctx
+ * @param {import('../src/types/shared-types.js').CalcRuntimeContext} ctx
  * @returns {Promise<boolean>}
  */
 async function runTraditionalGraphAutoChecks(ctx) {
@@ -320,7 +369,7 @@ async function runTraditionalGraphAutoChecks(ctx) {
 /**
  * П.2: явный condensing_dt30_55_45 в input → primary 6 сек (изолированный кейс).
  *
- * @param {import('../src/types/shared-types').CalcRuntimeContext} ctx
+ * @param {import('../src/types/shared-types.js').CalcRuntimeContext} ctx
  * @returns {Promise<boolean>}
  */
 async function runExplicitCondensingInputChecks(ctx) {
@@ -371,16 +420,17 @@ async function runExplicitCondensingInputChecks(ctx) {
     temps: { insideC: input.temps?.insideC ?? 20, outsideC: input.temps?.outsideC ?? -5 },
     building: input.building,
   });
-  const hotWater = calculateHotWaterDemand(input, ctx.waterNorms);
-  const hsForMatch = structuredClone(input.heatingSystem);
-  const { matching } = matchEquipment({
+  const hotWater = calculateHotWaterDemand(hotWaterInputFromCalcBody(input), ctx.waterNorms);
+  const hsForMatch = structuredClone(input.heatingSystem ?? {});
+  const { matching } = matchEquipmentTyped({
     heatLoss,
     hotWater,
     heatingSystem: hsForMatch,
     building: input.building,
     ctx,
   });
-  const secMatch = matching.radiators.byRoom?.[0]?.sections;
+  const radiators = assertDefined(matching.radiators, 'matching.radiators');
+  const secMatch = radiators.byRoom?.[0]?.sections;
 
   ok = logCheck(
     secMatch === FIXTURE_SECTIONS_CONDENSING,
@@ -407,10 +457,10 @@ const heatLoss = calculateHeatLossForBuilding({
   temps: { insideC: highBody.temps?.insideC ?? 20, outsideC: highBody.temps?.outsideC ?? -5 },
   building: highBody.building,
 });
-const hotWater = calculateHotWaterDemand(highBody, waterNorms);
+const hotWater = calculateHotWaterDemand(hotWaterInputFromCalcBody(highBody), waterNorms);
 
-const hsForMatch = structuredClone(highBody.heatingSystem);
-const { matching } = matchEquipment({
+const hsForMatch = structuredClone(highBody.heatingSystem ?? {});
+const { matching } = matchEquipmentTyped({
   heatLoss,
   hotWater,
   heatingSystem: hsForMatch,
@@ -427,31 +477,34 @@ const radiatorsHigh = pickRadiators({
 });
 
 const hsLow = structuredClone(highBody.heatingSystem);
-hsLow.thermalRegimePreset = 'condensing_dt30_55_45';
-hsLow.supplyC = 55;
-hsLow.returnC = 45;
-hsLow.radiatorReferenceDeltaT = 50;
+if (hsLow) {
+  hsLow.thermalRegimePreset = 'condensing_dt30_55_45';
+  hsLow.supplyC = 55;
+  hsLow.returnC = 45;
+  hsLow.radiatorReferenceDeltaT = 50;
+}
 const radiatorsLowExplicit = pickRadiators({
   roomsHeatLoss: heatLoss,
-  heatingSystem: hsLow,
+  heatingSystem: hsLow ?? {},
   catalog,
   building: highBody.building,
   boilerMatching: null,
   radiatorLineTier: 'efficient',
 });
 
-const roomQ = heatLoss.rooms[0].envelopeWatts;
-const baseWatts = matching.radiators.chosen?.baseOutputWatts ?? 0;
-const passportBaseDeltaT = /** @type {50 | 70} */ (matching.radiators.chosen?.baseDeltaT ?? 50);
+const roomQ = assertAt(assertDefined(heatLoss.rooms, 'heatLoss.rooms'), 0, 'heatLoss.rooms[0]').envelopeWatts;
+const radiatorsMatch = assertDefined(matching.radiators, 'matching.radiators');
+const baseWatts = radiatorsMatch.chosen?.baseOutputWatts ?? 0;
+const passportBaseDeltaT = /** @type {50 | 70} */ (radiatorsMatch.chosen?.baseDeltaT ?? 50);
 const ventMode = highBody.building?.objectMeta?.ventilationReserveMode ?? 'natural';
 
 const expHigh = expectedSections(roomQ, ventMode, baseWatts, passportBaseDeltaT, 75, 65);
 const expLow = expectedSections(roomQ, ventMode, baseWatts, passportBaseDeltaT, 55, 45);
 
-const secMatch = matching.radiators.byRoom[0]?.sections;
+const secMatch = radiatorsMatch.byRoom[0]?.sections;
 const secHigh = radiatorsHigh.byRoom[0]?.sections;
 const secLowExplicit = radiatorsLowExplicit.byRoom[0]?.sections;
-const secLineEfficient = matching.radiators.lineEfficient?.byRoom?.[0]?.sections;
+const secLineEfficient = radiatorsMatch.lineEfficient?.byRoom?.[0]?.sections;
 
 console.log(
   'auto primary:', secMatch,
@@ -497,7 +550,7 @@ const heatRecup = calculateHeatLossForBuilding({
   temps: { insideC: 20, outsideC: -5 },
   building: recuperBody.building,
 });
-const kVentRecupOk = heatRecup.rooms[0]?.ventilationReserveFactor === 1.1;
+const kVentRecupOk = assertAt(assertDefined(heatRecup.rooms, 'heatRecup.rooms'), 0, 'heatRecup.rooms[0]').ventilationReserveFactor === 1.1;
 formulaOk = logCheck(kVentRecupOk, 'recuperation kVent 1.1') && formulaOk;
 
 const allOk =

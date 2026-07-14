@@ -117,7 +117,7 @@ export function SurveySessionProvider({
     (mutation: SurveyMutation) => {
       setSession((prev) => {
         const result = runSurveyMutationPipeline(prev, mutation);
-        queueMicrotask(() => handleCalcAction(result.calcAction));
+        queueMicrotask(() => { handleCalcAction(result.calcAction); });
         return result.state;
       });
 

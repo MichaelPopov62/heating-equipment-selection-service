@@ -4,6 +4,7 @@
  * сохранения проектов; при недоступности — ошибка 503 MONGODB_UNAVAILABLE.
  */
 import { ensureMongoReferenceConnection } from '../utils/mongoReferenceConnection.js';
+import { createAppError } from '../utils/createAppError.js';
 
 /**
  * Подключение к MongoDB обязательно для API проектов.
@@ -20,28 +21,23 @@ export async function requireMongoForProjects() {
     );
 
   if (cfgMissing) {
-    const err = new Error(
+    throw createAppError(
       'Сохранение проектов недоступно: задайте MONGODB_URI или MONGODB_USER/PASSWORD/URL/DB в backend/.env',
+      'MONGODB_UNAVAILABLE',
+      503,
     );
-    err.statusCode = 503;
-    err.code = 'MONGODB_UNAVAILABLE';
-    throw err;
   }
 
   try {
     const ok = await ensureMongoReferenceConnection();
     if (!ok) {
-      const err = new Error('Не удалось подключиться к MongoDB.');
-      err.statusCode = 503;
-      err.code = 'MONGODB_UNAVAILABLE';
-      throw err;
+      throw createAppError('Не удалось подключиться к MongoDB.', 'MONGODB_UNAVAILABLE', 503);
     }
   } catch (connectErr) {
-    const err = new Error(
+    throw createAppError(
       connectErr instanceof Error ? connectErr.message : 'Не удалось подключиться к MongoDB.',
+      'MONGODB_UNAVAILABLE',
+      503,
     );
-    err.statusCode = 503;
-    err.code = 'MONGODB_UNAVAILABLE';
-    throw err;
   }
 }

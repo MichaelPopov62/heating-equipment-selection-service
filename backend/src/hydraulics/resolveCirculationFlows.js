@@ -10,7 +10,7 @@ import { thermalLoadToFlow } from './thermalLoadToFlow.js';
 /** @typedef {'direct' | 'mixing_valve' | 'hydraulic_separator'} CirculationTopology */
 
 /**
- * @param {import('./types').HydraulicsPipelineInput} dto
+ * @param {import('./types.js').HydraulicsPipelineInput} dto
  * @returns {number}
  */
 function sumRadiatorHeatWatts(dto) {
@@ -21,7 +21,7 @@ function sumRadiatorHeatWatts(dto) {
 }
 
 /**
- * @param {import('./types').HydraulicsPipelineInput} dto
+ * @param {import('./types.js').HydraulicsPipelineInput} dto
  * @returns {{
  *   rad: number;
  *   ufh: number;
@@ -65,8 +65,8 @@ function flowFromHeatWatts(heatLoadWatts, deltaTK) {
 }
 
 /**
- * @param {import('./types').HydraulicsPipelineInput} dto
- * @returns {import('./types').HydraulicsCirculationFlowsResult}
+ * @param {import('./types.js').HydraulicsPipelineInput} dto
+ * @returns {import('./types.js').HydraulicsCirculationFlowsResult}
  */
 export function resolveCirculationFlows(dto) {
   const mode = dto.meta.heatingEmittersMode;
@@ -75,7 +75,7 @@ export function resolveCirculationFlows(dto) {
   const mixing = ufhCircuit?.isMixingNodeRequired === true;
   const preset = ufhCircuit?.distributionPreset;
 
-  /** @type {import('./types').HydraulicsCirculationZone[]} */
+  /** @type {import('./types.js').HydraulicsCirculationZone[]} */
   const zones = [];
   /** @type {string[]} */
   const notes = [];
@@ -96,7 +96,7 @@ export function resolveCirculationFlows(dto) {
   }
 
   /**
-   * @param {import('./types').HydraulicsCirculationZone} zone
+   * @param {import('./types.js').HydraulicsCirculationZone} zone
    */
   const pushZone = (zone) => {
     zones.push(zone);
@@ -282,7 +282,7 @@ export function resolveCirculationFlows(dto) {
       label: 'Змеевик БКН (режим прогрева)',
       pumpRole: 'dhw',
       designFlowM3PerHour: qDhw,
-      heatLoadWatts: dhw.hotWaterPowerKw * 1000,
+      heatLoadWatts: (dhw?.hotWaterPowerKw ?? 0) * 1000,
       deltaTK: dtBoiler,
       requiresCatalogPump: false,
       simultaneousWithHeating: false,
@@ -308,7 +308,7 @@ export function resolveCirculationFlows(dto) {
 /**
  * Расход на магистрали графа (котёл → коллектор / гидрострелка).
  *
- * @param {import('./types').HydraulicsPipelineInput} dto
+ * @param {import('./types.js').HydraulicsPipelineInput} dto
  * @returns {number}
  */
 export function resolvePrimaryMainLineFlowM3h(dto) {
@@ -318,7 +318,7 @@ export function resolvePrimaryMainLineFlowM3h(dto) {
 /**
  * Расчётный расход котлового насоса с учётом приоритета ГВС.
  *
- * @param {import('./types').HydraulicsPipelineInput} dto
+ * @param {import('./types.js').HydraulicsPipelineInput} dto
  * @returns {number}
  */
 export function resolveDesignPumpFlowM3h(dto) {

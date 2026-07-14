@@ -5,10 +5,17 @@
 
 import assert from 'node:assert/strict';
 import { resolveCirculationFlows } from '../src/hydraulics/resolveCirculationFlows.js';
+import {
+  buildHydraulicsRadiatorsCircuit,
+  DEFAULT_LOCAL_LOSS_ZETA,
+} from './fixtures/verifyFixtures.js';
 
-/** @param {import('../src/hydraulics/types').HydraulicsPipelineInput} dto */
-function withRadiatorsCircuit(radiatorsPartial) {
-  return {
+/**
+ * @param {Partial<import('../src/hydraulics/types.js').HydraulicsRadiatorsCircuit>} [radiatorsPartial]
+ * @returns {import('../src/hydraulics/types.js').HydraulicsRadiatorsCircuit}
+ */
+function withRadiatorsCircuit(radiatorsPartial = {}) {
+  return buildHydraulicsRadiatorsCircuit({
     thermalRegime: { supplyC: 75, returnC: 65, deltaTK: 10 },
     flowDeltaTK: 20,
     connectionType: 'side',
@@ -23,12 +30,15 @@ function withRadiatorsCircuit(radiatorsPartial) {
     ],
     totalFlowRateM3PerHour: 0.431,
     ...radiatorsPartial,
-  };
+  });
 }
 
-/** @param {import('../src/hydraulics/types').HydraulicsPipelineInput} dto */
+/**
+ * @param {Partial<import('../src/hydraulics/types.js').HydraulicsPipelineInput>} [overrides]
+ * @returns {import('../src/hydraulics/types.js').HydraulicsPipelineInput}
+ */
 function baseDto(overrides = {}) {
-  /** @type {import('../src/hydraulics/types').HydraulicsPipelineInput} */
+  /** @type {import('../src/hydraulics/types.js').HydraulicsPipelineInput} */
   const dto = {
     schemaVersion: 1,
     meta: {
@@ -59,7 +69,15 @@ function baseDto(overrides = {}) {
       ufhCollectorTransit: [],
     },
     rules: {
+      mainTransitMinInternalDiameterMm: 20,
+      branchMinInternalDiameterMm: 12,
       velocityLimitsMps: { mainMax: 0.8, branchMax: 0.5, mainMin: 0.2 },
+      radiatorBranchGrouping: {
+        minFlowM3PerHourForIndividualBranch: 0.019,
+        minHeatLoadWattsForIndividualBranch: 150,
+        manifoldTrunkLengthM: 2,
+        localZetaManifold: 1.5,
+      },
       defaultLengthsM: {
         mainLine: 8,
         radiatorBranch: 4,
@@ -68,6 +86,7 @@ function baseDto(overrides = {}) {
       maxUfhLoopLengthM: 80,
       roughnessMmByMaterial: { pex: 0.007 },
       localLossZeta: {
+        ...DEFAULT_LOCAL_LOSS_ZETA,
         elbow90: 0.9,
         teeBranch: 1.2,
         mixingNode: 2.5,

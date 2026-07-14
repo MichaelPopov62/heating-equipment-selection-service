@@ -9,12 +9,10 @@ const C_J_PER_KG_K = 4180;
 const RHO_KG_PER_M3 = 1000;
 
 /**
- * @param {object} args
- * @param {number} args.heatLoadWatts
- * @param {number} args.deltaTK — перепад температур контура, K
+ * @param {{ heatLoadWatts?: number; deltaTK?: number }} [args]
  * @returns {{ deltaTK: number, massFlowKgPerSec: number, flowRateM3PerHour: number }}
  */
-export function thermalLoadToFlow({ heatLoadWatts, deltaTK } = {}) {
+export function thermalLoadToFlow({ heatLoadWatts = 0, deltaTK = 0 } = {}) {
   const Q = Number(heatLoadWatts) || 0;
   const dt = Number(deltaTK) || 0;
 
@@ -28,5 +26,3 @@ export function thermalLoadToFlow({ heatLoadWatts, deltaTK } = {}) {
     flowRateM3PerHour: round(flowRateM3PerHour, 3),
   };
 }
-
-export { C_J_PER_KG_K, RHO_KG_PER_M3 };

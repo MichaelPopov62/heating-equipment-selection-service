@@ -9,7 +9,7 @@ import { logger } from '../utils/logger.js';
 
 /**
  * Лучший вариант по потребности в литрах (минимальный объём среди ≥ need; иначе — максимальный у модели).
- * @param {import('../catalog/types').WaterHeaterCatalogItemNormalized} heater
+ * @param {import('../catalog/types.js').WaterHeaterCatalogItemNormalized} heater
  * @param {number} need
  */
 function pickBestVariantForNeed(heater, need) {
@@ -17,18 +17,18 @@ function pickBestVariantForNeed(heater, need) {
     (a, b) => a.volumeLiters - b.volumeLiters,
   );
   if (!variants.length) return null;
-  if (need <= 0) return variants[0];
+  if (need <= 0) return variants[0] ?? null;
   const ok = variants.find((v) => v.volumeLiters >= need);
-  return ok ?? variants[variants.length - 1];
+  return ok ?? variants[variants.length - 1] ?? null;
 }
 
 /**
  * @param {object} args
- * @param {import('../types/shared-types').HotWaterReport} args.hotWater
- * @param {import('../catalog/types').NormalizedCatalog} args.catalog
- * @returns {import('../types/shared-types').WaterHeaterMatchingReport}
+ * @param {import('../types/shared-types.js').HotWaterReport} args.hotWater
+ * @param {import('../catalog/types.js').NormalizedCatalog} args.catalog
+ * @returns {import('../types/shared-types.js').WaterHeaterMatchingReport}
  */
-export function pickWaterHeater({ hotWater, catalog } = {}) {
+export function pickWaterHeater({ hotWater, catalog }) {
   const sortPools = buildMatchingSortPools(catalog);
   const heaters = sortPools.waterHeatersSortedByMinVolume ?? [];
   if (!heaters.length) {
@@ -44,7 +44,7 @@ export function pickWaterHeater({ hotWater, catalog } = {}) {
   const need = Number(hotWater?.recommendedTankLiters) || 0;
   logger.info('matching.waterHeater.start', null, { requiredTankLiters: need });
 
-  /** @type {{ heater: import('../catalog/types').WaterHeaterCatalogItemNormalized; variant: import('../catalog/types').WaterHeaterVariantNormalized } | null} */
+  /** @type {{ heater: import('../catalog/types.js').WaterHeaterCatalogItemNormalized; variant: import('../catalog/types.js').WaterHeaterVariantNormalized } | null} */
   let best = null;
 
   for (const h of heaters) {
@@ -67,17 +67,15 @@ export function pickWaterHeater({ hotWater, catalog } = {}) {
   const warnings = [];
 
   if (!best && heaters.length) {
-    /** @type {{ heater: import('../catalog/types').WaterHeaterCatalogItemNormalized; variant: import('../catalog/types').WaterHeaterVariantNormalized } | null} */
+    /** @type {{ heater: import('../catalog/types.js').WaterHeaterCatalogItemNormalized; variant: import('../catalog/types.js').WaterHeaterVariantNormalized } | null} */
     let largest = null;
     for (const h of heaters) {
       const vars = [...(h.variants ?? [])].sort(
         (a, b) => a.volumeLiters - b.volumeLiters,
       );
       const v = vars[vars.length - 1];
-      if (
-        !largest
-        || v.volumeLiters > largest.variant.volumeLiters
-      ) {
+      if (!v) continue;
+      if (!largest || v.volumeLiters > largest.variant.volumeLiters) {
         largest = { heater: h, variant: v };
       }
     }
@@ -92,7 +90,7 @@ export function pickWaterHeater({ hotWater, catalog } = {}) {
     return { selected: null, chosenVariant: null, warnings, requiredTankLiters: need };
   }
 
-  /** @type {import('../types/shared-types').WaterHeaterChosenVariant} */
+  /** @type {import('../types/shared-types.js').WaterHeaterChosenVariant} */
   const chosenVariant = {
     volumeLiters: best.variant.volumeLiters,
     price: best.variant.price,

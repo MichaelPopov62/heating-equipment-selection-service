@@ -12,7 +12,7 @@ assert.equal(
 );
 
 assert.equal(
-  resolveFlowDeltaTK({ supplyC: 75, returnC: 65 }),
+  resolveFlowDeltaTK({ deltaTSystemK: undefined, supplyC: 75, returnC: 65 }),
   10,
   'fallback — supplyC−returnC',
 );
@@ -24,7 +24,7 @@ assert.equal(
 );
 
 assert.equal(
-  resolveFlowDeltaTK({ supplyC: 75, returnC: 75 }),
+  resolveFlowDeltaTK({ deltaTSystemK: undefined, supplyC: 75, returnC: 75 }),
   0.1,
   'нулевой перепад графика → min 0.1 K',
 );

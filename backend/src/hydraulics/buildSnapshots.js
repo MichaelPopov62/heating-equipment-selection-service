@@ -14,8 +14,8 @@ import { round } from '../utils/math.js';
 import { resolveFlowDeltaTK } from './resolveFlowDeltaTK.js';
 
 /**
- * @param {import('./types').HydraulicsUfhLoop & { hydraulics?: unknown }} loop
- * @returns {import('./types').HydraulicsUfhLoop}
+ * @param {import('./types.js').HydraulicsUfhLoop & { hydraulics?: unknown }} loop
+ * @returns {import('./types.js').HydraulicsUfhLoop}
  */
 function toPipelineUfhLoop(loop) {
   const hydraulics = loop.hydraulics;
@@ -36,7 +36,7 @@ function toPipelineUfhLoop(loop) {
 }
 
 /**
- * @param {import('../types/shared-types').BuildingInput | undefined | null} building
+ * @param {import('../types/shared-types.js').BuildingInput | undefined | null} building
  * @returns {Map<string, number>}
  */
 function roomFloorById(building) {
@@ -49,7 +49,7 @@ function roomFloorById(building) {
 }
 
 /**
- * @param {import('../types/shared-types').HydraulicsSurveyInput | undefined | null} hydraulics
+ * @param {import('../types/shared-types.js').HydraulicsSurveyInput | undefined | null} hydraulics
  * @returns {Map<string, number>}
  */
 function radiatorBranchOverrideByRoomId(hydraulics) {
@@ -68,17 +68,18 @@ function radiatorBranchOverrideByRoomId(hydraulics) {
 }
 
 /**
- * @param {import('./types').HydraulicsRadiatorConsumer[]} consumers
- * @param {import('../types/shared-types').HydraulicsRadiatorBranchOverride[] | undefined} overrides
+ * @param {import('./types.js').HydraulicsRadiatorConsumer[]} consumers
+ * @param {import('../types/shared-types.js').HydraulicsRadiatorBranchOverride[] | undefined} overrides
  * @param {Map<string, number>} radiatorOverrides
  * @param {number} defaultBranchLengthM
- * @returns {import('./types').HydraulicsRadiatorBranchLayout[]}
+ * @returns {import('./types.js').HydraulicsRadiatorBranchLayout[]}
  */
 function buildOrderedRadiatorBranches(consumers, overrides, radiatorOverrides, defaultBranchLengthM) {
   /** @type {Map<string, number>} */
   const orderIndex = new Map();
-  for (let i = 0; i < (overrides?.length ?? 0); i += 1) {
-    const item = overrides[i];
+  const overrideList = overrides ?? [];
+  for (let i = 0; i < overrideList.length; i += 1) {
+    const item = overrideList[i];
     if (item?.roomId) orderIndex.set(item.roomId, i);
   }
 
@@ -101,7 +102,7 @@ function buildOrderedRadiatorBranches(consumers, overrides, radiatorOverrides, d
 
 /**
  * @param {string | undefined} raw
- * @returns {import('./types').RadiatorWiringSystemType}
+ * @returns {import('./types.js').RadiatorWiringSystemType}
  */
 function resolveRadiatorWiringSystemType(raw) {
   const allowed = new Set([
@@ -111,19 +112,19 @@ function resolveRadiatorWiringSystemType(raw) {
     'manifold',
   ]);
   if (raw && allowed.has(raw)) {
-    return /** @type {import('./types').RadiatorWiringSystemType} */ (raw);
+    return /** @type {import('./types.js').RadiatorWiringSystemType} */ (raw);
   }
   return 'auto';
 }
 
 /**
  * @param {object} args
- * @param {import('../types/shared-types').CalcRequestBody} args.input
- * @param {import('../types/shared-types').HotWaterReport} args.hotWater
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} args.underfloorHeating
- * @param {import('../types/shared-types').MatchingReport} args.matching
- * @param {import('./types').HydraulicsApplianceRules} args.hydraulicsRules
- * @returns {import('./types').HydraulicsPipelineInput}
+ * @param {import('../types/shared-types.js').CalcRequestBody} args.input
+ * @param {import('../types/shared-types.js').HotWaterReport} args.hotWater
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null | undefined} args.underfloorHeating
+ * @param {import('../types/shared-types.js').MatchingReport} args.matching
+ * @param {import('./types.js').HydraulicsApplianceRules} args.hydraulicsRules
+ * @returns {import('./types.js').HydraulicsPipelineInput}
  */
 export function buildHydraulicsSnapshots({
   input,
@@ -156,18 +157,22 @@ export function buildHydraulicsSnapshots({
     selected?.connectionDiameters ?? [],
   );
 
-  /** @type {import('./types').HydraulicsSourceNode} */
+  /** @type {import('./types.js').HydraulicsSourceNode} */
   const source = {
-    catalogBoilerId: selected?.id ?? selected?.model,
+    ...(selected?.id || selected?.model
+      ? { catalogBoilerId: selected.id ?? selected.model }
+      : {}),
     supplyC,
     returnC,
     deltaTK,
     requiredKw: matching.boiler?.requiredKw ?? 0,
     connectionNominalMm,
-    mountingType: selected?.mountingType,
+    ...(selected?.mountingType !== undefined
+      ? { mountingType: selected.mountingType }
+      : {}),
   };
 
-  /** @type {import('./types').HydraulicsCircuits} */
+  /** @type {import('./types.js').HydraulicsCircuits} */
   const circuits = {};
 
   const floors = roomFloorById(input.building);
@@ -186,7 +191,7 @@ export function buildHydraulicsSnapshots({
         returnC: radReturn,
       });
 
-    /** @type {import('./types').HydraulicsRadiatorConsumer[]} */
+    /** @type {import('./types.js').HydraulicsRadiatorConsumer[]} */
     const consumers = matching.radiators.byRoom
       .filter((r) => (r.radiatorDesignWatts ?? 0) > 0)
       .map((r) => ({
@@ -219,7 +224,7 @@ export function buildHydraulicsSnapshots({
     (emittersMode === 'ufh_only' || emittersMode === 'mixed')
     && underfloorHeating?.rooms?.length
   ) {
-    /** @type {import('./types').HydraulicsUfhRoom[]} */
+    /** @type {import('./types.js').HydraulicsUfhRoom[]} */
     const ufhRooms = underfloorHeating.rooms.map((room) => ({
       roomId: room.roomId,
       roomName: room.roomName,
@@ -239,20 +244,28 @@ export function buildHydraulicsSnapshots({
         : { ufhTerminalControl: /** @type {const} */ ('collector') }),
     }));
 
-    /** @type {import('./types').HydraulicsMixingNodeSnapshot | undefined} */
+    /** @type {import('./types.js').HydraulicsMixingNodeSnapshot | undefined} */
     let mixingNodeSnap;
     const mn = underfloorHeating.mixingNode;
-    if (mn && typeof mn.flowRateM3PerHour === 'number') {
+    if (
+      mn
+      && typeof mn.flowRateM3PerHour === 'number'
+      && typeof mn.headMetersMin === 'number'
+      && typeof mn.valveKvsMin === 'number'
+    ) {
       mixingNodeSnap = {
         flowRateM3PerHour: mn.flowRateM3PerHour,
         headMetersMin: mn.headMetersMin,
         valveKvsMin: mn.valveKvsMin,
-        boilerSupplyC: mn.boilerSupplyC,
-        floorCircuitSupplyC: mn.floorCircuitSupplyC,
+        ...(mn.boilerSupplyC !== undefined ? { boilerSupplyC: mn.boilerSupplyC } : {}),
+        ...(mn.floorCircuitSupplyC !== undefined
+          ? { floorCircuitSupplyC: mn.floorCircuitSupplyC }
+          : {}),
       };
     }
 
-    circuits.underfloor = {
+    /** @type {import('./types.js').HydraulicsUnderfloorCircuit} */
+    const underfloorCircuit = {
       deltaTK: underfloorHeating.underfloorHydraulics?.deltaTK ?? 10,
       aggregate: {
         heatLoadWatts: underfloorHeating.totalHeatFluxUpWatts ?? 0,
@@ -260,22 +273,28 @@ export function buildHydraulicsSnapshots({
           underfloorHeating.underfloorHydraulics?.flowRateM3PerHour ?? 0,
       },
       isMixingNodeRequired: underfloorHeating.isMixingNodeRequired === true,
-      ...(underfloorHeating.distributionPreset
-        ? { distributionPreset: underfloorHeating.distributionPreset }
-        : {}),
-      ...(mixingNodeSnap ? { mixingNode: mixingNodeSnap } : {}),
       rooms: ufhRooms,
     };
+    const dist = underfloorHeating.distributionPreset;
+    if (dist === 'collector_mixing_valve' || dist === 'hydraulic_separator') {
+      underfloorCircuit.distributionPreset = dist;
+    }
+    if (mixingNodeSnap) {
+      underfloorCircuit.mixingNode = mixingNodeSnap;
+    }
+    circuits.underfloor = underfloorCircuit;
   }
 
   if (hotWater && (hotWater.peakFlowLps != null || hotWater.hotWaterPowerKw != null)) {
-    /** @type {import('./types').HydraulicsDhwCircuit} */
+    /** @type {import('./types.js').HydraulicsDhwCircuit} */
     const dhw = {
       scenario: hotWater.dhwSupplyScenario === 'storage' ? 'storage' : 'flowThrough',
       peakFlowLps: hotWater.peakFlowLps ?? 0,
       hotWaterPowerKw: hotWater.hotWaterPowerKw ?? 0,
-      designColdWaterC: hotWater.designColdWaterC,
-      hotWaterC: hotWater.hotWaterC,
+      ...(hotWater.designColdWaterC !== undefined
+        ? { designColdWaterC: hotWater.designColdWaterC }
+        : {}),
+      ...(hotWater.hotWaterC !== undefined ? { hotWaterC: hotWater.hotWaterC } : {}),
     };
 
     const indirect = matching.indirectWaterHeater?.selected;
@@ -309,7 +328,7 @@ export function buildHydraulicsSnapshots({
     input.hydraulics?.radiatorWiringSystemType,
   );
 
-  /** @type {import('./types').HydraulicsUfhCollectorTransit[]} */
+  /** @type {import('./types.js').HydraulicsUfhCollectorTransit[]} */
   const ufhCollectorTransit = [];
   if (circuits.underfloor?.rooms?.length) {
     const floorsWithUfh = new Set(
@@ -326,7 +345,7 @@ export function buildHydraulicsSnapshots({
     }
   }
 
-  /** @type {import('./types').HydraulicsPipelineInput} */
+  /** @type {import('./types.js').HydraulicsPipelineInput} */
   return {
     schemaVersion: 1,
     meta: {

@@ -22,8 +22,12 @@ function pipeCell(p: Record<string, unknown>, key: string): string {
   const v = p[key];
   if (v == null || v === '') return '—';
   if (typeof v === 'number') return Number.isFinite(v) ? String(v) : '—';
-  const s = String(v).trim();
-  return s || '—';
+  if (typeof v === 'string') {
+    const s = v.trim();
+    return s || '—';
+  }
+  if (typeof v === 'boolean') return v ? 'true' : 'false';
+  return '—';
 }
 
 function formatPriceUah(price: number): string {

@@ -13,9 +13,9 @@ import { resolveHeadForZone } from './resolveZoneHead.js';
 import { round } from '../utils/math.js';
 
 /**
- * @param {import('../catalog/types').NormalizedCatalog['boilers']} boilers
+ * @param {import('../catalog/types.js').NormalizedCatalog['boilers']} boilers
  * @param {string | undefined} catalogBoilerId
- * @returns {import('../catalog/types').BoilerCatalogItemNormalized | null}
+ * @returns {import('../catalog/types.js').BoilerCatalogItemNormalized | null}
  */
 function findBoilerInCatalog(boilers, catalogBoilerId) {
   if (!catalogBoilerId || !boilers) return null;
@@ -48,15 +48,15 @@ function isWallMountedBoiler(boilerRecord) {
 
 /**
  * @param {object} args
- * @param {import('./types').HydraulicsCirculationZone} args.zone
+ * @param {import('./types.js').HydraulicsCirculationZone} args.zone
  * @param {number} args.headRequiredM
- * @param {import('./types').HydraulicsPumpDutyRules} args.dutyRules
+ * @param {import('./types.js').HydraulicsPumpDutyRules} args.dutyRules
  * @param {Record<string, unknown> | null | undefined} args.boilerRecord
- * @param {import('../catalog/types').NormalizedCatalog['pumps']} args.catalogPumps
+ * @param {import('../catalog/types.js').NormalizedCatalog['pumps']} args.catalogPumps
  * @returns {{
- *   match: import('./types').HydraulicsResolvedPump | null;
+ *   match: import('./types.js').HydraulicsResolvedPump | null;
  *   warnings: string[];
- *   builtinPumpDuty?: import('./types').BuiltinPumpDutyReport;
+ *   builtinPumpDuty?: import('./types.js').BuiltinPumpDutyReport;
  * }}
  */
 function resolvePumpForZone({
@@ -87,7 +87,7 @@ function resolvePumpForZone({
     warnings: [],
   };
 
-  /** @type {import('./types').BuiltinPumpDutyReport | undefined} */
+  /** @type {import('./types.js').BuiltinPumpDutyReport | undefined} */
   let builtinPumpDuty;
 
   if (zone.pumpRole === 'main') {
@@ -124,14 +124,14 @@ function resolvePumpForZone({
           match: {
             ...base,
             pumpSource: 'boiler_builtin',
-            catalogBoilerId: boilerId,
+            ...(boilerId !== undefined ? { catalogBoilerId: boilerId } : {}),
             modeName: evalResult.modeName,
             headAtDesignM: evalResult.headAtDesignM,
             headMarginPercent: evalResult.headMarginPercent ?? 0,
             note: 'Используется встроенный насос котла.',
           },
           warnings,
-          builtinPumpDuty,
+          ...(builtinPumpDuty !== undefined ? { builtinPumpDuty } : {}),
         };
       }
 
@@ -142,7 +142,11 @@ function resolvePumpForZone({
           + `(q_min=${qMin} м³/ч) — риск тактования и перегрева теплообменника.`,
         );
         if (isWallMountedBoiler(boilerRecord)) {
-          return { match: null, warnings, builtinPumpDuty };
+          return {
+            match: null,
+            warnings,
+            ...(builtinPumpDuty !== undefined ? { builtinPumpDuty } : {}),
+          };
         }
       } else {
         warnings.push(
@@ -163,27 +167,33 @@ function resolvePumpForZone({
   warnings.push(...pickWarnings.map((w) => `[${zone.label}] ${w}`));
 
   if (!pump) {
-    return { match: null, warnings, builtinPumpDuty };
+    return {
+      match: null,
+      warnings,
+      ...(builtinPumpDuty !== undefined ? { builtinPumpDuty } : {}),
+    };
   }
 
   return {
     match: {
       ...base,
       pumpSource: 'catalog',
-      catalogPumpId: pump.catalogPumpId,
+      ...(pump.catalogPumpId !== undefined
+        ? { catalogPumpId: pump.catalogPumpId }
+        : {}),
       modeName: pump.modeName,
       headAtDesignM: pump.headAtDesignM,
       headMarginPercent: pump.headMarginPercent,
       warnings: pump.warnings,
     },
     warnings,
-    builtinPumpDuty,
+    ...(builtinPumpDuty !== undefined ? { builtinPumpDuty } : {}),
   };
 }
 
 /**
- * @param {import('./types').HydraulicsResolvedPump} resolved
- * @returns {import('./types').HydraulicsPumpMatch}
+ * @param {import('./types.js').HydraulicsResolvedPump} resolved
+ * @returns {import('./types.js').HydraulicsPumpMatch}
  */
 function toLegacyPumpMatch(resolved) {
   return {
@@ -205,10 +215,10 @@ function toLegacyPumpMatch(resolved) {
 
 /**
  * @param {object} args
- * @param {import('./types').HydraulicsPipelineInput} args.dto
- * @param {import('./types').HydraulicsPressureReport} args.pressure
- * @param {import('../catalog/types').NormalizedCatalog} args.catalog
- * @returns {import('./types').HydraulicsSystemPumpsResult}
+ * @param {import('./types.js').HydraulicsPipelineInput} args.dto
+ * @param {import('./types.js').HydraulicsPressureReport} args.pressure
+ * @param {import('../catalog/types.js').NormalizedCatalog} args.catalog
+ * @returns {import('./types.js').HydraulicsSystemPumpsResult}
  */
 export function resolveSystemPumps({ dto, pressure, catalog }) {
   const flows = resolveCirculationFlows(dto);
@@ -219,13 +229,13 @@ export function resolveSystemPumps({ dto, pressure, catalog }) {
     dto.source.catalogBoilerId,
   );
 
-  /** @type {import('./types').HydraulicsResolvedPump[]} */
+  /** @type {import('./types.js').HydraulicsResolvedPump[]} */
   const pumps = [];
   /** @type {string[]} */
   const warnings = [...flows.warnings];
   /** @type {string[]} */
   const notes = [...flows.notes];
-  /** @type {import('./types').BuiltinPumpDutyReport | undefined} */
+  /** @type {import('./types.js').BuiltinPumpDutyReport | undefined} */
   let builtinPumpDuty;
 
   for (const zone of flows.zones) {

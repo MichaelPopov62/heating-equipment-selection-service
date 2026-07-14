@@ -155,10 +155,12 @@ const {
 cd frontend && npm run verify && npm run build
 ```
 
-- **`npm run verify`** — exit `0` обязателен (`lint` + `verify:survey-session` + `verify:dead-code`/knip).
-- **`npm run build`** — `tsc -b` + Vite без ошибок.
+- **`npm run verify`** — exit `0` обязателен (`lint` + **`typecheck`** + `verify:survey-session` + `verify:dead-code`/knip).
+- **`npm run build`** — `typecheck` + Vite без ошибок.
+- **`npm run typecheck`** — `tsc -b` с `tsconfig.strict-base` (`exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`).
+- ESLint: `strictTypeChecked` + `no-unsafe-*` (см. [`type-safety.md`](type-safety.md)).
 
-Из корня репозитория: `npm run verify:frontend`, `npm run lint:frontend`.
+Из корня репозитория: `npm run verify:frontend`, `npm run lint:frontend`, `npm run verify` (полный gate).
 
 Связанные backend-проверки:
 
@@ -167,3 +169,5 @@ cd backend && npm run verify:survey-draft-migration && npm run verify:water-heat
 ```
 
 Knip: compat-модули миграции в `knip.json` → `ignore` — см. [`survey-draft.md`](survey-draft.md).
+
+Типобезопасность: [`type-safety.md`](type-safety.md).

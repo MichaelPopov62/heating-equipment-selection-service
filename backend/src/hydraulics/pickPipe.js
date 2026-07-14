@@ -27,7 +27,7 @@ import {
 
 /**
  * @param {'main' | 'trunk' | 'branch' | 'ufh_collector_transit' | 'ufh_loop' | 'dhw'} segmentRole
- * @param {import('./types').HydraulicsRules} rules
+ * @param {import('./types.js').HydraulicsRules} rules
  * @returns {number}
  */
 function resolveVelocityMaxMps(segmentRole, rules) {
@@ -39,12 +39,12 @@ function resolveVelocityMaxMps(segmentRole, rules) {
 }
 
 /**
- * @param {import('../catalog/types').PipeCatalogItemNormalized[]} pipes
- * @param {import('./types').HydraulicsSurveyInput['pipeMaterialPreference']} [materialPreference]
- * @returns {import('../catalog/types').PipeCatalogItemNormalized[]}
+ * @param {import('../catalog/types.js').PipeCatalogItemNormalized[]} pipes
+ * @param {import('./types.js').HydraulicsSurveyInput['pipeMaterialPreference']} [materialPreference]
+ * @returns {import('../catalog/types.js').PipeCatalogItemNormalized[]}
  */
 function filterPipePool(pipes, materialPreference) {
-  /** @type {import('../catalog/types').PipeCatalogItemNormalized[]} */
+  /** @type {import('../catalog/types.js').PipeCatalogItemNormalized[]} */
   let pool = [...pipes];
 
   if (materialPreference) {
@@ -69,12 +69,12 @@ function filterPipePool(pipes, materialPreference) {
 
 /**
  * @param {object} args
- * @param {import('../catalog/types').PipeCatalogItemNormalized[]} args.pool
+ * @param {import('../catalog/types.js').PipeCatalogItemNormalized[]} args.pool
  * @param {number} args.flowM3PerHour
  * @param {number} args.vMax
  * @param {number} args.vMin
  * @returns {{
- *   pipe: import('../catalog/types').PipeCatalogItemNormalized;
+ *   pipe: import('../catalog/types.js').PipeCatalogItemNormalized;
  *   velocityLimitExceeded?: boolean;
  *   velocityBelowMin?: boolean;
  * }}
@@ -103,11 +103,11 @@ function selectPipeFromPool({ pool, flowM3PerHour, vMax, vMin }) {
 }
 
 /**
- * @param {import('./types').HydraulicsGraphEdge} edge
- * @param {import('./types').HydraulicsRules} rules
- * @param {import('../catalog/types').PipeCatalogItemNormalized[]} materialPool
+ * @param {import('./types.js').HydraulicsGraphEdge} edge
+ * @param {import('./types.js').HydraulicsRules} rules
+ * @param {import('../catalog/types.js').PipeCatalogItemNormalized[]} materialPool
  * @returns {{
- *   pool: import('../catalog/types').PipeCatalogItemNormalized[];
+ *   pool: import('../catalog/types.js').PipeCatalogItemNormalized[];
  *   exhausted: boolean;
  *   minInternalMm: number;
  *   mainTransitGuardApplied: boolean;
@@ -129,12 +129,12 @@ function applyInternalDiameterGuard(edge, rules, materialPool) {
 
 /**
  * @param {object} args
- * @param {import('./types').HydraulicsGraphEdge} args.edge
- * @param {import('../catalog/types').NormalizedCatalog['pipes']} args.pipes
+ * @param {import('./types.js').HydraulicsGraphEdge} args.edge
+ * @param {import('../catalog/types.js').NormalizedCatalog['pipes']} args.pipes
  * @param {string} args.catalogPipeId
- * @param {import('./types').HydraulicsRules} args.rules
+ * @param {import('./types.js').HydraulicsRules} args.rules
  * @param {number} [args.localZeta]
- * @returns {import('./types').HydraulicsPipeMatchItem | null}
+ * @returns {import('./types.js').HydraulicsPipeMatchItem | null}
  */
 export function pickPipeForEdgeByCatalogId({
   edge,
@@ -167,12 +167,12 @@ export function pickPipeForEdgeByCatalogId({
 
 /**
  * @param {object} args
- * @param {import('./types').HydraulicsGraphEdge} args.edge
- * @param {import('../catalog/types').NormalizedCatalog['pipes']} args.pipes
- * @param {import('./types').HydraulicsRules} args.rules
- * @param {import('./types').HydraulicsSurveyInput['pipeMaterialPreference']} [args.materialPreference]
+ * @param {import('./types.js').HydraulicsGraphEdge} args.edge
+ * @param {import('../catalog/types.js').NormalizedCatalog['pipes']} args.pipes
+ * @param {import('./types.js').HydraulicsRules} args.rules
+ * @param {import('./types.js').HydraulicsSurveyInput['pipeMaterialPreference']} [args.materialPreference]
  * @param {number} [args.localZeta]
- * @returns {import('./types').HydraulicsPipeMatchItem | null}
+ * @returns {import('./types.js').HydraulicsPipeMatchItem | null}
  */
 export function pickPipeForEdge({
   edge,
@@ -238,9 +238,9 @@ export function pickPipeForEdge({
 }
 
 /**
- * @param {import('./types').HydraulicsGraphEdge} edge
- * @param {import('./types').HydraulicsRules} rules
- * @param {import('./types').HydraulicsApplianceRules['localLossZeta']} zeta
+ * @param {import('./types.js').HydraulicsGraphEdge} edge
+ * @param {import('./types.js').HydraulicsRules} rules
+ * @param {import('./types.js').HydraulicsApplianceRules['localLossZeta']} zeta
  * @returns {number}
  */
 function resolveLocalZetaForEdge(edge, rules, zeta) {
@@ -277,8 +277,8 @@ function resolveLocalZetaForEdge(edge, rules, zeta) {
 }
 
 /**
- * @param {import('./types').HydraulicsGraphEdge} edge
- * @param {import('./types').HydraulicsRules} rules
+ * @param {import('./types.js').HydraulicsGraphEdge} edge
+ * @param {import('./types.js').HydraulicsRules} rules
  * @returns {number}
  */
 function resolveVelocityMinForEdge(edge, rules) {
@@ -290,19 +290,19 @@ function resolveVelocityMinForEdge(edge, rules) {
 
 /**
  * @param {object} args
- * @param {import('./types').HydraulicsGraph} args.graph
- * @param {import('../catalog/types').NormalizedCatalog} args.catalog
- * @param {import('./types').HydraulicsPipelineInput} args.dto
- * @returns {{ pipes: import('./types').HydraulicsPipeMatchItem[]; warnings: string[] }}
+ * @param {import('./types.js').HydraulicsGraph} args.graph
+ * @param {import('../catalog/types.js').NormalizedCatalog} args.catalog
+ * @param {import('./types.js').HydraulicsPipelineInput} args.dto
+ * @returns {{ pipes: import('./types.js').HydraulicsPipeMatchItem[]; warnings: string[] }}
  */
 export function pickPipesForGraph({ graph, catalog, dto }) {
-  /** @type {import('./types').HydraulicsPipeMatchItem[]} */
+  /** @type {import('./types.js').HydraulicsPipeMatchItem[]} */
   const pipes = [];
   /** @type {string[]} */
   const warnings = [];
   const zeta = dto.rules.localLossZeta;
 
-  /** @type {Map<string, import('./types').HydraulicsPipeMatchItem | null>} */
+  /** @type {Map<string, import('./types.js').HydraulicsPipeMatchItem | null>} */
   const trunkChainMatches = new Map();
   /** @type {Set<string>} */
   const trunkChainEdgeIds = new Set();

@@ -8,12 +8,13 @@ import { thermalLoadToFlow } from '../hydraulics/thermalLoadToFlow.js';
 import { coarseRecommendedDn } from '../hydraulics/pressureDrop.js';
 
 /**
- * @param {object} args
- * @param {number} args.heatLoadWatts
- * @param {number} [args.deltaTSystemK]
- * @param {number} [args.mainLineLengthM]
- * @param {number} [args.flowRateM3PerHour] — явный расход (м³/ч)
- * @returns {import('../types/shared-types').HydraulicsReport}
+ * @param {{
+ *   heatLoadWatts?: number;
+ *   deltaTSystemK?: number;
+ *   mainLineLengthM?: number;
+ *   flowRateM3PerHour?: number;
+ * }} [args]
+ * @returns {import('../types/shared-types.js').HydraulicsReport}
  */
 export function calculateHydraulics({
   heatLoadWatts,

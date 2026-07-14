@@ -10,43 +10,49 @@ import {
 } from '../src/hydraulics/pipeCatalogPoolFilter.js';
 import { pipeInternalDiameterMm } from '../src/hydraulics/pipeHydraulics.js';
 import { hydraulicsRulesFromAppliance } from '../src/hydraulics/resolveEmittersMode.js';
+import { assertAt } from './fixtures/scriptAssert.js';
+import { buildHydraulicsGraphEdge } from './fixtures/verifyFixtures.js';
 
 const bundle = await getReferenceBundle();
 const pipes = [...(bundle.catalog.pipes ?? [])].sort(
   (a, b) => pipeInternalDiameterMm(a) - pipeInternalDiameterMm(b),
 );
-const rules = hydraulicsRulesFromAppliance(bundle.appliances.byKind.hydraulics);
+const rules = hydraulicsRulesFromAppliance(
+  /** @type {import('../src/hydraulics/types.js').HydraulicsApplianceRules} */ (
+    bundle.appliances.byKind.hydraulics
+  ),
+);
 
-const mainEdge = {
+/** @type {import('../src/hydraulics/types.js').HydraulicsGraphEdge} */
+const mainEdge = buildHydraulicsGraphEdge({
   id: 'e_boiler_main',
   from: 'boiler',
   to: 'main_collector',
   lengthM: 10,
-  fluid: 'heating',
-  designFlowM3PerHour: 0.075,
   segmentRole: 'main',
+  designFlowM3PerHour: 0.075,
   isMainLine: true,
-};
+});
 
-const branchEdge = {
+/** @type {import('../src/hydraulics/types.js').HydraulicsGraphEdge} */
+const branchEdge = buildHydraulicsGraphEdge({
   id: 'e_test_branch',
   from: 'main_collector',
   to: 'rad_r1',
   lengthM: 4,
-  fluid: 'heating',
-  designFlowM3PerHour: 0.004,
   segmentRole: 'branch',
-};
+  designFlowM3PerHour: 0.004,
+});
 
-const ufhLoopEdge = {
+/** @type {import('../src/hydraulics/types.js').HydraulicsGraphEdge} */
+const ufhLoopEdge = buildHydraulicsGraphEdge({
   id: 'r1_loop_1',
   from: 'ufh_collector',
   to: 'r1_loop_1',
   lengthM: 50,
-  fluid: 'heating',
-  designFlowM3PerHour: 0.02,
   segmentRole: 'ufh_loop',
-};
+  designFlowM3PerHour: 0.02,
+});
 
 const mainMin = resolveMinInternalDiameterMm(mainEdge, rules);
 const branchMin = resolveMinInternalDiameterMm(branchEdge, rules);
@@ -76,7 +82,7 @@ const branchPool = filterPoolByMinInternalDiameter(pipes, branchMin);
 if (branchPool.exhausted) {
   throw new Error('branchPool: пул не должен быть пустым');
 }
-const smallestBranch = branchPool.pool[0];
+const smallestBranch = assertAt(branchPool.pool, 0, 'smallestBranch');
 if (pipeInternalDiameterMm(smallestBranch) < 12) {
   throw new Error(
     `branchPool: min ${smallestBranch.id} Dвн ${pipeInternalDiameterMm(smallestBranch)} < 12`,

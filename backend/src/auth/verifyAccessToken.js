@@ -28,7 +28,7 @@ function getRemoteJwks() {
 export async function verifyAccessToken(bearerToken) {
   if (!hasProjectsJwtConfig()) {
     const err = new Error('AUTH_NOT_CONFIGURED');
-    /** @type {import('../types/shared-types').AppErrorLike} */
+    /** @type {import('../types/shared-types.js').AppErrorLike} */
     const appErr = err;
     appErr.code = 'PROJECTS_AUTH_NOT_CONFIGURED';
     appErr.statusCode = 503;
@@ -50,7 +50,7 @@ export async function verifyAccessToken(bearerToken) {
     const secret = process.env.AUTH_JWT_SECRET?.trim();
     if (!secret) {
       const err = new Error('AUTH_NOT_CONFIGURED');
-      /** @type {import('../types/shared-types').AppErrorLike} */
+      /** @type {import('../types/shared-types.js').AppErrorLike} */
       const appErr = err;
       appErr.code = 'PROJECTS_AUTH_NOT_CONFIGURED';
       appErr.statusCode = 503;
@@ -63,7 +63,7 @@ export async function verifyAccessToken(bearerToken) {
   const sub = result.payload.sub;
   if (typeof sub !== 'string' || !sub.trim()) {
     const err = new Error('JWT без sub');
-    /** @type {import('../types/shared-types').AppErrorLike} */
+    /** @type {import('../types/shared-types.js').AppErrorLike} */
     const appErr = err;
     appErr.code = 'PROJECTS_AUTH_FORBIDDEN';
     appErr.statusCode = 403;

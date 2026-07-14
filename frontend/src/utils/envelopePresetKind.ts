@@ -12,8 +12,8 @@ const KNOWN: ReadonlySet<string> = new Set(['wall', 'window', 'ceiling', 'floor'
  */
 export function sortWallPresetsForDisplay(presets: EnvelopePreset[]): EnvelopePreset[] {
   return [...presets].sort((a, b) => {
-    const la = (a.material ?? a.construction ?? a.id).trim();
-    const lb = (b.material ?? b.construction ?? b.id).trim();
+    const la = (a.material || a.construction || a.id).trim();
+    const lb = (b.material || b.construction || b.id).trim();
     return la.localeCompare(lb, 'ru', { sensitivity: 'base' });
   });
 }
@@ -23,12 +23,12 @@ export function sortWallPresetsForDisplay(presets: EnvelopePreset[]): EnvelopePr
  * Если поле kind отсутствует или нестандартно, пытаемся вывести его из id или construction.
  */
 export function envelopePresetKindNormalized(p: Partial<EnvelopePreset> & { id?: string }): EnvelopePresetKind {
-  const raw = String(p.kind ?? '')
+  const raw = (typeof p.kind === 'string' ? p.kind : '')
     .trim()
     .toLowerCase();
   if (KNOWN.has(raw)) return raw as EnvelopePresetKind;
 
-  const id = String(p.id ?? '').toLowerCase();
+  const id = (typeof p.id === 'string' ? p.id : '').toLowerCase();
   if (id.startsWith('insul_')) return 'insulation';
   if (id.startsWith('window_')) return 'window';
   if (id.startsWith('wall_')) return 'wall';
@@ -36,7 +36,7 @@ export function envelopePresetKindNormalized(p: Partial<EnvelopePreset> & { id?:
   if (id.startsWith('ceiling_')) return 'ceiling';
   if (id.startsWith('roof_')) return 'roof';
 
-  const c = String(p.construction ?? '').toLowerCase();
+  const c = (typeof p.construction === 'string' ? p.construction : '').toLowerCase();
   if (c.includes('окно')) return 'window';
   if (c.includes('потолок')) return 'ceiling';
   if (c === 'пол' || c.startsWith('пол ')) return 'floor';

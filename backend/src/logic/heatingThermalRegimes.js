@@ -39,7 +39,7 @@ export function isHeatingThermalRegimePresetId(id) {
  * t внутри для расчёта излучателей подставляется из building.temps при отсутствии heatingSystem.insideC.
  * Без пресета: квартира — 55/45 (конденсация); дом — 75/65 (прежнее поведение).
  *
- * @param {import('../types/shared-types').CalcRequestBody} body
+ * @param {import('../types/shared-types.js').CalcRequestBody} body
  */
 export function normalizeHeatingSystemThermalRegime(body) {
   const hs = body.heatingSystem;
@@ -64,12 +64,15 @@ export function normalizeHeatingSystemThermalRegime(body) {
     }
   }
 
-  if (isHeatingThermalRegimePresetId(hs.thermalRegimePreset)) {
-    const p = HEATING_THERMAL_REGIME_PRESETS[hs.thermalRegimePreset];
-    hs.supplyC = p.supplyC;
-    hs.returnC = p.returnC;
-    if (hs.radiatorReferenceDeltaT == null) {
-      hs.radiatorReferenceDeltaT = p.defaultRadiatorReferenceDeltaT;
+  const regimePresetId = hs.thermalRegimePreset;
+  if (regimePresetId != null && isHeatingThermalRegimePresetId(regimePresetId)) {
+    const p = HEATING_THERMAL_REGIME_PRESETS[regimePresetId];
+    if (p) {
+      hs.supplyC = p.supplyC;
+      hs.returnC = p.returnC;
+      if (hs.radiatorReferenceDeltaT == null) {
+        hs.radiatorReferenceDeltaT = p.defaultRadiatorReferenceDeltaT;
+      }
     }
   } else {
     if (hs.supplyC == null) hs.supplyC = 75;
@@ -82,10 +85,14 @@ export function normalizeHeatingSystemThermalRegime(body) {
   );
 }
 
-/** @returns {string} Человекочитаемая метка текущего графика для сообщений. */
+/**
+ * @param {import('../types/shared-types.js').HeatingSystemInput} hs
+ * @returns {string} Человекочитаемая метка текущего графика для сообщений.
+ */
 function formatHeatingGraphLabel(hs) {
-  if (isHeatingThermalRegimePresetId(hs.thermalRegimePreset)) {
-    return hs.thermalRegimePreset;
+  const presetId = hs.thermalRegimePreset;
+  if (presetId != null && isHeatingThermalRegimePresetId(presetId)) {
+    return presetId;
   }
   const s = hs.supplyC;
   const r = hs.returnC;
@@ -97,7 +104,7 @@ function formatHeatingGraphLabel(hs) {
 
 /**
  * Высокотемпературный график (не подходит для устойчивой конденсации).
- * @param {import('../types/shared-types').HeatingSystemInput | undefined} hs
+ * @param {import('../types/shared-types.js').HeatingSystemInput | undefined} hs
  * @returns {boolean}
  */
 export function isHighTemperatureHeatingGraph(hs) {
@@ -118,14 +125,15 @@ export function isHighTemperatureHeatingGraph(hs) {
 
 /**
  * Подставляет пресет в heatingSystem (подача, обратка, база ΔT каталога).
- * @param {import('../types/shared-types').HeatingSystemInput} hs
- * @param {import('../types/shared-types').HeatingThermalRegimePreset} presetId
+ * @param {import('../types/shared-types.js').HeatingSystemInput} hs
+ * @param {import('../types/shared-types.js').HeatingThermalRegimePreset} presetId
  * @returns {boolean}
  */
 export function applyThermalRegimePresetToHeatingSystem(hs, presetId) {
   if (!hs || typeof hs !== 'object') return false;
   if (!isHeatingThermalRegimePresetId(presetId)) return false;
   const p = HEATING_THERMAL_REGIME_PRESETS[presetId];
+  if (!p) return false;
   hs.thermalRegimePreset = presetId;
   hs.supplyC = p.supplyC;
   hs.returnC = p.returnC;
@@ -136,8 +144,8 @@ export function applyThermalRegimePresetToHeatingSystem(hs, presetId) {
 /**
  * Если подобран конденсационный котёл, а график высокотемпературный — предупреждение без подмены input.
  *
- * @param {import('../types/shared-types').HeatingSystemInput | undefined} heatingSystem
- * @param {import('../catalog/types').BoilerCatalogItemNormalized | null | undefined} selectedBoiler
+ * @param {import('../types/shared-types.js').HeatingSystemInput | undefined} heatingSystem
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized | null | undefined} selectedBoiler
  * @returns {string | null} Текст предупреждения или null
  */
 export function alignHeatingGraphForCondensingBoiler(heatingSystem, selectedBoiler) {

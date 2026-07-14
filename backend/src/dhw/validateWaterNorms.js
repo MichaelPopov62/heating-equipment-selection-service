@@ -16,10 +16,13 @@ function normObjectTypes(raw) {
     throw new Error('water_norms.objectTypes: ожидается объект');
   }
   const o = /** @type {Record<string, unknown>} */ (raw);
-  /** @type {'house' | 'apartment'} */
+  /** @type {ReadonlyArray<'house' | 'apartment'>} */
   const keys = ['house', 'apartment'];
-  /** @type {import('./types').NormalizedWaterNorms['objectTypes']} */
-  const out = /** @type {import('./types').NormalizedWaterNorms['objectTypes']} */ ({});
+  /** @type {import('./types.js').NormalizedWaterNorms['objectTypes']} */
+  const out = {
+    house: { simultaneityBase: 0, dhwSupplyScenario: 'storage' },
+    apartment: { simultaneityBase: 0, dhwSupplyScenario: 'flowThrough' },
+  };
   for (const key of keys) {
     const rec = requireObject(o, key, `water_norms.objectTypes.${key}`);
     const base = requirePosNum(rec, 'simultaneityBase', `water_norms.objectTypes.${key}`);
@@ -39,7 +42,7 @@ function normObjectTypes(raw) {
 
 /**
  * @param {unknown} json
- * @returns {import('./types').NormalizedWaterNorms}
+ * @returns {import('./types.js').NormalizedWaterNorms}
  */
 export function validateAndNormalizeWaterNorms(json) {
   if (!json || typeof json !== 'object') {

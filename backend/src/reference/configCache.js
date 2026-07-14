@@ -15,15 +15,15 @@ const DEFAULT_TTL_MS = 60 * 60 * 1000;
 
 /**
  * @typedef {object} ReferenceBundle
- * @property {import('../catalog/types').NormalizedCatalog} catalog
+ * @property {import('../catalog/types.js').NormalizedCatalog} catalog
  * @property {'file' | 'mongo'} catalogSource
- * @property {import('../dhw/types').NormalizedWaterNorms} waterNorms
+ * @property {import('../dhw/types.js').NormalizedWaterNorms} waterNorms
  * @property {'file' | 'mongo'} waterNormsSource
- * @property {import('../dhw/types').AppliancesBundle} appliances
+ * @property {import('../dhw/types.js').AppliancesBundle} appliances
  * @property {'file' | 'mongo'} appliancesSource
- * @property {import('../recommendations/types').RecommendationsBundle} recommendations
+ * @property {import('../recommendations/types.js').RecommendationsBundle} recommendations
  * @property {'file' | 'mongo'} recommendationsSource
- * @property {import('../ufh/types').UnderfloorHeatingPresetsBundle} ufhPresets
+ * @property {import('../ufh/types.js').UnderfloorHeatingPresetsBundle} ufhPresets
  * @property {'file' | 'mongo'} ufhPresetsSource
  * @property {number} loadedAt — timestamp (Date.now()) момента успешной загрузки
  */
@@ -126,7 +126,9 @@ async function refreshReferenceCache(opts = {}) {
 
   const genAtStart = cacheGeneration;
 
-  const flight = (async () => {
+  /** @type {Promise<ReferenceBundle> | null} */
+  let flight = null;
+  flight = (async () => {
     try {
       const next = await loadReferenceBundleFresh();
       if (genAtStart !== cacheGeneration) {
@@ -150,7 +152,7 @@ async function refreshReferenceCache(opts = {}) {
       }
       throw err;
     } finally {
-      if (refreshInFlight === flight) {
+      if (flight != null && refreshInFlight === flight) {
         refreshInFlight = null;
       }
     }

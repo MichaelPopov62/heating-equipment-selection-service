@@ -90,7 +90,7 @@ export function buildSurveyCalcInputKey(params: {
       roomExteriorLayout: r.roomExteriorLayout,
       ceilingAreaM2: r.ceilingAreaM2,
       roofAreaM2: r.roofAreaM2,
-      windows: (r.windows ?? []).map((w) => ({
+      windows: r.windows.map((w) => ({
         id: w.id,
         presetId: w.presetId,
         openingWidthMm: w.openingWidthMm,

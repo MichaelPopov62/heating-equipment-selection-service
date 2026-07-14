@@ -31,7 +31,12 @@ export function useProjectCalculationsQuery({
 }: UseProjectCalculationsQueryParams): UseProjectCalculationsQueryResult {
   const query = useQuery({
     queryKey: queryKeys.projectCalculations(projectId ?? ''),
-    queryFn: () => listProjectCalculations(projectId!, { limit }),
+    queryFn: () => {
+      if (projectId == null || projectId.length === 0) {
+        throw new Error('projectId обязателен для списка расчётов');
+      }
+      return listProjectCalculations(projectId, { limit });
+    },
     enabled: enabled && projectId != null && projectId.length > 0,
     staleTime: 0,
   });

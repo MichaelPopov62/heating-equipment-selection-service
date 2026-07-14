@@ -25,8 +25,8 @@ export function radiatorConsumerNodeId(roomId) {
 }
 
 /**
- * @param {import('./types').HydraulicsPipelineInput} dto
- * @returns {import('./types').HydraulicsRadiatorConsumer[]}
+ * @param {import('./types.js').HydraulicsPipelineInput} dto
+ * @returns {import('./types.js').HydraulicsRadiatorConsumer[]}
  */
 export function orderRadiatorConsumers(dto) {
   const consumers = dto.circuits.radiators?.consumers ?? [];
@@ -35,7 +35,9 @@ export function orderRadiatorConsumers(dto) {
   /** @type {Map<string, number>} */
   const orderIndex = new Map();
   for (let i = 0; i < dto.layout.radiatorBranches.length; i += 1) {
-    orderIndex.set(dto.layout.radiatorBranches[i].roomId, i);
+    const branch = dto.layout.radiatorBranches[i];
+    if (!branch) continue;
+    orderIndex.set(branch.roomId, i);
   }
 
   return [...consumers].sort((a, b) => {
@@ -60,7 +62,7 @@ export function splitMainLineIntoTrunkSegments(totalLengthM, segmentCount) {
 
 /**
  * @param {string} roomId
- * @param {import('./types').HydraulicsPipelineInput} dto
+ * @param {import('./types.js').HydraulicsPipelineInput} dto
  * @returns {number}
  */
 export function resolveBranchLengthM(roomId, dto) {
@@ -72,7 +74,7 @@ export function resolveBranchLengthM(roomId, dto) {
 }
 
 /**
- * @param {import('./types').HydraulicsRadiatorsCircuit} rad
+ * @param {import('./types.js').HydraulicsRadiatorsCircuit} rad
  * @returns {{ supplyC: number; returnC: number }}
  */
 export function radiatorThermalRegime(rad) {
@@ -83,7 +85,7 @@ export function radiatorThermalRegime(rad) {
 }
 
 /**
- * @param {import('./types').HydraulicsRadiatorConsumer[]} consumers
+ * @param {import('./types.js').HydraulicsRadiatorConsumer[]} consumers
  * @param {number} fromIndex
  * @returns {number}
  */

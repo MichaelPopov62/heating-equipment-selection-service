@@ -21,7 +21,7 @@ export const MAX_CALCULATION_DOC_BSON_BYTES = 14_000_000;
  */
 function throwPayloadTooLarge(message, code) {
   const err = new Error(message);
-  /** @type {import('../types/shared-types').AppErrorLike} */
+  /** @type {import('../types/shared-types.js').AppErrorLike} */
   const appErr = err;
   appErr.statusCode = 413;
   appErr.code = code;

@@ -11,8 +11,8 @@ import {
 } from '../../../shared/heatingMatchingSchemes.js';
 
 /**
- * @param {import('../dhw/types').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer'] | undefined} [serialBufferConfig]
- * @returns {import('../dhw/types').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']}
+ * @param {import('../dhw/types.js').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer'] | undefined} [serialBufferConfig]
+ * @returns {import('../dhw/types.js').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']}
  */
 function resolveSerialBufferConfig(serialBufferConfig) {
   if (serialBufferConfig) return serialBufferConfig;
@@ -22,7 +22,7 @@ function resolveSerialBufferConfig(serialBufferConfig) {
 }
 
 /**
- * @param {import('../types/shared-types').HotWaterFixturesInput | undefined} fixtures
+ * @param {import('../types/shared-types.js').HotWaterFixturesInput | undefined} fixtures
  */
 function thermalFixtureCount(fixtures) {
   if (!fixtures || typeof fixtures !== 'object') return 0;
@@ -37,12 +37,12 @@ function thermalFixtureCount(fixtures) {
 /**
  * @param {object} p
  * @param {'apartment' | 'house'} p.objectType
- * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} p.requestedScheme
- * @param {import('../types/boiler-types').BoilerCircuitFallbackReport | null | undefined} [p.circuitFallback]
+ * @param {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme} p.requestedScheme
+ * @param {import('../types/boiler-types.js').BoilerCircuitFallbackReport | null | undefined} [p.circuitFallback]
  * @param {'flowThrough' | 'storage' | undefined} p.dhwSupplyScenario
- * @param {import('../types/shared-types').HotWaterFixturesInput | undefined} [p.fixtures]
+ * @param {import('../types/shared-types.js').HotWaterFixturesInput | undefined} [p.fixtures]
  * @param {number} [p.peakThermalPowerKw]
- * @param {import('../dhw/types').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']} [p.serialBufferConfig]
+ * @param {import('../dhw/types.js').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']} [p.serialBufferConfig]
  */
 export function isApartmentCombiSerialBufferEligible({
   objectType,
@@ -67,7 +67,7 @@ export function isApartmentCombiSerialBufferEligible({
   );
 }
 
-/** @param {import('../dhw/types').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']} [serialBufferConfig] */
+/** @param {import('../dhw/types.js').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']} [serialBufferConfig] */
 export function apartmentCombiSerialBufferTemplateVars(serialBufferConfig) {
   const cfg = resolveSerialBufferConfig(serialBufferConfig);
   return {
@@ -77,9 +77,9 @@ export function apartmentCombiSerialBufferTemplateVars(serialBufferConfig) {
 }
 
 /**
- * @returns {import('../types/boiler-types').BoilerMatchingRecommendation | null}
- * @param {import('../dhw/types').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']} serialBufferConfig
- * @param {import('../recommendations/types').RecommendationsBundle} recommendations
+ * @returns {import('../types/boiler-types.js').BoilerMatchingRecommendation | null}
+ * @param {import('../dhw/types.js').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']} serialBufferConfig
+ * @param {import('../recommendations/types.js').RecommendationsBundle} recommendations
  */
 export function buildApartmentCombiSerialBufferRecommendation(
   serialBufferConfig,
@@ -100,14 +100,14 @@ export function buildApartmentCombiSerialBufferRecommendation(
 /**
  * Добавить подсказку в meta.automationHints (после matching, когда известен circuitFallback).
  *
- * @param {import('../types/shared-types').MatchingAutomationHint[]} hints
+ * @param {import('../types/shared-types.js').MatchingAutomationHint[]} hints
  * @param {object} p
  * @param {'apartment' | 'house'} p.objectType
- * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} p.requestedScheme
- * @param {import('../types/boiler-types').BoilerCircuitFallbackReport | null | undefined} [p.circuitFallback]
- * @param {import('../types/shared-types').HotWaterReport | undefined} p.hotWaterReport
- * @param {import('../dhw/types').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']} [p.serialBufferConfig]
- * @param {import('../recommendations/types').RecommendationsBundle} p.recommendations
+ * @param {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme} p.requestedScheme
+ * @param {import('../types/boiler-types.js').BoilerCircuitFallbackReport | null | undefined} [p.circuitFallback]
+ * @param {import('../types/shared-types.js').HotWaterReport | undefined} p.hotWaterReport
+ * @param {import('../dhw/types.js').BoilerApplianceRules['hints']['apartmentCombiSerialBuffer']} [p.serialBufferConfig]
+ * @param {import('../recommendations/types.js').RecommendationsBundle} p.recommendations
  */
 export function appendApartmentCombiSerialBufferAutomationHint(hints, {
   objectType,
@@ -131,6 +131,8 @@ export function appendApartmentCombiSerialBufferAutomationHint(hints, {
     return;
   }
 
+  if (!serialBufferConfig) return;
+
   const rec = buildApartmentCombiSerialBufferRecommendation(
     serialBufferConfig,
     recommendations,
@@ -147,13 +149,13 @@ export function appendApartmentCombiSerialBufferAutomationHint(hints, {
 /**
  * Подсказка: при oversize 1К предложить переход на max-combi (без принудительной подмены схемы).
  *
- * @param {import('../types/shared-types').MatchingAutomationHint[]} hints
+ * @param {import('../types/shared-types.js').MatchingAutomationHint[]} hints
  * @param {object} p
  * @param {'apartment' | 'house'} p.objectType
- * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} p.requestedScheme
- * @param {import('../types/boiler-types').BoilerCircuitFallbackReport | null | undefined} [p.circuitFallback]
- * @param {import('../recommendations/types').ResolvedRecommendation[]} [p.resolvedRecommendations]
- * @param {import('../recommendations/types').RecommendationsBundle} p.recommendations
+ * @param {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme} p.requestedScheme
+ * @param {import('../types/boiler-types.js').BoilerCircuitFallbackReport | null | undefined} [p.circuitFallback]
+ * @param {import('../recommendations/types.js').ResolvedRecommendation[]} [p.resolvedRecommendations]
+ * @param {import('../recommendations/types.js').RecommendationsBundle} p.recommendations
  */
 export function appendApartmentSingleOversizeCombiHint(hints, {
   objectType,

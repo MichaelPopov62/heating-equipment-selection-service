@@ -97,16 +97,18 @@ export function RoomsForm({
               roofPresetId: r0.roofPresetId,
               externalWall1: { ...r0.externalWall1 },
               externalWall2: { ...r0.externalWall2 },
-              roomExteriorLayout: r0.roomExteriorLayout,
+              ...(r0.roomExteriorLayout !== undefined
+                ? { roomExteriorLayout: r0.roomExteriorLayout }
+                : {}),
               ceilingAreaM2: r0.ceilingAreaM2,
               roofAreaM2: r0.roofAreaM2,
-              windows: (r0.windows ?? []).map((w, wi) => ({
+              windows: r0.windows.map((w, wi) => ({
                 ...w,
                 id: `win-${r.id}-${wi + 1}`,
               })),
-              underfloorHeating: r0.underfloorHeating
-                ? { ...r0.underfloorHeating }
-                : undefined,
+              ...(r0.underfloorHeating
+                ? { underfloorHeating: { ...r0.underfloorHeating } }
+                : {}),
             },
       ),
     );
@@ -135,7 +137,7 @@ export function RoomsForm({
             room={room}
             index={index}
             isOpen={openIds.has(room.id)}
-            onToggle={() => toggleAccordion(room.id)}
+            onToggle={() => { toggleAccordion(room.id); }}
             maxFloors={maxFloors}
             objectExternalWallsSummary={objectExternalWallsSummary}
             windowPresets={windowPresets}

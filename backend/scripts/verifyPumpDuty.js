@@ -10,7 +10,7 @@ import {
 } from '../src/hydraulics/pickPump.js';
 import { validateAndNormalizeCatalog } from '../src/catalog/validateCatalog.js';
 
-/** @type {import('../src/hydraulics/types').HydraulicsPumpDutyRules} */
+/** @type {import('../src/hydraulics/types.js').HydraulicsPumpDutyRules} */
 const dutyRules = {
   pumpHeadMarginPercent: 12,
   pumpDutyQMaxUtilizationPercent: 85,
@@ -18,9 +18,11 @@ const dutyRules = {
   pumpMaxHeadMarginPercent: 60,
 };
 
-/** @type {{ modeName: string; qMinM3h: number; qMaxM3h: number; coefficients: { a: number; b: number; c: number } }} */
+/** @type {import('../src/catalog/types.js').PumpOperatingModeNormalized} */
 const testMode = {
   modeName: 'Тест',
+  speedIndex: 1,
+  powerWatts: 45,
   qMinM3h: 0.2,
   qMaxM3h: 4.0,
   coefficients: { a: -0.15, b: -0.02, c: 5.4 },

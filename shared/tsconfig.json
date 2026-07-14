@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.strict-base.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "esnext",
+    "lib": ["esnext"],
+    "types": ["node"],
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "maxNodeModuleJsDepth": 0
+  },
+  "include": ["**/*.js", "**/*.ts", "**/*.d.ts"],
+  "exclude": ["node_modules"]
+}

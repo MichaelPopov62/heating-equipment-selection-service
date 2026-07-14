@@ -20,12 +20,12 @@ export const MANIFOLD_FAILURE_CODE_INPUT = /** @type {const} */ ('MANIFOLD_INPUT
  * Інваріант: underfloor=[], radiator/boilerManifold=null — унібокси не бачать каскад.
  *
  * @param {object} args
- * @param {import('../types/shared-types').ManifoldsMatchingFailureCode} args.failureCode
- * @param {string} args.message — людськочитабельний підсумок для warnings
- * @param {string} [args.causeMessage] — коротка причина без stack
- * @returns {import('../types/shared-types').ManifoldsMatchingReport}
+ * @param {import('../types/shared-types.js').ManifoldsMatchingFailureCode} args.failureCode
+ * @param {string} args.message - людськочитабельний підсумок для warnings
+ * @param {string} [args.causeMessage] - коротка причина без stack
+ * @returns {import('../types/shared-types.js').ManifoldsMatchingReport}
  */
-export function buildEmptyManifoldsFailure({ failureCode, message, causeMessage } = {}) {
+export function buildEmptyManifoldsFailure({ failureCode, message, causeMessage }) {
   const code =
     failureCode === MANIFOLD_FAILURE_CODE_INPUT
       ? MANIFOLD_FAILURE_CODE_INPUT
@@ -53,18 +53,18 @@ export function buildEmptyManifoldsFailure({ failureCode, message, causeMessage 
  * Штатний звіт колекторів (ok: true). Дефіцит SKU (selected=null) — не soft-fail.
  *
  * @param {object} args
- * @param {import('../types/shared-types').ManifoldUnderfloorPick[]} args.underfloor
- * @param {import('../types/shared-types').ManifoldRadiatorPick | null} args.radiator
- * @param {import('../types/shared-types').BoilerManifoldPick | null} args.boilerManifold
+ * @param {import('../types/shared-types.js').ManifoldUnderfloorPick[]} args.underfloor
+ * @param {import('../types/shared-types.js').ManifoldRadiatorPick | null} args.radiator
+ * @param {import('../types/shared-types.js').BoilerManifoldPick | null} args.boilerManifold
  * @param {string[]} args.warnings
- * @returns {import('../types/shared-types').ManifoldsMatchingReport}
+ * @returns {import('../types/shared-types.js').ManifoldsMatchingReport}
  */
 export function buildOkManifoldsReport({
   underfloor = [],
   radiator = null,
   boilerManifold = null,
   warnings = [],
-} = {}) {
+}) {
   return {
     ok: true,
     underfloor,
@@ -77,27 +77,32 @@ export function buildOkManifoldsReport({
 /**
  * Обгортка core→звіт з catch (для verify ін'єкції throw без публічного _testThrow).
  *
- * @param {(args: object) => import('../types/shared-types').ManifoldsMatchingReport} core
+ * @param {(args: object) => import('../types/shared-types.js').ManifoldsMatchingReport} core
  * @param {object} [args]
- * @returns {import('../types/shared-types').ManifoldsMatchingReport}
+ * @returns {import('../types/shared-types.js').ManifoldsMatchingReport}
  */
 export function pickManifoldsWithCore(core, args = {}) {
   try {
     return core(args);
   } catch (err) {
+    const known =
+      err && typeof err === 'object'
+        ? /** @type {import('../types/shared-types.js').AppErrorLike & { message?: string }} */ (err)
+        : null;
     const failureCode =
-      err?.code === MANIFOLD_FAILURE_CODE_INPUT
+      known?.code === MANIFOLD_FAILURE_CODE_INPUT
         ? MANIFOLD_FAILURE_CODE_INPUT
         : MANIFOLD_FAILURE_CODE_INTERNAL;
-    logger.warn('matching.manifold.fail', err, {
+    const errMessage = known?.message ? String(known.message) : null;
+    logger.warn('matching.manifold.fail', null, {
       code: failureCode,
-      message: err?.message ?? null,
-    });
+      message: errMessage,
+    }, err);
     return buildEmptyManifoldsFailure({
       failureCode,
       message:
         'Смета коллекторов пуста; расчёт унибоксов и гидравлики продолжается.',
-      causeMessage: err?.message ? String(err.message) : undefined,
+      ...(errMessage ? { causeMessage: errMessage } : {}),
     });
   }
 }
@@ -148,18 +153,18 @@ function buildUfhCascadeWarning(unitCount, parts) {
 /**
  * Підбір розподільного колектора (ТП або радіатори).
  *
- * @param {object} [args]
- * @param {import('../catalog/types').NormalizedCatalog | undefined} args.catalog
+ * @param {object} args
+ * @param {import('../catalog/types.js').NormalizedCatalog | undefined} args.catalog
  * @param {'radiator' | 'underfloor'} args.application
  * @param {number} args.requiredOutlets
  * @returns {{
- *   selected: import('../catalog/types').ManifoldCatalogItemNormalized | null,
+ *   selected: import('../catalog/types.js').ManifoldCatalogItemNormalized | null,
  *   warnings: string[],
  * }}
  */
-export function pickDistributionManifold({ catalog, application, requiredOutlets } = {}) {
+export function pickDistributionManifold({ catalog, application, requiredOutlets }) {
   const need = Math.max(0, Math.floor(Number(requiredOutlets) || 0));
-  /** @type {import('../catalog/types').ManifoldCatalogItemNormalized[]} */
+  /** @type {import('../catalog/types.js').ManifoldCatalogItemNormalized[]} */
   const pool = (catalog?.manifolds ?? []).filter(
     (m) => m.manifoldApplication === application,
   );
@@ -180,7 +185,7 @@ export function pickDistributionManifold({ catalog, application, requiredOutlets
     };
   }
 
-  /** @type {import('../catalog/types').ManifoldCatalogItemNormalized[]} */
+  /** @type {import('../catalog/types.js').ManifoldCatalogItemNormalized[]} */
   const fitting = pool.filter((m) => m.outletsCount >= need);
   /** @type {string[]} */
   const warnings = [];
@@ -193,13 +198,16 @@ export function pickDistributionManifold({ catalog, application, requiredOutlets
       if (a.outletsCount !== b.outletsCount) return a.outletsCount - b.outletsCount;
       return a.price - b.price;
     });
-    return { selected: fitting[0], warnings };
+    return { selected: fitting[0] ?? null, warnings };
   }
 
   const fallback = [...pool].sort((a, b) => {
     if (b.outletsCount !== a.outletsCount) return b.outletsCount - a.outletsCount;
     return a.price - b.price;
   })[0];
+  if (!fallback) {
+    return { selected: null, warnings: ['В каталоге нет подходящих коллекторов.'] };
+  }
   warnings.push(
     `Подобран коллектор ${fallback.model} (${fallback.outletsCount} вых.) при потребности ${need} — ограничение каталога.`,
   );
@@ -208,18 +216,18 @@ export function pickDistributionManifold({ catalog, application, requiredOutlets
 
 /**
  * @param {object} args
- * @param {import('../catalog/types').NormalizedCatalog | undefined} args.catalog
+ * @param {import('../catalog/types.js').NormalizedCatalog | undefined} args.catalog
  * @param {number} args.requiredCircuits
  * @param {number} args.requiredPowerKw
  * @returns {{
- *   selected: import('../catalog/types').BoilerManifoldCatalogItemNormalized | null,
+ *   selected: import('../catalog/types.js').BoilerManifoldCatalogItemNormalized | null,
  *   warnings: string[],
  * }}
  */
-export function pickBoilerManifold({ catalog, requiredCircuits, requiredPowerKw } = {}) {
+export function pickBoilerManifold({ catalog, requiredCircuits, requiredPowerKw }) {
   const needCircuits = Math.max(0, Math.floor(Number(requiredCircuits) || 0));
   const needKw = Math.max(0, Number(requiredPowerKw) || 0);
-  /** @type {import('../catalog/types').BoilerManifoldCatalogItemNormalized[]} */
+  /** @type {import('../catalog/types.js').BoilerManifoldCatalogItemNormalized[]} */
   const pool = catalog?.boilerManifolds ?? [];
 
   if (needCircuits <= 0) {
@@ -237,7 +245,7 @@ export function pickBoilerManifold({ catalog, requiredCircuits, requiredPowerKw 
     };
   }
 
-  /** @type {import('../catalog/types').BoilerManifoldCatalogItemNormalized[]} */
+  /** @type {import('../catalog/types.js').BoilerManifoldCatalogItemNormalized[]} */
   const fitting = pool.filter(
     (m) => m.circuitsCount >= needCircuits && m.maxPowerKw >= needKw,
   );
@@ -250,7 +258,7 @@ export function pickBoilerManifold({ catalog, requiredCircuits, requiredPowerKw 
       if (a.maxPowerKw !== b.maxPowerKw) return a.maxPowerKw - b.maxPowerKw;
       return a.price - b.price;
     });
-    return { selected: fitting[0], warnings };
+    return { selected: fitting[0] ?? null, warnings };
   }
 
   const fallback = [...pool].sort((a, b) => {
@@ -258,7 +266,11 @@ export function pickBoilerManifold({ catalog, requiredCircuits, requiredPowerKw 
     if (b.maxPowerKw !== a.maxPowerKw) return b.maxPowerKw - a.maxPowerKw;
     return a.price - b.price;
   })[0];
+  if (!fallback) {
+    return { selected: null, warnings: ['В каталоге нет подходящих котельных коллекторов.'] };
+  }
 
+  /** @type {string[]} */
   const parts = [];
   if (fallback.circuitsCount < needCircuits) {
     parts.push(`контуров ${fallback.circuitsCount} < ${needCircuits}`);
@@ -281,7 +293,7 @@ export function pickBoilerManifold({ catalog, requiredCircuits, requiredPowerKw 
 }
 
 /**
- * @param {import('../types/shared-types').BuildingInput | undefined} building
+ * @param {import('../types/shared-types.js').BuildingInput | undefined} building
  * @returns {Map<string, number>}
  */
 function roomFloorById(building) {
@@ -295,7 +307,7 @@ function roomFloorById(building) {
 
 /**
  * Число петель ТП у кімнаті звіту.
- * @param {import('../types/shared-types').UnderfloorHeatingRoomReport} room
+ * @param {import('../types/shared-types.js').UnderfloorHeatingRoomReport} room
  * @returns {number}
  */
 function roomLoopsCount(room) {
@@ -309,14 +321,14 @@ function roomLoopsCount(room) {
 }
 
 /**
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} underfloorHeating
- * @param {import('../types/shared-types').BuildingInput | undefined} building
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null | undefined} underfloorHeating
+ * @param {import('../types/shared-types.js').BuildingInput | undefined} building
  * @returns {Map<number, number>}
  */
 /**
  * Терминал петли комнаты ТП (из отчёта или анкеты building).
- * @param {import('../types/shared-types').UnderfloorHeatingRoomReport} room
- * @param {import('../types/shared-types').BuildingInput | undefined} building
+ * @param {import('../types/shared-types.js').UnderfloorHeatingRoomReport} room
+ * @param {import('../types/shared-types.js').BuildingInput | undefined} building
  * @returns {'collector' | 'unibox'}
  */
 function roomUfhTerminalControl(room, building) {
@@ -331,6 +343,11 @@ function roomUfhTerminalControl(room, building) {
   return 'collector';
 }
 
+/**
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null | undefined} underfloorHeating
+ * @param {import('../types/shared-types.js').BuildingInput | undefined} building
+ * @returns {Map<number, number>}
+ */
 function underfloorOutletsByFloor(underfloorHeating, building) {
   /** @type {Map<number, number>} */
   const byFloor = new Map();
@@ -346,7 +363,7 @@ function underfloorOutletsByFloor(underfloorHeating, building) {
 }
 
 /**
- * @param {import('../types/shared-types').RadiatorsMatchingReport | undefined} radiators
+ * @param {import('../types/shared-types.js').RadiatorsMatchingReport | undefined} radiators
  * @returns {number}
  */
 function radiatorOutletNeed(radiators) {
@@ -361,7 +378,7 @@ function radiatorOutletNeed(radiators) {
  * Чи потрібен котельний колектор (лише house).
  * @param {object} args
  * @param {'apartment' | 'house'} args.objectType
- * @param {import('../types/shared-types').UfhDistributionPreset | undefined} args.distributionPreset
+ * @param {import('../types/shared-types.js').UfhDistributionPreset | undefined} args.distributionPreset
  * @param {boolean} args.hasRadiatorZone
  * @param {boolean} args.hasUfhZone
  * @returns {boolean}
@@ -382,13 +399,13 @@ function needsBoilerManifold({
  * публічний pickManifolds завжди ловить і повертає ok: false.
  *
  * @param {object} args
- * @param {import('../catalog/types').NormalizedCatalog} [args.catalog]
- * @param {import('../types/shared-types').BuildingInput | undefined} [args.building]
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} [args.underfloorHeating]
- * @param {import('../types/shared-types').RadiatorsMatchingReport | undefined} [args.radiators]
- * @param {import('../types/shared-types').BoilerMatchingReport | undefined} [args.boiler]
- * @param {import('../types/shared-types').HydraulicsSurveyInput | undefined} [args.hydraulics]
- * @returns {import('../types/shared-types').ManifoldsMatchingReport}
+ * @param {import('../catalog/types.js').NormalizedCatalog} [args.catalog]
+ * @param {import('../types/shared-types.js').BuildingInput | undefined} [args.building]
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null | undefined} [args.underfloorHeating]
+ * @param {import('../types/shared-types.js').RadiatorsMatchingReport | undefined} [args.radiators]
+ * @param {import('../types/shared-types.js').BoilerMatchingReport | undefined} [args.boiler]
+ * @param {import('../types/shared-types.js').HydraulicsSurveyInput | undefined} [args.hydraulics]
+ * @returns {import('../types/shared-types.js').ManifoldsMatchingReport}
  */
 export function pickManifoldsCore({
   catalog,
@@ -413,13 +430,13 @@ export function pickManifoldsCore({
     wiring: hydraulics?.radiatorWiringSystemType ?? null,
   });
 
-  /** @type {import('../types/shared-types').ManifoldUnderfloorPick[]} */
+  /** @type {import('../types/shared-types.js').ManifoldUnderfloorPick[]} */
   const underfloor = [];
   const outletsByFloor = underfloorOutletsByFloor(underfloorHeating, building);
   for (const floor of [...outletsByFloor.keys()].sort((a, b) => a - b)) {
     const requiredOutlets = outletsByFloor.get(floor) ?? 0;
     const parts = splitOutletsForCascade(requiredOutlets);
-    /** @type {import('../types/shared-types').ManifoldUnderfloorUnitPick[]} */
+    /** @type {import('../types/shared-types.js').ManifoldUnderfloorUnitPick[]} */
     const units = [];
     /** @type {string[]} */
     const floorWarnings = [];
@@ -432,6 +449,7 @@ export function pickManifoldsCore({
 
     for (let i = 0; i < parts.length; i += 1) {
       const partNeed = parts[i];
+      if (partNeed == null) continue;
       const pick = pickDistributionManifold({
         catalog,
         application: 'underfloor',
@@ -455,7 +473,7 @@ export function pickManifoldsCore({
     });
   }
 
-  /** @type {import('../types/shared-types').ManifoldRadiatorPick | null} */
+  /** @type {import('../types/shared-types.js').ManifoldRadiatorPick | null} */
   let radiator = null;
   if (hydraulics?.radiatorWiringSystemType === 'manifold') {
     const requiredOutlets = radiatorOutletNeed(radiators);
@@ -482,7 +500,7 @@ export function pickManifoldsCore({
     hasUfhZone,
   });
 
-  /** @type {import('../types/shared-types').BoilerManifoldPick | null} */
+  /** @type {import('../types/shared-types.js').BoilerManifoldPick | null} */
   let boilerManifold = null;
   if (wantBoiler) {
     const requiredCircuits = (hasRadiatorZone ? 1 : 0) + (hasUfhZone ? 1 : 0);
@@ -523,13 +541,13 @@ export function pickManifoldsCore({
  * Ніколи не кидає назовні: критичний збій → ok: false + порожні структури.
  *
  * @param {object} [args]
- * @param {import('../catalog/types').NormalizedCatalog} [args.catalog]
- * @param {import('../types/shared-types').BuildingInput | undefined} [args.building]
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} [args.underfloorHeating]
- * @param {import('../types/shared-types').RadiatorsMatchingReport | undefined} [args.radiators]
- * @param {import('../types/shared-types').BoilerMatchingReport | undefined} [args.boiler]
- * @param {import('../types/shared-types').HydraulicsSurveyInput | undefined} [args.hydraulics]
- * @returns {import('../types/shared-types').ManifoldsMatchingReport}
+ * @param {import('../catalog/types.js').NormalizedCatalog} [args.catalog]
+ * @param {import('../types/shared-types.js').BuildingInput | undefined} [args.building]
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null | undefined} [args.underfloorHeating]
+ * @param {import('../types/shared-types.js').RadiatorsMatchingReport | undefined} [args.radiators]
+ * @param {import('../types/shared-types.js').BoilerMatchingReport | undefined} [args.boiler]
+ * @param {import('../types/shared-types.js').HydraulicsSurveyInput | undefined} [args.hydraulics]
+ * @returns {import('../types/shared-types.js').ManifoldsMatchingReport}
  */
 export function pickManifolds(args = {}) {
   return pickManifoldsWithCore(pickManifoldsCore, args);

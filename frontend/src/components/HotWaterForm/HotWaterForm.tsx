@@ -19,19 +19,19 @@ function clampInt(n: number, min: number, max: number): number {
 
 export function HotWaterForm({ value, onChange }: Props) {
   const setResidents = (n: number) =>
-    onChange({ ...value, residents: clampInt(n, 0, 20) });
+    { onChange({ ...value, residents: clampInt(n, 0, 20) }); };
 
   const setTemp = (key: 'hotWaterC', n: number) =>
-    onChange({ ...value, [key]: n });
+    { onChange({ ...value, [key]: n }); };
 
   const setFixture = (key: keyof HotWaterFormFixtures, n: number) =>
-    onChange({
+    { onChange({
       ...value,
       fixtures: {
         ...value.fixtures,
         [key]: clampInt(n, 0, 30),
       },
-    });
+    }); };
 
   const f = value.fixtures;
 
@@ -66,7 +66,7 @@ export function HotWaterForm({ value, onChange }: Props) {
             <input
               type="checkbox"
               checked={value.tropicalShower}
-              onChange={(e) => onChange({ ...value, tropicalShower: e.target.checked })}
+              onChange={(e) => { onChange({ ...value, tropicalShower: e.target.checked }); }}
             />
             <span>
               Усиленный («тропический») душ — для дома увеличивает расчётный объём накопительного
@@ -88,7 +88,7 @@ export function HotWaterForm({ value, onChange }: Props) {
             min={0}
             max={20}
             value={value.residents}
-            onChange={(e) => setResidents(Number(e.target.value))}
+            onChange={(e) => { setResidents(Number(e.target.value)); }}
           />
         </div>
         <div className={styles.field}>
@@ -101,7 +101,7 @@ export function HotWaterForm({ value, onChange }: Props) {
                 type="radio"
                 name="coldWaterDesignSeason"
                 checked={value.coldWaterDesignSeason === 'winter'}
-                onChange={() => onChange({ ...value, coldWaterDesignSeason: 'winter' })}
+                onChange={() => { onChange({ ...value, coldWaterDesignSeason: 'winter' }); }}
               />
               Зима (+5&nbsp;°C)
             </label>
@@ -110,7 +110,7 @@ export function HotWaterForm({ value, onChange }: Props) {
                 type="radio"
                 name="coldWaterDesignSeason"
                 checked={value.coldWaterDesignSeason === 'summer'}
-                onChange={() => onChange({ ...value, coldWaterDesignSeason: 'summer' })}
+                onChange={() => { onChange({ ...value, coldWaterDesignSeason: 'summer' }); }}
               />
               Лето (+15&nbsp;°C)
             </label>
@@ -128,7 +128,7 @@ export function HotWaterForm({ value, onChange }: Props) {
             max={60}
             step={0.5}
             value={value.hotWaterC}
-            onChange={(e) => setTemp('hotWaterC', Number(e.target.value))}
+            onChange={(e) => { setTemp('hotWaterC', Number(e.target.value)); }}
           />
         </div>
       </div>
@@ -152,7 +152,7 @@ export function HotWaterForm({ value, onChange }: Props) {
               min={0}
               max={30}
               value={f.kitchenSink}
-              onChange={(e) => setFixture('kitchenSink', Number(e.target.value))}
+              onChange={(e) => { setFixture('kitchenSink', Number(e.target.value)); }}
             />
           </div>
           <div className={styles.fixtureField}>
@@ -166,7 +166,7 @@ export function HotWaterForm({ value, onChange }: Props) {
               min={0}
               max={30}
               value={f.dishwasher}
-              onChange={(e) => setFixture('dishwasher', Number(e.target.value))}
+              onChange={(e) => { setFixture('dishwasher', Number(e.target.value)); }}
             />
           </div>
         </div>
@@ -189,7 +189,7 @@ export function HotWaterForm({ value, onChange }: Props) {
               min={0}
               max={30}
               value={f.shower}
-              onChange={(e) => setFixture('shower', Number(e.target.value))}
+              onChange={(e) => { setFixture('shower', Number(e.target.value)); }}
             />
           </div>
           <div className={styles.fixtureField}>
@@ -203,7 +203,7 @@ export function HotWaterForm({ value, onChange }: Props) {
               min={0}
               max={30}
               value={f.bath}
-              onChange={(e) => setFixture('bath', Number(e.target.value))}
+              onChange={(e) => { setFixture('bath', Number(e.target.value)); }}
             />
           </div>
           <div className={styles.fixtureField}>
@@ -217,7 +217,7 @@ export function HotWaterForm({ value, onChange }: Props) {
               min={0}
               max={30}
               value={f.sink}
-              onChange={(e) => setFixture('sink', Number(e.target.value))}
+              onChange={(e) => { setFixture('sink', Number(e.target.value)); }}
             />
           </div>
           <div className={styles.fixtureField}>
@@ -231,7 +231,7 @@ export function HotWaterForm({ value, onChange }: Props) {
               min={0}
               max={30}
               value={f.toilet}
-              onChange={(e) => setFixture('toilet', Number(e.target.value))}
+              onChange={(e) => { setFixture('toilet', Number(e.target.value)); }}
             />
           </div>
           <div className={styles.fixtureField}>
@@ -245,7 +245,7 @@ export function HotWaterForm({ value, onChange }: Props) {
               min={0}
               max={30}
               value={f.bidet}
-              onChange={(e) => setFixture('bidet', Number(e.target.value))}
+              onChange={(e) => { setFixture('bidet', Number(e.target.value)); }}
             />
           </div>
         </div>
@@ -268,7 +268,7 @@ export function HotWaterForm({ value, onChange }: Props) {
               min={0}
               max={30}
               value={f.laundrySink}
-              onChange={(e) => setFixture('laundrySink', Number(e.target.value))}
+              onChange={(e) => { setFixture('laundrySink', Number(e.target.value)); }}
             />
           </div>
           <div className={styles.fixtureField}>
@@ -282,7 +282,7 @@ export function HotWaterForm({ value, onChange }: Props) {
               min={0}
               max={30}
               value={f.washingMachine}
-              onChange={(e) => setFixture('washingMachine', Number(e.target.value))}
+              onChange={(e) => { setFixture('washingMachine', Number(e.target.value)); }}
             />
           </div>
         </div>

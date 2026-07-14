@@ -45,7 +45,7 @@ function requireNonEmptyString(value, path) {
 
 /**
  * @param {Record<string, unknown>} raw
- * @returns {import('./types').NormalizedUfhModePreset}
+ * @returns {import('./types.js').NormalizedUfhModePreset}
  */
 function normalizeOnePreset(raw) {
   const presetId = requireNonEmptyString(raw.presetId, 'underfloor_heating_presets.presetId');
@@ -110,7 +110,7 @@ function normalizeOnePreset(raw) {
 
 /**
  * @param {unknown} json — массив документов или один bundle-объект
- * @returns {import('./types').UnderfloorHeatingPresetsBundle}
+ * @returns {import('./types.js').UnderfloorHeatingPresetsBundle}
  */
 export function validateAndNormalizeUnderfloorHeatingPresets(json) {
   /** @type {unknown[]} */
@@ -128,9 +128,9 @@ export function validateAndNormalizeUnderfloorHeatingPresets(json) {
     return /** @type {{ isActive?: boolean }} */ (d).isActive !== false;
   });
 
-  /** @type {import('./types').NormalizedUfhModePreset[]} */
+  /** @type {import('./types.js').NormalizedUfhModePreset[]} */
   const presets = [];
-  /** @type {Record<string, import('./types').NormalizedUfhModePreset>} */
+  /** @type {Record<string, import('./types.js').NormalizedUfhModePreset>} */
   const byPresetId = {};
 
   for (const doc of activeDocs) {

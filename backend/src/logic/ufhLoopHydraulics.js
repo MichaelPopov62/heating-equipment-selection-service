@@ -36,7 +36,7 @@ export function estimateUfhLoopElbowCount(loopLengthM, pipeSpacingMm) {
 }
 
 /**
- * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} rules
+ * @param {import('../dhw/types.js').HydraulicsApplianceRulesDoc} rules
  * @returns {{ deltaTK: number; velocityMinMps: number; velocityMaxMps: number; maxPressureDropKPa: number }}
  */
 export function ufhLoopHydraulicsThresholds(rules) {
@@ -49,7 +49,7 @@ export function ufhLoopHydraulicsThresholds(rules) {
 }
 
 /**
- * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} rules
+ * @param {import('../dhw/types.js').HydraulicsApplianceRulesDoc} rules
  * @returns {number}
  */
 function ufhLoopMinNominalDiameterMm(rules) {
@@ -63,7 +63,7 @@ function ufhLoopMinNominalDiameterMm(rules) {
  * @param {number} [args.heatFluxDownWatts]
  * @param {number} [args.heatFluxUpWatts]
  * @param {string} [args.bottomBoundary]
- * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} args.hydraulicsRules
+ * @param {import('../dhw/types.js').HydraulicsApplianceRulesDoc} args.hydraulicsRules
  * @returns {boolean}
  */
 export function shouldTriggerUfhPipeResize({
@@ -93,17 +93,17 @@ export function shouldTriggerUfhPipeResize({
 }
 
 /**
- * @param {import('../catalog/types').NormalizedCatalog['pipes']} pipes
- * @param {import('../hydraulics/types').HydraulicsSurveyInput['pipeMaterialPreference']} [materialPreference]
+ * @param {import('../catalog/types.js').NormalizedCatalog['pipes']} pipes
  * @param {number} minNominalDiameterMm
- * @returns {import('../catalog/types').PipeCatalogItemNormalized[]}
+ * @param {import('../hydraulics/types.js').HydraulicsSurveyInput['pipeMaterialPreference']} [materialPreference]
+ * @returns {import('../catalog/types.js').PipeCatalogItemNormalized[]}
  */
-function filterUfhPipePool(pipes, materialPreference, minNominalDiameterMm) {
+function filterUfhPipePool(pipes, minNominalDiameterMm, materialPreference) {
   if (!pipes?.length) return [];
 
   const minNom = Math.max(1, minNominalDiameterMm);
 
-  /** @type {import('../catalog/types').PipeCatalogItemNormalized[]} */
+  /** @type {import('../catalog/types.js').PipeCatalogItemNormalized[]} */
   let pool = pipes.filter((p) => (Number(p.diameter) || 0) >= minNom);
 
   if (materialPreference) {
@@ -126,11 +126,11 @@ function filterUfhPipePool(pipes, materialPreference, minNominalDiameterMm) {
 
 /**
  * @param {object} args
- * @param {import('../catalog/types').PipeCatalogItemNormalized} args.pipe
+ * @param {import('../catalog/types.js').PipeCatalogItemNormalized} args.pipe
  * @param {number} args.loopLengthM
  * @param {number} args.flowRateM3PerHour
  * @param {number} args.localZeta
- * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} args.hydraulicsRules
+ * @param {import('../dhw/types.js').HydraulicsApplianceRulesDoc} args.hydraulicsRules
  * @returns {{ catalogPipeId: string; internalDiameterMm: number; velocityMps: number; pressureDropKPa: number } | null}
  */
 function computeUfhLoopPipeHydraulics({
@@ -164,7 +164,7 @@ function computeUfhLoopPipeHydraulics({
 }
 
 /**
- * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult} h
+ * @param {import('./ufhLoopHydraulics.types.js').UfhLoopHydraulicsResult} h
  * @param {{ velocityMinMps: number; velocityMaxMps: number; maxPressureDropKPa: number }} thresholds
  * @returns {boolean}
  */
@@ -177,7 +177,7 @@ function isLoopVelocityOk(h, thresholds) {
 }
 
 /**
- * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult} h
+ * @param {import('./ufhLoopHydraulics.types.js').UfhLoopHydraulicsResult} h
  * @param {{ maxPressureDropKPa: number }} thresholds
  * @returns {boolean}
  */
@@ -189,7 +189,7 @@ function isLoopPressureOk(h, thresholds) {
 }
 
 /**
- * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]} loopHydraulics
+ * @param {import('./ufhLoopHydraulics.types.js').UfhLoopHydraulicsResult[]} loopHydraulics
  * @param {{ velocityMinMps: number; velocityMaxMps: number; maxPressureDropKPa: number }} thresholds
  * @returns {{ pressureOk: boolean; velocityOk: boolean }}
  */
@@ -200,7 +200,7 @@ function evaluateLoopsHydraulics(loopHydraulics, thresholds) {
 }
 
 /**
- * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]} loopHydraulics
+ * @param {import('./ufhLoopHydraulics.types.js').UfhLoopHydraulicsResult[]} loopHydraulics
  * @param {{ velocityMinMps: number; velocityMaxMps: number; maxPressureDropKPa: number }} thresholds
  * @returns {number}
  */
@@ -223,9 +223,9 @@ function scorePartialLoopsConfiguration(loopHydraulics, thresholds) {
 }
 
 /**
- * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]} loopHydraulics
- * @param {{ velocityMinMps: number; maxPressureDropKPa: number }} thresholds
- * @returns {import('./ufhLoopHydraulics.types').UfhLoopResolutionStatus}
+ * @param {import('./ufhLoopHydraulics.types.js').UfhLoopHydraulicsResult[]} loopHydraulics
+ * @param {{ velocityMinMps: number; velocityMaxMps: number; maxPressureDropKPa: number }} thresholds
+ * @returns {import('./ufhLoopHydraulics.types.js').UfhLoopResolutionStatus}
  */
 function deriveResolutionStatus(loopHydraulics, thresholds) {
   let hasLowVelocity = false;
@@ -257,8 +257,8 @@ function deriveResolutionStatus(loopHydraulics, thresholds) {
  * @param {object} args
  * @param {number} args.loopsCount
  * @param {number} args.minLoopsGeom
- * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]} args.loopHydraulics
- * @returns {import('./ufhLoopHydraulics.types').UfhLoopAppliedFix}
+ * @param {import('./ufhLoopHydraulics.types.js').UfhLoopHydraulicsResult[]} args.loopHydraulics
+ * @returns {import('./ufhLoopHydraulics.types.js').UfhLoopAppliedFix}
  */
 function deriveAppliedFix({ loopsCount, minLoopsGeom, loopHydraulics }) {
   if (loopsCount < minLoopsGeom) return 'loops_reduced';
@@ -274,15 +274,15 @@ function deriveAppliedFix({ loopsCount, minLoopsGeom, loopHydraulics }) {
 
 /**
  * @param {object} args
- * @param {import('../hydraulics/types').HydraulicsPipeMatchItem} args.defaultMatch
- * @param {import('../catalog/types').PipeCatalogItemNormalized[]} args.pool
+ * @param {import('../hydraulics/types.js').HydraulicsPipeMatchItem} args.defaultMatch
+ * @param {import('../catalog/types.js').PipeCatalogItemNormalized[]} args.pool
  * @param {number} args.loopLengthM
  * @param {number} args.flowRateM3PerHour
  * @param {number} args.localZeta
- * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} args.hydraulicsRules
+ * @param {import('../dhw/types.js').HydraulicsApplianceRulesDoc} args.hydraulicsRules
  * @param {{ velocityMinMps: number; velocityMaxMps: number; maxPressureDropKPa: number }} args.thresholds
  * @param {string} args.loopId
- * @returns {{ finalMatch: import('../hydraulics/types').HydraulicsPipeMatchItem; pipeResizeAction: import('./ufhLoopHydraulics.types').UfhLoopPipeResizeAction; pipeResizeReason: string | null }}
+ * @returns {{ finalMatch: import('../hydraulics/types.js').HydraulicsPipeMatchItem; pipeResizeAction: import('./ufhLoopHydraulics.types.js').UfhLoopPipeResizeAction; pipeResizeReason: string | null }}
  */
 function optimizeUfhLoopPipe({
   defaultMatch,
@@ -295,7 +295,7 @@ function optimizeUfhLoopPipe({
   loopId,
 }) {
   let finalMatch = defaultMatch;
-  /** @type {import('./ufhLoopHydraulics.types').UfhLoopPipeResizeAction} */
+  /** @type {import('./ufhLoopHydraulics.types.js').UfhLoopPipeResizeAction} */
   let pipeResizeAction = 'unchanged';
   /** @type {string | null} */
   let pipeResizeReason = null;
@@ -312,7 +312,7 @@ function optimizeUfhLoopPipe({
   const dpHigh = defaultMatch.pressureDropKPa > pressureUtilThreshold;
 
   if (vLow) {
-    /** @type {import('./ufhLoopHydraulics.types').UfhLoopPipeCandidate | null} */
+    /** @type {import('./ufhLoopHydraulics.types.js').UfhLoopPipeCandidate | null} */
     let smallerCandidate = null;
     for (const pipe of pool) {
       const computed = computeUfhLoopPipeHydraulics({
@@ -350,7 +350,7 @@ function optimizeUfhLoopPipe({
         + `рекомендован меньший Ø ${smallerCandidate.internalDiameterMm} мм.`;
     }
   } else if (vHigh || dpHigh) {
-    /** @type {import('./ufhLoopHydraulics.types').UfhLoopPipeCandidate | null} */
+    /** @type {import('./ufhLoopHydraulics.types.js').UfhLoopPipeCandidate | null} */
     let best = null;
     for (const pipe of pool) {
       const computed = computeUfhLoopPipeHydraulics({
@@ -414,10 +414,10 @@ function optimizeUfhLoopPipe({
  * @param {number} args.pipeSpacingMm
  * @param {number} args.heatLoadWatts
  * @param {number} args.deltaTK
- * @param {import('../catalog/types').NormalizedCatalog['pipes']} args.pipes
- * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} args.hydraulicsRules
- * @param {import('../hydraulics/types').HydraulicsSurveyInput['pipeMaterialPreference']} [args.materialPreference]
- * @returns {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult}
+ * @param {import('../catalog/types.js').NormalizedCatalog['pipes']} args.pipes
+ * @param {import('../dhw/types.js').HydraulicsApplianceRulesDoc} args.hydraulicsRules
+ * @param {import('../hydraulics/types.js').HydraulicsSurveyInput['pipeMaterialPreference']} [args.materialPreference]
+ * @returns {import('./ufhLoopHydraulics.types.js').UfhLoopHydraulicsResult}
  */
 export function validateUfhLoopHydraulics({
   loopId,
@@ -437,7 +437,7 @@ export function validateUfhLoopHydraulics({
   const elbowCount = estimateUfhLoopElbowCount(loopLengthM, pipeSpacingMm);
   const localZeta = elbowCount * hydraulicsRules.localLossZeta.elbow90;
 
-  /** @type {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult} */
+  /** @type {import('./ufhLoopHydraulics.types.js').UfhLoopHydraulicsResult} */
   const base = {
     loopId,
     loopLengthM: round(loopLengthM, 1),
@@ -463,7 +463,7 @@ export function validateUfhLoopHydraulics({
     return base;
   }
 
-  const pool = filterUfhPipePool(pipes, materialPreference, minNominalMm);
+  const pool = filterUfhPipePool(pipes, minNominalMm, materialPreference);
   const pipesForPick = pool.length ? pool : pipes;
 
   if (!pipesForPick?.length) {
@@ -471,6 +471,7 @@ export function validateUfhLoopHydraulics({
     return base;
   }
 
+  /** @type {import('../hydraulics/types.js').HydraulicsRules} */
   const rulesForPick = {
     mainTransitMinInternalDiameterMm: hydraulicsRules.mainTransitMinInternalDiameterMm ?? 20,
     branchMinInternalDiameterMm: hydraulicsRules.branchMinInternalDiameterMm ?? 12,
@@ -478,11 +479,18 @@ export function validateUfhLoopHydraulics({
       ...hydraulicsRules.velocityLimitsMps,
       branchMax: thresholds.velocityMaxMps,
     },
-    roughnessMmByMaterial: hydraulicsRules.roughnessMmByMaterial,
-    localLossZeta: hydraulicsRules.localLossZeta,
+    radiatorBranchGrouping: hydraulicsRules.radiatorBranchGrouping,
     defaultLengthsM: hydraulicsRules.defaultLengthsM,
     maxUfhLoopLengthM: hydraulicsRules.maxUfhLoopLengthM,
+    roughnessMmByMaterial: hydraulicsRules.roughnessMmByMaterial,
+    localLossZeta: hydraulicsRules.localLossZeta,
     pumpHeadMarginPercent: hydraulicsRules.pumpHeadMarginPercent,
+    pumpDutyQMaxUtilizationPercent: hydraulicsRules.pumpDutyQMaxUtilizationPercent,
+    pumpMinHeadAtDutyM: hydraulicsRules.pumpMinHeadAtDutyM,
+    pumpMaxHeadMarginPercent: hydraulicsRules.pumpMaxHeadMarginPercent,
+    pumpMinHeadAtQMaxM: hydraulicsRules.pumpMinHeadAtQMaxM,
+    primaryFlowMarginPercent: hydraulicsRules.primaryFlowMarginPercent,
+    balancingValveKPaPerTurn: hydraulicsRules.balancingValveKPaPerTurn,
   };
 
   const defaultMatch = pickPipeForEdge({
@@ -555,7 +563,7 @@ export function validateUfhLoopHydraulics({
  * @param {number} args.heatLoadWatts
  * @param {number} args.deltaTK
  * @param {string} args.roomId
- * @returns {import('../hydraulics/types').HydraulicsUfhLoop[]}
+ * @returns {import('../hydraulics/types.js').HydraulicsUfhLoop[]}
  */
 function buildLoopsArray({
   loopsCount,
@@ -572,7 +580,7 @@ function buildLoopsArray({
     deltaTK,
   });
 
-  /** @type {import('../hydraulics/types').HydraulicsUfhLoop[]} */
+  /** @type {import('../hydraulics/types.js').HydraulicsUfhLoop[]} */
   const loops = [];
   for (let i = 0; i < count; i += 1) {
     loops.push({
@@ -586,7 +594,7 @@ function buildLoopsArray({
 }
 
 /**
- * @param {import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]} loopHydraulics
+ * @param {import('./ufhLoopHydraulics.types.js').UfhLoopHydraulicsResult[]} loopHydraulics
  * @param {number} loopsCount
  * @param {number} minLoopsGeom
  */
@@ -613,13 +621,12 @@ function markLoopsCountAdjustment(loopHydraulics, loopsCount, minLoopsGeom) {
  * @param {number} args.totalLengthM
  * @param {number} args.pipeSpacingMm
  * @param {number} args.heatLoadWatts
- * @param {number} args.minLoopsGeom
  * @param {string} args.roomId
- * @param {import('../catalog/types').NormalizedCatalog['pipes']} args.pipes
- * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} args.hydraulicsRules
- * @param {import('../hydraulics/types').HydraulicsSurveyInput['pipeMaterialPreference']} [args.materialPreference]
+ * @param {import('../catalog/types.js').NormalizedCatalog['pipes']} args.pipes
+ * @param {import('../dhw/types.js').HydraulicsApplianceRulesDoc} args.hydraulicsRules
+ * @param {import('../hydraulics/types.js').HydraulicsSurveyInput['pipeMaterialPreference']} [args.materialPreference]
  * @param {{ velocityMinMps: number; velocityMaxMps: number; maxPressureDropKPa: number; deltaTK: number }} args.thresholds
- * @returns {{ loops: import('../hydraulics/types').HydraulicsUfhLoop[]; loopHydraulics: import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]; pressureOk: boolean; velocityOk: boolean }}
+ * @returns {{ loops: import('../hydraulics/types.js').HydraulicsUfhLoop[]; loopHydraulics: import('./ufhLoopHydraulics.types.js').UfhLoopHydraulicsResult[]; pressureOk: boolean; velocityOk: boolean }}
  */
 function buildAndValidateLoopsConfiguration({
   loopsCount,
@@ -671,10 +678,10 @@ function buildAndValidateLoopsConfiguration({
  * @param {number} [args.heatFluxUpWatts]
  * @param {string} [args.bottomBoundary]
  * @param {string} args.roomId
- * @param {import('../catalog/types').NormalizedCatalog['pipes']} args.pipes
- * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} args.hydraulicsRules
- * @param {import('../hydraulics/types').HydraulicsSurveyInput['pipeMaterialPreference']} [args.materialPreference]
- * @returns {import('./ufhLoopHydraulics.types').UfhRoomLoopsHydraulicsResult}
+ * @param {import('../catalog/types.js').NormalizedCatalog['pipes']} args.pipes
+ * @param {import('../dhw/types.js').HydraulicsApplianceRulesDoc} args.hydraulicsRules
+ * @param {import('../hydraulics/types.js').HydraulicsSurveyInput['pipeMaterialPreference']} [args.materialPreference]
+ * @returns {import('./ufhLoopHydraulics.types.js').UfhRoomLoopsHydraulicsResult}
  */
 export function resolveUfhRoomLoopsHydraulics({
   areaM2,
@@ -705,9 +712,9 @@ export function resolveUfhRoomLoopsHydraulics({
   const maxLen = Math.max(20, hydraulicsRules.maxUfhLoopLengthM);
   const minLoopsGeom = Math.max(1, Math.ceil(totalLengthM / maxLen));
 
-  /** @type {{ loopsCount: number; loops: import('../hydraulics/types').HydraulicsUfhLoop[]; loopHydraulics: import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]; distance: number } | null} */
+  /** @type {{ loopsCount: number; loops: import('../hydraulics/types.js').HydraulicsUfhLoop[]; loopHydraulics: import('./ufhLoopHydraulics.types.js').UfhLoopHydraulicsResult[]; distance: number } | null} */
   let bestResolved = null;
-  /** @type {{ loopsCount: number; loops: import('../hydraulics/types').HydraulicsUfhLoop[]; loopHydraulics: import('./ufhLoopHydraulics.types').UfhLoopHydraulicsResult[]; score: number; distance: number } | null} */
+  /** @type {{ loopsCount: number; loops: import('../hydraulics/types.js').HydraulicsUfhLoop[]; loopHydraulics: import('./ufhLoopHydraulics.types.js').UfhLoopHydraulicsResult[]; score: number; distance: number } | null} */
   let bestPartial = null;
 
   for (let loopsCount = 1; loopsCount <= MAX_LOOPS_HEURISTIC; loopsCount += 1) {
@@ -840,7 +847,10 @@ export function resolveUfhRoomLoopsHydraulics({
     loopHydraulics: outcome.loopHydraulics,
     warnings,
     pipeResizeApplied: outcome.pipeResizeApplied,
-    resolutionStatus: outcome.resolutionStatus,
+    resolutionStatus:
+      /** @type {import('./ufhLoopHydraulics.types.js').UfhLoopResolutionStatus} */ (
+        outcome.resolutionStatus
+      ),
     appliedFix: outcome.appliedFix,
     minLoopsGeom,
     chosenLoopsCount: outcome.chosenLoopsCount,
@@ -849,21 +859,22 @@ export function resolveUfhRoomLoopsHydraulics({
 
 /**
  * Структурированные REC/WARN по гидравлике петель ТП.
- * @param {import('../types/shared-types').UnderfloorHeatingReport} underfloorHeating
- * @param {import('../recommendations/types').RecommendationsBundle} recommendations
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport} underfloorHeating
+ * @param {import('../recommendations/types.js').RecommendationsBundle} recommendations
+ * @param {import('../dhw/types.js').HydraulicsApplianceRulesDoc | undefined} [hydraulicsRules]
  */
 export function applyUfhLoopHydraulicsRecommendations(
   underfloorHeating,
   recommendations,
   hydraulicsRules,
 ) {
-  if (!underfloorHeating?.rooms?.length) return;
+  if (!underfloorHeating?.rooms?.length || !hydraulicsRules) return;
 
   const thresholds = ufhLoopHydraulicsThresholds(hydraulicsRules);
 
   /** @type {string[]} */
   const warnings = [];
-  /** @type {import('../recommendations/types').ResolvedRecommendation[]} */
+  /** @type {import('../recommendations/types.js').ResolvedRecommendation[]} */
   const resolvedRecommendations = [];
 
   for (const room of underfloorHeating.rooms) {
@@ -936,11 +947,11 @@ export function applyUfhLoopHydraulicsRecommendations(
 
 /**
  * Обогащает отчёт ТП гидравликой петель (после warmFloorCalc, когда доступен каталог).
- * @param {import('../types/shared-types').UnderfloorHeatingReport} underfloorHeating
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport} underfloorHeating
  * @param {object} ctx
- * @param {import('../catalog/types').NormalizedCatalog} ctx.catalog
- * @param {import('../dhw/types').HydraulicsApplianceRulesDoc} ctx.hydraulicsRules
- * @param {import('../hydraulics/types').HydraulicsSurveyInput['pipeMaterialPreference']} [ctx.materialPreference]
+ * @param {import('../catalog/types.js').NormalizedCatalog} ctx.catalog
+ * @param {import('../dhw/types.js').HydraulicsApplianceRulesDoc} ctx.hydraulicsRules
+ * @param {import('../hydraulics/types.js').HydraulicsSurveyInput['pipeMaterialPreference']} [ctx.materialPreference]
  */
 export function enrichUnderfloorHeatingLoopHydraulics(
   underfloorHeating,

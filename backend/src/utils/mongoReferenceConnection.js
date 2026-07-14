@@ -11,6 +11,13 @@ import { applyMongoFriendlyDnsForUri } from './mongoDnsPreferPublic.js';
 let connectPromise = null;
 
 /**
+ * @returns {boolean}
+ */
+function isMongoConnected() {
+  return mongoose.connection.readyState === mongoose.ConnectionStates.connected;
+}
+
+/**
  * Подключиться к MongoDB, если заданы переменные окружения.
  * @returns {Promise<boolean>} true, если соединение установлено
  */
@@ -18,7 +25,7 @@ export async function ensureMongoReferenceConnection() {
   const cfg = getMongoConnectionConfigOrNull();
   if (!cfg) return false;
 
-  if (mongoose.connection.readyState === 1) return true;
+  if (isMongoConnected()) return true;
 
   if (!connectPromise) {
     applyMongoFriendlyDnsForUri(cfg.uri);
@@ -32,5 +39,5 @@ export async function ensureMongoReferenceConnection() {
   }
 
   await connectPromise;
-  return mongoose.connection.readyState === 1;
+  return isMongoConnected();
 }

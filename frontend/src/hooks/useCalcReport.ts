@@ -6,6 +6,7 @@
 import { useMemo } from 'react';
 import type { CalcReportJson } from '../types/calcApi';
 import type { HotWaterBoilerPowerMatchingScheme } from '../types/heatingMatching';
+import type { ApiHotWater } from '../types/recommendationsBlock';
 import { heatLossReserveKw, heatLossTotalKw, wattsToKilowatts } from '../utils/calculators/heatLoss';
 import { isRecord, readRecordField } from '../utils/jsonGuards';
 import { parseBoilerFromReport } from '../utils/parsers/parseBoilerFromReport';
@@ -43,7 +44,7 @@ export function useCalcReport(
     };
   }, [calcReport]);
 
-  const apiHotWaterFromReport = useMemo(() => {
+  const apiHotWaterFromReport = useMemo((): ApiHotWater => {
     if (calcReport === null) return null;
     const calculations = readRecordField(calcReport, 'calculations');
     if (!calculations) return null;
@@ -51,6 +52,10 @@ export function useCalcReport(
     if (!hotWater) return null;
     const { peakFlowLps, hotWaterPowerKw, recommendedTankLiters, simultaneityFactor, sumFlowLpsRaw, peakThermalPowerKw, dhwSupplyScenario } = hotWater;
     if (typeof peakFlowLps !== 'number' || typeof hotWaterPowerKw !== 'number') return null;
+    const scenario: NonNullable<ApiHotWater>['dhwSupplyScenario'] =
+      dhwSupplyScenario === 'flowThrough' || dhwSupplyScenario === 'storage'
+        ? dhwSupplyScenario
+        : null;
     return {
       peakFlowLps,
       hotWaterPowerKw,
@@ -58,10 +63,7 @@ export function useCalcReport(
         typeof peakThermalPowerKw === 'number' && Number.isFinite(peakThermalPowerKw)
           ? peakThermalPowerKw
           : null,
-      dhwSupplyScenario:
-        dhwSupplyScenario === 'flowThrough' || dhwSupplyScenario === 'storage'
-          ? (dhwSupplyScenario as 'flowThrough' | 'storage')
-          : null,
+      dhwSupplyScenario: scenario,
       recommendedTankLiters:
         typeof recommendedTankLiters === 'number' ? recommendedTankLiters : null,
       simultaneityFactor:
@@ -136,7 +138,11 @@ export function useCalcReport(
       const ss = item.suggestedScheme;
       const suggestedScheme =
         typeof ss === 'string' && isCalcMatchingScheme(ss) ? ss : undefined;
-      out.push({ type, message, suggestedScheme });
+      out.push({
+        type,
+        message,
+        ...(suggestedScheme !== undefined ? { suggestedScheme } : {}),
+      });
     }
     return out;
   }, [calcReport, isCalcMatchingScheme]);

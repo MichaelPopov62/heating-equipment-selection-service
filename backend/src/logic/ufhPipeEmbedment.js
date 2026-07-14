@@ -33,5 +33,10 @@ export function resolvePipeEmbedmentResistanceM2KW(pipeSpacingMm) {
   const key = isAllowedPipeSpacingMm(pipeSpacingMm)
     ? pipeSpacingMm
     : DEFAULT_PIPE_SPACING_MM;
-  return R_PIPE_EMBEDMENT_BY_STEP_MM[key];
+  const value = R_PIPE_EMBEDMENT_BY_STEP_MM[key]
+    ?? R_PIPE_EMBEDMENT_BY_STEP_MM[DEFAULT_PIPE_SPACING_MM];
+  if (value === undefined) {
+    throw new Error(`ufhPipeEmbedment: немає R для шага ${key} мм`);
+  }
+  return value;
 }

@@ -7,9 +7,9 @@ import { resolveObjectType } from '../utils/boilerMountingConstraints.js';
 import { isPlainObject } from '../utils/isPlainObject.js';
 
 /**
- * @param {import('../types/shared-types').HotWaterReport | undefined | null} hotWater
- * @param {import('../types/shared-types').BuildingObjectMeta | undefined} objectMeta
- * @returns {import('../types/shared-types').BuildingObjectType}
+ * @param {import('../types/shared-types.js').HotWaterReport | undefined | null} hotWater
+ * @param {import('../types/shared-types.js').BuildingObjectMeta | undefined} objectMeta
+ * @returns {import('../types/shared-types.js').BuildingObjectType}
  */
 function resolveSummaryObjectType(hotWater, objectMeta) {
   const fromHotWater = hotWater?.objectType;
@@ -20,8 +20,8 @@ function resolveSummaryObjectType(hotWater, objectMeta) {
 }
 
 /**
- * @param {import('../types/shared-types').CalcReport} report
- * @returns {import('../types/shared-types').CalculationSummary}
+ * @param {import('../types/shared-types.js').CalcReport} report
+ * @returns {import('../types/shared-types.js').CalculationSummary}
  */
 export function extractCalculationSummary(report) {
   const heatLoss = report?.calculations?.heatLoss;
@@ -40,12 +40,8 @@ export function extractCalculationSummary(report) {
     boiler?.proposalEconomy?.model ??
     null;
 
-  return {
-    heatLossKw,
-    hotWaterPowerKw:
-      typeof hotWater?.hotWaterPowerKw === 'number' ? hotWater.hotWaterPowerKw : undefined,
-    boilerRequiredKw: typeof boiler?.requiredKw === 'number' ? boiler.requiredKw : undefined,
-    boilerModel: boilerModel ? String(boilerModel) : undefined,
+  /** @type {import('../types/shared-types.js').CalculationSummary} */
+  const summary = {
     insideTempC: report?.temps?.insideC,
     outsideTempC: report?.temps?.outsideC,
     objectType: resolveSummaryObjectType(
@@ -55,18 +51,29 @@ export function extractCalculationSummary(report) {
     warningsCount: Array.isArray(report?.warnings) ? report.warnings.length : 0,
     generatedAt: report?.meta?.generatedAt,
   };
+
+  if (heatLossKw !== undefined) summary.heatLossKw = heatLossKw;
+  if (typeof hotWater?.hotWaterPowerKw === 'number') {
+    summary.hotWaterPowerKw = hotWater.hotWaterPowerKw;
+  }
+  if (typeof boiler?.requiredKw === 'number') {
+    summary.boilerRequiredKw = boiler.requiredKw;
+  }
+  if (boilerModel) summary.boilerModel = String(boilerModel);
+
+  return summary;
 }
 
 /**
  * Санитизация summary при чтении из MongoDB (legacy-документы с битым objectType).
  *
  * @param {unknown} summary
- * @returns {import('../types/shared-types').CalculationSummary}
+ * @returns {import('../types/shared-types.js').CalculationSummary}
  */
 export function sanitizeCalculationSummary(summary) {
   const base = isPlainObject(summary)
-      ? /** @type {import('../types/shared-types').CalculationSummary} */ ({ ...summary })
-      : /** @type {import('../types/shared-types').CalculationSummary} */ ({});
+      ? /** @type {import('../types/shared-types.js').CalculationSummary} */ ({ ...summary })
+      : /** @type {import('../types/shared-types.js').CalculationSummary} */ ({});
 
   if (base.objectType === 'apartment' || base.objectType === 'house') {
     return base;

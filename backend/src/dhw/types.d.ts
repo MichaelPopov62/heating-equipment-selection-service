@@ -104,6 +104,8 @@ export interface HydraulicsApplianceRulesDoc {
   localLossZeta: {
     elbow90: number;
     teeBranch: number;
+    teePass: number;
+    teeBranchTakeoff: number;
     mixingNode: number;
     collector: number;
   };
@@ -115,6 +117,9 @@ export interface HydraulicsApplianceRulesDoc {
   primaryFlowMarginPercent: number;
   balancingValveKPaPerTurn: number;
 }
+
+/** Алиас для потребителей (report/hydraulics), совпадает с HydraulicsApplianceRulesDoc. */
+export type HydraulicsApplianceRules = HydraulicsApplianceRulesDoc;
 
 export interface UnderfloorHeatingDistributionRules {
   autoHydraulicSeparatorMinBoilerKw: number;

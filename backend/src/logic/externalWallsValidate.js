@@ -15,15 +15,13 @@ import {
 /**
  * Нормализация и cross-validation externalWalls (СП 50.13330: СФТК — только ППС 16Ф; открытый фасад — минвата).
  *
- * @param {import('../types/shared-types').BuildingInput | undefined} building
+ * @param {import('../types/shared-types.js').BuildingInput | undefined} building
  */
 export function assertExternalWalls(building) {
   if (!building?.objectMeta?.externalWalls) return;
 
   const ew = /** @type {Record<string, unknown>} */ (
-    /** @type {import('../types/shared-types').BuildingObjectMetaExternalWalls} */ (
-      building.objectMeta.externalWalls
-    )
+    /** @type {unknown} */ (building.objectMeta.externalWalls)
   );
 
   const presetId = String(ew.presetId ?? '').trim();
@@ -132,11 +130,13 @@ export function assertExternalWalls(building) {
 /**
  * @param {string} code
  * @param {string} message
- * @returns {Error & { statusCode: number, code: string }}
+ * @returns {Error & import('../types/shared-types.js').AppErrorLike}
  */
 function fieldError(code, message) {
   const err = new Error(message);
-  err.statusCode = 400;
-  err.code = code;
-  return err;
+  /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
+  const appErr = err;
+  appErr.statusCode = 400;
+  appErr.code = code;
+  return appErr;
 }

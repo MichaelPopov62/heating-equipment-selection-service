@@ -55,14 +55,14 @@ export function buildSurveyTextSummary(
 export function surveyDraftForUrlShare(draft: SurveyDraft): SurveyDraft {
   const { lastCalcReport: _drop, ...rest } = draft;
   void _drop;
-  return { ...rest, lastCalcReport: undefined };
+  return rest;
 }
 
 export function encodeSurveyDraftToUrl(draft: SurveyDraft): string {
   const compact = surveyDraftForUrlShare(draft);
   const json = JSON.stringify(compact);
   const b64 = btoa(
-    encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, (_, hex) =>
+    encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, (_match: string, hex: string) =>
       String.fromCharCode(Number.parseInt(hex, 16)),
     ),
   );
@@ -95,16 +95,21 @@ export async function shareSurveyText(title: string, text: string): Promise<bool
       throw err;
     }
   }
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
+  // clipboard может отсутствовать в старых браузерах.
+  const clip: Clipboard | undefined = (navigator as { clipboard?: Clipboard })
+    .clipboard;
+  if (typeof clip?.writeText === 'function') {
+    await clip.writeText(text);
     return true;
   }
   return false;
 }
 
 export async function copyTextToClipboard(text: string): Promise<void> {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
+  const clip: Clipboard | undefined = (navigator as { clipboard?: Clipboard })
+    .clipboard;
+  if (typeof clip?.writeText === 'function') {
+    await clip.writeText(text);
     return;
   }
   throw new Error('Буфер обмена недоступен в этом браузере');

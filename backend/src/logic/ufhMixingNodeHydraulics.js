@@ -13,8 +13,8 @@ const RHO_KG_PER_L = 1;
  * @param {number} args.powerKw — суммарная полезная мощность ТП, кВт
  * @param {number} [args.deltaTK=10]
  * @param {'collector_mixing_valve' | 'hydraulic_separator'} [args.distributionPreset]
- * @param {import('../dhw/types').UnderfloorHeatingMixingNodeRules} [args.mixingNodeRules]
- * @returns {import('../types/shared-types').UfhMixingNodeSpec}
+ * @param {import('../dhw/types.js').UnderfloorHeatingMixingNodeRules} [args.mixingNodeRules]
+ * @returns {import('../types/shared-types.js').UfhMixingNodeSpec}
  */
 export function computeUfhMixingNodeSpec(args) {
   const {

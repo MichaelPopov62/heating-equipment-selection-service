@@ -4,8 +4,8 @@
  */
 
 /**
- * @param {import('../dhw/types').BoilerApplianceRules['mounting'] | undefined} mounting
- * @returns {import('../dhw/types').BoilerApplianceRules['mounting']}
+ * @param {import('../dhw/types.js').BoilerApplianceRules['mounting'] | undefined} mounting
+ * @returns {import('../dhw/types.js').BoilerApplianceRules['mounting']}
  */
 function resolveMounting(mounting) {
   if (mounting) return mounting;
@@ -17,7 +17,7 @@ function resolveMounting(mounting) {
 /**
  * Канонический type комнаты «котельная» в анкете (rooms[].type).
  *
- * @param {import('../dhw/types').BoilerApplianceRules['mounting']} [mounting]
+ * @param {import('../dhw/types.js').BoilerApplianceRules['mounting']} [mounting]
  */
 export function getBoilerRoomType(mounting) {
   return resolveMounting(mounting).boilerRoomType;
@@ -28,7 +28,7 @@ export function getBoilerRoomType(mounting) {
 /** @typedef {'wall' | 'floor'} BoilerMountingType */
 
 /**
- * @param {import('../types/shared-types').BuildingObjectMeta | undefined} objectMeta
+ * @param {import('../types/shared-types.js').BuildingObjectMeta | undefined} objectMeta
  * @returns {'house' | 'apartment'}
  */
 export function resolveObjectType(objectMeta) {
@@ -36,9 +36,9 @@ export function resolveObjectType(objectMeta) {
 }
 
 /**
- * @param {import('../types/shared-types').BuildingInput | undefined} building
- * @param {import('../types/shared-types').BuildingObjectMeta | undefined} objectMeta
- * @param {import('../dhw/types').BoilerApplianceRules['mounting']} [mounting]
+ * @param {import('../types/shared-types.js').BuildingInput | undefined} building
+ * @param {import('../types/shared-types.js').BuildingObjectMeta | undefined} objectMeta
+ * @param {import('../dhw/types.js').BoilerApplianceRules['mounting']} [mounting]
  * @returns {{ volumeM3: number, heightM: number, source: 'room' | 'meta' } | null}
  */
 export function resolveBoilerRoomMetrics(building, objectMeta, mounting) {
@@ -77,7 +77,7 @@ export function resolveBoilerRoomMetrics(building, objectMeta, mounting) {
 
 /**
  * @param {{ volumeM3: number, heightM: number } | null | undefined} metrics
- * @param {import('../dhw/types').BoilerApplianceRules['mounting']} [mounting]
+ * @param {import('../dhw/types.js').BoilerApplianceRules['mounting']} [mounting]
  * @returns {boolean}
  */
 export function isBoilerRoomVolumeCompliant(metrics, mounting) {
@@ -91,10 +91,10 @@ export function isBoilerRoomVolumeCompliant(metrics, mounting) {
 /**
  * Подходит ли котёл из каталога под объект (монтаж + зона; объём котельной — на входе API).
  *
- * @param {import('../types/shared-types').BuildingObjectMeta | undefined} objectMeta
- * @param {import('../catalog/types').BoilerCatalogItemNormalized} boiler
- * @param {import('../types/shared-types').BuildingInput | undefined} [building]
- * @param {import('../dhw/types').BoilerApplianceRules['mounting']} [mounting]
+ * @param {import('../types/shared-types.js').BuildingObjectMeta | undefined} objectMeta
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized} boiler
+ * @param {import('../types/shared-types.js').BuildingInput | undefined} [building]
+ * @param {import('../dhw/types.js').BoilerApplianceRules['mounting']} [mounting]
  * @returns {boolean}
  */
 export function checkMountingConstraints(objectMeta, boiler, building = undefined, mounting) {
@@ -121,11 +121,11 @@ export function checkMountingConstraints(objectMeta, boiler, building = undefine
 }
 
 /**
- * @param {import('../catalog/types').BoilerCatalogItemNormalized[]} boilers
- * @param {import('../types/shared-types').BuildingObjectMeta | undefined} objectMeta
- * @param {import('../types/shared-types').BuildingInput | undefined} [building]
- * @param {import('../dhw/types').BoilerApplianceRules['mounting']} [mounting]
- * @returns {import('../catalog/types').BoilerCatalogItemNormalized[]}
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized[]} boilers
+ * @param {import('../types/shared-types.js').BuildingObjectMeta | undefined} objectMeta
+ * @param {import('../types/shared-types.js').BuildingInput | undefined} [building]
+ * @param {import('../dhw/types.js').BoilerApplianceRules['mounting']} [mounting]
+ * @returns {import('../catalog/types.js').BoilerCatalogItemNormalized[]}
  */
 export function filterBoilersByMountingConstraints(boilers, objectMeta, building = undefined, mounting) {
   if (!boilers?.length) return [];

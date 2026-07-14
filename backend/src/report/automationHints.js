@@ -16,12 +16,12 @@ import {
 /**
  * @param {object} args
  * @param {'apartment' | 'house'} args.objectType
- * @param {import('../types/shared-types').HotWaterReport | undefined} args.hotWaterReport
+ * @param {import('../types/shared-types.js').HotWaterReport | undefined} args.hotWaterReport
  * @param {string | undefined} args.activeScheme
- * @param {import('../types/shared-types').BuildingInput | undefined} [args.building]
+ * @param {import('../types/shared-types.js').BuildingInput | undefined} [args.building]
  * @param {number | undefined} [args.heatingLoadKw]
- * @param {import('../dhw/types').BoilerApplianceRules['apartmentClassification']} [args.apartmentClassification]
- * @returns {import('../types/shared-types').MatchingAutomationHint[]}
+ * @param {import('../dhw/types.js').BoilerApplianceRules['apartmentClassification']} [args.apartmentClassification]
+ * @returns {import('../types/shared-types.js').MatchingAutomationHint[]}
  */
 export function buildMatchingAutomationHints({
   objectType,
@@ -30,8 +30,8 @@ export function buildMatchingAutomationHints({
   building,
   heatingLoadKw,
   apartmentClassification,
-} = {}) {
-  /** @type {import('../types/shared-types').MatchingAutomationHint[]} */
+}) {
+  /** @type {import('../types/shared-types.js').MatchingAutomationHint[]} */
   const hints = [];
   if (!hotWaterReport) return hints;
 
@@ -61,7 +61,7 @@ export function buildMatchingAutomationHints({
     }
   }
 
-  if (objectType === 'apartment') {
+  if (objectType === 'apartment' && apartmentClassification) {
     const large =
       heatingLoadKw != null
         ? isLargeApartment(building, heatingLoadKw, fx, apartmentClassification)

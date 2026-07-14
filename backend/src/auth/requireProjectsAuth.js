@@ -23,7 +23,7 @@ function extractBearerToken(req) {
 
 /**
  * @param {import('express').Request} req
- * @param {import('express').Response<import('../types/shared-types').ErrorEnvelope>} res
+ * @param {import('express').Response<import('../types/shared-types.js').ErrorEnvelope>} res
  * @param {import('express').NextFunction} next
  */
 export async function requireProjectsAuth(req, res, next) {
@@ -50,14 +50,17 @@ export async function requireProjectsAuth(req, res, next) {
     req.projectsUser = await verifyAccessToken(token);
     next();
   } catch (err) {
-    const known = err && typeof err === 'object' ? /** @type {import('../types/shared-types').AppErrorLike} */ (err) : null;
+    const known = err && typeof err === 'object' ? /** @type {import('../types/shared-types.js').AppErrorLike} */ (err) : null;
     const statusCode = known?.statusCode === 503 ? 503 : 403;
     const code =
       known?.code === 'PROJECTS_AUTH_NOT_CONFIGURED'
         ? 'PROJECTS_AUTH_NOT_CONFIGURED'
         : 'PROJECTS_AUTH_FORBIDDEN';
 
-    logger.warn('projects.auth.failed', { requestId: req.requestId ?? null }, {
+    /** @type {{ requestId?: string } | null} */
+    const logMeta = req.requestId ? { requestId: req.requestId } : null;
+
+    logger.warn('projects.auth.failed', logMeta, {
       statusCode,
       code,
       message: err instanceof Error ? err.message : String(err),

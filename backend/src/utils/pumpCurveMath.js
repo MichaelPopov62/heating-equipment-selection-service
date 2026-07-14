@@ -6,8 +6,11 @@
 /** Минимальный H(qMax) при валидации каталога (согласовано с appliances.hydraulics.pumpMinHeadAtQMaxM). */
 export const PUMP_CURVE_MIN_HEAD_AT_QMAX_M = 0.5;
 
+/** Коэффициенты кривой напора H(Q)=a·Q²+b·Q+c. */
+/** @typedef {{ a?: unknown; b?: unknown; c?: unknown }} PumpCurveCoefficients */
+
 /**
- * @param {object} coeffs
+ * @param {PumpCurveCoefficients} coeffs
  * @param {number} qM3h
  * @returns {number}
  */
@@ -21,7 +24,7 @@ export function pumpHeadM(coeffs, qM3h) {
 /**
  * Подрезает qMax до максимального Q на кривой с H ≥ minHeadAtQMaxM (мутирует mode.qMaxM3h).
  *
- * @param {{ qMinM3h: number; qMaxM3h: number; coefficients: object }} mode
+ * @param {{ qMinM3h: number; qMaxM3h: number; coefficients: PumpCurveCoefficients }} mode
  * @param {string} ctx
  * @param {number} [minHeadAtQMaxM]
  */
@@ -69,7 +72,7 @@ export function normalizePumpModeQMaxToCurve(
 /**
  * Геометрия кривой на [qMin, qMax]: положительный напор и убывание H при росте Q.
  *
- * @param {{ qMinM3h: number; qMaxM3h: number; coefficients: object }} mode
+ * @param {{ qMinM3h: number; qMaxM3h: number; coefficients: PumpCurveCoefficients }} mode
  * @param {string} ctx
  * @param {number} [minHeadAtQMaxM]
  */

@@ -40,7 +40,7 @@ function assertThrows(fn, expectedMessage, label) {
   }
 }
 
-/** @returns {import('../src/types/shared-types').CalcRequestBody} */
+/** @returns {import('../src/types/shared-types.js').CalcRequestBody} */
 function minimalCalcBody() {
   return {
     building: {
@@ -81,19 +81,29 @@ function minimalCalcBody() {
 console.log('=== CalcRuntimeContext: fail-fast без ctx ===');
 
 assertThrows(
-  () => validateAndNormalizeInput(minimalCalcBody()),
+  () =>
+    validateAndNormalizeInput(
+      minimalCalcBody(),
+      /** @type {import('../src/types/shared-types.js').CalcRuntimeContext} */ (
+        /** @type {unknown} */ (undefined)
+      ),
+    ),
   'CalcRuntimeContext отсутствует',
   'validateAndNormalizeInput без ctx → assertCalcRuntimeContext',
 );
 
 assertThrows(
   () =>
-    calculateUnderfloorHeating({
-      temps: { insideC: 20, outsideC: -5 },
-      building: minimalCalcBody().building,
-      heatingSystem: { ufhPresetId: 'ufh_only', waterUnderfloorHeating: true },
-      heatLoss: null,
-    }),
+    calculateUnderfloorHeating(
+      /** @type {Parameters<typeof calculateUnderfloorHeating>[0]} */ (
+        /** @type {unknown} */ ({
+          temps: { insideC: 20, outsideC: -5 },
+          building: minimalCalcBody().building,
+          heatingSystem: { ufhPresetId: 'ufh_only', waterUnderfloorHeating: true },
+          heatLoss: null,
+        })
+      ),
+    ),
   'ufhPresets обязательны',
   'calculateUnderfloorHeating без ufhPresets → throw',
 );
@@ -124,12 +134,14 @@ assertThrows(
     calculateUnderfloorHeating({
       temps: { insideC: 20, outsideC: -5 },
       building: minimalCalcBody().building,
-      heatingSystem: {
-        ufhPresetId: 'unknown_preset_xyz',
-        waterUnderfloorHeating: true,
-        supplyC: 55,
-        returnC: 45,
-      },
+      heatingSystem: /** @type {import('../src/types/shared-types.js').HeatingSystemInput} */ (
+        /** @type {unknown} */ ({
+          ufhPresetId: 'unknown_preset_xyz',
+          waterUnderfloorHeating: true,
+          supplyC: 55,
+          returnC: 45,
+        })
+      ),
       heatLoss: null,
       ufhPresets: ctx.ufhPresets,
     }),

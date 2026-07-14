@@ -12,6 +12,6 @@ export function parseApiErrorMessage(data: unknown, fallback: string): string {
   if (!isRecord(errNode)) return fallback;
   const m = errNode.message;
   if (typeof m === 'string') return m;
-  if (m != null && typeof m !== 'object') return String(m);
+  if (typeof m === 'number' || typeof m === 'boolean') return String(m);
   return fallback;
 }

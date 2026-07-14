@@ -6,8 +6,8 @@
 import { pipeInternalDiameterMm } from './pipeHydraulics.js';
 
 /**
- * @param {import('./types').HydraulicsGraphEdge} edge
- * @param {import('./types').HydraulicsRules} rules
+ * @param {import('./types.js').HydraulicsGraphEdge} edge
+ * @param {import('./types.js').HydraulicsRules} rules
  * @returns {number}
  */
 export function resolveMinInternalDiameterMm(edge, rules) {
@@ -27,10 +27,10 @@ export function resolveMinInternalDiameterMm(edge, rules) {
 }
 
 /**
- * @param {import('../catalog/types').PipeCatalogItemNormalized[]} pool — отсортирован по Ø↑
+ * @param {import('../catalog/types.js').PipeCatalogItemNormalized[]} pool — отсортирован по Ø↑
  * @param {number} minInternalMm
  * @returns {{
- *   pool: import('../catalog/types').PipeCatalogItemNormalized[];
+ *   pool: import('../catalog/types.js').PipeCatalogItemNormalized[];
  *   exhausted: boolean;
  * }}
  */

@@ -9,7 +9,15 @@ import { resolvePipeCatalogId } from '../src/catalog/pipeCatalogHelpers.js';
  * Минимальный envelope каталога только с массивом pipes.
  *
  * @param {Record<string, unknown>[]} pipes
- * @returns {Record<string, unknown>}
+ * @returns {{
+ *   schemaVersion: number;
+ *   products: {
+ *     boilers: { doubleCircuit: never[]; singleCircuit: never[] };
+ *     radiators: never[];
+ *     waterHeaters: never[];
+ *     pipes: Record<string, unknown>[];
+ *   };
+ * }}
  */
 function catalogEnvelopeWithPipes(pipes) {
   return {
@@ -153,8 +161,8 @@ if (catalogId !== 'p-mongo-roundtrip') {
   process.exitCode = 1;
   process.exit(process.exitCode);
 }
-const rowFromMongo = { ...mongoLike, id: catalogId };
-delete rowFromMongo.pipeId;
+const { pipeId: _pipeId, ...rowWithoutPipeId } = mongoLike;
+const rowFromMongo = { ...rowWithoutPipeId, id: catalogId };
 validateAndNormalizeCatalog(catalogEnvelopeWithPipes([rowFromMongo]));
 
 process.stdout.write('verify:pipe-catalog OK — mongo pipeId → id round-trip\n');

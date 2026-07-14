@@ -19,17 +19,17 @@ export function createSystemRouter() {
    *
    * @param {import('express').Request} req
    * @param {import('express').Response<
-   *   import('../types/shared-types').InvalidateReferenceCacheOkResponse
-   *   | import('../types/shared-types').ErrorEnvelope
+   *   import('../types/shared-types.js').InvalidateReferenceCacheOkResponse
+   *   | import('../types/shared-types.js').ErrorEnvelope
    * >} res
    * @param {import('express').NextFunction} next
    */
   router.post('/api/v1/system/invalidate-reference-cache', async (req, res, next) => {
-    const requestId = req.requestId ?? null;
+    const logMeta = req.requestId ? { requestId: req.requestId } : null;
     try {
       const configured = process.env.SYSTEM_INTERNAL_TOKEN?.trim();
       if (!configured) {
-        return res.status(503).json({
+        res.status(503).json({
           ok: false,
           error: {
             message:
@@ -38,13 +38,14 @@ export function createSystemRouter() {
             statusCode: 503,
           },
         });
+        return;
       }
 
       const headerToken = req.headers['x-system-token'];
       const token = typeof headerToken === 'string' ? headerToken.trim() : '';
       if (token !== configured) {
-        logger.warn('referenceCache.invalidate.forbidden', { requestId });
-        return res.status(403).json({
+        logger.warn('referenceCache.invalidate.forbidden', logMeta);
+        res.status(403).json({
           ok: false,
           error: {
             message: 'Неверный или отсутствующий X-System-Token.',
@@ -52,9 +53,10 @@ export function createSystemRouter() {
             statusCode: 403,
           },
         });
+        return;
       }
 
-      logger.info('referenceCache.invalidate.request', { requestId });
+      logger.info('referenceCache.invalidate.request', logMeta);
       const bundle = await invalidateAndWarmReferenceCache();
 
       res.status(200).json({

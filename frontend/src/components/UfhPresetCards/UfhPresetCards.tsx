@@ -37,7 +37,7 @@ export function UfhPresetCards({
         <button
           type="button"
           className={`${styles.card} ${selectedPresetId == null ? styles.cardSelected : ''}`}
-          onClick={() => onSelect(null)}
+          onClick={() => { onSelect(null); }}
         >
           <span className={styles.cardTitle}>Только радиаторы</span>
           <span className={styles.cardBadge}>Классика</span>
@@ -50,7 +50,7 @@ export function UfhPresetCards({
             key={p.presetId}
             type="button"
             className={`${styles.card} ${selectedPresetId === p.presetId ? styles.cardSelected : ''}`}
-            onClick={() => onSelect(p.presetId)}
+            onClick={() => { onSelect(p.presetId); }}
           >
             <span className={styles.cardTitle}>{p.ui.title}</span>
             <span className={styles.cardBadge}>{p.ui.badge}</span>

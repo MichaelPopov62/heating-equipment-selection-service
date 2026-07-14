@@ -4,6 +4,7 @@
  */
 
 import type {
+  BottomBoundaryType,
   ExternalWallFormValue,
   RoomFormValue,
   WindowOrientation,
@@ -48,61 +49,67 @@ export function totalExternalWallAreaM2(room: RoomFormValue): number {
   return a1 + a2;
 }
 
-/** Легаси-поле анкеты до разбиения на externalWall1/2. */
-type RoomFormLegacyFields = {
+/**
+ * Комната в формате старого черновика (до externalWall1/2 и с возможными
+ * произвольными строками для границ).
+ */
+type RoomFormCompat = Omit<
+  RoomFormValue,
+  'bottomBoundaryType' | 'externalWall1' | 'externalWall2'
+> & {
+  bottomBoundaryType?: string;
+  externalWall1?: ExternalWallFormValue;
+  externalWall2?: ExternalWallFormValue | null;
   wallAreaM2?: number | '';
 };
+
+/**
+ * Нормализует нижнюю границу; для легаси-значений вне heated|unheated — дефолт по этажу.
+ */
+function resolveBottomBoundaryType(
+  bottom: string | undefined,
+  floor: RoomFormValue['floor'],
+): BottomBoundaryType {
+  if (bottom === 'heated' || bottom === 'unheated') return bottom;
+  return defaultHouseBottomBoundary(floor);
+}
 
 /**
  * Compat: миграция wallAreaM2 → externalWall1/externalWall2.
  *
  * @param rooms
  */
-function migrateLegacyWallAreaM2(rooms: RoomFormValue[]): RoomFormValue[] {
-  let changed = false;
+function migrateLegacyWallAreaM2(rooms: RoomFormCompat[]): RoomFormValue[] {
   const next = rooms.map((room) => {
-    const legacy = room as RoomFormValue & RoomFormLegacyFields;
-    if (!('wallAreaM2' in legacy)) return room;
-
-    changed = true;
-    warnCompatMigration('RoomWallAreaM2', `roomId=${room.id}`);
-
-    const patch: Partial<RoomFormValue> = {};
-    if (
-      room.bottomBoundaryType !== 'heated' &&
-      room.bottomBoundaryType !== 'unheated'
-    ) {
-      patch.bottomBoundaryType = defaultHouseBottomBoundary(room.floor);
+    if (!('wallAreaM2' in room)) {
+      return room as RoomFormValue;
     }
 
-    const wallArea =
-      typeof legacy.wallAreaM2 === 'number' && legacy.wallAreaM2 > 0
-        ? legacy.wallAreaM2
-        : '';
-    const rest = { ...legacy };
-    delete rest.wallAreaM2;
-    const hasWall1Area =
-      typeof rest.externalWall1?.areaM2 === 'number' &&
-      rest.externalWall1.areaM2 > 0;
+    warnCompatMigration('RoomWallAreaM2', `roomId=${room.id}`);
 
-    const migratedWall1: ExternalWallFormValue = hasWall1Area
-      ? rest.externalWall1
-      : { areaM2: wallArea, orientation: 'N' };
+    const wallArea =
+      typeof room.wallAreaM2 === 'number' && room.wallAreaM2 > 0
+        ? room.wallAreaM2
+        : '';
+    const { wallAreaM2: _drop, ...rest } = room;
+    void _drop;
+
+    const wall1 = rest.externalWall1;
 
     return {
       ...rest,
-      ...patch,
-      externalWall1: migratedWall1,
+      externalWall1:
+        wall1 != null && typeof wall1.areaM2 === 'number' && wall1.areaM2 > 0
+          ? wall1
+          : { areaM2: wallArea, orientation: 'N' as const },
       externalWall2: rest.externalWall2 ?? createDefaultExternalWall(),
-      bottomBoundaryType:
-        rest.bottomBoundaryType === 'heated' ||
-        rest.bottomBoundaryType === 'unheated'
-          ? rest.bottomBoundaryType
-          : (patch.bottomBoundaryType ??
-            defaultHouseBottomBoundary(rest.floor)),
-    };
+      bottomBoundaryType: resolveBottomBoundaryType(
+        rest.bottomBoundaryType,
+        rest.floor,
+      ),
+    } satisfies RoomFormValue;
   });
-  return changed ? next : rooms;
+  return next.some((r, i) => r !== rooms[i]) ? next : (rooms as RoomFormValue[]);
 }
 
 /**
@@ -113,13 +120,11 @@ function migrateLegacyWallAreaM2(rooms: RoomFormValue[]): RoomFormValue[] {
 function normalizeRoomEnvelopeFields(
   rooms: RoomFormValue[],
 ): RoomFormValue[] {
-  let changed = false;
   const next = rooms.map((room) => {
     const patch: Partial<RoomFormValue> = {};
-    if (
-      room.bottomBoundaryType !== 'heated' &&
-      room.bottomBoundaryType !== 'unheated'
-    ) {
+    // Рантайм-compat: после JSON-cast граница может быть произвольной строкой.
+    const bottomRaw: string | undefined = (room as RoomFormCompat).bottomBoundaryType;
+    if (bottomRaw !== 'heated' && bottomRaw !== 'unheated') {
       patch.bottomBoundaryType = defaultHouseBottomBoundary(room.floor);
     }
     const inferredLayout = inferRoomExteriorLayout(room);
@@ -128,18 +133,15 @@ function normalizeRoomEnvelopeFields(
     }
     if (
       !showSecondExternalWall(inferredLayout) &&
-      typeof room.externalWall2?.areaM2 === 'number' &&
+      typeof room.externalWall2.areaM2 === 'number' &&
       room.externalWall2.areaM2 > 0
     ) {
       patch.externalWall2 = createDefaultExternalWall();
     }
-    if (Object.keys(patch).length > 0) {
-      changed = true;
-      return { ...room, ...patch };
-    }
-    return room;
+    if (Object.keys(patch).length === 0) return room;
+    return { ...room, ...patch };
   });
-  return changed ? next : rooms;
+  return next.some((r, i) => r !== rooms[i]) ? next : rooms;
 }
 
 /**

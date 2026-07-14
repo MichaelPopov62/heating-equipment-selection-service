@@ -16,8 +16,8 @@ import {
 /**
  * @param {object} args
  * @param {number} args.qRad
- * @param {import('../../catalog/types').RadiatorCatalogItemNormalized[]} args.sectionalPool
- * @param {import('../../catalog/types').RadiatorCatalogItemNormalized[]} args.panelPoolFiltered
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized[]} args.sectionalPool
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized[]} args.panelPoolFiltered
  * @param {50 | 70} args.baseDeltaT
  * @param {number} args.targetDeltaT
  * @param {'side' | 'bottom' | undefined} args.radiatorConnection
@@ -72,7 +72,7 @@ export function exploreRoomEmitterKindVote(args) {
     sectionalWin = applyWindowWidthRulesSectional({
       sections: sectionalThermal.sections,
       sectionWidthMm,
-      windowOpeningWidthMm,
+      windowOpeningWidthMm: windowOpeningWidthMm ?? null,
       ventilationReserveFactor,
       maxSectionsHeuristic,
     });
@@ -100,7 +100,8 @@ export function exploreRoomEmitterKindVote(args) {
       };
     }
     if (
-      sectionalWin.sections > maxSectionsBeforeMultiUnit
+      sectionalWin.sections != null
+      && sectionalWin.sections > maxSectionsBeforeMultiUnit
       && panelPick.adjustedWatts >= qRad
     ) {
       return {
@@ -138,7 +139,7 @@ export function exploreRoomEmitterKindVote(args) {
 
 /**
  * @param {number} qRad
- * @param {import('../../catalog/types').RadiatorCatalogItemNormalized[]} sectionalPool
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized[]} sectionalPool
  * @param {50 | 70} baseDeltaT
  * @param {number} targetDeltaT
  * @param {number} candidateLimit
@@ -152,7 +153,7 @@ export function sizeSectionalThermal(
 ) {
   if (!sectionalPool.length || qRad <= 0) return null;
   const candidates = sectionalPool.slice(0, candidateLimit);
-  /** @type {{ kind: 'section', radiator: import('../../catalog/types').RadiatorCatalogItemNormalized, sections: number, adjustedWatts: number, sectionsThermalMin: number } | null} */
+  /** @type {{ kind: 'section', radiator: import('../../catalog/types.js').RadiatorCatalogItemNormalized, sections: number, adjustedWatts: number, sectionsThermalMin: number } | null} */
   let best = null;
   for (const r of candidates) {
     const adjustedWatts = adjustedRadiatorWatts(r, baseDeltaT, targetDeltaT);
@@ -176,7 +177,16 @@ export function sizeSectionalThermal(
 }
 
 /**
- * @param {object} roomCtx
+ * @typedef {object} WindowWidthSectionalCtx
+ * @property {number | null} sections
+ * @property {number | null} sectionWidthMm
+ * @property {number | null} windowOpeningWidthMm
+ * @property {number} ventilationReserveFactor
+ * @property {number} maxSectionsHeuristic
+ */
+
+/**
+ * @param {WindowWidthSectionalCtx} roomCtx
  */
 export function applyWindowWidthRulesSectional(roomCtx) {
   const {
@@ -239,7 +249,7 @@ export function applyWindowWidthRulesSectional(roomCtx) {
 
 /**
  * Сортировка секционного пула: выше/глубже (больше Вт/секцию) — для эскалации B.
- * @param {import('../../catalog/types').RadiatorCatalogItemNormalized[]} pool
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized[]} pool
  * @param {50 | 70} baseDeltaT
  * @param {number} targetDeltaT
  */

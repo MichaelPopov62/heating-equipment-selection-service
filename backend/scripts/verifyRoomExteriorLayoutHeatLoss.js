@@ -8,32 +8,29 @@ import {
   CORNER_ROOM_HEAT_LOSS_FACTOR,
   INTERNAL_CORRIDOR_DESIGN_TEMP_C,
 } from '../src/logic/roomExteriorLayoutHeatLoss.js';
+import { assertAt, assertDefined } from './fixtures/scriptAssert.js';
+import { buildObjectMeta, buildRoom } from './fixtures/verifyFixtures.js';
 
-const objectMeta = {
-  objectType: 'apartment',
-  floors: 1,
-  roomsCount: 1,
-  externalWalls: {
-    presetId: 'wall_gas_concrete_d500',
-    thicknessMm: 375,
-    facadeSystem: 'none',
-  },
-};
+const objectMeta = buildObjectMeta({ objectType: 'apartment', roomsCount: 1 });
 
-const baseRoom = {
+const baseRoom = buildRoom({
   id: 'r1',
   name: 'Тест',
   type: 'гостиная',
-  floor: 1,
-  topBoundary: 'heated',
   bottomBoundary: 'heated',
   areaM2: 20,
   heightM: 2.7,
-};
+});
 
 const temps = { insideC: 20, outsideC: -22 };
 const area = 10;
 
+/**
+ * @param {string} roomId
+ * @param {string} construction
+ * @param {import('../src/types/shared-types.js').EnvelopeElementInput['orientation']} [orientation]
+ * @returns {import('../src/types/shared-types.js').EnvelopeElementInput}
+ */
 function wallEl(roomId, construction, orientation = 'N') {
   return {
     kind: 'wall',
@@ -46,6 +43,12 @@ function wallEl(roomId, construction, orientation = 'N') {
   };
 }
 
+/**
+ * @param {string} label
+ * @param {import('../src/types/shared-types.js').RoomInput} room
+ * @param {import('../src/types/shared-types.js').EnvelopeElementInput[]} elements
+ * @returns {import('../src/types/shared-types.js').HeatLossElementReport}
+ */
 function runCase(label, room, elements) {
   const report = calculateHeatLossForBuilding({
     temps,
@@ -55,7 +58,8 @@ function runCase(label, room, elements) {
       envelopeElements: elements,
     },
   });
-  const el = report.rooms[0].elements[0];
+  const roomReport = assertAt(assertDefined(report.rooms, 'report.rooms'), 0, 'report.rooms[0]');
+  const el = assertAt(roomReport.elements, 0, 'roomReport.elements[0]');
   console.log(`\n=== ${label} ===`);
   console.log(
     JSON.stringify(
@@ -90,10 +94,10 @@ const internalEl = runCase('internal corridor', { ...baseRoom, type: 'прихо
 
 const errors = [];
 
-if (Math.abs(facadeEl.heatLossFactor - 1.1) > 0.001) {
+if (Math.abs((facadeEl.heatLossFactor ?? 0) - 1.1) > 0.001) {
   errors.push(`facade: ожидался heatLossFactor 1.1, получено ${facadeEl.heatLossFactor}`);
 }
-if (Math.abs(cornerEl.heatLossFactor - 1.1 * CORNER_ROOM_HEAT_LOSS_FACTOR) > 0.001) {
+if (Math.abs((cornerEl.heatLossFactor ?? 0) - 1.1 * CORNER_ROOM_HEAT_LOSS_FACTOR) > 0.001) {
   errors.push(
     `corner: ожидался heatLossFactor ${1.1 * CORNER_ROOM_HEAT_LOSS_FACTOR}, получено ${cornerEl.heatLossFactor}`,
   );

@@ -3,7 +3,7 @@
  * Описание: Содержит массив ENVELOPE_PRESETS (стены, утеплители, окна, потолки, полы, кровля) с U или uModel для расчёта по толщине. Экспортирует getEnvelopePresetById(); отдаётся через GET /api/v1/presets/envelope и используется в wallAssembly, heatlossByRooms, validate.
  */
 
-/** @type {import('../types/shared-types').EnvelopePreset[]} */
+/** @type {import('../types/shared-types.js').EnvelopePreset[]} */
 export const ENVELOPE_PRESETS = [
   {
     id: 'wall_gas_concrete_d500',
@@ -419,7 +419,7 @@ export const ENVELOPE_PRESETS = [
 
 /**
  * @param {string} presetId
- * @returns {import('../types/shared-types').EnvelopePreset | null}
+ * @returns {import('../types/shared-types.js').EnvelopePreset | null}
  */
 export function getEnvelopePresetById(presetId) {
   if (!presetId) return null;

@@ -7,8 +7,8 @@ import { thermalRegimeRecommendationHint } from '../../../shared/heatingThermalR
 import { isHeatingThermalRegimePresetId } from './heatingThermalRegimes.js';
 
 /**
- * @param {import('../types/shared-types').CalcRequestBody} body
- * @param {import('../ufh/types').UnderfloorHeatingPresetsBundle} ufhPresets
+ * @param {import('../types/shared-types.js').CalcRequestBody} body
+ * @param {import('../ufh/types.js').UnderfloorHeatingPresetsBundle} ufhPresets
  */
 export function normalizeHeatingUfhPreset(body, ufhPresets) {
   const hs = body.heatingSystem;
@@ -24,9 +24,11 @@ export function normalizeHeatingUfhPreset(body, ufhPresets) {
   const preset = ufhPresets.byPresetId[presetId];
   if (!preset) {
     const err = new Error(`Неизвестный ufhPresetId "${presetId}".`);
-    err.statusCode = 400;
-    err.code = 'UFH_PRESET_INVALID';
-    throw err;
+    /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
+    const appErr = err;
+    appErr.statusCode = 400;
+    appErr.code = 'UFH_PRESET_INVALID';
+    throw appErr;
   }
 
   hs.waterUnderfloorHeating = true;
@@ -79,7 +81,7 @@ export function normalizeHeatingUfhPreset(body, ufhPresets) {
 /**
  * Подсказка при явном thermalRegimePreset, расходящемся с рекомендацией схемы.
  *
- * @param {import('../types/shared-types').CalcRequestBody} body
+ * @param {import('../types/shared-types.js').CalcRequestBody} body
  */
 export function appendThermalRegimeSchemeWarnings(body) {
   const hs = body.heatingSystem;

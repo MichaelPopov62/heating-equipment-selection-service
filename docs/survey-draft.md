@@ -96,7 +96,7 @@ cd backend && npm run verify:survey-draft-migration
 cd frontend && npm run verify
 ```
 
-`npm run verify` во frontend = `lint` + `verify:survey-session` + `verify:dead-code` (knip).
+`npm run verify` во frontend = `lint` + **`typecheck`** + `verify:survey-session` + `verify:dead-code` (knip).
 
 ### Автоматизированная приёмка (frontend)
 
@@ -106,8 +106,9 @@ cd frontend && npm run verify
 cd frontend && npm run verify && npm run build
 ```
 
-- **`npm run verify`** — exit `0` обязателен; ошибки ESLint, `verify:survey-session` или knip (вне `ignore`) блокируют приёмку.
-- **`npm run build`** — `tsc -b` + Vite без ошибок.
+- **`npm run verify`** — exit `0` обязателен; ошибки ESLint (`strictTypeChecked`), `typecheck`, `verify:survey-session` или knip (вне `ignore`) блокируют приёмку.
+- **`npm run build`** — `typecheck` + Vite без ошибок.
+- Полный gate репозитория: из корня `npm run verify` (см. [`type-safety.md`](type-safety.md)).
 
 **Knip (`knip.json`):** модули живой миграции черновиков в секции `ignore` (не анализируются, без ложных срабатываний):
 

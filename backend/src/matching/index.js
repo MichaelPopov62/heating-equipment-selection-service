@@ -26,32 +26,11 @@ import { assertCalcRuntimeContext } from '../reference/assertCalcRuntimeContext.
 import { logger } from '../utils/logger.js';
 
 /**
- * Єдина точка входу для підбору обладнання.
- * Приймає результати розрахунків та каталог і повертає підібрані позиції.
+ * База отопления для pickBoiler: при ufh_only - отдача ТП вверх, иначе теплопотери ограждения.
  *
- * Для дома с БКН: спочатку підбір БКН з каталогу,
- * потім уточнення потужності ГВС по фактичному об'єму бака і підбір котла
- * (схема max або сумма мощностей для «1К + БКН»).
- *
- * @param {object} args
- * @param {import('../types/shared-types').HeatLossReport} args.heatLoss
- * @param {import('../types/shared-types').HotWaterReport} args.hotWater
- * @param {import('../types/shared-types').HeatingSystemInput} args.heatingSystem
- * @param {import('../types/shared-types').BuildingInput | undefined} args.building
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null} [args.underfloorHeating]
- * @param {import('../types/shared-types').HydraulicsSurveyInput | undefined} [args.hydraulics]
- * @param {import('../types/shared-types').CalcRuntimeContext} args.ctx
- * @returns {{
- *   matching: import('../types/shared-types').MatchingReport,
- *   hotWaterForCalculations: import('../types/shared-types').HotWaterReport,
- * }}
- */
-/**
- * База отопления для pickBoiler: при ufh_only — отдача ТП вверх, иначе теплопотери ограждения.
- *
- * @param {import('../types/shared-types').HeatingSystemInput | undefined} heatingSystem
- * @param {import('../types/shared-types').HeatLossReport | undefined} heatLoss
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} underfloorHeating
+ * @param {import('../types/shared-types.js').HeatingSystemInput | undefined} heatingSystem
+ * @param {import('../types/shared-types.js').HeatLossReport | undefined} heatLoss
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null | undefined} underfloorHeating
  * @returns {{ boilerHeatingLoadWatts: number, envelopeHeatLossWatts: number, usedUfhHeatFlux: boolean }}
  */
 function resolveBoilerHeatingLoadWatts(heatingSystem, heatLoss, underfloorHeating) {
@@ -82,6 +61,27 @@ function resolveBoilerHeatingLoadWatts(heatingSystem, heatLoss, underfloorHeatin
   };
 }
 
+/**
+ * Єдина точка входу для підбору обладнання.
+ * Приймає результати розрахунків та каталог і повертає підібрані позиції.
+ *
+ * Для дома с БКН: спочатку підбір БКН з каталогу,
+ * потім уточнення потужності ГВС по фактичному об'єму бака і підбір котла
+ * (схема max або сумма мощностей для «1К + БКН»).
+ *
+ * @param {object} args
+ * @param {import('../types/shared-types.js').HeatLossReport} args.heatLoss
+ * @param {import('../types/shared-types.js').HotWaterReport} args.hotWater
+ * @param {import('../types/shared-types.js').HeatingSystemInput} args.heatingSystem
+ * @param {import('../types/shared-types.js').BuildingInput | undefined} args.building
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null} [args.underfloorHeating]
+ * @param {import('../types/shared-types.js').HydraulicsSurveyInput | undefined} [args.hydraulics]
+ * @param {import('../types/shared-types.js').CalcRuntimeContext} args.ctx
+ * @returns {{
+ *   matching: import('../types/shared-types.js').MatchingReport,
+ *   hotWaterForCalculations: import('../types/shared-types.js').HotWaterReport,
+ * }}
+ */
 export function matchEquipment({
   heatLoss,
   hotWater,
@@ -90,7 +90,7 @@ export function matchEquipment({
   underfloorHeating = null,
   hydraulics,
   ctx,
-} = {}) {
+}) {
   assertCalcRuntimeContext(ctx);
   const { catalog, waterNorms, appliances, recommendations } = ctx;
   const heatingLoad = resolveBoilerHeatingLoadWatts(
@@ -124,7 +124,7 @@ export function matchEquipment({
     (scheme === SCHEME_BOILER_MAX_COMBI ||
       scheme === SCHEME_BOILER_SINGLE_INDIRECT_SUM);
 
-  /** @type {import('../types/shared-types').IndirectWaterHeaterMatchingReport} */
+  /** @type {import('../types/shared-types.js').IndirectWaterHeaterMatchingReport} */
   let indirectWaterHeater = pickIndirectWaterHeater({
     hotWater,
     catalog,
@@ -132,7 +132,7 @@ export function matchEquipment({
     objectType,
   });
 
-  /** @type {import('../types/shared-types').HotWaterReport | undefined} */
+  /** @type {import('../types/shared-types.js').HotWaterReport | undefined} */
   let hotWaterResolved = hotWater;
   if (hotWaterResolved && indirectWaterHeater.selected) {
     hotWaterResolved = applyIndirectTankToHotWaterReport(
@@ -240,7 +240,7 @@ export function matchEquipment({
     recommendations,
   });
 
-  /** @type {import('../types/shared-types').WaterHeaterMatchingReport} */
+  /** @type {import('../types/shared-types.js').WaterHeaterMatchingReport} */
   let waterHeater = {
     selected: null,
     chosenVariant: null,
@@ -252,14 +252,14 @@ export function matchEquipment({
 
   if (scheme === SCHEME_BOILER_COMBI_BUFFER_ELECTRIC) {
     waterHeater = pickWaterHeater({ hotWater: hwForBoiler, catalog });
-    if (waterHeater.requiredTankLiters > 0) {
+    if ((waterHeater.requiredTankLiters ?? 0) > 0) {
       waterHeater.warnings.unshift(
         `Электробойлер подобран как температурный буфер объёмом ${waterHeater.requiredTankLiters} л для сглаживания температурных скачков ГВС двухконтурного котла.`,
       );
     }
   } else if (scheme === SCHEME_BOILER_SINGLE_BUFFER_ELECTRIC) {
     waterHeater = pickWaterHeater({ hotWater: hwForBoiler, catalog });
-    if (waterHeater.requiredTankLiters > 0) {
+    if ((waterHeater.requiredTankLiters ?? 0) > 0) {
       waterHeater.warnings.unshift(
         `Электробойлер подобран как буфер/накопитель объёмом ${waterHeater.requiredTankLiters} л (схема 1К + буферный ЭВН).`,
       );

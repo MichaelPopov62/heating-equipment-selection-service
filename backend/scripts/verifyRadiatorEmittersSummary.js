@@ -11,6 +11,15 @@ import {
 } from '../src/matching/radiatorSizingHelpers.js';
 import { warmupReferenceCache, getReferenceBundle, toCalcRuntimeContext } from '../src/reference/public.js';
 import { pickRadiatorsWithProposalLines } from '../src/matching/radiators.js';
+import { assertDefined } from './fixtures/scriptAssert.js';
+import {
+  buildBoilerEquipmentProposal,
+  buildHeatLossReport,
+  buildHeatLossRoom,
+  buildMinimalBoilerMatchingReport,
+  buildObjectMeta,
+  buildRoom,
+} from './fixtures/verifyFixtures.js';
 
 /** @param {boolean} ok @param {string} label */
 function check(ok, label) {
@@ -77,7 +86,10 @@ async function main() {
   await warmupReferenceCache();
   const bundle = await getReferenceBundle();
   const ctx = toCalcRuntimeContext(bundle);
-  const panels = (ctx.catalog?.radiators ?? []).filter((r) => r.priceBasis === 'panel');
+  const panels = (ctx.catalog?.radiators ?? []).filter(
+    /** @param {import('../src/catalog/types.js').RadiatorCatalogItemNormalized} r */
+    (r) => r.priceBasis === 'panel',
+  );
 
   const qRad = 788;
   const opening = 1850;
@@ -109,30 +121,31 @@ async function main() {
       'без фильтра окна выбирается более короткая панель (регресс-якорь)',
     ) && ok;
 
-  const heatLoss = {
+  const heatLoss = buildHeatLossReport({
+    totalWatts: 788,
     rooms: [
-      {
+      buildHeatLossRoom({
         id: 'r6',
         name: 'Комната 6',
         type: 'спальня',
         envelopeWatts: 606,
         designWatts: 788,
-      },
+      }),
     ],
-  };
+  });
+
+  /** @type {import('../src/types/shared-types.js').BuildingInput} */
   const building = {
-    objectMeta: { objectType: 'apartment', ventilationReserveMode: 'natural' },
+    objectMeta: buildObjectMeta({ objectType: 'apartment', ventilationReserveMode: 'natural' }),
     rooms: [
-      {
+      buildRoom({
         id: 'r6',
         name: 'Комната 6',
         type: 'спальня',
-        floor: 1,
-        topBoundary: 'heated',
         areaM2: 14,
         heightM: 2.75,
         roomExteriorLayout: 'corner',
-      },
+      }),
     ],
     envelopeElements: [
       {
@@ -147,32 +160,21 @@ async function main() {
     temps: { insideC: 20, outsideC: -23 },
   };
 
-  /** @type {import('../src/types/boiler-types').BoilerMatchingReport} */
-  const boilerStub = {
+  const boilerStub = buildMinimalBoilerMatchingReport({
     heatLossKw: 0.8,
-    reserveFactor: 1.15,
     requiredKw: 24,
-    selected: { model: 'stub' },
-    warnings: [],
-    proposalEconomy: {
-      kind: 'single',
+    selected: null,
+    proposalEconomy: buildBoilerEquipmentProposal({
       headline: 'eco',
       model: 'Baxi ECO Home 24 F',
-      unitsCount: 1,
-      unitMaxPowerKw: 24,
-      totalNominalKw: 24,
-      requiredKw: 24,
-    },
-    proposalEfficient: {
-      kind: 'single',
+    }),
+    proposalEfficient: buildBoilerEquipmentProposal({
       headline: 'eff',
       model: 'Luna Duo-Tec E 33',
-      unitsCount: 1,
       unitMaxPowerKw: 28,
       totalNominalKw: 28,
-      requiredKw: 24,
-    },
-  };
+    }),
+  });
 
   const report = pickRadiatorsWithProposalLines({
     roomsHeatLoss: heatLoss,
@@ -186,12 +188,15 @@ async function main() {
     catalog: ctx.catalog,
     building,
     boiler: boilerStub,
-    radiatorRules: ctx.appliances?.radiator ?? null,
+    radiatorRules: ctx.appliances?.byKind?.radiator ?? null,
     recommendations: ctx.recommendations ?? null,
   });
 
   const ecoR6 = report.lineEconomy?.byRoom?.find((r) => r.roomId === 'r6');
-  const effR6 = report.lineEfficient?.byRoom?.find((r) => r.roomId === 'r6');
+  const effR6 = assertDefined(
+    report.lineEfficient?.byRoom?.find((r) => r.roomId === 'r6'),
+    'effR6',
+  );
 
   ok =
     check(
@@ -203,10 +208,9 @@ async function main() {
   ok =
     check(
       ecoR6 != null &&
-        effR6 != null &&
-        ecoR6.displayKind === effR6.displayKind &&
+        effR6.displayKind === ecoR6.displayKind &&
         ecoR6.displayKind !== 'none',
-      `economy/efficient r6 same displayKind=${ecoR6?.displayKind} (models ${ecoR6?.radiatorModel} / ${effR6?.radiatorModel})`,
+      `economy/efficient r6 same displayKind=${ecoR6?.displayKind} (models ${ecoR6?.radiatorModel} / ${effR6.radiatorModel})`,
     ) && ok;
 
   if (ecoR6?.displayKind === 'panel') {
@@ -227,12 +231,13 @@ async function main() {
           ecoR6.widthOk === true,
         `economy sectional under window (sections=${ecoR6?.sections}, widthOk=${ecoR6?.widthOk})`,
       ) && ok;
+    const ecoSections = assertDefined(ecoR6.sections, 'ecoR6.sections');
     ok =
       check(
         typeof effR6.sections === 'number' &&
-          effR6.sections >= ecoR6.sections &&
+          effR6.sections >= ecoSections &&
           effR6.widthOk === true,
-        `efficient sectional ≥ economy sections under same window (${effR6?.sections} ≥ ${ecoR6?.sections})`,
+        `efficient sectional ≥ economy sections under same window (${effR6.sections} ≥ ${ecoSections})`,
       ) && ok;
   }
 

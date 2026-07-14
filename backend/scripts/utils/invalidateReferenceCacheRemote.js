@@ -57,8 +57,7 @@ export async function tryInvalidateReferenceCacheRemote() {
       return;
     }
 
-    /** @type {{ referenceBundleLoadedAt?: number }} */
-    const payload = await res.json();
+    const payload = /** @type {{ referenceBundleLoadedAt?: number }} */ (await res.json());
     process.stdout.write(
       `[seed] reference cache invalidated; loadedAt=${payload.referenceBundleLoadedAt ?? '?'}\n`,
     );

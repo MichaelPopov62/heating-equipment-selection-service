@@ -6,7 +6,7 @@
 
 import { round } from '../utils/math.js';
 
-/** @type {import('./types').HydraulicsNodeKind[]} */
+/** @type {import('./types.js').HydraulicsNodeKind[]} */
 const LEAF_NODE_KINDS = [
   'radiator_consumer',
   'radiator_manifold',
@@ -16,8 +16,8 @@ const LEAF_NODE_KINDS = [
 ];
 
 /**
- * @param {import('./types').HydraulicsGraph} graph
- * @returns {import('./types').HydraulicsGraphNode[]}
+ * @param {import('./types.js').HydraulicsGraph} graph
+ * @returns {import('./types.js').HydraulicsGraphNode[]}
  */
 function findLeafNodes(graph) {
   const incoming = new Set(graph.edges.map((e) => e.to));
@@ -27,12 +27,12 @@ function findLeafNodes(graph) {
 }
 
 /**
- * @param {import('./types').HydraulicsGraph} graph
+ * @param {import('./types.js').HydraulicsGraph} graph
  * @param {string} leafId
- * @returns {import('./types').HydraulicsGraphEdge[]}
+ * @returns {import('./types.js').HydraulicsGraphEdge[]}
  */
 function tracePathFromBoiler(graph, leafId) {
-  /** @type {Map<string, import('./types').HydraulicsGraphEdge>} */
+  /** @type {Map<string, import('./types.js').HydraulicsGraphEdge>} */
   const parentEdge = new Map();
   /** @type {string[]} */
   const queue = ['boiler'];
@@ -54,7 +54,7 @@ function tracePathFromBoiler(graph, leafId) {
 
   if (!visited.has(leafId)) return [];
 
-  /** @type {import('./types').HydraulicsGraphEdge[]} */
+  /** @type {import('./types.js').HydraulicsGraphEdge[]} */
   const path = [];
   let current = leafId;
   while (current !== 'boiler') {
@@ -67,8 +67,8 @@ function tracePathFromBoiler(graph, leafId) {
 }
 
 /**
- * @param {import('./types').HydraulicsGraphNode} node
- * @returns {import('./types').HydraulicsCirculationCircuitKind}
+ * @param {import('./types.js').HydraulicsGraphNode} node
+ * @returns {import('./types.js').HydraulicsCirculationCircuitKind}
  */
 function resolveCircuitKind(node) {
   if (node.kind === 'radiator_consumer' || node.kind === 'radiator_manifold') {
@@ -80,8 +80,8 @@ function resolveCircuitKind(node) {
 }
 
 /**
- * @param {import('./types').HydraulicsGraphEdge[]} pathEdges
- * @param {Map<string, import('./types').HydraulicsPipeMatchItem>} pipeByEdge
+ * @param {import('./types.js').HydraulicsGraphEdge[]} pathEdges
+ * @param {Map<string, import('./types.js').HydraulicsPipeMatchItem>} pipeByEdge
  * @returns {number}
  */
 function sumPathPressureDropKPa(pathEdges, pipeByEdge) {
@@ -94,10 +94,10 @@ function sumPathPressureDropKPa(pathEdges, pipeByEdge) {
 
 /**
  * @param {object} args
- * @param {import('./types').HydraulicsGraph} args.graph
- * @param {import('./types').HydraulicsPipeMatchItem[]} args.pipes
+ * @param {import('./types.js').HydraulicsGraph} args.graph
+ * @param {import('./types.js').HydraulicsPipeMatchItem[]} args.pipes
  * @param {number} args.balancingValveKPaPerTurn
- * @returns {import('./types').HydraulicsCirculationLoopsReport}
+ * @returns {import('./types.js').HydraulicsCirculationLoopsReport}
  */
 export function computeCirculationLoops({ graph, pipes, balancingValveKPaPerTurn }) {
   const pipeByEdge = new Map(pipes.map((p) => [p.edgeId, p]));
@@ -105,7 +105,7 @@ export function computeCirculationLoops({ graph, pipes, balancingValveKPaPerTurn
     LEAF_NODE_KINDS.includes(n.kind),
   );
 
-  /** @type {import('./types').HydraulicsCirculationLoopBranch[]} */
+  /** @type {import('./types.js').HydraulicsCirculationLoopBranch[]} */
   const branches = [];
 
   for (const leaf of leaves) {
@@ -117,8 +117,8 @@ export function computeCirculationLoops({ graph, pipes, balancingValveKPaPerTurn
       branchId: leaf.id,
       label: leaf.label,
       circuit: resolveCircuitKind(leaf),
-      roomId: leaf.roomId,
-      loopId: leaf.loopId,
+      ...(leaf.roomId !== undefined ? { roomId: leaf.roomId } : {}),
+      ...(leaf.loopId !== undefined ? { loopId: leaf.loopId } : {}),
       edgeIds: pathEdges.map((e) => e.id),
       pressureDropKPa,
       isCritical: false,
@@ -127,7 +127,7 @@ export function computeCirculationLoops({ graph, pipes, balancingValveKPaPerTurn
 
   branches.sort((a, b) => b.pressureDropKPa - a.pressureDropKPa);
 
-  /** @type {import('./types').HydraulicsCirculationLoopBranch | null} */
+  /** @type {import('./types.js').HydraulicsCirculationLoopBranch | null} */
   let criticalLoop = branches[0] ?? null;
   if (criticalLoop) {
     criticalLoop = { ...criticalLoop, isCritical: true };
@@ -136,7 +136,7 @@ export function computeCirculationLoops({ graph, pipes, balancingValveKPaPerTurn
 
   const criticalKPa = criticalLoop?.pressureDropKPa ?? 0;
 
-  /** @type {import('./types').HydraulicsBalancingRecommendation[]} */
+  /** @type {import('./types.js').HydraulicsBalancingRecommendation[]} */
   const balancingRecommendations = [];
 
   for (const branch of branches) {

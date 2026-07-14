@@ -54,6 +54,8 @@ function createLimiter(opts) {
 }
 
 /**
+ * @param {string} name
+ * @param {number} fallback
  * @returns {number}
  */
 function envLimit(name, fallback) {

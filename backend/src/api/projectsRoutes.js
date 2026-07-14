@@ -43,11 +43,11 @@ import {
 import { logger } from '../utils/logger.js';
 
 /**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
+ * @param {import('express').Request} _req
+ * @param {import('express').Response} _res
  * @param {import('express').NextFunction} next
  */
-async function mongoMiddleware(req, res, next) {
+async function mongoMiddleware(_req, _res, next) {
   try {
     await requireMongoForProjects();
     next();
@@ -62,6 +62,28 @@ async function mongoMiddleware(req, res, next) {
  */
 function ownerSubFromRequest(req) {
   return req.projectsUser?.sub ?? resolveProjectsDevOwnerId();
+}
+
+/**
+ * Мета для logger с optional requestId (exactOptionalPropertyTypes).
+ *
+ * @param {import('express').Request} req
+ * @returns {{ requestId: string } | null}
+ */
+function reqLogMeta(req) {
+  return req.requestId ? { requestId: req.requestId } : null;
+}
+
+/**
+ * Параметр маршрута Express → строка (checkJs: params может быть string | string[]).
+ *
+ * @param {unknown} value
+ * @returns {string}
+ */
+function asRouteParam(value) {
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value) && typeof value[0] === 'string') return value[0];
+  return '';
 }
 
 /**
@@ -85,7 +107,7 @@ export function createProjectsRouter() {
 
   /**
    * @param {import('express').Request} req
-   * @param {import('express').Response<import('../types/shared-types').ProjectsListResponse>} res
+   * @param {import('express').Response<import('../types/shared-types.js').ProjectsListResponse>} res
    * @param {import('express').NextFunction} next
    */
   router.get('/api/v1/projects', projectsReadRateLimiter, async (req, res, next) => {
@@ -133,8 +155,8 @@ export function createProjectsRouter() {
   });
 
   /**
-   * @param {import('express').Request<{}, import('../types/shared-types').ProjectCreateResponse, import('../types/shared-types').ProjectCreateBody>} req
-   * @param {import('express').Response<import('../types/shared-types').ProjectCreateResponse>} res
+   * @param {import('express').Request<{}, import('../types/shared-types.js').ProjectCreateResponse, import('../types/shared-types.js').ProjectCreateBody>} req
+   * @param {import('express').Response<import('../types/shared-types.js').ProjectCreateResponse>} res
    * @param {import('express').NextFunction} next
    */
   router.post('/api/v1/projects', projectsWriteRateLimiter, async (req, res, next) => {
@@ -149,7 +171,7 @@ export function createProjectsRouter() {
         label: payload.label,
         survey: payload.survey,
       });
-      logger.info('project.create', { requestId: req.requestId ?? null }, {
+      logger.info('project.create', reqLogMeta(req), {
         projectId: String(doc._id),
         ownerId: ownerSub,
         survey: surveyAuditMeta(payload.survey),
@@ -165,13 +187,13 @@ export function createProjectsRouter() {
 
   /**
    * @param {import('express').Request<{ id: string }>} req
-   * @param {import('express').Response<import('../types/shared-types').ProjectGetResponse>} res
+   * @param {import('express').Response<import('../types/shared-types.js').ProjectGetResponse>} res
    * @param {import('express').NextFunction} next
    */
   router.get('/api/v1/projects/:id', projectsReadRateLimiter, async (req, res, next) => {
     try {
       const ownerSub = ownerSubFromRequest(req);
-      const oid = parseObjectIdParam(req.params.id);
+      const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
         res.status(400).json({
           ok: false,
@@ -191,7 +213,8 @@ export function createProjectsRouter() {
 
       const calculationsCount = await Calculation.countDocuments({ projectId: oid });
 
-      let lastCalculation = undefined;
+      /** @type {import('../types/shared-types.js').CalculationListItem | undefined} */
+      let lastCalculation;
       if (req.query.includeLastCalculation === '1' || req.query.includeLastCalculation === 'true') {
         const last = await Calculation.findOne({ projectId: oid })
           .sort({ createdAt: -1 })
@@ -199,9 +222,15 @@ export function createProjectsRouter() {
         if (last) lastCalculation = serializeCalculationListItem(last);
       }
 
+      /** @type {{ calculationsCount: number; lastCalculation?: import('../types/shared-types.js').CalculationListItem }} */
+      const detailExtra = { calculationsCount };
+      if (lastCalculation !== undefined) {
+        detailExtra.lastCalculation = lastCalculation;
+      }
+
       res.status(200).json({
         ok: true,
-        project: serializeProjectDetail(doc, { calculationsCount, lastCalculation }),
+        project: serializeProjectDetail(doc, detailExtra),
       });
     } catch (err) {
       next(err);
@@ -209,14 +238,14 @@ export function createProjectsRouter() {
   });
 
   /**
-   * @param {import('express').Request<{ id: string }, import('../types/shared-types').ProjectUpdateResponse, import('../types/shared-types').ProjectUpdateBody>} req
-   * @param {import('express').Response<import('../types/shared-types').ProjectUpdateResponse>} res
+   * @param {import('express').Request<{ id: string }, import('../types/shared-types.js').ProjectUpdateResponse, import('../types/shared-types.js').ProjectUpdateBody>} req
+   * @param {import('express').Response<import('../types/shared-types.js').ProjectUpdateResponse>} res
    * @param {import('express').NextFunction} next
    */
   router.put('/api/v1/projects/:id', projectsWriteRateLimiter, async (req, res, next) => {
     try {
       const ownerSub = ownerSubFromRequest(req);
-      const oid = parseObjectIdParam(req.params.id);
+      const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
         res.status(400).json({
           ok: false,
@@ -246,7 +275,7 @@ export function createProjectsRouter() {
       }
 
       const calculationsCount = await Calculation.countDocuments({ projectId: oid });
-      logger.info('project.update', { requestId: req.requestId ?? null }, {
+      logger.info('project.update', reqLogMeta(req), {
         projectId: String(oid),
         ownerId: ownerSub,
         changedFields: projectPatchFields(/** @type {Record<string, unknown>} */ (patch)),
@@ -264,13 +293,13 @@ export function createProjectsRouter() {
 
   /**
    * @param {import('express').Request<{ id: string }>} req
-   * @param {import('express').Response<import('../types/shared-types').ProjectDeleteResponse>} res
+   * @param {import('express').Response<import('../types/shared-types.js').ProjectDeleteResponse>} res
    * @param {import('express').NextFunction} next
    */
   router.delete('/api/v1/projects/:id', projectsWriteRateLimiter, async (req, res, next) => {
     try {
       const ownerSub = ownerSubFromRequest(req);
-      const oid = parseObjectIdParam(req.params.id);
+      const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
         res.status(400).json({
           ok: false,
@@ -293,7 +322,7 @@ export function createProjectsRouter() {
       }
 
       const calcResult = await Calculation.deleteMany({ projectId: oid });
-      logger.info('project.delete', { requestId: req.requestId ?? null }, {
+      logger.info('project.delete', reqLogMeta(req), {
         projectId: String(oid),
         ownerId: ownerSub,
         calculationsRemoved: calcResult.deletedCount ?? 0,
@@ -310,12 +339,12 @@ export function createProjectsRouter() {
   });
 
   /**
-   * @param {import('express').Request<{ id: string }, import('../types/shared-types').ProjectCalcResponse, import('../types/shared-types').ProjectCalcBody>} req
-   * @param {import('express').Response<import('../types/shared-types').ProjectCalcResponse>} res
+   * @param {import('express').Request<{ id: string }, import('../types/shared-types.js').ProjectCalcResponse, import('../types/shared-types.js').ProjectCalcBody>} req
+   * @param {import('express').Response<import('../types/shared-types.js').ProjectCalcResponse>} res
    * @param {import('express').NextFunction} next
    */
   router.post('/api/v1/projects/:id/calc', projectCalcRateLimiter, async (req, res, next) => {
-    const requestId = req.requestId ?? null;
+    const logMeta = reqLogMeta(req);
     /** @type {string | undefined} */
     let projectIdForLog;
     /** @type {string | undefined} */
@@ -327,7 +356,7 @@ export function createProjectsRouter() {
     try {
       const ownerSub = ownerSubFromRequest(req);
       ownerIdForLog = ownerSub;
-      const oid = parseObjectIdParam(req.params.id);
+      const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
         res.status(400).json({
           ok: false,
@@ -336,14 +365,25 @@ export function createProjectsRouter() {
         return;
       }
 
-      const project = await findOwnedProjectDoc(oid, ownerSub);
-      if (!project) {
+      const projectRaw = await findOwnedProjectDoc(oid, ownerSub);
+      if (!projectRaw) {
         res.status(404).json({
           ok: false,
           error: { message: 'Проект не найден', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
         });
         return;
       }
+
+      /** @type {import('mongoose').Document & {
+       *   survey?: unknown;
+       *   lastCalcInput?: import('../types/shared-types.js').CalcRequestBody;
+       *   ownerId?: string;
+       * }} */
+      const project = /** @type {import('mongoose').Document & {
+       *   survey?: unknown;
+       *   lastCalcInput?: import('../types/shared-types.js').CalcRequestBody;
+       *   ownerId?: string;
+       * }} */ (projectRaw);
 
       await assertCanCreateCalculation(oid);
 
@@ -365,7 +405,7 @@ export function createProjectsRouter() {
       const resolved = resolveProjectCalcInput(body, project.lastCalcInput);
       calcInputSource = resolved.source;
 
-      logger.info('project.calc.start', { requestId }, {
+      logger.info('project.calc.start', logMeta, {
         projectId: projectIdForLog,
         ownerId: ownerSub,
         calcInputSource,
@@ -375,7 +415,7 @@ export function createProjectsRouter() {
       });
 
       if (calcInputSource === 'lastCalcInput' && !saveSurvey) {
-        logger.info('project.calc.reuseLastInput', { requestId }, {
+        logger.info('project.calc.reuseLastInput', logMeta, {
           projectId: projectIdForLog,
           ownerId: ownerSub,
         });
@@ -401,7 +441,7 @@ export function createProjectsRouter() {
       project.lastCalcInput = input;
       await project.save();
 
-      logger.info('project.calc.done', { requestId }, {
+      logger.info('project.calc.done', logMeta, {
         projectId: projectIdForLog,
         ownerId: ownerSub,
         calculationId: String(calcDoc._id),
@@ -425,7 +465,7 @@ export function createProjectsRouter() {
         }),
       });
     } catch (err) {
-      logger.error('project.calc.fail', { requestId }, {
+      logger.error('project.calc.fail', logMeta, {
         projectId: projectIdForLog,
         ownerId: ownerIdForLog,
         calcInputSource,
@@ -438,13 +478,13 @@ export function createProjectsRouter() {
 
   /**
    * @param {import('express').Request<{ id: string }>} req
-   * @param {import('express').Response<import('../types/shared-types').CalculationsListResponse>} res
+   * @param {import('express').Response<import('../types/shared-types.js').CalculationsListResponse>} res
    * @param {import('express').NextFunction} next
    */
   router.get('/api/v1/projects/:id/calculations', projectsReadRateLimiter, async (req, res, next) => {
     try {
       const ownerSub = ownerSubFromRequest(req);
-      const oid = parseObjectIdParam(req.params.id);
+      const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
         res.status(400).json({
           ok: false,
@@ -488,7 +528,7 @@ export function createProjectsRouter() {
 
   /**
    * @param {import('express').Request<{ projectId: string, calcId: string }>} req
-   * @param {import('express').Response<import('../types/shared-types').CalculationGetResponse>} res
+   * @param {import('express').Response<import('../types/shared-types.js').CalculationGetResponse>} res
    * @param {import('express').NextFunction} next
    */
   router.get(
@@ -497,8 +537,8 @@ export function createProjectsRouter() {
     async (req, res, next) => {
       try {
         const ownerSub = ownerSubFromRequest(req);
-        const projectOid = parseObjectIdParam(req.params.projectId);
-        const calcOid = parseObjectIdParam(req.params.calcId);
+        const projectOid = parseObjectIdParam(asRouteParam(req.params.projectId));
+        const calcOid = parseObjectIdParam(asRouteParam(req.params.calcId));
         if (!projectOid || !calcOid) {
           res.status(400).json({
             ok: false,

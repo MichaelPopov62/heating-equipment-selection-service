@@ -11,7 +11,7 @@ import { validateAndNormalizeInput } from './validate.js';
  * Загружает справочники, валидирует вход и строит отчёт расчёта.
  *
  * @param {unknown} rawBody — сырой CalcInput (до AJV)
- * @returns {Promise<import('../types/shared-types').IRunCalculationResult>}
+ * @returns {Promise<import('../types/shared-types.js').IRunCalculationResult>}
  */
 export async function runCalculation(rawBody) {
   const bundle = await getReferenceBundle();

@@ -11,6 +11,7 @@ import type {
   UfhTerminalControl,
 } from '../types/rooms';
 import { DEFAULT_UFH_PIPE_SPACING_MM } from '../types/underfloorHeating';
+import { isRecord } from './jsonGuards';
 import { warnCompatMigration } from './compatTelemetry';
 
 /** Миграция устаревших монолитных presetId → base + finish (только compat). */
@@ -29,13 +30,10 @@ const LEGACY_MONOLITHIC_UFH_PRESET_MAP: Record<
 };
 
 export function migrateRoomUnderfloorHeating(rooms: RoomFormValue[]): RoomFormValue[] {
-  let changed = false;
   const next = rooms.map((room) => {
     const ufh = room.underfloorHeating;
     if (!ufh) return room;
     if (!ufh.enabled) {
-      if (!('underfloorHeating' in room)) return room;
-      changed = true;
       const { underfloorHeating: _removed, ...rest } = room;
       return rest;
     }
@@ -45,15 +43,19 @@ export function migrateRoomUnderfloorHeating(rooms: RoomFormValue[]): RoomFormVa
     let finishMaterialId =
       typeof ufh.finishMaterialId === 'string' ? ufh.finishMaterialId.trim() : '';
 
-    const legacyPresetId =
-      typeof ufh.presetId === 'string' ? ufh.presetId.trim() : '';
-    if ((!basePresetId || !finishMaterialId) && legacyPresetId) {
-      const mapped = LEGACY_MONOLITHIC_UFH_PRESET_MAP[legacyPresetId];
+    // Совместимость: монолитный presetId читаем через Record, без deprecated-поля типа.
+    const ufhRaw = ufh as unknown;
+    const legacyPresetRaw =
+      isRecord(ufhRaw) && typeof ufhRaw.presetId === 'string' ? ufhRaw.presetId.trim() : '';
+    if ((!basePresetId || !finishMaterialId) && legacyPresetRaw) {
+      const mapped = LEGACY_MONOLITHIC_UFH_PRESET_MAP[legacyPresetRaw];
       if (mapped) {
         basePresetId = mapped.basePresetId;
         finishMaterialId = mapped.finishMaterialId;
-        warnCompatMigration('RoomUfhPreset', `${legacyPresetId} → base+finish (roomId=${room.id})`);
-        changed = true;
+        warnCompatMigration(
+          'RoomUfhPreset',
+          `${legacyPresetRaw} → base+finish (roomId=${room.id})`,
+        );
       }
     }
 
@@ -84,14 +86,14 @@ export function migrateRoomUnderfloorHeating(rooms: RoomFormValue[]): RoomFormVa
     };
 
     if (
-      room.underfloorHeating?.basePresetId !== normalized.basePresetId ||
-      room.underfloorHeating?.finishMaterialId !== normalized.finishMaterialId ||
-      room.underfloorHeating?.pipeSpacingMm !== normalized.pipeSpacingMm ||
-      room.underfloorHeating?.ufhTerminalControl !== normalized.ufhTerminalControl ||
-      room.underfloorHeating?.furnitureOccupiedAreaM2 !==
-        normalized.furnitureOccupiedAreaM2
+      ufh.basePresetId === normalized.basePresetId &&
+      ufh.finishMaterialId === normalized.finishMaterialId &&
+      ufh.pipeSpacingMm === normalized.pipeSpacingMm &&
+      ufh.ufhTerminalControl === normalized.ufhTerminalControl &&
+      ufh.furnitureOccupiedAreaM2 === normalized.furnitureOccupiedAreaM2 &&
+      !('presetId' in ufh)
     ) {
-      changed = true;
+      return room;
     }
 
     return {
@@ -99,5 +101,5 @@ export function migrateRoomUnderfloorHeating(rooms: RoomFormValue[]): RoomFormVa
       underfloorHeating: normalized,
     };
   });
-  return changed ? next : rooms;
+  return next.some((r, i) => r !== rooms[i]) ? next : rooms;
 }

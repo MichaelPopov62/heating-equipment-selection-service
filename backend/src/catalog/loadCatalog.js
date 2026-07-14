@@ -30,9 +30,10 @@ function countBoilersInProductsJson(json) {
   const products = /** @type {Record<string, unknown>} */ (json).products;
   if (!products || typeof products !== 'object') return 0;
   const boilers = /** @type {Record<string, unknown>} */ (products).boilers;
-  if (!boilers || typeof boilers !== 'object') return 0;
-  const dc = /** @type {unknown[]} */ (boilers).doubleCircuit;
-  const sc = /** @type {unknown[]} */ (boilers).singleCircuit;
+  if (!boilers || typeof boilers !== 'object' || Array.isArray(boilers)) return 0;
+  const boilersRec = /** @type {Record<string, unknown>} */ (boilers);
+  const dc = boilersRec.doubleCircuit;
+  const sc = boilersRec.singleCircuit;
   return (Array.isArray(dc) ? dc.length : 0) + (Array.isArray(sc) ? sc.length : 0);
 }
 
@@ -42,36 +43,31 @@ function countBoilersInProductsJson(json) {
  */
 function countProductRowsInEnvelope(json) {
   if (!json || typeof json !== 'object') return 0;
-  const products = /** @type {Record<string, unknown>} */ (json).products;
-  if (!products || typeof products !== 'object') return 0;
+  const productsRaw = /** @type {Record<string, unknown>} */ (json).products;
+  if (!productsRaw || typeof productsRaw !== 'object' || Array.isArray(productsRaw)) return 0;
+  /** @type {Record<string, unknown>} */
+  const products = /** @type {Record<string, unknown>} */ (productsRaw);
+  const root = /** @type {Record<string, unknown>} */ (json);
   const boilers = countBoilersInProductsJson(json);
   const radiators = Array.isArray(products.radiators) ? products.radiators.length : 0;
   const waterHeaters = Array.isArray(products.waterHeaters)
     ? products.waterHeaters.length
     : 0;
   const pipes = Array.isArray(products.pipes) ? products.pipes.length : 0;
-  const pumps = Array.isArray(/** @type {Record<string, unknown>} */ (json).pumps)
-    ? /** @type {unknown[]} */ ((/** @type {Record<string, unknown>} */ (json)).pumps).length
+  const pumps = Array.isArray(root.pumps)
+    ? root.pumps.length
     : Array.isArray(products.pumps)
       ? products.pumps.length
       : 0;
-  const indirect = Array.isArray(
-    /** @type {Record<string, unknown>} */ (json).indirectWaterHeaters,
-  )
-    ? /** @type {unknown[]} */ ((/** @type {Record<string, unknown>} */ (json)).indirectWaterHeaters)
-        .length
+  const indirect = Array.isArray(root.indirectWaterHeaters)
+    ? root.indirectWaterHeaters.length
     : 0;
-  const manifolds = Array.isArray(/** @type {Record<string, unknown>} */ (json).manifold)
-    ? /** @type {unknown[]} */ ((/** @type {Record<string, unknown>} */ (json)).manifold).length
+  const manifolds = Array.isArray(root.manifold) ? root.manifold.length : 0;
+  const boilerManifolds = Array.isArray(root.boilerManifold)
+    ? root.boilerManifold.length
     : 0;
-  const boilerManifolds = Array.isArray(
-    /** @type {Record<string, unknown>} */ (json).boilerManifold,
-  )
-    ? /** @type {unknown[]} */ ((/** @type {Record<string, unknown>} */ (json)).boilerManifold)
-        .length
-    : 0;
-  const uniboxes = Array.isArray(/** @type {Record<string, unknown>} */ (json).uniboxes)
-    ? /** @type {unknown[]} */ ((/** @type {Record<string, unknown>} */ (json)).uniboxes).length
+  const uniboxes = Array.isArray(root.uniboxes)
+    ? root.uniboxes.length
     : Array.isArray(products.uniboxes)
       ? products.uniboxes.length
       : 0;
@@ -285,7 +281,7 @@ async function loadCatalogJsonFromMongo() {
 /**
  * @param {'file' | 'mongo'} catalogSource
  * @param {unknown} json
- * @returns {{ catalog: import('./types').NormalizedCatalog, catalogSource: 'file' | 'mongo' }}
+ * @returns {{ catalog: import('./types.js').NormalizedCatalog, catalogSource: 'file' | 'mongo' }}
  */
 function normalizeCatalogEnvelope(json, catalogSource) {
   const normalized = validateAndNormalizeCatalog(json);
@@ -336,7 +332,7 @@ function normalizeCatalogEnvelope(json, catalogSource) {
 }
 
 /**
- * @returns {Promise<{ catalog: import('./types').NormalizedCatalog, catalogSource: 'file' | 'mongo' }>}
+ * @returns {Promise<{ catalog: import('./types.js').NormalizedCatalog, catalogSource: 'file' | 'mongo' }>}
  */
 export async function loadCatalog() {
   const rawSource = String(process.env.CATALOG_SOURCE ?? 'auto').trim().toLowerCase();

@@ -9,9 +9,9 @@ import {
   getFlooringFinishMaterialById,
 } from './flooringFinishMaterials.js';
 
-/** @typedef {import('../types/shared-types').UnderfloorHeatingAssemblyLayer} UnderfloorHeatingAssemblyLayer */
-/** @typedef {import('../types/shared-types').UnderfloorHeatingBasePreset} UnderfloorHeatingBasePreset */
-/** @typedef {import('../types/shared-types').FlooringFinishMaterial} FlooringFinishMaterial */
+/** @typedef {import('../types/shared-types.js').UnderfloorHeatingAssemblyLayer} UnderfloorHeatingAssemblyLayer */
+/** @typedef {import('../types/shared-types.js').UnderfloorHeatingBasePreset} UnderfloorHeatingBasePreset */
+/** @typedef {import('../types/shared-types.js').FlooringFinishMaterial} FlooringFinishMaterial */
 
 /**
  * Термическое сопротивление одного слоя, м²·K/Вт (R = δ/λ).
@@ -37,7 +37,9 @@ export function computeBaseCoveringResistanceM2KW(layers) {
   if (heatingIdx < 0) return 0;
   let sum = 0;
   for (let i = heatingIdx + 1; i < layers.length; i += 1) {
-    sum += computeLayerResistanceM2KW(layers[i]);
+    const layer = layers[i];
+    if (!layer) continue;
+    sum += computeLayerResistanceM2KW(layer);
   }
   return Math.round(sum * 10000) / 10000;
 }
@@ -81,39 +83,42 @@ export const LEGACY_MONOLITHIC_UFH_PRESET_MAP = Object.freeze({
  */
 function buildInterstoryUfhBasePreset({ id, name, xpsThicknessM }) {
   const xpsMm = Math.round(xpsThicknessM * 1000);
+  /** @type {UnderfloorHeatingAssemblyLayer[]} */
+  const layers = [
+    {
+      name: 'Железобетонная плита перекрытия',
+      thicknessM: 0.15,
+      thermalConductivityWmK: 1.74,
+      isHeatingLayer: false,
+    },
+    {
+      name: 'Теплоизоляция (XPS)',
+      thicknessM: xpsThicknessM,
+      thermalConductivityWmK: 0.034,
+      isHeatingLayer: false,
+    },
+    {
+      name: 'Стяжка ТП с трубами',
+      thicknessM: 0.065,
+      thermalConductivityWmK: 1.4,
+      isHeatingLayer: true,
+    },
+    {
+      name: 'Самовыровнивающийся слой',
+      thicknessM: 0.005,
+      thermalConductivityWmK: 1.1,
+      isHeatingLayer: false,
+    },
+  ];
   return {
     id,
     name,
     description:
       `Водяной тёплый пол в стяжке 65 мм над плитой перекрытия; XPS ${xpsMm} мм под контуром. Финиш выбирается отдельно.`,
-    usage: 'underfloor_heating_base',
-    bottomBoundary: 'heated',
-    layers: [
-      {
-        name: 'Железобетонная плита перекрытия',
-        thicknessM: 0.15,
-        thermalConductivityWmK: 1.74,
-        isHeatingLayer: false,
-      },
-      {
-        name: 'Теплоизоляция (XPS)',
-        thicknessM: xpsThicknessM,
-        thermalConductivityWmK: 0.034,
-        isHeatingLayer: false,
-      },
-      {
-        name: 'Стяжка ТП с трубами',
-        thicknessM: 0.065,
-        thermalConductivityWmK: 1.4,
-        isHeatingLayer: true,
-      },
-      {
-        name: 'Самовыровнивающийся слой',
-        thicknessM: 0.005,
-        thermalConductivityWmK: 1.1,
-        isHeatingLayer: false,
-      },
-    ],
+    usage: /** @type {const} */ ('underfloor_heating_base'),
+    bottomBoundary: /** @type {const} */ ('heated'),
+    layers,
+    baseCoveringResistanceM2KW: computeBaseCoveringResistanceM2KW(layers),
   };
 }
 
@@ -139,14 +144,11 @@ export const UNDERFLOOR_HEATING_BASE_PRESETS = [
     name: 'Межэтажная основа: плита + XPS 100 мм + стяжка ТП 65 мм',
     xpsThicknessM: 0.1,
   }),
-].map((preset) => ({
-  ...preset,
-  baseCoveringResistanceM2KW: computeBaseCoveringResistanceM2KW(preset.layers),
-}));
+];
 
 /**
  * @param {string} basePresetId
- * @returns {UnderfloorHeatingBasePreset | null}
+ * @returns {import('../types/shared-types.js').UnderfloorHeatingBasePreset | null}
  */
 export function getUnderfloorHeatingBasePresetById(basePresetId) {
   if (!basePresetId) return null;
@@ -158,8 +160,18 @@ export function getUnderfloorHeatingBasePresetById(basePresetId) {
 /**
  * Разрешает base + finish из комнаты (с миграцией legacy presetId).
  *
- * @param {{ enabled?: boolean, presetId?: string, basePresetId?: string, finishMaterialId?: string }} ufh
- * @returns {{ basePresetId: string, finishMaterialId: string } | null}
+ * @param {import('../types/shared-types.js').RoomUnderfloorHeatingInput | {
+ *   enabled?: boolean;
+ *   presetId?: string;
+ *   basePresetId?: string;
+ *   finishMaterialId?: string;
+ * } | null | undefined} ufh
+ * @returns {{
+ *   basePresetId: string;
+ *   finishMaterialId: string;
+ *   base: import('../types/shared-types.js').UnderfloorHeatingBasePreset;
+ *   finish: import('../types/shared-types.js').FlooringFinishMaterial;
+ * } | null}
  */
 export function resolveUnderfloorHeatingComposition(ufh) {
   if (!ufh || ufh.enabled !== true) return null;

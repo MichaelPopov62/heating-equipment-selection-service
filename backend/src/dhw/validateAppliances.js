@@ -12,7 +12,7 @@ import {
 
 /**
  * @param {unknown} doc
- * @returns {import('./types').NormalizedApplianceRules}
+ * @returns {import('./types.js').NormalizedApplianceRules}
  */
 function validateAndNormalizeApplianceDoc(doc) {
   if (!doc || typeof doc !== 'object') {
@@ -480,7 +480,7 @@ function validateAndNormalizeApplianceDoc(doc) {
         + `mainTransitMinInternalDiameterMm (${mainTransitMin})`,
       );
     }
-    return rec;
+    return /** @type {import('./types.js').HydraulicsApplianceRulesDoc} */ (rec);
   }
 
   throw new Error(`appliances: неизвестный applianceKind «${kind}»`);
@@ -488,24 +488,51 @@ function validateAndNormalizeApplianceDoc(doc) {
 
 /**
  * @param {unknown} json — массив документов
- * @param {string} [source]
- * @returns {import('./types').AppliancesBundle}
+ * @param {'file' | 'mongo'} [source]
+ * @returns {import('./types.js').AppliancesBundle}
  */
 export function validateAndNormalizeAppliancesBundle(json, source = 'file') {
   if (!Array.isArray(json)) {
     throw new Error('appliances: ожидается массив документов');
   }
-  /** @type {Partial<import('./types').AppliancesBundle['byKind']>} */
+  /** @type {Partial<import('./types.js').AppliancesBundle['byKind']>} */
   const byKind = {};
-  /** @type {Partial<Record<import('./types').ApplianceKind, number>>} */
+  /** @type {Partial<Record<import('./types.js').ApplianceKind, number>>} */
   const schemaVersions = {};
 
   for (const item of json) {
-    const rec = /** @type {import('./types').NormalizedApplianceRules} */ (
-      validateAndNormalizeApplianceDoc(item)
-    );
-    byKind[rec.applianceKind] = rec;
-    schemaVersions[rec.applianceKind] = rec.schemaVersion;
+    const rec = validateAndNormalizeApplianceDoc(item);
+    switch (rec.applianceKind) {
+      case 'indirect_water_heater':
+        byKind.indirect_water_heater = rec;
+        schemaVersions.indirect_water_heater = rec.schemaVersion;
+        break;
+      case 'boiler':
+        byKind.boiler = rec;
+        schemaVersions.boiler = rec.schemaVersion;
+        break;
+      case 'electric_storage':
+        byKind.electric_storage = rec;
+        schemaVersions.electric_storage = rec.schemaVersion;
+        break;
+      case 'radiator':
+        byKind.radiator = rec;
+        schemaVersions.radiator = rec.schemaVersion;
+        break;
+      case 'underfloor_heating':
+        byKind.underfloor_heating = rec;
+        schemaVersions.underfloor_heating = rec.schemaVersion;
+        break;
+      case 'hydraulics':
+        byKind.hydraulics = rec;
+        schemaVersions.hydraulics = rec.schemaVersion;
+        break;
+      default: {
+        const _exhaustive = /** @type {never} */ (rec);
+        void _exhaustive;
+        throw new Error('appliances: неподдерживаемый applianceKind после валидации');
+      }
+    }
   }
 
   const required = /** @type {const} */ ([
@@ -522,9 +549,11 @@ export function validateAndNormalizeAppliancesBundle(json, source = 'file') {
     }
   }
 
+  const resolvedSource = source === 'mongo' ? 'mongo' : 'file';
+
   return {
-    byKind: /** @type {import('./types').AppliancesBundle['byKind']} */ (byKind),
+    byKind: /** @type {import('./types.js').AppliancesBundle['byKind']} */ (byKind),
     schemaVersions,
-    source,
+    source: resolvedSource,
   };
 }

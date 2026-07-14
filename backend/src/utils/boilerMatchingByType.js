@@ -9,8 +9,8 @@ import {
   SCHEME_BOILER_SINGLE_INDIRECT_SUM,
 } from '../../../shared/heatingMatchingSchemes.js';
 /**
- * @param {import('../dhw/types').BoilerApplianceRules | undefined} boilerRules
- * @returns {import('../dhw/types').BoilerApplianceRules}
+ * @param {import('../dhw/types.js').BoilerApplianceRules | undefined} boilerRules
+ * @returns {import('../dhw/types.js').BoilerApplianceRules}
  */
 function resolveBoilerRules(boilerRules) {
   if (boilerRules) return boilerRules;
@@ -21,7 +21,7 @@ function resolveBoilerRules(boilerRules) {
 
 /**
  * Требуемая мощность котла по схеме ГВС из отопительной части и расчёта горячей воды.
- * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} scheme
+ * @param {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme} scheme
  * @param {number} heatingLoadPartKw
  * @param {number} hwKw
  */
@@ -40,7 +40,7 @@ export function requiredKwFromHeatingAndDhw(scheme, heatingLoadPartKw, hwKw) {
 
 /**
  * Жёсткий фильтр каталога по числу контуров (после прочих фильтров).
- * @param {import('../catalog/types').BoilerCatalogItemNormalized[]} boilers
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized[]} boilers
  * @param {'double' | 'single' | null | undefined} mode
  */
 export function filterBoilersByCircuitMode(boilers, mode) {
@@ -64,7 +64,7 @@ export function filterBoilersByCircuitMode(boilers, mode) {
  * — Двухконтурный комби (включая дом с накопителем в расчёте ГВС): только двухконтурные.
  *
  * @param {object} p
- * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme | undefined} p.scheme
+ * @param {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme | undefined} p.scheme
  * @param {'flowThrough' | 'storage' | undefined} [p.dhwSupplyScenario]
  * @returns {'double' | 'single'}
  */
@@ -83,7 +83,7 @@ export function resolveBoilerCircuitFilterMode({ scheme, dhwSupplyScenario }) {
 /**
  * Отопительная нагрузка с запасом для линии «Эффективный» (конденсация).
  * @param {number} heatLossKw
- * @param {import('../dhw/types').BoilerApplianceRules} boilerRules
+ * @param {import('../dhw/types.js').BoilerApplianceRules} boilerRules
  */
 export function heatingLoadKwForCondensingLine(heatLossKw, boilerRules) {
   return Number(heatLossKw) * resolveBoilerRules(boilerRules).matching.condensingHeatingReserveFactor;
@@ -91,7 +91,7 @@ export function heatingLoadKwForCondensingLine(heatLossKw, boilerRules) {
 
 /**
  * Конденсационная технология котла из каталога (type или тег «condensing»).
- * @param {import('../catalog/types').BoilerCatalogItemNormalized | Record<string, unknown>} boiler
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized | Record<string, unknown>} boiler
  */
 export function isCondensingBoiler(boiler) {
   const type = String(
@@ -107,7 +107,7 @@ export function isCondensingBoiler(boiler) {
 
 /**
  * Традиционный (не конденсационный) котёл из позиции каталога.
- * @param {import('../catalog/types').BoilerCatalogItemNormalized | Record<string, unknown>} boiler
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized | Record<string, unknown>} boiler
  */
 function isTraditionalBoiler(boiler) {
   return !isCondensingBoiler(boiler);
@@ -115,7 +115,7 @@ function isTraditionalBoiler(boiler) {
 
 /**
  * Фильтр каталога: линия «Эконом» — только не конденсационные аппараты.
- * @param {import('../catalog/types').BoilerCatalogItemNormalized[]} boilers
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized[]} boilers
  */
 export function filterBoilersForEconomyLine(boilers) {
   return boilers.filter((b) => isTraditionalBoiler(b));
@@ -123,7 +123,7 @@ export function filterBoilersForEconomyLine(boilers) {
 
 /**
  * Фильтр каталога: линия «Эффективный» — только конденсационные аппараты.
- * @param {import('../catalog/types').BoilerCatalogItemNormalized[]} boilers
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized[]} boilers
  */
 export function filterBoilersForEfficientLine(boilers) {
   return boilers.filter((b) => isCondensingBoiler(b));
@@ -144,8 +144,8 @@ export function matchesCombustionTypePreference(preferred, boiler) {
 /**
  * Рекомендации по эксплуатации конденсационной линии (график, без избыточного номинала).
  * @param {number} reserveFactorTraditional множитель запаса на линии «Эконом» (например 1.15)
- * @param {import('../dhw/types').BoilerApplianceRules} boilerRules
- * @returns {import('../types/boiler-types').BoilerMatchingRecommendation[]}
+ * @param {import('../dhw/types.js').BoilerApplianceRules} boilerRules
+ * @returns {import('../types/boiler-types.js').BoilerMatchingRecommendation[]}
  */
 export function buildCondensingBoilerMatchingRecommendations(
   reserveFactorTraditional,
@@ -168,8 +168,8 @@ export function buildCondensingBoilerMatchingRecommendations(
 /**
  * Подсказка про каскад для традиционной линии (общий подбор / эконом), если одна машина и мощность > 30 кВт.
  * @param {number} requiredKw
- * @param {import('../dhw/types').BoilerApplianceRules} boilerRules
- * @returns {import('../types/boiler-types').BoilerMatchingRecommendation | null}
+ * @param {import('../dhw/types.js').BoilerApplianceRules} boilerRules
+ * @returns {import('../types/boiler-types.js').BoilerMatchingRecommendation | null}
  */
 export function buildTraditionalCascadeHint(requiredKw, boilerRules) {
   const req = Number(requiredKw);
@@ -186,8 +186,8 @@ export function buildTraditionalCascadeHint(requiredKw, boilerRules) {
 /**
  * Подсказка про каскад для конденсационной линии подбора.
  * @param {number} requiredKwCondensing
- * @param {import('../dhw/types').BoilerApplianceRules} boilerRules
- * @returns {import('../types/boiler-types').BoilerMatchingRecommendation | null}
+ * @param {import('../dhw/types.js').BoilerApplianceRules} boilerRules
+ * @returns {import('../types/boiler-types.js').BoilerMatchingRecommendation | null}
  */
 export function buildCondensingCascadeHint(requiredKwCondensing, boilerRules) {
   const req = Number(requiredKwCondensing);
@@ -203,7 +203,7 @@ export function buildCondensingCascadeHint(requiredKwCondensing, boilerRules) {
 
 /**
  * Тексты к заметкам карточки предложения по камере сгорания.
- * @param {import('../catalog/types').BoilerCatalogItemNormalized | Record<string, unknown>} boiler
+ * @param {import('../catalog/types.js').BoilerCatalogItemNormalized | Record<string, unknown>} boiler
  * @returns {string[]}
  */
 export function chimneyNotesForBoilerCombustionType(boiler) {

@@ -15,12 +15,12 @@ const SEGMENT_ROLE_LABELS = {
   dhw: 'ГВС',
 };
 
-/** @type {Record<string, string>} */
+/** @type {string} */
 const MAIN_TRANSIT_ROLE_LABEL = 'Транзит котла';
 
 /**
- * @param {import('./types').HydraulicsGraphEdge} edge
- * @param {Map<string, import('./types').HydraulicsGraphNode>} nodesById
+ * @param {import('./types.js').HydraulicsGraphEdge} edge
+ * @param {Map<string, import('./types.js').HydraulicsGraphNode>} nodesById
  * @returns {string}
  */
 function edgeSegmentLabel(edge, nodesById) {
@@ -33,9 +33,9 @@ function edgeSegmentLabel(edge, nodesById) {
 }
 
 /**
- * @param {import('../catalog/types').NormalizedCatalog['pipes']} pipes
+ * @param {import('../catalog/types.js').NormalizedCatalog['pipes']} pipes
  * @param {string} catalogPipeId
- * @returns {import('../catalog/types').PipeCatalogItemNormalized | null}
+ * @returns {import('../catalog/types.js').PipeCatalogItemNormalized | null}
  */
 function findPipeInCatalog(pipes, catalogPipeId) {
   if (!pipes?.length || !catalogPipeId) return null;
@@ -43,9 +43,9 @@ function findPipeInCatalog(pipes, catalogPipeId) {
 }
 
 /**
- * @param {import('../catalog/types').NormalizedCatalog['pumps']} pumps
+ * @param {import('../catalog/types.js').NormalizedCatalog['pumps']} pumps
  * @param {string} catalogPumpId
- * @returns {import('../catalog/types').PumpCatalogItemNormalized | null}
+ * @returns {import('../catalog/types.js').PumpCatalogItemNormalized | null}
  */
 function findPumpInCatalog(pumps, catalogPumpId) {
   if (!pumps?.length || !catalogPumpId) return null;
@@ -53,9 +53,9 @@ function findPumpInCatalog(pumps, catalogPumpId) {
 }
 
 /**
- * @param {import('../catalog/types').NormalizedCatalog['boilers']} boilers
+ * @param {import('../catalog/types.js').NormalizedCatalog['boilers']} boilers
  * @param {string | undefined} catalogBoilerId
- * @returns {import('../catalog/types').BoilerCatalogItemNormalized | null}
+ * @returns {import('../catalog/types.js').BoilerCatalogItemNormalized | null}
  */
 function findBoilerInCatalog(boilers, catalogBoilerId) {
   if (!catalogBoilerId || !boilers) return null;
@@ -70,11 +70,11 @@ function findBoilerInCatalog(boilers, catalogBoilerId) {
 }
 
 /**
- * @param {import('./types').HydraulicsPipeSegmentProposal[]} segments
- * @returns {import('./types').HydraulicsPipeProposalLine[]}
+ * @param {import('./types.js').HydraulicsPipeSegmentProposal[]} segments
+ * @returns {import('./types.js').HydraulicsPipeProposalLine[]}
  */
 function aggregatePipeLinesFromSegments(segments) {
-  /** @type {Map<string, import('./types').HydraulicsPipeProposalLine>} */
+  /** @type {Map<string, import('./types.js').HydraulicsPipeProposalLine>} */
   const aggregated = new Map();
 
   for (const seg of segments) {
@@ -104,9 +104,9 @@ function aggregatePipeLinesFromSegments(segments) {
 }
 
 /**
- * @param {import('./types').HydraulicsPipeSegmentProposal[]} segments
+ * @param {import('./types.js').HydraulicsPipeSegmentProposal[]} segments
  * @param {Set<string>} roles
- * @returns {import('./types').HydraulicsPipeProposalLine[]}
+ * @returns {import('./types.js').HydraulicsPipeProposalLine[]}
  */
 function pipeLinesForRoles(segments, roles) {
   return aggregatePipeLinesFromSegments(
@@ -115,9 +115,9 @@ function pipeLinesForRoles(segments, roles) {
 }
 
 /**
- * @param {import('./types').HydraulicsResolvedPump} resolved
- * @param {import('../catalog/types').NormalizedCatalog} catalog
- * @returns {import('./types').HydraulicsPumpProposal}
+ * @param {import('./types.js').HydraulicsResolvedPump} resolved
+ * @param {import('../catalog/types.js').NormalizedCatalog} catalog
+ * @returns {import('./types.js').HydraulicsPumpProposal}
  */
 function buildPumpProposal(resolved, catalog) {
   if (resolved.pumpSource === 'boiler_builtin') {
@@ -149,25 +149,27 @@ function buildPumpProposal(resolved, catalog) {
     catalogPumpId: resolved.catalogPumpId ?? '',
     brand: catalogPump?.brand ?? '',
     model: catalogPump?.model ?? resolved.catalogPumpId ?? '',
-    segment: catalogPump?.segment,
+    ...(catalogPump?.segment !== undefined ? { segment: catalogPump.segment } : {}),
     price: catalogPump?.price ?? 0,
     modeName: resolved.modeName,
     headAtDesignM: resolved.headAtDesignM,
     headRequiredM: resolved.headRequiredM,
     designFlowM3PerHour: resolved.designFlowM3PerHour,
     headMarginPercent: resolved.headMarginPercent,
-    connectionNominalMm: catalogPump?.connections?.nominalDiameterMm,
+    ...(catalogPump?.connections?.nominalDiameterMm !== undefined
+      ? { connectionNominalMm: catalogPump.connections.nominalDiameterMm }
+      : {}),
   };
 }
 
 /**
  * @param {object} args
- * @param {import('./types').HydraulicsMatchingReport} args.matching
- * @param {import('./types').HydraulicsGraph} args.graph
- * @param {import('./types').HydraulicsPressureReport} args.pressure
- * @param {import('../catalog/types').NormalizedCatalog} args.catalog
- * @param {import('./types').HydraulicsSystemPumpsResult} [args.pumpResult]
- * @returns {import('./types').HydraulicsProposalReport}
+ * @param {import('./types.js').HydraulicsMatchingReport} args.matching
+ * @param {import('./types.js').HydraulicsGraph} args.graph
+ * @param {import('./types.js').HydraulicsPressureReport} args.pressure
+ * @param {import('../catalog/types.js').NormalizedCatalog} args.catalog
+ * @param {import('./types.js').HydraulicsSystemPumpsResult} [args.pumpResult]
+ * @returns {import('./types.js').HydraulicsProposalReport}
  */
 export function buildHydraulicsProposal({
   matching,
@@ -176,12 +178,12 @@ export function buildHydraulicsProposal({
   catalog,
   pumpResult,
 }) {
-  /** @type {Map<string, import('./types').HydraulicsGraphNode>} */
+  /** @type {Map<string, import('./types.js').HydraulicsGraphNode>} */
   const nodesById = new Map(graph.nodes.map((n) => [n.id, n]));
-  /** @type {Map<string, import('./types').HydraulicsGraphEdge>} */
+  /** @type {Map<string, import('./types.js').HydraulicsGraphEdge>} */
   const edgesById = new Map(graph.edges.map((e) => [e.id, e]));
 
-  /** @type {import('./types').HydraulicsPipeSegmentProposal[]} */
+  /** @type {import('./types.js').HydraulicsPipeSegmentProposal[]} */
   const pipeSegments = [];
 
   for (const pipeMatch of matching.pipes ?? []) {
@@ -238,7 +240,7 @@ export function buildHydraulicsProposal({
   const heatingRoles = new Set(['main', 'branch']);
   const ufhRoles = new Set(['ufh_collector_transit', 'ufh_loop']);
 
-  /** @type {import('./types').HydraulicsPipeLineGroup[]} */
+  /** @type {import('./types.js').HydraulicsPipeLineGroup[]} */
   const pipeLineGroups = [];
 
   const heatingLines = pipeLinesForRoles(pipeSegments, heatingRoles);
@@ -267,7 +269,7 @@ export function buildHydraulicsProposal({
   );
 
   const resolvedPumps = pumpResult?.pumps ?? [];
-  /** @type {import('./types').HydraulicsPumpProposal[]} */
+  /** @type {import('./types.js').HydraulicsPumpProposal[]} */
   const pumpProposals = resolvedPumps.map((p) => buildPumpProposal(p, catalog));
   const estimatedPumpPrice = round(
     pumpProposals.reduce((s, p) => s + (p.price ?? 0), 0),

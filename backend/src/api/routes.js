@@ -22,18 +22,18 @@ export async function createRoutes() {
   const router = express.Router();
 
   /**
-   * @param {import('express').Request} req
-   * @param {import('express').Response<import('../types/shared-types').HealthOkResponse>} res
+   * @param {import('express').Request} _req
+   * @param {import('express').Response<import('../types/shared-types.js').HealthOkResponse>} res
    */
-  router.get('/health', (req, res) => res.status(200).json({ ok: true, status: 'up' }));
+  router.get('/health', (_req, res) => res.status(200).json({ ok: true, status: 'up' }));
 
   router.use(createSystemRouter());
 
   /**
-   * @param {import('express').Request} req
-   * @param {import('express').Response<import('../types/shared-types').CatalogResponse>} res
+   * @param {import('express').Request} _req
+   * @param {import('express').Response<import('../types/shared-types.js').CatalogResponse>} res
    */
-  router.get('/api/v1/catalog', async (req, res, next) => {
+  router.get('/api/v1/catalog', async (_req, res, next) => {
     try {
       const bundle = await getReferenceBundle();
       res.status(200).json({
@@ -49,46 +49,46 @@ export async function createRoutes() {
   /**
    * Справочники для анкеты: не кешировать в браузере/прокси (envelope, ТП, финиши, modes).
    *
-   * @param {import('express').Request} req
+   * @param {import('express').Request} _req
    * @param {import('express').Response} res
    * @param {import('express').NextFunction} next
    */
-  router.use('/api/v1/presets', (req, res, next) => {
+  router.use('/api/v1/presets', (_req, res, next) => {
     setNoStoreCacheHeaders(res);
     next();
   });
 
   /**
-   * @param {import('express').Request} req
-   * @param {import('express').Response<import('../types/shared-types').EnvelopePresetsResponse>} res
+   * @param {import('express').Request} _req
+   * @param {import('express').Response<import('../types/shared-types.js').EnvelopePresetsResponse>} res
    */
-  router.get('/api/v1/presets/envelope', (req, res) => {
+  router.get('/api/v1/presets/envelope', (_req, res) => {
     res.status(200).json({ ok: true, presets: ENVELOPE_PRESETS });
   });
 
   /**
-   * @param {import('express').Request} req
-   * @param {import('express').Response<import('../types/shared-types').UnderfloorHeatingBasesResponse>} res
+   * @param {import('express').Request} _req
+   * @param {import('express').Response<import('../types/shared-types.js').UnderfloorHeatingBasesResponse>} res
    */
-  router.get('/api/v1/presets/underfloor-heating/bases', (req, res) => {
+  router.get('/api/v1/presets/underfloor-heating/bases', (_req, res) => {
     res.status(200).json({ ok: true, bases: UNDERFLOOR_HEATING_BASE_PRESETS });
   });
 
   /**
-   * @param {import('express').Request} req
-   * @param {import('express').Response<import('../types/shared-types').FlooringFinishesResponse>} res
+   * @param {import('express').Request} _req
+   * @param {import('express').Response<import('../types/shared-types.js').FlooringFinishesResponse>} res
    */
-  router.get('/api/v1/presets/flooring-finishes', (req, res) => {
+  router.get('/api/v1/presets/flooring-finishes', (_req, res) => {
     res.status(200).json({ ok: true, finishes: FLOORING_FINISH_MATERIALS });
   });
 
   /**
    * Сводный ответ: базы + финиши (для одного запроса UI).
    *
-   * @param {import('express').Request} req
-   * @param {import('express').Response<import('../types/shared-types').UnderfloorHeatingPresetsBundleResponse>} res
+   * @param {import('express').Request} _req
+   * @param {import('express').Response<import('../types/shared-types.js').UnderfloorHeatingPresetsBundleResponse>} res
    */
-  router.get('/api/v1/presets/underfloor-heating', (req, res) => {
+  router.get('/api/v1/presets/underfloor-heating', (_req, res) => {
     res.status(200).json({
       ok: true,
       bases: UNDERFLOOR_HEATING_BASE_PRESETS,
@@ -99,11 +99,11 @@ export async function createRoutes() {
   /**
    * Режимы ТП с человекочитаемым UI (Mongo underfloor_heating_presets).
    *
-   * @param {import('express').Request} req
+   * @param {import('express').Request} _req
    * @param {import('express').Response} res
    * @param {import('express').NextFunction} next
    */
-  router.get('/api/v1/presets/underfloor-heating/modes', async (req, res, next) => {
+  router.get('/api/v1/presets/underfloor-heating/modes', async (_req, res, next) => {
     try {
       const bundle = await getReferenceBundle();
       res.status(200).json({
@@ -121,19 +121,19 @@ export async function createRoutes() {
   });
 
   /**
-   * @param {import('express').Request<{}, import('../types/shared-types').CalcOkResponse, import('../types/shared-types').CalcRequestBody>} req
-   * @param {import('express').Response<import('../types/shared-types').CalcOkResponse>} res
+   * @param {import('express').Request<{}, import('../types/shared-types.js').CalcOkResponse, import('../types/shared-types.js').CalcRequestBody>} req
+   * @param {import('express').Response<import('../types/shared-types.js').CalcOkResponse>} res
    * @param {import('express').NextFunction} next
    * @returns {Promise<void>}
    */
   router.use(createProjectsRouter());
 
   router.post('/api/v1/calc', calcRateLimiter, async (req, res, next) => {
-    const requestId = req.requestId ?? null;
+    const logMeta = req.requestId ? { requestId: req.requestId } : null;
     try {
-      logger.debug('calc.request.start', { requestId });
+      logger.debug('calc.request.start', logMeta);
       const { report } = await runCalculation(req.body);
-      logger.debug('calc.request.done', { requestId }, { warnings: report?.warnings?.length ?? 0 });
+      logger.debug('calc.request.done', logMeta, { warnings: report?.warnings?.length ?? 0 });
       res.status(200).json({ ok: true, report });
     } catch (err) {
       next(err);
@@ -142,10 +142,10 @@ export async function createRoutes() {
 
   // 404 для всіх інших маршрутів (у форматі ErrorEnvelope, як і раніше)
   /**
-   * @param {import('express').Request} req
-   * @param {import('express').Response<import('../types/shared-types').ErrorEnvelope>} res
+   * @param {import('express').Request} _req
+   * @param {import('express').Response<import('../types/shared-types.js').ErrorEnvelope>} res
    */
-  router.use((req, res) =>
+  router.use((_req, res) =>
     res.status(404).json({ ok: false, error: { message: 'Не найдено', code: 'NOT_FOUND', statusCode: 404 } }),
   );
 

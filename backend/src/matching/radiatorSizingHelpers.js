@@ -6,7 +6,7 @@
 const MIN_UNDERWINDOW_CLEARANCE_MM = 100;
 
 /**
- * @param {import('../catalog/types').RadiatorCatalogItemNormalized} r
+ * @param {import('../catalog/types.js').RadiatorCatalogItemNormalized} r
  * @returns {boolean}
  */
 export function isPanelRadiator(r) {
@@ -14,7 +14,7 @@ export function isPanelRadiator(r) {
 }
 
 /**
- * @param {import('../catalog/types').RadiatorCatalogItemNormalized} r
+ * @param {import('../catalog/types.js').RadiatorCatalogItemNormalized} r
  * @returns {boolean}
  */
 export function isSectionalRadiator(r) {
@@ -48,7 +48,7 @@ export function parsePanelHeightMm(model) {
 }
 
 /**
- * @param {import('../catalog/types').RadiatorCatalogItemNormalized} r
+ * @param {import('../catalog/types.js').RadiatorCatalogItemNormalized} r
  * @returns {'side' | 'bottom' | null}
  */
 export function inferPanelConnection(r) {
@@ -59,7 +59,7 @@ export function inferPanelConnection(r) {
 }
 
 /**
- * @param {import('../catalog/types').RadiatorCatalogItemNormalized[]} panelPool
+ * @param {import('../catalog/types.js').RadiatorCatalogItemNormalized[]} panelPool
  * @param {'side' | 'bottom' | undefined} radiatorConnection
  */
 export function filterPanelsByConnection(panelPool, radiatorConnection) {
@@ -91,7 +91,7 @@ export function adjustOutputWatts({
 }
 
 /**
- * @param {import('../catalog/types').RadiatorCatalogItemNormalized} r
+ * @param {import('../catalog/types.js').RadiatorCatalogItemNormalized} r
  * @param {50 | 70} baseDeltaT
  * @param {number} targetDeltaT
  */
@@ -106,12 +106,12 @@ export function adjustedRadiatorWatts(r, baseDeltaT, targetDeltaT) {
  * При заданном окне сначала ищет панели с length ≥ 70% openingWidth, затем fallback без этого фильтра.
  *
  * @param {number} qRad
- * @param {import('../catalog/types').RadiatorCatalogItemNormalized[]} panelPool
+ * @param {import('../catalog/types.js').RadiatorCatalogItemNormalized[]} panelPool
  * @param {50 | 70} baseDeltaT
  * @param {number} targetDeltaT
  * @param {number | null} [windowOpeningWidthMm]
  * @returns {{
- *   radiator: import('../catalog/types').RadiatorCatalogItemNormalized,
+ *   radiator: import('../catalog/types.js').RadiatorCatalogItemNormalized,
  *   adjustedWatts: number,
  *   panelLengthMm: number,
  *   underpowered?: boolean,
@@ -133,7 +133,11 @@ export function pickPanelSkuForRoom(
       const adjustedWatts = adjustedRadiatorWatts(r, baseDeltaT, targetDeltaT);
       return { r, panelLengthMm, adjustedWatts };
     })
-    .filter((x) => x.panelLengthMm != null && x.adjustedWatts > 0)
+    .flatMap((x) =>
+      x.panelLengthMm != null && x.adjustedWatts > 0
+        ? [{ r: x.r, panelLengthMm: x.panelLengthMm, adjustedWatts: x.adjustedWatts }]
+        : [],
+    )
     .sort((a, b) => a.panelLengthMm - b.panelLengthMm);
 
   if (!withLength.length) return null;
@@ -175,6 +179,7 @@ export function pickPanelSkuForRoom(
   }
 
   const largest = withLength[withLength.length - 1];
+  if (!largest) return null;
   return {
     radiator: largest.r,
     adjustedWatts: largest.adjustedWatts,

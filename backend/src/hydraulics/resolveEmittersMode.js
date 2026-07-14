@@ -4,26 +4,23 @@
  */
 
 /**
- * @param {import('../types/shared-types').HeatingSystemInput | undefined | null} heatingSystem
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} underfloorHeating
- * @returns {import('./types').HydraulicsEmittersMode}
+ * @param {import('../types/shared-types.js').HeatingSystemInput | undefined | null} heatingSystem
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null | undefined} underfloorHeating
+ * @returns {import('./types.js').HydraulicsEmittersMode}
  */
 export function resolvePipelineEmittersMode(heatingSystem, underfloorHeating) {
   const hsMode = heatingSystem?.heatingEmittersMode;
   if (hsMode === 'ufh_only') return 'ufh_only';
 
   const hasUfh = (underfloorHeating?.rooms?.length ?? 0) > 0;
-  const hasRadiators = hsMode !== 'ufh_only';
-
-  if (hasUfh && hasRadiators) return 'mixed';
-  if (hasUfh) return 'ufh_only';
-
+  // Після early-return для ufh_only режим анкети — радіатори (або не заданий).
+  if (hasUfh) return 'mixed';
   return 'radiators_only';
 }
 
 /**
- * @param {import('./types').HydraulicsApplianceRules} hydraulicsRules
- * @returns {import('./types').HydraulicsRules}
+ * @param {import('./types.js').HydraulicsApplianceRules} hydraulicsRules
+ * @returns {import('./types.js').HydraulicsRules}
  */
 export function hydraulicsRulesFromAppliance(hydraulicsRules) {
   const vel = hydraulicsRules.velocityLimitsMps;

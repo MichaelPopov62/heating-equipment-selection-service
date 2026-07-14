@@ -23,7 +23,7 @@ import {
  * @param {string} args.roomId
  * @returns {{
  *   loopsCount: number;
- *   loops: import('../hydraulics/types').HydraulicsUfhLoop[];
+ *   loops: import('../hydraulics/types.js').HydraulicsUfhLoop[];
  *   flowRateM3PerHour: number;
  *   totalLengthM: number;
  *   pipeMetersPerSqM: number;
@@ -67,7 +67,7 @@ export function computeUfhLoopGeometry({
     deltaTK,
   });
 
-  /** @type {import('../hydraulics/types').HydraulicsUfhLoop[]} */
+  /** @type {import('../hydraulics/types.js').HydraulicsUfhLoop[]} */
   const loops = [];
   for (let i = 0; i < loopsCount; i += 1) {
     loops.push({

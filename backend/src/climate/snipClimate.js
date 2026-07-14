@@ -5,8 +5,15 @@
 
 import { gunzipSync } from 'node:zlib';
 import { logger } from '../utils/logger.js';
+import { throwAppError } from '../utils/createAppError.js';
 
 const STATIONS_LITE_GZ_URL = 'https://bulk.meteostat.net/v2/stations/lite.json.gz';
+
+/**
+ * @param {number} year
+ * @param {string} stationId
+ * @returns {string}
+ */
 const DAILY_CSV_GZ_URL = (year, stationId) => `https://data.meteostat.net/daily/${year}/${stationId}.csv.gz`;
 
 /** @type {Promise<Array<{ id: string, lat: number, lon: number }>> | null} */
@@ -21,27 +28,52 @@ let stationsLiteCachePromise = null;
  * - шукаємо мінімальне ковзне середнє за 5 днів
  */
 
+/**
+ * @param {unknown} value
+ * @param {number} fallback
+ * @returns {number}
+ */
 function toInt(value, fallback) {
   const n = Number(value);
   if (!Number.isFinite(n)) return fallback;
   return Math.trunc(n);
 }
 
+/**
+ * @param {number[]} values
+ * @param {number} windowSize
+ * @returns {number | null}
+ */
 function minRollingAverage(values, windowSize) {
   if (!Array.isArray(values) || values.length < windowSize) return null;
   let sum = 0;
-  for (let i = 0; i < windowSize; i += 1) sum += values[i];
+  for (let i = 0; i < windowSize; i += 1) {
+    const v = values[i];
+    if (v === undefined) return null;
+    sum += v;
+  }
   let min = sum / windowSize;
   for (let i = windowSize; i < values.length; i += 1) {
-    sum += values[i] - values[i - windowSize];
+    const current = values[i];
+    const outgoing = values[i - windowSize];
+    if (current === undefined || outgoing === undefined) return null;
+    sum += current - outgoing;
     const avg = sum / windowSize;
     if (avg < min) min = avg;
   }
   return min;
 }
 
+/**
+ * @param {number} lat1
+ * @param {number} lon1
+ * @param {number} lat2
+ * @param {number} lon2
+ * @returns {number}
+ */
 function haversineKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
+  /** @param {number} deg */
   const toRad = (deg) => (deg * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
@@ -51,6 +83,10 @@ function haversineKm(lat1, lon1, lat2, lon2) {
   return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
 }
 
+/**
+ * @param {string} url
+ * @returns {Promise<Buffer>}
+ */
 async function fetchBuffer(url) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 15000);
@@ -61,15 +97,20 @@ async function fetchBuffer(url) {
     clearTimeout(t);
   }
   if (!resp.ok) {
-    const err = new Error(`Не удалось загрузить Meteostat bulk: ${url} (HTTP ${resp.status})`);
-    err.statusCode = 502;
-    err.code = 'METEOSTAT_BULK_HTTP_ERROR';
-    throw err;
+    throwAppError(
+      `Не удалось загрузить Meteostat bulk: ${url} (HTTP ${resp.status})`,
+      'METEOSTAT_BULK_HTTP_ERROR',
+      502,
+    );
   }
   const ab = await resp.arrayBuffer();
   return Buffer.from(ab);
 }
 
+/**
+ * @param {string} url
+ * @returns {Promise<boolean>}
+ */
 async function headOk(url) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 8000);
@@ -83,6 +124,9 @@ async function headOk(url) {
   }
 }
 
+/**
+ * @returns {Promise<Array<{ id: string, lat: number, lon: number }>>}
+ */
 async function loadStationsLite() {
   if (!stationsLiteCachePromise) {
     stationsLiteCachePromise = (async () => {
@@ -92,31 +136,37 @@ async function loadStationsLite() {
       try {
         jsonText = gunzipSync(gz).toString('utf8');
       } catch {
-        const err = new Error('Не удалось распаковать stations/lite.json.gz');
-        err.statusCode = 502;
-        err.code = 'METEOSTAT_STATIONS_LITE_GUNZIP_FAILED';
-        throw err;
+        throwAppError(
+          'Не удалось распаковать stations/lite.json.gz',
+          'METEOSTAT_STATIONS_LITE_GUNZIP_FAILED',
+          502,
+        );
       }
 
       /** @type {unknown} */
       const parsed = JSON.parse(jsonText);
       if (!Array.isArray(parsed)) {
-        const err = new Error('Некорректный формат stations/lite.json.gz (ожидался массив)');
-        err.statusCode = 502;
-        err.code = 'METEOSTAT_STATIONS_LITE_BAD_FORMAT';
-        throw err;
+        throwAppError(
+          'Некорректный формат stations/lite.json.gz (ожидался массив)',
+          'METEOSTAT_STATIONS_LITE_BAD_FORMAT',
+          502,
+        );
       }
 
       const lite = parsed
         .map((s) => {
-          const id = s?.id ?? s?.i ?? null;
-          const lat = s?.location?.latitude ?? s?.lat ?? s?.latitude ?? null;
-          const lon = s?.location?.longitude ?? s?.lon ?? s?.longitude ?? null;
+          const rec = s && typeof s === 'object' ? /** @type {Record<string, unknown>} */ (s) : null;
+          const location = rec?.location && typeof rec.location === 'object'
+            ? /** @type {Record<string, unknown>} */ (rec.location)
+            : null;
+          const id = rec?.id ?? rec?.i ?? null;
+          const lat = location?.latitude ?? rec?.lat ?? rec?.latitude ?? null;
+          const lon = location?.longitude ?? rec?.lon ?? rec?.longitude ?? null;
           if (!id) return null;
           if (!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lon))) return null;
           return { id: String(id), lat: Number(lat), lon: Number(lon) };
         })
-        .filter(Boolean);
+        .filter((item) => item !== null);
 
       logger.info('climate.meteostat.stationsLite.ok', null, { count: lite.length });
       return /** @type {Array<{ id: string, lat: number, lon: number }>} */ (lite);
@@ -125,10 +175,16 @@ async function loadStationsLite() {
   return stationsLiteCachePromise;
 }
 
+/**
+ * @param {number} lat
+ * @param {number} lon
+ * @returns {Promise<{ stationId: string | null, distanceKm: number, candidates: Array<{ id: string, km: number }> }>}
+ */
 async function pickNearestStationId(lat, lon) {
   const stations = await loadStationsLite();
   let best = null;
   let bestKm = Infinity;
+  /** @type {Array<{ id: string, km: number }>} */
   const bestCandidates = [];
   for (const s of stations) {
     const km = haversineKm(lat, lon, s.lat, s.lon);
@@ -140,9 +196,12 @@ async function pickNearestStationId(lat, lon) {
     if (bestCandidates.length < 20) {
       bestCandidates.push({ id: s.id, km });
       bestCandidates.sort((a, b) => a.km - b.km);
-    } else if (km < bestCandidates[bestCandidates.length - 1].km) {
-      bestCandidates[bestCandidates.length - 1] = { id: s.id, km };
-      bestCandidates.sort((a, b) => a.km - b.km);
+    } else {
+      const last = bestCandidates[bestCandidates.length - 1];
+      if (last && km < last.km) {
+        bestCandidates[bestCandidates.length - 1] = { id: s.id, km };
+        bestCandidates.sort((a, b) => a.km - b.km);
+      }
     }
   }
   return {
@@ -152,17 +211,25 @@ async function pickNearestStationId(lat, lon) {
   };
 }
 
+/**
+ * @param {string} csvText
+ * @returns {number[]}
+ */
 function parseDailyCsvTavg(csvText) {
   const lines = csvText.split('\n').map((l) => l.trim()).filter(Boolean);
-  if (!lines.length) return [];
-  const header = lines[0].split(',').map((x) => x.trim());
+  const headerLine = lines[0];
+  if (!headerLine) return [];
+  const header = headerLine.split(',').map((x) => x.trim());
   // В bulk daily по документации колонка средней температуры может называться `temp`
   // (а в некоторых форматах встречается `tavg`). Поддерживаем оба варианта.
   const idxTemp = header.indexOf('tavg') >= 0 ? header.indexOf('tavg') : header.indexOf('temp');
   if (idxTemp < 0) return [];
+  /** @type {number[]} */
   const out = [];
   for (let i = 1; i < lines.length; i += 1) {
-    const cols = lines[i].split(',');
+    const line = lines[i];
+    if (!line) continue;
+    const cols = line.split(',');
     const v = cols[idxTemp];
     const n = Number(v);
     if (Number.isFinite(n)) out.push(n);
@@ -193,22 +260,25 @@ export async function getDesignOutsideTempFromMeteostat({ lat, lon }) {
   logger.info('climate.meteostat.stations.start', null, { lat: Number(lat), lon: Number(lon), years });
 
   const { candidates } = await pickNearestStationId(Number(lat), Number(lon));
-  if (!candidates?.length) {
+  if (!candidates.length) {
     logger.warn('climate.meteostat.stations.none', null, { lat: Number(lat), lon: Number(lon) });
-    const err = new Error('Не найдена станция Meteostat рядом с указанными координатами');
-    err.statusCode = 502;
-    err.code = 'METEOSTAT_NO_STATION';
-    throw err;
+    throwAppError(
+      'Не найдена станция Meteostat рядом с указанными координатами',
+      'METEOSTAT_NO_STATION',
+      502,
+    );
   }
 
   const startYear = start.getFullYear();
   const endYear = end.getFullYear();
+  /** @type {number[]} */
   const windowYears = [];
   for (let y = startYear; y <= endYear; y += 1) windowYears.push(y);
 
   // Пробуем несколько ближайших станций: часто у самой близкой нет daily-данных.
   for (const c of candidates) {
     const stationId = c.id;
+    /** @type {number[]} */
     const allTavg = [];
 
     // Быстрый “пробник”: если нет daily хотя бы за один из последних 3 лет — станцию пропускаем.
@@ -266,9 +336,9 @@ export async function getDesignOutsideTempFromMeteostat({ lat, lon }) {
     return result;
   }
 
-  const err = new Error('Недостаточно данных Meteostat для расчёта пятидневки');
-  err.statusCode = 502;
-  err.code = 'METEOSTAT_INSUFFICIENT_DATA';
-  throw err;
+  throwAppError(
+    'Недостаточно данных Meteostat для расчёта пятидневки',
+    'METEOSTAT_INSUFFICIENT_DATA',
+    502,
+  );
 }
-

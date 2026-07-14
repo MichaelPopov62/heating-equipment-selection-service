@@ -7,40 +7,46 @@ import assert from 'node:assert/strict';
 import { resolveMicroLoadRadiatorStrategy } from '../src/matching/internal/resolveMicroLoadRadiatorStrategy.js';
 import { pickRadiators } from '../src/matching/internal/pickRadiatorsCore.js';
 import { warmupReferenceCache, getReferenceBundle, toCalcRuntimeContext } from '../src/reference/public.js';
+import {
+  buildHeatLossReport,
+  buildHeatLossRoom,
+  buildObjectMeta,
+  buildRoom,
+} from './fixtures/verifyFixtures.js';
 
-/** @type {import('../src/dhw/types').RadiatorApplianceRules['microLoad']} */
+/** @type {import('../src/dhw/types.js').RadiatorApplianceRules['microLoad']} */
 const MICRO_LOAD_RULES = {
   minDesignWattsThreshold: 150,
   entryRoomTypes: ['прихожая', 'коридор', 'тамбур'],
 };
 
-const entryCorridor = {
+const entryCorridor = buildHeatLossRoom({
   id: 'r-entry',
   name: 'Коридор',
   type: 'коридор',
   areaM2: 4,
   heightM: 2.7,
+  volumeM3: 10.8,
   envelopeWatts: 80,
   designWatts: 80,
-  elements: [],
-};
+});
 
-const internalTech = {
+const internalTech = buildHeatLossRoom({
   id: 'r-tech',
   name: 'Кладовая',
   type: 'тех',
   areaM2: 3,
   heightM: 2.5,
+  volumeM3: 7.5,
   envelopeWatts: 60,
   designWatts: 60,
-  elements: [],
-};
+});
 
 const entryStrategy = resolveMicroLoadRadiatorStrategy({
   rules: MICRO_LOAD_RULES,
   room: entryCorridor,
   building: {
-    rooms: [{ id: 'r-entry', roomExteriorLayout: 'internal' }],
+    rooms: [buildRoom({ id: 'r-entry', name: 'Коридор', roomExteriorLayout: 'internal' })],
     envelopeElements: [],
   },
   qRad: 80,
@@ -51,7 +57,7 @@ const internalStrategy = resolveMicroLoadRadiatorStrategy({
   rules: MICRO_LOAD_RULES,
   room: internalTech,
   building: {
-    rooms: [{ id: 'r-tech', roomExteriorLayout: 'internal' }],
+    rooms: [buildRoom({ id: 'r-tech', name: 'Кладовая', type: 'тех', roomExteriorLayout: 'internal' })],
     envelopeElements: [],
   },
   qRad: 60,
@@ -62,7 +68,7 @@ const facadeStrategy = resolveMicroLoadRadiatorStrategy({
   rules: MICRO_LOAD_RULES,
   room: { ...internalTech, id: 'r-fac', type: 'спальня' },
   building: {
-    rooms: [{ id: 'r-fac', roomExteriorLayout: 'facade' }],
+    rooms: [buildRoom({ id: 'r-fac', name: 'Спальня', type: 'спальня', roomExteriorLayout: 'facade' })],
     envelopeElements: [],
   },
   qRad: 100,
@@ -74,7 +80,10 @@ const ctx = toCalcRuntimeContext(await getReferenceBundle());
 const radiatorRules = ctx.appliances.byKind.radiator;
 
 const report = pickRadiators({
-  roomsHeatLoss: { rooms: [entryCorridor, internalTech], totalWatts: 140 },
+  roomsHeatLoss: buildHeatLossReport({
+    totalWatts: 140,
+    rooms: [entryCorridor, internalTech],
+  }),
   heatingSystem: {
     supplyC: 75,
     returnC: 65,
@@ -83,10 +92,10 @@ const report = pickRadiators({
   },
   catalog: ctx.catalog,
   building: {
-    objectMeta: { objectType: 'apartment', ventilationReserveMode: 'natural' },
+    objectMeta: buildObjectMeta({ objectType: 'apartment', ventilationReserveMode: 'natural' }),
     rooms: [
-      { id: 'r-entry', type: 'коридор', roomExteriorLayout: 'internal' },
-      { id: 'r-tech', type: 'тех', roomExteriorLayout: 'internal' },
+      buildRoom({ id: 'r-entry', name: 'Коридор', type: 'коридор', roomExteriorLayout: 'internal' }),
+      buildRoom({ id: 'r-tech', name: 'Кладовая', type: 'тех', roomExteriorLayout: 'internal' }),
     ],
     envelopeElements: [],
   },

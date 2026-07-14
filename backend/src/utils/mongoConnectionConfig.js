@@ -17,11 +17,12 @@ function defaultMongoConnectOptions() {
 }
 
 /**
- * @returns {{ authMechanism: string, authSource: string }}
+ * @returns {{ authMechanism: import('mongodb').AuthMechanism, authSource: string }}
  */
 function readMongoAuthEnv() {
+  const raw = process.env.MONGODB_AUTH_MECHANISM?.trim() || 'SCRAM-SHA-256';
   return {
-    authMechanism: process.env.MONGODB_AUTH_MECHANISM?.trim() || 'SCRAM-SHA-256',
+    authMechanism: /** @type {import('mongodb').AuthMechanism} */ (raw),
     authSource: process.env.MONGODB_AUTH_SOURCE?.trim() || 'admin',
   };
 }
@@ -118,8 +119,8 @@ export function getMongoConnectionConfigs() {
  */
 export function getMongoConnectionConfigOrNull() {
   const candidates = getMongoConnectionConfigs();
-  if (candidates.length === 0) return null;
   const first = candidates[0];
+  if (!first) return null;
   return { uri: first.uri, options: first.options };
 }
 

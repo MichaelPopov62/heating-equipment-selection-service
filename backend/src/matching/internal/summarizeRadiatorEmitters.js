@@ -4,7 +4,7 @@
  */
 
 /**
- * @returns {import('../../types/shared-types').RadiatorsEmittersSummary}
+ * @returns {import('../../types/shared-types.js').RadiatorsEmittersSummary}
  */
 export function emptyRadiatorsEmittersSummary() {
   return {
@@ -19,8 +19,8 @@ export function emptyRadiatorsEmittersSummary() {
 
 /**
  * Агрегація byRoom → emittersSummary.
- * @param {import('../../types/shared-types').RadiatorsByRoomItem[] | undefined | null} byRoom
- * @returns {import('../../types/shared-types').RadiatorsEmittersSummary}
+ * @param {import('../../types/shared-types.js').RadiatorsByRoomItem[] | undefined | null} byRoom
+ * @returns {import('../../types/shared-types.js').RadiatorsEmittersSummary}
  */
 export function summarizeRadiatorEmitters(byRoom) {
   const summary = emptyRadiatorsEmittersSummary();
@@ -64,24 +64,24 @@ export function summarizeRadiatorEmitters(byRoom) {
 
 /**
  * Порівняння byRoom ліній economy / efficient по кімнатах.
- * @param {import('../../types/shared-types').RadiatorsByRoomItem[] | undefined | null} economyByRoom
- * @param {import('../../types/shared-types').RadiatorsByRoomItem[] | undefined | null} efficientByRoom
- * @returns {import('../../types/shared-types').RadiatorsRoomEmitterDiff[]}
+ * @param {import('../../types/shared-types.js').RadiatorsByRoomItem[] | undefined | null} economyByRoom
+ * @param {import('../../types/shared-types.js').RadiatorsByRoomItem[] | undefined | null} efficientByRoom
+ * @returns {import('../../types/shared-types.js').RadiatorsRoomEmitterDiff[]}
  */
 export function buildRadiatorRoomEmitterDiffs(economyByRoom, efficientByRoom) {
-  /** @type {Map<string, import('../../types/shared-types').RadiatorsByRoomItem>} */
+  /** @type {Map<string, import('../../types/shared-types.js').RadiatorsByRoomItem>} */
   const ecoMap = new Map();
   for (const row of economyByRoom ?? []) {
     if (row?.roomId) ecoMap.set(row.roomId, row);
   }
-  /** @type {Map<string, import('../../types/shared-types').RadiatorsByRoomItem>} */
+  /** @type {Map<string, import('../../types/shared-types.js').RadiatorsByRoomItem>} */
   const effMap = new Map();
   for (const row of efficientByRoom ?? []) {
     if (row?.roomId) effMap.set(row.roomId, row);
   }
 
   const roomIds = new Set([...ecoMap.keys(), ...effMap.keys()]);
-  /** @type {import('../../types/shared-types').RadiatorsRoomEmitterDiff[]} */
+  /** @type {import('../../types/shared-types.js').RadiatorsRoomEmitterDiff[]} */
   const diffs = [];
 
   for (const roomId of roomIds) {
@@ -117,7 +117,7 @@ export function buildRadiatorRoomEmitterDiffs(economyByRoom, efficientByRoom) {
 }
 
 /**
- * @param {import('../../types/shared-types').RadiatorsByRoomItem | undefined} row
+ * @param {import('../../types/shared-types.js').RadiatorsByRoomItem | undefined} row
  * @returns {'sectional' | 'panel' | 'none'}
  */
 function resolveDisplayKind(row) {

@@ -114,9 +114,9 @@ export function WaterHeaterForm({
           className={styles.select}
           value={value.hotWaterBoilerPowerMatchingScheme}
           onChange={(e) =>
-            handleSchemeChange(
+            { handleSchemeChange(
               e.target.value as HotWaterBoilerPowerMatchingScheme,
-            )
+            ); }
           }
         >
           {schemeOptions.map((o) => (
@@ -139,10 +139,10 @@ export function WaterHeaterForm({
               type="checkbox"
               checked={value.indirectDhwSpaceAvailable}
               onChange={(e) =>
-                onChange({
+                { onChange({
                   ...value,
                   indirectDhwSpaceAvailable: e.target.checked,
-                })
+                }); }
               }
             />
             <span>

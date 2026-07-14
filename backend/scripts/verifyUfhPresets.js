@@ -18,6 +18,8 @@ import {
   UFH_PRESET_MIXED_RADIATORS,
   UFH_PRESET_ONLY,
 } from '../../shared/ufhModePresetIds.js';
+import { assertAt, assertDefined } from './fixtures/scriptAssert.js';
+import { buildObjectMeta, buildRoom, buildUfhReport, buildUfhRoom } from './fixtures/verifyFixtures.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_FILE = path.join(__dirname, '..', 'data', 'underfloor_heating_presets.json');
@@ -129,8 +131,6 @@ if (base && tile && laminate) {
     finish: tile,
     pipeSpacingMm: 150,
     circuitMeanC: 40,
-    circuitSupplyC: 45,
-    circuitReturnC: 35,
     presetMaxSurfaceTemperatureC: 29,
     insideC: 20,
     outsideC: -5,
@@ -151,30 +151,29 @@ if (base && tile && laminate) {
     ),
   );
 
-  const tileReport = {
-    rooms: [{
-      roomId: 'r1',
-      roomName: 'Тест',
-      finishMaterialId: 'ceramic_tile',
-      finishMaterialName: tile.name,
-      presetMaxSurfaceTemperatureCelsius: 29,
-      finishMaxSurfaceTemperatureCelsius: 35,
-      maxSurfaceTemperatureCelsius: 29,
-      surfaceTempC: 25,
-      heatFluxUpWm2: 50,
-      maxAllowableHeatFluxUpWm2: 60,
-      pipeSpacingMm: 150,
-      circuitSupplyC: 45,
-      circuitReturnC: 35,
-      heatFluxUpWatts: 500,
-      heatFluxDownWatts: 100,
-      warnings: [],
-    }],
-    warnings: [],
-  };
+  const tileReport = buildUfhReport({
+    rooms: [
+      buildUfhRoom('r1', 'Тест', 0, {
+        finishMaterialId: 'ceramic_tile',
+        finishMaterialName: tile.name,
+        presetMaxSurfaceTemperatureCelsius: 29,
+        finishMaxSurfaceTemperatureCelsius: 35,
+        maxSurfaceTemperatureCelsius: 29,
+        surfaceTempC: 25,
+        heatFluxUpWm2: 50,
+        maxAllowableHeatFluxUpWm2: 60,
+        pipeSpacingMm: 150,
+        circuitSupplyC: 45,
+        circuitReturnC: 35,
+        heatFluxUpWatts: 500,
+        heatFluxDownWatts: 100,
+      }),
+    ],
+  });
   applyUnderfloorHeatingRecommendations(tileReport, calcCtx.recommendations);
   const hasOverrideRec = (tileReport.resolvedRecommendations ?? []).some(
-    (r) => r.code === 'WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE',
+    (/** @type {import('../src/recommendations/types.js').ResolvedRecommendation} */ r) =>
+      r.code === 'WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE',
   );
   tally(
     logCheck(
@@ -188,8 +187,6 @@ if (base && tile && laminate) {
     finish: laminate,
     pipeSpacingMm: 150,
     circuitMeanC: 35,
-    circuitSupplyC: 40,
-    circuitReturnC: 30,
     presetMaxSurfaceTemperatureC: 27,
     insideC: 20,
     outsideC: -5,
@@ -205,15 +202,16 @@ if (base && tile && laminate) {
 
   const pvcGlue = getFlooringFinishMaterialById('pvc_glue');
   if (pvcGlue) {
+    const mixedPresetExpected = assertDefined(
+      EXPECTED_TECHNICAL[UFH_PRESET_MIXED_RADIATORS],
+      'EXPECTED_TECHNICAL mixed',
+    );
     const pvcFlux = computeUfhRoomHeatFlux({
       base,
       finish: pvcGlue,
       pipeSpacingMm: 150,
       circuitMeanC: 35,
-      circuitSupplyC: 40,
-      circuitReturnC: 30,
-      presetMaxSurfaceTemperatureC:
-        EXPECTED_TECHNICAL[UFH_PRESET_MIXED_RADIATORS].maxSurfaceTemperatureC,
+      presetMaxSurfaceTemperatureC: mixedPresetExpected.maxSurfaceTemperatureC,
       insideC: 20,
       outsideC: -5,
       bottomBoundary: 'heated',
@@ -228,15 +226,16 @@ if (base && tile && laminate) {
   }
 
   console.log('\n=== cap q↑ по лимиту поверхности (п.2) ===');
+  const mixedCapExpected = assertDefined(
+    EXPECTED_TECHNICAL[UFH_PRESET_MIXED_RADIATORS],
+    'EXPECTED_TECHNICAL mixed cap',
+  );
   const lamCapFlux = computeUfhRoomHeatFlux({
     base,
     finish: laminate,
     pipeSpacingMm: 100,
     circuitMeanC: 41,
-    circuitSupplyC: 46,
-    circuitReturnC: 36,
-    presetMaxSurfaceTemperatureC:
-      EXPECTED_TECHNICAL[UFH_PRESET_MIXED_RADIATORS].maxSurfaceTemperatureC,
+    presetMaxSurfaceTemperatureC: mixedCapExpected.maxSurfaceTemperatureC,
     insideC: 20,
     outsideC: -5,
     bottomBoundary: 'heated',
@@ -272,8 +271,6 @@ if (base && tile && laminate) {
     finish: tile,
     pipeSpacingMm: 150,
     circuitMeanC: 40,
-    circuitSupplyC: 45,
-    circuitReturnC: 35,
     presetMaxSurfaceTemperatureC: 29,
     insideC: 20,
     outsideC: -5,
@@ -303,20 +300,17 @@ if (base && tile && laminate) {
     ),
   );
   if (baseXps30 && baseXps100 && laminate) {
+    /** @type {Omit<Parameters<typeof computeUfhRoomHeatFlux>[0], 'base' | 'pipeSpacingMm' | 'areaM2'>} */
     const fluxArgs = {
       finish: laminate,
-      pipeSpacingMm: 150,
       circuitMeanC: 35,
-      circuitSupplyC: 40,
-      circuitReturnC: 30,
       presetMaxSurfaceTemperatureC: 27,
       insideC: 20,
       outsideC: -5,
       bottomBoundary: 'heated',
-      areaM2: 12,
     };
-    const down30 = computeUfhRoomHeatFlux({ ...fluxArgs, base: baseXps30 });
-    const down100 = computeUfhRoomHeatFlux({ ...fluxArgs, base: baseXps100 });
+    const down30 = computeUfhRoomHeatFlux({ ...fluxArgs, base: baseXps30, pipeSpacingMm: 150, areaM2: 12 });
+    const down100 = computeUfhRoomHeatFlux({ ...fluxArgs, base: baseXps100, pipeSpacingMm: 150, areaM2: 12 });
     tally(
       logCheck(
         down100.heatFluxDownWm2 < down30.heatFluxDownWm2,
@@ -351,34 +345,24 @@ if (base && tile && laminate) {
   const { calculateUnderfloorHeating } = await import('../src/logic/warmFloorCalc.js');
   const { calculateHeatLossForBuilding } = await import('../src/logic/heatlossByRooms.js');
 
+  /** @type {import('../src/types/shared-types.js').BuildingInput} */
   const ufhInputBuilding = {
     temps: { insideC: 20, outsideC: -5 },
-    objectMeta: {
-      objectType: 'house',
-      floors: 1,
-      roomsCount: 1,
-      externalWalls: {
-        presetId: 'wall_gas_concrete_d500',
-        thicknessMm: 375,
-        facadeSystem: 'none',
-      },
-    },
-    rooms: [{
-      id: 'r_ufh',
-      name: 'Гостиная',
-      type: 'гостиная',
-      floor: 1,
-      topBoundary: 'heated',
-      bottomBoundary: 'heated',
-      areaM2: 20,
-      heightM: 2.7,
-      underfloorHeating: {
-        enabled: true,
-        basePresetId: 'ufh_base_interstory_screed_65',
-        finishMaterialId: 'ceramic_tile',
-        pipeSpacingMm: 150,
-      },
-    }],
+    objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 1 }),
+    rooms: [
+      buildRoom({
+        id: 'r_ufh',
+        name: 'Гостиная',
+        bottomBoundary: 'heated',
+        areaM2: 20,
+        underfloorHeating: {
+          enabled: true,
+          basePresetId: 'ufh_base_interstory_screed_65',
+          finishMaterialId: 'ceramic_tile',
+          pipeSpacingMm: 150,
+        },
+      }),
+    ],
     envelopeElements: [{
       kind: 'wall',
       roomId: 'r_ufh',
@@ -412,18 +396,18 @@ if (base && tile && laminate) {
   if (!ufhReport?.rooms?.[0]) {
     tally(logCheck(false, 'warmFloorCalc → комната с ТП'));
   } else {
-    const ufhRoom = ufhReport.rooms[0];
+    const ufhRoomCalc = assertAt(ufhReport.rooms, 0, 'ufhReport.rooms[0]');
     const trigger = shouldTriggerUfhPipeResize({
-      heatFluxDownWm2: ufhRoom.heatFluxDownWm2,
-      heatFluxDownWatts: ufhRoom.heatFluxDownWatts,
-      heatFluxUpWatts: ufhRoom.heatFluxUpWatts,
-      bottomBoundary: ufhRoom.bottomBoundary,
+      heatFluxDownWm2: ufhRoomCalc.heatFluxDownWm2,
+      heatFluxDownWatts: ufhRoomCalc.heatFluxDownWatts,
+      heatFluxUpWatts: ufhRoomCalc.heatFluxUpWatts,
+      bottomBoundary: ufhRoomCalc.bottomBoundary,
       hydraulicsRules: hydRules,
     });
     tally(
       logCheck(
-        trigger === (ufhRoom.bottomBoundary === 'heated' && ufhRoom.heatFluxDownWm2 >= 5),
-        `shouldTriggerUfhPipeResize для heated + q↓=${ufhRoom.heatFluxDownWm2?.toFixed(1)}`,
+        trigger === (ufhRoomCalc.bottomBoundary === 'heated' && ufhRoomCalc.heatFluxDownWm2 >= 5),
+        `shouldTriggerUfhPipeResize для heated + q↓=${ufhRoomCalc.heatFluxDownWm2?.toFixed(1)}`,
       ),
     );
 
@@ -432,14 +416,14 @@ if (base && tile && laminate) {
       hydraulicsRules: hydRules,
     });
 
-    const enriched = ufhReport.rooms[0];
+    const enriched = assertAt(ufhReport.rooms, 0, 'enriched ufhReport.rooms[0]');
     tally(
       logCheck(
         (enriched.loops?.length ?? 0) > 0,
         `enrich → loopsCount=${enriched.loopsCount}, loops=${enriched.loops?.length}`,
       ),
     );
-    const loopHyd = enriched.loops?.[0]?.hydraulics;
+    const loopHyd = assertAt(enriched.loops ?? [], 0, 'enriched.loops[0]').hydraulics;
     tally(
       logCheck(
         loopHyd?.catalogPipeId != null && loopHyd.velocityMps != null,

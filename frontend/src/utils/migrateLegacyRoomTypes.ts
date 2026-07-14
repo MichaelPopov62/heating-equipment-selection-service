@@ -14,16 +14,13 @@ const LEGACY = LEGACY_ROOM_TYPE_MAP as Readonly<
 /** Однократная миграция старых типов помещений (living и т.д.) → новый справочник. */
 export function migrateLegacyRoomTypes(rooms: RoomFormValue[]): RoomFormValue[] {
   const allowed = new Set<string>([...CANONICAL_ROOM_TYPES]);
-  let changed = false;
   const next = rooms.map((r) => {
     const t = r.type as string;
     const nt: RoomFormValue['type'] =
       LEGACY[t] ?? (allowed.has(t) ? (t as RoomFormValue['type']) : 'помещение');
-    if (nt !== r.type) {
-      changed = true;
-      warnCompatMigration('RoomTypes', `${t} → ${nt} (roomId=${r.id})`);
-    }
+    if (nt === r.type) return r;
+    warnCompatMigration('RoomTypes', `${t} → ${nt} (roomId=${r.id})`);
     return { ...r, type: nt };
   });
-  return changed ? next : rooms;
+  return next.some((r, i) => r !== rooms[i]) ? next : rooms;
 }

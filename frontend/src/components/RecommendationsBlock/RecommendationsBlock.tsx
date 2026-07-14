@@ -307,7 +307,9 @@ export function RecommendationsBlock({
                     <UfhLoopHydraulicsTable
                       loopsCount={room.loopsCount ?? room.loops.length}
                       loops={room.loops}
-                      pipeResizeApplied={room.pipeResizeApplied}
+                      {...(room.pipeResizeApplied !== undefined
+                        ? { pipeResizeApplied: room.pipeResizeApplied }
+                        : {})}
                     />
                   )}
                   {room.warnings.length > 0 && (
@@ -424,8 +426,9 @@ export function RecommendationsBlock({
             <dd>
               {displayedRadiatorSectionsTotal} <span>шт.</span>
               <span className={styles.radiatorsTotalSource}>
-                {apiRadiatorsFromReport?.lineEconomy?.emittersSummary != null &&
-                apiRadiatorsFromReport?.lineEfficient?.emittersSummary != null
+                {apiRadiatorsFromReport != null &&
+                apiRadiatorsFromReport.lineEconomy?.emittersSummary != null &&
+                apiRadiatorsFromReport.lineEfficient?.emittersSummary != null
                   ? ' — эконом / эффективный (панели и секции раздельно, из API)'
                   : apiRadiatorsFromReport != null &&
                       apiRadiatorsFromReport.byRoom.length > 0 &&

@@ -27,7 +27,7 @@
  * @param {object} args
  * @param {'auto' | 'sectional' | 'panel'} args.preference
  * @param {EmitterKindVote[]} args.votes
- * @param {EmitterKind | null | undefined} [args.forcedOverride] — от primary для economy/efficient
+ * @param {EmitterKind | null | undefined} [args.forcedOverride] - от primary для economy/efficient
  * @param {'sectional' | 'panel'} [args.tieBreakKind]
  * @returns {EmitterKindDecision}
  */

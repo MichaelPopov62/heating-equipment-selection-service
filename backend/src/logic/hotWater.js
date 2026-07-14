@@ -23,10 +23,10 @@ function clampInteger(value, min, max) {
 }
 
 /**
- * @param {import('../types/shared-types').HotWaterInput & { objectType?: string }} input
- * @param {import('../dhw/types').NormalizedWaterNorms} norms
+ * @param {import('../types/shared-types.js').HotWaterInput & { objectType?: string }} input
+ * @param {import('../dhw/types.js').NormalizedWaterNorms} norms
  * @param {{ dhwSupplyScenarioOverride?: 'flowThrough' | 'storage' }} [options]
- * @returns {import('../types/shared-types').HotWaterReport}
+ * @returns {import('../types/shared-types.js').HotWaterReport}
  */
 export function calculateHotWaterDemand(input = {}, norms, options = {}) {
   if (!norms) {
@@ -43,19 +43,19 @@ export function calculateHotWaterDemand(input = {}, norms, options = {}) {
     norms.objectTypes[objectType]?.dhwSupplyScenario ??
     (objectType === 'apartment' ? 'flowThrough' : 'storage');
 
-  const residents = clampInteger(input.residents, 0, 20);
+  const residents = clampInteger(input.residents ?? 0, 0, 20);
 
   const fx = input.fixtures ?? {};
   const fixtures = {
-    shower: clampInteger(fx.shower, 0, 30),
-    bath: clampInteger(fx.bath, 0, 30),
-    sink: clampInteger(fx.sink, 0, 30),
-    toilet: clampInteger(fx.toilet, 0, 30),
-    kitchenSink: clampInteger(fx.kitchenSink, 0, 30),
-    dishwasher: clampInteger(fx.dishwasher, 0, 30),
-    laundrySink: clampInteger(fx.laundrySink, 0, 30),
-    washingMachine: clampInteger(fx.washingMachine, 0, 30),
-    bidet: clampInteger(fx.bidet, 0, 30),
+    shower: clampInteger(fx.shower ?? 0, 0, 30),
+    bath: clampInteger(fx.bath ?? 0, 0, 30),
+    sink: clampInteger(fx.sink ?? 0, 0, 30),
+    toilet: clampInteger(fx.toilet ?? 0, 0, 30),
+    kitchenSink: clampInteger(fx.kitchenSink ?? 0, 0, 30),
+    dishwasher: clampInteger(fx.dishwasher ?? 0, 0, 30),
+    laundrySink: clampInteger(fx.laundrySink ?? 0, 0, 30),
+    washingMachine: clampInteger(fx.washingMachine ?? 0, 0, 30),
+    bidet: clampInteger(fx.bidet ?? 0, 0, 30),
   };
 
   const tropicalShower = Boolean(input.tropicalShower);
@@ -146,9 +146,18 @@ export function calculateHotWaterDemand(input = {}, norms, options = {}) {
       dhwEquivalentTankLitersFromSession,
     );
 
-    recommendedTankLiters =
-      typicalTankSizes.find((t) => t >= dhwTankLitersCombinedRaw) ??
+    const fallbackTank =
       typicalTankSizes[typicalTankSizes.length - 1];
+    if (fallbackTank === undefined) {
+      throw new Error('water_norms.storage.typicalTankSizes пуст');
+    }
+    const combinedRaw = dhwTankLitersCombinedRaw;
+    if (combinedRaw === undefined) {
+      throw new Error('hotWater: dhwTankLitersCombinedRaw не вычислен');
+    }
+    recommendedTankLiters =
+      typicalTankSizes.find((t) => t >= combinedRaw) ??
+      fallbackTank;
   }
 
   let hotWaterPowerKw;
@@ -196,11 +205,21 @@ export function calculateHotWaterDemand(input = {}, norms, options = {}) {
     ...(dhwSupplyScenario === 'storage'
       ? {
           storageTankLitersPerPersonBasis: norms.storage.litersPerResident,
-          storageHeatTimeMinutes,
-          storageIndirectHeatPowerKw,
-          sessionDemandLitersMixed,
-          dhwEquivalentTankLitersFromSession,
-          dhwTankLitersCombinedRaw,
+          ...(storageHeatTimeMinutes !== undefined
+            ? { storageHeatTimeMinutes }
+            : {}),
+          ...(storageIndirectHeatPowerKw !== undefined
+            ? { storageIndirectHeatPowerKw }
+            : {}),
+          ...(sessionDemandLitersMixed !== undefined
+            ? { sessionDemandLitersMixed }
+            : {}),
+          ...(dhwEquivalentTankLitersFromSession !== undefined
+            ? { dhwEquivalentTankLitersFromSession }
+            : {}),
+          ...(dhwTankLitersCombinedRaw !== undefined
+            ? { dhwTankLitersCombinedRaw }
+            : {}),
         }
       : {}),
     simultaneityBaseNorm: objectNorms.simultaneityBase,

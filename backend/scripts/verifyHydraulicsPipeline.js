@@ -15,9 +15,15 @@ import {
   runHydraulicsPipeline,
   validateHydraulicsPipelineInput,
 } from '../src/hydraulics/public.js';
+import { assertAt } from './fixtures/scriptAssert.js';
+import {
+  buildObjectMeta,
+  buildRoom,
+  DEFAULT_EXTERNAL_WALLS,
+} from './fixtures/verifyFixtures.js';
 
 /** @param {string} label
- * @param {import('../src/types/shared-types').CalcRequestBody} input
+ * @param {import('../src/types/shared-types.js').CalcRequestBody} input
  */
 async function runFixture(label, input) {
   const bundle = await getReferenceBundle();
@@ -46,7 +52,7 @@ async function runFixture(label, input) {
     { ...(input.hotWater ?? {}), objectType: input.building?.objectMeta?.objectType ?? 'house' },
     ctx.waterNorms,
   );
-  const { matching, hotWaterForCalculations } = matchEquipment({
+  const { matching, hotWaterForCalculations } = matchEquipment(/** @type {Parameters<typeof matchEquipment>[0]} */ ({
     heatLoss,
     hotWater,
     heatingSystem: input.heatingSystem ?? {},
@@ -54,7 +60,7 @@ async function runFixture(label, input) {
     underfloorHeating,
     hydraulics: input.hydraulics,
     ctx,
-  });
+  }));
 
   const dto = buildHydraulicsSnapshots({
     input,
@@ -206,10 +212,10 @@ async function runFixture(label, input) {
             const pipe = result.hydraulicsMatching.pipes.find((p) => p.edgeId === edge.id);
             return pipe ? { edge, pipe } : null;
           })
-          .filter(Boolean);
+          .filter((item) => item != null);
         for (let ti = 1; ti < trunkPipes.length; ti += 1) {
-          const prev = trunkPipes[ti - 1];
-          const curr = trunkPipes[ti];
+          const prev = assertAt(trunkPipes, ti - 1, 'trunkPipe prev');
+          const curr = assertAt(trunkPipes, ti, 'trunkPipe curr');
           if (curr.pipe.internalDiameterMm > prev.pipe.internalDiameterMm) {
             throw new Error(
               `${label}: trunk ${curr.edge.id} Dвн ${curr.pipe.internalDiameterMm} `
@@ -349,28 +355,17 @@ async function runFixture(label, input) {
   );
 }
 
-const baseBuilding = {
+const baseBuilding = /** @type {import('../src/types/shared-types.js').BuildingInput} */ ({
   temps: { insideC: 20, outsideC: -5 },
-  objectMeta: {
-    objectType: 'house',
-    floors: 1,
-    roomsCount: 1,
-    externalWalls: {
-      presetId: 'wall_gas_concrete_d500',
-      thicknessMm: 375,
-      facadeSystem: 'none',
-    },
-  },
-  rooms: [{
-    id: 'r1',
-    name: 'Комната',
-    type: 'гостиная',
-    floor: 1,
-    topBoundary: 'heated',
-    bottomBoundary: 'heated',
-    areaM2: 10,
-    heightM: 2.7,
-  }],
+  objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 1 }),
+  rooms: [
+    buildRoom({
+      id: 'r1',
+      name: 'Комната',
+      bottomBoundary: 'heated',
+      areaM2: 10,
+    }),
+  ],
   envelopeElements: [{
     kind: 'wall',
     roomId: 'r1',
@@ -379,24 +374,15 @@ const baseBuilding = {
     areaM2: 12,
     orientation: 'N',
   }],
-};
+});
 
-const houseThreeRooms = {
+const houseThreeRooms = /** @type {import('../src/types/shared-types.js').BuildingInput} */ ({
   temps: { insideC: 20, outsideC: -5 },
-  objectMeta: {
-    objectType: 'house',
-    floors: 1,
-    roomsCount: 3,
-    externalWalls: {
-      presetId: 'wall_gas_concrete_d500',
-      thicknessMm: 375,
-      facadeSystem: 'none',
-    },
-  },
+  objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 3 }),
   rooms: [
-    { id: 'r1', name: 'Гостиная', type: 'гостиная', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 20, heightM: 2.7 },
-    { id: 'r2', name: 'Спальня', type: 'гостиная', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 14, heightM: 2.7 },
-    { id: 'r3', name: 'Кухня', type: 'kitchen', floor: 1, topBoundary: 'heated', bottomBoundary: 'heated', areaM2: 12, heightM: 2.7 },
+    buildRoom({ id: 'r1', name: 'Гостиная', bottomBoundary: 'heated', areaM2: 20 }),
+    buildRoom({ id: 'r2', name: 'Спальня', type: 'спальня', bottomBoundary: 'heated', areaM2: 14 }),
+    buildRoom({ id: 'r3', name: 'Кухня', type: 'кухня', bottomBoundary: 'heated', areaM2: 12 }),
   ],
   envelopeElements: [
     { kind: 'wall', roomId: 'r1', name: 'Стена r1', construction: 'наружная стена', presetId: 'wall_gas_concrete_d500', areaM2: 14, orientation: 'N' },
@@ -406,7 +392,7 @@ const houseThreeRooms = {
     { kind: 'wall', roomId: 'r3', name: 'Стена r3', construction: 'наружная стена', presetId: 'wall_gas_concrete_d500', areaM2: 9, orientation: 'W' },
     { kind: 'window', roomId: 'r3', construction: 'окно', presetId: 'window_pvc_double_chamber_3_glass', areaM2: 2, orientation: 'W', openingWidthMm: 1200, openingHeightMm: 1200, name: 'Окно r3' },
   ],
-};
+});
 
 const wiringHydraulicsBase = {
   mainLineLengthM: 9,
@@ -430,7 +416,7 @@ await runFixture('radiators_only', {
   hydraulics: { mainLineLengthM: 6, deltaTSystemK: 20 },
 });
 
-for (const wiringType of ['two-pipe-dead-end', 'two-pipe-pass', 'manifold']) {
+for (const wiringType of /** @type {const} */ (['two-pipe-dead-end', 'two-pipe-pass', 'manifold'])) {
   const suffix = wiringType === 'two-pipe-dead-end'
     ? 'dead_end'
     : wiringType === 'two-pipe-pass'
@@ -455,15 +441,17 @@ for (const wiringType of ['two-pipe-dead-end', 'two-pipe-pass', 'manifold']) {
 await runFixture('ufh_only', {
   building: {
     ...baseBuilding,
-    rooms: [{
-      ...baseBuilding.rooms[0],
-      underfloorHeating: {
-        enabled: true,
-        basePresetId: 'ufh_base_interstory_screed_65',
-        finishMaterialId: 'ceramic_tile',
-        pipeSpacingMm: 150,
-      },
-    }],
+    rooms: [
+      buildRoom({
+        ...assertAt(baseBuilding.rooms, 0),
+        underfloorHeating: {
+          enabled: true,
+          basePresetId: 'ufh_base_interstory_screed_65',
+          finishMaterialId: 'ceramic_tile',
+          pipeSpacingMm: 150,
+        },
+      }),
+    ],
   },
   heatingSystem: {
     supplyC: 40,
@@ -479,24 +467,21 @@ await runFixture('ufh_only', {
 await runFixture('mixed_radiators_ufh', {
   building: {
     ...baseBuilding,
-    objectMeta: {
-      ...baseBuilding.objectMeta,
+    objectMeta: buildObjectMeta({
       objectType: 'apartment',
       roomsCount: 2,
-    },
+    }),
     rooms: [
-      {
-        ...baseBuilding.rooms[0],
+      buildRoom({
         id: 'r1',
         name: 'Комната',
         roomExteriorLayout: 'facade',
         areaM2: 20,
-      },
-      {
-        ...baseBuilding.rooms[0],
+      }),
+      buildRoom({
         id: 'r2',
         name: 'Кухня',
-        type: 'kitchen',
+        type: 'кухня',
         roomExteriorLayout: 'facade',
         areaM2: 12,
         underfloorHeating: {
@@ -505,7 +490,7 @@ await runFixture('mixed_radiators_ufh', {
           finishMaterialId: 'ceramic_tile',
           pipeSpacingMm: 150,
         },
-      },
+      }),
     ],
     envelopeElements: [
       {
@@ -564,6 +549,7 @@ await runFixture('mixed_radiators_ufh', {
   hydraulics: { mainLineLengthM: 8, deltaTSystemK: 20 },
 });
 
+/** @type {import('../src/types/shared-types.js').RoomUnderfloorHeatingInput} */
 const ufhRoomPartial = {
   enabled: true,
   basePresetId: 'ufh_base_interstory_screed_65',
@@ -571,37 +557,38 @@ const ufhRoomPartial = {
   pipeSpacingMm: 150,
 };
 
+/** @type {import('../src/types/shared-types.js').EnvelopeElementInput} */
 const apartmentEnvelopeWall = {
   kind: 'wall',
   construction: 'наружная стена',
   presetId: 'wall_gas_concrete_d500',
   areaM2: 8,
   orientation: 'N',
+  roomId: 'r1',
 };
 
 await runFixture('apartment_mixed_ufh_micro_branches', {
   building: {
     temps: { insideC: 20, outsideC: -22 },
-    objectMeta: {
+    objectMeta: buildObjectMeta({
       objectType: 'apartment',
-      apartmentStackPosition: 'middle',
-      floors: 1,
+      apartmentStackPosition: 'middle_floor',
       roomsCount: 5,
       ventilationReserveMode: 'natural',
       externalWalls: {
-        presetId: 'wall_gas_concrete_d500',
+        ...DEFAULT_EXTERNAL_WALLS,
         thicknessMm: 450,
         facadeSystem: 'sftk',
         insulationPresetId: 'insul_sftk_pps16f',
         insulationThicknessMm: 100,
       },
-    },
+    }),
     rooms: [
-      { id: 'r1', name: 'Гостиная', type: 'гостиная', floor: 1, topBoundary: 'heated', areaM2: 18, heightM: 2.7, roomExteriorLayout: 'facade', underfloorHeating: ufhRoomPartial },
-      { id: 'r2', name: 'Спальня 1', type: 'гостиная', floor: 1, topBoundary: 'heated', areaM2: 12, heightM: 2.7, roomExteriorLayout: 'facade', underfloorHeating: ufhRoomPartial },
-      { id: 'r3', name: 'Спальня 2', type: 'гостиная', floor: 1, topBoundary: 'heated', areaM2: 10, heightM: 2.7, roomExteriorLayout: 'internal', underfloorHeating: ufhRoomPartial },
-      { id: 'r4', name: 'Детская', type: 'гостиная', floor: 1, topBoundary: 'heated', areaM2: 9, heightM: 2.7, roomExteriorLayout: 'internal', underfloorHeating: ufhRoomPartial },
-      { id: 'r5', name: 'Кухня', type: 'kitchen', floor: 1, topBoundary: 'heated', areaM2: 14, heightM: 2.7, roomExteriorLayout: 'facade' },
+      buildRoom({ id: 'r1', name: 'Гостиная', areaM2: 18, roomExteriorLayout: 'facade', underfloorHeating: ufhRoomPartial }),
+      buildRoom({ id: 'r2', name: 'Спальня 1', type: 'спальня', areaM2: 12, roomExteriorLayout: 'facade', underfloorHeating: ufhRoomPartial }),
+      buildRoom({ id: 'r3', name: 'Спальня 2', type: 'спальня', areaM2: 10, roomExteriorLayout: 'internal', underfloorHeating: ufhRoomPartial }),
+      buildRoom({ id: 'r4', name: 'Детская', type: 'гостиная', areaM2: 9, roomExteriorLayout: 'internal', underfloorHeating: ufhRoomPartial }),
+      buildRoom({ id: 'r5', name: 'Кухня', type: 'кухня', areaM2: 14, roomExteriorLayout: 'facade' }),
     ],
     envelopeElements: [
       { ...apartmentEnvelopeWall, roomId: 'r1', name: 'Стена r1', areaM2: 9 },
@@ -694,17 +681,19 @@ await runFixture('apartment_mixed_ufh_mixing_valve', {
 await runFixture('ufh_parasitic_down_resize', {
   building: {
     ...baseBuilding,
-    rooms: [{
-      ...baseBuilding.rooms[0],
-      areaM2: 24,
-      bottomBoundary: 'heated',
-      underfloorHeating: {
-        enabled: true,
-        basePresetId: 'ufh_base_interstory_screed_65',
-        finishMaterialId: 'ceramic_tile',
-        pipeSpacingMm: 150,
-      },
-    }],
+    rooms: [
+      buildRoom({
+        ...assertAt(baseBuilding.rooms, 0),
+        areaM2: 24,
+        bottomBoundary: 'heated',
+        underfloorHeating: {
+          enabled: true,
+          basePresetId: 'ufh_base_interstory_screed_65',
+          finishMaterialId: 'ceramic_tile',
+          pipeSpacingMm: 150,
+        },
+      }),
+    ],
   },
   heatingSystem: {
     supplyC: 40,

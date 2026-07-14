@@ -10,9 +10,9 @@ import {
 } from './internal/uniboxRoomAirPresets.js';
 
 /**
- * @typedef {import('../catalog/types').UniboxCatalogItemNormalized} UniboxCatalogItemNormalized
- * @typedef {import('../types/shared-types').UniboxLoopDemand} UniboxLoopDemand
- * @typedef {import('../types/shared-types').UniboxesMatchingReport} UniboxesMatchingReport
+ * @typedef {import('../catalog/types.js').UniboxCatalogItemNormalized} UniboxCatalogItemNormalized
+ * @typedef {import('../types/shared-types.js').UniboxLoopDemand} UniboxLoopDemand
+ * @typedef {import('../types/shared-types.js').UniboxesMatchingReport} UniboxesMatchingReport
  * @typedef {import('./internal/uniboxRoomAirPresets.js').UniboxRoomAirTempSource} UniboxRoomAirTempSource
  */
 
@@ -208,12 +208,16 @@ export function pickUniboxForDemand(pool, demand) {
     const rankDiff = uniboxTypeRank(a.type) - uniboxTypeRank(b.type);
     if (rankDiff !== 0) return rankDiff;
     // Пріоритет G3/4 (типовий євроконус 16×2) над G1/2.
+    /**
+     * @param {UniboxCatalogItemNormalized} u
+     * @returns {number}
+     */
     const threadScore = (u) => (u.connection?.thread === 'G3/4' ? 0 : 1);
     const th = threadScore(a) - threadScore(b);
     if (th !== 0) return th;
     return a.price - b.price;
   });
-  return fitting[0];
+  return fitting[0] ?? null;
 }
 
 /**
@@ -236,10 +240,11 @@ function buildRoomTypeById(rooms) {
  * ufhTerminalControl=unibox. Без fallback loopLengthM=0.
  * T повітря: пресет за room.type (санузел → 24 °C) або temps.insideC з анкети.
  *
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} underfloorHeating
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null | undefined} underfloorHeating
  * @param {object} ctx
- * @param {number} ctx.surveyInsideC — temps.insideC (T повітря за замовчуванням)
- * @param {number | undefined | null} [ctx.bathroomAirTempC] — temps.bathroomAirTempC
+ * @param {number} [ctx.surveyInsideC] temps.insideC (T повітря за замовчуванням)
+ * @param {number} [ctx.roomAirTempC] alias surveyInsideC (legacy)
+ * @param {number | undefined | null} [ctx.bathroomAirTempC] temps.bathroomAirTempC
  * @param {number} [ctx.systemPressureBar]
  * @param {Array<{ id?: string, type?: string }> | null | undefined} [ctx.rooms]
  * @returns {Array<{ roomId: string, loopId: string, required: UniboxLoopDemand }>}
@@ -314,7 +319,7 @@ export function collectUniboxLoopDemands(underfloorHeating, ctx) {
  * Сигнал з H.15 pickManifolds (не дублюємо splitOutletsForCascade).
  * manifolds.ok=false / порожній underfloor → не каскад (soft-fail колекторів).
  *
- * @param {import('../types/shared-types').ManifoldsMatchingReport | null | undefined} manifolds
+ * @param {import('../types/shared-types.js').ManifoldsMatchingReport | null | undefined} manifolds
  * @returns {boolean}
  */
 export function hasUnderfloorManifoldCascade(manifolds) {
@@ -357,13 +362,13 @@ function buildNoMatchWarning(loopId, required, surveyInsideC) {
  * Оркестратор підбору унібоксів після pickManifolds, до гідравліки.
  *
  * @param {object} args
- * @param {import('../catalog/types').NormalizedCatalog | undefined} args.catalog
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} args.underfloorHeating
- * @param {number | undefined} args.roomAirTempC — temps.insideC (T повітря з анкети)
- * @param {number | undefined} [args.bathroomAirTempC] — temps.bathroomAirTempC
- * @param {number | undefined} [args.systemPressureBar]
- * @param {import('../types/shared-types').ManifoldsMatchingReport | null | undefined} [args.manifolds]
- * @param {Array<{ id?: string, type?: string }> | null | undefined} [args.rooms] — building.rooms для room.type
+ * @param {import('../catalog/types.js').NormalizedCatalog | undefined} args.catalog
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null | undefined} args.underfloorHeating
+ * @param {number} [args.roomAirTempC] temps.insideC (T повітря з анкети)
+ * @param {number} [args.bathroomAirTempC] temps.bathroomAirTempC
+ * @param {number} [args.systemPressureBar]
+ * @param {import('../types/shared-types.js').ManifoldsMatchingReport | null | undefined} [args.manifolds]
+ * @param {Array<{ id?: string, type?: string }> | null | undefined} [args.rooms] building.rooms для room.type
  * @returns {UniboxesMatchingReport}
  */
 export function pickUniboxes({
@@ -374,7 +379,7 @@ export function pickUniboxes({
   systemPressureBar,
   manifolds = null,
   rooms = null,
-} = {}) {
+}) {
   /** @type {UniboxCatalogItemNormalized[]} */
   const pool = catalog?.uniboxes ?? [];
   /** @type {string[]} */
@@ -440,7 +445,7 @@ export function pickUniboxes({
     return { byLoop, warnings };
   }
 
-  /** @type {import('../types/shared-types').UniboxLoopPick[]} */
+  /** @type {import('../types/shared-types.js').UniboxLoopPick[]} */
   const byLoop = [];
 
   for (const demand of demands) {

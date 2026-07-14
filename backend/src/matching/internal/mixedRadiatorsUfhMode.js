@@ -6,12 +6,12 @@
 import { UFH_PRESET_ONLY } from '../../../../shared/ufhModePresetIds.js';
 
 /**
- * @param {import('../../types/shared-types').HeatingSystemInput | undefined | null} heatingSystem
+ * @param {import('../../types/shared-types.js').HeatingSystemInput | undefined | null} heatingSystem
  * @returns {boolean}
  */
 export function isMixedRadiatorsUfhHeatingMode(heatingSystem) {
   const mode = heatingSystem?.heatingEmittersMode;
-  if (mode === UFH_PRESET_ONLY || mode === 'ufh_only') return false;
+  if (mode === UFH_PRESET_ONLY) return false;
   if (mode === 'radiators') return false;
   if (mode === 'mixed') return true;
 

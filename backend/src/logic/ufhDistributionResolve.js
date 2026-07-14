@@ -6,7 +6,7 @@
 import { resolveUfhDistributionPreset } from '../../../shared/ufhDistributionPresets.js';
 
 /**
- * @param {import('../dhw/types').UnderfloorHeatingApplianceRules | undefined} ufhAppliance
+ * @param {import('../dhw/types.js').UnderfloorHeatingApplianceRules | undefined} ufhAppliance
  * @returns {import('../../../shared/ufhDistributionPresets.js').UfhDistributionAutoRules | undefined}
  */
 export function ufhDistributionAutoRulesFromAppliances(ufhAppliance) {
@@ -16,12 +16,15 @@ export function ufhDistributionAutoRulesFromAppliances(ufhAppliance) {
 /**
  * @param {import('../../../shared/ufhDistributionPresets.js').UfhDistributionPreset | undefined | null} requested
  * @param {object} ctx
- * @param {import('../dhw/types').AppliancesBundle | undefined} [appliances]
+ * @param {import('../dhw/types.js').AppliancesBundle | undefined} [appliances]
  * @returns {Exclude<import('../../../shared/ufhDistributionPresets.js').UfhDistributionPreset, 'auto'>}
  */
 export function resolveUfhDistributionWithAppliances(requested, ctx, appliances) {
   const autoRules = ufhDistributionAutoRulesFromAppliances(
     appliances?.byKind?.underfloor_heating,
   );
-  return resolveUfhDistributionPreset(requested, { ...ctx, autoRules });
+  return resolveUfhDistributionPreset(requested, {
+    ...ctx,
+    ...(autoRules !== undefined ? { autoRules } : {}),
+  });
 }

@@ -10,15 +10,15 @@ export { resolveDesignPumpFlowM3h } from './resolveCirculationFlows.js';
 
 /**
  * @param {object} args
- * @param {import('./types').HydraulicsGraph} args.graph
- * @param {import('./types').HydraulicsPipeMatchItem[]} args.pipes
- * @param {import('./types').HydraulicsPipelineInput} args.dto
- * @returns {import('./types').HydraulicsPressureReport}
+ * @param {import('./types.js').HydraulicsGraph} args.graph
+ * @param {import('./types.js').HydraulicsPipeMatchItem[]} args.pipes
+ * @param {import('./types.js').HydraulicsPipelineInput} args.dto
+ * @returns {import('./types.js').HydraulicsPressureReport}
  */
 export function computePressureReport({ graph, pipes, dto }) {
   const pipeByEdge = new Map(pipes.map((p) => [p.edgeId, p]));
 
-  /** @type {import('./types').HydraulicsPressureSegment[]} */
+  /** @type {import('./types.js').HydraulicsPressureSegment[]} */
   const segments = [];
 
   for (const edge of graph.edges) {
@@ -29,7 +29,9 @@ export function computePressureReport({ graph, pipes, dto }) {
       lengthM: edge.lengthM,
       velocityMps: pipe?.velocityMps ?? 0,
       pressureDropKPa: pipe?.pressureDropKPa ?? 0,
-      catalogPipeId: pipe?.catalogPipeId,
+      ...(pipe?.catalogPipeId !== undefined
+        ? { catalogPipeId: pipe.catalogPipeId }
+        : {}),
     });
   }
 
@@ -62,7 +64,9 @@ export function computePressureReport({ graph, pipes, dto }) {
     criticalLoopEdgeIds: criticalEdgeIds,
     headRequiredM,
     criticalPressureDropKPa: circulation.criticalPressureDropKPa,
-    criticalLoop: circulation.criticalLoop ?? undefined,
+    ...(circulation.criticalLoop
+      ? { criticalLoop: circulation.criticalLoop }
+      : {}),
     circulationLoops: circulation.branches,
     balancingRecommendations: circulation.balancingRecommendations,
     segments,
@@ -70,11 +74,11 @@ export function computePressureReport({ graph, pipes, dto }) {
 }
 
 /**
- * @param {import('./types').HydraulicsPipelineInput} dto
- * @returns {import('./types').HydraulicsConsumerSummary[]}
+ * @param {import('./types.js').HydraulicsPipelineInput} dto
+ * @returns {import('./types.js').HydraulicsConsumerSummary[]}
  */
 export function buildConsumerSummaries(dto) {
-  /** @type {import('./types').HydraulicsConsumerSummary[]} */
+  /** @type {import('./types.js').HydraulicsConsumerSummary[]} */
   const out = [];
   if (dto.circuits.radiators) {
     out.push({

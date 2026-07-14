@@ -6,6 +6,7 @@
 import { isPlainObject } from '../utils/isPlainObject.js';
 import { sanitizeTrimAngleBrackets } from '../utils/sanitizeString.js';
 import { MAX_SURVEY_JSON_CHARS } from './documentSizeLimits.js';
+import { throwAppError } from '../utils/createAppError.js';
 
 const MAX_CLIENT_NAME_LEN = 200;
 const MAX_LABEL_LEN = 200;
@@ -16,17 +17,11 @@ const MAX_LABEL_LEN = 200;
 function assertSurveyShape(survey) {
   if (survey === undefined || survey === null) return;
   if (!isPlainObject(survey)) {
-    const err = new Error('Поле survey должно быть объектом.');
-    err.statusCode = 400;
-    err.code = 'VALIDATION_ERROR';
-    throw err;
+    throwAppError('Поле survey должно быть объектом.', 'VALIDATION_ERROR', 400);
   }
   const serialized = JSON.stringify(survey);
   if (serialized.length > MAX_SURVEY_JSON_CHARS) {
-    const err = new Error('Слишком большой объект survey.');
-    err.statusCode = 413;
-    err.code = 'PAYLOAD_TOO_LARGE';
-    throw err;
+    throwAppError('Слишком большой объект survey.', 'PAYLOAD_TOO_LARGE', 413);
   }
 }
 
@@ -37,16 +32,14 @@ function assertSurveyShape(survey) {
 function normalizeClientName(raw) {
   const name = sanitizeTrimAngleBrackets(raw);
   if (!name) {
-    const err = new Error('Укажите имя клиента (clientName).');
-    err.statusCode = 400;
-    err.code = 'VALIDATION_ERROR';
-    throw err;
+    throwAppError('Укажите имя клиента (clientName).', 'VALIDATION_ERROR', 400);
   }
   if (name.length > MAX_CLIENT_NAME_LEN) {
-    const err = new Error(`Имя клиента не длиннее ${MAX_CLIENT_NAME_LEN} символов.`);
-    err.statusCode = 400;
-    err.code = 'VALIDATION_ERROR';
-    throw err;
+    throwAppError(
+      `Имя клиента не длиннее ${MAX_CLIENT_NAME_LEN} символов.`,
+      'VALIDATION_ERROR',
+      400,
+    );
   }
   return name;
 }
@@ -60,10 +53,11 @@ function normalizeLabel(raw) {
   const label = sanitizeTrimAngleBrackets(raw);
   if (!label) return undefined;
   if (label.length > MAX_LABEL_LEN) {
-    const err = new Error(`Подпись объекта не длиннее ${MAX_LABEL_LEN} символов.`);
-    err.statusCode = 400;
-    err.code = 'VALIDATION_ERROR';
-    throw err;
+    throwAppError(
+      `Подпись объекта не длиннее ${MAX_LABEL_LEN} символов.`,
+      'VALIDATION_ERROR',
+      400,
+    );
   }
   return label;
 }
@@ -74,19 +68,19 @@ function normalizeLabel(raw) {
  */
 export function validateProjectCreateBody(body) {
   if (!isPlainObject(body)) {
-    const err = new Error('Тело запроса должно быть JSON-объектом.');
-    err.statusCode = 400;
-    err.code = 'VALIDATION_ERROR';
-    throw err;
+    throwAppError('Тело запроса должно быть JSON-объектом.', 'VALIDATION_ERROR', 400);
   }
   const clientName = normalizeClientName(body.clientName);
   const label = normalizeLabel(body.label);
   assertSurveyShape(body.survey);
-  return {
-    clientName,
-    label,
-    survey: body.survey === undefined ? undefined : /** @type {Record<string, unknown>} */ (body.survey),
-  };
+
+  /** @type {{ clientName: string, label?: string, survey?: Record<string, unknown> }} */
+  const out = { clientName };
+  if (label !== undefined) out.label = label;
+  if (body.survey !== undefined) {
+    out.survey = /** @type {Record<string, unknown>} */ (body.survey);
+  }
+  return out;
 }
 
 /**
@@ -95,20 +89,18 @@ export function validateProjectCreateBody(body) {
  */
 export function validateProjectUpdateBody(body) {
   if (!isPlainObject(body)) {
-    const err = new Error('Тело запроса должно быть JSON-объектом.');
-    err.statusCode = 400;
-    err.code = 'VALIDATION_ERROR';
-    throw err;
+    throwAppError('Тело запроса должно быть JSON-объектом.', 'VALIDATION_ERROR', 400);
   }
   const hasClient = Object.prototype.hasOwnProperty.call(body, 'clientName');
   const hasLabel = Object.prototype.hasOwnProperty.call(body, 'label');
   const hasSurvey = Object.prototype.hasOwnProperty.call(body, 'survey');
 
   if (!hasClient && !hasLabel && !hasSurvey) {
-    const err = new Error('Укажите хотя бы одно поле: clientName, label или survey.');
-    err.statusCode = 400;
-    err.code = 'VALIDATION_ERROR';
-    throw err;
+    throwAppError(
+      'Укажите хотя бы одно поле: clientName, label или survey.',
+      'VALIDATION_ERROR',
+      400,
+    );
   }
 
   /** @type {{ clientName?: string, label?: string | null, survey?: Record<string, unknown> }} */
@@ -121,7 +113,7 @@ export function validateProjectUpdateBody(body) {
     if (body.label === null) {
       out.label = null;
     } else {
-      out.label = normalizeLabel(body.label);
+      out.label = normalizeLabel(body.label) ?? null;
     }
   }
   if (hasSurvey) {

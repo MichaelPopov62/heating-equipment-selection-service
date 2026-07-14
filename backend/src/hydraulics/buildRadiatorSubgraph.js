@@ -24,9 +24,9 @@ import {
 /**
  * @typedef {object} RadiatorSubgraphContext
  * @property {string} upstreamId
- * @property {import('./types').HydraulicsPipelineInput} dto
- * @property {(id: string, kind: import('./types').HydraulicsNodeKind, label: string, extra?: object) => void} pushNode
- * @property {(edge: import('./types').HydraulicsGraphEdge) => void} pushEdge
+ * @property {import('./types.js').HydraulicsPipelineInput} dto
+ * @property {(id: string, kind: import('./types.js').HydraulicsNodeKind, label: string, extra?: object) => void} pushNode
+ * @property {(edge: import('./types.js').HydraulicsGraphEdge) => void} pushEdge
  */
 
 /**
@@ -114,6 +114,7 @@ function buildSequentialRadiatorGraph(ctx, mode) {
 
   if (consumers.length === 1) {
     const consumer = consumers[0];
+    if (!consumer) return;
     const nodeId = radiatorConsumerNodeId(consumer.roomId);
     ctx.pushNode(nodeId, 'radiator_consumer', consumer.roomName, {
       roomId: consumer.roomId,
@@ -138,6 +139,7 @@ function buildSequentialRadiatorGraph(ctx, mode) {
     ctx.pushNode(junctionId, 'radiator_trunk_junction', `Тройник ${i + 1}`, {});
 
     const consumer = consumers[i];
+    if (!consumer) continue;
     const radNodeId = radiatorConsumerNodeId(consumer.roomId);
     ctx.pushNode(radNodeId, 'radiator_consumer', consumer.roomName, {
       roomId: consumer.roomId,

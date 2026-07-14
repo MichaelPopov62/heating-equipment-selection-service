@@ -7,8 +7,8 @@ import { geocodeAddress } from './geocode.js';
 import { getDesignOutsideTempFromMeteostat } from './snipClimate.js';
 
 /**
- * @param {import('../types/shared-types').LocationInput} location
- * @returns {Promise<import('../types/shared-types').ClimateSnapshot | null>}
+ * @param {import('../types/shared-types.js').LocationInput} location
+ * @returns {Promise<import('../types/shared-types.js').ClimateSnapshot | null>}
  */
 export async function getDesignOutsideTempC(location) {
   if (!location || typeof location !== 'object') return null;

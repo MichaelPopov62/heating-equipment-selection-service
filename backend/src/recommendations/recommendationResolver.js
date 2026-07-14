@@ -17,10 +17,10 @@ function formatRecommendationText(template, vars = {}) {
 }
 
 /**
- * @param {import('./types').RecommendationsBundle} recommendations
+ * @param {import('./types.js').RecommendationsBundle} recommendations
  * @param {string} code
  * @param {Record<string, string | number | undefined>} [vars]
- * @returns {import('./types').ResolvedRecommendation | null}
+ * @returns {import('./types.js').ResolvedRecommendation | null}
  */
 export function resolveRecommendation(recommendations, code, vars = {}) {
   if (!recommendations?.byCode) {
@@ -43,11 +43,11 @@ export function resolveRecommendation(recommendations, code, vars = {}) {
 /**
  * Добавить рекомендацию в warnings (текст) и в структурированный список.
  * @param {string[]} warnings
- * @param {import('./types').ResolvedRecommendation[]} resolvedList
- * @param {import('./types').RecommendationsBundle} recommendations
+ * @param {import('./types.js').ResolvedRecommendation[]} resolvedList
+ * @param {import('./types.js').RecommendationsBundle} recommendations
  * @param {string} code
  * @param {Record<string, string | number | undefined>} [vars]
- * @returns {import('./types').ResolvedRecommendation | null}
+ * @returns {import('./types.js').ResolvedRecommendation | null}
  */
 export function pushRecommendation(
   warnings,

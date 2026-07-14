@@ -20,6 +20,11 @@ import {
 } from './manifoldSeriesGeometry.js';
 import { assertKnownBoilerManifoldSeriesGeometry } from './boilerManifoldSeriesGeometry.js';
 
+/**
+ * @param {unknown} x
+ * @param {{ field?: string, min?: number, max?: number }} [opts]
+ * @returns {number}
+ */
 function toFiniteNumber(x, { field, min = -Infinity, max = Infinity } = {}) {
   const n = Number(x);
   if (!Number.isFinite(n)) {
@@ -106,7 +111,11 @@ function normalizeBoilerFromExtendedFormats(item) {
   }
 }
 
-/** Панельный радиатор — теплоотдача целиком по изделию (specs.thermal_output_full). */
+/**
+ * Панельный радиатор — теплоотдача целиком по изделию (specs.thermal_output_full).
+ * @param {Record<string, unknown>} item
+ * @returns {boolean}
+ */
 function radiatorLooksLikePanelRecord(item) {
   const specs = /** @type {Record<string, unknown>} */ (item.specs);
   return Boolean(specs && isPlainObject(specs.thermal_output_full));
@@ -125,6 +134,9 @@ function inferRadiatorPriceBasis(item) {
   return 'section';
 }
 
+/**
+ * @param {Record<string, unknown>} item
+ */
 function normalizeRadiatorFromExtendedFormats(item) {
   if (!isPlainObject(item)) return;
 
@@ -226,14 +238,18 @@ function validateBoiler(item, ctx, expectedCircuitsCount) {
   if (!isPlainObject(item.powerKw)) throw new Error(`Каталог: powerKw обязателен (${ctx}).`);
   // Ноль или отрицательные значения мощности приведут к абсурдному подбору.
   // Поэтому задаём нижнюю границу > 0 (минимум 0.1 кВт).
-  item.powerKw.max = toFiniteNumber(item.powerKw.max, { field: `powerKw.max (${ctx})`, min: 0.1 });
-  item.powerKw.min = toFiniteNumber(item.powerKw.min, { field: `powerKw.min (${ctx})`, min: 0.1 });
-  if (item.powerKw.min > item.powerKw.max) {
+  const powerKw = item.powerKw;
+  const powerKwMax = toFiniteNumber(powerKw.max, { field: `powerKw.max (${ctx})`, min: 0.1 });
+  const powerKwMin = toFiniteNumber(powerKw.min, { field: `powerKw.min (${ctx})`, min: 0.1 });
+  if (powerKwMin > powerKwMax) {
     throw new Error(`Каталог: powerKw.min > powerKw.max (${ctx}).`);
   }
+  powerKw.max = powerKwMax;
+  powerKw.min = powerKwMin;
 
-  item.fuel = sanitizeTrimAngleBrackets(item.fuel);
-  if (item.fuel && !['Газ', 'Электричество', 'Твердое топливо', 'Твердотопливный'].includes(item.fuel)) {
+  const fuel = sanitizeTrimAngleBrackets(item.fuel);
+  item.fuel = fuel;
+  if (fuel && !['Газ', 'Электричество', 'Твердое топливо', 'Твердотопливный'].includes(fuel)) {
     // Мягкая проверка enum: можно расширять список по мере появления.
     // Не бросаем ошибку, если fuel пустой/неизвестный — но фиксируем очевидный мусор в model/power.
   }
@@ -317,6 +333,10 @@ function validateBoiler(item, ctx, expectedCircuitsCount) {
   }
 }
 
+/**
+ * @param {unknown} item
+ * @param {number} idx
+ */
 function validateRadiator(item, idx) {
   if (!isPlainObject(item)) throw new Error(`Каталог: радиатор должен быть объектом (radiators[${idx}]).`);
 
@@ -419,6 +439,10 @@ function validateRadiator(item, idx) {
   }
 }
 
+/**
+ * @param {unknown} item
+ * @param {number} idx
+ */
 function validateWaterHeater(item, idx) {
   if (!isPlainObject(item)) {
     throw new Error(`Каталог: водонагреватель должен быть объектом (waterHeaters[${idx}]).`);
@@ -524,10 +548,11 @@ function validatePipe(item, idx, seenIds) {
   if (!item.id) {
     throw new Error(`Каталог: id обязателен (${ctx}).`);
   }
-  if (seenIds.has(item.id)) {
-    throw new Error(`Каталог: дубликат id="${item.id}" (${ctx}).`);
+  const pipeId = /** @type {string} */ (item.id);
+  if (seenIds.has(pipeId)) {
+    throw new Error(`Каталог: дубликат id="${pipeId}" (${ctx}).`);
   }
-  seenIds.add(item.id);
+  seenIds.add(pipeId);
 
   item.brand = sanitizeTrimAngleBrackets(item.brand);
   if (!item.brand) {
@@ -670,14 +695,16 @@ function validatePumpOperatingMode(raw, ctx) {
     min: 0,
     max: 100,
   });
-  if (mode.qMaxM3h < mode.qMinM3h) {
+  const qMinM3h = /** @type {number} */ (mode.qMinM3h);
+  const qMaxM3h = /** @type {number} */ (mode.qMaxM3h);
+  if (qMaxM3h < qMinM3h) {
     throw new Error(`Каталог: qMaxM3h < qMinM3h (${ctx}).`);
   }
 
   /** @type {{ qMinM3h: number; qMaxM3h: number; coefficients: object }} */
   const modeCurve = {
-    qMinM3h: /** @type {number} */ (mode.qMinM3h),
-    qMaxM3h: /** @type {number} */ (mode.qMaxM3h),
+    qMinM3h,
+    qMaxM3h,
     coefficients: coef,
   };
   normalizePumpModeQMaxToCurve(modeCurve, ctx, PUMP_CURVE_MIN_HEAD_AT_QMAX_M);
@@ -707,10 +734,11 @@ function validatePump(item, idx, seenIds) {
   if (!item.id) {
     throw new Error(`Каталог: id обязателен (${ctx}).`);
   }
-  if (seenIds.has(item.id)) {
-    throw new Error(`Каталог: дубликат id="${item.id}" (${ctx}).`);
+  const pumpId = /** @type {string} */ (item.id);
+  if (seenIds.has(pumpId)) {
+    throw new Error(`Каталог: дубликат id="${pumpId}" (${ctx}).`);
   }
-  seenIds.add(item.id);
+  seenIds.add(pumpId);
 
   item.brand = sanitizeTrimAngleBrackets(item.brand);
   if (!item.brand) {
@@ -1252,10 +1280,11 @@ function validateUnibox(item, idx, seenIds) {
   if (!item.id) {
     throw new Error(`Каталог: id обязателен (${ctx}).`);
   }
-  if (seenIds.has(item.id)) {
-    throw new Error(`Каталог: дублирующий id унибокса "${item.id}" (${ctx}).`);
+  const uniboxId = /** @type {string} */ (item.id);
+  if (seenIds.has(uniboxId)) {
+    throw new Error(`Каталог: дублирующий id унибокса "${uniboxId}" (${ctx}).`);
   }
-  seenIds.add(item.id);
+  seenIds.add(uniboxId);
 
   item.brand = sanitizeTrimAngleBrackets(item.brand);
   if (!item.brand) {
@@ -1448,7 +1477,7 @@ function validateUnibox(item, idx, seenIds) {
  * Валидирует и (минимально) нормализует каталог.
  * Входной json не мутируется (клонирование как в validateAndNormalizeInput для calc).
  * @param {unknown} json
- * @returns {import('./types').NormalizedCatalog}
+ * @returns {import('./types.js').NormalizedCatalog}
  */
 export function validateAndNormalizeCatalog(json) {
   if (!isPlainObject(json)) throw new Error('Каталог: корневой JSON должен быть объектом.');
@@ -1496,15 +1525,29 @@ export function validateAndNormalizeCatalog(json) {
   uniboxes.forEach((item, i) => validateUnibox(item, i, seenUniboxIds));
 
   return {
-    boilers: { doubleCircuit, singleCircuit },
-    radiators,
-    waterHeaters,
-    pipes,
-    pumps,
-    indirectWaterHeaters,
-    manifolds,
-    boilerManifolds,
-    uniboxes,
+    boilers: {
+      doubleCircuit: /** @type {import('./types.js').BoilerCatalogItemNormalized[]} */ (
+        doubleCircuit
+      ),
+      singleCircuit: /** @type {import('./types.js').BoilerCatalogItemNormalized[]} */ (
+        singleCircuit
+      ),
+    },
+    radiators: /** @type {import('./types.js').RadiatorCatalogItemNormalized[]} */ (radiators),
+    waterHeaters: /** @type {import('./types.js').WaterHeaterCatalogItemNormalized[]} */ (
+      waterHeaters
+    ),
+    pipes: /** @type {import('./types.js').PipeCatalogItemNormalized[]} */ (pipes),
+    pumps: /** @type {import('./types.js').PumpCatalogItemNormalized[]} */ (pumps),
+    indirectWaterHeaters:
+      /** @type {import('./types.js').IndirectWaterHeaterCatalogItemNormalized[]} */ (
+        indirectWaterHeaters
+      ),
+    manifolds: /** @type {import('./types.js').ManifoldCatalogItemNormalized[]} */ (manifolds),
+    boilerManifolds: /** @type {import('./types.js').BoilerManifoldCatalogItemNormalized[]} */ (
+      boilerManifolds
+    ),
+    uniboxes: /** @type {import('./types.js').UniboxCatalogItemNormalized[]} */ (uniboxes),
   };
 }
 

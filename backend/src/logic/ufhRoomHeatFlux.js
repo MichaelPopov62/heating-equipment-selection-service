@@ -20,14 +20,16 @@ export const R_CONV_DOWN_HEATED_M2KW = 0.05;
 export const R_CONV_DOWN_UNHEATED_M2KW = 0.15;
 
 /**
- * @param {import('../types/shared-types').UnderfloorHeatingAssemblyLayer[]} layers
+ * @param {import('../types/shared-types.js').UnderfloorHeatingAssemblyLayer[]} layers
  * @param {number} heatingIdx
  * @returns {number}
  */
 function sumResistanceBelowHeatingLayer(layers, heatingIdx) {
   let sum = 0;
   for (let i = 0; i < heatingIdx; i += 1) {
-    sum += computeLayerResistanceM2KW(layers[i]);
+    const layer = layers[i];
+    if (!layer) continue;
+    sum += computeLayerResistanceM2KW(layer);
   }
   return sum;
 }
@@ -35,11 +37,11 @@ function sumResistanceBelowHeatingLayer(layers, heatingIdx) {
 /**
  * Лимит температуры поверхности: min(пресет Mongo, паспорт финиша) при заданном пресете.
  *
- * @param {number | undefined} presetMaxSurfaceTemperatureC — technical.maxSurfaceTemperatureC
- * @param {import('../types/shared-types').FlooringFinishMaterial} finish
+ * @param {number | undefined} presetMaxSurfaceTemperatureC
+ * @param {import('../types/shared-types.js').FlooringFinishMaterial} finish
  * @returns {{
  *   appliedMaxSurfaceT: number,
- *   appliedComfortMaxSurfaceT: number,
+ *   appliedComfortMaxSurfaceT: number | undefined,
  *   finishMaxSurfaceT: number,
  *   presetMaxSurfaceT?: number,
  * }}
@@ -77,17 +79,50 @@ function resolveAppliedSurfaceTemperatureLimits(
 }
 
 /**
+ * Результат физической модели тепловіддачі ТП (без полів кімнати/анкети).
+ *
+ * @typedef {object} UfhRoomHeatFluxComputed
+ * @property {number} areaM2
+ * @property {number} pipeSpacingMm
+ * @property {number} pipeEmbedmentResistanceM2KW
+ * @property {number} baseCoveringResistanceM2KW
+ * @property {number} finishCoveringResistanceM2KW
+ * @property {number} coveringResistanceM2KW
+ * @property {number} resistanceUpM2KW
+ * @property {number} resistanceDownM2KW
+ * @property {number} circuitSupplyC
+ * @property {number} circuitReturnC
+ * @property {number} circuitMeanC
+ * @property {number} heatFluxUpWm2
+ * @property {number} heatFluxDownWm2
+ * @property {number} maxAllowableHeatFluxUpWm2
+ * @property {number} heatFluxUpWatts
+ * @property {number} heatFluxDownWatts
+ * @property {number} surfaceTempC
+ * @property {number} maxSurfaceTemperatureCelsius
+ * @property {number} [comfortMaxSurfaceTemperatureCelsius]
+ * @property {number} finishMaxSurfaceTemperatureCelsius
+ * @property {number} [presetMaxSurfaceTemperatureCelsius]
+ * @property {'heated' | 'unheated'} bottomBoundary
+ * @property {number} neighborTempC
+ * @property {boolean} heatFluxUpLimitedBySurface
+ * @property {string[]} roomWarnings
+ */
+
+/**
  * @param {object} args
- * @param {import('../types/shared-types').UnderfloorHeatingBasePreset} args.base
- * @param {import('../types/shared-types').FlooringFinishMaterial} args.finish
+ * @param {import('../types/shared-types.js').UnderfloorHeatingBasePreset} args.base
+ * @param {import('../types/shared-types.js').FlooringFinishMaterial} args.finish
  * @param {number} args.pipeSpacingMm
- * @param {number} args.circuitMeanC — средняя температура теплоносителя контура ТП
- * @param {number} [args.presetMaxSurfaceTemperatureC] — technical.maxSurfaceTemperatureC из underfloor_heating_presets
+ * @param {number} args.circuitMeanC
+ * @param {number} [args.circuitSupplyC]
+ * @param {number} [args.circuitReturnC]
+ * @param {number} [args.presetMaxSurfaceTemperatureC]
  * @param {number} args.insideC
  * @param {number} args.outsideC
  * @param {'heated' | 'unheated'} args.bottomBoundary
  * @param {number} args.areaM2
- * @returns {Omit<import('../types/shared-types').UnderfloorHeatingRoomReport, 'roomId' | 'roomName' | 'basePresetId' | 'finishMaterialId' | 'basePresetName' | 'finishMaterialName' | 'ufhCircuitPresetId' | 'roomHeatLossWatts' | 'heatFluxCoverageRatio' | 'warnings'> & { roomWarnings: string[] }}
+ * @returns {UfhRoomHeatFluxComputed}
  */
 export function computeUfhRoomHeatFlux(args) {
   const {
@@ -104,10 +139,16 @@ export function computeUfhRoomHeatFlux(args) {
     areaM2,
   } = args;
 
+  const resolvedSupplyC = circuitSupplyC ?? circuitMeanC;
+  const resolvedReturnC = circuitReturnC ?? circuitMeanC;
+
   const layers = base.layers;
   const heatingIdx = layers.findIndex((l) => l.isHeatingLayer);
   const rPipeEmbed = resolvePipeEmbedmentResistanceM2KW(pipeSpacingMm);
-  const screedLayer = layers[heatingIdx];
+  const screedLayer = heatingIdx >= 0 ? layers[heatingIdx] : undefined;
+  if (!screedLayer) {
+    throw new Error('ufhRoomHeatFlux: в сборке нет слоя isHeatingLayer');
+  }
   const rScreedHalf = computeLayerResistanceM2KW(screedLayer) / 2;
   const rBaseAbove = computeBaseCoveringResistanceM2KW(layers);
   const rFinish = computeFinishCoveringResistanceM2KW(finish);
@@ -153,7 +194,8 @@ export function computeUfhRoomHeatFlux(args) {
     );
   }
 
-  return {
+  /** @type {UfhRoomHeatFluxComputed} */
+  const result = {
     areaM2,
     pipeSpacingMm,
     pipeEmbedmentResistanceM2KW: round(rPipeEmbed, 3),
@@ -162,8 +204,8 @@ export function computeUfhRoomHeatFlux(args) {
     coveringResistanceM2KW: round(rCovering, 4),
     resistanceUpM2KW: round(rUp, 4),
     resistanceDownM2KW: round(rDown, 4),
-    circuitSupplyC,
-    circuitReturnC,
+    circuitSupplyC: resolvedSupplyC,
+    circuitReturnC: resolvedReturnC,
     circuitMeanC: round(circuitMeanC, 1),
     heatFluxUpWm2: round(heatFluxUpWm2, 1),
     heatFluxDownWm2: round(heatFluxDownWm2, 1),
@@ -171,16 +213,18 @@ export function computeUfhRoomHeatFlux(args) {
     heatFluxUpWatts: round(heatFluxUpWatts, 0),
     heatFluxDownWatts: round(heatFluxDownWatts, 0),
     surfaceTempC: round(surfaceTempC, 1),
-    /** Фактический лимит расчёта (min пресета БД и паспорта финиша). */
     maxSurfaceTemperatureCelsius: maxSurfaceT,
-    comfortMaxSurfaceTemperatureCelsius: comfortMaxSurfaceT,
     finishMaxSurfaceTemperatureCelsius: surfaceLimits.finishMaxSurfaceT,
-    ...(surfaceLimits.presetMaxSurfaceT != null
-      ? { presetMaxSurfaceTemperatureCelsius: surfaceLimits.presetMaxSurfaceT }
-      : {}),
     bottomBoundary,
     neighborTempC: round(neighborTempC, 1),
     heatFluxUpLimitedBySurface,
     roomWarnings,
   };
+  if (comfortMaxSurfaceT !== undefined) {
+    result.comfortMaxSurfaceTemperatureCelsius = comfortMaxSurfaceT;
+  }
+  if (surfaceLimits.presetMaxSurfaceT != null) {
+    result.presetMaxSurfaceTemperatureCelsius = surfaceLimits.presetMaxSurfaceT;
+  }
+  return result;
 }

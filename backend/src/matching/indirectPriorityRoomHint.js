@@ -5,8 +5,8 @@
  */
 
 /**
- * @param {import('../types/shared-types').IndirectWaterHeaterMatchingReport | undefined} indirectReport
- * @param {import('../types/shared-types').HeatLossReport | undefined} heatLoss
+ * @param {import('../types/shared-types.js').IndirectWaterHeaterMatchingReport | undefined} indirectReport
+ * @param {import('../types/shared-types.js').HeatLossReport | undefined} heatLoss
  */
 export function appendIndirectPriorityRoomWarnings(indirectReport, heatLoss) {
   if (
@@ -19,7 +19,10 @@ export function appendIndirectPriorityRoomWarnings(indirectReport, heatLoss) {
   const t = indirectReport.heatTimeMinutesFullTank;
   if (t < 18) return;
 
-  let worst = heatLoss.rooms[0];
+  const firstRoom = heatLoss.rooms[0];
+  if (!firstRoom) return;
+
+  let worst = firstRoom;
   for (const r of heatLoss.rooms) {
     if ((r.envelopeWatts ?? 0) > (worst.envelopeWatts ?? 0)) worst = r;
   }

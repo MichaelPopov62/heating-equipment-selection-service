@@ -12,6 +12,13 @@ import {
   collectUniboxLoopDemands,
   resolveUniboxRoomAirTempC,
 } from '../src/matching/unibox.js';
+import { assertAt } from './fixtures/scriptAssert.js';
+import {
+  buildObjectMeta,
+  buildRoom,
+  buildUfhReport,
+  buildUfhRoom,
+} from './fixtures/verifyFixtures.js';
 
 assert.equal(BATHROOM_DESIGN_AIR_TEMP_FLOOR_C, 24);
 
@@ -60,30 +67,24 @@ assert.equal(BATHROOM_DESIGN_AIR_TEMP_FLOOR_C, 24);
 }
 
 const temps20 = { insideC: 20, outsideC: -22 };
+/** @type {import('../src/types/shared-types.js').BuildingInput} */
 const buildingBase = {
   rooms: [
-    {
+    buildRoom({
       id: 'bath',
       name: 'Санузел',
       type: 'санузел',
-      floor: 1,
-      topBoundary: 'heated',
       bottomBoundary: 'heated',
       areaM2: 5,
-      heightM: 2.7,
       roomExteriorLayout: 'internal',
-    },
-    {
+    }),
+    buildRoom({
       id: 'liv',
       name: 'Гостиная',
-      type: 'гостиная',
-      floor: 1,
-      topBoundary: 'heated',
       bottomBoundary: 'heated',
       areaM2: 20,
-      heightM: 2.7,
       roomExteriorLayout: 'facade',
-    },
+    }),
   ],
   envelopeElements: [
     {
@@ -105,21 +106,13 @@ const buildingBase = {
       orientation: 'N',
     },
   ],
-  objectMeta: {
-    objectType: 'house',
-    floors: 1,
-    roomsCount: 2,
-    externalWalls: {
-      presetId: 'wall_gas_concrete_d500',
-      thicknessMm: 375,
-      facadeSystem: 'none',
-    },
-  },
+  objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 2 }),
 };
 
 const hl = calculateHeatLossForBuilding({ temps: temps20, building: buildingBase });
-const bathRoom = hl.rooms.find((r) => r.id === 'bath');
-const livRoom = hl.rooms.find((r) => r.id === 'liv');
+const hlRooms = hl.rooms ?? [];
+const bathRoom = hlRooms.find((r) => r.id === 'bath');
+const livRoom = hlRooms.find((r) => r.id === 'liv');
 assert.ok(bathRoom);
 assert.ok(livRoom);
 assert.equal(bathRoom.designAirTempC, 24);
@@ -133,31 +126,23 @@ const hlForced20 = calculateHeatLossForBuilding({
   building: {
     ...buildingBase,
     rooms: buildingBase.rooms.map((r) =>
-      r.id === 'bath' ? { ...r, type: 'гостиная' } : r,
+      r.id === 'bath' ? buildRoom({ ...r, type: 'гостиная' }) : r,
     ),
   },
 });
-const bathAsLiving = hlForced20.rooms.find((r) => r.id === 'bath');
+const bathAsLiving = (hlForced20.rooms ?? []).find((r) => r.id === 'bath');
 assert.ok(bathAsLiving);
 assert.ok(
   (bathRoom.envelopeWatts ?? 0) > (bathAsLiving.envelopeWatts ?? 0),
   'санузел при 24 °C воздуха: Q выше, чем при 20 °C',
 );
 
-const underfloorHeating = {
-  enabled: true,
-  circuitSupplyC: 40,
-  circuitReturnC: 30,
-  circuitMeanC: 35,
-  circuitSource: 'finish_preset',
+const underfloorHeating = buildUfhReport({
   rooms: [
-    {
-      roomId: 'bath',
-      roomName: 'Санузел',
+    buildUfhRoom('bath', 'Санузел', 1, {
       heatedAreaM2: 4,
       areaM2: 4,
-      circuitSupplyC: 40,
-      circuitReturnC: 30,
+      ufhTerminalControl: 'unibox',
       loops: [
         {
           loopId: 'bath-L1',
@@ -166,26 +151,24 @@ const underfloorHeating = {
           flowRateM3PerHour: 0.04,
         },
       ],
-      ufhTerminalControl: 'unibox',
-    },
+    }),
   ],
   totalHeatFluxUpWatts: 400,
   totalHeatFluxDownWatts: 0,
-  warnings: [],
-};
+});
 
 const demands = collectUniboxLoopDemands(underfloorHeating, {
   surveyInsideC: 20,
   rooms: [{ id: 'bath', type: 'санузел' }],
 });
-assert.equal(demands[0].required.roomAirTempC, 24);
+assert.equal(assertAt(demands, 0).required.roomAirTempC, 24);
 
 const demandsField = collectUniboxLoopDemands(underfloorHeating, {
   surveyInsideC: 20,
   bathroomAirTempC: 27,
   rooms: [{ id: 'bath', type: 'санузел' }],
 });
-assert.equal(demandsField[0].required.roomAirTempC, 27);
-assert.equal(demandsField[0].required.roomAirTempSource, 'bathroom_field');
+assert.equal(assertAt(demandsField, 0).required.roomAirTempC, 27);
+assert.equal(assertAt(demandsField, 0).required.roomAirTempSource, 'bathroom_field');
 
 console.log('verify:room-design-air-temp OK');

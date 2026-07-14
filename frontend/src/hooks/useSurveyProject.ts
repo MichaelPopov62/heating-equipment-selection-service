@@ -77,7 +77,7 @@ export function useSurveyProject({
   const showOk = useCallback((msg: string) => {
     setStatusError(null);
     setStatusMessage(msg);
-    window.setTimeout(() => setStatusMessage(null), 4000);
+    window.setTimeout(() => { setStatusMessage(null); }, 4000);
   }, []);
 
   const showErr = useCallback((msg: string) => {

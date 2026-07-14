@@ -1,0 +1,53 @@
+name: verify
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+            shared/package-lock.json
+
+      - name: Install shared
+        working-directory: shared
+        run: npm ci
+
+      - name: Install backend
+        working-directory: backend
+        run: npm ci
+
+      - name: Install frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Type safety bypass gate
+        run: node scripts/verifyNoTypeBypass.mjs
+
+      - name: Shared typecheck
+        working-directory: shared
+        run: npm run typecheck
+
+      - name: Backend verify
+        working-directory: backend
+        run: npm run verify
+
+      - name: Frontend verify
+        working-directory: frontend
+        run: npm run verify
+
+      - name: Frontend build
+        working-directory: frontend
+        run: npm run build

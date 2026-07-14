@@ -17,7 +17,7 @@ import {
 /**
  * @typedef {object} ForcedEmitterSized
  * @property {'section' | 'panel'} kind
- * @property {import('../../catalog/types').RadiatorCatalogItemNormalized} radiator
+ * @property {import('../../catalog/types.js').RadiatorCatalogItemNormalized} radiator
  * @property {number | null} sections
  * @property {number | null} sectionsThermalMin
  * @property {number} adjustedWatts
@@ -35,14 +35,14 @@ import {
  * @param {object} args
  * @param {number} args.qRad
  * @param {'sectional' | 'panel'} args.forcedKind
- * @param {import('../../catalog/types').RadiatorCatalogItemNormalized[]} args.sectionalPool
- * @param {import('../../catalog/types').RadiatorCatalogItemNormalized[]} args.panelPoolFiltered
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized[]} args.sectionalPool
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized[]} args.panelPoolFiltered
  * @param {50 | 70} args.baseDeltaT
  * @param {number} args.targetDeltaT
- * @param {number | null} [args.windowOpeningWidthMm]
- * @param {number | null} [args.openingHeightMm]
+ * @param {number | null | undefined} [args.windowOpeningWidthMm]
+ * @param {number | null | undefined} [args.openingHeightMm]
  * @param {number} args.ventilationReserveFactor
- * @param {import('../../dhw/types').RadiatorEmitterKindRules} args.emitterKindRules
+ * @param {import('../../dhw/types.js').RadiatorEmitterKindRules} args.emitterKindRules
  * @returns {ForcedEmitterSized | null}
  */
 export function sizeForcedRoomEmitter(args) {
@@ -54,7 +54,16 @@ export function sizeForcedRoomEmitter(args) {
 }
 
 /**
- * @param {object} args
+ * @param {{
+ *   qRad: number;
+ *   sectionalPool: import('../../catalog/types.js').RadiatorCatalogItemNormalized[];
+ *   baseDeltaT: 50 | 70;
+ *   targetDeltaT: number;
+ *   windowOpeningWidthMm?: number | null | undefined;
+ *   openingHeightMm?: number | null | undefined;
+ *   ventilationReserveFactor: number;
+ *   emitterKindRules: import('../../dhw/types.js').RadiatorEmitterKindRules;
+ * }} args
  * @returns {ForcedEmitterSized | null}
  */
 function sizeForcedSectional(args) {
@@ -113,7 +122,7 @@ function sizeForcedSectional(args) {
         maxSectionsHeuristic,
       });
 
-      if (win.sections > maxSectionsHeuristic) continue;
+      if (win.sections == null || win.sections > maxSectionsHeuristic) continue;
 
       const deliverablePerUnit = adjustedWatts * win.sections;
       const deliverableTotal = deliverablePerUnit * unitsCount;
@@ -201,7 +210,15 @@ function sizeForcedSectional(args) {
 }
 
 /**
- * @param {object} args
+ * @param {{
+ *   qRad: number;
+ *   panelPoolFiltered: import('../../catalog/types.js').RadiatorCatalogItemNormalized[];
+ *   baseDeltaT: 50 | 70;
+ *   targetDeltaT: number;
+ *   windowOpeningWidthMm?: number | null | undefined;
+ *   openingHeightMm?: number | null | undefined;
+ *   emitterKindRules: import('../../dhw/types.js').RadiatorEmitterKindRules;
+ * }} args
  * @returns {ForcedEmitterSized | null}
  */
 function sizeForcedPanel(args) {
@@ -347,8 +364,8 @@ function scoreCovering(c) {
  * Минимальный прибор при forced kind (входные зоны).
  * @param {object} args
  * @param {'sectional' | 'panel'} args.forcedKind
- * @param {import('../../catalog/types').RadiatorCatalogItemNormalized[]} args.sectionalPool
- * @param {import('../../catalog/types').RadiatorCatalogItemNormalized[]} args.panelPoolFiltered
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized[]} args.sectionalPool
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized[]} args.panelPoolFiltered
  * @param {50 | 70} args.baseDeltaT
  * @param {number} args.targetDeltaT
  * @param {number | null} [args.windowOpeningWidthMm]
@@ -412,7 +429,7 @@ export function pickMinimumViableForcedKind(args) {
     };
   }
 
-  /** @type {{ radiator: import('../../catalog/types').RadiatorCatalogItemNormalized, adjustedWatts: number } | null} */
+  /** @type {{ radiator: import('../../catalog/types.js').RadiatorCatalogItemNormalized, adjustedWatts: number } | null} */
   let smallest = null;
   for (const r of sectionalPool.slice(0, 16)) {
     const adjustedWatts = adjustedRadiatorWatts(r, baseDeltaT, targetDeltaT);

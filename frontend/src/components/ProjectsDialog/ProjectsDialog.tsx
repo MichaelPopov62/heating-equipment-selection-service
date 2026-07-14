@@ -46,7 +46,7 @@ export function ProjectsDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="projects-dialog-title"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => { e.stopPropagation(); }}
       >
         <h2 id="projects-dialog-title" className={styles.title}>
           Проекты клиентов
@@ -72,7 +72,7 @@ export function ProjectsDialog({
                 <button
                   type="button"
                   className={styles.itemButton}
-                  onClick={() => onSelectProject(p.id)}
+                  onClick={() => { onSelectProject(p.id); }}
                 >
                   {p.clientName}
                   <span className={styles.itemMeta}>
@@ -93,7 +93,7 @@ export function ProjectsDialog({
                   <button
                     type="button"
                     className={styles.itemButton}
-                    onClick={() => onSelectCalculation(c.id)}
+                    onClick={() => { onSelectCalculation(c.id); }}
                   >
                     {c.summary.generatedAt
                       ? new Date(c.summary.generatedAt).toLocaleString('ru-RU')

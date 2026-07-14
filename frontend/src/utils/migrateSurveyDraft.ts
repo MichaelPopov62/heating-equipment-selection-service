@@ -4,14 +4,10 @@
  */
 
 import { isSurveyStep } from '../constants/surveySteps';
-import type { CalcReportJson } from '../types/calcApi';
 import type { ObjectMetaValue } from '../types/envelope';
 import type { HeatingThermalRegimePreset } from '../types/heatingThermalRegime';
 import { isDeprecatedHeatingThermalRegimePreset } from '../types/heatingThermalRegime';
-import {
-  normalizeRadiatorConnection,
-  type RadiatorConnection,
-} from '../types/radiatorConnection';
+import { normalizeRadiatorConnection } from '../types/radiatorConnection';
 import { normalizeRadiatorEmitterPreference } from '../types/radiatorEmitterPreference';
 import type { LegacyWiringBranch } from '../types/surveyDraftCompat';
 import {
@@ -29,7 +25,7 @@ import {
   type WiringLayoutV3,
 } from '../surveySession/wiringLayoutV3';
 import { warnCompatMigration } from './compatTelemetry';
-import { isRecord } from './jsonGuards';
+import { isRecord, readRecordField } from './jsonGuards';
 import { migrateObjectMetaExternalWalls } from './migrateLegacyExternalWalls';
 import { migrateLegacyRoomTypes } from './migrateLegacyRoomTypes';
 import { migrateRoomUnderfloorHeating } from './migrateRoomUnderfloorHeating';
@@ -40,6 +36,11 @@ import {
   DEFAULT_HYDRAULICS_FORM,
   type HydraulicsFormValue,
 } from '../types/hydraulics';
+
+/** Строка из неизвестного JSON-поля (объекты не stringify). */
+function readJsonString(value: unknown, fallback = ''): string {
+  return typeof value === 'string' ? value : fallback;
+}
 
 /**
  * Нормализует сохранённый snapshot в текущий контракт SurveyDraft.
@@ -66,7 +67,7 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
     );
   }
 
-  const rawMeta = raw.objectMeta as Record<string, unknown>;
+  const rawMeta = raw.objectMeta;
   const { indirectDhwSpaceAvailable: indirectFromMeta, ...metaRest } = rawMeta;
 
   if (
@@ -88,10 +89,16 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
   const objectMeta: ObjectMetaValue = {
     ...(metaRest as ObjectMetaValue),
     externalWalls: migrateObjectMetaExternalWalls(
-      (rawMeta.externalWalls as ObjectMetaValue['externalWalls']) ?? {
-        presetId: 'wall_gas_concrete_d500',
-        facadeSystem: 'none',
-      },
+      (() => {
+        const ew = readRecordField(rawMeta, 'externalWalls');
+        if (ew && typeof ew.presetId === 'string') {
+          return ew as ObjectMetaValue['externalWalls'];
+        }
+        return {
+          presetId: 'wall_gas_concrete_d500',
+          facadeSystem: 'none' as const,
+        };
+      })(),
     ),
   };
 
@@ -105,7 +112,7 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
       : 'Без имени';
 
   const thermalRegimePreset = (() => {
-    const preset = String(raw.thermalRegimePreset ?? '') as HeatingThermalRegimePreset;
+    const preset = readJsonString(raw.thermalRegimePreset) as HeatingThermalRegimePreset;
     if (isDeprecatedHeatingThermalRegimePreset(preset)) {
       warnCompatMigration('SurveyDraftLoad', `thermalRegimePreset ${preset} → traditional_dt50_75_65`);
       return 'traditional_dt50_75_65' satisfies HeatingThermalRegimePreset;
@@ -117,7 +124,7 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
     schemaVersion: SURVEY_DRAFT_SCHEMA_VERSION,
     savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : new Date().toISOString(),
     clientName,
-    projectId: typeof raw.projectId === 'string' ? raw.projectId : undefined,
+    ...(typeof raw.projectId === 'string' ? { projectId: raw.projectId } : {}),
     currentStep: isSurveyStep(raw.currentStep) ? raw.currentStep : 'object',
     objectMeta,
     rooms,
@@ -136,18 +143,18 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
     waterHeaterForm,
     waterUnderfloorHeating: Boolean(raw.waterUnderfloorHeating),
     underfloorDistributionPreset: (() => {
-      const v = String(raw.underfloorDistributionPreset ?? 'auto');
+      const v = readJsonString(raw.underfloorDistributionPreset, 'auto');
       return isUfhDistributionPreset(v) ? v : ('auto' satisfies UfhDistributionPreset);
     })(),
     thermalRegimePreset,
     radiatorConnection: normalizeRadiatorConnection(
       raw.radiatorConnection,
-    ) as RadiatorConnection,
+    ),
     radiatorEmitterPreference: normalizeRadiatorEmitterPreference(
       raw.radiatorEmitterPreference,
     ),
     ufhPresetId: (() => {
-      const id = String(raw.ufhPresetId ?? '').trim();
+      const id = readJsonString(raw.ufhPresetId).trim();
       if (!id) return null;
       if (id === 'ufh_direct_tile' || id === 'ufh_direct_laminate') {
         warnCompatMigration('SurveyDraftLoad', `${id} → ufh_mixed_radiators`);
@@ -185,7 +192,9 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
         const wl = raw.wiringLayoutV3 as WiringLayoutV3 & {
           branches?: LegacyWiringBranch[];
         };
-        const branches = (wl.branches ?? []) as LegacyWiringBranch[];
+        const branches: LegacyWiringBranch[] = Array.isArray(wl.branches)
+          ? wl.branches
+          : [];
         const hasLegacyBranchLength = branches.some(
           (b) =>
             b.estimatedLengthM != null &&
@@ -214,6 +223,6 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
     })(),
     lastCalcReport: (isRecord(raw.lastCalcReport)
       ? raw.lastCalcReport
-      : null) as CalcReportJson | null,
+      : null),
   };
 }

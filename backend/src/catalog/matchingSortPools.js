@@ -10,14 +10,14 @@ import {
   compareWaterHeatersByMinVolumeAsc,
 } from './comparators.js';
 
-/** @type {WeakMap<object, { boilersSortedByMaxPower: import('./types').BoilerCatalogItemNormalized[], waterHeatersSortedByMinVolume: import('./types').WaterHeaterCatalogItemNormalized[] }>} */
+/** @type {WeakMap<object, { boilersSortedByMaxPower: import('./types.js').BoilerCatalogItemNormalized[], waterHeatersSortedByMinVolume: import('./types.js').WaterHeaterCatalogItemNormalized[] }>} */
 const sortPoolsCache = new WeakMap();
 
 /**
- * @param {import('./types').NormalizedCatalog} catalog
+ * @param {import('./types.js').NormalizedCatalog} catalog
  * @returns {{
- *   boilersSortedByMaxPower: import('./types').BoilerCatalogItemNormalized[],
- *   waterHeatersSortedByMinVolume: import('./types').WaterHeaterCatalogItemNormalized[],
+ *   boilersSortedByMaxPower: import('./types.js').BoilerCatalogItemNormalized[],
+ *   waterHeatersSortedByMinVolume: import('./types.js').WaterHeaterCatalogItemNormalized[],
  * }}
  */
 export function buildMatchingSortPools(catalog) {

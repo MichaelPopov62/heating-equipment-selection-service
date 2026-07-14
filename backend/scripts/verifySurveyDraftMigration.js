@@ -28,6 +28,10 @@ const SURVEY_DRAFT_SCHEMA_VERSION = Number(schemaMatch[1]);
 
 let failed = 0;
 
+/**
+ * @param {boolean} cond
+ * @param {string} msg
+ */
 function assert(cond, msg) {
   if (!cond) {
     console.error('FAIL:', msg);
@@ -37,11 +41,17 @@ function assert(cond, msg) {
   }
 }
 
-const SCHEME_SET = new Set(HOT_WATER_BOILER_MATCHING_SCHEME_ENUM);
+const SCHEME_SET = new Set(/** @type {readonly string[]} */ (HOT_WATER_BOILER_MATCHING_SCHEME_ENUM));
+
+/**
+ * @typedef {Object} WaterHeaterFormValue
+ * @property {string} hotWaterBoilerPowerMatchingScheme
+ * @property {boolean} indirectDhwSpaceAvailable
+ */
 
 /**
  * @param {unknown} raw
- * @returns {import('../../frontend/src/types/waterHeater.ts').WaterHeaterFormValue}
+ * @returns {WaterHeaterFormValue}
  */
 function normalizeWaterHeaterForm(raw) {
   const defaults = {

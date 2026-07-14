@@ -18,7 +18,7 @@ const SUGGESTED_MAX_PIPE_SPACING_MM = 200;
 /**
  * Текстовые подсказки для отчёта подбора, если в анкете отмечен водяной тёплый пол.
  *
- * @param {import('../types/shared-types').HeatingSystemInput | undefined | null} heatingSystem
+ * @param {import('../types/shared-types.js').HeatingSystemInput | undefined | null} heatingSystem
  * @returns {string[]}
  */
 export function buildWarmFloorMatchingNotes(heatingSystem) {
@@ -33,7 +33,7 @@ export function buildWarmFloorMatchingNotes(heatingSystem) {
 /**
  * Подсказки с расчётными цифрами ТП (warmFloorCalc).
  *
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} report
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null | undefined} report
  * @returns {string[]}
  */
 export function buildWarmFloorCalcMatchingNotes(report) {
@@ -55,7 +55,7 @@ export function buildWarmFloorCalcMatchingNotes(report) {
 }
 
 /**
- * @param {import('../types/shared-types').UnderfloorHeatingRoomReport} room
+ * @param {import('../types/shared-types.js').UnderfloorHeatingRoomReport} room
  * @returns {Record<string, string | number | undefined>}
  */
 function recommendationVarsForRoom(room) {
@@ -89,10 +89,10 @@ function recommendationVarsForRoom(room) {
 }
 
 /**
- * @param {import('../types/shared-types').UnderfloorHeatingRoomReport} room
+ * @param {import('../types/shared-types.js').UnderfloorHeatingRoomReport} room
  * @param {string[]} warnings
- * @param {import('../recommendations/types').ResolvedRecommendation[]} resolvedList
- * @param {import('../recommendations/types').RecommendationsBundle} recommendations
+ * @param {import('../recommendations/types.js').ResolvedRecommendation[]} resolvedList
+ * @param {import('../recommendations/types.js').RecommendationsBundle} recommendations
  * @param {string} code
  * @param {Record<string, string | number | undefined>} vars
  */
@@ -106,14 +106,14 @@ function pushUfhRecommendation(room, warnings, resolvedList, recommendations, co
 /**
  * Структурированные WARN/REC по перегреву поверхности; дополняет report на месте.
  *
- * @param {import('../types/shared-types').UnderfloorHeatingReport | null | undefined} report
- * @param {import('../recommendations/types').RecommendationsBundle} recommendations
- * @returns {{ warnings: string[], resolvedRecommendations: import('../recommendations/types').ResolvedRecommendation[] }}
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null | undefined} report
+ * @param {import('../recommendations/types.js').RecommendationsBundle} recommendations
+ * @returns {{ warnings: string[], resolvedRecommendations: import('../recommendations/types.js').ResolvedRecommendation[] }}
  */
 export function applyUnderfloorHeatingRecommendations(report, recommendations) {
   /** @type {string[]} */
   const warnings = [];
-  /** @type {import('../recommendations/types').ResolvedRecommendation[]} */
+  /** @type {import('../recommendations/types.js').ResolvedRecommendation[]} */
   const resolvedRecommendations = [];
 
   if (!report?.rooms?.length) {
@@ -283,13 +283,13 @@ export function applyUnderfloorHeatingRecommendations(report, recommendations) {
 /**
  * REC/WARN по смесительному узлу и авто-схеме распределения (фаза 7).
  *
- * @param {import('../types/shared-types').UnderfloorHeatingReport} report
+ * @param {import('../types/shared-types.js').UnderfloorHeatingReport} report
  * @param {object} ctx
- * @param {import('../types/shared-types').UfhDistributionPreset | undefined | null} ctx.requestedPreset
- * @param {Exclude<import('../types/shared-types').UfhDistributionPreset, 'auto'>} ctx.resolvedPreset
+ * @param {import('../types/shared-types.js').UfhDistributionPreset | undefined | null} ctx.requestedPreset
+ * @param {Exclude<import('../types/shared-types.js').UfhDistributionPreset, 'auto'>} ctx.resolvedPreset
  * @param {number} ctx.minBoilerKw
  * @param {number | undefined} ctx.requiredBoilerKw
- * @param {import('../recommendations/types').RecommendationsBundle} recommendations
+ * @param {import('../recommendations/types.js').RecommendationsBundle} recommendations
  */
 export function applyUnderfloorMixingDistributionRecommendations(
   report,
@@ -300,7 +300,7 @@ export function applyUnderfloorMixingDistributionRecommendations(
 
   /** @type {string[]} */
   const warnings = [];
-  /** @type {import('../recommendations/types').ResolvedRecommendation[]} */
+  /** @type {import('../recommendations/types.js').ResolvedRecommendation[]} */
   const resolvedRecommendations = [];
 
   const mixing = report.mixingNode;

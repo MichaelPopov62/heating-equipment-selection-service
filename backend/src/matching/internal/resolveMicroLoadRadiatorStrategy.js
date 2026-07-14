@@ -20,10 +20,10 @@ import {
 
 /**
  * @param {object} args
- * @param {import('../../dhw/types').RadiatorApplianceRules['microLoad']} args.rules
- * @param {import('../../types/shared-types').HeatLossRoomReport} args.room
- * @param {import('../../types/shared-types').BuildingInput | null} [args.building]
- * @param {number} args.qRad — остаточная нагрузка на радиатор, Вт
+ * @param {import('../../dhw/types.js').RadiatorApplianceRules['microLoad']} args.rules
+ * @param {import('../../types/shared-types.js').HeatLossRoomReport} args.room
+ * @param {import('../../types/shared-types.js').BuildingInput | null} [args.building]
+ * @param {number} args.qRad - остаточная нагрузка на радиатор, Вт
  * @returns {MicroLoadRadiatorStrategy}
  */
 export function resolveMicroLoadRadiatorStrategy({ rules, room, building, qRad }) {
@@ -36,7 +36,7 @@ export function resolveMicroLoadRadiatorStrategy({ rules, room, building, qRad }
   const roomType = String(room?.type ?? '').trim().toLowerCase();
   const entryTypes = new Set(rules.entryRoomTypes.map((t) => String(t).toLowerCase()));
 
-  /** @type {import('../../types/shared-types').RoomExteriorLayout | undefined} */
+  /** @type {'corner' | 'facade' | 'internal' | undefined} */
   let layout = building?.rooms?.find((r) => r.id === roomId)?.roomExteriorLayout;
   if (layout !== 'corner' && layout !== 'facade' && layout !== 'internal') {
     const counts = countExteriorWallsForRoom(building?.envelopeElements ?? [], roomId);

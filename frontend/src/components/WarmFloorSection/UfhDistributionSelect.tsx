@@ -25,7 +25,7 @@ export function UfhDistributionSelect({ value, onChange, disabled = false }: Pro
         className={styles.select}
         value={value}
         disabled={disabled}
-        onChange={(e) => onChange(e.target.value as UfhDistributionPreset)}
+        onChange={(e) => { onChange(e.target.value as UfhDistributionPreset); }}
       >
         {UFH_DISTRIBUTION_UI_OPTIONS.map((o) => (
           <option key={o.value} value={o.value}>

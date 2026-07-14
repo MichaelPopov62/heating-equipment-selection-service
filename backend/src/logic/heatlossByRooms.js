@@ -36,12 +36,16 @@ import { resolveDesignRoomAirTempC } from '../../../shared/roomDesignAirTemp.js'
  * - список элементов ограждений с привязкой к комнате
  */
 
+/**
+ * @param {number[]} numbers
+ * @returns {number}
+ */
 function sum(numbers) {
-  return numbers.reduce((a, b) => a + b, 0);
+  return numbers.reduce((/** @type {number} */ a, /** @type {number} */ b) => a + b, 0);
 }
 
 /**
- * @param {import('../types/shared-types').EnvelopePresetUModel} model
+ * @param {import('../types/shared-types.js').EnvelopePresetUModel} model
  * @param {number} thicknessMm
  * @returns {number}
  */
@@ -54,9 +58,9 @@ function computeUFromThickness(model, thicknessMm) {
 
 /**
  * @param {object} args
- * @param {{ insideC: number, outsideC: number }} args.temps
- * @param {import('../types/shared-types').BuildingInput} args.building
- * @returns {import('../types/shared-types').HeatLossReport}
+ * @param {{ insideC: number, outsideC: number, bathroomAirTempC?: number }} args.temps
+ * @param {import('../types/shared-types.js').BuildingInput} args.building
+ * @returns {import('../types/shared-types.js').HeatLossReport}
  */
 export function calculateHeatLossForBuilding({ temps, building }) {
   const insideC = temps.insideC;
@@ -78,13 +82,13 @@ export function calculateHeatLossForBuilding({ temps, building }) {
   });
 
   const roomsById = new Map(building.rooms.map((r) => [r.id, r]));
-  /** @type {Map<string, { designAirTempC: number, source: import('../types/shared-types').DesignRoomAirTempSource }>} */
+  /** @type {Map<string, { designAirTempC: number, source: import('../types/shared-types.js').DesignRoomAirTempSource }>} */
   const roomAirById = new Map();
   for (const room of building.rooms) {
     const resolved = resolveDesignRoomAirTempC({
       roomType: room.type,
       insideC,
-      bathroomAirTempC,
+      ...(bathroomAirTempC !== undefined ? { bathroomAirTempC } : {}),
     });
     if (resolved) roomAirById.set(room.id, resolved);
   }
@@ -100,9 +104,11 @@ export function calculateHeatLossForBuilding({ temps, building }) {
     const room = roomsById.get(el.roomId);
     if (!room) {
       const err = new Error(`Неизвестная комната roomId="${el.roomId}"`);
-      err.statusCode = 400;
-      err.code = 'UNKNOWN_ROOM';
-      throw err;
+      /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
+      const appErr = err;
+      appErr.statusCode = 400;
+      appErr.code = 'UNKNOWN_ROOM';
+      throw appErr;
     }
 
     const preset = el.presetId ? getEnvelopePresetById(el.presetId) : null;
@@ -132,15 +138,17 @@ export function calculateHeatLossForBuilding({ temps, building }) {
       const err = new Error(
         `Некорректный элемент ограждения: не задан uValue и не удалось вывести его из presetId/thickness (roomId="${el.roomId}", construction="${el.construction}")`,
       );
-      err.statusCode = 400;
-      err.code = 'ENVELOPE_UVALUE_MISSING';
-      throw err;
+      /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
+      const appErr = err;
+      appErr.statusCode = 400;
+      appErr.code = 'ENVELOPE_UVALUE_MISSING';
+      throw appErr;
     }
 
     const constructionResolved = el.construction ?? preset?.construction ?? null;
     uValue = resolveElementUValue(uValue, constructionResolved) ?? uValue;
 
-    const roomInput = /** @type {import('../types/shared-types').RoomInput} */ (room);
+    const roomInput = /** @type {import('../types/shared-types.js').RoomInput} */ (room);
     const tb = /** @type {'heated' | 'unheated' | 'roof'} */ (roomInput.topBoundary);
     const bb = /** @type {'heated' | 'unheated'} */ (
       roomInput.bottomBoundary ?? 'unheated'
@@ -200,13 +208,24 @@ export function calculateHeatLossForBuilding({ temps, building }) {
         ? INTERNAL_CORRIDOR_DESIGN_TEMP_C
         : outsideC;
 
-      return {
+      /** @type {import('../types/shared-types.js').HeatLossCalcElementInput['kind']} */
+      const kind =
+        e.kind === 'wall'
+        || e.kind === 'window'
+        || e.kind === 'ceiling'
+        || e.kind === 'floor'
+        || e.kind === 'roof'
+          ? e.kind
+          : null;
+
+      /** @type {import('../types/shared-types.js').HeatLossCalcElementInput} */
+      const element = {
         name: e.name,
         construction: e.construction,
         material: e.material,
         areaM2: e.areaM2,
         uValue: e.uValue,
-        kind: e.kind,
+        kind,
         count: e.count,
         orientation: e.orientation,
         openingWidthMm: e.openingWidthMm,
@@ -216,15 +235,22 @@ export function calculateHeatLossForBuilding({ temps, building }) {
         cornerRoomFactor,
         adjacentTempC,
       };
+      return element;
     }),
     ventilation: null,
   });
 
-  const elementsWithRoom = heatLoss.envelope.elements.map((calcEl, idx) => ({
-    ...calcEl,
-    roomId: normalizedElements[idx].roomId,
-    roomName: normalizedElements[idx].roomName,
-  }));
+  const elementsWithRoom = heatLoss.envelope.elements.map((calcEl, idx) => {
+    const normalized = normalizedElements[idx];
+    if (!normalized) {
+      throw new Error(`heatloss: отсутствует normalizedElements[${idx}]`);
+    }
+    return {
+      ...calcEl,
+      roomId: normalized.roomId,
+      roomName: normalized.roomName,
+    };
+  });
 
   const rooms = building.rooms.map((room) => {
     const els = elementsWithRoom.filter((x) => x.roomId === room.id);

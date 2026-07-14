@@ -7,6 +7,8 @@ import { warmupReferenceCache, getReferenceBundle, toCalcRuntimeContext } from '
 import { validateAndNormalizeInput } from '../src/api/validate.js';
 import { buildReport } from '../src/report/public.js';
 import { resolveUfhActiveFloorAreaM2 } from '../src/logic/ufhActiveFloorArea.js';
+import { assertAt, assertDefined } from './fixtures/scriptAssert.js';
+import { buildObjectMeta, buildRoom } from './fixtures/verifyFixtures.js';
 
 let passed = 0;
 let failed = 0;
@@ -28,30 +30,17 @@ function check(ok, label) {
 await warmupReferenceCache();
 const ctx = toCalcRuntimeContext(await getReferenceBundle());
 
-/** @type {import('../src/types/shared-types').CalcRequestBody} */
+/** @type {import('../src/types/shared-types.js').CalcRequestBody} */
 const baseBody = {
   building: {
     temps: { insideC: 20, outsideC: -5 },
-    objectMeta: {
-      objectType: 'house',
-      floors: 1,
-      roomsCount: 1,
-      externalWalls: {
-        presetId: 'wall_gas_concrete_d500',
-        thicknessMm: 375,
-        facadeSystem: 'none',
-      },
-    },
+    objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 1 }),
     rooms: [
-      {
+      buildRoom({
         id: 'r1',
         name: 'Гостиная',
-        type: 'гостиная',
-        floor: 1,
-        topBoundary: 'heated',
         bottomBoundary: 'heated',
         areaM2: 20,
-        heightM: 2.7,
         roomExteriorLayout: 'facade',
         underfloorHeating: {
           enabled: true,
@@ -59,7 +48,7 @@ const baseBody = {
           finishMaterialId: 'laminate_click',
           pipeSpacingMm: 200,
         },
-      },
+      }),
     ],
     envelopeElements: [
       {
@@ -113,7 +102,11 @@ check(
 );
 
 const inputFurniture = structuredClone(baseBody);
-inputFurniture.building.rooms[0].underfloorHeating.furnitureOccupiedAreaM2 = 17;
+const furnitureRoom = assertAt(inputFurniture.building.rooms, 0, 'building.rooms[0]');
+furnitureRoom.underfloorHeating = {
+  ...assertDefined(furnitureRoom.underfloorHeating, 'underfloorHeating'),
+  furnitureOccupiedAreaM2: 17,
+};
 const normFurniture = await validateAndNormalizeInput(inputFurniture, ctx);
 const reportFurniture = await buildReport({ input: normFurniture, ctx });
 const roomFurniture = reportFurniture.calculations?.underfloorHeating?.rooms?.[0];
@@ -170,7 +163,11 @@ check(
 let validationRejected = false;
 try {
   const badInput = structuredClone(baseBody);
-  badInput.building.rooms[0].underfloorHeating.furnitureOccupiedAreaM2 = 20;
+  const badRoom = assertAt(badInput.building.rooms, 0, 'building.rooms[0]');
+  badRoom.underfloorHeating = {
+    ...assertDefined(badRoom.underfloorHeating, 'underfloorHeating'),
+    furnitureOccupiedAreaM2: 20,
+  };
   await validateAndNormalizeInput(badInput, ctx);
 } catch (err) {
   validationRejected =

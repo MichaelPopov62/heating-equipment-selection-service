@@ -11,8 +11,8 @@ import {
 } from '../../../shared/heatingMatchingSchemes.js';
 
 /**
- * @param {import('../types/shared-types').WaterHeaterMatchingReport | undefined} waterHeater
- * @returns {import('../types/boiler-types').EquipmentBundleCompanion | null}
+ * @param {import('../types/shared-types.js').WaterHeaterMatchingReport | undefined} waterHeater
+ * @returns {import('../types/boiler-types.js').EquipmentBundleCompanion | null}
  */
 function buildWaterHeaterCompanion(waterHeater) {
   const selected = waterHeater?.selected;
@@ -39,8 +39,8 @@ function buildWaterHeaterCompanion(waterHeater) {
 }
 
 /**
- * @param {import('../types/shared-types').IndirectWaterHeaterMatchingReport | undefined} indirectWaterHeater
- * @returns {import('../types/boiler-types').EquipmentBundleCompanion | null}
+ * @param {import('../types/shared-types.js').IndirectWaterHeaterMatchingReport | undefined} indirectWaterHeater
+ * @returns {import('../types/boiler-types.js').EquipmentBundleCompanion | null}
  */
 function buildIndirectWaterHeaterCompanion(indirectWaterHeater) {
   const selected = indirectWaterHeater?.selected;
@@ -70,9 +70,9 @@ function buildIndirectWaterHeaterCompanion(indirectWaterHeater) {
  *
  * @param {object} ctx
  * @param {'proposal' | 'economy' | 'efficient'} ctx.tier
- * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} ctx.scheme
+ * @param {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme} ctx.scheme
  * @param {'apartment' | 'house'} ctx.objectType
- * @param {import('../types/boiler-types').BoilerCircuitFallbackReport | null | undefined} ctx.circuitFallback
+ * @param {import('../types/boiler-types.js').BoilerCircuitFallbackReport | null | undefined} ctx.circuitFallback
  * @param {boolean} ctx.hasWaterHeater
  * @param {boolean} ctx.hasIndirect
  * @returns {{ includeWaterHeater: boolean; includeIndirect: boolean }}
@@ -114,14 +114,14 @@ function resolveCompanionFlags({
 }
 
 /**
- * @param {import('../types/boiler-types').BoilerEquipmentProposal | null | undefined} proposal
- * @param {import('../types/shared-types').WaterHeaterMatchingReport | undefined} waterHeater
- * @param {import('../types/shared-types').IndirectWaterHeaterMatchingReport | undefined} indirectWaterHeater
+ * @param {import('../types/boiler-types.js').BoilerEquipmentProposal | null | undefined} proposal
+ * @param {import('../types/shared-types.js').WaterHeaterMatchingReport | undefined} waterHeater
+ * @param {import('../types/shared-types.js').IndirectWaterHeaterMatchingReport | undefined} indirectWaterHeater
  * @param {object} ctx
  * @param {'proposal' | 'economy' | 'efficient'} ctx.tier
- * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} ctx.scheme
+ * @param {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme} ctx.scheme
  * @param {'apartment' | 'house'} ctx.objectType
- * @param {import('../types/boiler-types').BoilerCircuitFallbackReport | null | undefined} [ctx.circuitFallback]
+ * @param {import('../types/boiler-types.js').BoilerCircuitFallbackReport | null | undefined} [ctx.circuitFallback]
  */
 function enrichProposalWithBundlePrice(
   proposal,
@@ -142,7 +142,7 @@ function enrichProposalWithBundlePrice(
     hasIndirect: bknCompanion != null,
   });
 
-  /** @type {import('../types/boiler-types').EquipmentBundleCompanion[]} */
+  /** @type {import('../types/boiler-types.js').EquipmentBundleCompanion[]} */
   const companions = [];
   if (flags.includeWaterHeater && whCompanion) companions.push(whCompanion);
   if (flags.includeIndirect && bknCompanion) companions.push(bknCompanion);
@@ -150,7 +150,7 @@ function enrichProposalWithBundlePrice(
     proposal.equipmentBundleCompanions = companions;
   }
 
-  /** @type {import('../types/boiler-types').EquipmentBundlePriceBreakdown} */
+  /** @type {import('../types/boiler-types.js').EquipmentBundlePriceBreakdown} */
   const breakdown = {};
   let total = 0;
   let hasAny = false;
@@ -197,11 +197,11 @@ function enrichProposalWithBundlePrice(
 }
 
 /**
- * @param {import('../types/boiler-types').BoilerMatchingReport | null | undefined} boiler
- * @param {import('../types/shared-types').WaterHeaterMatchingReport | undefined} waterHeater
- * @param {import('../types/shared-types').IndirectWaterHeaterMatchingReport | undefined} indirectWaterHeater
+ * @param {import('../types/boiler-types.js').BoilerMatchingReport | null | undefined} boiler
+ * @param {import('../types/shared-types.js').WaterHeaterMatchingReport | undefined} waterHeater
+ * @param {import('../types/shared-types.js').IndirectWaterHeaterMatchingReport | undefined} indirectWaterHeater
  * @param {object} ctx
- * @param {import('../types/boiler-types').HotWaterBoilerPowerMatchingScheme} ctx.scheme
+ * @param {import('../types/boiler-types.js').HotWaterBoilerPowerMatchingScheme} ctx.scheme
  * @param {'apartment' | 'house'} ctx.objectType
  */
 export function enrichBoilerMatchingProposals(

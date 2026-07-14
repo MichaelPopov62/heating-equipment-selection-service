@@ -4,7 +4,7 @@
  */
 
 /**
- * @param {import('../../types/shared-types').UnderfloorHeatingReport | null | undefined} underfloorHeating
+ * @param {import('../../types/shared-types.js').UnderfloorHeatingReport | null | undefined} underfloorHeating
  * @returns {Map<string, number>}
  */
 export function buildUfhHeatFluxUpWattsByRoomId(underfloorHeating) {

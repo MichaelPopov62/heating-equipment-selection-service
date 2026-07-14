@@ -4,6 +4,7 @@
  */
 
 import { logger } from '../utils/logger.js';
+import { throwAppError } from '../utils/createAppError.js';
 
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 
@@ -15,7 +16,7 @@ const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
  */
 /**
  * @param {string} address
- * @returns {Promise<import('../types/shared-types').LocationInput & { displayName?: string | null } | null>}
+ * @returns {Promise<import('../types/shared-types.js').LocationInput & { displayName?: string | null } | null>}
  */
 export async function geocodeAddress(address) {
   if (!address || typeof address !== 'string') return null;
@@ -37,10 +38,7 @@ export async function geocodeAddress(address) {
 
   if (!resp.ok) {
     logger.warn('climate.geocode.fail', null, { status: resp.status });
-    const err = new Error('Не удалось выполнить геокодинг адреса');
-    err.statusCode = 502;
-    err.code = 'GEOCODE_FAILED';
-    throw err;
+    throwAppError('Не удалось выполнить геокодинг адреса', 'GEOCODE_FAILED', 502);
   }
 
   /** @type {unknown} */

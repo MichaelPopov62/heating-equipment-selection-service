@@ -10,17 +10,23 @@ import {
 } from '../src/hydraulics/pickTrunkChain.js';
 import { pipeInternalDiameterMm } from '../src/hydraulics/pipeHydraulics.js';
 import { hydraulicsRulesFromAppliance } from '../src/hydraulics/resolveEmittersMode.js';
+import { assertAt } from './fixtures/scriptAssert.js';
+import { buildHydraulicsGraphEdge } from './fixtures/verifyFixtures.js';
 
 const bundle = await getReferenceBundle();
 const pipes = bundle.catalog.pipes ?? [];
-const rules = hydraulicsRulesFromAppliance(bundle.appliances.byKind.hydraulics);
+const rules = hydraulicsRulesFromAppliance(
+  /** @type {import('../src/hydraulics/types.js').HydraulicsApplianceRules} */ (
+    bundle.appliances.byKind.hydraulics
+  ),
+);
 
 /**
  * @param {string} label
- * @param {import('../src/hydraulics/types').HydraulicsGraphEdge} edge
+ * @param {import('../src/hydraulics/types.js').HydraulicsGraphEdge} edge
  * @param {number} flowM3PerHour
- * @param {(match: import('../src/hydraulics/types').HydraulicsPipeMatchItem) => void} assertFn
- * @param {{ rules?: import('../src/hydraulics/types').HydraulicsRules }} [options]
+ * @param {(match: import('../src/hydraulics/types.js').HydraulicsPipeMatchItem) => void} assertFn
+ * @param {{ rules?: import('../src/hydraulics/types.js').HydraulicsRules }} [options]
  */
 function runCase(label, edge, flowM3PerHour, assertFn, options = {}) {
   const match = pickPipeForEdge({
@@ -44,31 +50,31 @@ function runCase(label, edge, flowM3PerHour, assertFn, options = {}) {
 const sorted = [...pipes].sort(
   (a, b) => pipeInternalDiameterMm(a) - pipeInternalDiameterMm(b),
 );
-const minPipeOverall = sorted[0];
-const minBranchPipe = sorted.find((p) => pipeInternalDiameterMm(p) >= 12) ?? sorted[0];
+const minPipeOverall = assertAt(sorted, 0, 'minPipeOverall');
+const minBranchPipe = sorted.find((p) => pipeInternalDiameterMm(p) >= 12) ?? minPipeOverall;
 const minMainTransitPipe = sorted.find((p) => pipeInternalDiameterMm(p) >= 20);
-const maxPipe = sorted[sorted.length - 1];
+const maxPipe = assertAt(sorted, sorted.length - 1, 'maxPipe');
 
-const branchEdge = {
+/** @type {import('../src/hydraulics/types.js').HydraulicsGraphEdge} */
+const branchEdge = buildHydraulicsGraphEdge({
   id: 'e_test_branch',
   from: 'boiler',
   to: 'rad_test',
   lengthM: 4,
-  fluid: 'heating',
-  designFlowM3PerHour: 0,
   segmentRole: 'branch',
-};
+  designFlowM3PerHour: 0,
+});
 
-const mainTransitEdge = {
+/** @type {import('../src/hydraulics/types.js').HydraulicsGraphEdge} */
+const mainTransitEdge = buildHydraulicsGraphEdge({
   id: 'e_boiler_main',
   from: 'boiler',
   to: 'main_collector',
   lengthM: 10,
-  fluid: 'heating',
-  designFlowM3PerHour: 0,
   segmentRole: 'main',
+  designFlowM3PerHour: 0,
   isMainLine: true,
-};
+});
 
 runCase('branch_micro_flow', branchEdge, 0.004, (m) => {
   if (m.catalogPipeId === minPipeOverall.id && pipeInternalDiameterMm(minPipeOverall) < 12) {
@@ -146,27 +152,27 @@ runCase('main_transit_normal_Q', mainTransitEdge, 0.2, (m) => {
   }
 });
 
-const trunkEdgeHigh = {
+/** @type {import('../src/hydraulics/types.js').HydraulicsGraphEdge} */
+const trunkEdgeHigh = buildHydraulicsGraphEdge({
   id: 'e_trunk_high',
   from: 'rad_trunk_j_0',
   to: 'rad_trunk_j_1',
   lengthM: 3,
-  fluid: 'heating',
-  designFlowM3PerHour: 0,
   segmentRole: 'trunk',
   teeRole: 'pass_through',
-};
+  designFlowM3PerHour: 0,
+});
 
-const trunkEdgeLow = {
+/** @type {import('../src/hydraulics/types.js').HydraulicsGraphEdge} */
+const trunkEdgeLow = buildHydraulicsGraphEdge({
   id: 'e_trunk_low',
   from: 'rad_trunk_j_1',
   to: 'rad_trunk_j_2',
   lengthM: 3,
-  fluid: 'heating',
-  designFlowM3PerHour: 0,
   segmentRole: 'trunk',
   teeRole: 'pass_through',
-};
+  designFlowM3PerHour: 0,
+});
 
 runCase('trunk_high_flow', trunkEdgeHigh, 0.12, (m) => {
   if (m.internalDiameterMm < 12) {

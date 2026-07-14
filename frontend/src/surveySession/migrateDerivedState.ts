@@ -133,12 +133,6 @@ export function migrateDerivedState(
   }
 
   if (mutation.type === 'DRAFT_LOADED') {
-    if (!mutation.draft.wiringLayoutV3?.schemaVersion) {
-      return ensureWiringBranches({
-        ...draft,
-        wiringLayoutV3: adaptFlatRoomsToWiringLayout(draft.rooms, 'auto'),
-      });
-    }
     return ensureWiringBranches(draft);
   }
 
@@ -153,24 +147,32 @@ export function migrateDerivedState(
  * @returns {SurveyDraftSnapshot} Начальный черновик сессии.
  */
 export function createInitialDraftSnapshot(
-  partial: Partial<SurveyDraftSnapshot> = {},
+  partial: Partial<SurveyDraftSnapshot> &
+    Pick<
+      SurveyDraftSnapshot,
+      | 'objectMeta'
+      | 'hotWaterForm'
+      | 'waterHeaterForm'
+      | 'thermalRegimePreset'
+      | 'hydraulicsForm'
+    >,
 ): SurveyDraftSnapshot {
   return {
     currentStep: partial.currentStep ?? 'object',
-    objectMeta: partial.objectMeta!,
+    objectMeta: partial.objectMeta,
     rooms: partial.rooms ?? [],
     temps: partial.temps ?? { insideC: 20, outsideC: -5 },
-    hotWaterForm: partial.hotWaterForm!,
-    waterHeaterForm: partial.waterHeaterForm!,
+    hotWaterForm: partial.hotWaterForm,
+    waterHeaterForm: partial.waterHeaterForm,
     waterUnderfloorHeating: partial.waterUnderfloorHeating ?? false,
     underfloorDistributionPreset:
       partial.underfloorDistributionPreset ?? 'auto',
-    thermalRegimePreset: partial.thermalRegimePreset!,
+    thermalRegimePreset: partial.thermalRegimePreset,
     radiatorConnection: partial.radiatorConnection ?? DEFAULT_RADIATOR_CONNECTION,
     radiatorEmitterPreference:
       partial.radiatorEmitterPreference ?? DEFAULT_RADIATOR_EMITTER_PREFERENCE,
     ufhPresetId: partial.ufhPresetId ?? null,
-    hydraulicsForm: partial.hydraulicsForm!,
+    hydraulicsForm: partial.hydraulicsForm,
     wiringLayoutV3: partial.wiringLayoutV3 ?? createDefaultWiringLayout(),
   };
 }

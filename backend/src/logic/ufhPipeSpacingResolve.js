@@ -14,7 +14,11 @@ import {
 const FLUX_EPSILON_WM2 = 0.05;
 
 /**
- * @param {object} fluxArgs — аргументы computeUfhRoomHeatFlux без pipeSpacingMm и areaM2
+ * @typedef {Omit<Parameters<typeof computeUfhRoomHeatFlux>[0], 'pipeSpacingMm' | 'areaM2'>} UfhFluxContext
+ */
+
+/**
+ * @param {UfhFluxContext} fluxArgs
  * @param {number} pipeSpacingMm
  * @returns {number}
  */
@@ -31,7 +35,7 @@ function deliverableHeatFluxUpWm2(fluxArgs, pipeSpacingMm) {
  * @param {object} args
  * @param {number} [args.requestedPipeSpacingMm]
  * @param {number | null} [args.qRequiredWm2]
- * @param {Omit<Parameters<typeof computeUfhRoomHeatFlux>[0], 'pipeSpacingMm' | 'areaM2'>} args.fluxContext
+ * @param {UfhFluxContext} args.fluxContext
  * @returns {{
  *   requestedPipeSpacingMm: number,
  *   resolvedPipeSpacingMm: number,
@@ -39,9 +43,11 @@ function deliverableHeatFluxUpWm2(fluxArgs, pipeSpacingMm) {
  * }}
  */
 export function resolveUfhPipeSpacingMm(args) {
+  const requestedRaw = args.requestedPipeSpacingMm;
   const requestedPipeSpacingMm =
-    ALLOWED_PIPE_SPACING_MM.includes(args.requestedPipeSpacingMm)
-      ? args.requestedPipeSpacingMm
+    typeof requestedRaw === 'number'
+    && ALLOWED_PIPE_SPACING_MM.includes(requestedRaw)
+      ? requestedRaw
       : DEFAULT_PIPE_SPACING_MM;
 
   const qRequired = args.qRequiredWm2;
@@ -79,9 +85,10 @@ export function resolveUfhPipeSpacingMm(args) {
     };
   }
 
+  const fallbackSpacing = ALLOWED_PIPE_SPACING_MM[0] ?? DEFAULT_PIPE_SPACING_MM;
   return {
     requestedPipeSpacingMm,
-    resolvedPipeSpacingMm: ALLOWED_PIPE_SPACING_MM[0],
+    resolvedPipeSpacingMm: fallbackSpacing,
     pipeSpacingResolution: 'none_sufficient',
   };
 }

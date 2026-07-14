@@ -11,9 +11,14 @@ import {
   objectMetaForCalcPayload,
   shouldShowIndirectDhwSpaceCheckbox,
 } from '../../shared/waterHeaterFormContract.js';
+import { buildObjectMeta } from './fixtures/verifyFixtures.js';
 
 let failed = 0;
 
+/**
+ * @param {boolean} cond
+ * @param {string} msg
+ */
 function assert(cond, msg) {
   if (!cond) {
     console.error('FAIL:', msg);
@@ -23,30 +28,39 @@ function assert(cond, msg) {
   }
 }
 
-const houseMeta = { objectType: 'house', floors: 1, roomsCount: 1 };
-const aptMeta = { objectType: 'apartment', floors: 1, roomsCount: 2 };
+const houseMeta = buildObjectMeta({ objectType: 'house', roomsCount: 1 });
+const aptMeta = buildObjectMeta({ objectType: 'apartment', roomsCount: 2 });
 
 assert(
-  objectMetaForCalcPayload(houseMeta, {
-    hotWaterBoilerPowerMatchingScheme: SCHEME_BOILER_MAX_COMBI,
-    indirectDhwSpaceAvailable: true,
-  }).indirectDhwSpaceAvailable === undefined,
+  objectMetaForCalcPayload(
+    /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (houseMeta)),
+    {
+      hotWaterBoilerPowerMatchingScheme: SCHEME_BOILER_MAX_COMBI,
+      indirectDhwSpaceAvailable: true,
+    },
+  ).indirectDhwSpaceAvailable === undefined,
   'дом: флаг БКН не попадает в payload даже если true в форме',
 );
 
 assert(
-  objectMetaForCalcPayload(aptMeta, {
-    hotWaterBoilerPowerMatchingScheme: SCHEME_BOILER_SINGLE_INDIRECT_SUM,
-    indirectDhwSpaceAvailable: true,
-  }).indirectDhwSpaceAvailable === true,
+  objectMetaForCalcPayload(
+    /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (aptMeta)),
+    {
+      hotWaterBoilerPowerMatchingScheme: SCHEME_BOILER_SINGLE_INDIRECT_SUM,
+      indirectDhwSpaceAvailable: true,
+    },
+  ).indirectDhwSpaceAvailable === true,
   'квартира 1К+БКН + галочка → indirectDhwSpaceAvailable в payload',
 );
 
 assert(
-  objectMetaForCalcPayload(aptMeta, {
-    hotWaterBoilerPowerMatchingScheme: SCHEME_BOILER_SINGLE_INDIRECT_SUM,
-    indirectDhwSpaceAvailable: false,
-  }).indirectDhwSpaceAvailable === undefined,
+  objectMetaForCalcPayload(
+    /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (aptMeta)),
+    {
+      hotWaterBoilerPowerMatchingScheme: SCHEME_BOILER_SINGLE_INDIRECT_SUM,
+      indirectDhwSpaceAvailable: false,
+    },
+  ).indirectDhwSpaceAvailable === undefined,
   'квартира 1К+БКН без галочки → флаг не отправляется',
 );
 

@@ -42,7 +42,7 @@ export function inferRoomExteriorLayout(room: RoomFormValue): RoomExteriorLayout
     return stored;
   }
   const wall2Area =
-    typeof room.externalWall2?.areaM2 === 'number' && room.externalWall2.areaM2 > 0;
+    typeof room.externalWall2.areaM2 === 'number' && room.externalWall2.areaM2 > 0;
   if (wall2Area) return 'corner';
   return defaultLayoutForRoomType(room.type);
 }

@@ -5,16 +5,17 @@
 
 import { buildHydraulicsGraph } from '../src/hydraulics/buildGraph.js';
 import { RAD_DISTRIBUTION_MANIFOLD_NODE_ID } from '../src/hydraulics/radiatorGraphHelpers.js';
+import { assertAt } from './fixtures/scriptAssert.js';
 
 /**
- * @param {import('../src/hydraulics/types').HydraulicsPipelineInput} dto
- * @returns {import('../src/hydraulics/types').HydraulicsGraph}
+ * @param {import('../src/hydraulics/types.js').HydraulicsPipelineInput} dto
+ * @returns {import('../src/hydraulics/types.js').HydraulicsGraph}
  */
 function buildGraphForDto(dto) {
   return buildHydraulicsGraph(dto);
 }
 
-/** @type {import('../src/hydraulics/types').HydraulicsRadiatorConsumer[]} */
+/** @type {import('../src/hydraulics/types.js').HydraulicsRadiatorConsumer[]} */
 const consumers = [
   {
     roomId: 'r1',
@@ -39,7 +40,7 @@ const consumers = [
   },
 ];
 
-/** @type {import('../src/hydraulics/types').HydraulicsRules} */
+/** @type {import('../src/hydraulics/types.js').HydraulicsRules} */
 const rules = {
   mainTransitMinInternalDiameterMm: 20,
   branchMinInternalDiameterMm: 12,
@@ -76,8 +77,8 @@ const rules = {
 };
 
 /**
- * @param {import('../src/hydraulics/types').RadiatorWiringSystemType} wiringType
- * @returns {import('../src/hydraulics/types').HydraulicsPipelineInput}
+ * @param {import('../src/hydraulics/types.js').RadiatorWiringSystemType} wiringType
+ * @returns {import('../src/hydraulics/types.js').HydraulicsPipelineInput}
  */
 function baseDto(wiringType) {
   return {
@@ -125,8 +126,10 @@ if (deadEndTrunks.length !== 2) {
     `dead-end: ожидалось 2 trunk, получено ${deadEndTrunks.length}`,
   );
 }
+const deadEndTrunkHigh = assertAt(deadEndTrunks, 0, 'deadEndTrunks[0]');
+const deadEndTrunkLow = assertAt(deadEndTrunks, 1, 'deadEndTrunks[1]');
 if (
-  deadEndTrunks[0].designFlowM3PerHour < deadEndTrunks[1].designFlowM3PerHour
+  deadEndTrunkHigh.designFlowM3PerHour < deadEndTrunkLow.designFlowM3PerHour
 ) {
   throw new Error('dead-end: Q на trunk должен убывать вдоль магистрали');
 }

@@ -17,7 +17,7 @@ const DEFAULT_STRUCTURAL_WALL_PRESET_ID = 'wall_gas_concrete_d500';
 export function migrateObjectMetaExternalWalls(
   externalWalls: ObjectMetaValue['externalWalls'],
 ): ObjectMetaValue['externalWalls'] {
-  const presetId = String(externalWalls.presetId ?? '').trim();
+  const presetId = externalWalls.presetId.trim();
   if (!presetId) return externalWalls;
 
   if (LEGACY_COMBINED_WALL_PRESET_IDS.has(presetId)) {

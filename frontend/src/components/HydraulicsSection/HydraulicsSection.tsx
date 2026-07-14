@@ -28,7 +28,7 @@ type HydraulicsSectionProps = {
 function resolveRoomLabel(rooms: RoomFormValue[], roomId: string): string {
   const room = rooms.find((r) => r.id === roomId);
   if (!room) return roomId;
-  const name = room.name?.trim();
+  const name = room.name.trim();
   return name || roomId;
 }
 
@@ -79,7 +79,7 @@ export function HydraulicsSection({
                   name="wiringSystemType"
                   value={opt.value}
                   checked={isSelected}
-                  onChange={() => onWiringSystemTypeChange(opt.value)}
+                  onChange={() => { onWiringSystemTypeChange(opt.value); }}
                 />
                 <span className={styles.wiringOptionBody}>
                   <span className={styles.wiringOptionTitleRow}>
@@ -104,10 +104,10 @@ export function HydraulicsSection({
           step={0.5}
           value={value.mainLineLengthM}
           onChange={(e) =>
-            onChange({
+            { onChange({
               ...value,
               mainLineLengthM: Number(e.target.value) || 0,
-            })
+            }); }
           }
         />
       </label>
@@ -121,10 +121,10 @@ export function HydraulicsSection({
           step={1}
           value={value.deltaTSystemK}
           onChange={(e) =>
-            onChange({
+            { onChange({
               ...value,
               deltaTSystemK: Number(e.target.value) || 20,
-            })
+            }); }
           }
         />
       </label>
@@ -134,10 +134,10 @@ export function HydraulicsSection({
         <select
           value={value.pipeMaterialPreference}
           onChange={(e) =>
-            onChange({
+            { onChange({
               ...value,
               pipeMaterialPreference: e.target.value as HydraulicsFormValue['pipeMaterialPreference'],
-            })
+            }); }
           }
         >
           <option value="">Авто (из каталога)</option>
@@ -178,7 +178,7 @@ export function HydraulicsSection({
                           type="button"
                           className={styles.orderBtn}
                           disabled={index === 0}
-                          onClick={() => onBranchReorder(branch.roomId, 'up')}
+                          onClick={() => { onBranchReorder(branch.roomId, 'up'); }}
                           aria-label={`Выше: ${resolveRoomLabel(rooms, branch.roomId)}`}
                         >
                           ↑
@@ -187,7 +187,7 @@ export function HydraulicsSection({
                           type="button"
                           className={styles.orderBtn}
                           disabled={index === branches.length - 1}
-                          onClick={() => onBranchReorder(branch.roomId, 'down')}
+                          onClick={() => { onBranchReorder(branch.roomId, 'down'); }}
                           aria-label={`Ниже: ${resolveRoomLabel(rooms, branch.roomId)}`}
                         >
                           ↓
@@ -204,10 +204,10 @@ export function HydraulicsSection({
                       className={styles.branchInput}
                       value={branch.pipeLengthToEquipmentM}
                       onChange={(e) =>
-                        onBranchLengthChange(
+                        { onBranchLengthChange(
                           branch.roomId,
                           Number(e.target.value) || 0,
-                        )
+                        ); }
                       }
                     />
                   </td>

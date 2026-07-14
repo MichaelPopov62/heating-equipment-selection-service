@@ -16,7 +16,7 @@ const MINERAL_WOOL_PREFIX = 'insul_minwool_';
 /** Поверхностное сопротивление Rsi+Rse для вертикальных стен, м²·К/Вт. */
 export const WALL_SURFACE_R = 0.158;
 
-/** @type {Readonly<Record<string, number>>} */
+/** @type {Readonly<{ min: number; max: number }>} */
 export const INSULATION_THICKNESS_BOUNDS = Object.freeze({ min: 30, max: 300 });
 
 /**
@@ -84,7 +84,7 @@ function computeWallUFromLayers({
 /**
  * U наружной стены объекта по objectMeta.externalWalls и пресету стены.
  *
- * @param {import('../types/shared-types').BuildingObjectMetaExternalWalls} externalWalls
+ * @param {import('../types/shared-types.js').BuildingObjectMetaExternalWalls} externalWalls
  * @param {string | null | undefined} [wallPresetIdOverride] presetId элемента (если отличается)
  * @returns {number}
  */

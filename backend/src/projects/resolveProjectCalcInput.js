@@ -5,6 +5,7 @@
 
 import { isPlainObject } from '../utils/isPlainObject.js';
 import { assertCalcInputJsonSize } from './documentSizeLimits.js';
+import { throwAppError } from '../utils/createAppError.js';
 
 /** @typedef {'calcInput' | 'body' | 'lastCalcInput'} ProjectCalcInputSource */
 
@@ -13,20 +14,26 @@ import { assertCalcInputJsonSize } from './documentSizeLimits.js';
  */
 function assertCalcInputLike(value) {
   if (!isPlainObject(value)) {
-    const err = new Error('Вход расчёта должен быть объектом CalcInput.');
-    err.statusCode = 400;
-    err.code = 'CALC_INPUT_REQUIRED';
-    throw err;
+    throwAppError('Вход расчёта должен быть объектом CalcInput.', 'CALC_INPUT_REQUIRED', 400);
   }
   const building = value.building;
   if (!isPlainObject(building)) {
-    const err = new Error(
+    throwAppError(
       'Нет входа для расчёта: передайте calcInput или building, либо выполните первый расчёт с полным CalcInput.',
+      'CALC_INPUT_REQUIRED',
+      400,
     );
-    err.statusCode = 400;
-    err.code = 'CALC_INPUT_REQUIRED';
-    throw err;
   }
+}
+
+/**
+ * @param {Record<string, unknown>} value
+ * @returns {import('../types/shared-types.js').CalcRequestBody}
+ */
+function asCalcRequestBody(value) {
+  return /** @type {import('../types/shared-types.js').CalcRequestBody} */ (
+    /** @type {unknown} */ (value)
+  );
 }
 
 /**
@@ -34,7 +41,7 @@ function assertCalcInputLike(value) {
  *
  * @param {unknown} body — тело POST .../projects/:id/calc
  * @param {unknown} lastCalcInput — project.lastCalcInput из MongoDB
- * @returns {{ payload: import('../types/shared-types').CalcRequestBody, source: ProjectCalcInputSource }}
+ * @returns {{ payload: import('../types/shared-types.js').CalcRequestBody, source: ProjectCalcInputSource }}
  */
 export function resolveProjectCalcInput(body, lastCalcInput) {
   const requestBody = isPlainObject(body) ? body : {};
@@ -43,8 +50,8 @@ export function resolveProjectCalcInput(body, lastCalcInput) {
     assertCalcInputLike(requestBody.calcInput);
     assertCalcInputJsonSize(requestBody.calcInput);
     return {
-      payload: /** @type {import('../types/shared-types').CalcRequestBody} */ (
-        requestBody.calcInput
+      payload: asCalcRequestBody(
+        /** @type {Record<string, unknown>} */ (requestBody.calcInput),
       ),
       source: 'calcInput',
     };
@@ -55,7 +62,7 @@ export function resolveProjectCalcInput(body, lastCalcInput) {
     assertCalcInputLike(calcOnly);
     assertCalcInputJsonSize(calcOnly);
     return {
-      payload: /** @type {import('../types/shared-types').CalcRequestBody} */ (calcOnly),
+      payload: asCalcRequestBody(calcOnly),
       source: 'body',
     };
   }
@@ -64,17 +71,14 @@ export function resolveProjectCalcInput(body, lastCalcInput) {
     assertCalcInputLike(lastCalcInput);
     assertCalcInputJsonSize(lastCalcInput);
     return {
-      payload: structuredClone(
-        /** @type {import('../types/shared-types').CalcRequestBody} */ (lastCalcInput),
-      ),
+      payload: structuredClone(asCalcRequestBody(lastCalcInput)),
       source: 'lastCalcInput',
     };
   }
 
-  const err = new Error(
+  throwAppError(
     'Нет входа для расчёта: передайте calcInput или building, либо выполните первый расчёт с полным CalcInput.',
+    'CALC_INPUT_REQUIRED',
+    400,
   );
-  err.statusCode = 400;
-  err.code = 'CALC_INPUT_REQUIRED';
-  throw err;
 }

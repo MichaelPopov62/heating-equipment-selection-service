@@ -30,6 +30,8 @@ import {
 import { pushRecommendation } from '../recommendations/recommendationResolver.js';
 import { assertCalcRuntimeContext } from '../reference/assertCalcRuntimeContext.js';
 import { logger } from '../utils/logger.js';
+import { createAppError } from '../utils/createAppError.js';
+import { isPlainObject } from '../utils/isPlainObject.js';
 import { buildMatchingAutomationHints } from './automationHints.js';
 import { recommendedApartmentElectricTankLiters, recommendedCombiBufferTankLiters, recommendedSingleCircuitBufferTankLiters } from '../utils/apartmentMatching.js';
 import {
@@ -47,12 +49,12 @@ import {
 /**
  * Структурированные WARN_* / REC_* по подбору труб pipeline.
  * @param {object} args
- * @param {import('../hydraulics/types').HydraulicsMatchingReport} args.hydraulicsMatching
- * @param {import('../types/shared-types').HydraulicsReport} args.hydraulics
- * @param {import('../appliances/types').HydraulicsApplianceRules} args.hydraulicsRules
+ * @param {import('../hydraulics/types.js').HydraulicsMatchingReport} args.hydraulicsMatching
+ * @param {import('../types/shared-types.js').HydraulicsReport} args.hydraulics
+ * @param {import('../dhw/types.js').HydraulicsApplianceRulesDoc} args.hydraulicsRules
  * @param {string[]} args.warnings
- * @param {import('../recommendations/types').RecommendationsBundle} args.recommendations
- * @returns {import('../recommendations/types').ResolvedRecommendation[]}
+ * @param {import('../recommendations/types.js').RecommendationsBundle} args.recommendations
+ * @returns {import('../recommendations/types.js').ResolvedRecommendation[]}
  */
 function applyHydraulicsPipeRecommendations({
   hydraulicsMatching,
@@ -61,7 +63,7 @@ function applyHydraulicsPipeRecommendations({
   warnings,
   recommendations,
 }) {
-  /** @type {import('../recommendations/types').ResolvedRecommendation[]} */
+  /** @type {import('../recommendations/types.js').ResolvedRecommendation[]} */
   const resolved = [];
   const edgesById = new Map(
     (hydraulics.graph?.edges ?? []).map((edge) => [edge.id, edge]),
@@ -196,9 +198,9 @@ function applyHydraulicsPipeRecommendations({
 
 /**
  * @param {object} args
- * @param {import('../types/shared-types').CalcRequestBody} args.input
- * @param {import('../types/shared-types').CalcRuntimeContext} args.ctx
- * @returns {Promise<import('../types/shared-types').CalcReport>}
+ * @param {import('../types/shared-types.js').CalcRequestBody} args.input
+ * @param {import('../types/shared-types.js').CalcRuntimeContext} args.ctx
+ * @returns {Promise<import('../types/shared-types.js').CalcReport>}
  */
 export async function buildReport({ input, ctx }) {
   assertCalcRuntimeContext(ctx);
@@ -242,25 +244,36 @@ export async function buildReport({ input, ctx }) {
       : {}),
   };
   if (temps.insideC == null) {
-    const err = new Error('Не задана внутренняя температура building.temps.insideC.');
-    err.statusCode = 400;
-    err.code = 'INSIDE_TEMP_REQUIRED';
-    throw err;
+    throw createAppError(
+      'Не задана внутренняя температура building.temps.insideC.',
+      'INSIDE_TEMP_REQUIRED',
+      400,
+    );
   }
   if (temps.outsideC == null) {
-    const err = new Error('Не задана наружная температура temps.outsideC и не получен климат.');
-    err.statusCode = 400;
-    err.code = 'OUTSIDE_TEMP_REQUIRED';
-    throw err;
+    throw createAppError(
+      'Не задана наружная температура temps.outsideC и не получен климат.',
+      'OUTSIDE_TEMP_REQUIRED',
+      400,
+    );
   }
 
+  /** @type {{ insideC: number, outsideC: number, bathroomAirTempC?: number }} */
+  const designTemps = {
+    insideC: temps.insideC,
+    outsideC: temps.outsideC,
+    ...(typeof temps.bathroomAirTempC === 'number'
+      ? { bathroomAirTempC: temps.bathroomAirTempC }
+      : {}),
+  };
+
   // Прокинути bathroomAirTempC у building.temps (радіатори / shared resolve).
-  if (input.building && typeof temps.bathroomAirTempC === 'number') {
-    const bt = input.building.temps ?? { insideC: temps.insideC };
+  if (input.building && typeof designTemps.bathroomAirTempC === 'number') {
+    const bt = input.building.temps ?? { insideC: designTemps.insideC };
     input.building.temps = {
       ...bt,
-      insideC: bt.insideC ?? temps.insideC,
-      bathroomAirTempC: temps.bathroomAirTempC,
+      insideC: bt.insideC ?? designTemps.insideC,
+      bathroomAirTempC: designTemps.bathroomAirTempC,
     };
   }
 
@@ -270,14 +283,14 @@ export async function buildReport({ input, ctx }) {
     elements: input.building?.envelopeElements?.length ?? 0,
   });
   const heatLoss = calculateHeatLossForBuilding({
-    temps,
+    temps: designTemps,
     building: input.building,
   });
   logger.info('report.heatloss.done', null, { totalWatts: heatLoss.totalWatts });
 
   // 2b) Водяной тёплый пол — теплоотдача вверх/вниз, Tповерх
   const underfloorHeating = calculateUnderfloorHeating({
-    temps,
+    temps: designTemps,
     building: input.building,
     heatingSystem: input.heatingSystem,
     heatLoss,
@@ -348,7 +361,7 @@ export async function buildReport({ input, ctx }) {
     );
     hotWaterInitial = {
       ...hotWaterInitial,
-      recommendedTankLiters: tankLiters,
+      recommendedTankLiters: tankLiters ?? 0,
     };
   }
 
@@ -359,7 +372,7 @@ export async function buildReport({ input, ctx }) {
     );
     hotWaterInitial = {
       ...hotWaterInitial,
-      recommendedTankLiters: tankLiters,
+      recommendedTankLiters: tankLiters ?? 0,
     };
   }
 
@@ -370,7 +383,7 @@ export async function buildReport({ input, ctx }) {
     );
     hotWaterInitial = {
       ...hotWaterInitial,
-      recommendedTankLiters: tankLiters,
+      recommendedTankLiters: tankLiters ?? 0,
       dhwSupplyScenario: 'storage',
     };
   }
@@ -474,8 +487,12 @@ export async function buildReport({ input, ctx }) {
       distributionPreset: resolvedPreset,
       mixingNodeRules: ufhAppliance.mixingNode,
     });
-    underfloorHeating.mixingNode.boilerSupplyC = input.heatingSystem?.supplyC;
-    underfloorHeating.mixingNode.floorCircuitSupplyC = primaryRoom?.circuitSupplyC;
+    if (typeof input.heatingSystem?.supplyC === 'number') {
+      underfloorHeating.mixingNode.boilerSupplyC = input.heatingSystem.supplyC;
+    }
+    if (typeof primaryRoom?.circuitSupplyC === 'number') {
+      underfloorHeating.mixingNode.floorCircuitSupplyC = primaryRoom.circuitSupplyC;
+    }
 
     applyUnderfloorMixingDistributionRecommendations(
       underfloorHeating,
@@ -490,7 +507,7 @@ export async function buildReport({ input, ctx }) {
   }
 
   // 4b) Підбір колекторів — soft-fail: не валимо весь report
-  /** @type {import('../types/shared-types').ManifoldsMatchingReport} */
+  /** @type {import('../types/shared-types.js').ManifoldsMatchingReport} */
   let manifoldsReport;
   try {
     manifoldsReport = pickManifolds({
@@ -503,12 +520,18 @@ export async function buildReport({ input, ctx }) {
     });
   } catch (err) {
     // Страховка, якщо контракт модуля порушено (pickManifolds не повинен кидати)
-    logger.warn('matching.manifold.throw', err, { code: 'MANIFOLD_INTERNAL' });
+    const known = isPlainObject(err)
+      ? /** @type {import('../types/shared-types.js').AppErrorLike & { message?: string }} */ (err)
+      : null;
+    logger.warn('matching.manifold.throw', null, {
+      code: 'MANIFOLD_INTERNAL',
+      message: known?.message ?? null,
+    }, err);
     manifoldsReport = buildEmptyManifoldsFailure({
       failureCode: 'MANIFOLD_INTERNAL',
       message:
         'Смета коллекторов пуста; расчёт унибоксов и гидравлики продолжается.',
-      causeMessage: err?.message ? String(err.message) : undefined,
+      ...(known?.message ? { causeMessage: String(known.message) } : {}),
     });
   }
 
@@ -541,9 +564,10 @@ export async function buildReport({ input, ctx }) {
   matching.uniboxes = pickUniboxes({
     catalog: ctx.catalog,
     underfloorHeating,
-    roomAirTempC,
-    bathroomAirTempC:
-      typeof temps.bathroomAirTempC === 'number' ? temps.bathroomAirTempC : undefined,
+    ...(roomAirTempC !== undefined ? { roomAirTempC } : {}),
+    ...(typeof designTemps.bathroomAirTempC === 'number'
+      ? { bathroomAirTempC: designTemps.bathroomAirTempC }
+      : {}),
     manifolds: matching.manifolds,
     rooms: input.building?.rooms,
   });
@@ -559,12 +583,22 @@ export async function buildReport({ input, ctx }) {
     manifoldsFailureCode: matching?.manifolds?.failureCode ?? null,
     manifoldUnderfloorCount: matching?.manifolds?.underfloor?.length ?? 0,
     manifoldUnderfloorUnits:
-      matching?.manifolds?.underfloor?.reduce((s, f) => s + (f.units?.length ?? 0), 0) ?? 0,
+      matching?.manifolds?.underfloor?.reduce(
+        /**
+         * @param {number} s
+         * @param {import('../types/shared-types.js').ManifoldUnderfloorPick} f
+         */
+        (s, f) => s + (f.units?.length ?? 0),
+        0,
+      ) ?? 0,
     manifoldRadiatorModel: matching?.manifolds?.radiator?.selected?.model ?? null,
     boilerManifoldModel: matching?.manifolds?.boilerManifold?.selected?.model ?? null,
     uniboxLoopCount: matching?.uniboxes?.byLoop?.length ?? 0,
     uniboxSelectedCount:
-      matching?.uniboxes?.byLoop?.filter((row) => row.selected)?.length ?? 0,
+      matching?.uniboxes?.byLoop?.filter(
+        /** @param {import('../types/shared-types.js').UniboxLoopPick} row */
+        (row) => row.selected,
+      )?.length ?? 0,
     warnings: (matching?.boiler?.warnings?.length ?? 0)
       + (matching?.radiators?.warnings?.length ?? 0)
       + (matching?.waterHeater?.warnings?.length ?? 0)
@@ -575,7 +609,7 @@ export async function buildReport({ input, ctx }) {
 
   // 5) Гидравлика Pure Pipeline (после matching)
   logger.info('report.hydraulics.start', null);
-  /** @type {import('../types/shared-types').HydraulicsReport} */
+  /** @type {import('../types/shared-types.js').HydraulicsReport} */
   let hydraulics;
   try {
     const pipelineDto = buildHydraulicsSnapshots({
@@ -606,12 +640,15 @@ export async function buildReport({ input, ctx }) {
       warnings.push(...pipelineResult.hydraulicsMatching.warnings);
     }
   } catch (hydErr) {
-    logger.warn('report.hydraulics.fail', hydErr, {
-      code: hydErr?.code ?? null,
-    });
+    const known = isPlainObject(hydErr)
+      ? /** @type {import('../types/shared-types.js').AppErrorLike & { message?: string }} */ (hydErr)
+      : null;
+    logger.warn('report.hydraulics.fail', null, {
+      code: known?.code ?? null,
+    }, hydErr);
     const hydraulicsFailMessage =
-      hydErr?.message
-        ? `Гидравлика: ${hydErr.message}`
+      known?.message
+        ? `Гидравлика: ${known.message}`
         : 'Гидравлика: не удалось выполнить pipeline.';
     warnings.push(hydraulicsFailMessage);
     hydraulics = {
@@ -628,7 +665,7 @@ export async function buildReport({ input, ctx }) {
         estimatedPipesPrice: 0,
         estimatedPumpPrice: 0,
         estimatedTotalPrice: 0,
-        unavailableReason: hydErr?.message ?? 'Расчёт гидравлики не выполнен.',
+        unavailableReason: known?.message ?? 'Расчёт гидравлики не выполнен.',
       },
       warnings: [hydraulicsFailMessage],
       pipes: [],
@@ -651,7 +688,7 @@ export async function buildReport({ input, ctx }) {
     ...(matching.hydraulics?.warnings ?? []),
   ];
 
-  /** @type {import('../recommendations/types').ResolvedRecommendation[]} */
+  /** @type {import('../recommendations/types.js').ResolvedRecommendation[]} */
   const reportRecommendations = [
     ...(matching.boiler?.resolvedRecommendations ?? []),
     ...(matching.indirectWaterHeater?.resolvedRecommendations ?? []),
@@ -673,7 +710,7 @@ export async function buildReport({ input, ctx }) {
     delete hsClean._normalizationWarnings;
     delete hsClean._thermalRegimeAutoAdjusted;
     inputForReport.heatingSystem =
-      /** @type {import('../types/shared-types').HeatingSystemInput} */ (hsClean);
+      /** @type {import('../types/shared-types.js').HeatingSystemInput} */ (hsClean);
   }
 
   return {
@@ -690,12 +727,14 @@ export async function buildReport({ input, ctx }) {
         : {}),
       recommendationsSource,
       ufhPresetsSource,
-      ufhPresetsSchemaVersion,
+      ...(typeof ufhPresetsSchemaVersion === 'number'
+        ? { ufhPresetsSchemaVersion }
+        : {}),
       automationHints,
     },
     input: inputForReport,
     climate,
-    temps,
+    temps: designTemps,
     calculations: {
       heatLoss,
       hotWater,
@@ -703,7 +742,9 @@ export async function buildReport({ input, ctx }) {
       underfloorHeating: underfloorHeating ?? null,
     },
     matching,
-    recommendations: reportRecommendations.length ? reportRecommendations : undefined,
+    ...(reportRecommendations.length > 0
+      ? { recommendations: reportRecommendations }
+      : {}),
     warnings: allWarnings,
   };
 }

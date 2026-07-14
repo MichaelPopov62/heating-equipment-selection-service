@@ -43,7 +43,7 @@ async function loadRecommendationsJsonFromMongo() {
 }
 
 /**
- * @returns {Promise<{ recommendations: import('./types').RecommendationsBundle, recommendationsSource: 'file' | 'mongo' }>}
+ * @returns {Promise<{ recommendations: import('./types.js').RecommendationsBundle, recommendationsSource: 'file' | 'mongo' }>}
  */
 export async function loadRecommendations() {
   const { data, source } = await loadReferenceCollection({

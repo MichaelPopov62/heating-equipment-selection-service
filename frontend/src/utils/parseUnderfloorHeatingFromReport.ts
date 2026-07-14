@@ -238,17 +238,24 @@ function parseRoomRow(item: unknown): ParsedUnderfloorHeatingRoom | null {
       ? pipeSpacingResolutionRaw
       : undefined;
 
+  const roomAreaM2 = readOptionalNumber('roomAreaM2');
+  const furnitureOccupiedAreaM2 = readOptionalNumber('furnitureOccupiedAreaM2');
+  const heatedAreaM2 = readOptionalNumber('heatedAreaM2');
+  const requiredHeatFluxUpWm2 = readOptionalNumber('requiredHeatFluxUpWm2');
+  const requestedPipeSpacingMm = readOptionalNumber('requestedPipeSpacingMm');
+  const resolvedPipeSpacingMm = readOptionalNumber('resolvedPipeSpacingMm');
+
   return {
     roomId,
     roomName,
     basePresetName,
     finishMaterialName,
-    roomAreaM2: readOptionalNumber('roomAreaM2'),
-    furnitureOccupiedAreaM2: readOptionalNumber('furnitureOccupiedAreaM2'),
-    heatedAreaM2: readOptionalNumber('heatedAreaM2'),
-    requiredHeatFluxUpWm2: readOptionalNumber('requiredHeatFluxUpWm2'),
-    requestedPipeSpacingMm: readOptionalNumber('requestedPipeSpacingMm'),
-    resolvedPipeSpacingMm: readOptionalNumber('resolvedPipeSpacingMm'),
+    ...(roomAreaM2 !== undefined ? { roomAreaM2 } : {}),
+    ...(furnitureOccupiedAreaM2 !== undefined ? { furnitureOccupiedAreaM2 } : {}),
+    ...(heatedAreaM2 !== undefined ? { heatedAreaM2 } : {}),
+    ...(requiredHeatFluxUpWm2 !== undefined ? { requiredHeatFluxUpWm2 } : {}),
+    ...(requestedPipeSpacingMm !== undefined ? { requestedPipeSpacingMm } : {}),
+    ...(resolvedPipeSpacingMm !== undefined ? { resolvedPipeSpacingMm } : {}),
     ...(pipeSpacingResolution ? { pipeSpacingResolution } : {}),
     heatFluxUpWm2: item.heatFluxUpWm2 as number,
     heatFluxDownWm2: item.heatFluxDownWm2 as number,
@@ -258,8 +265,12 @@ function parseRoomRow(item: unknown): ParsedUnderfloorHeatingRoom | null {
     surfaceTempC: item.surfaceTempC as number,
     maxSurfaceTemperatureCelsius: item.maxSurfaceTemperatureCelsius as number,
     comfortMaxSurfaceTemperatureCelsius,
-    finishMaxSurfaceTemperatureCelsius,
-    presetMaxSurfaceTemperatureCelsius,
+    ...(finishMaxSurfaceTemperatureCelsius !== undefined
+      ? { finishMaxSurfaceTemperatureCelsius }
+      : {}),
+    ...(presetMaxSurfaceTemperatureCelsius !== undefined
+      ? { presetMaxSurfaceTemperatureCelsius }
+      : {}),
     pipeSpacingMm,
     pipeEmbedmentResistanceM2KW,
     finishCoveringResistanceM2KW,

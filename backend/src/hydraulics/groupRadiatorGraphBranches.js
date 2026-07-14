@@ -11,17 +11,17 @@ export const RAD_MICRO_MANIFOLD_NODE_ID = 'rad_micro_manifold';
 
 /**
  * @param {object} args
- * @param {import('./types').HydraulicsRadiatorConsumer[]} args.consumers
- * @param {import('./types').HydraulicsRadiatorBranchGrouping} args.grouping
+ * @param {import('./types.js').HydraulicsRadiatorConsumer[]} args.consumers
+ * @param {import('./types.js').HydraulicsRadiatorBranchGrouping} args.grouping
  * @returns {{
- *   individual: import('./types').HydraulicsRadiatorConsumer[];
- *   microConsumers: import('./types').HydraulicsRadiatorConsumer[];
+ *   individual: import('./types.js').HydraulicsRadiatorConsumer[];
+ *   microConsumers: import('./types.js').HydraulicsRadiatorConsumer[];
  * }}
  */
 export function partitionRadiatorConsumersForGraph({ consumers, grouping }) {
-  /** @type {import('./types').HydraulicsRadiatorConsumer[]} */
+  /** @type {import('./types.js').HydraulicsRadiatorConsumer[]} */
   const individual = [];
-  /** @type {import('./types').HydraulicsRadiatorConsumer[]} */
+  /** @type {import('./types.js').HydraulicsRadiatorConsumer[]} */
   const microConsumers = [];
 
   const minFlow = grouping.minFlowM3PerHourForIndividualBranch;
@@ -45,7 +45,7 @@ export function partitionRadiatorConsumersForGraph({ consumers, grouping }) {
 }
 
 /**
- * @param {import('./types').HydraulicsRadiatorConsumer[]} microConsumers
+ * @param {import('./types.js').HydraulicsRadiatorConsumer[]} microConsumers
  * @returns {string}
  */
 export function buildMicroManifoldLabel(microConsumers) {
@@ -55,8 +55,8 @@ export function buildMicroManifoldLabel(microConsumers) {
 
 /**
  * @param {object} args
- * @param {import('./types').HydraulicsRadiatorConsumer[]} args.microConsumers
- * @param {import('./types').HydraulicsBranchLayout[]} args.branches
+ * @param {import('./types.js').HydraulicsRadiatorConsumer[]} args.microConsumers
+ * @param {import('./types.js').HydraulicsBranchLayout[]} args.branches
  * @param {number} args.defaultBranchLengthM
  * @param {number} args.manifoldTrunkLengthM
  * @returns {number}
@@ -77,7 +77,7 @@ export function resolveMicroManifoldEdgeLength({
 }
 
 /**
- * @param {import('./types').HydraulicsRadiatorConsumer[]} microConsumers
+ * @param {import('./types.js').HydraulicsRadiatorConsumer[]} microConsumers
  * @returns {number}
  */
 export function sumMicroConsumersFlowM3h(microConsumers) {

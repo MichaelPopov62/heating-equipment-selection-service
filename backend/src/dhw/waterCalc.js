@@ -5,7 +5,7 @@
  */
 
 /**
- * @param {import('./types').NormalizedWaterNorms} norms
+ * @param {import('./types.js').NormalizedWaterNorms} norms
  * @param {number} flowLps
  * @param {number} deltaTK
  * @returns {number}
@@ -19,7 +19,7 @@ export function hotWaterThermalPowerKw(norms, flowLps, deltaTK) {
 }
 
 /**
- * @param {import('./types').NormalizedWaterNorms} norms
+ * @param {import('./types.js').NormalizedWaterNorms} norms
  * @param {number} residents
  * @param {number} bathCount
  * @param {boolean} tropicalShower
@@ -40,7 +40,7 @@ export function recommendedStorageTankLitersRaw(norms, residents, bathCount, tro
 }
 
 /**
- * @param {import('./types').NormalizedWaterNorms} norms
+ * @param {import('./types.js').NormalizedWaterNorms} norms
  * @param {number} volumeLiters
  * @param {number} deltaTK
  * @param {number} [heatMinutes]
@@ -56,8 +56,8 @@ export function tankVolumeHeatPowerKw(norms, volumeLiters, deltaTK, heatMinutes)
 }
 
 /**
- * @param {import('./types').NormalizedWaterNorms} norms
- * @param {import('../types/shared-types').HotWaterFixturesInput | Record<string, number>} fixtures
+ * @param {import('./types.js').NormalizedWaterNorms} norms
+ * @param {import('../types/shared-types.js').HotWaterFixturesInput | Record<string, number>} fixtures
  * @param {number} residents
  * @returns {number}
  */
@@ -85,7 +85,7 @@ export function estimatePeakSessionLitersMixed(norms, fixtures, residents) {
 }
 
 /**
- * @param {import('./types').NormalizedWaterNorms} norms
+ * @param {import('./types.js').NormalizedWaterNorms} norms
  * @param {number} sessionLitersMixed
  */
 export function equivalentStorageTankLitersFromSession(norms, sessionLitersMixed) {
@@ -96,7 +96,7 @@ export function equivalentStorageTankLitersFromSession(norms, sessionLitersMixed
 }
 
 /**
- * @param {import('./types').NormalizedWaterNorms} norms
+ * @param {import('./types.js').NormalizedWaterNorms} norms
  * @param {number} volumeLiters
  * @param {number} deltaTK
  * @param {number} powerKw
@@ -113,7 +113,7 @@ function tankFullHeatTimeSeconds(norms, volumeLiters, deltaTK, powerKw) {
 }
 
 /**
- * @param {import('./types').NormalizedWaterNorms} norms
+ * @param {import('./types.js').NormalizedWaterNorms} norms
  * @param {number} volumeLiters
  * @param {number} deltaTK
  * @param {number} powerKw
@@ -125,7 +125,7 @@ export function tankFullHeatTimeMinutes(norms, volumeLiters, deltaTK, powerKw) {
 }
 
 /**
- * @param {import('./types').NormalizedWaterNorms} norms
+ * @param {import('./types.js').NormalizedWaterNorms} norms
  * @param {'house' | 'apartment'} objectType
  * @param {number} thermalFixtureCount
  * @param {number} residents

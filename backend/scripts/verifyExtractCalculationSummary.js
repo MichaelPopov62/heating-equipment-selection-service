@@ -6,6 +6,7 @@ import {
   extractCalculationSummary,
   sanitizeCalculationSummary,
 } from '../src/projects/extractCalculationSummary.js';
+import { buildObjectMeta } from './fixtures/verifyFixtures.js';
 
 /** @param {boolean} ok @param {string} label */
 function logCheck(ok, label) {
@@ -20,9 +21,9 @@ function tally(ok) {
   if (!ok) failed += 1;
 }
 
-/** @param {Partial<import('../src/types/shared-types').CalcReport>} patch */
+/** @param {Partial<import('../src/types/shared-types.js').CalcReport>} patch */
 function minimalReport(patch = {}) {
-  return /** @type {import('../src/types/shared-types').CalcReport} */ ({
+  return /** @type {import('../src/types/shared-types.js').CalcReport} */ ({
     meta: { generatedAt: '2026-01-01T00:00:00.000Z', schemaVersion: 1 },
     input: {
       building: {
@@ -33,6 +34,7 @@ function minimalReport(patch = {}) {
     calculations: {
       heatLoss: { totalWatts: 5000 },
       hotWater: { objectType: 'house', hotWaterPowerKw: 12 },
+      hydraulics: {},
     },
     matching: { boiler: { requiredKw: 8, selected: { model: 'Test' } } },
     warnings: [],
@@ -48,13 +50,20 @@ tally(logCheck(house.objectType === 'house', 'input house + hotWater house → h
 const apt = extractCalculationSummary(
   minimalReport({
     input: {
-      building: {
-        objectMeta: { objectType: 'villa', floors: 1, roomsCount: 1 },
-      },
+      building: /** @type {import('../src/types/shared-types.js').BuildingInput} */ (
+        /** @type {unknown} */ ({
+          objectMeta: buildObjectMeta({
+            objectType: /** @type {import('../src/types/shared-types.js').BuildingObjectType} */ (
+              /** @type {unknown} */ ('villa')
+            ),
+          }),
+        })
+      ),
     },
     calculations: {
       heatLoss: { totalWatts: 5000 },
       hotWater: { objectType: 'apartment', hotWaterPowerKw: 12 },
+      hydraulics: {},
     },
   }),
 );
@@ -68,13 +77,25 @@ tally(
 const fallbackHouse = extractCalculationSummary(
   minimalReport({
     input: {
-      building: {
-        objectMeta: { objectType: 'villa', floors: 1, roomsCount: 1 },
-      },
+      building: /** @type {import('../src/types/shared-types.js').BuildingInput} */ (
+        /** @type {unknown} */ ({
+          objectMeta: buildObjectMeta({
+            objectType: /** @type {import('../src/types/shared-types.js').BuildingObjectType} */ (
+              /** @type {unknown} */ ('villa')
+            ),
+          }),
+        })
+      ),
     },
     calculations: {
       heatLoss: { totalWatts: 5000 },
-      hotWater: { objectType: 'garbage', hotWaterPowerKw: 12 },
+      hotWater: {
+        objectType: /** @type {import('../src/types/shared-types.js').BuildingObjectType} */ (
+          /** @type {unknown} */ ('garbage')
+        ),
+        hotWaterPowerKw: 12,
+      },
+      hydraulics: {},
     },
   }),
 );
@@ -87,10 +108,15 @@ tally(
 
 const noMeta = extractCalculationSummary(
   minimalReport({
-    input: { building: {} },
+    input: {
+      building: /** @type {import('../src/types/shared-types.js').BuildingInput} */ (
+        /** @type {unknown} */ ({})
+      ),
+    },
     calculations: {
       heatLoss: { totalWatts: 5000 },
       hotWater: { hotWaterPowerKw: 12 },
+      hydraulics: {},
     },
   }),
 );

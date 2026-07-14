@@ -78,10 +78,16 @@ export function ObjectMetaForm({
 
   const onFacadeSystemChange = (next: FacadeSystem) => {
     if (next === 'none') {
-      patchExternalWalls({
-        facadeSystem: 'none',
-        insulationPresetId: undefined,
-        insulationThicknessMm: undefined,
+      const {
+        insulationPresetId: _insulationPresetId,
+        insulationThicknessMm: _insulationThicknessMm,
+        ...wallsWithoutInsulation
+      } = value.externalWalls;
+      void _insulationPresetId;
+      void _insulationThicknessMm;
+      onChange({
+        ...value,
+        externalWalls: { ...wallsWithoutInsulation, facadeSystem: 'none' },
       });
       return;
     }
@@ -94,16 +100,20 @@ export function ObjectMetaForm({
       });
       return;
     }
+    const defaultVentilatedInsulationId = ventilatedInsulationPresets[0]?.id;
+    const ventilatedInsulationPresetId =
+      value.externalWalls.insulationPresetId
+      && ventilatedInsulationPresets.some(
+        (p) => p.id === value.externalWalls.insulationPresetId,
+      )
+        ? value.externalWalls.insulationPresetId
+        : defaultVentilatedInsulationId;
     patchExternalWalls({
       facadeSystem: 'ventilated',
-      insulationPresetId:
-        value.externalWalls.insulationPresetId &&
-        ventilatedInsulationPresets.some(
-          (p) => p.id === value.externalWalls.insulationPresetId,
-        )
-          ? value.externalWalls.insulationPresetId
-          : (ventilatedInsulationPresets[0]?.id ?? undefined),
       insulationThicknessMm: value.externalWalls.insulationThicknessMm ?? 100,
+      ...(ventilatedInsulationPresetId !== undefined
+        ? { insulationPresetId: ventilatedInsulationPresetId }
+        : {}),
     });
   };
 
@@ -126,8 +136,12 @@ export function ObjectMetaForm({
                 floors: value.floors,
                 roomsCount: value.roomsCount,
                 externalWalls: value.externalWalls,
-                roofPresetId: value.roofPresetId,
-                ventilationReserveMode: value.ventilationReserveMode,
+                ...(value.ventilationReserveMode !== undefined
+                  ? { ventilationReserveMode: value.ventilationReserveMode }
+                  : {}),
+                ...(value.roofPresetId !== undefined
+                  ? { roofPresetId: value.roofPresetId }
+                  : {}),
               });
               return;
             }
@@ -153,10 +167,10 @@ export function ObjectMetaForm({
             className={styles.control}
             value={value.apartmentStackPosition ?? 'middle_floor'}
             onChange={(e) =>
-              onChange({
+              { onChange({
                 ...value,
                 apartmentStackPosition: e.target.value as ApartmentStackPosition,
-              })
+              }); }
             }
           >
             <option value="first_floor">Первый (снизу подвал / холод)</option>
@@ -179,10 +193,10 @@ export function ObjectMetaForm({
           className={styles.control}
           value={value.floors}
           onChange={(e) =>
-            onChange({
+            { onChange({
               ...value,
               floors: (toIntOrUndefined(e.target.value) ?? 1) as 1 | 2 | 3,
-            })
+            }); }
           }
         >
           <option value={1}>1</option>
@@ -204,10 +218,10 @@ export function ObjectMetaForm({
           step={1}
           value={value.roomsCount}
           onChange={(e) =>
-            onChange({
+            { onChange({
               ...value,
               roomsCount: clampRoomsCount(Number(e.target.value)),
-            })
+            }); }
           }
         />
       </div>
@@ -221,10 +235,10 @@ export function ObjectMetaForm({
           className={styles.control}
           value={value.ventilationReserveMode ?? 'natural'}
           onChange={(e) =>
-            onChange({
+            { onChange({
               ...value,
               ventilationReserveMode: e.target.value as VentilationReserveMode,
-            })
+            }); }
           }
         >
           <option value="natural">
@@ -251,10 +265,10 @@ export function ObjectMetaForm({
               className={styles.control}
               value={value.boilerPlacementZone ?? 'kitchen'}
               onChange={(e) =>
-                onChange({
+                { onChange({
                   ...value,
                   boilerPlacementZone: e.target.value as BoilerPlacementZone,
-                })
+                }); }
               }
             >
               <option value="kitchen">Кухня (настенный)</option>
@@ -282,7 +296,13 @@ export function ObjectMetaForm({
                   value={value.boilerRoomAreaM2 ?? ''}
                   onChange={(e) => {
                     const v = e.target.value === '' ? undefined : Number(e.target.value);
-                    onChange({ ...value, boilerRoomAreaM2: v });
+                    if (v !== undefined) {
+                      onChange({ ...value, boilerRoomAreaM2: v });
+                      return;
+                    }
+                    const { boilerRoomAreaM2: _omit, ...rest } = value;
+                    void _omit;
+                    onChange(rest);
                   }}
                   placeholder="например, 3.5"
                 />
@@ -301,7 +321,13 @@ export function ObjectMetaForm({
                   value={value.ceilingHeightM ?? ''}
                   onChange={(e) => {
                     const v = e.target.value === '' ? undefined : Number(e.target.value);
-                    onChange({ ...value, ceilingHeightM: v });
+                    if (v !== undefined) {
+                      onChange({ ...value, ceilingHeightM: v });
+                      return;
+                    }
+                    const { ceilingHeightM: _omit, ...rest } = value;
+                    void _omit;
+                    onChange(rest);
                   }}
                   placeholder="не менее 2,2"
                 />
@@ -319,7 +345,7 @@ export function ObjectMetaForm({
           id="wallPresetId"
           className={styles.control}
           value={wallPresets.length === 0 ? '' : value.externalWalls.presetId}
-          onChange={(e) => patchExternalWalls({ presetId: e.target.value })}
+          onChange={(e) => { patchExternalWalls({ presetId: e.target.value }); }}
           disabled={loadingPresets || wallPresets.length === 0}
         >
           {loadingPresets ? (
@@ -358,7 +384,13 @@ export function ObjectMetaForm({
           value={value.externalWalls.thicknessMm ?? ''}
           onChange={(e) => {
             const next = e.target.value === '' ? undefined : Number(e.target.value);
-            patchExternalWalls({ thicknessMm: next });
+            if (next !== undefined) {
+              patchExternalWalls({ thicknessMm: next });
+              return;
+            }
+            const { thicknessMm: _omit, ...wallsWithout } = value.externalWalls;
+            void _omit;
+            onChange({ ...value, externalWalls: wallsWithout });
           }}
           placeholder={
             thicknessOptions && thicknessOptions.length > 0
@@ -381,7 +413,7 @@ export function ObjectMetaForm({
           id="facadeSystem"
           className={styles.control}
           value={facadeSystem}
-          onChange={(e) => onFacadeSystemChange(e.target.value as FacadeSystem)}
+          onChange={(e) => { onFacadeSystemChange(e.target.value as FacadeSystem); }}
         >
           <option value="none">Без утеплителя</option>
           <option value="sftk">СФТК (мокрый фасад) — ППС 16Ф</option>
@@ -407,7 +439,7 @@ export function ObjectMetaForm({
                   ? ''
                   : (value.externalWalls.insulationPresetId ?? '')
               }
-              onChange={(e) => patchExternalWalls({ insulationPresetId: e.target.value })}
+              onChange={(e) => { patchExternalWalls({ insulationPresetId: e.target.value }); }}
               disabled={loadingPresets || activeInsulationPresets.length === 0}
             >
               {activeInsulationPresets.length === 0 ? (
@@ -437,7 +469,13 @@ export function ObjectMetaForm({
               value={value.externalWalls.insulationThicknessMm ?? ''}
               onChange={(e) => {
                 const next = e.target.value === '' ? undefined : Number(e.target.value);
-                patchExternalWalls({ insulationThicknessMm: next });
+                if (next !== undefined) {
+                  patchExternalWalls({ insulationThicknessMm: next });
+                  return;
+                }
+                const { insulationThicknessMm: _omit, ...wallsWithout } = value.externalWalls;
+                void _omit;
+                onChange({ ...value, externalWalls: wallsWithout });
               }}
               placeholder={
                 insulationThicknessOptions && insulationThicknessOptions.length > 0
@@ -462,7 +500,7 @@ export function ObjectMetaForm({
           id="roofPresetId"
           className={styles.control}
           value={roofPresets.length === 0 ? '' : (value.roofPresetId ?? '')}
-          onChange={(e) => onChange({ ...value, roofPresetId: e.target.value })}
+          onChange={(e) => { onChange({ ...value, roofPresetId: e.target.value }); }}
           disabled={loadingPresets || roofPresets.length === 0}
         >
           {loadingPresets ? (

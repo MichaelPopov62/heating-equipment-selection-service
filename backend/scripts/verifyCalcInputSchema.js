@@ -3,14 +3,38 @@
  * Описание: Сверяет enum room.type в OpenAPI с CANONICAL_ROOM_TYPES, собирает CalcInput.yaml
  * в JSON Schema, компилирует в AJV и валидирует тестовые payload (в т.ч. type=котельная).
  */
-import Ajv from 'ajv';
+import AjvModule from 'ajv';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CANONICAL_ROOM_TYPES } from '../../shared/roomTypeNormalization.js';
 import { loadCalcInputSchemaForAjv } from '../src/api/calcInputSchemaLoader.js';
+import { buildObjectMeta, buildRoom } from './fixtures/verifyFixtures.js';
+
+const AjvCtor = /** @type {typeof import('ajv').default} */ (/** @type {unknown} */ (AjvModule));
 
 const REPO_ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+/**
+ * Извлекает enum building.rooms[].type из развёрнутой OpenAPI-схемы.
+ *
+ * @param {unknown} schema
+ * @returns {string[] | undefined}
+ */
+function extractRoomTypeEnum(schema) {
+  if (typeof schema !== 'object' || schema === null) return undefined;
+  const root = /** @type {Record<string, unknown>} */ (schema);
+  const properties = /** @type {Record<string, unknown>} */ (root.properties ?? {});
+  const building = /** @type {Record<string, unknown>} */ (properties.building ?? {});
+  const buildingProps = /** @type {Record<string, unknown>} */ (building.properties ?? {});
+  const rooms = /** @type {Record<string, unknown>} */ (buildingProps.rooms ?? {});
+  const items = /** @type {Record<string, unknown>} */ (rooms.items ?? {});
+  const itemProps = /** @type {Record<string, unknown>} */ (items.properties ?? {});
+  const typeField = /** @type {Record<string, unknown>} */ (itemProps.type ?? {});
+  const enumVal = typeField.enum;
+  if (!Array.isArray(enumVal)) return undefined;
+  return enumVal.filter((value) => typeof value === 'string');
+}
 
 /**
  * Сверка enum room.type в CalcInput.yaml с CANONICAL_ROOM_TYPES (двусторонняя).
@@ -19,9 +43,8 @@ const REPO_ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '../..
  */
 async function verifyRoomTypesSync() {
   const calcInputPath = path.join(REPO_ROOT, 'components/schemas/CalcInput.yaml');
-  const openApiSchema = await $RefParser.parse(calcInputPath);
-  const openApiEnum = openApiSchema.properties?.building?.properties?.rooms?.items?.properties?.type
-    ?.enum;
+  const parsed = await $RefParser.parse(calcInputPath);
+  const openApiEnum = extractRoomTypeEnum(parsed);
 
   if (!Array.isArray(openApiEnum) || openApiEnum.length === 0) {
     throw new Error('Не удалось найти enum building.rooms[].type в CalcInput.yaml');
@@ -59,36 +82,20 @@ if (process.exitCode === 1) {
   process.exit(process.exitCode);
 }
 
-const ajv = new Ajv({ allErrors: true, coerceTypes: false, removeAdditional: true });
+const ajv = new AjvCtor({ allErrors: true, coerceTypes: false, removeAdditional: true });
 const schema = await loadCalcInputSchemaForAjv();
 const validate = ajv.compile(schema);
-
-const externalWalls = {
-  presetId: 'wall_gas_concrete_d500',
-  thicknessMm: 375,
-  facadeSystem: 'none',
-};
 
 const minimal = {
   building: {
     temps: { insideC: 20, outsideC: -5 },
-    objectMeta: {
-      objectType: 'house',
-      floors: 1,
-      roomsCount: 1,
-      externalWalls,
-    },
+    objectMeta: buildObjectMeta({ objectType: 'house' }),
     rooms: [
-      {
+      buildRoom({
         id: 'r1',
         name: 'Комната',
-        type: 'гостиная',
-        floor: 1,
-        topBoundary: 'heated',
-        bottomBoundary: 'unheated',
         areaM2: 10,
-        heightM: 2.7,
-      },
+      }),
     ],
     envelopeElements: [
       {
@@ -106,34 +113,24 @@ const minimal = {
 const withBoilerRoom = {
   building: {
     temps: { insideC: 20, outsideC: -5 },
-    objectMeta: {
+    objectMeta: buildObjectMeta({
       objectType: 'house',
-      floors: 1,
       roomsCount: 2,
       boilerPlacementZone: 'boiler_room',
-      externalWalls,
-    },
+    }),
     rooms: [
-      {
+      buildRoom({
         id: 'r1',
         name: 'Гостиная',
-        type: 'гостиная',
-        floor: 1,
-        topBoundary: 'heated',
-        bottomBoundary: 'unheated',
         areaM2: 10,
-        heightM: 2.7,
-      },
-      {
+      }),
+      buildRoom({
         id: 'br1',
         name: 'Котельная',
         type: 'котельная',
-        floor: 1,
-        topBoundary: 'heated',
-        bottomBoundary: 'unheated',
         areaM2: 4,
         heightM: 2.5,
-      },
+      }),
     ],
     envelopeElements: [
       {

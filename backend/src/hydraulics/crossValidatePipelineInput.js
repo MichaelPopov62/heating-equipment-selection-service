@@ -7,7 +7,7 @@ import { thermalLoadToFlow } from './thermalLoadToFlow.js';
 import { round } from '../utils/math.js';
 
 /**
- * @param {import('./types').HydraulicsPipelineInput} dto
+ * @param {import('./types.js').HydraulicsPipelineInput} dto
  */
 export function crossValidateHydraulicsPipelineInput(dto) {
   const mode = dto.meta.heatingEmittersMode;
@@ -99,11 +99,13 @@ export function crossValidateHydraulicsPipelineInput(dto) {
 /**
  * @param {string} message
  * @param {string} path
- * @returns {Error & { code: string; details: { instancePath: string; message: string }[] }}
+ * @returns {Error & import('../types/shared-types.js').AppErrorLike}
  */
 function validationError(message, path) {
   const err = new Error(message);
-  err.code = 'HYDRAULICS_PIPELINE_INPUT_INVALID';
-  err.details = [{ instancePath: `/${path.replace(/\./g, '/')}`, message }];
-  return err;
+  /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
+  const appErr = err;
+  appErr.code = 'HYDRAULICS_PIPELINE_INPUT_INVALID';
+  appErr.details = [{ instancePath: `/${path.replace(/\./g, '/')}`, message }];
+  return appErr;
 }
