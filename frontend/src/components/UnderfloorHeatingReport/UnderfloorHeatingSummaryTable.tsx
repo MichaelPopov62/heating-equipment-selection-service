@@ -11,7 +11,7 @@ import {
   selectUfhZonePumps,
   ufhPumpSummaryLabel,
 } from '../../utils/ufhHydraulicsPumps';
-import { hasUnderfloorHeatingReportContent } from './UnderfloorHeatingReportView';
+import { hasUnderfloorHeatingReportContent } from './hasUnderfloorHeatingReportContent';
 import styles from './UnderfloorHeatingSummaryTable.module.css';
 
 export type UnderfloorHeatingSummaryTableProps = {

@@ -10,8 +10,8 @@ import type { ParsedUnderfloorHeating } from '../../types/underfloorHeating';
 import type { ParsedUniboxesMatching } from '../../utils/parseUniboxesMatchingFromReport';
 import {
   UnderfloorHeatingReportView,
-  hasUnderfloorHeatingReportContent,
 } from './UnderfloorHeatingReportView';
+import { hasUnderfloorHeatingReportContent } from './hasUnderfloorHeatingReportContent';
 import { UniboxMatchingSection } from './UniboxMatchingSection';
 import styles from './UnderfloorHeatingReportDialog.module.css';
 
@@ -47,9 +47,11 @@ export function UnderfloorHeatingReportDialog({
   if (!open) return null;
 
   const hasUfh = hasUnderfloorHeatingReportContent(underfloorHeating);
-  const hasUnibox =
+  const uniboxMatching =
     uniboxes != null
-    && (uniboxes.byLoop.length > 0 || uniboxes.warnings.length > 0);
+    && (uniboxes.byLoop.length > 0 || uniboxes.warnings.length > 0)
+      ? uniboxes
+      : null;
 
   return (
     <div
@@ -88,8 +90,8 @@ export function UnderfloorHeatingReportDialog({
             uniboxes={uniboxes}
             hydraulicsPumps={hydraulicsPumps}
           />
-        ) : hasUnibox && uniboxes != null ? (
-          <UniboxMatchingSection matching={uniboxes} />
+        ) : uniboxMatching != null ? (
+          <UniboxMatchingSection matching={uniboxMatching} />
         ) : (
           <p className={styles.empty}>
             Нет данных расчёта ТП. Заполните помещения с тёплым полом и дождитесь

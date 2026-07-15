@@ -7,7 +7,7 @@ import { useState } from 'react';
 
 import { UfhPresetCards } from '../UfhPresetCards/UfhPresetCards';
 import { UnderfloorHeatingReportDialog } from '../UnderfloorHeatingReport/UnderfloorHeatingReportDialog';
-import { hasUnderfloorHeatingReportContent } from '../UnderfloorHeatingReport/UnderfloorHeatingReportView';
+import { hasUnderfloorHeatingReportContent } from '../UnderfloorHeatingReport/hasUnderfloorHeatingReportContent';
 import type { ParsedUnderfloorHeating } from '../../types/underfloorHeating';
 import type { ParsedHydraulicsPumpProposal } from '../../types/hydraulics';
 import type { UfhDistributionPreset } from '../../types/ufhDistribution';
