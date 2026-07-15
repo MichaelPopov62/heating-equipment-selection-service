@@ -91,7 +91,7 @@
 
 | Путь | Назначение |
 |------|------------|
-| `surveySteps.ts` | `SURVEY_STEPS`, `SURVEY_STEP_NAV_ITEMS`, `isSurveyStep`, `isCalcApiBarStep` — порядок шагов, навигация, валидация `currentStep` при загрузке черновика |
+| `surveySteps.ts` | `SURVEY_STEPS` (`object` → `warmFloor` → `rooms` → `hotWater` → `boiler` → `radiators` → `waterHeater` → `hydraulics` → `summary`), `SURVEY_STEP_NAV_ITEMS`, `isSurveyStep`, `isCalcApiBarStep` — порядок шагов, навигация, валидация `currentStep` при загрузке черновика |
 | `roomTypes.ts` | `ROOM_TYPE_UI_OPTIONS` — селект типа помещения |
 | `compatLegacyIds.ts` | `LEGACY_COMBINED_WALL_PRESET_IDS` — compat-слой пресетов стен |
 
@@ -192,7 +192,7 @@ Compat-телеметрия: `utils/compatTelemetry.ts` (`[survey-compat]` в DE
 | H.16b | Унибокс шаг 2: строгие неравенства; `validateUniboxLoopDemand`; smart fallback **T воздуха** (`санузел` → 24 °C, иначе `temps.insideC`); малые зоны `санузел`/`коридор`/`прихожая`/`тамбур`; гейт каскада H.15; verify + док. | ✅ |
 | H.16c | Фаза B: общий `resolveDesignRoomAirTempC` (heatloss + ТП + радиаторы + unibox); пол санузла `max(…, 24)`; поле `temps.bathroomAirTempC`; UI анкеты; verify `verify:room-design-air-temp`; док. [`docs/room-design-air-temp.md`](docs/room-design-air-temp.md) | ✅ |
 | **ТП — расчёт** | `logic/warmFloorCalc.js` | Rλ,B = база над контуром + финиш; q↑/q↓, Tповерх, `maxAllowableHeatFluxUpWm2`; warning при превышении лимита покрытия | Результат в `RecommendationsBlock` |
-| **ТП — matching** | `matching/warmFloor.js` | Подсказки в `radiatorSelectionNotes` + цифры из отчёта ТП | Шаг `warmFloor` + селекты в комнатах |
+| **ТП — matching** | `matching/warmFloor.js` | Подсказки в `radiatorSelectionNotes` + цифры из отчёта ТП | Шаг `warmFloor` (до `rooms`) + селекты в комнатах |
 | **ТП — heatloss** | `heatlossByRooms.js` + `floorPresetId` | Теплопотери через пол; при `bottomBoundary: heated` пол не считается | Поле «Пол (ограждение)» в комнате |
 
 ---

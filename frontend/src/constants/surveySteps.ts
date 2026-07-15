@@ -1,6 +1,8 @@
 /**
  * Назначение: порядок шагов анкеты (UI-навигация и валидация черновика).
  * Описание: SSOT для боковой навигации, migrateSurveyDraft и isSurveyStep.
+ * Порядок: object → warmFloor → rooms → hotWater → boiler → radiators →
+ * waterHeater → hydraulics → summary (ТП до помещений: флаг / ufhPresetId).
  */
 
 import type { SurveyCurrentStep } from '../types/surveyStep';
@@ -33,10 +35,10 @@ const DEFAULT_GLOBAL_META_TITLE = 'Параметры объекта';
 /** Канонический порядок шагов survey (SSOT для migrateSurveyDraft и навигации). */
 export const SURVEY_STEPS: readonly SurveyCurrentStep[] = [
   'object',
+  'warmFloor',
   'rooms',
   'hotWater',
   'boiler',
-  'warmFloor',
   'radiators',
   'waterHeater',
   'hydraulics',
@@ -61,7 +63,8 @@ export function isSurveyStep(v: unknown): v is SurveyCurrentStep {
 }
 
 /**
- * Шаги, на которых показывается панель ручного POST /api/v1/calc (все кроме «Объект»).
+ * Шаги, на которых в DEV показывается панель ручного POST /api/v1/calc
+ * (все кроме «Объект»). В production UI бар скрыт — расчёт идёт автоматически.
  *
  * @param step
  */

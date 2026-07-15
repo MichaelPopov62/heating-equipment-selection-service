@@ -1,11 +1,18 @@
 /**
  * Назначение: Секция шага «Тёплый пол».
- * Описание: Карточки режимов ТП из Mongo, флаг водяного ТП и схема подключения.
+ * Описание: Карточки режимов ТП, флаг, схема подключения; полный отчёт — в модалке.
  */
 
+import { useState } from 'react';
+
 import { UfhPresetCards } from '../UfhPresetCards/UfhPresetCards';
+import { UnderfloorHeatingReportDialog } from '../UnderfloorHeatingReport/UnderfloorHeatingReportDialog';
+import { hasUnderfloorHeatingReportContent } from '../UnderfloorHeatingReport/UnderfloorHeatingReportView';
+import type { ParsedUnderfloorHeating } from '../../types/underfloorHeating';
+import type { ParsedHydraulicsPumpProposal } from '../../types/hydraulics';
 import type { UfhDistributionPreset } from '../../types/ufhDistribution';
 import type { UfhModePresetCard, UfhModePresetId } from '../../types/ufhModePreset';
+import type { ParsedUniboxesMatching } from '../../utils/parseUniboxesMatchingFromReport';
 import styles from './WarmFloorSection.module.css';
 import { UfhDistributionSelect } from './UfhDistributionSelect';
 
@@ -19,6 +26,10 @@ type Props = {
   onUfhPresetChange: (presetId: UfhModePresetId | null) => void;
   onWaterUnderfloorChange: (value: boolean) => void;
   onDistributionPresetChange: (value: UfhDistributionPreset) => void;
+  underfloorHeatingReport?: ParsedUnderfloorHeating | null;
+  uniboxesReport?: ParsedUniboxesMatching | null;
+  /** proposal.pumps гидравлики — для зонального насоса ТП в модалке. */
+  hydraulicsPumps?: readonly ParsedHydraulicsPumpProposal[] | null;
 };
 
 /** Шаг анкеты: режим ТП (карточки), водяной тёплый пол и схема распределения. */
@@ -32,11 +43,18 @@ export function WarmFloorSection({
   onUfhPresetChange,
   onWaterUnderfloorChange,
   onDistributionPresetChange,
+  underfloorHeatingReport = null,
+  uniboxesReport = null,
+  hydraulicsPumps = null,
 }: Props) {
+  const [reportOpen, setReportOpen] = useState(false);
   const showDistribution =
     waterUnderfloorHeating
     && ufhPresetId != null
     && ufhPresetId !== 'ufh_only';
+  const canOpenReport = hasUnderfloorHeatingReportContent(underfloorHeatingReport)
+    || (uniboxesReport != null
+      && (uniboxesReport.byLoop.length > 0 || uniboxesReport.warnings.length > 0));
 
   return (
     <div className={styles.root}>
@@ -69,12 +87,39 @@ export function WarmFloorSection({
           onChange={onDistributionPresetChange}
         />
       )}
-      <p className={styles.hint} style={{ marginTop: 10 }}>
-        Поля API:{' '}
-        <code className={styles.inlineCode}>heatingSystem.ufhPresetId</code>,{' '}
-        <code className={styles.inlineCode}>heatingSystem.waterUnderfloorHeating</code>,{' '}
-        <code className={styles.inlineCode}>heatingSystem.underfloorDistributionPreset</code>.
-      </p>
+
+      <div className={styles.reportActions}>
+        <button
+          type="button"
+          className={styles.reportButton}
+          disabled={!canOpenReport}
+          onClick={() => { setReportOpen(true); }}
+        >
+          Отчёт по расчёту ТП
+        </button>
+        {!canOpenReport && (
+          <p className={styles.hint} style={{ marginTop: 8 }}>
+            Отчёт появится после авторасчёта с включённым ТП в помещениях.
+          </p>
+        )}
+      </div>
+
+      {import.meta.env.DEV && (
+        <p className={styles.hint} style={{ marginTop: 10 }}>
+          Поля API:{' '}
+          <code className={styles.inlineCode}>heatingSystem.ufhPresetId</code>,{' '}
+          <code className={styles.inlineCode}>heatingSystem.waterUnderfloorHeating</code>,{' '}
+          <code className={styles.inlineCode}>heatingSystem.underfloorDistributionPreset</code>.
+        </p>
+      )}
+
+      <UnderfloorHeatingReportDialog
+        open={reportOpen}
+        onClose={() => { setReportOpen(false); }}
+        underfloorHeating={underfloorHeatingReport}
+        uniboxes={uniboxesReport}
+        hydraulicsPumps={hydraulicsPumps}
+      />
     </div>
   );
 }

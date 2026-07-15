@@ -127,7 +127,7 @@
 | `src/services/` | HTTP-клиенты (fetch) для queryFn/mutationFn |
 | `src/hooks/` | Оркестрация UI (без прямого HTTP к API) |
 | `src/components/` | Формы и блоки отчёта (Boiler, Rooms, Hydraulics, …) |
-| `src/constants/` | SSOT шагов анкеты, типы комнат, compat-id |
+| `src/constants/` | SSOT шагов анкеты (`SURVEY_STEPS`: Объект → Тёплый пол → Помещения → …), типы комнат, compat-id |
 | `src/types/` | DTO/view-модели UI |
 | `src/utils/` | Парсеры отчёта, миграции черновика, лейблы, guards |
 | `src/data/fallback*.ts` | Офлайн-fallback справочников |

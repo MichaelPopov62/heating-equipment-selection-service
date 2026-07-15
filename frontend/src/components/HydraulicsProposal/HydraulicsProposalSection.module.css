@@ -43,30 +43,6 @@
   margin: 0;
 }
 
-.dl {
-  display: grid;
-  grid-template-columns: minmax(140px, 1fr) minmax(0, 1.2fr);
-  gap: 4px 12px;
-  margin: 0;
-  font: 13px/1.4 var(--sans);
-}
-
-.dl dt {
-  color: var(--text-m);
-}
-
-.dl dd {
-  margin: 0;
-}
-
-.pumpCard {
-  margin-top: 8px;
-  padding: 10px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 90%, var(--accent-bg));
-  border: 1px solid var(--border);
-}
-
 .pumpsList {
   display: flex;
   flex-direction: column;

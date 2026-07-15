@@ -1,0 +1,60 @@
+/* Назначение: Стили полного отчёта ТП (модалка / шаговый отчёт). */
+
+.hint {
+  composes: hint from '../../styles/formElements.module.css';
+}
+
+.roomBlock {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.roomTitle {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--text-h);
+}
+
+.pumpBlock {
+  margin-top: 12px;
+}
+
+.dl {
+  display: grid;
+  grid-template-columns: minmax(8rem, 40%) 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.dl dt {
+  margin: 0;
+  color: var(--text);
+  opacity: 0.9;
+}
+
+.dl dd {
+  margin: 0;
+  color: var(--text-h);
+}
+
+.muted {
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.85;
+}
+
+.alertValue {
+  font-weight: 800;
+  color: var(--text-h);
+}
+
+.warningsList {
+  margin: 8px 0 0;
+  padding-left: 1.1rem;
+  font-size: 13px;
+  color: var(--danger, #b00020);
+}

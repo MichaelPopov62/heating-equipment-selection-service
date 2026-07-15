@@ -1,6 +1,6 @@
 /**
  * Назначение: підбір унібоксів з каталогу для смети.
- * Опис: по одній позиції на петлю ТП (≤2 петель); строгі нерівності за паспортом;
+ * Опис: по одній позиції на петлю ТП; м'яке попередження від 4 петель; строгі нерівності за паспортом;
  * smart fallback T повітря за room.type (анкету не змінюємо).
  */
 
@@ -22,8 +22,8 @@ export const UNIBOX_DESIGN_PRESSURE_BAR = 3;
 /** Макс. Δp на клапані унібокса для оцінки мін. Kv, бар. */
 export const UNIBOX_VALVE_MAX_DP_BAR = 0.25;
 
-/** Унібокс — локальний регулятор; при >2 петель ТП — лише колекторна схема. */
-export const UNIBOX_MAX_LOOPS_FOR_MATCHING = 2;
+/** Унібокс — локальний регулятор; м'яке попередження від цього числа петель (включно). */
+export const UNIBOX_MAX_LOOPS_FOR_MATCHING = 4;
 
 /** Підключення петлі ТП (PEX) у цьому сервісі — євроконус. */
 export const UNIBOX_REQUIRED_FIT = /** @type {const} */ ('eurocone');
@@ -424,8 +424,8 @@ export function pickUniboxes({
   }
 
   // Каскад колекторів стосується лише колекторної схеми; явні unibox-зони не блокуємо.
-  // Ліміт UNIBOX_MAX_LOOPS_FOR_MATCHING — м'яке попередження (не skip), бо вибір в анкеті явний.
-  if (demands.length > UNIBOX_MAX_LOOPS_FOR_MATCHING) {
+  // UNIBOX_MAX_LOOPS_FOR_MATCHING — м'яке попередження від 4 петель (не skip), бо вибір в анкеті явний.
+  if (demands.length >= UNIBOX_MAX_LOOPS_FOR_MATCHING) {
     warnings.push(
       `Выбрано ${demands.length} зон с унибоксом (ориентир до ${UNIBOX_MAX_LOOPS_FOR_MATCHING}); ` +
         'проверьте гидравлику и целесообразность локальных регуляторов.',

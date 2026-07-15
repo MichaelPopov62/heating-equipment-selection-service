@@ -96,14 +96,19 @@ const {
 - Перед POST сравнивается `JSON.stringify(payload)` с последним успешным — дубликаты не уходят
 - При dedup (`CALC_SKIP_DEDUP`) вызывается `applyCalcSkippedDedup` → `uiPhase` снова `stable`/`idle`
   (иначе баннер «Обновление расчёта…» зависал бы при неизменном payload)
-- `runApiCalc` (кнопка «Рассчитать») — `useMutation`, сброс dedup и немедленный POST
+- `runApiCalc` (кнопка «Отправить расчёт на сервер» в `calcApiBar`, только `import.meta.env.DEV`) — `useMutation`, сброс dedup и немедленный POST; production UI без бара, клиент опирается на автопересчёт
 - `abortInFlightCalc` — `queryClient.cancelQueries({ queryKey: ['calc'] })`
 
 ### UI блока «Тёплый пол»
 
-`RecommendationsBlock` показывает секцию ТП, если в отчёте есть комнаты **или** глобальные
-`calculations.underfloorHeating.warnings` (например ТП включён в анкете, но ни в одной комнате
-не заданы base/finish). Пустой `rooms[]` без warnings — секция скрыта.
+- **Шаг `warmFloor` (`WarmFloorSection`):** кнопка «Отчёт по расчёту ТП» открывает модалку
+  (`UnderfloorHeatingReportDialog`) с полным расчётом ТП, унибоксами и **зональным насосом ТП**
+  (только если `isMixingNodeRequired`; иначе текст «циркуляция насосом котла»). Котловой насос
+  (`boiler_primary`) в отчёте ТП не показывается.
+- **Сайдбар «Итог»:** `UnderfloorHeatingSummaryTable` — агрегаты (в т.ч. строка насоса ТП).
+  `HydraulicsProposalSection` показывает насосы **без** зон `ufh_*` (без дубля с отчётом ТП).
+- Модалка активна, если в отчёте есть комнаты ТП и/или warnings (или есть строки/warnings унибоксов).
+  Пустой `rooms[]` без warnings — кнопка неактивна.
 
 ### Загрузка черновика
 
@@ -144,6 +149,12 @@ const {
 ### Шаги анкеты (навигация)
 
 Порядок и подписи шагов — **`frontend/src/constants/surveySteps.ts`** (`SURVEY_STEPS`, `SURVEY_STEP_NAV_ITEMS`). `AppSurveyContent` рендерит боковую навигацию из этого списка; `migrateSurveyDraft` валидирует `currentStep` через `isSurveyStep`. Новый шаг добавляется **только** в `SURVEY_STEPS` и в union `SurveyCurrentStep` (`types/surveyStep.ts`).
+
+Канонический порядок `SURVEY_STEPS`:
+
+`object` → `warmFloor` → `rooms` → `hotWater` → `boiler` → `radiators` → `waterHeater` → `hydraulics` → `summary`
+
+Шаг «Тёплый пол» стоит сразу после «Объект» и перед «Помещения»: глобальный флаг / `ufhPresetId` задают схему излучателей до заполнения комнат.
 
 ---
 

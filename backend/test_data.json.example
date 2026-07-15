@@ -2209,55 +2209,14 @@
   ],
   "pumps": [
     {
-      "id": "pump-grundfos-alpha1-l-25-60-180",
-      "brand": "Grundfos",
-      "series": "Alpha1 L",
-      "model": "Alpha1 L 25-60 180",
-      "segment": "premium",
-      "country": "Denmark",
-      "type": "electronic",
-      "price": 7458,
-      "connections": {
-        "mountingLengthMm": 180,
-        "threadInch": "1 1/2",
-        "nominalDiameterMm": 25
-      },
-      "operatingModes": [
-        {
-          "modeName": "Пропорциональное давление PP2",
-          "speedIndex": 1,
-          "powerWatts": 45,
-          "coefficients": {
-            "a": -0.45,
-            "b": 0.12,
-            "c": 6
-          },
-          "qMinM3h": 0.1,
-          "qMaxM3h": 4.5
-        },
-        {
-          "modeName": "Постоянное давление CP2",
-          "speedIndex": 2,
-          "powerWatts": 50,
-          "coefficients": {
-            "a": -0.15,
-            "b": -0.02,
-            "c": 5.4
-          },
-          "qMinM3h": 0.2,
-          "qMaxM3h": 4
-        }
-      ]
-    },
-    {
       "id": "pump-grundfos-ups-25-40-180",
       "brand": "Grundfos",
       "series": "UPS",
       "model": "UPS 25-40 180",
-      "segment": "premium",
+      "segment": "medium",
       "country": "Denmark",
       "type": "three_speed",
-      "price": 1250,
+      "price": 1625,
       "connections": {
         "mountingLengthMm": 180,
         "threadInch": "1 1/2",
@@ -2265,40 +2224,346 @@
       },
       "operatingModes": [
         {
-          "modeName": "Скорость 3",
-          "speedIndex": 3,
-          "powerWatts": 45,
+          "modeName": "Скорость 1",
+          "speedIndex": 1,
+          "powerWatts": 25,
           "coefficients": {
-            "a": -0.45,
-            "b": -0.06,
-            "c": 4
+            "a": -0.454,
+            "b": -0.608,
+            "c": 1.93
           },
-          "qMinM3h": 0.4,
-          "qMaxM3h": 3.5
+          "qMinM3h": 0.09,
+          "qMaxM3h": 1.43
         },
         {
           "modeName": "Скорость 2",
           "speedIndex": 2,
           "powerWatts": 35,
           "coefficients": {
-            "a": -0.4,
-            "b": -0.05,
-            "c": 3.2
+            "a": -0.398,
+            "b": -0.683,
+            "c": 2.73
           },
-          "qMinM3h": 0.3,
-          "qMaxM3h": 2.6
+          "qMinM3h": 0.09,
+          "qMaxM3h": 1.804
         },
+        {
+          "modeName": "Скорость 3",
+          "speedIndex": 3,
+          "powerWatts": 45,
+          "coefficients": {
+            "a": -0.34,
+            "b": -0.714,
+            "c": 3.5
+          },
+          "qMinM3h": 0.1,
+          "qMaxM3h": 2.2
+        }
+      ]
+    },
+    {
+      "id": "pump-grundfos-ups-25-60-180",
+      "brand": "Grundfos",
+      "series": "UPS",
+      "model": "UPS 25-60 180",
+      "segment": "medium",
+      "country": "Denmark",
+      "type": "three_speed",
+      "price": 2750,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "1 1/2",
+        "nominalDiameterMm": 25
+      },
+      "operatingModes": [
         {
           "modeName": "Скорость 1",
           "speedIndex": 1,
-          "powerWatts": 25,
+          "powerWatts": 50,
           "coefficients": {
-            "a": -0.35,
-            "b": -0.01,
-            "c": 2.2
+            "a": -0.32,
+            "b": -0.608,
+            "c": 2.86
+          },
+          "qMinM3h": 0.18,
+          "qMaxM3h": 2.08
+        },
+        {
+          "modeName": "Скорость 2",
+          "speedIndex": 2,
+          "powerWatts": 70,
+          "coefficients": {
+            "a": -0.275,
+            "b": -0.671,
+            "c": 4.06
+          },
+          "qMinM3h": 0.18,
+          "qMaxM3h": 2.624
+        },
+        {
+          "modeName": "Скорость 3",
+          "speedIndex": 3,
+          "powerWatts": 90,
+          "coefficients": {
+            "a": -0.233,
+            "b": -0.7,
+            "c": 5.2
           },
           "qMinM3h": 0.2,
-          "qMaxM3h": 1.7
+          "qMaxM3h": 3.2
+        }
+      ]
+    },
+    {
+      "id": "pump-grundfos-ups-32-80-180",
+      "brand": "Grundfos",
+      "series": "UPS",
+      "model": "UPS 32-80 180",
+      "segment": "medium",
+      "country": "Denmark",
+      "type": "three_speed",
+      "price": 4015,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "2",
+        "nominalDiameterMm": 32
+      },
+      "operatingModes": [
+        {
+          "modeName": "Скорость 1",
+          "speedIndex": 1,
+          "powerWatts": 74,
+          "coefficients": {
+            "a": -0.11,
+            "b": -0.415,
+            "c": 3.96
+          },
+          "qMinM3h": 0.45,
+          "qMaxM3h": 4.225
+        },
+        {
+          "modeName": "Скорость 2",
+          "speedIndex": 2,
+          "powerWatts": 105,
+          "coefficients": {
+            "a": -0.093,
+            "b": -0.456,
+            "c": 5.62
+          },
+          "qMinM3h": 0.45,
+          "qMaxM3h": 5.33
+        },
+        {
+          "modeName": "Скорость 3",
+          "speedIndex": 3,
+          "powerWatts": 135,
+          "coefficients": {
+            "a": -0.079,
+            "b": -0.475,
+            "c": 7.2
+          },
+          "qMinM3h": 0.5,
+          "qMaxM3h": 6.5
+        }
+      ]
+    },
+    {
+      "id": "pump-wilo-yonos-para-rs-25-6-rka",
+      "brand": "Wilo",
+      "series": "Yonos PARA",
+      "model": "Yonos PARA RS 25/6 RKA",
+      "segment": "premium",
+      "country": "Germany",
+      "type": "electronic",
+      "price": 5200,
+      "connections": {
+        "mountingLengthMm": 130,
+        "threadInch": "1 1/2",
+        "nominalDiameterMm": 25
+      },
+      "operatingModes": [
+        {
+          "modeName": "Δp-v (переменный перепад)",
+          "speedIndex": 1,
+          "powerWatts": 45,
+          "coefficients": {
+            "a": -0.292,
+            "b": -0.789,
+            "c": 5.06
+          },
+          "qMinM3h": 0.1,
+          "qMaxM3h": 2.8
+        },
+        {
+          "modeName": "Δp-c (постоянный перепад)",
+          "speedIndex": 2,
+          "powerWatts": 38,
+          "coefficients": {
+            "a": -0.257,
+            "b": -0.622,
+            "c": 3.85
+          },
+          "qMinM3h": 0.1,
+          "qMaxM3h": 2.52
+        }
+      ]
+    },
+    {
+      "id": "pump-wilo-star-rs-25-4-180",
+      "brand": "Wilo",
+      "series": "Star-RS",
+      "model": "Star-RS 25/4 180",
+      "segment": "medium",
+      "country": "Germany",
+      "type": "three_speed",
+      "price": 1700,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "1 1/2",
+        "nominalDiameterMm": 25
+      },
+      "operatingModes": [
+        {
+          "modeName": "Скорость 1",
+          "speedIndex": 1,
+          "powerWatts": 26,
+          "coefficients": {
+            "a": -0.557,
+            "b": -0.674,
+            "c": 1.93
+          },
+          "qMinM3h": 0.09,
+          "qMaxM3h": 1.3
+        },
+        {
+          "modeName": "Скорость 2",
+          "speedIndex": 2,
+          "powerWatts": 37,
+          "coefficients": {
+            "a": -0.487,
+            "b": -0.755,
+            "c": 2.73
+          },
+          "qMinM3h": 0.09,
+          "qMaxM3h": 1.64
+        },
+        {
+          "modeName": "Скорость 3",
+          "speedIndex": 3,
+          "powerWatts": 48,
+          "coefficients": {
+            "a": -0.416,
+            "b": -0.789,
+            "c": 3.5
+          },
+          "qMinM3h": 0.1,
+          "qMaxM3h": 2
+        }
+      ]
+    },
+    {
+      "id": "pump-wilo-star-rs-25-6-180",
+      "brand": "Wilo",
+      "series": "Star-RS",
+      "model": "Star-RS 25/6 180",
+      "segment": "medium",
+      "country": "Germany",
+      "type": "three_speed",
+      "price": 2600,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "1 1/2",
+        "nominalDiameterMm": 25
+      },
+      "operatingModes": [
+        {
+          "modeName": "Скорость 1",
+          "speedIndex": 1,
+          "powerWatts": 46,
+          "coefficients": {
+            "a": -0.334,
+            "b": -0.59,
+            "c": 2.64
+          },
+          "qMinM3h": 0.18,
+          "qMaxM3h": 1.95
+        },
+        {
+          "modeName": "Скорость 2",
+          "speedIndex": 2,
+          "powerWatts": 66,
+          "coefficients": {
+            "a": -0.285,
+            "b": -0.649,
+            "c": 3.74
+          },
+          "qMinM3h": 0.18,
+          "qMaxM3h": 2.46
+        },
+        {
+          "modeName": "Скорость 3",
+          "speedIndex": 3,
+          "powerWatts": 84,
+          "coefficients": {
+            "a": -0.242,
+            "b": -0.679,
+            "c": 4.8
+          },
+          "qMinM3h": 0.2,
+          "qMaxM3h": 3
+        }
+      ]
+    },
+    {
+      "id": "pump-wilo-star-rs-15-4-130",
+      "brand": "Wilo",
+      "series": "Star-RS",
+      "model": "Star-RS 15/4 130",
+      "segment": "budget",
+      "country": "Germany",
+      "type": "three_speed",
+      "price": 1500,
+      "connections": {
+        "mountingLengthMm": 130,
+        "threadInch": "1",
+        "nominalDiameterMm": 15
+      },
+      "operatingModes": [
+        {
+          "modeName": "Скорость 1",
+          "speedIndex": 1,
+          "powerWatts": 26,
+          "coefficients": {
+            "a": -0.853,
+            "b": -0.789,
+            "c": 1.76
+          },
+          "qMinM3h": 0.05,
+          "qMaxM3h": 0.975
+        },
+        {
+          "modeName": "Скорость 2",
+          "speedIndex": 2,
+          "powerWatts": 37,
+          "coefficients": {
+            "a": -0.758,
+            "b": -0.894,
+            "c": 2.5
+          },
+          "qMinM3h": 0.05,
+          "qMaxM3h": 1.23
+        },
+        {
+          "modeName": "Скорость 3",
+          "speedIndex": 3,
+          "powerWatts": 48,
+          "coefficients": {
+            "a": -0.642,
+            "b": -0.931,
+            "c": 3.2
+          },
+          "qMinM3h": 0.05,
+          "qMaxM3h": 1.5
         }
       ]
     }

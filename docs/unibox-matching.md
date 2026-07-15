@@ -77,7 +77,7 @@ Hard-filter каталога по `roomType` нет. Пол T воздуха —
 
 1. В отчёте ТП есть комнаты с `ufhTerminalControl=unibox` и петлями `loopLengthM > 0`.
 2. Задан `temps.insideC` (иначе пустой отчёт) — база для T воздуха.
-3. Число таких петель > `UNIBOX_MAX_LOOPS_FOR_MATCHING` (2) — **мягкое** предупреждение, подбор **не** отменяется (явный выбор в анкете).
+3. Число таких петель ≥ `UNIBOX_MAX_LOOPS_FOR_MATCHING` (4) — **мягкое** предупреждение, подбор **не** отменяется (явный выбор в анкете). До 3 петель предупреждения нет.
 4. Каскад коллекторов ТП **не** блокирует явные unibox-зоны.
 5. `manifolds.ok === false` — informational warning, подбор продолжается.
 6. На каждую петлю — `validateUniboxLoopDemand` + паспорт. Fail → `selected: null` + warning.
@@ -112,6 +112,6 @@ matchEquipment → (резолв distributionPreset ТП) → pickManifolds → 
 cd backend && npm run verify:unibox-matching
 ```
 
-Кейсы: границы паспорта; санузел → T воздуха 24; коридор/прихожая/тамбур → анкета; `ufhTerminalControl=collector` → нет demands; mixed (только санузел unibox) → один byLoop; >2 явных unibox → soft warning, подбор идёт; каскад коллекторов не блокирует; `manifolds.ok=false` → informational warning в `matching.uniboxes.warnings` (не в `byLoop`); пул через `validateAndNormalizeCatalog`; Δp=0 в `minKvM3hForFlowLph` → finite; flow=0 → `selected: null`; invalid ΔT → null.
+Кейсы: границы паспорта; санузел → T воздуха 24; коридор/прихожая/тамбур → анкета; `ufhTerminalControl=collector` → нет demands; mixed (только санузел unibox) → один byLoop; 3 явных unibox → без soft warning; ≥4 → soft warning, подбор идёт; каскад коллекторов не блокирует; `manifolds.ok=false` → informational warning в `matching.uniboxes.warnings` (не в `byLoop`); пул через `validateAndNormalizeCatalog`; Δp=0 в `minKvM3hForFlowLph` → finite; flow=0 → `selected: null`; invalid ΔT → null.
 
 Входит в общий `npm run verify`.

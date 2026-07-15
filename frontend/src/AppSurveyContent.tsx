@@ -579,13 +579,6 @@ export function AppSurveyContent({
               </p>
             )}
 
-            {currentStep === 'warmFloor' && (
-              <p className={styles.hint} style={{ marginTop: 8 }}>
-                Отметьте наличие водяного тёплого пола — для конденсационного
-                контура это типичный партнёр низкотемпературной подачи.
-              </p>
-            )}
-
             {/* Температуры (MVP): относятся к объекту */}
             {currentStep === 'object' && (
               <div className={styles.tempRow}>
@@ -829,10 +822,13 @@ export function AppSurveyContent({
                 onDistributionPresetChange={(preset) => {
                   dispatch({ type: 'UFH_DISTRIBUTION_PRESET_SET', preset });
                 }}
+                underfloorHeatingReport={apiUnderfloorHeatingFromReport}
+                uniboxesReport={apiUniboxesFromReport}
+                hydraulicsPumps={apiHydraulicsFromReport?.proposal?.pumps ?? null}
               />
             )}
 
-            {showCalcApiBar && (
+            {import.meta.env.DEV && showCalcApiBar && (
               <div className={styles.calcApiBar}>
                 {autoCalcBlockedReason != null ? (
                   <p className={styles.calcApiBarWarn}>

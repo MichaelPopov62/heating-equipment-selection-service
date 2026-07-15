@@ -391,8 +391,8 @@ assert.equal(badDtReport.byLoop.length, 1);
 assert.equal(assertAt(badDtReport.byLoop, 0).selected, null);
 assert.ok(badDtReport.warnings.some((w) => w.includes('обратка') || w.includes('UNIBOX') || w.includes('<')));
 
-// >2 петель з явним unibox — підбір триває, м'яке попередження
-const manyLoopsRoom = buildUfhReport({
+// 3 петлі з явним unibox — без м'якого попередження (поріг від 4)
+const threeLoopsRoom = buildUfhReport({
   rooms: [
     buildUfhRoom('r1', 'Комната', 3, {
       heatedAreaM2: 12,
@@ -408,12 +408,38 @@ const manyLoopsRoom = buildUfhReport({
   totalHeatFluxUpWatts: 600,
   totalHeatFluxDownWatts: 120,
 });
-const tooMany = pickUniboxes({
+const threeLoopsPick = pickUniboxes({
   catalog,
-  underfloorHeating: manyLoopsRoom,
+  underfloorHeating: threeLoopsRoom,
   roomAirTempC: 20,
 });
-assert.equal(tooMany.byLoop.length, 3);
+assert.equal(threeLoopsPick.byLoop.length, 3);
+assert.ok(!threeLoopsPick.warnings.some((w) => w.includes('унибоксом')));
+
+// ≥4 петель з явним unibox — підбір триває, м'яке попередження
+const fourLoopsRoom = buildUfhReport({
+  rooms: [
+    buildUfhRoom('r1', 'Комната', 3, {
+      heatedAreaM2: 12,
+      areaM2: 12,
+      ufhTerminalControl: 'unibox',
+      loops: [
+        { loopId: 'a', loopLengthM: 40, heatLoadWatts: 200, flowRateM3PerHour: 0.03 },
+        { loopId: 'b', loopLengthM: 40, heatLoadWatts: 200, flowRateM3PerHour: 0.03 },
+        { loopId: 'c', loopLengthM: 40, heatLoadWatts: 200, flowRateM3PerHour: 0.03 },
+        { loopId: 'd', loopLengthM: 40, heatLoadWatts: 200, flowRateM3PerHour: 0.03 },
+      ],
+    }),
+  ],
+  totalHeatFluxUpWatts: 800,
+  totalHeatFluxDownWatts: 160,
+});
+const tooMany = pickUniboxes({
+  catalog,
+  underfloorHeating: fourLoopsRoom,
+  roomAirTempC: 20,
+});
+assert.equal(tooMany.byLoop.length, 4);
 assert.ok(tooMany.warnings.some((w) => w.includes('унибоксом')));
 
 // Каскад коллекторов не блокує явні unibox-зони

@@ -117,8 +117,12 @@ returnC = supplyC − 10
 ## Frontend
 
 - Карточки режима: `UfhPresetCards`, загрузка `useUfhModePresetsQuery` (`frontend/src/query/`)
-- Секция: `WarmFloorSection` — при `ufh_only` скрыта схема распределения ТП
+- Секция: `WarmFloorSection` на шаге `warmFloor` (`SURVEY_STEPS`: после `object`, перед `rooms`); при `ufh_only` скрыта схема распределения ТП
+- Полный отчёт ТП + унибоксы + насос зоны ТП (при смесителе): кнопка «Отчёт по расчёту ТП»
+- Итог (сайдбар): `UnderfloorHeatingSummaryTable` — агрегаты и warnings
+- Котловой насос — в блоке гидравлики «Итог» (`boiler_primary`), не в отчёте ТП
 - Payload: `buildCalcRequestPayload.ts` — `ufhPresetId`, `heatingEmittersMode`
+- Порядок шагов: [`frontend-calc-runner.md`](frontend-calc-runner.md) § «Шаги анкеты» / § «UI блока Тёплый пол»
 
 ---
 

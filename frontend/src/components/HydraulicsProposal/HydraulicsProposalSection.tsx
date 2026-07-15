@@ -8,13 +8,14 @@ import type {
   ParsedHydraulicsPipeLine,
   ParsedHydraulicsPipeLineGroup,
   ParsedHydraulicsProposal,
-  ParsedHydraulicsPumpProposal,
   ParsedHydraulicsView,
 } from '../../types/hydraulics';
 import {
   formatBrandModel,
   formatPriceUah,
 } from '../../utils/format';
+import { excludeUfhZonePumps } from '../../utils/ufhHydraulicsPumps';
+import { HydraulicsPumpCard } from './HydraulicsPumpCard';
 import styles from './HydraulicsProposalSection.module.css';
 
 type HydraulicsProposalSectionProps = {
@@ -48,9 +49,9 @@ function topologyLabel(topology: ParsedHydraulicsProposal['topology']): string |
     case 'direct':
       return 'Прямое подключение (суммарный расход контуров).';
     case 'mixing_valve':
-      return 'Смесительный узел ТП — отдельный насос контура пола.';
+      return 'Смесительный узел ТП — насос контура пола в отчёте шага «Тёплый пол».';
     case 'hydraulic_separator':
-      return 'Гидрострелка — первичный и зональные контуры.';
+      return 'Гидрострелка — первичный контур здесь; насос ТП в отчёте шага «Тёплый пол».';
     default:
       return null;
   }
@@ -214,51 +215,6 @@ function PipeLinesTable({
   );
 }
 
-function PumpCard({ pump }: { pump: ParsedHydraulicsPumpProposal }) {
-  return (
-    <div className={styles.pumpCard} aria-labelledby={`hyd-pump-${pump.zoneId}`}>
-      <h4 id={`hyd-pump-${pump.zoneId}`} className={styles.subTitle}>
-        {pump.zoneLabel}
-      </h4>
-      {pump.note && <p className={styles.hint}>{pump.note}</p>}
-      <dl className={styles.dl}>
-        <dt>{pump.pumpSource === 'boiler_builtin' ? 'Котёл' : 'Модель'}</dt>
-        <dd className={styles.valueStrong}>
-          {formatBrandModel(pump.brand, pump.model)}
-        </dd>
-        <dt>Расчётный расход</dt>
-        <dd>
-          {pump.designFlowM3PerHour.toFixed(3)} <span className={styles.unit}>м³/ч</span>
-        </dd>
-        <dt>Режим работы</dt>
-        <dd>{pump.modeName}</dd>
-        <dt>Напор при расчётном расходе</dt>
-        <dd>
-          {pump.headAtDesignM.toFixed(2)} <span className={styles.unit}>м</span>
-          {' '}
-          <span className={styles.hintInline}>
-            (запас {pump.headMarginPercent.toFixed(1)} %)
-          </span>
-        </dd>
-        {pump.connectionNominalMm != null && (
-          <>
-            <dt>Условный диаметр подключения</dt>
-            <dd>DN{pump.connectionNominalMm}</dd>
-          </>
-        )}
-        {pump.price > 0 && (
-          <>
-            <dt>Цена в каталоге</dt>
-            <dd className={styles.valueStrong}>
-              {formatPriceUah(pump.price)} <span className={styles.unit}>грн</span>
-            </dd>
-          </>
-        )}
-      </dl>
-    </div>
-  );
-}
-
 function ProposalContent({
   proposal,
   catalogSource,
@@ -272,6 +228,9 @@ function ProposalContent({
       : catalogSource === 'file'
         ? 'Подбор по каталогу из файла (локальные данные API).'
         : null;
+
+  /** Зоны ТП — только в отчёте шага «Тёплый пол». */
+  const pumpsForHydraulics = excludeUfhZonePumps(proposal.pumps);
 
   return (
     <>
@@ -307,14 +266,14 @@ function ProposalContent({
         <p className={styles.emptyHint}>{proposal.unavailableReason}</p>
       )}
 
-      {proposal.pumpUnavailableReason && proposal.pumps.length === 0 && (
+      {proposal.pumpUnavailableReason && pumpsForHydraulics.length === 0 && (
         <p className={styles.hint}>{proposal.pumpUnavailableReason}</p>
       )}
 
-      {proposal.pumps.length > 0 && (
+      {pumpsForHydraulics.length > 0 && (
         <div className={styles.pumpsList}>
-          {proposal.pumps.map((p) => (
-            <PumpCard key={p.zoneId} pump={p} />
+          {pumpsForHydraulics.map((p) => (
+            <HydraulicsPumpCard key={p.zoneId} pump={p} />
           ))}
         </div>
       )}

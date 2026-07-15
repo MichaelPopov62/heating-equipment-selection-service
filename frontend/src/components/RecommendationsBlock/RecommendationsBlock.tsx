@@ -10,19 +10,14 @@ import {
   formatAreaM2,
   formatCoefficient,
   formatFlowLps,
-  formatHeatFluxWm2,
   formatKw,
   formatLiters,
-  formatTempC,
-  formatWatts,
 } from '../../utils/format';
 import { BoilerProposalCard } from '../BoilerProposalCard/BoilerProposalCard';
 import { RadiatorProposalLineTable } from '../RadiatorProposalLineTable/RadiatorProposalLineTable';
 import { WaterHeaterMatchingPreview } from '../WaterHeaterMatchingPreview/WaterHeaterMatchingPreview';
 import { CatalogEquipmentReference } from '../CatalogEquipmentReference/CatalogEquipmentReference';
-import { UfhMixingNodeSpecCard } from '../UnderfloorHeatingReport/UfhMixingNodeSpecCard';
-import { UfhLoopHydraulicsTable } from '../UnderfloorHeatingReport/UfhLoopHydraulicsTable';
-import { UniboxMatchingSection } from '../UnderfloorHeatingReport/UniboxMatchingSection';
+import { UnderfloorHeatingSummaryTable } from '../UnderfloorHeatingReport/UnderfloorHeatingSummaryTable';
 import { HydraulicsProposalSection } from '../HydraulicsProposal/HydraulicsProposalSection';
 import styles from './RecommendationsBlock.module.css';
 
@@ -122,220 +117,13 @@ export function RecommendationsBlock({
           </dl>
         </div>
 
-        {apiUnderfloorHeatingFromReport != null
-          && (apiUnderfloorHeatingFromReport.rooms.length > 0
-            || apiUnderfloorHeatingFromReport.warnings.length > 0) && (
-            <div className={styles.summaryGroup} aria-labelledby="underfloor-heating-title">
-              <h3 id="underfloor-heating-title">Тёплый пол</h3>
-              {apiUnderfloorHeatingFromReport.rooms.length === 0 ? (
-                <div className={styles.hint} style={{ marginBottom: 8 }}>
-                  Режим ТП включён в анкете, но нет комнат с включённым тёплым полом.
-                  На шаге «Помещения» отметьте «Тёплый пол в этом помещении» и задайте основу + финиш.
-                </div>
-              ) : (
-                <div className={styles.hint} style={{ marginBottom: 8 }}>
-                  Источник: расчёт API (warmFloorCalc) · контур{' '}
-                  {apiUnderfloorHeatingFromReport.circuitSupplyC}/
-                  {apiUnderfloorHeatingFromReport.circuitReturnC} °C
-                  {apiUnderfloorHeatingFromReport.circuitSource === 'mixed_default'
-                    ? ' (типичный смесительный узел)'
-                    : apiUnderfloorHeatingFromReport.circuitSource === 'finish_preset'
-                      ? ' (по финишу покрытия)'
-                      : apiUnderfloorHeatingFromReport.circuitSource === 'ufh_mode_preset'
-                        ? ' (пресет режима ТП)'
-                        : ''}
-                  {apiUnderfloorHeatingFromReport.isMixingNodeRequired
-                    ? ' · требуется смесительный узел'
-                    : ''}
-                </div>
-              )}
-              {apiUnderfloorHeatingFromReport.rooms.length > 0 && (
-                <>
-              {apiUnderfloorHeatingFromReport.mixingNode != null && (
-                <UfhMixingNodeSpecCard mixingNode={apiUnderfloorHeatingFromReport.mixingNode} />
-              )}
-              {apiUnderfloorHeatingFromReport.underfloorHydraulics != null && (
-                <dl style={{ marginTop: 10 }}>
-                  <dt>Гидравлика контура ТП</dt>
-                  <dd>
-                    Δt = {apiUnderfloorHeatingFromReport.underfloorHydraulics.deltaTK} K, расход{' '}
-                    {apiUnderfloorHeatingFromReport.underfloorHydraulics.flowRateM3PerHour} м³/ч
-                  </dd>
-                </dl>
-              )}
-              <dl>
-                <dt>Суммарная отдача вверх</dt>
-                <dd>
-                  {formatKw(apiUnderfloorHeatingFromReport.totalHeatFluxUpWatts / 1000, 2)}{' '}
-                  <span>кВт</span>
-                  <span className={styles.radiatorsTotalSource}>
-                    {' '}
-                    ({formatWatts(apiUnderfloorHeatingFromReport.totalHeatFluxUpWatts)} Вт)
-                  </span>
-                </dd>
-                <dt>Паразитный поток вниз</dt>
-                <dd>
-                  {formatKw(apiUnderfloorHeatingFromReport.totalHeatFluxDownWatts / 1000, 2)}{' '}
-                  <span>кВт</span>
-                  <span className={styles.radiatorsTotalSource}>
-                    {' '}
-                    ({formatWatts(apiUnderfloorHeatingFromReport.totalHeatFluxDownWatts)} Вт)
-                  </span>
-                </dd>
-              </dl>
-              {apiUnderfloorHeatingFromReport.rooms.map((room) => (
-                <div key={room.roomId} className={styles.boilerCalcSummary} style={{ marginTop: 10 }}>
-                  <h4 className={styles.boilerCalcSummaryTitle}>{room.roomName}</h4>
-                  <dl className={styles.boilerCalcDl}>
-                    <dt>Основа</dt>
-                    <dd>{room.basePresetName}</dd>
-                    <dt>Покрытие</dt>
-                    <dd>{room.finishMaterialName}</dd>
-                    {room.heatedAreaM2 != null && room.heatedAreaM2 > 0 && (
-                      <>
-                        <dt>S_акт (пол под ТП)</dt>
-                        <dd>
-                          {room.heatedAreaM2.toFixed(1)} <span>м²</span>
-                          {room.furnitureOccupiedAreaM2 != null && room.furnitureOccupiedAreaM2 > 0 && (
-                            <span className={styles.radiatorsTotalSource}>
-                              {' '}
-                              (мебель {room.furnitureOccupiedAreaM2.toFixed(1)} м²
-                              {room.roomAreaM2 != null ? ` из ${room.roomAreaM2.toFixed(1)} м²` : ''})
-                            </span>
-                          )}
-                        </dd>
-                      </>
-                    )}
-                    {room.requiredHeatFluxUpWm2 != null && room.requiredHeatFluxUpWm2 > 0 && (
-                      <>
-                        <dt>q_треб (на S_акт)</dt>
-                        <dd>
-                          {formatHeatFluxWm2(room.requiredHeatFluxUpWm2)} <span>Вт/м²</span>
-                        </dd>
-                      </>
-                    )}
-                    <dt>Шаг укладки</dt>
-                    <dd>
-                      {room.pipeSpacingMm} <span>мм</span>
-                      {room.requestedPipeSpacingMm != null
-                        && room.resolvedPipeSpacingMm != null
-                        && room.requestedPipeSpacingMm !== room.resolvedPipeSpacingMm && (
-                          <span className={styles.radiatorsTotalSource}>
-                            {' '}
-                            (запрошено {room.requestedPipeSpacingMm} мм)
-                          </span>
-                        )}
-                      <span className={styles.radiatorsTotalSource}>
-                        {' '}
-                        (R_embed {room.pipeEmbedmentResistanceM2KW.toFixed(3)} м²·K/Вт)
-                      </span>
-                    </dd>
-                    <dt>q↑ (в комнату)</dt>
-                    <dd>
-                      {formatHeatFluxWm2(room.heatFluxUpWm2)} <span>Вт/м²</span> (
-                      {formatWatts(room.heatFluxUpWatts)} Вт)
-                    </dd>
-                    <dt>q↓ (вниз)</dt>
-                    <dd>
-                      {formatHeatFluxWm2(room.heatFluxDownWm2)} <span>Вт/м²</span> (
-                      {formatWatts(room.heatFluxDownWatts)} Вт)
-                    </dd>
-                    <dt>T поверхности</dt>
-                    <dd
-                      className={
-                        room.surfaceTempC > room.maxSurfaceTemperatureCelsius
-                        || (room.comfortMaxSurfaceTemperatureCelsius != null
-                          && room.surfaceTempC > room.comfortMaxSurfaceTemperatureCelsius)
-                          ? styles.totalValue
-                          : undefined
-                      }
-                    >
-                      {formatTempC(room.surfaceTempC)} <span>°C</span>
-                      <span className={styles.radiatorsTotalSource}>
-                        {' '}
-                        (
-                        {room.presetMaxSurfaceTemperatureCelsius != null
-                          ? `применённый лимит ${formatTempC(room.maxSurfaceTemperatureCelsius)} °C`
-                          : `лимит материала ${formatTempC(room.maxSurfaceTemperatureCelsius)} °C`}
-                        {room.finishMaxSurfaceTemperatureCelsius != null
-                          && room.presetMaxSurfaceTemperatureCelsius != null
-                          && room.finishMaxSurfaceTemperatureCelsius
-                            > room.presetMaxSurfaceTemperatureCelsius
-                          ? `, паспорт покрытия ${formatTempC(room.finishMaxSurfaceTemperatureCelsius)} °C`
-                          : ''}
-                        {room.comfortMaxSurfaceTemperatureCelsius != null
-                          ? `, комфорт ${formatTempC(room.comfortMaxSurfaceTemperatureCelsius)} °C`
-                          : ''}
-                        )
-                      </span>
-                    </dd>
-                    <dt>Rλ,B финиша</dt>
-                    <dd>
-                      {room.finishCoveringResistanceM2KW.toFixed(4)} <span>м²·K/Вт</span>
-                    </dd>
-                    <dt>Rλ,B (основа + финиш)</dt>
-                    <dd>
-                      {room.coveringResistanceM2KW.toFixed(4)} <span>м²·K/Вт</span>
-                    </dd>
-                    {room.maxAllowableHeatFluxUpWm2 > 0 && (
-                      <>
-                        <dt>q↑ допустимо при лимите T</dt>
-                        <dd>
-                          {formatHeatFluxWm2(room.maxAllowableHeatFluxUpWm2)} <span>Вт/м²</span>
-                        </dd>
-                      </>
-                    )}
-                    {room.loopsCount != null && room.loopsCount > 0 && (
-                      <>
-                        <dt>Число петель ТП</dt>
-                        <dd>{room.loopsCount}</dd>
-                      </>
-                    )}
-                    {room.loops != null && room.loops.length > 0 && (
-                      <>
-                        <dt>Σ длина петель</dt>
-                        <dd>
-                          {room.loops
-                            .reduce((sum, loop) => sum + loop.loopLengthM, 0)
-                            .toFixed(1)}{' '}
-                          <span>м</span>
-                        </dd>
-                      </>
-                    )}
-                  </dl>
-                  {room.loops != null && room.loops.length > 0 && (
-                    <UfhLoopHydraulicsTable
-                      loopsCount={room.loopsCount ?? room.loops.length}
-                      loops={room.loops}
-                      {...(room.pipeResizeApplied !== undefined
-                        ? { pipeResizeApplied: room.pipeResizeApplied }
-                        : {})}
-                    />
-                  )}
-                  {room.warnings.length > 0 && (
-                    <ul className={styles.radiatorsWarningsList}>
-                      {room.warnings.map((w, i) => (
-                        <li key={`ufh-room-${room.roomId}-${i}`}>{w}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
-                </>
-              )}
-              {apiUnderfloorHeatingFromReport.warnings.length > 0 && (
-                <ul className={styles.radiatorsWarningsList}>
-                  {apiUnderfloorHeatingFromReport.warnings.map((w, i) => (
-                    <li key={`ufh-global-${i}`}>{w}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-
-        {apiUniboxesFromReport != null && (
-          <div className={styles.summaryGroup} aria-labelledby="unibox-matching-title">
-            <UniboxMatchingSection matching={apiUniboxesFromReport} />
+        {apiUnderfloorHeatingFromReport != null && (
+          <div className={styles.summaryGroup}>
+            <UnderfloorHeatingSummaryTable
+              underfloorHeating={apiUnderfloorHeatingFromReport}
+              uniboxes={apiUniboxesFromReport}
+              hydraulicsPumps={apiHydraulicsFromReport?.proposal?.pumps ?? null}
+            />
           </div>
         )}
 
