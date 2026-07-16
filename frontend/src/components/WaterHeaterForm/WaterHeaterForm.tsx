@@ -1,22 +1,22 @@
 /**
  * Назначение: Форма шага «Водонагреватель».
- * Описание: Стратегия подбора БКН/ЭВН, контекст потребления и превью результата API.
+ * Описание: Стратегия подбора БКН/ЭВН; полный отчёт matching — в модалке.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import type { ObjectType } from '../../types/envelope';
 import type { HotWaterBoilerPowerMatchingScheme } from '../../types/heatingMatching';
 import type { HotWaterFormValue } from '../../types/hotWater';
 import type { WaterHeaterFormValue } from '../../types/waterHeater';
-import type { ApiHotWater } from '../../types/recommendationsBlock';
 import type { ParsedIndirectWaterHeaterMatching } from '../../utils/parseIndirectWaterHeaterMatchingFromReport';
 import type { ParsedWaterHeaterMatching } from '../../utils/parseWaterHeaterMatchingFromReport';
-import { formatLiters } from '../../utils/format';
 import { getWaterHeaterSchemeOptions } from '../../utils/waterHeaterSchemeOptions';
 import { validateWaterHeaterForm } from '../../utils/validateWaterHeaterForm';
 import { shouldShowIndirectDhwSpaceCheckbox } from '../../../../shared/waterHeaterFormContract.js';
-import { WaterHeaterMatchingPreview } from '../WaterHeaterMatchingPreview/WaterHeaterMatchingPreview';
+import { WaterHeaterReportDialog } from '../WaterHeaterReport/WaterHeaterReportDialog';
+import { hasWaterHeaterReportContent } from '../WaterHeaterReport/hasWaterHeaterReportContent';
+import reportActionsStyles from '../SurveyNavigation/SurveyReportActions.module.css';
 import styles from './WaterHeaterForm.module.css';
 
 type Props = {
@@ -25,10 +25,11 @@ type Props = {
   objectType: ObjectType;
   apartmentLarge: boolean;
   hotWaterForm: HotWaterFormValue;
-  hotWaterReport: ApiHotWater;
   calcLoading: boolean;
   indirectMatching: ParsedIndirectWaterHeaterMatching | null;
   electricMatching: ParsedWaterHeaterMatching | null;
+  /** Прокрутка к итогу ЭБ/БКН в сайдбаре «Результаты». */
+  onBackToResults?: () => void;
 };
 
 export function WaterHeaterForm({
@@ -37,11 +38,17 @@ export function WaterHeaterForm({
   objectType,
   apartmentLarge,
   hotWaterForm,
-  hotWaterReport,
   calcLoading,
   indirectMatching,
   electricMatching,
+  onBackToResults,
 }: Props) {
+  const [reportOpen, setReportOpen] = useState(false);
+  const canOpenReport = hasWaterHeaterReportContent(
+    indirectMatching,
+    electricMatching,
+  );
+
   const schemeOptions = useMemo(
     () => getWaterHeaterSchemeOptions(objectType, apartmentLarge),
     [objectType, apartmentLarge],
@@ -66,22 +73,6 @@ export function WaterHeaterForm({
     objectType,
     value.hotWaterBoilerPowerMatchingScheme,
   );
-
-  const dhwScenarioLabel =
-    hotWaterReport?.dhwSupplyScenario === 'storage'
-      ? 'Накопительный (дом): объём бака и мощность нагрева бака'
-      : hotWaterReport?.dhwSupplyScenario === 'flowThrough'
-        ? 'Проточный пик (квартира): мощность от расхода и ΔT'
-        : objectType === 'house'
-          ? 'Накопительный (ожидается для дома после расчёта)'
-          : 'Проточный (ожидается для квартиры после расчёта)';
-
-  const recommendedTankLabel =
-    hotWaterReport?.recommendedTankLiters == null
-      ? '— (отправьте расчёт)'
-      : hotWaterReport.recommendedTankLiters === 0
-        ? 'Не применяется (проточный сценарий)'
-        : `${formatLiters(hotWaterReport.recommendedTankLiters)} л`;
 
   const handleSchemeChange = (scheme: HotWaterBoilerPowerMatchingScheme) => {
     const next: WaterHeaterFormValue = {
@@ -153,29 +144,10 @@ export function WaterHeaterForm({
         )}
       </div>
 
-      <div className={styles.contextSection}>
-        <h3 className={styles.sectionTitle}>Контекст расчёта</h3>
-        <dl className={styles.contextDl}>
-          <dt>Тип объекта</dt>
-          <dd>{objectType === 'apartment' ? 'Квартира' : 'Дом'}</dd>
-          <dt>Сценарий ГВС</dt>
-          <dd>{dhwScenarioLabel}</dd>
-          <dt>Рекомендуемый объём (расчёт ГВС)</dt>
-          <dd
-            className={
-              hotWaterReport?.recommendedTankLiters != null &&
-              hotWaterReport.recommendedTankLiters > 0
-                ? styles.contextValueHighlight
-                : undefined
-            }
-          >
-            {recommendedTankLabel}
-          </dd>
-        </dl>
-        <p className={styles.hint}>
-          Жильцы, температура ГВС и точки водоразбора — на шаге «Горячая вода».
-        </p>
-      </div>
+      <p className={styles.hint}>
+        Детали расчёта потребления (расход, мощность, объём бака) — на шаге
+        «Горячая вода», кнопка «Отчёт по расчёту ГВ».
+      </p>
 
       {validation.warnings.length > 0 && (
         <div className={styles.warningsSection} role="status">
@@ -188,17 +160,44 @@ export function WaterHeaterForm({
         </div>
       )}
 
-      <div className={styles.previewSection}>
-        <WaterHeaterMatchingPreview
-          sectionTitle="Результат подбора"
-          idPrefix="wh-form"
-          indirect={indirectMatching}
-          electric={electricMatching}
-          calcLoading={calcLoading}
-          showPendingHint
-          variant="embedded"
-        />
+      <div className={reportActionsStyles.reportActions}>
+        <div className={reportActionsStyles.reportActionsRow}>
+          <button
+            type="button"
+            className={reportActionsStyles.reportButton}
+            disabled={!canOpenReport}
+            onClick={() => { setReportOpen(true); }}
+          >
+            Отчёт по подбору водонагревателя
+          </button>
+          {onBackToResults != null && (
+            <button
+              type="button"
+              className={reportActionsStyles.backButton}
+              onClick={onBackToResults}
+            >
+              Назад к результатам
+            </button>
+          )}
+        </div>
+        {calcLoading && (
+          <p className={styles.hint} style={{ marginTop: 8 }} role="status">
+            Обновление подбора…
+          </p>
+        )}
+        {!canOpenReport && !calcLoading && (
+          <p className={styles.hint} style={{ marginTop: 8 }}>
+            Отчёт появится после авторасчёта с выбранной схемой ГВС.
+          </p>
+        )}
       </div>
+
+      <WaterHeaterReportDialog
+        open={reportOpen}
+        onClose={() => { setReportOpen(false); }}
+        indirect={indirectMatching}
+        electric={electricMatching}
+      />
     </div>
   );
 }

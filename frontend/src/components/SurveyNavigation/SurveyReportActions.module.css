@@ -1,0 +1,45 @@
+/* Назначение: Общие стили кнопок «Отчёт» / «Назад к результатам» на шагах ТП, ГВ, ВН. */
+
+.reportActions {
+  margin-top: 16px;
+}
+
+.reportActionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.reportButton {
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-2) 88%, var(--accent-bg) 12%);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font: 600 14px/1.2 var(--sans);
+  color: var(--text-h);
+}
+
+.reportButton:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+.reportButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.backButton {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font: 600 14px/1.2 var(--sans);
+  color: var(--text-h);
+}
+
+.backButton:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}

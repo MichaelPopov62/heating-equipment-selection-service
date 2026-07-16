@@ -25,7 +25,9 @@ properties:
   tropicalShowerVolumeFactor:
     type: number
     minimum: 0.01
-    description: Множитель объёма при tropicalShower (MVP — 1.3).
+    description: >
+      Множитель объёма при hotWater.tropicalShower (MVP — 1.3). Применяется к storage
+      (дом) и к нормам буферного/квартирного ЭВН до округления по typicalTankSizes.
     example: 1.3
   indirectHeatTimeMinutes:
     type: number

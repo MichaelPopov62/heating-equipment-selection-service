@@ -20,4 +20,4 @@ export type WaterHeaterProposalCardProps =
       data: ParsedWaterHeaterMatching;
     };
 
-export type WaterHeaterMatchingPreviewIdPrefix = 'wh-form' | 'sidebar';
+export type WaterHeaterMatchingPreviewIdPrefix = 'wh-report';

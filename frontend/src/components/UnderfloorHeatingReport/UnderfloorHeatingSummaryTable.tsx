@@ -12,6 +12,8 @@ import {
   ufhPumpSummaryLabel,
 } from '../../utils/ufhHydraulicsPumps';
 import { hasUnderfloorHeatingReportContent } from './hasUnderfloorHeatingReportContent';
+import { RESULTS_SECTION_IDS } from '../../constants/surveyResultsSections';
+import { SurveyStepLink } from '../SurveyNavigation/SurveyStepLink';
 import styles from './UnderfloorHeatingSummaryTable.module.css';
 
 export type UnderfloorHeatingSummaryTableProps = {
@@ -53,13 +55,19 @@ export function UnderfloorHeatingSummaryTable({
     || (uniboxes?.warnings.length ?? 0) > 0;
 
   return (
-    <div className={styles.wrap} aria-labelledby="underfloor-heating-summary-title">
+    <div
+      id={RESULTS_SECTION_IDS.warmFloor}
+      className={styles.wrap}
+      aria-labelledby="underfloor-heating-summary-title"
+    >
       <h3 id="underfloor-heating-summary-title" className={styles.title}>
         Тёплый пол (итог)
       </h3>
       {underfloorHeating.rooms.length === 0 ? (
         <p className={styles.hint}>
-          Режим ТП включён, но нет комнат с ТП. Детали — на шаге «Тёплый пол».
+          Режим ТП включён, но нет комнат с ТП. Детали — на шаге{' '}
+          <SurveyStepLink step="warmFloor">«Тёплый пол»</SurveyStepLink>
+          .
         </p>
       ) : (
         <div className={styles.tableWrap}>
@@ -108,9 +116,18 @@ export function UnderfloorHeatingSummaryTable({
           </table>
         </div>
       )}
+      {underfloorHeating.rooms.length > 0 && (
+        <p className={styles.hint}>
+          Детали расчёта по комнатам, унибоксам и насосу контура — на шаге{' '}
+          <SurveyStepLink step="warmFloor">«Тёплый пол»</SurveyStepLink>
+          .
+        </p>
+      )}
       {hasWarnings && (
         <p className={styles.attention}>
-          Обратите внимание на рекомендации и предупреждения в карте ТП.
+          Обратите внимание на рекомендации и предупреждения в карте{' '}
+          <SurveyStepLink step="warmFloor">«Тёплый пол»</SurveyStepLink>
+          .
         </p>
       )}
     </div>

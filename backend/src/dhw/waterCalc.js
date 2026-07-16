@@ -19,22 +19,22 @@ export function hotWaterThermalPowerKw(norms, flowLps, deltaTK) {
 }
 
 /**
+ * Legacy-норма накопичувача: жильці × л/особу, мін. при ванні.
+ * Множник tropicalShower застосовується в calculateHotWaterDemand
+ * один раз до combinedRaw (max legacy/сеанс), не тут.
+ *
  * @param {import('./types.js').NormalizedWaterNorms} norms
  * @param {number} residents
  * @param {number} bathCount
- * @param {boolean} tropicalShower
  * @returns {number}
  */
-export function recommendedStorageTankLitersRaw(norms, residents, bathCount, tropicalShower) {
+export function recommendedStorageTankLitersRaw(norms, residents, bathCount) {
   const { storage } = norms;
   const pop = Math.max(0, Math.trunc(Number(residents) || 0));
   const baths = Math.max(0, Math.trunc(Number(bathCount) || 0));
   let liters = pop * storage.litersPerResident;
   if (baths >= 1) {
     liters = Math.max(liters, storage.bathMinTankLiters);
-  }
-  if (tropicalShower) {
-    liters *= storage.tropicalShowerVolumeFactor;
   }
   return Math.ceil(liters);
 }

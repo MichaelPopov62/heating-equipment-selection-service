@@ -10,6 +10,7 @@ import {
   SCHEME_BOILER_SINGLE_INDIRECT_SUM,
 } from '../types/heatingMatching';
 import type { RoomFormValue } from '../types/rooms';
+import { normalizeHotWaterFixtures } from './normalizeHotWaterForm';
 
 /**
  * Квартира считается «крупной», если доступна схема 1К+БКН в UI
@@ -26,7 +27,8 @@ export function isApartmentLargeForIndirectScheme(
     const t = r.type.toLowerCase();
     return t === 'bathroom' || t.includes('сануз');
   }).length;
-  const bathPoints = fixtures.bath + fixtures.shower;
+  const fx = normalizeHotWaterFixtures(fixtures);
+  const bathPoints = fx.bath + fx.shower;
   return totalArea > 50 || Math.max(bathRooms, bathPoints) >= 2;
 }
 

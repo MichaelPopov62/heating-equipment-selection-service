@@ -768,7 +768,7 @@ export interface HotWaterReport {
   objectType?: BuildingObjectType;
   residents?: number;
   fixtures?: HotWaterFixturesInput;
-  /** Отметка «тропический душ» (накопительный сценарий). */
+  /** Отметка «тропический душ» (+30 % к объёму накопителя/буфера). */
   tropicalShower?: boolean;
   /** Зима / лето для расчётной ХВ (+5 °C / +15 °C). */
   coldWaterDesignSeason?: 'winter' | 'summer';

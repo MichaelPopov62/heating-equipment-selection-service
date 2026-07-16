@@ -8,13 +8,15 @@
 
 ## Пять схем `hotWaterBoilerPowerMatchingScheme`
 
-| Код API | Суть подбора `requiredKw` |
-|---------|---------------------------|
-| `maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw` | 2К: **max**(отопление×запас, ГВС); для дома с storage — пик `peakThermalPowerKw` |
-| `heatingLoadWithReserveOnlySeparateElectricStorageWaterHeater` | 1К: только отопление×запас; ГВС — электронакопитель |
-| `singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw` | 1К+БКН: отопление×запас **+** мощность нагрева бака; учёт `minSourcePowerKw` БКН |
-| `combiBoilerWithBufferElectricStorage` | 2К+буферный ЭВН: max(отопление×запас, пик ГВС); буфер из `water_norms.combiBufferElectricStorage` |
-| `singleCircuitBoilerWithBufferElectricStorage` | 1К+буферный ЭВН: котёл только по отоплению×запас; ГВС через накопитель (`water_norms.singleCircuitBufferElectricStorage`) |
+| Код API | Суть подбора `requiredKw` | Объём бака и `tropicalShower` |
+|---------|---------------------------|-------------------------------|
+| `maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw` | 2К: **max**(отопление×запас, ГВС); для дома с storage — пик `peakThermalPowerKw` | Дом storage/БКН: объём из `calculateHotWaterDemand` (+30 % при флаге) |
+| `heatingLoadWithReserveOnlySeparateElectricStorageWaterHeater` | 1К: только отопление×запас; ГВС — электронакопитель | Квартира: `apartmentElectricStorage` × `tropicalShowerVolumeFactor` при флаге (`buildReport`) |
+| `singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw` | 1К+БКН: отопление×запас **+** мощность нагрева бака; учёт `minSourcePowerKw` БКН | Storage-объём (дом или override квартиры) + tropical в `hotWater.js` |
+| `combiBoilerWithBufferElectricStorage` | 2К+буферный ЭВН: max(отопление×запас, пик ГВС); буфер из `water_norms.combiBufferElectricStorage` | Буфер: `recommendedCombiBufferTankLiters(…, tropicalShower)` |
+| `singleCircuitBoilerWithBufferElectricStorage` | 1К+буферный ЭВН: котёл только по отоплению×запас; ГВС через накопитель (`water_norms.singleCircuitBufferElectricStorage`) | Буфер: `recommendedSingleCircuitBufferTankLiters(…, tropicalShower)` |
+
+Множитель: `water_norms.storage.tropicalShowerVolumeFactor` (1.3). Детали — [`water-heater-form.md`](water-heater-form.md) § tropicalShower.
 
 Фильтр контура котла: `resolveBoilerCircuitFilterMode` в `backend/src/utils/boilerMatchingByType.js`.
 

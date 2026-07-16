@@ -24,29 +24,6 @@
   align-items: center;
 }
 
-.reportActions {
-  margin-top: 16px;
-}
-
-.reportButton {
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface-2) 88%, var(--accent-bg) 12%);
-  border-radius: 10px;
-  padding: 10px 14px;
-  cursor: pointer;
-  font: 600 14px/1.2 var(--sans);
-  color: var(--text-h);
-}
-
-.reportButton:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
-}
-
-.reportButton:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
 .fieldBlock {
   display: flex;
   flex-direction: column;

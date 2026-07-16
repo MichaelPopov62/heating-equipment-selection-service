@@ -1,6 +1,6 @@
 /**
  * Назначение: Превью подбора БКН и электробойлера.
- * Описание: Единая точка рендера карточек matching для формы и RecommendationsBlock.
+ * Описание: Единая точка рендера карточек matching (модалка отчёта шага «Водонагреватель»).
  */
 
 import type { WaterHeaterMatchingPreviewIdPrefix } from '../../types/waterHeaterMatching';
@@ -14,11 +14,11 @@ type Props = {
   electric: ParsedWaterHeaterMatching | null;
   idPrefix: WaterHeaterMatchingPreviewIdPrefix;
   calcLoading?: boolean;
-  /** Подсказка «после расчёта…» — только на шаге формы. */
+  /** Подсказка «после расчёта…», если карточек ещё нет. */
   showPendingHint?: boolean;
-  /** Заголовок секции (на форме — «Результат подбора»). */
+  /** Заголовок секции (в отчёте — «Результат подбора»). */
   sectionTitle?: string;
-  /** embedded — внутри previewSection формы; standalone — в сайдбаре. */
+  /** embedded — с отступами секции; standalone — без внешней рамки. */
   variant?: 'embedded' | 'standalone';
 };
 

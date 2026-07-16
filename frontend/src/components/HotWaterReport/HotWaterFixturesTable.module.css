@@ -1,0 +1,32 @@
+/* Назначение: Таблица точек водоразбора ГВ (модалка и сайдбар). */
+
+.tableWrap {
+  overflow-x: auto;
+  margin-bottom: 4px;
+}
+
+.fixturesTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.fixturesTable th,
+.fixturesTable td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.fixturesTable th {
+  font-weight: 600;
+  color: var(--text-m);
+  width: 65%;
+  background: var(--surface-2);
+}
+
+.totalRow {
+  font-weight: 700;
+  color: var(--text-h);
+}

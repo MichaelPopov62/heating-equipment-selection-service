@@ -126,11 +126,11 @@ export function calculateHotWaterDemand(input = {}, norms, options = {}) {
   if (dhwSupplyScenario === 'flowThrough') {
     recommendedTankLiters = 0;
   } else {
+    // Множник tropicalShower — один раз до combinedRaw (не в legacy-формулі).
     const rawTankLegacy = recommendedStorageTankLitersRaw(
       norms,
       residents,
       fixtures.bath,
-      tropicalShower,
     );
     sessionDemandLitersMixed = estimatePeakSessionLitersMixed(
       norms,
@@ -141,19 +141,21 @@ export function calculateHotWaterDemand(input = {}, norms, options = {}) {
       norms,
       sessionDemandLitersMixed,
     );
-    dhwTankLitersCombinedRaw = Math.max(
+    let combinedRaw = Math.max(
       rawTankLegacy,
       dhwEquivalentTankLitersFromSession,
     );
+    if (tropicalShower) {
+      combinedRaw = Math.ceil(
+        combinedRaw * norms.storage.tropicalShowerVolumeFactor,
+      );
+    }
+    dhwTankLitersCombinedRaw = combinedRaw;
 
     const fallbackTank =
       typicalTankSizes[typicalTankSizes.length - 1];
     if (fallbackTank === undefined) {
       throw new Error('water_norms.storage.typicalTankSizes пуст');
-    }
-    const combinedRaw = dhwTankLitersCombinedRaw;
-    if (combinedRaw === undefined) {
-      throw new Error('hotWater: dhwTankLitersCombinedRaw не вычислен');
     }
     recommendedTankLiters =
       typicalTankSizes.find((t) => t >= combinedRaw) ??

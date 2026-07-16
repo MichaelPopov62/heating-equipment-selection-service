@@ -22,6 +22,7 @@ import type { RoomFormValue } from '../types/rooms';
 import type { HydraulicsFormValue } from '../types/hydraulics';
 import type { WiringLayoutV3 } from '../surveySession/wiringLayoutV3';
 import { objectMetaForCalcPayload } from '../utils/objectMetaForCalcPayload';
+import { normalizeHotWaterForm } from '../utils/normalizeHotWaterForm';
 import { inferRoomExteriorLayout, wallEnvelopeEntriesForRoom } from '../utils/roomExteriorLayout';
 
 /**
@@ -47,7 +48,7 @@ export function buildCalcRequestPayload(params: {
     rooms,
     temps,
     objectMeta,
-    hotWaterForm,
+    hotWaterForm: hotWaterFormRaw,
     waterHeaterForm,
     windowPresets,
     waterUnderfloorHeating = false,
@@ -59,6 +60,8 @@ export function buildCalcRequestPayload(params: {
     hydraulicsForm,
     wiringLayoutV3,
   } = params;
+
+  const hotWaterForm = normalizeHotWaterForm(hotWaterFormRaw);
 
   const buildingRooms = rooms.map((r) => {
     const room: Record<string, unknown> = {

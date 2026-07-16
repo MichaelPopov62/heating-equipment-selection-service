@@ -10,6 +10,7 @@ import {
   type HotWaterBoilerPowerMatchingScheme,
 } from '../types/heatingMatching';
 import type { WaterHeaterFormValue } from '../types/waterHeater';
+import { countThermalFixtures } from './countThermalFixtures';
 
 export type WaterHeaterFormValidation = {
   /** Блокирующих ошибок нет — только подсказки. */
@@ -50,26 +51,12 @@ export function validateWaterHeaterForm(
     );
   }
 
-  const fx = hotWaterForm.fixtures;
-  const thermalPoints =
-    fx.shower +
-    fx.bath +
-    fx.sink +
-    fx.kitchenSink +
-    fx.dishwasher +
-    fx.laundrySink +
-    fx.washingMachine +
-    fx.bidet;
-
-  if (thermalPoints === 0 && hotWaterForm.residents === 0) {
+  if (
+    countThermalFixtures(hotWaterForm.fixtures) === 0
+    && hotWaterForm.residents === 0
+  ) {
     warnings.push(
       'На шаге «Горячая вода» не заданы жильцы и точки водоразбора — расчёт объёма и мощности ГВС может быть некорректным.',
-    );
-  }
-
-  if (objectType === 'apartment' && hotWaterForm.tropicalShower) {
-    warnings.push(
-      '«Тропический душ» влияет на объём накопителя для дома; для квартиры (проточный сценарий) параметр не меняет подбор котла.',
     );
   }
 

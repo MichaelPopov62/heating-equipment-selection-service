@@ -14,6 +14,9 @@ import type { ParsedUnderfloorHeating } from './underfloorHeating';
 import type { ParsedHydraulicsView } from './hydraulics';
 import type { ParsedUniboxesMatching } from '../utils/parseUniboxesMatchingFromReport';
 import type { SurveyUiPhase } from '../surveySession/types';
+import type { HotWaterFormFixtures } from './hotWater';
+import type { ParsedHotWaterReport } from './hotWaterReport';
+import type { SurveyCurrentStep } from './surveyStep';
 
 export type QuickEstimate = {
   totalAreaM2: number;
@@ -32,15 +35,8 @@ export type ApiHeatLoss = {
   totalHeatKw: number;
 } | null;
 
-export type ApiHotWater = {
-  peakFlowLps: number;
-  hotWaterPowerKw: number;
-  peakThermalPowerKw: number | null;
-  dhwSupplyScenario: 'flowThrough' | 'storage' | null;
-  recommendedTankLiters: number | null;
-  simultaneityFactor: number | null;
-  sumFlowLpsRaw: number | null;
-} | null;
+/** Расчёт ГВС из API — алиас ParsedHotWaterReport для обратной совместимости UI. */
+export type ApiHotWater = ParsedHotWaterReport | null;
 
 export type AutomationHint = {
   type: string;
@@ -53,6 +49,9 @@ export type RecommendationsBlockProps = {
   quickEstimate: QuickEstimate;
   apiHeatLoss: ApiHeatLoss;
   apiHotWaterFromReport: ApiHotWater;
+  /** Точки водоразбора из анкеты (live) — таблица в «Результатах». */
+  hotWaterFixtures: HotWaterFormFixtures;
+  waterHeaterScheme: HotWaterBoilerPowerMatchingScheme;
   apiBoilerFromReport: ParsedBoilerMatching | null;
   apiBoilerKw: number | null;
   apiRadiatorsFromReport: ParsedRadiatorsMatching | null;
@@ -74,4 +73,6 @@ export type RecommendationsBlockProps = {
   /** Единый флаг устаревания всех секций отчёта (pipeline recalculating). */
   reportIsStale?: boolean;
   uiPhase?: SurveyUiPhase;
+  /** Переход на шаг анкеты из inline-ссылок summary-блоков (делегирование клика). */
+  onNavigateToSurveyStep?: (step: SurveyCurrentStep) => void;
 };

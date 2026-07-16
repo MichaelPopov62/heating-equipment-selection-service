@@ -90,45 +90,77 @@ export function isLargeApartment(
 }
 
 /**
+ * Округлення потреби в літрах до типорозміру бака; опційно +tropicalShower.
+ * @param {import('../dhw/types.js').NormalizedWaterNorms} norms
+ * @param {number} needLiters
+ * @param {boolean} [tropicalShower]
+ * @returns {number}
+ */
+function snapTankLitersWithTropical(norms, needLiters, tropicalShower = false) {
+  let need = Math.max(0, Math.ceil(Number(needLiters) || 0));
+  if (tropicalShower) {
+    need = Math.ceil(need * norms.storage.tropicalShowerVolumeFactor);
+  }
+  const sizes = norms.storage.typicalTankSizes;
+  const fallback = sizes[sizes.length - 1];
+  if (fallback === undefined) {
+    throw new Error('water_norms.storage.typicalTankSizes пуст');
+  }
+  return sizes.find((t) => t >= need) ?? fallback;
+}
+
+/**
  * Объём электробойлера для квартиры (л) по норме apartmentElectricStorage.
  * @param {import('../dhw/types.js').NormalizedWaterNorms} norms
  * @param {number} residents
+ * @param {boolean} [tropicalShower]
  */
-export function recommendedApartmentElectricTankLiters(norms, residents) {
+export function recommendedApartmentElectricTankLiters(
+  norms,
+  residents,
+  tropicalShower = false,
+) {
   const aes = norms.apartmentElectricStorage;
   const pop = Math.max(0, Math.trunc(Number(residents) || 0));
   const raw = pop * aes.litersPerResident;
   const need = Math.max(aes.minTankLiters, Math.ceil(raw));
-  const sizes = norms.storage.typicalTankSizes;
-  return sizes.find((t) => t >= need) ?? sizes[sizes.length - 1];
+  return snapTankLitersWithTropical(norms, need, tropicalShower);
 }
 
 /**
  * Объём буферного электробойлера для схемы 2К + буфер (л) по норме combiBufferElectricStorage.
  * @param {import('../dhw/types.js').NormalizedWaterNorms} norms
  * @param {number} residents
+ * @param {boolean} [tropicalShower]
  */
-export function recommendedCombiBufferTankLiters(norms, residents) {
+export function recommendedCombiBufferTankLiters(
+  norms,
+  residents,
+  tropicalShower = false,
+) {
   const cfg = norms.combiBufferElectricStorage;
   const pop = Math.max(0, Math.trunc(Number(residents) || 0));
   const raw = pop * cfg.litersPerResident;
   const need = Math.max(cfg.minTankLiters, Math.ceil(raw));
-  const sizes = norms.storage.typicalTankSizes;
-  return sizes.find((t) => t >= need) ?? sizes[sizes.length - 1];
+  return snapTankLitersWithTropical(norms, need, tropicalShower);
 }
 
 /**
  * Объём буферного электробойлера для схемы 1К + буфер (л) по норме singleCircuitBufferElectricStorage.
  * @param {import('../dhw/types.js').NormalizedWaterNorms} norms
  * @param {number} residents
+ * @param {boolean} [tropicalShower]
  */
-export function recommendedSingleCircuitBufferTankLiters(norms, residents) {
+export function recommendedSingleCircuitBufferTankLiters(
+  norms,
+  residents,
+  tropicalShower = false,
+) {
   const cfg = norms.singleCircuitBufferElectricStorage;
   const pop = Math.max(0, Math.trunc(Number(residents) || 0));
   const raw = pop * cfg.litersPerResident;
   const need = Math.max(cfg.minTankLiters, Math.ceil(raw));
-  const sizes = norms.storage.typicalTankSizes;
-  return sizes.find((t) => t >= need) ?? sizes[sizes.length - 1];
+  return snapTankLitersWithTropical(norms, need, tropicalShower);
 }
 
 /**

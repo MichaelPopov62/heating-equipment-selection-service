@@ -30,8 +30,10 @@ import {
   SURVEY_STEP_NAV_ITEMS,
   surveyStepGlobalMetaTitle,
 } from './constants/surveySteps';
+import { RESULTS_SECTION_IDS } from './constants/surveyResultsSections';
 import type { SurveyCurrentStep } from './types/surveyStep';
 import { useCalcReport } from './hooks/useCalcReport';
+import { useSurveyStepNavigation } from './hooks/useSurveyStepNavigation';
 import { useSurveySession } from './surveySession/useSurveySession';
 import { surveyDraftToSessionSnapshot } from './surveySession/surveyDraftBridge';
 import { RecommendationsBlock } from './components/RecommendationsBlock/RecommendationsBlock';
@@ -156,6 +158,11 @@ export function AppSurveyContent({
     (step: SurveyCurrentStep) => { dispatch({ type: 'SET_CURRENT_STEP', step }); },
     [dispatch],
   );
+
+  const { mainColumnRef, navigateToSurveyStep, navigateToResultsSection } =
+    useSurveyStepNavigation({
+      setCurrentStep,
+    });
 
   const setObjectMeta = useCallback(
     (next: ObjectMetaValue | ((prev: ObjectMetaValue) => ObjectMetaValue)) => {
@@ -528,7 +535,7 @@ export function AppSurveyContent({
           </nav>
         </aside>
 
-        <main className={styles.mainColumn}>
+        <main ref={mainColumnRef} className={styles.mainColumn}>
           {/* Секция с общими коэффициентами */}
           <section
             className={styles.globalMeta}
@@ -664,7 +671,15 @@ export function AppSurveyContent({
               />
             )}
             {currentStep === 'hotWater' && (
-              <HotWaterForm value={hotWaterForm} onChange={setHotWaterForm} />
+              <HotWaterForm
+                value={hotWaterForm}
+                onChange={setHotWaterForm}
+                hotWaterReport={apiHotWaterFromReport}
+                calcLoading={calcLoading}
+                onBackToResults={() => {
+                  navigateToResultsSection(RESULTS_SECTION_IDS.hotWater);
+                }}
+              />
             )}
 
             {currentStep === 'boiler' && (
@@ -787,10 +802,12 @@ export function AppSurveyContent({
                 objectType={objectMeta.objectType}
                 apartmentLarge={apartmentLargeForScheme}
                 hotWaterForm={hotWaterForm}
-                hotWaterReport={apiHotWaterFromReport}
                 calcLoading={calcLoading}
                 indirectMatching={apiIndirectWhFromReport}
                 electricMatching={apiElectricWhFromReport}
+                onBackToResults={() => {
+                  navigateToResultsSection(RESULTS_SECTION_IDS.waterHeater);
+                }}
               />
             )}
 
@@ -825,6 +842,9 @@ export function AppSurveyContent({
                 underfloorHeatingReport={apiUnderfloorHeatingFromReport}
                 uniboxesReport={apiUniboxesFromReport}
                 hydraulicsPumps={apiHydraulicsFromReport?.proposal?.pumps ?? null}
+                onBackToResults={() => {
+                  navigateToResultsSection(RESULTS_SECTION_IDS.warmFloor);
+                }}
               />
             )}
 
@@ -888,6 +908,8 @@ export function AppSurveyContent({
           quickEstimate={quickEstimate}
           apiHeatLoss={apiHeatLoss}
           apiHotWaterFromReport={apiHotWaterFromReport}
+          hotWaterFixtures={hotWaterForm.fixtures}
+          waterHeaterScheme={waterHeaterForm.hotWaterBoilerPowerMatchingScheme}
           apiBoilerFromReport={apiBoilerFromReport}
           apiBoilerKw={apiBoilerKw}
           apiRadiatorsFromReport={apiRadiatorsFromReport}
@@ -908,6 +930,7 @@ export function AppSurveyContent({
           calcLoading={calcLoading}
           reportIsStale={reportIsStale}
           uiPhase={uiPhase}
+          onNavigateToSurveyStep={navigateToSurveyStep}
         />
       </div>
 

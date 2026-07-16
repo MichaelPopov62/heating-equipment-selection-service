@@ -106,9 +106,59 @@ const {
   (только если `isMixingNodeRequired`; иначе текст «циркуляция насосом котла»). Котловой насос
   (`boiler_primary`) в отчёте ТП не показывается.
 - **Сайдбар «Итог»:** `UnderfloorHeatingSummaryTable` — агрегаты (в т.ч. строка насоса ТП).
-  `HydraulicsProposalSection` показывает насосы **без** зон `ufh_*` (без дубля с отчётом ТП).
+  Под таблицей — inline-ссылки на шаг `warmFloor` (`SurveyStepLink` + делегирование клика
+  в `RecommendationsBlock`). `HydraulicsProposalSection` показывает насосы **без** зон `ufh_*`
+  (без дубля с отчётом ТП).
 - Модалка активна, если в отчёте есть комнаты ТП и/или warnings (или есть строки/warnings унибоксов).
   Пустой `rooms[]` без warnings — кнопка неактивна.
+
+### UI блока «Горячая вода»
+
+- **Шаг `hotWater` (`HotWaterForm`):** ввод жильцов, точек, температуры; **без** inline-расчёта API.
+  Кнопка «Отчёт по расчёту ГВ» активна при точках в анкете **или** при ответе calc.
+  `HotWaterReportDialog` / `HotWaterReportView`: таблица точек — из
+  `normalizeHotWaterForm(hotWaterForm)` (live); пик/кВт/бак — из API, если есть.
+  Запись в сессию и calc payload всегда проходят `normalizeHotWaterForm` (полный
+  `fixtures` без `undefined`/`NaN`).
+- **Шаг `waterHeater` (`WaterHeaterForm`):** схема котёл/ГВС; карточки подбора ЭБ/БКН — только в
+  модалке `WaterHeaterReportDialog` (`WaterHeaterMatchingPreview`); расчёт потребления здесь
+  **не** дублируется.
+- **Сайдбар «Результаты» (порядок после теплопотерь):**
+  1. `HotWaterFixturesSummaryTable` — **только** точки водоразбора из анкеты (live при изменении
+     `hotWaterForm.fixtures`); скрыта, пока все точки = 0; ссылка на шаг `hotWater`.
+  2. … ТП, гидравлика …
+  3. `HotWaterSummaryTable` — компактная таблица подбора (строки ЭБ и БКН); скрыта, пока нет
+     данных расчёта/подбора; ссылки на `hotWater` и `waterHeater`.
+
+### Навигация из сайдбара «Итог» (RecommendationsBlock)
+
+Переход на шаг анкеты из текста summary-блоков — **без React Context**:
+
+1. **`AppSurveyContent`** — `useSurveyStepNavigation`: `dispatch SET_CURRENT_STEP` +
+   `scrollIntoView` основной колонки (`<main ref={mainColumnRef}>`).
+2. **`RecommendationsBlock`** — один обработчик `onClick` на `<section>`; делегирование
+   `closest('[data-survey-step]')` + `isSurveyStep`.
+3. **Дочерние summary** — разметка `SurveyStepLink` (`data-survey-step`, `type="button"`).
+
+Обратный переход (форма → сайдбар) — кнопка **«Назад к результатам»** рядом с отчётом на шагах
+`warmFloor`, `hotWater`, `waterHeater`:
+
+| Шаг | Якорь (`RESULTS_SECTION_IDS`) | Секция в сайдбаре |
+|-----|-------------------------------|-------------------|
+| Тёплый пол | `warmFloor` → `results-warm-floor` | `UnderfloorHeatingSummaryTable` |
+| Горячая вода | `hotWater` → `results-hot-water` | `HotWaterFixturesSummaryTable` |
+| Водонагреватель | `waterHeater` → `results-water-heater` | `HotWaterSummaryTable` (ЭБ/БКН) |
+
+`navigateToResultsSection` в `useSurveyStepNavigation`: scroll к секции; если её ещё нет в DOM —
+к `#calculation-results-title`. Стили кнопок — `SurveyReportActions.module.css`.
+
+| Модуль | Назначение |
+|--------|------------|
+| `hooks/useSurveyStepNavigation.ts` | Шаг ↔ форма; scroll к якорю результатов |
+| `constants/surveyResultsSections.ts` | SSOT id секций сайдбара |
+| `components/SurveyNavigation/SurveyStepLink.tsx` | Inline-кнопка с `data-survey-step` |
+| `components/SurveyNavigation/SurveyReportActions.module.css` | «Отчёт» / «Назад к результатам» |
+| `constants/surveySteps.ts` → `surveyStepNavLabel()` | Подпись шага для `aria-label` |
 
 ### Загрузка черновика
 
@@ -138,10 +188,12 @@ const {
 | `useSurveyCalc` | calc API (авто query + ручная mutation) |
 | `useReferenceData` | композиция справочных query |
 | `useCalcReport` | парсинг report → DTO для UI |
+| `useSurveyStepNavigation` | переход на шаг анкеты из сайдбара + scroll к `<main>` |
 | `useSurveyProject` | файлы, Mongo, hash-URL (поверх project mutations) |
 | `useRoomsOrchestration` | синхронизация комнат с objectMeta |
 | `useSurveyEstimates` | локальные оценки до API |
-| `constants/surveySteps.ts` | SSOT шагов: `SURVEY_STEPS`, навигация, `isSurveyStep` |
+| `constants/surveySteps.ts` | SSOT шагов: `SURVEY_STEPS`, навигация, `isSurveyStep`, `surveyStepNavLabel` |
+| `RecommendationsBlock` | сайдбар «Итог»; делегирование `data-survey-step` |
 | `HydraulicsProposalSection` | блок гидравлики из `matching.hydraulics` |
 
 Ручной `invalidateCalcReport()` в формах **не нужен** — пересчёт централизован в сессии.

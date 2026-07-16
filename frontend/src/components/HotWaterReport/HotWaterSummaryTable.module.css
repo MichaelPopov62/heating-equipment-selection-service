@@ -1,0 +1,61 @@
+/* Назначение: Компактная таблица ГВС в блоке «Итог» / RecommendationsBlock. */
+
+.wrap {
+  margin-top: 4px;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: var(--text-h);
+}
+
+.hint {
+  composes: hint from '../../styles/formElements.module.css';
+  margin: 8px 0 0;
+}
+
+.attention {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: hsl(61, 88%, 52%);
+  font-weight: bold;
+  background: #6d7791;
+  border: 1px solid #fcd34d;
+  border-radius: 6px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th,
+.table td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  background: var(--surface-2);
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.table td {
+  color: var(--text);
+}
+
+.notParticipating {
+  opacity: 0.85;
+  font-style: italic;
+}

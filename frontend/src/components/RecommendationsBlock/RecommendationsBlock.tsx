@@ -1,31 +1,56 @@
 /**
  * Назначение: Боковая панель рекомендаций по расчёту.
- * Описание: Теплопотери, котёл, радиаторы, бойлеры и предупреждения из JSON-отчёта.
+ * Описание: Теплопотери, точки ГВ, котёл, радиаторы, бойлеры и предупреждения из JSON-отчёта.
  */
 
+import type { MouseEvent } from 'react';
 import type { RecommendationsBlockProps } from '../../types/recommendationsBlock';
+import { isSurveyStep } from '../../constants/surveySteps';
 import { SCHEME_BOILER_MAX_COMBI } from '../../types/heatingMatching';
 import { getBoilerUiLabels } from '../../utils/boilerUiLabels';
 import {
   formatAreaM2,
   formatCoefficient,
-  formatFlowLps,
   formatKw,
-  formatLiters,
 } from '../../utils/format';
 import { BoilerProposalCard } from '../BoilerProposalCard/BoilerProposalCard';
 import { RadiatorProposalLineTable } from '../RadiatorProposalLineTable/RadiatorProposalLineTable';
-import { WaterHeaterMatchingPreview } from '../WaterHeaterMatchingPreview/WaterHeaterMatchingPreview';
 import { CatalogEquipmentReference } from '../CatalogEquipmentReference/CatalogEquipmentReference';
 import { UnderfloorHeatingSummaryTable } from '../UnderfloorHeatingReport/UnderfloorHeatingSummaryTable';
+import { HotWaterFixturesSummaryTable } from '../HotWaterReport/HotWaterFixturesSummaryTable';
+import { HotWaterSummaryTable } from '../HotWaterReport/HotWaterSummaryTable';
+import { hasHotWaterSummaryContent } from '../HotWaterReport/hasHotWaterSummaryContent';
+import { hasHotWaterFixturesContent } from '../../utils/countThermalFixtures';
 import { HydraulicsProposalSection } from '../HydraulicsProposal/HydraulicsProposalSection';
 import styles from './RecommendationsBlock.module.css';
+
+/**
+ * Делегирование клика по data-survey-step в дочерних summary-блоках.
+ *
+ * @param e
+ * @param onNavigate
+ */
+function handleSummaryNavigateClick(
+  e: MouseEvent<HTMLElement>,
+  onNavigate: RecommendationsBlockProps['onNavigateToSurveyStep'],
+) {
+  if (onNavigate == null) return;
+  const el = (e.target as HTMLElement).closest('[data-survey-step]');
+  if (el == null) return;
+  const step = el.getAttribute('data-survey-step');
+  if (isSurveyStep(step)) {
+    e.preventDefault();
+    onNavigate(step);
+  }
+}
 
 export function RecommendationsBlock({
   className,
   quickEstimate,
   apiHeatLoss,
   apiHotWaterFromReport,
+  hotWaterFixtures,
+  waterHeaterScheme,
   apiBoilerFromReport,
   apiBoilerKw,
   apiRadiatorsFromReport,
@@ -46,11 +71,15 @@ export function RecommendationsBlock({
   calcLoading = false,
   reportIsStale = false,
   uiPhase = 'idle',
+  onNavigateToSurveyStep,
 }: RecommendationsBlockProps) {
   const showRecalculating = calcLoading || reportIsStale || uiPhase === 'recalculating';
   return (
     <aside className={[styles.root, className].filter(Boolean).join(' ')}>
-      <section aria-labelledby="calculation-results-title">
+      <section
+        aria-labelledby="calculation-results-title"
+        onClick={(e) => { handleSummaryNavigateClick(e, onNavigateToSurveyStep); }}
+      >
         <h2 id="calculation-results-title">Результаты расчета</h2>
 
         {showRecalculating && (
@@ -117,6 +146,12 @@ export function RecommendationsBlock({
           </dl>
         </div>
 
+        {hasHotWaterFixturesContent(hotWaterFixtures) && (
+          <div className={styles.summaryGroup}>
+            <HotWaterFixturesSummaryTable fixtures={hotWaterFixtures} />
+          </div>
+        )}
+
         {apiUnderfloorHeatingFromReport != null && (
           <div className={styles.summaryGroup}>
             <UnderfloorHeatingSummaryTable
@@ -136,68 +171,21 @@ export function RecommendationsBlock({
           />
         </div>
 
-        {/* Группа: Водоснабжение */}
-        <div className={styles.summaryGroup} aria-labelledby="hotWater-title">
-          <h3 id="hotWater-title">Горячая вода</h3>
-          <div className={styles.hint} style={{ marginBottom: 8 }}>
-            {apiHotWaterFromReport == null
-              ? 'Источник: после расчёта API'
-              : apiHotWaterFromReport.dhwSupplyScenario === 'storage'
-                ? 'Сценарий API: дом — накопитель (объём бака и мощность для котла от нагрева бака; пик расхода ниже — справочно).'
-                : 'Сценарий API: квартира — проточный пик (мощность на нагрев от расхода и ΔT).'}
+        {hasHotWaterSummaryContent(
+          apiHotWaterFromReport,
+          apiElectricWhFromReport,
+          apiIndirectWhFromReport,
+        ) && (
+          <div className={styles.summaryGroup}>
+            <HotWaterSummaryTable
+              scheme={waterHeaterScheme}
+              hotWater={apiHotWaterFromReport}
+              electric={apiElectricWhFromReport}
+              indirect={apiIndirectWhFromReport}
+              calcLoading={showRecalculating}
+            />
           </div>
-          <dl>
-            <dt>Пиковый расход горячей воды</dt>
-            <dd>
-              {formatFlowLps(
-                apiHotWaterFromReport?.peakFlowLps ??
-                  quickEstimate.hotWaterPeakFlowLitersPerSecond,
-              )}{' '}
-              <span>л/с</span>
-            </dd>
-            {apiHotWaterFromReport?.sumFlowLpsRaw != null && (
-              <>
-                <dt>Сумма расходов (без снижения)</dt>
-                <dd>
-                  {formatFlowLps(apiHotWaterFromReport.sumFlowLpsRaw)} <span>л/с</span>
-                </dd>
-              </>
-            )}
-            {apiHotWaterFromReport?.simultaneityFactor != null && (
-              <>
-                <dt>Коэффициент одновременности</dt>
-                <dd>{formatCoefficient(apiHotWaterFromReport.simultaneityFactor)}</dd>
-              </>
-            )}
-            <dt>Мощность на горячую воду для подбора котла</dt>
-            <dd>
-              {formatKw(
-                apiHotWaterFromReport?.hotWaterPowerKw ?? quickEstimate.hotWaterPowerKilowatts,
-              )}{' '}
-              <span>кВт</span>
-            </dd>
-            {apiHotWaterFromReport?.dhwSupplyScenario === 'storage' &&
-              apiHotWaterFromReport.peakThermalPowerKw != null && (
-                <>
-                  <dt>
-                    Мощность при пиковом расходе (справочно, не для формулы котла)
-                  </dt>
-                  <dd>
-                    {formatKw(apiHotWaterFromReport.peakThermalPowerKw)} <span>кВт</span>
-                  </dd>
-                </>
-              )}
-            <dt>Рекомендуемый накопитель</dt>
-            <dd>
-              {apiHotWaterFromReport != null &&
-              apiHotWaterFromReport.recommendedTankLiters === 0
-                ? 'Не применяется (проточный сценарий)'
-                : apiHotWaterFromReport?.recommendedTankLiters != null
-                  ? `${formatLiters(apiHotWaterFromReport.recommendedTankLiters)} л`
-                  : '—'}
-            </dd>
-          </dl>
-        </div>
+        )}
 
         {/* Группа: Оборудование */}
         <div className={styles.summaryGroup} aria-labelledby="recommendation-title">
@@ -306,12 +294,6 @@ export function RecommendationsBlock({
               {formatKw(apiBoilerKw ?? quickEstimate.boilerKw)} <span>кВт</span>
             </dd>
           </dl>
-
-          <WaterHeaterMatchingPreview
-            idPrefix="sidebar"
-            indirect={apiIndirectWhFromReport}
-            electric={apiElectricWhFromReport}
-          />
 
           {apiRadiatorsFromReport != null && apiRadiatorsFromReport.warnings.length > 0 && (
             <ul className={styles.radiatorsWarningsList}>

@@ -80,3 +80,12 @@ export function isCalcApiBarStep(step: SurveyCurrentStep): boolean {
 export function surveyStepGlobalMetaTitle(step: SurveyCurrentStep): string {
   return SURVEY_STEP_GLOBAL_META_TITLES[step] ?? DEFAULT_GLOBAL_META_TITLE;
 }
+
+/**
+ * Подпись шага для aria-label и UI-ссылок навигации.
+ *
+ * @param step
+ */
+export function surveyStepNavLabel(step: SurveyCurrentStep): string {
+  return SURVEY_STEP_NAV_LABELS[step];
+}

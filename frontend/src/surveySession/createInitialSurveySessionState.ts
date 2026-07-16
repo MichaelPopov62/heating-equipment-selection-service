@@ -4,6 +4,7 @@
 
 import { DEFAULT_HYDRAULICS_FORM } from '../types/hydraulics';
 import { createDefaultWaterHeaterFormValue } from '../utils/waterHeaterFormDefaults';
+import { createDefaultHotWaterFormValue } from '../utils/hotWaterFormDefaults';
 import { migrateLegacyRoomTypes } from '../utils/migrateLegacyRoomTypes';
 import {
   createDefaultExternalWall,
@@ -67,23 +68,7 @@ export function createInitialSurveySessionState(): SurveySessionState {
       ventilationReserveMode: 'natural',
     },
     rooms: initialRooms,
-    hotWaterForm: {
-      residents: 0,
-      coldWaterDesignSeason: 'winter',
-      hotWaterC: 60,
-      tropicalShower: false,
-      fixtures: {
-        shower: 0,
-        bath: 0,
-        sink: 0,
-        toilet: 0,
-        kitchenSink: 0,
-        dishwasher: 0,
-        laundrySink: 0,
-        washingMachine: 0,
-        bidet: 0,
-      },
-    },
+    hotWaterForm: createDefaultHotWaterFormValue(),
     waterHeaterForm,
     thermalRegimePreset,
     radiatorConnection: DEFAULT_RADIATOR_CONNECTION,

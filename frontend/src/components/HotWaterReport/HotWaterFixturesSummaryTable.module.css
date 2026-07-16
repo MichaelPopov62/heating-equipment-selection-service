@@ -1,0 +1,16 @@
+/* Назначение: Обёртка таблицы точек ГВ в блоке «Результаты». */
+
+.wrap {
+  margin-top: 4px;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: var(--text-h);
+}
+
+.hint {
+  composes: hint from '../../styles/formElements.module.css';
+  margin: 8px 0 0;
+}

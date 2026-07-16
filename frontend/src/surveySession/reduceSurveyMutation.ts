@@ -3,6 +3,8 @@
  */
 
 import type { SurveyDraftSnapshot, SurveyMutation } from './types';
+import { normalizeHotWaterForm } from '../utils/normalizeHotWaterForm';
+import { normalizeWaterHeaterForm } from '../utils/normalizeWaterHeaterForm';
 
 /**
  * @param draft
@@ -23,9 +25,15 @@ export function reduceSurveyMutation(
     case 'SET_TEMPS':
       return { ...draft, temps: mutation.temps };
     case 'SET_HOT_WATER_FORM':
-      return { ...draft, hotWaterForm: mutation.hotWaterForm };
+      return {
+        ...draft,
+        hotWaterForm: normalizeHotWaterForm(mutation.hotWaterForm),
+      };
     case 'SET_WATER_HEATER_FORM':
-      return { ...draft, waterHeaterForm: mutation.waterHeaterForm };
+      return {
+        ...draft,
+        waterHeaterForm: normalizeWaterHeaterForm(mutation.waterHeaterForm),
+      };
     case 'HEATING_EMITTERS_MODE_SET':
       return { ...draft, ufhPresetId: mutation.presetId };
     case 'WATER_UFH_FLAG_SET':

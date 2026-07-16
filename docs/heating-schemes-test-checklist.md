@@ -17,10 +17,17 @@
 
 - [ ] В UI доступны все 5 схем на шаге **«Водонагреватель»** (`WaterHeaterForm`; в малой квартире без БКН — без `singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw`)
 - [ ] Галочка места под БКН видна **только** при квартире + схема «1К + БКН» (не на шаге «Объект», не для дома)
-- [ ] Смена схемы или галочки → debounce → обновление карточек БКН/ЭВН в `WaterHeaterMatchingPreview` (форма + «Рекомендация»)
+- [ ] Смена схемы или галочки → debounce → обновление карточек БКН/ЭВН в модалке `WaterHeaterReportDialog` (`WaterHeaterMatchingPreview`); в сайдбаре — строки `HotWaterSummaryTable`
 - [ ] `singleCircuitBoilerWithBufferElectricStorage` — подбор 1К + буферный ЭВН, `recommendedTankLiters` из `water_norms`
 - [ ] `combiBoilerWithBufferElectricStorage` — 2К + буфер, объём из `combiBufferElectricStorage`
 - [ ] Квартира + БКН-схема → нормализация на max-комби + warning в отчёте
+
+### `tropicalShower` (+30 % к объёму бака)
+
+- [ ] **Квартира** + `combiBoilerWithBufferElectricStorage`, 3 жильца: без флага → **80 л**, с флагом → **100 л** (`requiredTankLiters` / карточка ЭВН)
+- [ ] **Квартира** + отдельный ЭВН (`heatingLoadWithReserveOnlySeparateElectricStorageWaterHeater`), 3 жильца: без флага → **150 л**, с флагом → **200 л**
+- [ ] **Дом** + storage/БКН: включение «тропический душ» увеличивает `recommendedTankLiters` (типично 200 → 250 при ванне + душах)
+- [ ] Чекбокс на шаге «Горячая вода» → debounce calc → объём в отчёте ГВ и в подборе ВН обновляется
 
 ---
 

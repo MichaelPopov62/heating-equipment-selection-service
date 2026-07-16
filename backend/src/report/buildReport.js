@@ -351,6 +351,8 @@ export async function buildReport({ input, ctx }) {
     hotWaterOptions,
   );
 
+  const tropicalShower = hotWaterInitial.tropicalShower === true;
+
   if (
     objectTypeNorm === 'apartment' &&
     activeScheme === SCHEME_BOILER_ELECTRIC_SEPARATE
@@ -358,6 +360,7 @@ export async function buildReport({ input, ctx }) {
     const tankLiters = recommendedApartmentElectricTankLiters(
       waterNorms,
       hotWaterInitial.residents ?? 0,
+      tropicalShower,
     );
     hotWaterInitial = {
       ...hotWaterInitial,
@@ -369,6 +372,7 @@ export async function buildReport({ input, ctx }) {
     const tankLiters = recommendedCombiBufferTankLiters(
       waterNorms,
       hotWaterInitial.residents ?? 0,
+      tropicalShower,
     );
     hotWaterInitial = {
       ...hotWaterInitial,
@@ -380,6 +384,7 @@ export async function buildReport({ input, ctx }) {
     const tankLiters = recommendedSingleCircuitBufferTankLiters(
       waterNorms,
       hotWaterInitial.residents ?? 0,
+      tropicalShower,
     );
     hotWaterInitial = {
       ...hotWaterInitial,

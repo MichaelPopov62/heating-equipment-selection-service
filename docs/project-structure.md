@@ -125,8 +125,8 @@
 | `src/surveySession/` | Клиентский state анкеты: `dispatch` → pipeline → calc |
 | `src/query/` | React Query: справочники, calc, проекты |
 | `src/services/` | HTTP-клиенты (fetch) для queryFn/mutationFn |
-| `src/hooks/` | Оркестрация UI (без прямого HTTP к API) |
-| `src/components/` | Формы и блоки отчёта (Boiler, Rooms, Hydraulics, …) |
+| `src/hooks/` | Оркестрация UI; `useSurveyStepNavigation` — переход на шаг из сайдбара |
+| `src/components/` | Формы и блоки отчёта; `HotWaterReport/`, `SurveyNavigation/SurveyStepLink` |
 | `src/constants/` | SSOT шагов анкеты (`SURVEY_STEPS`: Объект → Тёплый пол → Помещения → …), типы комнат, compat-id |
 | `src/types/` | DTO/view-модели UI |
 | `src/utils/` | Парсеры отчёта, миграции черновика, лейблы, guards |

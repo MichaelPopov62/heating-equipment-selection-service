@@ -13,6 +13,7 @@ import type { ParsedHydraulicsPumpProposal } from '../../types/hydraulics';
 import type { UfhDistributionPreset } from '../../types/ufhDistribution';
 import type { UfhModePresetCard, UfhModePresetId } from '../../types/ufhModePreset';
 import type { ParsedUniboxesMatching } from '../../utils/parseUniboxesMatchingFromReport';
+import reportActionsStyles from '../SurveyNavigation/SurveyReportActions.module.css';
 import styles from './WarmFloorSection.module.css';
 import { UfhDistributionSelect } from './UfhDistributionSelect';
 
@@ -30,6 +31,8 @@ type Props = {
   uniboxesReport?: ParsedUniboxesMatching | null;
   /** proposal.pumps гидравлики — для зонального насоса ТП в модалке. */
   hydraulicsPumps?: readonly ParsedHydraulicsPumpProposal[] | null;
+  /** Прокрутка к итогу ТП в сайдбаре «Результаты». */
+  onBackToResults?: () => void;
 };
 
 /** Шаг анкеты: режим ТП (карточки), водяной тёплый пол и схема распределения. */
@@ -46,6 +49,7 @@ export function WarmFloorSection({
   underfloorHeatingReport = null,
   uniboxesReport = null,
   hydraulicsPumps = null,
+  onBackToResults,
 }: Props) {
   const [reportOpen, setReportOpen] = useState(false);
   const showDistribution =
@@ -88,15 +92,26 @@ export function WarmFloorSection({
         />
       )}
 
-      <div className={styles.reportActions}>
-        <button
-          type="button"
-          className={styles.reportButton}
-          disabled={!canOpenReport}
-          onClick={() => { setReportOpen(true); }}
-        >
-          Отчёт по расчёту ТП
-        </button>
+      <div className={reportActionsStyles.reportActions}>
+        <div className={reportActionsStyles.reportActionsRow}>
+          <button
+            type="button"
+            className={reportActionsStyles.reportButton}
+            disabled={!canOpenReport}
+            onClick={() => { setReportOpen(true); }}
+          >
+            Отчёт по расчёту ТП
+          </button>
+          {onBackToResults != null && (
+            <button
+              type="button"
+              className={reportActionsStyles.backButton}
+              onClick={onBackToResults}
+            >
+              Назад к результатам
+            </button>
+          )}
+        </div>
         {!canOpenReport && (
           <p className={styles.hint} style={{ marginTop: 8 }}>
             Отчёт появится после авторасчёта с включённым ТП в помещениях.

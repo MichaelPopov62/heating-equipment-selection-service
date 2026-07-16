@@ -15,6 +15,10 @@ properties:
     additionalProperties: true
   tropicalShower:
     type: boolean
+    description: >
+      Усиленный («тропический») душ: в отчёте отражает входной флаг; на объём бака
+      влияет через tropicalShowerVolumeFactor (дом — storage; квартира/буферные схемы ЭВН —
+      нормы apartmentElectricStorage / combiBuffer / singleCircuitBuffer).
   coldWaterDesignSeason:
     type: string
     enum: [winter, summer]
@@ -22,7 +26,8 @@ properties:
     type: string
     enum: [flowThrough, storage]
     description: >
-      flowThrough — квартира (мощность от пика расхода); storage — дом (объём бака и нагрев за время из норм).
+      Базовый сценарий по типу объекта (квартира — flowThrough, дом — storage);
+      может быть переопределён схемой котла/ГВС (например storage для квартиры + ЭВН/БКН).
   designColdWaterC:
     type: number
     description: Фактическая расчётная температура ХВ (+5 зима / +15 лето из water_norms).
@@ -42,6 +47,9 @@ properties:
     type: number
   recommendedTankLiters:
     type: integer
+    description: >
+      Рекомендуемый объём накопителя/буфера после норм и (при флаге) × tropicalShowerVolumeFactor;
+      для чистого flowThrough без бака — 0.
   normsSchemaVersion:
     type: integer
     minimum: 1

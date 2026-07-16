@@ -1,15 +1,24 @@
 /**
  * Назначение: Форма шага «Горячее водоснабжение».
- * Описание: Жильцы, температура ГВС, сезон ХВ, точки водоразбора и тропический душ.
+ * Описание: Жильцы, температура ГВС, точки водоразбора; полный отчёт — в модалке.
  */
 
-import { useMemo } from 'react';
-import type { HotWaterFormFixtures, HotWaterFormValue } from '../../types/hotWater';
+import { useState } from 'react';
+import type { HotWaterFormValue } from '../../types/hotWater';
+import type { ParsedHotWaterReport } from '../../types/hotWaterReport';
+import { HotWaterReportDialog } from '../HotWaterReport/HotWaterReportDialog';
+import { hasHotWaterReportContent } from '../HotWaterReport/hasHotWaterReportContent';
+import { hasHotWaterFixturesContent } from '../../utils/countThermalFixtures';
+import reportActionsStyles from '../SurveyNavigation/SurveyReportActions.module.css';
 import styles from './HotWaterForm.module.css';
 
 type Props = {
   value: HotWaterFormValue;
   onChange: (next: HotWaterFormValue) => void;
+  hotWaterReport?: ParsedHotWaterReport | null;
+  calcLoading?: boolean;
+  /** Прокрутка к таблице точек в сайдбаре «Результаты». */
+  onBackToResults?: () => void;
 };
 
 function clampInt(n: number, min: number, max: number): number {
@@ -17,14 +26,28 @@ function clampInt(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, Math.trunc(n)));
 }
 
-export function HotWaterForm({ value, onChange }: Props) {
+export function HotWaterForm({
+  value,
+  onChange,
+  hotWaterReport = null,
+  calcLoading = false,
+  onBackToResults,
+}: Props) {
+  const [reportOpen, setReportOpen] = useState(false);
+  const canOpenReport =
+    hasHotWaterReportContent(hotWaterReport)
+    || hasHotWaterFixturesContent(value.fixtures);
+
   const setResidents = (n: number) =>
     { onChange({ ...value, residents: clampInt(n, 0, 20) }); };
 
   const setTemp = (key: 'hotWaterC', n: number) =>
     { onChange({ ...value, [key]: n }); };
 
-  const setFixture = (key: keyof HotWaterFormFixtures, n: number) =>
+  const setFixture = (
+    key: keyof HotWaterFormValue['fixtures'],
+    n: number,
+  ) =>
     { onChange({
       ...value,
       fixtures: {
@@ -34,21 +57,6 @@ export function HotWaterForm({ value, onChange }: Props) {
     }); };
 
   const f = value.fixtures;
-
-  const thermalTotal = useMemo(() => {
-    return (
-      f.shower +
-      f.bath +
-      f.sink +
-      f.kitchenSink +
-      f.dishwasher +
-      f.laundrySink +
-      f.washingMachine +
-      f.bidet
-    );
-  }, [f]);
-
-  const allPointsTotal = useMemo(() => thermalTotal + f.toilet, [thermalTotal, f.toilet]);
 
   return (
     <div className={styles.root}>
@@ -69,8 +77,8 @@ export function HotWaterForm({ value, onChange }: Props) {
               onChange={(e) => { onChange({ ...value, tropicalShower: e.target.checked }); }}
             />
             <span>
-              Усиленный («тропический») душ — для дома увеличивает расчётный объём накопительного
-              бака на 30&nbsp;%
+              Усиленный («тропический») душ — увеличивает расчётный объём накопительного /
+              буферного бака на 30&nbsp;%
             </span>
           </label>
         </div>
@@ -288,57 +296,45 @@ export function HotWaterForm({ value, onChange }: Props) {
         </div>
       </div>
 
-      <div className={styles.summary}>
-        <h4 className={styles.summaryTitle}>Сводка: количество точек</h4>
-        <table className={styles.summaryTable}>
-          <tbody>
-            <tr>
-              <th scope="row">Душ</th>
-              <td>{f.shower}</td>
-            </tr>
-            <tr>
-              <th scope="row">Ванна</th>
-              <td>{f.bath}</td>
-            </tr>
-            <tr>
-              <th scope="row">Раковина (санузел)</th>
-              <td>{f.sink}</td>
-            </tr>
-            <tr>
-              <th scope="row">Унитаз</th>
-              <td>{f.toilet}</td>
-            </tr>
-            <tr>
-              <th scope="row">Биде</th>
-              <td>{f.bidet}</td>
-            </tr>
-            <tr>
-              <th scope="row">Кухня — мойка / смеситель</th>
-              <td>{f.kitchenSink}</td>
-            </tr>
-            <tr>
-              <th scope="row">Кухня — посудомоечная машина</th>
-              <td>{f.dishwasher}</td>
-            </tr>
-            <tr>
-              <th scope="row">Мойка (хозблок)</th>
-              <td>{f.laundrySink}</td>
-            </tr>
-            <tr>
-              <th scope="row">Стиральная машина (техпомещение)</th>
-              <td>{f.washingMachine}</td>
-            </tr>
-            <tr className={styles.summaryTotal}>
-              <th scope="row">Итого точек с расходом ГВ (для расчёта пика)</th>
-              <td>{thermalTotal}</td>
-            </tr>
-            <tr className={styles.summaryTotal}>
-              <th scope="row">Всего учтённых точек (с унитазом)</th>
-              <td>{allPointsTotal}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className={reportActionsStyles.reportActions}>
+        <div className={reportActionsStyles.reportActionsRow}>
+          <button
+            type="button"
+            className={reportActionsStyles.reportButton}
+            disabled={!canOpenReport}
+            onClick={() => { setReportOpen(true); }}
+          >
+            Отчёт по расчёту ГВ
+          </button>
+          {onBackToResults != null && (
+            <button
+              type="button"
+              className={reportActionsStyles.backButton}
+              onClick={onBackToResults}
+            >
+              Назад к результатам
+            </button>
+          )}
+        </div>
+        {calcLoading && (
+          <p className={styles.hint} style={{ marginTop: 8 }} role="status">
+            Обновление расчёта…
+          </p>
+        )}
+        {!canOpenReport && !calcLoading && (
+          <p className={styles.hint} style={{ marginTop: 8 }}>
+            Укажите точки водоразбора — отчёт и таблица в «Результатах» появятся
+            сразу; расчёт мощности — после авторасчёта.
+          </p>
+        )}
       </div>
+
+      <HotWaterReportDialog
+        open={reportOpen}
+        onClose={() => { setReportOpen(false); }}
+        hotWater={hotWaterReport}
+        formValue={value}
+      />
     </div>
   );
 }

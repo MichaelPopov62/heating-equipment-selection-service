@@ -18,7 +18,6 @@ import {
   isUfhDistributionPreset,
   type UfhDistributionPreset,
 } from '../types/ufhDistribution';
-import type { HotWaterFormValue } from '../types/hotWater';
 import type { RoomFormValue } from '../types/rooms';
 import {
   adaptFlatRoomsToWiringLayout,
@@ -29,6 +28,7 @@ import { isRecord, readRecordField } from './jsonGuards';
 import { migrateObjectMetaExternalWalls } from './migrateLegacyExternalWalls';
 import { migrateLegacyRoomTypes } from './migrateLegacyRoomTypes';
 import { migrateRoomUnderfloorHeating } from './migrateRoomUnderfloorHeating';
+import { normalizeHotWaterForm } from './normalizeHotWaterForm';
 import { normalizeWaterHeaterForm } from './normalizeWaterHeaterForm';
 import { migrateRoomEnvelopeFields } from './roomEnvelopeFields';
 import { isUfhModePresetId } from './ufhPresetCardsForUi';
@@ -137,9 +137,7 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
         ? { bathroomAirTempC: raw.temps.bathroomAirTempC }
         : {}),
     },
-    hotWaterForm: (isRecord(raw.hotWaterForm)
-      ? raw.hotWaterForm
-      : {}) as HotWaterFormValue,
+    hotWaterForm: normalizeHotWaterForm(raw.hotWaterForm),
     waterHeaterForm,
     waterUnderfloorHeating: Boolean(raw.waterUnderfloorHeating),
     underfloorDistributionPreset: (() => {
