@@ -18,6 +18,20 @@ const recommendationSchema = new mongoose.Schema(
     equipmentType: { type: String, required: true, trim: true },
     title: { type: String, required: true, trim: true },
     text: { type: String, required: true, trim: true },
+    // Без default: [] — иначе Mongoose пишет пустой массив во все документы и валидатор падает.
+    resolutionSteps: {
+      type: [
+        new mongoose.Schema(
+          {
+            title: { type: String, required: true, trim: true },
+            detail: { type: String, required: true, trim: true },
+          },
+          { _id: false },
+        ),
+      ],
+      required: false,
+      default: undefined,
+    },
   },
   { timestamps: true, strict: false },
 );

@@ -37,6 +37,14 @@ export function resolveRecommendation(recommendations, code, vars = {}) {
     equipmentType: rec.equipmentType,
     title: rec.title,
     text,
+    ...(rec.resolutionSteps?.length
+      ? {
+          resolutionSteps: rec.resolutionSteps.map((s) => ({
+            title: s.title,
+            detail: s.detail,
+          })),
+        }
+      : {}),
   };
 }
 

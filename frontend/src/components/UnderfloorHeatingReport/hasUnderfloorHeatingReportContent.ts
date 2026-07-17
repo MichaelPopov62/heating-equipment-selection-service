@@ -14,5 +14,9 @@ export function hasUnderfloorHeatingReportContent(
   report: ParsedUnderfloorHeating | null | undefined,
 ): boolean {
   if (report == null) return false;
-  return report.rooms.length > 0 || report.warnings.length > 0;
+  return (
+    report.rooms.length > 0
+    || report.warnings.length > 0
+    || report.resolvedRecommendations.length > 0
+  );
 }

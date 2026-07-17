@@ -64,13 +64,6 @@ export function UfhMixingNodeSpecCard({ mixingNode }: Props) {
           </>
         )}
       </dl>
-      {mixingNode.notes.length > 0 && (
-        <ul className={styles.notes}>
-          {mixingNode.notes.map((note, i) => (
-            <li key={`ufh-mix-note-${i}`}>{note}</li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }

@@ -1,8 +1,11 @@
 /**
  * Назначение: таблица гидравлики петель ТП в отчёте.
+ * Описание: предупреждения «низкая скорость» не дублируются здесь —
+ * выводятся один раз в отчёте с общей кнопкой устранения.
  */
 
 import type { ParsedUfhLoopHydraulics } from '../../types/underfloorHeating';
+import { isUfhLowVelocityWarning } from '../../utils/ufhWarningDisplay';
 import styles from './UfhLoopHydraulicsTable.module.css';
 
 /** Пороги MVP (appliances.hydraulics) — для подсветки в UI. */
@@ -51,6 +54,12 @@ export function UfhLoopHydraulicsTable({
   pipeResizeApplied,
 }: UfhLoopHydraulicsTableProps) {
   if (loops.length === 0) return null;
+
+  const otherWarnings = loops.flatMap((l) =>
+    l.warnings
+      .filter((w) => !isUfhLowVelocityWarning(w))
+      .map((w, i) => ({ key: `${l.loopId}-w-${i}`, text: w })),
+  );
 
   return (
     <div className={styles.root}>
@@ -112,13 +121,11 @@ export function UfhLoopHydraulicsTable({
           ))}
         </tbody>
       </table>
-      {loops.some((l) => l.warnings.length > 0) && (
+      {otherWarnings.length > 0 && (
         <ul className={styles.warnings}>
-          {loops.flatMap((l) =>
-            l.warnings.map((w, i) => (
-              <li key={`${l.loopId}-w-${i}`}>{w}</li>
-            )),
-          )}
+          {otherWarnings.map((w) => (
+            <li key={w.key}>{w.text}</li>
+          ))}
         </ul>
       )}
     </div>

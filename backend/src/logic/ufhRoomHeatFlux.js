@@ -188,11 +188,7 @@ export function computeUfhRoomHeatFlux(args) {
       `Отдача вверх ограничена лимитом поверхности ${round(maxSurfaceT, 1)} °C: q↑ снижен с ≈${round(heatFluxUpUncappedWm2, 0)} до ≈${round(heatFluxUpWm2, 0)} Вт/м² (Tповерх ≈${round(surfaceTempC, 1)} °C).`,
     );
   }
-  if (bottomBoundary === 'heated' && heatFluxDownWm2 > 5) {
-    roomWarnings.push(
-      `Паразитный поток вниз ≈${round(heatFluxDownWm2, 0)} Вт/м² (${round(heatFluxDownWatts, 0)} Вт) — прогрев плиты перекрытия.`,
-    );
-  }
+  // Паразитный q↓ при heated: структурированный WARN_UFH_PARASITIC_DOWN_HEATED в matching/warmFloor.js
 
   /** @type {UfhRoomHeatFluxComputed} */
   const result = {

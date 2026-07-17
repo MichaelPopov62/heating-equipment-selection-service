@@ -9,6 +9,7 @@ import type {
   ParsedUnderfloorHydraulics,
   ParsedUfhLoopHydraulics,
   ParsedUfhMixingNodeSpec,
+  ParsedUfhResolvedRecommendation,
 } from '../types/underfloorHeating';
 import type { UfhDistributionPreset } from '../types/ufhDistribution';
 import { isUfhDistributionPreset } from '../types/ufhDistribution';
@@ -40,6 +41,48 @@ function parseMixingNode(block: Record<string, unknown>): ParsedUfhMixingNodeSpe
     distributionPreset,
     notes: readStringArray(raw.notes),
   };
+}
+
+function parseResolvedRecommendations(
+  block: Record<string, unknown>,
+): ParsedUfhResolvedRecommendation[] {
+  const raw = block.resolvedRecommendations;
+  if (!Array.isArray(raw)) return [];
+  const out: ParsedUfhResolvedRecommendation[] = [];
+  for (const item of raw) {
+    if (!isRecord(item)) continue;
+    const code = typeof item.code === 'string' ? item.code.trim() : '';
+    const title = typeof item.title === 'string' ? item.title.trim() : '';
+    const text = typeof item.text === 'string' ? item.text.trim() : '';
+    const equipmentType =
+      typeof item.equipmentType === 'string' ? item.equipmentType.trim() : '';
+    const category = item.category;
+    if (!code || !title || !text) continue;
+    if (category !== 'warnings' && category !== 'automationHints') continue;
+    const stepsRaw = item.resolutionSteps;
+    const resolutionSteps = Array.isArray(stepsRaw)
+      ? stepsRaw
+          .map((s) => {
+            if (!isRecord(s)) return null;
+            const stepTitle = typeof s.title === 'string' ? s.title.trim() : '';
+            const stepDetail = typeof s.detail === 'string' ? s.detail.trim() : '';
+            if (!stepTitle || !stepDetail) return null;
+            return { title: stepTitle, detail: stepDetail };
+          })
+          .filter((s): s is { title: string; detail: string } => s != null)
+      : undefined;
+    out.push({
+      code,
+      category,
+      equipmentType: equipmentType || 'underfloor_heating',
+      title,
+      text,
+      ...(resolutionSteps && resolutionSteps.length > 0
+        ? { resolutionSteps }
+        : {}),
+    });
+  }
+  return out;
 }
 
 function parseUnderfloorHydraulics(
@@ -336,5 +379,6 @@ export function parseUnderfloorHeatingFromReport(
     totalHeatFluxUpWatts: totalUp,
     totalHeatFluxDownWatts: totalDown,
     warnings: readStringArray(block.warnings),
+    resolvedRecommendations: parseResolvedRecommendations(block),
   };
 }

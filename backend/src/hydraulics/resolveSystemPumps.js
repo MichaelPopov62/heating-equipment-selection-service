@@ -157,11 +157,15 @@ function resolvePumpForZone({
     }
   }
 
+  const isZonePump = zone.pumpRole === 'zone';
   const { pump, warnings: pickWarnings } = pickPumpForSystem({
     designFlowM3PerHour: q,
     headRequiredM: h,
     pumps: catalogPumps ?? [],
     dutyRules,
+    softQMin: isZonePump,
+    skipHeadOversizedCheck: isZonePump,
+    useExactHeadRequired: isZonePump,
   });
 
   warnings.push(...pickWarnings.map((w) => `[${zone.label}] ${w}`));

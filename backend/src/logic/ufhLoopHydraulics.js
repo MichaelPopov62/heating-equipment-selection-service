@@ -837,9 +837,8 @@ export function resolveUfhRoomLoopsHydraulics({
   })();
 
   warnings.push(...outcome.extraWarnings);
-  for (const h of outcome.loopHydraulics) {
-    warnings.push(...h.warnings);
-  }
+  // Предупреждения петель остаются только на loopHydraulics[].warnings —
+  // не дублируем их в room/global (см. enrichUnderfloorHeatingLoopHydraulics).
 
   return {
     loopsCount: outcome.loops.length,

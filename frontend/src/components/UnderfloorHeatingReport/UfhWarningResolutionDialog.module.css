@@ -1,0 +1,85 @@
+/* Назначение: Модалка устранения WARN низкой скорости ТП. */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: color-mix(in srgb, #000 45%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.dialog {
+  width: min(560px, 100%);
+  max-height: min(88vh, 720px);
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: 17px;
+  color: var(--text-h);
+}
+
+.closeIconButton {
+  composes: button from '../../styles/formElements.module.css';
+  flex-shrink: 0;
+  padding: 4px 10px;
+  min-width: 2rem;
+}
+
+.steps {
+  margin: 0 0 16px;
+  padding-left: 1.25rem;
+  list-style: decimal;
+}
+
+.stepItem {
+  margin: 0 0 14px;
+}
+
+.stepItem:last-child {
+  margin-bottom: 0;
+}
+
+.stepTitle {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.stepDetail {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.hint {
+  composes: hint from '../../styles/formElements.module.css';
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.closeButton {
+  composes: button from '../../styles/formElements.module.css';
+}

@@ -117,6 +117,20 @@ export type ParsedUnderfloorHydraulics = {
   flowRateM3PerHour: number;
 };
 
+export type ParsedUfhResolutionStep = {
+  title: string;
+  detail: string;
+};
+
+export type ParsedUfhResolvedRecommendation = {
+  code: string;
+  category: 'warnings' | 'automationHints';
+  equipmentType: string;
+  title: string;
+  text: string;
+  resolutionSteps?: ParsedUfhResolutionStep[];
+};
+
 export type ParsedUnderfloorHeating = {
   circuitSupplyC: number;
   circuitReturnC: number;
@@ -130,4 +144,5 @@ export type ParsedUnderfloorHeating = {
   totalHeatFluxUpWatts: number;
   totalHeatFluxDownWatts: number;
   warnings: string[];
+  resolvedRecommendations: ParsedUfhResolvedRecommendation[];
 };

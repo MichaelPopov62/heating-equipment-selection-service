@@ -372,8 +372,6 @@ export function calculateUnderfloorHeating(args) {
     }
   }
 
-  const allRoomWarnings = roomReports.flatMap((r) => r.warnings);
-
   return {
     enabled: true,
     circuitSupplyC: primaryRoom?.circuitSupplyC ?? 45,
@@ -387,6 +385,7 @@ export function calculateUnderfloorHeating(args) {
     rooms: roomReports,
     totalHeatFluxUpWatts,
     totalHeatFluxDownWatts,
-    warnings: [...globalWarnings, ...allRoomWarnings],
+    // Только глобальные WARN: комнатные остаются в rooms[].warnings (без дубля в корне).
+    warnings: globalWarnings,
   };
 }

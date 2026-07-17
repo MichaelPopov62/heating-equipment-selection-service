@@ -52,6 +52,7 @@ export function UnderfloorHeatingSummaryTable({
 
   const hasWarnings =
     underfloorHeating.warnings.length > 0
+    || underfloorHeating.resolvedRecommendations.length > 0
     || (uniboxes?.warnings.length ?? 0) > 0;
 
   return (

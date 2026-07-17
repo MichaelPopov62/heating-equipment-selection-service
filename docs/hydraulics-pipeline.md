@@ -213,23 +213,36 @@
 
 Единая проверка для `pickPumpForSystem` и `evaluatePumpCurveAtDuty` (встроенный насос котла). Пороги — `dto.rules` → `pumpDutyRulesFromHydraulicsRules`.
 
-| Проверка | Условие отказа |
-|----------|----------------|
-| `out_of_flow_range` | `Q < qMin` или `Q > qMax` (после нормализации каталога) |
+| Проверка | Условие отказа (default / `main`) |
+|----------|-----------------------------------|
+| `below_manufacturer_qmin` | `Q < qMin` (после нормализации каталога) |
+| `curve_unavailable` | `Q > qMax` или `H(Q) < pumpMinHeadAtDutyM` |
 | `near_qmax` | `Q > qMax × pumpDutyQMaxUtilizationPercent / 100` |
-| `negative_or_tiny_head` | `H(Q) < pumpMinHeadAtDutyM` |
-| `insufficient_head` | `H(Q) < H_target` |
+| `insufficient_head` | `H(Q) < H_target` (`H_target = H_req × (1 + pumpHeadMarginPercent/100)`) |
 | `head_oversized` | `(H(Q) − H_sys) / H_sys × 100 > pumpMaxHeadMarginPercent` |
 
 **Выбор насоса:** среди режимов с `ok: true` — **минимальный** запас по напору (не самый мощный насос в каталоге).
 
+### Гибрид для зоны смесителя ТП (`pumpRole: zone`)
+
+В `resolveSystemPumps` → `pickPumpForSystem` для зонального насоса (`ufh_floor` / `ufh_floor_secondary`):
+
+| Опция | Поведение |
+|-------|-----------|
+| `softQMin: true` | `Q < qMin` **не** отсекает режим; warning «работа у левого края кривой» |
+| `skipHeadOversizedCheck: true` | потолок `pumpMaxHeadMarginPercent` **не** применяется (`headMetersMin` смесителя — нижняя граница, не точный H_sys) |
+| `useExactHeadRequired: true` | `H_target = H_req` без дополнительного `+12 %` поверх ориентира смесителя |
+
+Котловой контур (`main`) и встроенный насос котла — **без** soft QMin; политика `below_manufacturer_qmin` для wall-boiler без catalog fallback сохраняется.
+
 ## Подбор насосов (`resolveSystemPumps`)
 
 1. `resolveCirculationFlows` — duty points по зонам.
-2. `resolveHeadForZone` — H по зоне из `pressure`.
+2. `resolveHeadForZone` — H по зоне из `pressure` (для ТП: `max(mixingNode.headMetersMin, Δp петель)`).
 3. Для каждой зоны с `requiresCatalogPump`:
    - **main:** если у котла в каталоге есть `circulationPump.operatingModes` — `evaluatePumpCurveAtDuty`; при успехе `pumpSource: boiler_builtin`, иначе fallback в каталог;
-   - **все зоны:** `pickPumpForSystem` из `catalog.pumps` (тип `circulation_hot_water` пропускается).
+   - **zone (смеситель ТП):** `pickPumpForSystem` с `softQMin` + `skipHeadOversizedCheck` + `useExactHeadRequired`;
+   - **прочие:** `pickPumpForSystem` из `catalog.pumps` со строгим duty-окном (тип `circulation_hot_water` пропускается).
 
 Поиск котла в каталоге: `source.catalogBoilerId` сопоставляется с `boiler.id` **или** `boiler.model`.
 
@@ -294,7 +307,7 @@
 ```bash
 cd backend && npm run verify:flow-delta-tk       # SSOT resolveFlowDeltaTK
 cd backend && npm run verify:circulation-flows   # зоны Q, топологии
-cd backend && npm run verify:pump-duty          # зона рабочей точки, геометрия каталога
+cd backend && npm run verify:pump-duty          # duty main + гибрид zone (softQMin / skip oversized)
 cd backend && npm run verify:builtin-boiler-pump # circulationPump котла (Baxi 6 режимов)
 cd backend && npm run verify:fit-pump-curve      # аппроксимация H(Q) Baxi
 cd backend && npm run verify:pick-pipe           # fallback min/max Ø + guard транзита

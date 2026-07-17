@@ -22,3 +22,23 @@ properties:
   text:
     type: string
     description: Текст после подстановки плейсхолдеров {{key}} из шаблона в БД.
+  resolutionSteps:
+    type: array
+    description: >
+      Опциональные шаги устранения предупреждения (пусковой регламент).
+      В UI: кнопка «Устранение предупреждения» → модалка с title + detail.
+    items:
+      type: object
+      additionalProperties: false
+      required: [title, detail]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          description: Краткий заголовок решения
+        detail:
+          type: string
+          minLength: 1
+          description: Полный текст регламента
+    minItems: 1
+    maxItems: 20

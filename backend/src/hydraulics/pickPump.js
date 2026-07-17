@@ -53,7 +53,14 @@ export function resolveHeatingCircuitMinFlowM3h(modes) {
  * @param {number} args.headTarget
  * @param {import('./types.js').HydraulicsPumpDutyRules} args.dutyRules
  * @param {boolean} [args.skipHeadOversizedCheck]
- * @returns {{ ok: boolean; headAtQ?: number; marginPercent?: number; issue?: PumpDutyIssue }}
+ * @param {boolean} [args.softQMin] — зона смесителя: Q &lt; qMin не отсекает режим
+ * @returns {{
+ *   ok: boolean;
+ *   headAtQ?: number;
+ *   marginPercent?: number;
+ *   issue?: PumpDutyIssue;
+ *   softQMinApplied?: boolean;
+ * }}
  */
 export function evaluatePumpModeAtDuty({
   mode,
@@ -62,12 +69,17 @@ export function evaluatePumpModeAtDuty({
   headTarget,
   dutyRules,
   skipHeadOversizedCheck = false,
+  softQMin = false,
 }) {
   const qMin = mode.qMinM3h ?? 0;
   const qMax = mode.qMaxM3h ?? Infinity;
 
+  let softQMinApplied = false;
   if (q < qMin) {
-    return { ok: false, issue: 'below_manufacturer_qmin' };
+    if (!softQMin) {
+      return { ok: false, issue: 'below_manufacturer_qmin' };
+    }
+    softQMinApplied = true;
   }
   if (q > qMax) {
     return { ok: false, issue: 'curve_unavailable' };
@@ -91,15 +103,25 @@ export function evaluatePumpModeAtDuty({
     return { ok: false, issue: 'head_oversized' };
   }
 
-  return { ok: true, headAtQ, marginPercent: margin };
+  return {
+    ok: true,
+    headAtQ,
+    marginPercent: margin,
+    ...(softQMinApplied ? { softQMinApplied: true } : {}),
+  };
 }
 
 /**
+ * Подбор насоса из каталога по рабочей точке.
+ *
  * @param {object} args
  * @param {number} args.designFlowM3PerHour
  * @param {number} args.headRequiredM
  * @param {import('../catalog/types.js').NormalizedCatalog['pumps']} args.pumps
  * @param {import('./types.js').HydraulicsPumpDutyRules} args.dutyRules
+ * @param {boolean} [args.softQMin] — допускать Q &lt; qMin (зона смесителя ТП)
+ * @param {boolean} [args.skipHeadOversizedCheck] — не отсекать по запасу &gt; pumpMaxHeadMarginPercent
+ * @param {boolean} [args.useExactHeadRequired] — H_target = H_req без +pumpHeadMarginPercent
  * @returns {{ pump: import('./types.js').HydraulicsPumpMatch | null; warnings: string[] }}
  */
 export function pickPumpForSystem({
@@ -107,11 +129,16 @@ export function pickPumpForSystem({
   headRequiredM,
   pumps,
   dutyRules,
+  softQMin = false,
+  skipHeadOversizedCheck = false,
+  useExactHeadRequired = false,
 }) {
   /** @type {string[]} */
   const warnings = [];
   const q = designFlowM3PerHour;
-  const headTarget = headRequiredM * (1 + dutyRules.pumpHeadMarginPercent / 100);
+  const headTarget = useExactHeadRequired
+    ? headRequiredM
+    : headRequiredM * (1 + dutyRules.pumpHeadMarginPercent / 100);
 
   if (q <= 0 || headRequiredM <= 0) {
     return { pump: null, warnings: ['Насос не подобран: нулевой расход или напор.'] };
@@ -123,6 +150,7 @@ export function pickPumpForSystem({
 
   /** @type {import('./types.js').HydraulicsPumpMatch | null} */
   let best = null;
+  let bestSoftQMin = false;
 
   for (const pump of pumps) {
     if (pump.type === 'circulation_hot_water') continue;
@@ -134,9 +162,21 @@ export function pickPumpForSystem({
         headRequiredM,
         headTarget,
         dutyRules,
+        skipHeadOversizedCheck,
+        softQMin,
       });
       if (!evalResult.ok || evalResult.headAtQ == null || evalResult.marginPercent == null) {
         continue;
+      }
+
+      /** @type {string[]} */
+      const candWarnings = [];
+      if (evalResult.softQMinApplied) {
+        const modeQMin = mode.qMinM3h ?? 0;
+        candWarnings.push(
+          `Расход Q=${q} м³/ч ниже паспортного q_min=${modeQMin} м³/ч режима «${mode.modeName}» — `
+          + 'допущена работа у левого края кривой (зона смесительного узла).',
+        );
       }
 
       const candidate = {
@@ -146,25 +186,33 @@ export function pickPumpForSystem({
         designFlowM3PerHour: q,
         headRequiredM: round(headRequiredM, 2),
         headAtDesignM: round(evalResult.headAtQ, 2),
-        warnings: [],
+        warnings: candWarnings,
       };
       if (
         !best
         || candidate.headMarginPercent < best.headMarginPercent
       ) {
         best = candidate;
+        bestSoftQMin = evalResult.softQMinApplied === true;
       }
     }
   }
 
   if (!best) {
+    const marginHint = skipHeadOversizedCheck
+      ? `H≥${round(headTarget, 2)} м (без потолка запаса по напору)`
+      : `H≥${round(headTarget, 2)} м (запас по напору ${dutyRules.pumpHeadMarginPercent}…${dutyRules.pumpMaxHeadMarginPercent} %)`;
     warnings.push(
-      `Не найден насос для Q=${q} м³/ч и H≥${round(headTarget, 2)} м `
-      + `(допустимая зона: Q≤${dutyRules.pumpDutyQMaxUtilizationPercent} % Q_max режима, `
-      + `запас по напору ${dutyRules.pumpHeadMarginPercent}…${dutyRules.pumpMaxHeadMarginPercent} %) — `
-      + 'расширьте каталог или снизьте сопротивления.',
+      `Не найден насос для Q=${q} м³/ч и ${marginHint} `
+      + `(допустимая зона: Q≤${dutyRules.pumpDutyQMaxUtilizationPercent} % Q_max режима`
+      + (softQMin ? ', soft qMin для зоны смесителя' : '')
+      + ') — расширьте каталог или снизьте сопротивления.',
     );
     return { pump: null, warnings };
+  }
+
+  if (bestSoftQMin && best.warnings.length) {
+    warnings.push(...best.warnings);
   }
 
   return { pump: best, warnings };

@@ -5,6 +5,12 @@
  */
 export type RecommendationCategory = 'warnings' | 'automationHints';
 
+/** Шаг устранения предупреждения (заголовок + пояснение). */
+export interface RecommendationResolutionStep {
+  title: string;
+  detail: string;
+}
+
 export interface NormalizedRecommendation {
   code: string;
   schemaVersion: number;
@@ -12,6 +18,8 @@ export interface NormalizedRecommendation {
   equipmentType: string;
   title: string;
   text: string;
+  /** Шаги устранения (опционально; для WARN с пусковым регламентом). */
+  resolutionSteps?: RecommendationResolutionStep[];
 }
 
 export interface RecommendationsBundle {
@@ -25,4 +33,6 @@ export interface ResolvedRecommendation {
   equipmentType: string;
   title: string;
   text: string;
+  /** Шаги устранения из справочника (без подстановки {{vars}}). */
+  resolutionSteps?: RecommendationResolutionStep[];
 }

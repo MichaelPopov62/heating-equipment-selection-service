@@ -53,6 +53,37 @@ export function validateAndNormalizeRecommendationsBundle(json, source = 'file')
       throw new Error(`recommendations[${code}].text: обязательная непустая строка`);
     }
 
+    /** @type {import('./types.js').RecommendationResolutionStep[] | undefined} */
+    let resolutionSteps;
+    if (d.resolutionSteps != null) {
+      if (!Array.isArray(d.resolutionSteps)) {
+        throw new Error(
+          `recommendations[${code}].resolutionSteps: ожидается массив объектов {title, detail}`,
+        );
+      }
+      // Пустой массив в Mongo (legacy / default схемы) = поле отсутствует
+      if (d.resolutionSteps.length > 0) {
+        resolutionSteps = [];
+        for (let si = 0; si < d.resolutionSteps.length; si += 1) {
+          const rawStep = d.resolutionSteps[si];
+          if (!rawStep || typeof rawStep !== 'object' || Array.isArray(rawStep)) {
+            throw new Error(
+              `recommendations[${code}].resolutionSteps[${si}]: ожидается объект {title, detail}`,
+            );
+          }
+          const stepObj = /** @type {Record<string, unknown>} */ (rawStep);
+          const stepTitle = String(stepObj.title ?? '').trim();
+          const stepDetail = String(stepObj.detail ?? '').trim();
+          if (!stepTitle || !stepDetail) {
+            throw new Error(
+              `recommendations[${code}].resolutionSteps[${si}]: title и detail обязательны`,
+            );
+          }
+          resolutionSteps.push({ title: stepTitle, detail: stepDetail });
+        }
+      }
+    }
+
     byCode[code] = {
       code,
       schemaVersion: Math.trunc(schemaVersionRaw),
@@ -60,6 +91,7 @@ export function validateAndNormalizeRecommendationsBundle(json, source = 'file')
       equipmentType,
       title,
       text,
+      ...(resolutionSteps ? { resolutionSteps } : {}),
     };
   }
 

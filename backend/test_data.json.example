@@ -2209,6 +2209,35 @@
   ],
   "pumps": [
     {
+      "id": "pump-grundfos-alpha1-l-25-60-180",
+      "brand": "Grundfos",
+      "series": "Alpha1 L",
+      "model": "Alpha1 L 25-60 180",
+      "segment": "premium",
+      "country": "Denmark",
+      "type": "electronic",
+      "price": 7200,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "1 1/2",
+        "nominalDiameterMm": 25
+      },
+      "operatingModes": [
+        {
+          "modeName": "Пропорциональное давление max",
+          "speedIndex": 1,
+          "powerWatts": 45,
+          "coefficients": {
+            "a": -0.15,
+            "b": -0.22,
+            "c": 6
+          },
+          "qMinM3h": 0.1,
+          "qMaxM3h": 3.2
+        }
+      ]
+    },
+    {
       "id": "pump-grundfos-ups-25-40-180",
       "brand": "Grundfos",
       "series": "UPS",
@@ -2315,6 +2344,59 @@
       ]
     },
     {
+      "id": "pump-grundfos-ups-25-80-180",
+      "brand": "Grundfos",
+      "series": "UPS",
+      "model": "UPS 25-80 180",
+      "segment": "medium",
+      "country": "Denmark",
+      "type": "three_speed",
+      "price": 5400,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "1 1/2",
+        "nominalDiameterMm": 25
+      },
+      "operatingModes": [
+        {
+          "modeName": "Скорость 1",
+          "speedIndex": 1,
+          "powerWatts": 110,
+          "coefficients": {
+            "a": -0.18,
+            "b": -0.32,
+            "c": 4.5
+          },
+          "qMinM3h": 0.15,
+          "qMaxM3h": 3.5
+        },
+        {
+          "modeName": "Скорость 2",
+          "speedIndex": 2,
+          "powerWatts": 155,
+          "coefficients": {
+            "a": -0.15,
+            "b": -0.38,
+            "c": 6.8
+          },
+          "qMinM3h": 0.18,
+          "qMaxM3h": 4.2
+        },
+        {
+          "modeName": "Скорость 3",
+          "speedIndex": 3,
+          "powerWatts": 165,
+          "coefficients": {
+            "a": -0.12,
+            "b": -0.42,
+            "c": 8
+          },
+          "qMinM3h": 0.2,
+          "qMaxM3h": 4.8
+        }
+      ]
+    },
+    {
       "id": "pump-grundfos-ups-32-80-180",
       "brand": "Grundfos",
       "series": "UPS",
@@ -2364,6 +2446,93 @@
           },
           "qMinM3h": 0.5,
           "qMaxM3h": 6.5
+        }
+      ]
+    },
+    {
+      "id": "pump-wilo-yonos-pico-25-1-6-180",
+      "brand": "Wilo",
+      "series": "Yonos Pico",
+      "model": "Yonos Pico 25/1-6 180",
+      "segment": "premium",
+      "country": "Germany",
+      "type": "electronic",
+      "price": 6800,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "1 1/2",
+        "nominalDiameterMm": 25
+      },
+      "operatingModes": [
+        {
+          "modeName": "Режим постоянного давления max",
+          "speedIndex": 1,
+          "powerWatts": 40,
+          "coefficients": {
+            "a": -0.11,
+            "b": -0.15,
+            "c": 6
+          },
+          "qMinM3h": 0.1,
+          "qMaxM3h": 3.6
+        }
+      ]
+    },
+    {
+      "id": "pump-wilo-yonos-pico-25-1-8-180",
+      "brand": "Wilo",
+      "series": "Yonos Pico",
+      "model": "Yonos Pico 25/1-8 180",
+      "segment": "premium",
+      "country": "Germany",
+      "type": "electronic",
+      "price": 9800,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "1 1/2",
+        "nominalDiameterMm": 25
+      },
+      "operatingModes": [
+        {
+          "modeName": "Режим постоянного давления max",
+          "speedIndex": 1,
+          "powerWatts": 75,
+          "coefficients": {
+            "a": -0.09,
+            "b": -0.11,
+            "c": 8
+          },
+          "qMinM3h": 0.1,
+          "qMaxM3h": 4.5
+        }
+      ]
+    },
+    {
+      "id": "pump-wilo-yonos-pico-32-1-8-180",
+      "brand": "Wilo",
+      "series": "Yonos Pico",
+      "model": "Yonos Pico 32/1-8 180",
+      "segment": "premium",
+      "country": "Germany",
+      "type": "electronic",
+      "price": 10500,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "2",
+        "nominalDiameterMm": 32
+      },
+      "operatingModes": [
+        {
+          "modeName": "Режим постоянного давления max",
+          "speedIndex": 1,
+          "powerWatts": 75,
+          "coefficients": {
+            "a": -0.07,
+            "b": -0.09,
+            "c": 8
+          },
+          "qMinM3h": 0.1,
+          "qMaxM3h": 4.8
         }
       ]
     },
@@ -2564,6 +2733,117 @@
           },
           "qMinM3h": 0.05,
           "qMaxM3h": 1.5
+        }
+      ]
+    },
+    {
+      "id": "pump-dab-va-55-180",
+      "brand": "DAB",
+      "series": "VA",
+      "model": "VA 55/180",
+      "segment": "medium",
+      "country": "Italy",
+      "type": "three_speed",
+      "price": 2600,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "1 1/2",
+        "nominalDiameterMm": 25
+      },
+      "operatingModes": [
+        {
+          "modeName": "Скорость 1",
+          "speedIndex": 1,
+          "powerWatts": 41,
+          "coefficients": {
+            "a": -0.31,
+            "b": -0.58,
+            "c": 2.1
+          },
+          "qMinM3h": 0.15,
+          "qMaxM3h": 1.7
+        },
+        {
+          "modeName": "Скорость 2",
+          "speedIndex": 2,
+          "powerWatts": 54,
+          "coefficients": {
+            "a": -0.26,
+            "b": -0.64,
+            "c": 3.4
+          },
+          "qMinM3h": 0.18,
+          "qMaxM3h": 2.3
+        },
+        {
+          "modeName": "Скорость 3",
+          "speedIndex": 3,
+          "powerWatts": 78,
+          "coefficients": {
+            "a": -0.22,
+            "b": -0.71,
+            "c": 5.4
+          },
+          "qMinM3h": 0.2,
+          "qMaxM3h": 2.8
+        }
+      ]
+    },
+    {
+      "id": "pump-dab-evosta2-25-80-180",
+      "brand": "DAB",
+      "series": "Evosta 2",
+      "model": "Evosta 2 25-80/180",
+      "segment": "medium",
+      "country": "Italy",
+      "type": "electronic",
+      "price": 6200,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "1 1/2",
+        "nominalDiameterMm": 25
+      },
+      "operatingModes": [
+        {
+          "modeName": "Режим постоянного давления max",
+          "speedIndex": 1,
+          "powerWatts": 55,
+          "coefficients": {
+            "a": -0.11,
+            "b": -0.14,
+            "c": 8
+          },
+          "qMinM3h": 0.1,
+          "qMaxM3h": 4.2
+        }
+      ]
+    },
+    {
+      "id": "pump-dab-evosta2-32-80-180",
+      "brand": "DAB",
+      "series": "Evosta 2",
+      "model": "Evosta 2 32-80/180",
+      "segment": "medium",
+      "country": "Italy",
+      "type": "electronic",
+      "price": 6800,
+      "connections": {
+        "mountingLengthMm": 180,
+        "threadInch": "2",
+        "nominalDiameterMm": 32
+      },
+      "operatingModes": [
+        {
+          "modeName": "Режим постоянного давления max",
+          "speedIndex": 1,
+          "powerWatts": 55,
+          "coefficients": {
+            "a": -0.09,
+            "b": -0.12,
+            "c": 8
+          },
+          "qMinM3h": 0.1,
+          "qMaxM3h": 4.4
         }
       ]
     }

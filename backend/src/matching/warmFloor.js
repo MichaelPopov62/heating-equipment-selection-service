@@ -14,6 +14,8 @@ const MATERIAL_LIMIT_FINISH_IDS = new Set([
 
 const SURFACE_TEMP_EPSILON_C = 0.05;
 const SUGGESTED_MAX_PIPE_SPACING_MM = 200;
+/** Порог q↓ (Вт/м²) для WARN паразитного потока — согласован с ufhParasiticDownTriggerWm2. */
+const PARASITIC_DOWN_WARN_WM2 = 5;
 
 /**
  * Текстовые подсказки для отчёта подбора, если в анкете отмечен водяной тёплый пол.
@@ -73,6 +75,8 @@ function recommendationVarsForRoom(room) {
     circuitSupplyC: room.circuitSupplyC,
     circuitReturnC: room.circuitReturnC,
     heatFluxUpWm2: room.heatFluxUpWm2,
+    heatFluxDownWm2: room.heatFluxDownWm2,
+    heatFluxDownWatts: room.heatFluxDownWatts,
     maxAllowableHeatFluxUpWm2: room.maxAllowableHeatFluxUpWm2,
     pipeSpacingMm: room.pipeSpacingMm,
     requestedPipeSpacingMm: room.requestedPipeSpacingMm,
@@ -150,6 +154,22 @@ export function applyUnderfloorHeatingRecommendations(report, recommendations) {
         resolvedRecommendations,
         recommendations,
         'WARN_UFH_COVERAGE_LOW',
+        vars,
+      );
+    }
+
+    if (
+      room.bottomBoundary === 'heated'
+      && typeof room.heatFluxDownWm2 === 'number'
+      && Number.isFinite(room.heatFluxDownWm2)
+      && room.heatFluxDownWm2 > PARASITIC_DOWN_WARN_WM2
+    ) {
+      pushUfhRecommendation(
+        room,
+        warnings,
+        resolvedRecommendations,
+        recommendations,
+        'WARN_UFH_PARASITIC_DOWN_HEATED',
         vars,
       );
     }

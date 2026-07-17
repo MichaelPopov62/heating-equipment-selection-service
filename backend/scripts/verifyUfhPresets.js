@@ -171,14 +171,22 @@ if (base && tile && laminate) {
     ],
   });
   applyUnderfloorHeatingRecommendations(tileReport, calcCtx.recommendations);
-  const hasOverrideRec = (tileReport.resolvedRecommendations ?? []).some(
+  const overrideRec = (tileReport.resolvedRecommendations ?? []).find(
     (/** @type {import('../src/recommendations/types.js').ResolvedRecommendation} */ r) =>
       r.code === 'WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE',
   );
   tally(
     logCheck(
-      hasOverrideRec,
+      overrideRec != null,
       'плитка + preset 29 °C → WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE',
+    ),
+  );
+  tally(
+    logCheck(
+      (overrideRec?.resolutionSteps?.length ?? 0) === 4
+        && overrideRec?.resolutionSteps?.[0]?.title
+          === 'Санитарно-комфортный лимит режима ТП',
+      'WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE + 4 resolutionSteps',
     ),
   );
 
@@ -323,6 +331,63 @@ if (base && tile && laminate) {
         'толщина XPS не меняет q↑ (одинаковый rUp)',
       ),
     );
+    if (down30.heatFluxDownWm2 > 5) {
+      const parasiticReport = buildUfhReport({
+        rooms: [
+          buildUfhRoom('r_parasitic', 'Над отапливаемым', 0, {
+            basePresetId: 'ufh_base_interstory_screed_65',
+            finishMaterialId: 'laminate_click',
+            finishMaterialName: 'Ламинат',
+            roomAreaM2: 12,
+            heatedAreaM2: 12,
+            areaM2: 12,
+            pipeSpacingMm: 150,
+            requestedPipeSpacingMm: 150,
+            resolvedPipeSpacingMm: 150,
+            circuitSupplyC: 40,
+            circuitReturnC: 30,
+            circuitMeanC: down30.circuitMeanC,
+            heatFluxUpWm2: down30.heatFluxUpWm2,
+            heatFluxDownWm2: down30.heatFluxDownWm2,
+            heatFluxUpWatts: down30.heatFluxUpWatts,
+            heatFluxDownWatts: down30.heatFluxDownWatts,
+            maxAllowableHeatFluxUpWm2: down30.maxAllowableHeatFluxUpWm2,
+            surfaceTempC: down30.surfaceTempC,
+            maxSurfaceTemperatureCelsius: down30.maxSurfaceTemperatureCelsius,
+            bottomBoundary: 'heated',
+            neighborTempC: down30.neighborTempC,
+            coveringResistanceM2KW: down30.coveringResistanceM2KW,
+            finishCoveringResistanceM2KW: down30.finishCoveringResistanceM2KW,
+            pipeEmbedmentResistanceM2KW: down30.pipeEmbedmentResistanceM2KW,
+            baseCoveringResistanceM2KW: down30.baseCoveringResistanceM2KW,
+            resistanceUpM2KW: down30.resistanceUpM2KW,
+            resistanceDownM2KW: down30.resistanceDownM2KW,
+          }),
+        ],
+        totalHeatFluxUpWatts: down30.heatFluxUpWatts,
+        totalHeatFluxDownWatts: down30.heatFluxDownWatts,
+        circuitSupplyC: 40,
+        circuitReturnC: 30,
+        circuitMeanC: down30.circuitMeanC,
+        circuitSource: 'finish_preset',
+        isMixingNodeRequired: false,
+      });
+      applyUnderfloorHeatingRecommendations(parasiticReport, calcCtx.recommendations);
+      const parasiticRec = (parasiticReport.resolvedRecommendations ?? []).find(
+        (/** @type {import('../src/recommendations/types.js').ResolvedRecommendation} */ r) =>
+          r.code === 'WARN_UFH_PARASITIC_DOWN_HEATED',
+      );
+      tally(
+        logCheck(
+          parasiticRec != null
+            && (parasiticRec.resolutionSteps?.length ?? 0) === 4
+            && parasiticRec.resolutionSteps?.[0]?.title === 'Увеличьте толщину утеплителя',
+          'WARN_UFH_PARASITIC_DOWN_HEATED + 4 resolutionSteps',
+        ),
+      );
+    } else {
+      tally(logCheck(false, 'ожидался q↓ > 5 Вт/м² для WARN паразитного потока'));
+    }
   }
   console.log('\n=== ufhLoopHydraulics: appliances + enrich ===');
   const hydRules = calcCtx.appliances.byKind.hydraulics;
