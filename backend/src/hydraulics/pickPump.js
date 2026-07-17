@@ -53,7 +53,7 @@ export function resolveHeatingCircuitMinFlowM3h(modes) {
  * @param {number} args.headTarget
  * @param {import('./types.js').HydraulicsPumpDutyRules} args.dutyRules
  * @param {boolean} [args.skipHeadOversizedCheck]
- * @param {boolean} [args.softQMin] — зона смесителя: Q &lt; qMin не отсекает режим
+ * @param {boolean} [args.softQMin] - зона смесителя: Q < qMin не отсекает режим
  * @returns {{
  *   ok: boolean;
  *   headAtQ?: number;
@@ -119,9 +119,9 @@ export function evaluatePumpModeAtDuty({
  * @param {number} args.headRequiredM
  * @param {import('../catalog/types.js').NormalizedCatalog['pumps']} args.pumps
  * @param {import('./types.js').HydraulicsPumpDutyRules} args.dutyRules
- * @param {boolean} [args.softQMin] — допускать Q &lt; qMin (зона смесителя ТП)
- * @param {boolean} [args.skipHeadOversizedCheck] — не отсекать по запасу &gt; pumpMaxHeadMarginPercent
- * @param {boolean} [args.useExactHeadRequired] — H_target = H_req без +pumpHeadMarginPercent
+ * @param {boolean} [args.softQMin] - допускать Q < qMin (зона смесителя ТП)
+ * @param {boolean} [args.skipHeadOversizedCheck] - не отсекать по запасу > pumpMaxHeadMarginPercent
+ * @param {boolean} [args.useExactHeadRequired] - H_target = H_req без запаса pumpHeadMarginPercent
  * @returns {{ pump: import('./types.js').HydraulicsPumpMatch | null; warnings: string[] }}
  */
 export function pickPumpForSystem({

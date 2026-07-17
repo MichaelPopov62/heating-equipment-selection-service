@@ -188,6 +188,7 @@ const testMode = {
 
 // Zone: oversized не режет; среди прошедших — минимальный запас
 {
+  /** @type {import('../src/catalog/types.js').PumpCatalogItemNormalized} */
   const tight = {
     id: 'pump-tight',
     brand: 'T',
@@ -209,6 +210,7 @@ const testMode = {
       coefficients: { a: -0.05, b: -0.05, c: 3.4 },
     }],
   };
+  /** @type {import('../src/catalog/types.js').PumpCatalogItemNormalized} */
   const oversized = {
     id: 'pump-big',
     brand: 'B',
