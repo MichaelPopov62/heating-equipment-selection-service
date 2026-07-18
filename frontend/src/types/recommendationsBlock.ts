@@ -59,6 +59,7 @@ export type RecommendationsBlockProps = {
   apiElectricWhFromReport: ParsedWaterHeaterMatching | null;
   apiUnderfloorHeatingFromReport: ParsedUnderfloorHeating | null;
   apiUniboxesFromReport?: ParsedUniboxesMatching | null;
+  /** Підпис агрегату секцій / приладів для RadiatorsSummaryTable. */
   displayedRadiatorSectionsTotal: string;
   apiCatalogSource: 'file' | 'mongo' | null;
   apiAutomationHints: AutomationHint[];

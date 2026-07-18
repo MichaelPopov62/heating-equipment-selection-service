@@ -1,0 +1,27 @@
+/* Призначення: стилі кроку анкети «Котёл». */
+
+.root {
+  composes: block from '../../styles/formElements.module.css';
+}
+
+.fieldBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  composes: label from '../../styles/formElements.module.css';
+}
+
+.select {
+  composes: select from '../../styles/formElements.module.css';
+}
+
+.hint {
+  composes: hint from '../../styles/formElements.module.css';
+}
+
+.inlineCode {
+  composes: inlineCode from '../../styles/formElements.module.css';
+}

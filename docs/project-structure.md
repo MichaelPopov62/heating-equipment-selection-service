@@ -133,7 +133,7 @@
 | `src/data/fallback*.ts` | Офлайн-fallback справочников |
 | `src/styles/` | CSS-переменные / общие стили |
 | `scripts/verifySurveySessionPipeline.mjs` | Verify pipeline сессии |
-| `knip.json` | Dead-code (compat migrate в `ignore`) |
+| `knip.json` | Dead-code (`--treat-config-hints-as-errors`; без blanket-`ignore` migrate) |
 
 Подробные таблицы `query/`, `surveySession/`, `hooks/` — [`Plan.md`](../Plan.md) § `frontend/` и [`frontend-calc-runner.md`](frontend-calc-runner.md), [`frontend-query-inventory.md`](frontend-query-inventory.md), [`survey-draft.md`](survey-draft.md).
 

@@ -107,10 +107,19 @@ const {
   (`boiler_primary`) в отчёте ТП не показывается.
 - **Сайдбар «Итог»:** `UnderfloorHeatingSummaryTable` — агрегаты (в т.ч. строка насоса ТП).
   Под таблицей — inline-ссылки на шаг `warmFloor` (`SurveyStepLink` + делегирование клика
-  в `RecommendationsBlock`). `HydraulicsProposalSection` показывает насосы **без** зон `ufh_*`
-  (без дубля с отчётом ТП).
+  в `RecommendationsBlock`). В полном отчёте гидравлики (`HydraulicsReportView`) насосы зон
+  `ufh_*` не показываются (без дубля с отчётом ТП); то же правило — в summary.
 - Модалка активна, если в отчёте есть комнаты ТП и/или warnings (или есть строки/warnings унибоксов).
   Пустой `rooms[]` без warnings — кнопка неактивна.
+
+### UI блока «Гидравлика»
+
+- **Шаг `hydraulics` (`HydraulicsSection`):** ввод разводки/длин; кнопка «Отчёт по гидравлике»
+  открывает `HydraulicsReportDialog` / `HydraulicsReportView` (полный расчёт с ценами и участками).
+  См. [`hydraulics-survey-report.md`](hydraulics-survey-report.md).
+- **Сайдбар «Итог»:** `HydraulicsSummaryTable` — KPI (расход, напор, насос).
+- **Блок «Рекомендация»:** `HydraulicsProposalTable` — плоский подбор труб без колонок цены и без
+  детализации по контурам/участкам.
 
 ### UI блока «Горячая вода»
 
@@ -141,13 +150,16 @@ const {
 3. **Дочерние summary** — разметка `SurveyStepLink` (`data-survey-step`, `type="button"`).
 
 Обратный переход (форма → сайдбар) — кнопка **«Назад к результатам»** рядом с отчётом на шагах
-`warmFloor`, `hotWater`, `waterHeater`:
+`warmFloor`, `hotWater`, `waterHeater`, `radiators`, `boiler`, `hydraulics`:
 
 | Шаг | Якорь (`RESULTS_SECTION_IDS`) | Секция в сайдбаре |
 |-----|-------------------------------|-------------------|
 | Тёплый пол | `warmFloor` → `results-warm-floor` | `UnderfloorHeatingSummaryTable` |
 | Горячая вода | `hotWater` → `results-hot-water` | `HotWaterFixturesSummaryTable` |
 | Водонагреватель | `waterHeater` → `results-water-heater` | `HotWaterSummaryTable` (ЭБ/БКН) |
+| Радиаторы | `radiators` → `results-radiators` | `RadiatorsSummaryTable` |
+| Котёл | `boiler` → `results-boiler` | `BoilerSummaryTable` |
+| Гидравлика | `hydraulics` → `results-hydraulics` | `HydraulicsSummaryTable` |
 
 `navigateToResultsSection` в `useSurveyStepNavigation`: scroll к секции; если её ещё нет в DOM —
 к `#calculation-results-title`. Стили кнопок — `SurveyReportActions.module.css`.
@@ -194,7 +206,7 @@ const {
 | `useSurveyEstimates` | локальные оценки до API |
 | `constants/surveySteps.ts` | SSOT шагов: `SURVEY_STEPS`, навигация, `isSurveyStep`, `surveyStepNavLabel` |
 | `RecommendationsBlock` | сайдбар «Итог»; делегирование `data-survey-step` |
-| `HydraulicsProposalSection` | блок гидравлики из `matching.hydraulics` |
+| `HydraulicsReportView` / `HydraulicsSummaryTable` / `HydraulicsProposalTable` | гидравлика: полный отчёт / итог / трубы в «Рекомендации» — см. [`hydraulics-survey-report.md`](hydraulics-survey-report.md) |
 
 Ручной `invalidateCalcReport()` в формах **не нужен** — пересчёт централизован в сессии.
 
@@ -207,6 +219,16 @@ const {
 `object` → `warmFloor` → `rooms` → `hotWater` → `boiler` → `radiators` → `waterHeater` → `hydraulics` → `summary`
 
 Шаг «Тёплый пол» стоит сразу после «Объект» и перед «Помещения»: глобальный флаг / `ufhPresetId` задают схему излучателей до заполнения комнат.
+
+Содержимое ключевых шагов:
+
+| Шаг | Форма / поля |
+|-----|----------------|
+| `boiler` | `BoilerSurveyForm`: график + `BoilerReportDialog`; сайдбар — `BoilerSummaryTable`; в «Рекомендации» — `BoilerProposalCard` × economy/efficient. См. [`boiler-survey-report.md`](boiler-survey-report.md) |
+| `radiators` | `RadiatorsSurveyForm`: подводка/тип + `RadiatorsReportDialog` (полный расчёт); в сайдбаре — `RadiatorsSummaryTable`; в «Рекомендации» — `RadiatorProposalLineTable` отдельно от котлов. См. [`radiators-survey-report.md`](radiators-survey-report.md) |
+| `hydraulics` | `HydraulicsSection`: разводка + `HydraulicsReportDialog`; сайдбар — `HydraulicsSummaryTable`; в «Рекомендации» — `HydraulicsProposalTable` (трубы без цен). См. [`hydraulics-survey-report.md`](hydraulics-survey-report.md) |
+| `waterHeater` | Схема ГВС / БКН / ЭВН (`WaterHeaterForm`) |
+| `warmFloor` | Режим ТП, флаг водяного ТП, схема распределения (`WarmFloorSection`) |
 
 ---
 
@@ -230,6 +252,6 @@ cd frontend && npm run verify
 cd backend && npm run verify:survey-draft-migration && npm run verify:water-heater-form
 ```
 
-Knip: compat-модули миграции в `knip.json` → `ignore` — см. [`survey-draft.md`](survey-draft.md).
+Knip: `verify:dead-code` = `knip --treat-config-hints-as-errors`; compat/pipeline-миграции в графе импортов (без blanket-`ignore`) — см. [`survey-draft.md`](survey-draft.md).
 
 Типобезопасность: [`type-safety.md`](type-safety.md).

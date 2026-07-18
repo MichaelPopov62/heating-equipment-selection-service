@@ -1,12 +1,20 @@
 /**
  * Назначение: форма шага «Гидравлика» в анкете.
- * Описание: геометрия разводки, тип схемы, длины магистрали и подводов к радиаторам.
+ * Описание: разводка, длины; полный расчёт — в модалке (паттерн радиаторов / ГВ).
  */
 
+import { useState } from 'react';
+
 import type { RoomFormValue } from '../../types/rooms';
-import type { HydraulicsFormValue } from '../../types/hydraulics';
+import type {
+  HydraulicsFormValue,
+  ParsedHydraulicsView,
+} from '../../types/hydraulics';
 import type { WiringBranchV3, WiringSystemType } from '../../surveySession/wiringLayoutV3';
 import { WIRING_SYSTEM_TYPE_OPTIONS } from '../../utils/wiringSystemTypeLabels';
+import { HydraulicsReportDialog } from '../HydraulicsReport/HydraulicsReportDialog';
+import { hasHydraulicsReportContent } from '../HydraulicsReport/hasHydraulicsReportContent';
+import reportActionsStyles from '../SurveyNavigation/SurveyReportActions.module.css';
 import styles from './HydraulicsSection.module.css';
 
 type HydraulicsSectionProps = {
@@ -18,6 +26,11 @@ type HydraulicsSectionProps = {
   rooms: RoomFormValue[];
   onBranchLengthChange: (roomId: string, pipeLengthToEquipmentM: number) => void;
   onBranchReorder: (roomId: string, direction: 'up' | 'down') => void;
+  hydraulicsReport?: ParsedHydraulicsView | null;
+  catalogSource?: 'file' | 'mongo' | null;
+  calcLoading?: boolean;
+  /** Прокрутка до підсумку гідравліки в сайдбарі «Результати». */
+  onBackToResults?: () => void;
 };
 
 /**
@@ -49,15 +62,22 @@ export function HydraulicsSection({
   rooms,
   onBranchLengthChange,
   onBranchReorder,
+  hydraulicsReport = null,
+  catalogSource = null,
+  calcLoading = false,
+  onBackToResults,
 }: HydraulicsSectionProps) {
+  const [reportOpen, setReportOpen] = useState(false);
+  const canOpenReport = hasHydraulicsReportContent(hydraulicsReport);
+
   return (
     <div className={styles.root}>
       <p className={styles.hint}>
         Укажите тип разводки, длину магистрали котёл → коллектор и подводы коллектор →
         радиатор. Δt — для расчёта расхода радиаторного контура (может отличаться от
         номинального графика 75/65 или 55/45). Диаметры труб и насос подбираются
-        автоматически — результаты смотрите в правой колонке «Гидравлика — рекомендуемое
-        решение».
+        автоматически — полный расчёт с ценами и участками открывается кнопкой
+        «Отчёт по гидравлике»; краткий итог — в правой колонке.
       </p>
 
       <fieldset className={styles.wiringFieldset}>
@@ -222,6 +242,50 @@ export function HydraulicsSection({
           радиаторам.
         </p>
       )}
+
+      <div className={reportActionsStyles.reportActions}>
+        <div className={reportActionsStyles.reportActionsRow}>
+          <button
+            type="button"
+            className={reportActionsStyles.reportButton}
+            disabled={!canOpenReport}
+            onClick={() => {
+              setReportOpen(true);
+            }}
+          >
+            Отчёт по гидравлике
+          </button>
+          {onBackToResults != null && (
+            <button
+              type="button"
+              className={reportActionsStyles.backButton}
+              onClick={onBackToResults}
+            >
+              Назад к результатам
+            </button>
+          )}
+        </div>
+        {calcLoading && (
+          <p className={styles.hint} style={{ marginTop: 8 }} role="status">
+            Обновление расчёта…
+          </p>
+        )}
+        {!canOpenReport && !calcLoading && (
+          <p className={styles.hint} style={{ marginTop: 8 }}>
+            Отчёт появится после авторасчёта. Заполните помещения и ограждения,
+            задайте длины разводки.
+          </p>
+        )}
+      </div>
+
+      <HydraulicsReportDialog
+        open={reportOpen}
+        onClose={() => {
+          setReportOpen(false);
+        }}
+        hydraulics={hydraulicsReport}
+        catalogSource={catalogSource}
+      />
     </div>
   );
 }

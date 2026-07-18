@@ -1,5 +1,6 @@
 /**
- * Назначение: блок предложения по гидравлике (трубы + насос) для клиента.
+ * Призначення: повний звіт гідравліки (труби + насос).
+ * Опис: Тіло модалки кроку «Гидравлика»; деталізація не дублюється в «Рекомендації».
  */
 
 import type {
@@ -15,16 +16,18 @@ import {
   formatPriceUah,
 } from '../../utils/format';
 import { excludeUfhZonePumps } from '../../utils/ufhHydraulicsPumps';
-import { HydraulicsPumpCard } from './HydraulicsPumpCard';
-import styles from './HydraulicsProposalSection.module.css';
+import { HydraulicsPumpCard } from '../HydraulicsProposal/HydraulicsPumpCard';
+import styles from './HydraulicsReportView.module.css';
 
-type HydraulicsProposalSectionProps = {
-  hydraulics: ParsedHydraulicsView | null;
+export type HydraulicsReportViewProps = {
+  hydraulics: ParsedHydraulicsView;
   catalogSource?: 'file' | 'mongo' | null;
-  calcLoading?: boolean;
-  reportIsStale?: boolean;
 };
 
+/**
+ * @param role
+ * @param isMainLine
+ */
 function segmentRoleLabel(
   role: string,
   isMainLine?: boolean,
@@ -44,6 +47,9 @@ function segmentRoleLabel(
   }
 }
 
+/**
+ * @param topology
+ */
 function topologyLabel(topology: ParsedHydraulicsProposal['topology']): string | null {
   switch (topology) {
     case 'direct':
@@ -57,6 +63,9 @@ function topologyLabel(topology: ParsedHydraulicsProposal['topology']): string |
   }
 }
 
+/**
+ * @param props
+ */
 function FlowContextBlock({ flowContext }: { flowContext: ParsedHydraulicsFlowContext }) {
   const hasGraph =
     flowContext.supplyC != null && flowContext.returnC != null;
@@ -99,6 +108,9 @@ function FlowContextBlock({ flowContext }: { flowContext: ParsedHydraulicsFlowCo
   );
 }
 
+/**
+ * @param props
+ */
 function CalculationsSummary({
   calculations,
   proposal,
@@ -143,7 +155,8 @@ function CalculationsSummary({
           </dd>
         </>
       )}
-      {calculations.recommendedPipeDiameter && (
+      {calculations.recommendedPipeDiameter != null
+        && calculations.recommendedPipeDiameter.length > 0 && (
         <>
           <dt>Ориентировочный DN (по расходу)</dt>
           <dd>{calculations.recommendedPipeDiameter}</dd>
@@ -153,6 +166,9 @@ function CalculationsSummary({
   );
 }
 
+/**
+ * @param props
+ */
 function PipeLinesTable({
   title,
   pipeLines,
@@ -215,12 +231,15 @@ function PipeLinesTable({
   );
 }
 
+/**
+ * @param props
+ */
 function ProposalContent({
   proposal,
   catalogSource,
 }: {
   proposal: ParsedHydraulicsProposal;
-  catalogSource?: 'file' | 'mongo' | null;
+  catalogSource: 'file' | 'mongo' | null;
 }) {
   const sourceLine =
     catalogSource === 'mongo'
@@ -229,15 +248,16 @@ function ProposalContent({
         ? 'Подбор по каталогу из файла (локальные данные API).'
         : null;
 
-  /** Зоны ТП — только в отчёте шага «Тёплый пол». */
+  /** Зони ТП — лише в звіті кроку «Тёплый пол». */
   const pumpsForHydraulics = excludeUfhZonePumps(proposal.pumps);
+  const topologyText = topologyLabel(proposal.topology);
 
   return (
     <>
-      {sourceLine && <p className={styles.hint}>{sourceLine}</p>}
+      {sourceLine != null && <p className={styles.hint}>{sourceLine}</p>}
 
-      {topologyLabel(proposal.topology) && (
-        <p className={styles.hint}>{topologyLabel(proposal.topology)}</p>
+      {topologyText != null && (
+        <p className={styles.hint}>{topologyText}</p>
       )}
 
       {(proposal.designFlowM3PerHour > 0 || proposal.headRequiredM > 0) && (
@@ -262,11 +282,11 @@ function ProposalContent({
         </dl>
       )}
 
-      {!proposal.hasPipeSelection && proposal.unavailableReason && (
+      {!proposal.hasPipeSelection && proposal.unavailableReason != null && (
         <p className={styles.emptyHint}>{proposal.unavailableReason}</p>
       )}
 
-      {proposal.pumpUnavailableReason && pumpsForHydraulics.length === 0 && (
+      {proposal.pumpUnavailableReason != null && pumpsForHydraulics.length === 0 && (
         <p className={styles.hint}>{proposal.pumpUnavailableReason}</p>
       )}
 
@@ -297,7 +317,9 @@ function ProposalContent({
           />
         )}
 
-      {proposal.hasPipeSelection && proposal.estimatedPipesPrice > 0 && proposal.pipeLineGroups.length > 1 && (
+      {proposal.hasPipeSelection
+        && proposal.estimatedPipesPrice > 0
+        && proposal.pipeLineGroups.length > 1 && (
         <p className={styles.tableFooter}>
           Итого по трубам: <strong>{formatPriceUah(proposal.estimatedPipesPrice)} грн</strong>
         </p>
@@ -324,14 +346,14 @@ function ProposalContent({
                   className={
                     seg.velocityLimitExceeded
                     || seg.catalogPoolExhausted
-                    || (seg.velocityBelowMin && !seg.mainTransitGuardApplied)
+                    || (seg.velocityBelowMin === true && seg.mainTransitGuardApplied !== true)
                       ? styles.segmentRowWarning
                       : undefined
                   }
                 >
                   <td>
                     {seg.segmentLabel}
-                    {seg.groupedRoomIds && seg.groupedRoomIds.length > 0 ? (
+                    {seg.groupedRoomIds != null && seg.groupedRoomIds.length > 0 ? (
                       <span className={styles.hintInline}>
                         {' '}
                         (коллектор: {seg.groupedRoomIds.join(', ')})
@@ -345,17 +367,17 @@ function ProposalContent({
                   <td>{formatBrandModel(seg.brand, seg.model)}</td>
                   <td>
                     {seg.velocityMps.toFixed(2)} <span className={styles.unit}>м/с</span>
-                    {seg.velocityLimitExceeded ? (
+                    {seg.velocityLimitExceeded === true ? (
                       <span className={styles.hintInline}> (выше нормы)</span>
                     ) : null}
-                    {seg.velocityBelowMin ? (
+                    {seg.velocityBelowMin === true ? (
                       <span className={styles.hintInline}>
-                        {seg.mainTransitGuardApplied
+                        {seg.mainTransitGuardApplied === true
                           ? ' (ниже нормы v, guard Dвн)'
                           : ' (ниже нормы)'}
                       </span>
                     ) : null}
-                    {seg.catalogPoolExhausted ? (
+                    {seg.catalogPoolExhausted === true ? (
                       <span className={styles.hintInline}> (нет Ø в каталоге)</span>
                     ) : null}
                   </td>
@@ -380,73 +402,41 @@ function ProposalContent({
   );
 }
 
-export function HydraulicsProposalSection({
+/**
+ * @param props
+ */
+export function HydraulicsReportView({
   hydraulics,
-  catalogSource,
-  calcLoading = false,
-  reportIsStale = false,
-}: HydraulicsProposalSectionProps) {
-  const showStale = calcLoading || reportIsStale;
-  const proposal = hydraulics?.proposal ?? null;
-  const calculations = hydraulics?.calculations ?? null;
-  const flowContext = hydraulics?.flowContext ?? null;
-  const matchingWarnings = hydraulics?.matchingWarnings ?? [];
+  catalogSource = null,
+}: HydraulicsReportViewProps) {
+  const proposal = hydraulics.proposal;
+  const calculations = hydraulics.calculations;
+  const flowContext = hydraulics.flowContext;
+  const matchingWarnings = hydraulics.matchingWarnings;
 
   const allWarnings = [
     ...matchingWarnings,
     ...(calculations?.notes ?? []),
   ];
 
-  if (!hydraulics?.hasData) {
-    return (
-      <div className={styles.root} aria-labelledby="hydraulics-proposal-title">
-        <h3 id="hydraulics-proposal-title" className={styles.title}>
-          Гидравлика — рекомендуемое решение
-        </h3>
-        {calcLoading ? (
-          <p className={styles.hint} role="status">
-            Ожидание ответа сервера…
-          </p>
-        ) : (
-          <p className={styles.emptyHint}>
-            Заполните помещения и ограждения, затем дождитесь расчёта API — здесь появятся
-            расход, напор и подбор труб/насоса. Параметры магистрали задаются на шаге
-            «Гидравлика» слева.
-          </p>
-        )}
-      </div>
-    );
-  }
-
   return (
-    <div
-      className={[styles.root, showStale ? styles.rootStale : ''].filter(Boolean).join(' ')}
-      aria-labelledby="hydraulics-proposal-title"
-    >
-      <h3 id="hydraulics-proposal-title" className={styles.title}>
-        Гидравлика — рекомендуемое решение
-      </h3>
-
-      {showStale && (
-        <p className={styles.hint} role="status">
-          Обновление расчёта… показаны данные предыдущего ответа сервера.
-        </p>
-      )}
-
+    <div>
       <p className={styles.hint}>
         Источник: расчёт API (Pure Pipeline) · подбор труб и насоса из каталога.
+        В блоке «Рекомендация» — компактная таблица труб без цен; здесь — полный расчёт
+        с ценами и детализацией по участкам.
       </p>
 
-      {flowContext && <FlowContextBlock flowContext={flowContext} />}
+      {flowContext != null && <FlowContextBlock flowContext={flowContext} />}
 
-      {calculations && (
+      {calculations != null && (
         <CalculationsSummary calculations={calculations} proposal={proposal} />
       )}
 
-      {proposal ? (
+      {proposal != null ? (
         <ProposalContent
           proposal={proposal}
-          {...(catalogSource !== undefined ? { catalogSource } : {})}
+          catalogSource={catalogSource}
         />
       ) : (
         calculations != null && (
@@ -458,11 +448,14 @@ export function HydraulicsProposalSection({
       )}
 
       {allWarnings.length > 0 && (
-        <ul className={styles.warningsList}>
-          {allWarnings.map((w, i) => (
-            <li key={`hyd-mw-${i}-${w.slice(0, 64)}`}>{w}</li>
-          ))}
-        </ul>
+        <>
+          <h4 className={styles.sectionTitle}>Предупреждения</h4>
+          <ul className={styles.warningsList}>
+            {allWarnings.map((w, i) => (
+              <li key={`hyd-mw-${i}-${w.slice(0, 64)}`}>{w}</li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

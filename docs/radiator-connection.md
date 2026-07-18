@@ -18,7 +18,11 @@ OpenAPI: `components/schemas/CalcInput.yaml`.
 
 ## Анкета
 
-Шаг «Котёл»: select «Подводка радиаторов».  
+Шаг «Радиаторы»: компонент `frontend/src/components/RadiatorsSurveyForm/RadiatorsSurveyForm.tsx` — select «Подводка радиаторов».  
+Полный расчёт — модалка `RadiatorsReportDialog`; компактный итог — `RadiatorsSummaryTable` в сайдбаре.  
+Таблицы линий рядом с котлом остаются в блоке «Рекомендация». См. [`radiators-survey-report.md`](radiators-survey-report.md).  
+На шаге «Котёл» остаётся только `thermalRegimePreset` (график подачи/обратки).  
+При `ufhPresetId === 'ufh_only'` селект disabled (значения в draft не сбрасываются; matching радиаторов на сервере skip).  
 Черновик: `SurveyDraft.radiatorConnection` (compat: при загрузке старых draft без поля → `side`).  
 См. также [`survey-draft.md`](survey-draft.md).
 

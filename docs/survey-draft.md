@@ -13,8 +13,8 @@
 | `hydraulicsForm` | Шаг «Гидравлика»: `mainLineLengthM` (котёл → коллектор), `deltaTSystemK`, `pipeMaterialPreference` |
 | `wiringLayoutV3` | Схема разводки v3: `systemType` (`auto` \| `two-pipe-dead-end` \| …), `branches[]` (длина коллектор → радиатор); на calc уходит `hydraulics.radiatorWiringSystemType` + `radiatorBranchOverrides` |
 | `ufhPresetId` | Режим emitters (`ufh_only`, `ufh_mixed_radiators`, …); `null` — классика без ТП |
-| `radiatorConnection` | Подводка радиаторов: `side` \| `bottom` (дефолт `side`); UI — шаг «Котёл»; в calc → `heatingSystem.radiatorConnection`. SSOT — `shared/radiatorConnection.js`, см. [`radiator-connection.md`](radiator-connection.md). Старые draft без поля → `side` в `migrateSurveyDraft` |
-| `radiatorEmitterPreference` | Тип приборов на объект: `auto` \| `sectional` \| `panel` (дефолт `auto`); UI — шаг «Котёл»; в calc → `heatingSystem.radiatorEmitterPreference`. SSOT — `shared/radiatorEmitterPreference.js`, см. [`radiator-emitter-kind.md`](radiator-emitter-kind.md). Старые draft без поля → `auto` |
+| `radiatorConnection` | Подводка радиаторов: `side` \| `bottom` (дефолт `side`); UI — шаг «Радиаторы» (`RadiatorsSurveyForm`); полный расчёт — `RadiatorsReportDialog`; KPI — `RadiatorsSummaryTable`; в calc → `heatingSystem.radiatorConnection`. SSOT — `shared/radiatorConnection.js`, см. [`radiator-connection.md`](radiator-connection.md), [`radiators-survey-report.md`](radiators-survey-report.md). Старые draft без поля → `side` в `migrateSurveyDraft` |
+| `radiatorEmitterPreference` | Тип приборов на объект: `auto` \| `sectional` \| `panel` (дефолт `auto`); UI — шаг «Радиаторы» (`RadiatorsSurveyForm`); в calc → `heatingSystem.radiatorEmitterPreference`. SSOT — `shared/radiatorEmitterPreference.js`, см. [`radiator-emitter-kind.md`](radiator-emitter-kind.md), [`radiators-survey-report.md`](radiators-survey-report.md). Старые draft без поля → `auto` |
 
 ### ТП в комнате: `ufhTerminalControl`
 
@@ -37,6 +37,8 @@
 | Длина котёл → коллектор | `hydraulicsForm.mainLineLengthM` | `hydraulics.mainLineLengthM` |
 | Подвод коллектор → радиатор (по комнатам) | `wiringLayoutV3.branches[].pipeLengthToEquipmentM` | `hydraulics.radiatorBranchOverrides[]` |
 | Порядок радиаторов на магистрали | порядок `branches[]` (кнопки ↑↓ для dead-end / pass) | порядок `radiatorBranchOverrides[]` |
+
+Кнопки: «Отчёт по гидравлике» → `HydraulicsReportDialog`; «Назад к результатам» → якорь `results-hydraulics`. Слои UI — [`hydraulics-survey-report.md`](hydraulics-survey-report.md).
 
 Подписи схем — `frontend/src/utils/wiringSystemTypeLabels.ts` (`WIRING_SYSTEM_TYPE_OPTIONS`: заголовок + `description` под каждым radio). Дефолт — `auto` (бейдж «Рекомендуется»).
 
@@ -110,12 +112,6 @@ cd frontend && npm run verify
 - **`npm run verify`** — exit `0` обязателен; ESLint (`strictTypeChecked`), `typecheck`, knip, production `build` и `verify:survey-session` блокируют приёмку.
 - Полный gate репозитория: из корня `npm run verify` (см. [`type-safety.md`](type-safety.md)).
 
-**Knip (`knip.json`):** модули живой миграции черновиков в секции `ignore` (не анализируются, без ложных срабатываний):
-
-- `migrateLegacyRoomTypes.ts`
-- `migrateRoomUnderfloorHeating.ts`
-- `migrateLegacyExternalWalls.ts`
-- `migrateDerivedState.ts`
-- `migrateSurveyDraft.ts`
+**Knip (`knip.json`):** entry берётся из Vite-плагина; compat/pipeline-модули миграции (`migrateLegacy*`, `migrateSurveyDraft`, `migrateDerivedState`) в графе импортов — без blanket-`ignore`. Gate: `knip --treat-config-hints-as-errors` (configuration hints = fail).
 
 См. также: [`water-heater-form.md`](water-heater-form.md), [`frontend-calc-runner.md`](frontend-calc-runner.md).

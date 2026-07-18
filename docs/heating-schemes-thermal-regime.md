@@ -51,12 +51,14 @@
 ### Подводка радиаторов
 
 `heatingSystem.radiatorConnection`: `side` (дефолт) | `bottom`.  
-Анкета — шаг «Котёл»; детали — [`radiator-connection.md`](radiator-connection.md).
+Анкета — шаг «Радиаторы» (`RadiatorsSurveyForm`); детали — [`radiator-connection.md`](radiator-connection.md), UI отчёта — [`radiators-survey-report.md`](radiators-survey-report.md).  
+На шаге «Котёл» (`BoilerSurveyForm`) — `thermalRegimePreset` и полный отчёт подбора; см. [`boiler-survey-report.md`](boiler-survey-report.md).
 
 ### Тип радиаторов на объект
 
 `heatingSystem.radiatorEmitterPreference`: `auto` | `sectional` | `panel` (дефолт `auto`).  
-Единый тип приборов на все помещения (Two-Pass Orchestrator) — [`radiator-emitter-kind.md`](radiator-emitter-kind.md).
+Единый тип приборов на все помещения (Two-Pass Orchestrator) — [`radiator-emitter-kind.md`](radiator-emitter-kind.md).  
+Анкета — шаг «Радиаторы» (рядом с подводкой); полный расчёт — модалка отчёта.
 
 ### Конденсационный котёл + высокий график
 
@@ -104,7 +106,7 @@
 | Shared | `shared/heatingMatchingSchemes.js`, `shared/heatingThermalRegimeRecommendations.js` |
 | Валидация | `backend/src/api/validate.js`, `normalizeHeatingUfhPreset.js` |
 | Matching | `backend/src/matching/index.js`, `boiler.js`, `radiators.js` |
-| Frontend | `frontend/src/components/WaterHeaterForm/` (схема ГВС), `App.tsx` (thermalRegimePreset), `useSurveyCalc` (calc API, React Query) |
+| Frontend | `BoilerSurveyForm` / `BoilerReport*` (график + отчёт), `WaterHeaterForm/` (схема ГВС), `useSurveyCalc` (calc API, React Query) |
 | OpenAPI | `components/schemas/CalcInput.yaml` |
 
 Ручной чеклист: [`heating-schemes-test-checklist.md`](heating-schemes-test-checklist.md).

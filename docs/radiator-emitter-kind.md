@@ -93,8 +93,13 @@ Shared: `shared/radiatorEmitterPreference.js`.
 
 ## UI
 
-Анкета (шаг «Котёл»): preference рядом с подводкой.
-В отчёте — единый тип по объекту; `unitsCount` в колонке количества.
+Анкета (шаг «Радиаторы», `RadiatorsSurveyForm`): preference рядом с подводкой.  
+Полный расчёт — `RadiatorsReportView` в модалке; KPI — `RadiatorsSummaryTable` в сайдбаре.  
+В блоке «Рекомендация» — только `RadiatorProposalLineTable` рядом с котлом (не полный `dl`).  
+График подачи/обратки (`thermalRegimePreset`) — на шаге «Котёл».  
+При `ufh_only` оба селекта disabled; значения в черновике сохраняются.  
+В отчёте — единый тип по объекту; `unitsCount` в колонке количества.  
+См. [`radiators-survey-report.md`](radiators-survey-report.md).
 
 ## Verify
 

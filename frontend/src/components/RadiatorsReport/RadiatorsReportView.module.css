@@ -1,0 +1,64 @@
+/* Призначення: стилі повного звіту радіаторів (модалка кроку «Радіатори»). */
+@import '../../styles/custom-media.css';
+
+.hint {
+  composes: hint from '../../styles/formElements.module.css';
+}
+
+.dl {
+  display: grid;
+  grid-template-columns: minmax(8rem, 42%) 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.dl dt {
+  margin: 0;
+  color: var(--text);
+  opacity: 0.9;
+}
+
+.dl dd {
+  margin: 0;
+  color: var(--text-h);
+}
+
+.sectionTitle {
+  margin: 14px 0 8px;
+  font-size: 14px;
+  color: var(--text-h);
+}
+
+.warningsList {
+  margin: 8px 0 0;
+  padding-left: 1.15rem;
+  font: 500 12px/1.4 var(--sans);
+  color: var(--text-m);
+}
+
+.proposalLinesGrid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+  align-items: stretch;
+}
+
+.proposalLinesGrid > * {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+@media (--tablet) {
+  .proposalLinesGrid > * {
+    flex: 1 1 calc(50% - 6px);
+  }
+}
+
+.muted {
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.85;
+}

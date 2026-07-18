@@ -1,6 +1,6 @@
 /**
  * Назначение: Якоря секций сайдбара «Результаты» для кнопок «Назад к результатам».
- * Описание: SSOT id для ТП, ГВ (точки) и водонагревателя (ЭБ/БКН).
+ * Описание: SSOT id для ТП, ГВ, водонагревателя, радиаторов, котла и гидравлики.
  */
 
 export const RESULTS_SECTION_IDS = {
@@ -10,6 +10,12 @@ export const RESULTS_SECTION_IDS = {
   warmFloor: 'results-warm-floor',
   /** Итог подбора ЭБ/БКН (HotWaterSummaryTable). */
   waterHeater: 'results-water-heater',
+  /** Итог подбора радиаторов (RadiatorsSummaryTable). */
+  radiators: 'results-radiators',
+  /** Итог подбора котла (BoilerSummaryTable). */
+  boiler: 'results-boiler',
+  /** Итог гидравлики (HydraulicsSummaryTable). */
+  hydraulics: 'results-hydraulics',
 } as const;
 
 export type ResultsSectionId =

@@ -34,10 +34,17 @@ export type SurveyDraft = {
   waterHeaterForm: WaterHeaterFormValue;
   waterUnderfloorHeating: boolean;
   underfloorDistributionPreset: UfhDistributionPreset;
+  /** Шаг «Котёл»: график подачи/обратки (пресет под тип котла). */
   thermalRegimePreset: HeatingThermalRegimePreset;
-  /** Подводка радиаторов: side (боковая) | bottom (нижняя). */
+  /**
+   * Шаг «Радиаторы»: подводка side (боковая) | bottom (нижняя).
+   * В calc → heatingSystem.radiatorConnection.
+   */
   radiatorConnection: RadiatorConnection;
-  /** Глобальный тип приборов: auto | sectional | panel. */
+  /**
+   * Шаг «Радиаторы»: глобальный тип приборов auto | sectional | panel.
+   * В calc → heatingSystem.radiatorEmitterPreference.
+   */
   radiatorEmitterPreference: RadiatorEmitterPreference;
   ufhPresetId?: UfhModePresetId | null;
   /** Шаг «Гидравлика» (ΔT расхода, длина магистрали, материал). */

@@ -1,17 +1,26 @@
 /* Назначение: Стили таблицы радиаторов.
-   Описание: Табличная вёрстка линии подбора и сообщения о недоступности. */
+   Описание: Табличная вёрстка линии подбора; выравнивание в flex-ряду эконом/эффективный. */
+
 .wrap {
-  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 0;
+  min-width: 0;
+  height: 100%;
 }
 
 .caption {
-  margin: 0 0 8px;
+  margin: 0;
+  min-height: calc(1.35em * 3);
   font: 600 12px/1.35 var(--sans);
   color: var(--text-h);
+  overflow-wrap: anywhere;
 }
 
 .table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font: 13px/1.35 var(--sans);
 }
@@ -21,6 +30,8 @@
   border: 1px solid var(--border);
   padding: 6px 8px;
   text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
 }
 
 .table th {
@@ -28,8 +39,34 @@
   font-weight: 600;
 }
 
+/* Фіксовані частки колонок — однакова ширина в економ / ефективний (панелі не «розпирають»). */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 26%;
+}
+
+.table th:nth-child(1) {
+  white-space: nowrap;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 24%;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 32%;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 18%;
+  white-space: nowrap;
+}
+
 .unavailable {
-  margin: 8px 0 0;
+  margin: 0;
   font: 13px/1.4 var(--sans);
   color: var(--text-m);
 }

@@ -36,7 +36,7 @@
 
 Черновик: `SURVEY_DRAFT_SCHEMA_VERSION=4`, поля `hydraulicsForm`, `wiringLayoutV3`. Verify: `cd frontend && npm run verify:survey-session`.
 
-**UI анкеты (шаг «Гидравлика»):** `HydraulicsSection` — вертикальный radio-список типа разводки (4 схемы с пояснениями под каждым пунктом; `auto` — «Рекомендуется»), длина магистрали котёл → коллектор, таблица подводов коллектор → радиатор по комнатам; для `two-pipe-dead-end` / `two-pipe-pass` — порядок строк (кнопки ↑↓). Подписи — `wiringSystemTypeLabels.ts`. См. [`survey-draft.md`](survey-draft.md) § UI шага «Гидравлика`.
+**UI анкеты (шаг «Гидравлика»):** `HydraulicsSection` — вертикальный radio-список типа разводки (4 схемы с пояснениями под каждым пунктом; `auto` — «Рекомендуется»), длина магистрали котёл → коллектор, таблица подводов коллектор → радиатор по комнатам; для `two-pipe-dead-end` / `two-pipe-pass` — порядок строк (кнопки ↑↓). Полный расчёт — `HydraulicsReportDialog` / `HydraulicsReportView`; сайдбар — `HydraulicsSummaryTable`; в «Рекомендации» — `HydraulicsProposalTable`. Подписи — `wiringSystemTypeLabels.ts`. См. [`survey-draft.md`](survey-draft.md) § UI шага «Гидравлика», [`hydraulics-survey-report.md`](hydraulics-survey-report.md).
 
 ### Схемы разводки радиаторов (`wiringLayoutV3` → граф)
 

@@ -25,6 +25,7 @@ const SURVEY_STEP_GLOBAL_META_TITLES: Partial<Record<SurveyCurrentStep, string>>
   rooms: 'Параметры помещений',
   hotWater: 'Объект и горячая вода',
   boiler: 'Котёл: температурный график отопления',
+  radiators: 'Радиаторы: подводка и тип приборов',
   waterHeater: 'Водонагреватель и сценарий ГВС',
   warmFloor: 'Тёплый пол и низкотемпературный контур',
   hydraulics: 'Гидравлика и разводка',

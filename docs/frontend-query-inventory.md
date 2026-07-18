@@ -48,4 +48,4 @@ cd frontend && npm run lint && npm run build && npm run verify
 
 `npm run verify` = `lint` + `verify:survey-session` + `verify:dead-code` (knip). Exit `0` обязателен для приёмки.
 
-**Knip:** compat-модули миграции черновика — в `knip.json` → `ignore` (см. `docs/survey-draft.md`).
+**Knip:** `knip --treat-config-hints-as-errors`; compat/pipeline-миграции в графе импортов (см. `docs/survey-draft.md`).

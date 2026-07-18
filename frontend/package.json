@@ -10,7 +10,7 @@
     "typecheck": "tsc -b --pretty",
     "preview": "vite preview",
     "verify:survey-session": "node scripts/verifySurveySessionPipeline.mjs",
-    "verify:dead-code": "knip",
+    "verify:dead-code": "knip --treat-config-hints-as-errors",
     "verify": "npm run lint && npm run typecheck && npm run verify:dead-code && npm run build && npm run verify:survey-session"
   },
   "dependencies": {

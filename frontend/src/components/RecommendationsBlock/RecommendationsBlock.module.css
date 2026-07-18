@@ -53,7 +53,7 @@
   composes: hint from '../../styles/formElements.module.css';
 }
 
-/* ─── Рекомендації по схемі котел / ГВС ─── */
+/* ─── Рекомендації по схемі котел / ГВС (automation hints) ─── */
 .automationHintsList {
   margin: 6px 0 0;
   padding-left: 1.1rem;
@@ -74,7 +74,6 @@
   border-color: color-mix(in srgb, var(--border) 70%, var(--accent) 30%);
 }
 
-/* ─── Розрахункова зведення котла ─── */
 .boilerCalcSummary {
   margin-top: 10px;
   padding: 10px 12px;
@@ -89,67 +88,56 @@
   color: var(--text-h);
 }
 
-.boilerCalcDl {
-  margin: 0;
-  display: grid;
-  gap: 4px 10px;
-  font: 500 13px/1.4 var(--sans);
-}
-
-.boilerCalcDl dt {
-  margin: 0;
-  color: var(--text-m);
-  font-weight: 600;
-}
-
-.boilerCalcDl dd {
-  margin: 0 0 6px;
-  color: var(--text);
-}
-
-/* ─── Варіанти котлів (eконом / ефективний) ─── */
-.boilerChoiceGrid {
-  display: grid;
-  grid-template-columns: 1fr;
+/* ─── Картки котла + ГВС (економ / ефективний) у «Рекомендації» ─── */
+.boilerChoiceRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 10px;
-}
-
-@media (--tablet) {
-  .boilerChoiceGrid {
-    grid-template-columns: 1fr 1fr;
-  }
+  align-items: stretch;
 }
 
 .boilerChoiceColumn {
   display: flex;
   flex-direction: column;
   gap: 0;
+  flex: 1 1 100%;
   min-width: 0;
 }
 
-/* ─── Попередження ─── */
-.boilerWarningsList,
-.radiatorsWarningsList {
-  margin: 10px 0 0;
-  padding-left: 1.15rem;
-  font: 500 12px/1.4 var(--sans);
-  color: var(--text-m);
+@media (--tablet) {
+  .boilerChoiceColumn {
+    flex: 1 1 calc(50% - 6px);
+  }
 }
 
-/* ─── Радіатори ─── */
-.radiatorsTotalSource {
-  font-weight: 500;
-  font-size: 11px;
-  color: var(--text-m);
+/* ─── Радіатори в «Рекомендації» (окремо від карток котла) ─── */
+.radiatorsRecBlock {
+  margin-top: 14px;
 }
 
-.radiatorsByRoomDd {
-  margin: 0;
+.radiatorsRecTitle {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--text-h);
 }
 
 .radiatorsProposalLinesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 12px;
+  align-items: stretch;
+}
+
+.radiatorsProposalLinesGrid > * {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+@media (--tablet) {
+  .radiatorsProposalLinesGrid > * {
+    flex: 1 1 calc(50% - 6px);
+  }
 }

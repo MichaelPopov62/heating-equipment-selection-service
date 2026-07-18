@@ -44,19 +44,11 @@ import {
   type HotWaterBoilerPowerMatchingScheme,
 } from './types/heatingMatching';
 import {
-  HEATING_THERMAL_REGIME_OPTIONS,
   recommendedThermalRegimePresetForScheme,
   thermalRegimeRecommendationHint,
-  type HeatingThermalRegimePreset,
 } from './types/heatingThermalRegime';
-import {
-  isRadiatorConnection,
-  RADIATOR_CONNECTION_SURVEY_UI_OPTIONS,
-} from './types/radiatorConnection';
-import {
-  isRadiatorEmitterPreference,
-  RADIATOR_EMITTER_PREFERENCE_SURVEY_UI_OPTIONS,
-} from './types/radiatorEmitterPreference';
+import { BoilerSurveyForm } from './components/BoilerSurveyForm/BoilerSurveyForm';
+import { RadiatorsSurveyForm } from './components/RadiatorsSurveyForm/RadiatorsSurveyForm';
 import { WarmFloorSection } from './components/WarmFloorSection/WarmFloorSection';
 import { useRoomsOrchestration } from './hooks/useRoomsOrchestration';
 import { useSurveyEstimates } from './hooks/useSurveyEstimates';
@@ -573,8 +565,18 @@ export function AppSurveyContent({
 
             {currentStep === 'boiler' && (
               <p className={styles.hint} style={{ marginTop: 8 }}>
-                Задайте радиаторный график подачи/обратки. Сценарий горячей воды
-                и подбор БКН/электробойлера — на шаге «Водонагреватель».
+                Задайте график подачи/обратки радиаторного контура (пресет под
+                тип котла). Подводка и тип приборов — на шаге «Радиаторы».
+                Сценарий ГВС и подбор БКН/электробойлера — на шаге
+                «Водонагреватель».
+              </p>
+            )}
+
+            {currentStep === 'radiators' && (
+              <p className={styles.hint} style={{ marginTop: 8 }}>
+                Подводка (боковая / нижняя) фильтрует панельный пул; тип
+                приборов задаётся один на весь объект. График 75/65 или 55/45 —
+                на шаге «Котёл».
               </p>
             )}
 
@@ -683,116 +685,56 @@ export function AppSurveyContent({
             )}
 
             {currentStep === 'boiler' && (
-              <div className={styles.thermalRegimeBlock}>
-                <label
-                  className={styles.thermalRegimeLabel}
-                  htmlFor="thermal-regime-preset"
-                >
-                  Режим графика отопления (подача / обратка, пресет под тип
-                  котла)
-                </label>
-                <select
-                  id="thermal-regime-preset"
-                  className={styles.thermalRegimeSelect}
-                  value={thermalRegimePreset}
-                  onChange={(e) => {
-                    const next = e.target.value as HeatingThermalRegimePreset;
-                    thermalRegimeTouchedRef.current = true;
-                    dispatch({
-                      type: 'SET_THERMAL_REGIME_PRESET',
-                      preset: next,
-                      touched: true,
-                    });
-                  }}
-                >
-                  {HEATING_THERMAL_REGIME_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-                {thermalRegimeRecommendationHintText != null && (
-                  <p className={styles.hint} role="status">
-                    {thermalRegimeRecommendationHintText}
-                  </p>
-                )}
-                <p className={styles.hint} style={{ marginTop: 10 }}>
-                  Радиаторный контур: <strong>75/65</strong> (традиционный
-                  котёл) или <strong>55/45</strong> (конденсационный). Контур
-                  тёплого пола (45/35 или 40/30) задаётся отдельно по финишу
-                  покрытия на шаге «Помещения». В API:{' '}
-                  <code className={styles.inlineCode}>
-                    heatingSystem.thermalRegimePreset
-                  </code>
-                  .
-                </p>
-                <label
-                  className={styles.thermalRegimeLabel}
-                  htmlFor="radiator-connection"
-                  style={{ marginTop: 16, display: 'block' }}
-                >
-                  Подводка радиаторов
-                </label>
-                <select
-                  id="radiator-connection"
-                  className={styles.thermalRegimeSelect}
-                  value={radiatorConnection}
-                  onChange={(e) => {
-                    if (!isRadiatorConnection(e.target.value)) return;
-                    dispatch({
-                      type: 'SET_RADIATOR_CONNECTION',
-                      connection: e.target.value,
-                    });
-                  }}
-                >
-                  {RADIATOR_CONNECTION_SURVEY_UI_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-                <p className={styles.hint} style={{ marginTop: 8 }}>
-                  Боковая — серии K/Klasik; нижняя — VK/VKP. Фильтрует панельный
-                  пул. Тип прибора на весь объект задаётся отдельно. В API:{' '}
-                  <code className={styles.inlineCode}>
-                    heatingSystem.radiatorConnection
-                  </code>
-                  .
-                </p>
-                <label
-                  className={styles.thermalRegimeLabel}
-                  htmlFor="radiator-emitter-preference"
-                  style={{ marginTop: 16, display: 'block' }}
-                >
-                  Тип радиаторов на объект
-                </label>
-                <select
-                  id="radiator-emitter-preference"
-                  className={styles.thermalRegimeSelect}
-                  value={radiatorEmitterPreference}
-                  onChange={(e) => {
-                    if (!isRadiatorEmitterPreference(e.target.value)) return;
-                    dispatch({
-                      type: 'SET_RADIATOR_EMITTER_PREFERENCE',
-                      preference: e.target.value,
-                    });
-                  }}
-                >
-                  {RADIATOR_EMITTER_PREFERENCE_SURVEY_UI_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-                <p className={styles.hint} style={{ marginTop: 8 }}>
-                  Один тип приборов на все помещения (секции или панели). Авто —
-                  Two-Pass по объекту. В API:{' '}
-                  <code className={styles.inlineCode}>
-                    heatingSystem.radiatorEmitterPreference
-                  </code>
-                  .
-                </p>
-              </div>
+              <BoilerSurveyForm
+                thermalRegimePreset={thermalRegimePreset}
+                onThermalRegimeChange={(preset) => {
+                  thermalRegimeTouchedRef.current = true;
+                  dispatch({
+                    type: 'SET_THERMAL_REGIME_PRESET',
+                    preset,
+                    touched: true,
+                  });
+                }}
+                thermalRegimeRecommendationHintText={
+                  thermalRegimeRecommendationHintText
+                }
+                boilerMatching={apiBoilerFromReport}
+                objectType={objectMeta.objectType}
+                catalogSource={apiCatalogSource}
+                calcLoading={calcLoading}
+                onBackToResults={() => {
+                  navigateToResultsSection(RESULTS_SECTION_IDS.boiler);
+                }}
+              />
+            )}
+
+            {currentStep === 'radiators' && (
+              <RadiatorsSurveyForm
+                radiatorConnection={radiatorConnection}
+                radiatorEmitterPreference={radiatorEmitterPreference}
+                onConnectionChange={(connection) => {
+                  dispatch({
+                    type: 'SET_RADIATOR_CONNECTION',
+                    connection,
+                  });
+                }}
+                onPreferenceChange={(preference) => {
+                  dispatch({
+                    type: 'SET_RADIATOR_EMITTER_PREFERENCE',
+                    preference,
+                  });
+                }}
+                radiatorsDisabledReason={
+                  ufhPresetId === 'ufh_only'
+                    ? 'Режим «только тёплый пол» (ufh_only): подбор радиаторов на сервере пропускается. Значения подводки и типа приборов сохраняются в черновике и уходят в heatingSystem, но на matching.radiators не влияют, пока выбран этот режим.'
+                    : null
+                }
+                radiatorsMatching={apiRadiatorsFromReport}
+                calcLoading={calcLoading}
+                onBackToResults={() => {
+                  navigateToResultsSection(RESULTS_SECTION_IDS.radiators);
+                }}
+              />
             )}
 
             {currentStep === 'waterHeater' && (
@@ -821,6 +763,12 @@ export function AppSurveyContent({
                 rooms={rooms}
                 onBranchLengthChange={setBranchLength}
                 onBranchReorder={reorderBranch}
+                hydraulicsReport={apiHydraulicsFromReport}
+                catalogSource={apiCatalogSource}
+                calcLoading={calcLoading}
+                onBackToResults={() => {
+                  navigateToResultsSection(RESULTS_SECTION_IDS.hydraulics);
+                }}
               />
             )}
 

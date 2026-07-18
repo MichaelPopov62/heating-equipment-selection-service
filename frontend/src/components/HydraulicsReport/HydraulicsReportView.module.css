@@ -1,17 +1,14 @@
-/* Назначение: стили блока предложения по гидравлике.
-   Описание: Согласовано с RecommendationsBlock и карточками оборудования. */
+/* Призначення: стилі повного звіту гідравліки (модалка кроку «Гидравлика»). */
 
-.root {
-  margin-top: 12px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
+.hint {
+  margin: 0 0 8px;
+  font: 12px/1.4 var(--sans);
+  color: var(--text-m);
 }
 
-.title {
-  margin: 0 0 8px;
-  font: 600 14px/1.35 var(--sans);
+.sectionTitle {
+  margin: 14px 0 8px;
+  font-size: 14px;
   color: var(--text-h);
 }
 
@@ -19,12 +16,6 @@
   margin: 12px 0 8px;
   font: 600 13px/1.35 var(--sans);
   color: var(--text-h);
-}
-
-.hint {
-  margin: 0 0 8px;
-  font: 12px/1.4 var(--sans);
-  color: var(--text-m);
 }
 
 .summaryDl {
@@ -124,8 +115,4 @@
 .hintInline {
   font-size: 0.92em;
   color: var(--text-m);
-}
-
-.rootStale {
-  opacity: 0.92;
 }
