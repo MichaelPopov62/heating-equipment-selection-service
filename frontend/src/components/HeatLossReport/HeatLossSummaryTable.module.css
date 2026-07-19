@@ -1,0 +1,58 @@
+/* Призначення: компактна таблиця теплопотерь у блоці «Результаты» / RecommendationsBlock. */
+
+.wrap {
+  margin-top: 4px;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: var(--text-h);
+}
+
+.hint {
+  composes: hint from '../../styles/formElements.module.css';
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th,
+.table td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  background: var(--surface-2);
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.table td:last-child {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.unit {
+  color: var(--text-muted, var(--text));
+  font-weight: 400;
+}
+
+.totalRow td {
+  font-weight: 700;
+  color: var(--text-h);
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+}

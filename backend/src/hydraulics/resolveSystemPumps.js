@@ -189,6 +189,9 @@ function resolvePumpForZone({
       headAtDesignM: pump.headAtDesignM,
       headMarginPercent: pump.headMarginPercent,
       warnings: pump.warnings,
+      ...(zone.pumpRole === 'main'
+        ? { note: 'Доп. насос на котловую ветку (встроенный слаб).' }
+        : {}),
     },
     warnings,
     ...(builtinPumpDuty !== undefined ? { builtinPumpDuty } : {}),

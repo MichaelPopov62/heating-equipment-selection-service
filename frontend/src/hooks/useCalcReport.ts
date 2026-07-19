@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 import type { CalcReportJson } from '../types/calcApi';
 import type { HotWaterBoilerPowerMatchingScheme } from '../types/heatingMatching';
 import type { ApiHotWater } from '../types/recommendationsBlock';
+import type { UfhModePresetId } from '../types/ufhModePreset';
 import { parseHotWaterFromReport } from '../utils/parseHotWaterFromReport';
 import { heatLossReserveKw, heatLossTotalKw, wattsToKilowatts } from '../utils/calculators/heatLoss';
 import { isRecord, readRecordField } from '../utils/jsonGuards';
@@ -17,17 +18,28 @@ import { parseWaterHeaterMatchingFromReport } from '../utils/parseWaterHeaterMat
 import { parseUnderfloorHeatingFromReport } from '../utils/parseUnderfloorHeatingFromReport';
 import { parseHydraulicsFromReport } from '../utils/parseHydraulicsFromReport';
 import { parseUniboxesMatchingFromReport } from '../utils/parseUniboxesMatchingFromReport';
+import { parseCommercialBomFromReport } from '../utils/parseCommercialBomFromReport';
+import {
+  isRadiatorsMatchingSkipped,
+  isUfhOnlySurveyMode,
+} from '../utils/radiatorsSkip';
 
 type IsCalcMatchingScheme = (v: string) => v is HotWaterBoilerPowerMatchingScheme;
 
 /**
  * Парсить всі секції звіту POST /api/v1/calc.
  * Повертає стабільний об'єкт — усі поля null, поки звіт відсутній.
+ *
+ * @param calcReport
+ * @param isCalcMatchingScheme
+ * @param quickEstimateRadiatorsSections
+ * @param ufhPresetId — щоб не показувати чернеткові секції при ufh_only до/після calc
  */
 export function useCalcReport(
   calcReport: CalcReportJson | null,
   isCalcMatchingScheme: IsCalcMatchingScheme,
   quickEstimateRadiatorsSections: number,
+  ufhPresetId: UfhModePresetId | null = null,
 ) {
   const apiHeatLoss = useMemo(() => {
     if (calcReport === null) return null;
@@ -70,6 +82,12 @@ export function useCalcReport(
   );
 
   const displayedRadiatorSectionsTotal = useMemo(() => {
+    if (
+      isRadiatorsMatchingSkipped(apiRadiatorsFromReport)
+      || isUfhOnlySurveyMode(ufhPresetId)
+    ) {
+      return 'не требуется';
+    }
     const ecoLabel = formatRadiatorsEmittersSummaryLabel(
       apiRadiatorsFromReport?.lineEconomy?.emittersSummary,
     );
@@ -90,7 +108,7 @@ export function useCalcReport(
       return `${apiRadiatorsFromReport.totalSections} сек.`;
     }
     return String(quickEstimateRadiatorsSections);
-  }, [apiRadiatorsFromReport, quickEstimateRadiatorsSections]);
+  }, [apiRadiatorsFromReport, quickEstimateRadiatorsSections, ufhPresetId]);
 
   const apiCatalogSource = useMemo((): 'file' | 'mongo' | null => {
     if (calcReport === null) return null;
@@ -141,6 +159,11 @@ export function useCalcReport(
     [calcReport],
   );
 
+  const apiCommercialBomFromReport = useMemo(
+    () => parseCommercialBomFromReport(calcReport),
+    [calcReport],
+  );
+
   return {
     apiHeatLoss,
     apiHotWaterFromReport,
@@ -152,6 +175,7 @@ export function useCalcReport(
     apiUnderfloorHeatingFromReport,
     apiUniboxesFromReport,
     apiHydraulicsFromReport,
+    apiCommercialBomFromReport,
     displayedRadiatorSectionsTotal,
     apiCatalogSource,
     apiAutomationHints,

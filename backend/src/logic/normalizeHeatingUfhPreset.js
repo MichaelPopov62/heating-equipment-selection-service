@@ -1,10 +1,9 @@
 /**
  * Назначение: нормализация heatingSystem.ufhPresetId и heatingEmittersMode.
- * Описание: Lookup пресета из переданного bundle; derive supply/return для режима «только ТП»; warnings без мутации графика радиаторов.
+ * Описание: Lookup пресета из переданного bundle; для «только ТП» — график котла 40/30 и согласованный thermalRegimePreset (без рассинхрона с 75/65).
  */
 import { UFH_PRESET_ONLY, ufhModePresetIsMixedRadiators } from '../../../shared/ufhModePresetIds.js';
 import { thermalRegimeRecommendationHint } from '../../../shared/heatingThermalRegimeRecommendations.js';
-import { isHeatingThermalRegimePresetId } from './heatingThermalRegimes.js';
 
 /**
  * @param {import('../types/shared-types.js').CalcRequestBody} body
@@ -44,11 +43,11 @@ export function normalizeHeatingUfhPreset(body, ufhPresets) {
 
   if (presetId === UFH_PRESET_ONLY) {
     const tech = preset.technical;
+    hs.heatingEmittersMode = 'ufh_only';
     hs.supplyC = tech.supplyC;
     hs.returnC = tech.returnC;
-    if (!isHeatingThermalRegimePresetId(hs.thermalRegimePreset)) {
-      hs.thermalRegimePreset = 'condensing_dt30_55_45';
-    }
+    // Радіаторний пресет (у т.ч. 75/65) не повинен лишатися поруч із фактичним 40/30.
+    hs.thermalRegimePreset = 'condensing_dt30_55_45';
   }
 
   /** @type {string[]} */

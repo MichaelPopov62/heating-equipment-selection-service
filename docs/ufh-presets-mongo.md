@@ -92,7 +92,7 @@ returnC = supplyC − 10
 ```
 
 - `heatingEmittersMode` выводится из `ufhPresetId`, если не задан (`ufh_only` → `ufh_only`, иначе `mixed`).
-- Для `ufh_only`: нормализация выставляет график котла **40/30**, `thermalRegimePreset` → конденсационный при отсутствии явного выбора.
+- Для `ufh_only`: нормализация **всегда** выставляет график котла **40/30** и `thermalRegimePreset = condensing_dt30_55_45` (даже если во входе был `traditional_dt50_75_65`); `heatingEmittersMode = ufh_only`.
 - Несовместимый финиш при `ufh_direct_*` → **400** `UFH_MODE_FINISH_MISMATCH`.
 
 ### Meta отчёта

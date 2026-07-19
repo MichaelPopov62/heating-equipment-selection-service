@@ -132,14 +132,14 @@ const {
 - **Шаг `waterHeater` (`WaterHeaterForm`):** схема котёл/ГВС; карточки подбора ЭБ/БКН — только в
   модалке `WaterHeaterReportDialog` (`WaterHeaterMatchingPreview`); расчёт потребления здесь
   **не** дублируется.
-- **Сайдбар «Результаты» (порядок после теплопотерь):**
+- **Шаг `technicalResult` (`RecommendationsBlock`):** технический итог расчёта (порядок после теплопотерь):
   1. `HotWaterFixturesSummaryTable` — **только** точки водоразбора из анкеты (live при изменении
      `hotWaterForm.fixtures`); скрыта, пока все точки = 0; ссылка на шаг `hotWater`.
-  2. … ТП, гидравлика …
+  2. … ТП, котёл, радиаторы, гидравлика …
   3. `HotWaterSummaryTable` — компактная таблица подбора (строки ЭБ и БКН); скрыта, пока нет
      данных расчёта/подбора; ссылки на `hotWater` и `waterHeater`.
 
-### Навигация из сайдбара «Итог» (RecommendationsBlock)
+### Навигация шага «Результат технический» (RecommendationsBlock)
 
 Переход на шаг анкеты из текста summary-блоков — **без React Context**:
 
@@ -149,10 +149,10 @@ const {
    `closest('[data-survey-step]')` + `isSurveyStep`.
 3. **Дочерние summary** — разметка `SurveyStepLink` (`data-survey-step`, `type="button"`).
 
-Обратный переход (форма → сайдбар) — кнопка **«Назад к результатам»** рядом с отчётом на шагах
+Обратный переход (форма → итог) — кнопка **«Назад к результатам»** рядом с отчётом на шагах
 `warmFloor`, `hotWater`, `waterHeater`, `radiators`, `boiler`, `hydraulics`:
 
-| Шаг | Якорь (`RESULTS_SECTION_IDS`) | Секция в сайдбаре |
+| Шаг | Якорь (`RESULTS_SECTION_IDS`) | Секция на `technicalResult` |
 |-----|-------------------------------|-------------------|
 | Тёплый пол | `warmFloor` → `results-warm-floor` | `UnderfloorHeatingSummaryTable` |
 | Горячая вода | `hotWater` → `results-hot-water` | `HotWaterFixturesSummaryTable` |
@@ -161,13 +161,14 @@ const {
 | Котёл | `boiler` → `results-boiler` | `BoilerSummaryTable` |
 | Гидравлика | `hydraulics` → `results-hydraulics` | `HydraulicsSummaryTable` |
 
-`navigateToResultsSection` в `useSurveyStepNavigation`: scroll к секции; если её ещё нет в DOM —
-к `#calculation-results-title`. Стили кнопок — `SurveyReportActions.module.css`.
+`navigateToResultsSection` в `useSurveyStepNavigation`: сначала `setCurrentStep('technicalResult')`,
+затем после paint — scroll к секции; если её ещё нет в DOM — к `#calculation-results-title`.
+Стили кнопок — `SurveyReportActions.module.css`.
 
 | Модуль | Назначение |
 |--------|------------|
-| `hooks/useSurveyStepNavigation.ts` | Шаг ↔ форма; scroll к якорю результатов |
-| `constants/surveyResultsSections.ts` | SSOT id секций сайдбара |
+| `hooks/useSurveyStepNavigation.ts` | Шаг ↔ форма; переход на `technicalResult` + scroll к якорю |
+| `constants/surveyResultsSections.ts` | SSOT id секций шага «Результат технический» |
 | `components/SurveyNavigation/SurveyStepLink.tsx` | Inline-кнопка с `data-survey-step` |
 | `components/SurveyNavigation/SurveyReportActions.module.css` | «Отчёт» / «Назад к результатам» |
 | `constants/surveySteps.ts` → `surveyStepNavLabel()` | Подпись шага для `aria-label` |
@@ -216,7 +217,7 @@ const {
 
 Канонический порядок `SURVEY_STEPS`:
 
-`object` → `warmFloor` → `rooms` → `hotWater` → `boiler` → `radiators` → `waterHeater` → `hydraulics` → `summary`
+`object` → `warmFloor` → `rooms` → `hotWater` → `boiler` → `radiators` → `waterHeater` → `hydraulics` → `technicalResult` → `dataReference`
 
 Шаг «Тёплый пол» стоит сразу после «Объект» и перед «Помещения»: глобальный флаг / `ufhPresetId` задают схему излучателей до заполнения комнат.
 

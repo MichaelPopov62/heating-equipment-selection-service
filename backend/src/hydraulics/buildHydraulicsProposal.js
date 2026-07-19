@@ -159,6 +159,7 @@ function buildPumpProposal(resolved, catalog) {
     ...(catalogPump?.connections?.nominalDiameterMm !== undefined
       ? { connectionNominalMm: catalogPump.connections.nominalDiameterMm }
       : {}),
+    ...(resolved.note ? { note: resolved.note } : {}),
   };
 }
 

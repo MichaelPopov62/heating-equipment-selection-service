@@ -1123,6 +1123,11 @@ export interface RadiatorsByRoomItem {
   widthOk?: boolean | null;
   /** section — секции; panel — готовая панель из каталога. */
   priceBasis?: 'section' | 'panel';
+  /**
+   * Ціна з каталогу (UAH): за секцію або за панель цілком — залежно від priceBasis.
+   * Для report.commercial.
+   */
+  unitPriceUah?: number | null;
   /** Длина панели, мм (только priceBasis=panel). */
   panelLengthMm?: number | null;
   warnings?: string[];
@@ -1186,6 +1191,10 @@ export interface RadiatorsMatchingReport {
   emittersSummary?: RadiatorsEmittersSummary;
   /** Alias emittersSummary.sectionalSections (без панелей). */
   totalSections?: number | null;
+  /**
+   * Підбір не виконувався (ufh_only). UI не повинен показувати чернеткові секції.
+   */
+  skippedReason?: 'ufh_only' | null;
   /** Порівняння приладів economy vs efficient по кімнатах. */
   roomEmitterDiffs?: RadiatorsRoomEmitterDiff[];
   /** Лінія «Економ»: графік 75/65, секції під proposalEconomy. */
@@ -1242,6 +1251,63 @@ export interface MatchingAutomationHint {
   suggestedScheme?: HotWaterBoilerPowerMatchingScheme;
 }
 
+/** Вид рядка комерційної смети. */
+export type FinancialBomLineKind = 'equipment' | 'labor' | 'consumable' | 'note';
+
+/** Одиниця кількості в смети. */
+export type FinancialBomQtyUnit = 'pcs' | 'm' | 'section' | 'lot';
+
+/** Категорія обладнання / робіт у смети. */
+export type FinancialBomCategoryId =
+  | 'boiler_room'
+  | 'radiators'
+  | 'ufh'
+  | 'hydraulics_heating'
+  | 'works';
+
+/** Рядок report.commercial.lines[]. */
+export interface FinancialBomLine {
+  id: string;
+  kind: FinancialBomLineKind;
+  objectType: BuildingObjectType;
+  equipmentTypeLabel: string;
+  brand: string;
+  model: string;
+  qty: number;
+  qtyUnit: FinancialBomQtyUnit;
+  unitPriceUah: number | null;
+  lineTotalUah: number | null;
+  scopePath: string[];
+  categoryId: FinancialBomCategoryId;
+  catalogId?: string;
+  source: string;
+  note?: string;
+}
+
+/** Підсумки report.commercial.totals. */
+export interface CommercialBomTotals {
+  equipmentQtyPcs: number;
+  equipmentTotalUah: number;
+  laborTotalUah: number;
+  consumablesTotalUah: number;
+  grandTotalUah: number;
+}
+
+/** Ставки монтажу / расходників. */
+export interface CommercialBomRates {
+  laborPercentOfEquipment: 40;
+  consumablesPercentOfEquipment: 15;
+}
+
+/** report.commercial — фінансова смета після matching + hydraulics. */
+export interface CommercialBomReport {
+  schemaVersion: 1;
+  currency: 'UAH';
+  lines: FinancialBomLine[];
+  totals: CommercialBomTotals;
+  rates: CommercialBomRates;
+}
+
 export interface CalcReport {
   meta: {
     schemaVersion: number;
@@ -1283,6 +1349,12 @@ export interface CalcReport {
     underfloorHeating?: UnderfloorHeatingReport | null;
   };
   matching: MatchingReport;
+  /**
+   * Коммерческая смета: оборудование (основная линия) + монтаж 40% + расходники 15%.
+   * Собирается в buildReport после matching/hydraulics.
+   * Опционально для совместимости со старыми сохранёнными расчётами.
+   */
+  commercial?: CommercialBomReport;
   warnings: string[];
 }
 

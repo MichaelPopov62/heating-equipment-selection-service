@@ -1,12 +1,16 @@
 /**
  * Назначение: Справочник каталога оборудования.
- * Описание: Счётчики номенклатуры, радиаторы, трубы и коллекторы из GET /api/v1/catalog.
+ * Описание: Счётчики и таблицы номенклатуры из GET /api/v1/catalog (котлы, ГВС, радиаторы, трубы…).
  */
 
 import type {
+  CatalogBoilerItem,
   CatalogBoilerManifoldItem,
   CatalogEquipmentSnapshot,
+  CatalogIndirectWaterHeaterItem,
+  CatalogIndirectWaterHeaterType,
   CatalogManifoldItem,
+  CatalogWaterHeaterItem,
 } from '../../services/catalog';
 import { formatCatalogDimensionsMm } from '../../utils/formatCatalogDimensions';
 import { manifoldApplicationLabel } from '../../utils/manifoldApplicationLabel';
@@ -40,7 +44,46 @@ function formatBool(value: boolean): string {
 }
 
 /**
- * Справочник позиций каталога API: счётчики, радиаторы, трубы, коллекторы.
+ * @param pool
+ */
+function boilerCircuitLabel(pool: CatalogBoilerItem['circuitPool']): string {
+  return pool === 'doubleCircuit' ? '2К' : '1К';
+}
+
+/**
+ * @param mounting
+ */
+function boilerMountingLabel(mounting: CatalogBoilerItem['mountingType']): string {
+  if (mounting === 'wall') return 'настенный';
+  if (mounting === 'floor') return 'напольный';
+  return '—';
+}
+
+/**
+ * @param type
+ */
+function indirectTypeLabel(type: CatalogIndirectWaterHeaterType): string {
+  if (type === 'indirect_wall') return 'настенный';
+  if (type === 'indirect_floor') return 'напольный';
+  return 'storage_indirect';
+}
+
+/**
+ * @param item
+ */
+function waterHeaterVolumesLabel(item: CatalogWaterHeaterItem): string {
+  return item.variants.map((v) => `${v.volumeLiters} л`).join(', ');
+}
+
+/**
+ * @param item
+ */
+function waterHeaterPricesLabel(item: CatalogWaterHeaterItem): string {
+  return item.variants.map((v) => formatPriceUah(v.price)).join('; ');
+}
+
+/**
+ * Справочник позиций каталога API: счётчики и таблицы номенклатуры.
  */
 export function CatalogEquipmentReference({
   snapshot,
@@ -89,8 +132,10 @@ export function CatalogEquipmentReference({
   const {
     catalogSource,
     boilersTotal,
+    boilers,
     radiators,
     waterHeaters,
+    indirectWaterHeaters,
     pipes,
     manifolds,
     boilerManifolds,
@@ -118,8 +163,12 @@ export function CatalogEquipmentReference({
           <span className={styles.countValue}>{radiators.length}</span>
         </li>
         <li className={styles.countItem}>
-          <span className={styles.countLabel}>Водонагреватели</span>
+          <span className={styles.countLabel}>ЭВН</span>
           <span className={styles.countValue}>{waterHeaters.length}</span>
+        </li>
+        <li className={styles.countItem}>
+          <span className={styles.countLabel}>БКН</span>
+          <span className={styles.countValue}>{indirectWaterHeaters.length}</span>
         </li>
         <li className={styles.countItem}>
           <span className={styles.countLabel}>Трубы</span>
@@ -138,6 +187,46 @@ export function CatalogEquipmentReference({
           <span className={styles.countValue}>{uniboxes.length}</span>
         </li>
       </ul>
+
+      <details className={styles.block} open={boilers.length > 0 && boilers.length <= 16}>
+        <summary>Котлы ({boilers.length}) — 1К / 2К</summary>
+        {boilers.length === 0 ? (
+          <p className={styles.meta}>В каталоге нет котлов.</p>
+        ) : (
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Бренд</th>
+                  <th>Модель</th>
+                  <th>Контур</th>
+                  <th>Тип</th>
+                  <th>Мощность, кВт</th>
+                  <th>Монтаж</th>
+                  <th>Артикул</th>
+                  <th>Цена</th>
+                </tr>
+              </thead>
+              <tbody>
+                {boilers.map((b: CatalogBoilerItem, i) => (
+                  <tr key={`boiler-${b.circuitPool}-${b.model}-${i}`}>
+                    <td>{b.brand || '—'}</td>
+                    <td>{b.model}</td>
+                    <td>{boilerCircuitLabel(b.circuitPool)}</td>
+                    <td>{b.type}</td>
+                    <td>
+                      {b.powerKwMin}…{b.powerKwMax}
+                    </td>
+                    <td>{boilerMountingLabel(b.mountingType)}</td>
+                    <td>{b.article || '—'}</td>
+                    <td>{formatPriceUah(b.price)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </details>
 
       <details className={styles.block} open={radiators.length > 0 && radiators.length <= 12}>
         <summary>
@@ -169,6 +258,86 @@ export function CatalogEquipmentReference({
             );
           })}
         </ul>
+      </details>
+
+      <details
+        className={styles.block}
+        open={waterHeaters.length > 0 && waterHeaters.length <= 12}
+      >
+        <summary>
+          Водонагреватели ЭВН ({waterHeaters.length}) — электронакопители
+        </summary>
+        {waterHeaters.length === 0 ? (
+          <p className={styles.meta}>В каталоге нет электронакопителей.</p>
+        ) : (
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Бренд</th>
+                  <th>Модель</th>
+                  <th>Тип</th>
+                  <th>Объёмы</th>
+                  <th>Цены по вариантам</th>
+                </tr>
+              </thead>
+              <tbody>
+                {waterHeaters.map((w, i) => (
+                  <tr key={`wh-${w.model}-${i}`}>
+                    <td>{w.brand || '—'}</td>
+                    <td>{w.model}</td>
+                    <td>{w.type}</td>
+                    <td>{waterHeaterVolumesLabel(w)}</td>
+                    <td>{waterHeaterPricesLabel(w)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </details>
+
+      <details
+        className={styles.block}
+        open={indirectWaterHeaters.length > 0 && indirectWaterHeaters.length <= 12}
+      >
+        <summary>
+          БКН ({indirectWaterHeaters.length}) — бойлеры косвенного нагрева
+        </summary>
+        {indirectWaterHeaters.length === 0 ? (
+          <p className={styles.meta}>В каталоге нет бойлеров косвенного нагрева.</p>
+        ) : (
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Бренд</th>
+                  <th>Модель</th>
+                  <th>Тип</th>
+                  <th>Объём, л</th>
+                  <th>Змеевик, кВт</th>
+                  <th>Мин. источник, кВт</th>
+                  <th>Артикул</th>
+                  <th>Цена</th>
+                </tr>
+              </thead>
+              <tbody>
+                {indirectWaterHeaters.map((t: CatalogIndirectWaterHeaterItem, i) => (
+                  <tr key={`indirect-${t.model}-${t.article}-${i}`}>
+                    <td>{t.brand || '—'}</td>
+                    <td>{t.model}</td>
+                    <td>{indirectTypeLabel(t.type)}</td>
+                    <td>{t.volumeLiters}</td>
+                    <td>{t.coilPowerKw != null ? t.coilPowerKw : '—'}</td>
+                    <td>{t.minSourcePowerKw != null ? t.minSourcePowerKw : '—'}</td>
+                    <td>{t.article || '—'}</td>
+                    <td>{formatPriceUah(t.price)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </details>
 
       <details className={styles.block} open={manifolds.length > 0 && manifolds.length <= 8}>

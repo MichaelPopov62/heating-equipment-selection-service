@@ -506,5 +506,166 @@ if (base && tile && laminate) {
   tally(logCheck(false, 'база ТП или финиши для smoke-теста maxSurface'));
 }
 
+console.log('\n=== ufh_only: график котла 40/30 (не 75/65) ===');
+{
+  const { validateAndNormalizeInput } = await import('../src/api/validate.js');
+  const { isHighTemperatureHeatingGraph } = await import(
+    '../src/logic/heatingThermalRegimes.js'
+  );
+  const { calculateUnderfloorHeating } = await import('../src/logic/warmFloorCalc.js');
+  const { calculateHeatLossForBuilding } = await import('../src/logic/heatlossByRooms.js');
+
+  /** @type {import('../src/types/shared-types.js').CalcRequestBody} */
+  const ufhOnlyBody = {
+    building: {
+      temps: { insideC: 20, outsideC: -5 },
+      objectMeta: buildObjectMeta({ objectType: 'house', roomsCount: 1 }),
+      rooms: [
+        buildRoom({
+          id: 'r1',
+          name: 'Комната',
+          bottomBoundary: 'heated',
+          areaM2: 16,
+          underfloorHeating: {
+            enabled: true,
+            basePresetId: 'ufh_base_interstory_screed_65',
+            finishMaterialId: 'laminate_click',
+            pipeSpacingMm: 150,
+          },
+        }),
+      ],
+      envelopeElements: [
+        {
+          kind: 'wall',
+          roomId: 'r1',
+          construction: 'наружная стена',
+          presetId: 'wall_gas_concrete_d500',
+          areaM2: 12,
+          orientation: 'N',
+        },
+      ],
+    },
+    heatingSystem: {
+      thermalRegimePreset: 'traditional_dt50_75_65',
+      ufhPresetId: 'ufh_only',
+      waterUnderfloorHeating: true,
+      hotWaterBoilerPowerMatchingScheme:
+        'maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw',
+    },
+  };
+
+  const normalized = validateAndNormalizeInput(ufhOnlyBody, calcCtx);
+  const hs = normalized.heatingSystem;
+  tally(
+    logCheck(
+      hs?.supplyC === 40 && hs?.returnC === 30,
+      `ufh_only + traditional preset → supply/return ${hs?.supplyC}/${hs?.returnC} (ожид. 40/30)`,
+    ),
+  );
+  tally(
+    logCheck(
+      hs?.thermalRegimePreset === 'condensing_dt30_55_45',
+      `thermalRegimePreset согласован: ${hs?.thermalRegimePreset} (не traditional 75/65)`,
+    ),
+  );
+  tally(
+    logCheck(
+      hs?.heatingEmittersMode === 'ufh_only',
+      `heatingEmittersMode=${hs?.heatingEmittersMode}`,
+    ),
+  );
+  tally(
+    logCheck(
+      isHighTemperatureHeatingGraph(hs) === false,
+      'isHighTemperatureHeatingGraph(40/30) === false',
+    ),
+  );
+
+  const heatLossNorm = calculateHeatLossForBuilding({
+    temps: { insideC: 20, outsideC: -5 },
+    building: normalized.building,
+  });
+  const ufhOnlyReport = calculateUnderfloorHeating({
+    temps: { insideC: 20, outsideC: -5 },
+    building: normalized.building,
+    heatingSystem: hs,
+    heatLoss: heatLossNorm,
+    ufhPresets: calcCtx.ufhPresets,
+  });
+  tally(
+    logCheck(
+      ufhOnlyReport?.isMixingNodeRequired === false,
+      'isMixingNodeRequired === false (прямое подключение)',
+    ),
+  );
+  tally(
+    logCheck(
+      ufhOnlyReport?.circuitSupplyC === 40 && ufhOnlyReport?.circuitReturnC === 30,
+      `контур ТП ${ufhOnlyReport?.circuitSupplyC}/${ufhOnlyReport?.circuitReturnC}`,
+    ),
+  );
+  const mixWarn = (ufhOnlyReport?.warnings ?? []).find((w) =>
+    w.includes('прямое подключение'),
+  );
+  const falseHighTempWarn = (ufhOnlyReport?.warnings ?? []).find(
+    (w) => w.includes('не выше подачи контура') && w.includes('75'),
+  );
+  tally(
+    logCheck(mixWarn != null, 'warning: прямое подключение (не ложный 75 °C)'),
+  );
+  tally(
+    logCheck(falseHighTempWarn == null, 'нет ложного warning про котёл 75 °C'),
+  );
+
+  const { pickRadiatorsWithProposalLines } = await import(
+    '../src/matching/radiators.js'
+  );
+  const radSkip = pickRadiatorsWithProposalLines({
+    roomsHeatLoss: heatLossNorm,
+    heatingSystem: hs,
+    catalog: calcCtx.catalog,
+    building: normalized.building,
+    boiler: {
+      requiredKw: 10,
+      selected: null,
+      proposal: null,
+      proposalEconomy: null,
+      proposalEfficient: null,
+      warnings: [],
+      heatLossKw: 10,
+      reserveFactor: 1.15,
+      hotWaterPowerKw: 0,
+      heatingLoadKw: 11.5,
+      hotWaterBoilerPowerMatchingScheme:
+        'maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw',
+      condensingHeatingReserveFactor: 1.1,
+      heatingLoadKwCondensing: 11,
+      requiredKwForCondensingLine: 11,
+      recommendations: [],
+    },
+    underfloorHeating: ufhOnlyReport,
+    recommendations: calcCtx.recommendations,
+  });
+  tally(
+    logCheck(
+      radSkip.skippedReason === 'ufh_only',
+      `skippedReason=${radSkip.skippedReason}`,
+    ),
+  );
+  tally(
+    logCheck(
+      radSkip.byRoom.length === 0 && radSkip.totalSections == null,
+      'radiators skip: byRoom пуст, totalSections null',
+    ),
+  );
+  tally(
+    logCheck(
+      radSkip.lineEconomy?.unavailableReason != null
+        && radSkip.lineEfficient?.unavailableReason != null,
+      'lineEconomy/lineEfficient с unavailableReason',
+    ),
+  );
+}
+
 console.log(failed === 0 ? '\nverifyUfhPresets: ALL OK' : `\nverifyUfhPresets: ${failed} FAIL`);
 process.exitCode = failed === 0 ? 0 : 1;

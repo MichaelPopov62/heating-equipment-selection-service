@@ -277,14 +277,10 @@ export function matchEquipment({
   } else if (scheme === SCHEME_BOILER_ELECTRIC_SEPARATE) {
     waterHeater = pickWaterHeater({ hotWater: hwForBoiler, catalog });
   } else if (useIndirectDhw) {
-    if (indirectWaterHeater.selected) {
-      waterHeater = {
-        selected: null,
-        chosenVariant: null,
-        warnings: [],
-        requiredTankLiters: Number(hwForBoiler?.recommendedTankLiters) || 0,
-      };
-    } else {
+    if (!indirectWaterHeater.selected) {
+      // Fallback: БКН не обрано — запасний ЕВН. При обраному БКН waterHeater лишається
+      // порожньою заглушкою (requiredTankLiters: 0): не дзеркалимо recommendedTankLiters,
+      // щоб UI не показував фальшивий електробойлер. Обсяг — у indirectWaterHeater.
       waterHeater = pickWaterHeater({ hotWater: hwForBoiler, catalog });
       const noIndirectInCatalog = !catalog?.indirectWaterHeaters?.length;
       const prefix = noIndirectInCatalog

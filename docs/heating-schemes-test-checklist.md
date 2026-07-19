@@ -21,6 +21,8 @@
 - [ ] `singleCircuitBoilerWithBufferElectricStorage` — подбор 1К + буферный ЭВН, `recommendedTankLiters` из `water_norms`
 - [ ] `combiBoilerWithBufferElectricStorage` — 2К + буфер, объём из `combiBufferElectricStorage`
 - [ ] Квартира + БКН-схема → нормализация на max-комби + warning в отчёте
+- [ ] Дом + `ufh_only` + «1К + БКН» + успешный БКН: `matching.waterHeater.requiredTankLiters === 0`, `selected === null`; в `HotWaterSummaryTable` ЭБ = «Не участвует в расчёте», БКН = модель; карточки ЭБ в модалке нет
+- [ ] «1К + БКН» без подходящего БКН в каталоге → запасной ЭВН + warning; строка ЭБ с результатом подбора
 
 ### `tropicalShower` (+30 % к объёму бака)
 
@@ -55,11 +57,13 @@
 
 ### `ufh_only`
 
-- [ ] `heatingEmittersMode: ufh_only`, радиаторы не подбираются (`matching.radiators` с skip-warning)
+- [ ] `heatingEmittersMode: ufh_only`, радиаторы не подбираются (`matching.radiators.skippedReason: ufh_only`)
+- [ ] В UI итога радиаторов нет черновых секций (эвристика 100 Вт/м²); подпись «не требуется» / skip-hint
 - [ ] График котла 40/30 в `input.heatingSystem`
 - [ ] `matching.boiler.requiredKw` от **отдачи ТП** (`totalHeatFluxUpWatts`×запас), не от `heatLoss.totalWatts`
-- [ ] При q↑ < теплопотерь — warning дефицита в `matching.boiler.warnings`
+- [ ] При q↑ < теплопотерь — `WARN_UFH_COVERAGE_LOW_UFH_ONLY` (шаги без «добавьте радиатор» первым)
 - [ ] `requiresCondensingBoiler` → warning, если подобран не-condensing котёл
+- [ ] При схеме «1К + БКН» и успешном БКН сайдбар не показывает фальшивый ЭБ по литрам ГВС (см. пункт схем котла выше)
 
 ---
 
@@ -74,7 +78,7 @@
 ## Регрессия
 
 - [ ] `lineEconomy` / `lineEfficient` в matching радиаторов (кроме `ufh_only`)
-- [ ] REC/WARN ТП (`REC_UFH_*`, `WARN_UFH_MIXING_NODE_REQUIRED`) в `recommendations`
+- [ ] REC/WARN ТП (`REC_UFH_*`, `WARN_UFH_MIXING_NODE_REQUIRED`, `WARN_UFH_COVERAGE_LOW` + `resolutionSteps`) в `recommendations`
 - [ ] `meta.ufhPresetsSource` в отчёте calc
 
 ---

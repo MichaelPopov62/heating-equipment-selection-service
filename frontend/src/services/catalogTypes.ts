@@ -59,6 +59,56 @@ export type UniboxType =
 export type UniboxConnectionThread = 'G1/2' | 'G3/4';
 export type UniboxConnectionFit = 'eurocone' | 'internal_thread';
 
+/** Контур котла в каталоге (пул doubleCircuit / singleCircuit). */
+export type CatalogBoilerCircuitPool = 'doubleCircuit' | 'singleCircuit';
+
+/** Котёл из GET /api/v1/catalog → catalog.boilers.{doubleCircuit|singleCircuit}. */
+export type CatalogBoilerItem = {
+  model: string;
+  brand: string;
+  circuitPool: CatalogBoilerCircuitPool;
+  type: string;
+  powerKwMin: number;
+  powerKwMax: number;
+  price: number;
+  mountingType: 'wall' | 'floor' | null;
+  article: string;
+};
+
+/** Вариант ЭВН по объёму. */
+export type CatalogWaterHeaterVariant = {
+  volumeLiters: number;
+  price: number;
+  powerKw: number | null;
+  heatingTimeMinutes: number | null;
+};
+
+/** Электронакопитель из catalog.waterHeaters. */
+export type CatalogWaterHeaterItem = {
+  model: string;
+  brand: string;
+  type: string;
+  variants: CatalogWaterHeaterVariant[];
+};
+
+/** Тип БКН в каталоге. */
+export type CatalogIndirectWaterHeaterType =
+  | 'indirect_wall'
+  | 'indirect_floor'
+  | 'storage_indirect';
+
+/** БКН из catalog.indirectWaterHeaters. */
+export type CatalogIndirectWaterHeaterItem = {
+  model: string;
+  brand: string;
+  article: string;
+  type: CatalogIndirectWaterHeaterType;
+  price: number;
+  volumeLiters: number;
+  coilPowerKw: number | null;
+  minSourcePowerKw: number | null;
+};
+
 /** Унибокс из GET /api/v1/catalog → catalog.uniboxes. */
 export type CatalogUniboxItem = {
   id: string;

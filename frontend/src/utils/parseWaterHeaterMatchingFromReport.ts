@@ -25,7 +25,8 @@ export type ParsedWaterHeaterMatching = {
 
 /**
  * Извлекает подбор электробойлера из полного JSON отчёта POST /api/v1/calc.
- * Возвращает null, если блок отсутствует или это пустая заглушка без подбора.
+ * Возвращает null, если блок отсутствует или это пустая заглушка без подбора
+ * (в т.ч. «только литры» без модели/warnings — не оживлять UI).
  */
 export function parseWaterHeaterMatchingFromReport(
   calcReport: unknown,
@@ -40,6 +41,11 @@ export function parseWaterHeaterMatchingFromReport(
   const variantRaw = raw.chosenVariant;
   const hasCatalogSelection =
     isRecord(selectedRaw) && isRecord(variantRaw);
+  const warnings = readStringArray(raw.warnings);
+
+  if (!hasCatalogSelection && warnings.length === 0) {
+    return null;
+  }
 
   let selectedModel: string | null = null;
   let brand: string | null = null;
@@ -69,16 +75,6 @@ export function parseWaterHeaterMatchingFromReport(
     Number.isFinite(raw.requiredTankLiters)
       ? raw.requiredTankLiters
       : 0;
-
-  const warnings = readStringArray(raw.warnings);
-
-  if (
-    !hasCatalogSelection &&
-    warnings.length === 0 &&
-    requiredTankLiters <= 0
-  ) {
-    return null;
-  }
 
   return {
     selectedModel,

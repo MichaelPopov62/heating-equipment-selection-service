@@ -3,22 +3,34 @@
  * Описание: Загрузка снимка каталога с GET /api/v1/catalog для справочника в UI и будущего подбора в смете.
  */
 
+import { parseCatalogBoilers } from './parseCatalogBoilers';
 import {
   parseCatalogBoilerManifolds,
   parseCatalogManifolds,
 } from './parseCatalogManifolds';
+import { parseCatalogIndirectWaterHeaters } from './parseCatalogIndirectWaterHeaters';
 import { parseCatalogUniboxes } from './parseCatalogUniboxes';
+import { parseCatalogWaterHeaters } from './parseCatalogWaterHeaters';
 import type {
+  CatalogBoilerItem,
   CatalogBoilerManifoldItem,
+  CatalogIndirectWaterHeaterItem,
   CatalogManifoldItem,
   CatalogUniboxItem,
+  CatalogWaterHeaterItem,
 } from './catalogTypes';
 
 export type {
+  CatalogBoilerCircuitPool,
+  CatalogBoilerItem,
   CatalogBoilerManifoldItem,
+  CatalogIndirectWaterHeaterItem,
+  CatalogIndirectWaterHeaterType,
   CatalogManifoldDimensions,
   CatalogManifoldItem,
   CatalogUniboxItem,
+  CatalogWaterHeaterItem,
+  CatalogWaterHeaterVariant,
   ManifoldApplication,
   UniboxType,
 } from './catalogTypes';
@@ -31,8 +43,13 @@ export type CatalogEquipmentSnapshot = {
   catalogSource: 'file' | 'mongo';
   /** Всего котлов в обоих списках (двухконтурные + одноконтурные). */
   boilersTotal: number;
+  /** Котлы (doubleCircuit + singleCircuit). */
+  boilers: CatalogBoilerItem[];
   radiators: Record<string, unknown>[];
-  waterHeaters: Record<string, unknown>[];
+  /** Электронакопители (ЭВН). */
+  waterHeaters: CatalogWaterHeaterItem[];
+  /** Бойлеры косвенного нагрева (БКН). */
+  indirectWaterHeaters: CatalogIndirectWaterHeaterItem[];
   pipes: Record<string, unknown>[];
   /** Коллекторы ТП / радиаторов — номенклатура для подбора и сметы. */
   manifolds: CatalogManifoldItem[];
@@ -91,20 +108,17 @@ async function loadCatalogEquipmentFromApi(): Promise<CatalogEquipmentSnapshot> 
     catalogSource?: unknown;
   };
   const cat = data.catalog && typeof data.catalog === 'object' ? (data.catalog as Record<string, unknown>) : {};
-  const boilers =
-    cat.boilers && typeof cat.boilers === 'object' ? (cat.boilers as Record<string, unknown>) : {};
-  const dc = Array.isArray(boilers.doubleCircuit) ? boilers.doubleCircuit.length : 0;
-  const sc = Array.isArray(boilers.singleCircuit) ? boilers.singleCircuit.length : 0;
+  const boilers = parseCatalogBoilers(cat.boilers);
   const src = data.catalogSource;
   const catalogSource: 'file' | 'mongo' = src === 'mongo' ? 'mongo' : 'file';
 
   return {
     catalogSource,
-    boilersTotal: dc + sc,
+    boilersTotal: boilers.length,
+    boilers,
     radiators: Array.isArray(cat.radiators) ? (cat.radiators as Record<string, unknown>[]) : [],
-    waterHeaters: Array.isArray(cat.waterHeaters)
-      ? (cat.waterHeaters as Record<string, unknown>[])
-      : [],
+    waterHeaters: parseCatalogWaterHeaters(cat.waterHeaters),
+    indirectWaterHeaters: parseCatalogIndirectWaterHeaters(cat.indirectWaterHeaters),
     pipes: Array.isArray(cat.pipes) ? (cat.pipes as Record<string, unknown>[]) : [],
     manifolds: parseCatalogManifolds(cat.manifolds),
     boilerManifolds: parseCatalogBoilerManifolds(cat.boilerManifolds),

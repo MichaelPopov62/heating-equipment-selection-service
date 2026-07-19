@@ -4,7 +4,11 @@
  */
 
 import type { Dispatch, SetStateAction } from 'react';
-import { ROOM_TYPE_UI_OPTIONS } from '../../constants/roomTypes';
+import {
+  ROOM_TYPE_UI_OPTIONS,
+  isCanonicalRoomType,
+  parseCanonicalRoomTypeFromSelect,
+} from '../../constants/roomTypes';
 import type { EnvelopePreset, ObjectType } from '../../types/envelope';
 import type {
   ExternalWallFormValue,
@@ -319,9 +323,10 @@ export function RoomAccordionItem({
             <select
               id={`type-${room.id}`}
               className={styles.control}
-              value={room.type}
+              value={isCanonicalRoomType(room.type) ? room.type : 'помещение'}
               onChange={(e) => {
-                const nextType = e.target.value as RoomFormValue['type'];
+                const nextType = parseCanonicalRoomTypeFromSelect(e.target.value);
+                if (nextType == null) return;
                 const suggestedLayout = defaultLayoutForRoomType(nextType);
                 const currentLayout = inferRoomExteriorLayout(room);
                 const patch: Partial<RoomFormValue> = { type: nextType };

@@ -125,7 +125,14 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
     savedAt: typeof raw.savedAt === 'string' ? raw.savedAt : new Date().toISOString(),
     clientName,
     ...(typeof raw.projectId === 'string' ? { projectId: raw.projectId } : {}),
-    currentStep: isSurveyStep(raw.currentStep) ? raw.currentStep : 'object',
+    currentStep: (() => {
+      // Compat: пустой шаг «Итог» (summary) → «Итог финансовый».
+      if (raw.currentStep === 'summary') {
+        warnCompatMigration('SurveyDraftLoad', 'currentStep summary → financialResult');
+        return 'financialResult';
+      }
+      return isSurveyStep(raw.currentStep) ? raw.currentStep : 'object';
+    })(),
     objectMeta,
     rooms,
     temps: {

@@ -51,6 +51,8 @@ export type ParsedRadiatorsMatching = {
   /** Сума секцій (без панелей). */
   totalSections: number | null;
   emittersSummary: RadiatorsEmittersSummaryView | null;
+  /** Підбір не виконувався (режим тільки ТП). */
+  skippedReason: 'ufh_only' | null;
   roomEmitterDiffs: Array<{
     roomId: string;
     equipmentKindChanged: boolean;
@@ -344,6 +346,7 @@ export function parseRadiatorsMatchingFromReport(
     byRoom,
     totalSections,
     emittersSummary,
+    skippedReason: radiators.skippedReason === 'ufh_only' ? 'ufh_only' : null,
     roomEmitterDiffs,
     warnings,
     lineEconomy: parseProposalLine(radiators.lineEconomy, 'economy'),

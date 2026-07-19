@@ -86,8 +86,14 @@ function recommendationVarsForRoom(room) {
     furnitureOccupiedAreaM2: room.furnitureOccupiedAreaM2,
     heatedAreaM2: room.heatedAreaM2,
     requiredHeatFluxUpWm2: room.requiredHeatFluxUpWm2,
-    heatFluxUpWatts: room.heatFluxUpWatts,
-    roomHeatLossWatts: room.roomHeatLossWatts,
+    heatFluxUpWatts:
+      typeof room.heatFluxUpWatts === 'number' && Number.isFinite(room.heatFluxUpWatts)
+        ? Math.round(room.heatFluxUpWatts)
+        : room.heatFluxUpWatts,
+    roomHeatLossWatts:
+      typeof room.roomHeatLossWatts === 'number' && Number.isFinite(room.roomHeatLossWatts)
+        ? Math.round(room.roomHeatLossWatts)
+        : room.roomHeatLossWatts,
     coveragePercent,
   };
 }
@@ -112,9 +118,14 @@ function pushUfhRecommendation(room, warnings, resolvedList, recommendations, co
  *
  * @param {import('../types/shared-types.js').UnderfloorHeatingReport | null | undefined} report
  * @param {import('../recommendations/types.js').RecommendationsBundle} recommendations
+ * @param {{ heatingEmittersMode?: string | null }} [options]
  * @returns {{ warnings: string[], resolvedRecommendations: import('../recommendations/types.js').ResolvedRecommendation[] }}
  */
-export function applyUnderfloorHeatingRecommendations(report, recommendations) {
+export function applyUnderfloorHeatingRecommendations(
+  report,
+  recommendations,
+  options = {},
+) {
   /** @type {string[]} */
   const warnings = [];
   /** @type {import('../recommendations/types.js').ResolvedRecommendation[]} */
@@ -123,6 +134,8 @@ export function applyUnderfloorHeatingRecommendations(report, recommendations) {
   if (!report?.rooms?.length) {
     return { warnings, resolvedRecommendations };
   }
+
+  const isUfhOnly = options.heatingEmittersMode === 'ufh_only';
 
   for (const room of report.rooms) {
     const vars = recommendationVarsForRoom(room);
@@ -142,7 +155,9 @@ export function applyUnderfloorHeatingRecommendations(report, recommendations) {
         warnings,
         resolvedRecommendations,
         recommendations,
-        'WARN_UFH_ACTIVE_AREA_INSUFFICIENT',
+        isUfhOnly
+          ? 'WARN_UFH_ACTIVE_AREA_INSUFFICIENT_UFH_ONLY'
+          : 'WARN_UFH_ACTIVE_AREA_INSUFFICIENT',
         vars,
       );
     }
@@ -153,7 +168,7 @@ export function applyUnderfloorHeatingRecommendations(report, recommendations) {
         warnings,
         resolvedRecommendations,
         recommendations,
-        'WARN_UFH_COVERAGE_LOW',
+        isUfhOnly ? 'WARN_UFH_COVERAGE_LOW_UFH_ONLY' : 'WARN_UFH_COVERAGE_LOW',
         vars,
       );
     }
@@ -203,7 +218,9 @@ export function applyUnderfloorHeatingRecommendations(report, recommendations) {
         warnings,
         resolvedRecommendations,
         recommendations,
-        'WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE',
+        isUfhOnly
+          ? 'WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE_UFH_ONLY'
+          : 'WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE',
         {
           roomName: room.roomName,
           finishName: room.finishMaterialName ?? room.finishMaterialId,

@@ -106,5 +106,5 @@ cd backend && npm run verify:manifold-matching
 
 ## UI
 
-Справочник номенклатуры: `CatalogEquipmentReference` (`catalog.manifolds` / `catalog.boilerManifolds`).  
+Справочник номенклатуры: шаг анкеты «Справочник данных» → `CatalogEquipmentReference` (`catalog.manifolds` / `catalog.boilerManifolds` и др.).  
 Карточки сметы по `matching.manifolds.underfloor[].units` — отдельный шаг UI.

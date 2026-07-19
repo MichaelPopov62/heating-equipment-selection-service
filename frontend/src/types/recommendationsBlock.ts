@@ -1,6 +1,6 @@
 /**
  * Назначение: Типы блока рекомендаций.
- * Описание: Props и вспомогательные типы для RecommendationsBlock и карточек.
+ * Описание: Props и вспомогательные типы для RecommendationsBlock (шаг technicalResult).
  */
 
 import type { ParsedBoilerMatching } from '../utils/parsers/parseBoilerFromReport';
@@ -9,7 +9,6 @@ import type { ParsedIndirectWaterHeaterMatching } from '../utils/parseIndirectWa
 import type { ParsedWaterHeaterMatching } from '../utils/parseWaterHeaterMatchingFromReport';
 import type { HotWaterBoilerPowerMatchingScheme } from './heatingMatching';
 import type { ObjectType } from './envelope';
-import type { CatalogEquipmentSnapshot } from '../services/catalog';
 import type { ParsedUnderfloorHeating } from './underfloorHeating';
 import type { ParsedHydraulicsView } from './hydraulics';
 import type { ParsedUniboxesMatching } from '../utils/parseUniboxesMatchingFromReport';
@@ -64,10 +63,6 @@ export type RecommendationsBlockProps = {
   apiCatalogSource: 'file' | 'mongo' | null;
   apiAutomationHints: AutomationHint[];
   objectType: ObjectType;
-  catalogSnap: CatalogEquipmentSnapshot | null;
-  catalogSnapLoading: boolean;
-  catalogSnapError: string | null;
-  onRetryLoadCatalog: () => void;
   onApplyScheme: (scheme: HotWaterBoilerPowerMatchingScheme) => void;
   apiHydraulicsFromReport?: ParsedHydraulicsView | null;
   calcLoading?: boolean;

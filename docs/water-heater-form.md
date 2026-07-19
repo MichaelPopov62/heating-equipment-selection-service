@@ -129,6 +129,19 @@ Discriminated union в `frontend/src/types/waterHeaterMatching.ts`:
 
 Сайдбар «Итог» — компактная `HotWaterSummaryTable` (строки ЭБ/БКН), без `WaterHeaterMatchingPreview`.
 
+### Участие ЭБ/БКН в сайдбаре (`HotWaterSummaryTable`)
+
+Подписи строк — `resolveHotWaterEquipmentRowLabel` (`hotWaterEquipmentParticipation.ts`):
+
+| Схема / исход matching | ЭБ в сайдбаре | БКН в сайдбаре |
+|------------------------|---------------|----------------|
+| «1К + БКН» + БКН выбран | «Не участвует в расчёте» | результат подбора |
+| «1К + БКН» + fallback без БКН | результат запасного ЭВН (+ warning) | skipped / нет модели |
+| отдельный ЭВН / буферный ЭВН (1К или 2К) | результат подбора | «Не участвует в расчёте» |
+| max-комби без БКН | «Не участвует…» | «Не участвует…» / по matching |
+
+При успешном БКН оркестратор (`matching/index.js`) **не** пишет `recommendedTankLiters` в `matching.waterHeater.requiredTankLiters` (остаётся `0`, `selected: null`). Объём бака — только в `matching.indirectWaterHeater` и в `calculations.hotWater.recommendedTankLiters`. Парсер `parseWaterHeaterMatchingFromReport` игнорирует stub «только литры» без модели/warnings.
+
 ### `WaterHeaterReportDialog`
 
 Модалка полного подбора (паттерн `HotWaterReportDialog` / `UnderfloorHeatingReportDialog`):
@@ -222,6 +235,8 @@ Discriminated union в `frontend/src/types/waterHeaterMatching.ts`:
 | `frontend/src/components/HotWaterReport/HotWaterFixturesTable.tsx` | Таблица точек водоразбора (SSOT UI) |
 | `frontend/src/components/HotWaterReport/HotWaterFixturesSummaryTable.tsx` | Та же таблица в сайдбаре «Результаты» |
 | `frontend/src/components/HotWaterReport/HotWaterSummaryTable.tsx` | Компактный итог ЭБ/БКН в сайдбаре |
+| `frontend/src/utils/hotWaterEquipmentParticipation.ts` | Участие ЭБ/БКН по схеме и подписи строк сайдбара |
+| `frontend/src/utils/parseWaterHeaterMatchingFromReport.ts` | Парсинг `matching.waterHeater` (stub без модели → null) |
 | `frontend/src/components/WaterHeaterForm/WaterHeaterForm.tsx` | UI формы (стратегия + кнопки отчёта и «Назад к результатам») |
 | `frontend/src/constants/surveyResultsSections.ts` | Якоря секций сайдбара для «Назад к результатам» |
 | `frontend/src/components/SurveyNavigation/SurveyReportActions.module.css` | Общие стили кнопок отчёта / назад |

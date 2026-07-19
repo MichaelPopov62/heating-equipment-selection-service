@@ -81,7 +81,20 @@ SSOT длины: `backend/src/logic/ufhLoopLength.js` (`computeUfhLoopTotalLengt
 | `WARN_UFH_ACTIVE_AREA_INSUFFICIENT` | `q_треб > maxAllowableHeatFluxUpWm2` |
 | `WARN_UFH_HEATED_AREA_ZERO` | `heatedAreaM2 ≤ 0` |
 | `REC_UFH_PIPE_SPACING_AUTO` | `resolvedPipeSpacingMm ≠ requestedPipeSpacingMm` |
-| `WARN_UFH_COVERAGE_LOW` | `heatFluxCoverageRatio < 0.95` |
+| `WARN_UFH_COVERAGE_LOW` | `heatFluxCoverageRatio < 0.95` (`heatFluxCoverageStatus === 'low'`) |
+
+### `WARN_UFH_COVERAGE_LOW` — шаги устранения (UI)
+
+В `recommendations.json` у кода заданы **`resolutionSteps`** (тот же паттерн, что у `WARN_UFH_PARASITIC_DOWN_HEATED` / `WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE` / низкой скорости петель):
+
+1. **Добавьте радиатор или конвектор** — режим «ТП + радиаторы», закрытие дефицита прибором.
+2. **Уменьшите шаг укладки трубы** — 200 → 150/100 мм, рост q↑.
+3. **Замените тип чистового покрытия** — более теплопроводный финиш.
+4. **Снизьте теплопотери ограждений** — утепление / окна / площади.
+
+В отчёте ТП (`UnderfloorHeatingReportView`): тексты WARN по комнатам агрегируются в общий блок с кнопкой **«Устранение предупреждения»** → модалка `UfhWarningResolutionDialog` (шаги из `resolvedRecommendations`). Если API ещё без `resolutionSteps` (кэш/Mongo до seed) — UI подставляет fallback `UFH_COVERAGE_LOW_RESOLUTION_STEPS_FALLBACK` (тот же первый шаг «Добавьте радиатор или конвектор»). Классификация и дедуп — `ufhWarningDisplay.ts` (`UFH_WARN_COVERAGE_LOW_CODE`, `collectCoverageLowWarnings` из room.warnings и resolvedRecommendations).
+
+В шаблоне текста мощности **`heatFluxUpWatts`** / **`roomHeatLossWatts`** округляются до целых Вт (`recommendationVarsForRoom` в `matching/warmFloor.js`).
 
 ## Модули backend
 
@@ -100,6 +113,7 @@ SSOT длины: `backend/src/logic/ufhLoopLength.js` (`computeUfhLoopTotalLengt
 - Поле «Площадь, занятая мебелью…» только при включённом ТП в комнате.
 - Tooltip с пояснением; **без** отображения вычисляемой S_акт в hint анкеты.
 - S_акт, q_треб, шаги, **число и длина петель** — в блоке отчёта ТП.
+- При `WARN_UFH_COVERAGE_LOW` — блок предупреждений + кнопка устранения с `resolutionSteps` (см. выше).
 
 ## Verify
 

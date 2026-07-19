@@ -33,6 +33,7 @@ import { logger } from '../utils/logger.js';
 import { createAppError } from '../utils/createAppError.js';
 import { isPlainObject } from '../utils/isPlainObject.js';
 import { buildMatchingAutomationHints } from './automationHints.js';
+import { buildFinancialBom } from './buildFinancialBom.js';
 import { recommendedApartmentElectricTankLiters, recommendedCombiBufferTankLiters, recommendedSingleCircuitBufferTankLiters } from '../utils/apartmentMatching.js';
 import {
   appendApartmentCombiSerialBufferAutomationHint,
@@ -310,7 +311,9 @@ export async function buildReport({ input, ctx }) {
       recommendations,
       appliances.byKind.hydraulics,
     );
-    applyUnderfloorHeatingRecommendations(underfloorHeating, recommendations);
+    applyUnderfloorHeatingRecommendations(underfloorHeating, recommendations, {
+      heatingEmittersMode: input.heatingSystem?.heatingEmittersMode ?? null,
+    });
     logger.info('report.underfloorHeating.done', null, {
       rooms: underfloorHeating.rooms.length,
       totalHeatFluxUpWatts: underfloorHeating.totalHeatFluxUpWatts,
@@ -718,6 +721,17 @@ export async function buildReport({ input, ctx }) {
       /** @type {import('../types/shared-types.js').HeatingSystemInput} */ (hsClean);
   }
 
+  const commercial = buildFinancialBom({
+    input: inputForReport,
+    matching,
+    underfloorHeating: underfloorHeating ?? null,
+  });
+  logger.info('report.commercial.done', null, {
+    equipmentLines: commercial.lines.filter((l) => l.kind === 'equipment').length,
+    equipmentTotalUah: commercial.totals.equipmentTotalUah,
+    grandTotalUah: commercial.totals.grandTotalUah,
+  });
+
   return {
     meta: {
       generatedAt: new Date().toISOString(),
@@ -747,6 +761,7 @@ export async function buildReport({ input, ctx }) {
       underfloorHeating: underfloorHeating ?? null,
     },
     matching,
+    commercial,
     ...(reportRecommendations.length > 0
       ? { recommendations: reportRecommendations }
       : {}),

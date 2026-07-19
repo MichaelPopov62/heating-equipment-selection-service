@@ -37,17 +37,6 @@
   border-top: none;
 }
 
-/* ─── dl-підсумок: жирний рядок ─── */
-.totalLabel {
-  font-weight: 700;
-  color: var(--text-h);
-}
-
-.totalValue {
-  font-weight: 800;
-  color: var(--text-h);
-}
-
 /* ─── Підказка ─── */
 .hint {
   composes: hint from '../../styles/formElements.module.css';

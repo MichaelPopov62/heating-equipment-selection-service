@@ -76,6 +76,8 @@ export function buildOkManifoldsReport({
 
 /**
  * Обгортка core→звіт з catch (для verify ін'єкції throw без публічного _testThrow).
+ * Лог: MANIFOLD_INPUT_INVALID — лише code/message (без stack);
+ * MANIFOLD_INTERNAL — з Error (повний stack).
  *
  * @param {(args: object) => import('../types/shared-types.js').ManifoldsMatchingReport} core
  * @param {object} [args]
@@ -94,10 +96,15 @@ export function pickManifoldsWithCore(core, args = {}) {
         ? MANIFOLD_FAILURE_CODE_INPUT
         : MANIFOLD_FAILURE_CODE_INTERNAL;
     const errMessage = known?.message ? String(known.message) : null;
-    logger.warn('matching.manifold.fail', null, {
+    const payload = {
       code: failureCode,
       message: errMessage,
-    }, err);
+    };
+    if (failureCode === MANIFOLD_FAILURE_CODE_INTERNAL) {
+      logger.warn('matching.manifold.fail', null, payload, err);
+    } else {
+      logger.warn('matching.manifold.fail', null, payload);
+    }
     return buildEmptyManifoldsFailure({
       failureCode,
       message:

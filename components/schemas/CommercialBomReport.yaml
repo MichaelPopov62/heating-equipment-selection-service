@@ -1,0 +1,66 @@
+type: object
+description: >
+  Коммерческая смета расчёта (report.commercial): оборудование из matching/hydraulics,
+  плюс строки монтажа (40%) и расходников (15%) от суммы оборудования.
+  Линии proposalEconomy / proposalEfficient / lineEconomy / lineEfficient не учитываются.
+additionalProperties: false
+required:
+  - schemaVersion
+  - currency
+  - lines
+  - totals
+  - rates
+properties:
+  schemaVersion:
+    type: integer
+    enum: [1]
+  currency:
+    type: string
+    enum: [UAH]
+  lines:
+    type: array
+    items:
+      $ref: FinancialBomLine.yaml
+  totals:
+    type: object
+    additionalProperties: false
+    required:
+      - equipmentQtyPcs
+      - equipmentTotalUah
+      - laborTotalUah
+      - consumablesTotalUah
+      - grandTotalUah
+    properties:
+      equipmentQtyPcs:
+        type: number
+        minimum: 0
+        description: Сумма qty по kind=equipment и qtyUnit=pcs.
+      equipmentTotalUah:
+        type: number
+        minimum: 0
+        description: Сумма lineTotalUah по kind=equipment (без note).
+      laborTotalUah:
+        type: number
+        minimum: 0
+      consumablesTotalUah:
+        type: number
+        minimum: 0
+      grandTotalUah:
+        type: number
+        minimum: 0
+        description: equipment + labor + consumables.
+  rates:
+    type: object
+    additionalProperties: false
+    required:
+      - laborPercentOfEquipment
+      - consumablesPercentOfEquipment
+    properties:
+      laborPercentOfEquipment:
+        type: number
+        enum: [40]
+        description: Монтажные работы — процент от стоимости оборудования.
+      consumablesPercentOfEquipment:
+        type: number
+        enum: [15]
+        description: Расходные материалы — процент от стоимости оборудования.

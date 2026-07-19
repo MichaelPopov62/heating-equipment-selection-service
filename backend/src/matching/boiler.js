@@ -1115,11 +1115,13 @@ export function pickBoiler({
 
     if (highTempGraph || nonCondensing) {
       const thermalRegimeLabel =
-        hs.thermalRegimePreset === 'traditional_dt50_75_65'
-          ? 'традиционный 75/65'
-          : hs.thermalRegimePreset === 'condensing_dt30_55_45'
-            ? '55/45'
-            : `${hs.supplyC ?? '—'}/${hs.returnC ?? '—'} °C`;
+        typeof hs.supplyC === 'number' && typeof hs.returnC === 'number'
+          ? `${hs.supplyC}/${hs.returnC} °C`
+          : hs.thermalRegimePreset === 'traditional_dt50_75_65'
+            ? 'традиционный 75/65'
+            : hs.thermalRegimePreset === 'condensing_dt30_55_45'
+              ? '55/45'
+              : 'не задан';
       pushRecommendation(
         warnings,
         resolvedRecommendations,

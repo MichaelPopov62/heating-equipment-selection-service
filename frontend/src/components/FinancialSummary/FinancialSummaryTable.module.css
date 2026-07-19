@@ -1,0 +1,89 @@
+/* Призначення: таблиця фінансового підсумку (report.commercial). */
+
+.wrap {
+  margin-top: 4px;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: var(--text-h);
+}
+
+.meta {
+  margin: 0 0 10px;
+  font: 13px/1.4 var(--sans);
+  color: var(--text-m);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th,
+.table td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  background: var(--surface-2);
+  color: var(--text-h);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.groupRow td {
+  background: color-mix(in srgb, var(--surface) 80%, var(--accent-bg));
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.categoryRow td {
+  background: color-mix(in srgb, var(--surface) 92%, var(--accent-bg));
+  font-weight: 600;
+  color: var(--text-m);
+  font-size: 12px;
+}
+
+.num {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.unit {
+  margin-left: 4px;
+  color: var(--text-muted, var(--text-m));
+  font-weight: 400;
+}
+
+.totalsRow td {
+  font-weight: 600;
+  background: color-mix(in srgb, var(--surface) 88%, var(--accent-bg));
+}
+
+.grandRow td {
+  font-weight: 700;
+  background: color-mix(in srgb, var(--accent-bg) 35%, var(--surface));
+}
+
+.empty {
+  margin: 0;
+  font: 13px/1.4 var(--sans);
+  color: var(--text-m);
+}
+
+.stale {
+  margin: 0 0 8px;
+  font: 13px/1.4 var(--sans);
+  color: var(--text-m);
+}

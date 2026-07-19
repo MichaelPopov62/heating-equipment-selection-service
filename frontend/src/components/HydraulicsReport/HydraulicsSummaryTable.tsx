@@ -39,10 +39,14 @@ export function HydraulicsSummaryTable({
 
   const pumps = excludeUfhZonePumps(proposal?.pumps ?? []);
   const primaryPump = pumps[0] ?? proposal?.pump ?? null;
-  const pumpLabel =
-    primaryPump != null
-      ? formatBrandModel(primaryPump.brand, primaryPump.model)
-      : null;
+  const pumpLabel = (() => {
+    if (primaryPump == null) return null;
+    const base = formatBrandModel(primaryPump.brand, primaryPump.model);
+    if (primaryPump.pumpSource === 'catalog') {
+      return `${base} — доп. на котловую ветку (встроенный слаб)`;
+    }
+    return base;
+  })();
 
   const hasWarnings =
     hydraulics.matchingWarnings.length > 0

@@ -73,6 +73,24 @@ function emitterFieldsFromSized(kind, adjustedWatts, sections, unitsCount = 1) {
 }
 
 /**
+ * Ціна позиції каталогу для смети (report.commercial).
+ *
+ * @param {import('../../catalog/types.js').RadiatorCatalogItemNormalized | null | undefined} radiator
+ * @returns {{ unitPriceUah?: number }}
+ */
+function radiatorCommercialPriceFields(radiator) {
+  if (
+    radiator
+    && typeof radiator.price === 'number'
+    && Number.isFinite(radiator.price)
+    && radiator.price > 0
+  ) {
+    return { unitPriceUah: radiator.price };
+  }
+  return {};
+}
+
+/**
  * @param {Pick<import('../../types/shared-types.js').RadiatorsByRoomItem, 'roomId' | 'roomName' | 'heatLossWatts' | 'radiatorDesignWatts'> & {
  *   designAirTempC?: number;
  *   designAirTempSource?: import('../../types/shared-types.js').DesignRoomAirTempSource;
@@ -670,6 +688,7 @@ export function pickRadiators({
           ...(minSized.sizingNotes ?? []),
         ],
         priceBasis: emitter.priceBasis,
+        ...radiatorCommercialPriceFields(minSized.radiator),
         ...(minSized.panelLengthMm != null
           ? { panelLengthMm: minSized.panelLengthMm }
           : {}),
@@ -762,6 +781,7 @@ export function pickRadiators({
       warnings: roomWarnings,
       sizingNotes: [...prep.mixedNotes, ...(sized.sizingNotes ?? [])],
       priceBasis: emitter.priceBasis,
+      ...radiatorCommercialPriceFields(sized.radiator),
       ...(sized.panelLengthMm != null ? { panelLengthMm: sized.panelLengthMm } : {}),
     });
   }

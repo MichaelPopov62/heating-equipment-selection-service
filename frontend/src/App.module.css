@@ -124,12 +124,6 @@
   font: 500 13px/1.2 var(--sans);
 }
 
-.calculationResults {
-  flex: 1 1 auto;
-  width: 100%;
-  min-width: 0;
-}
-
 .hint {
   composes: hint from './styles/formElements.module.css';
 }
@@ -233,13 +227,6 @@
   .mainColumn {
     flex: 1 1 360px;
     width: auto;
-  }
-
-  .calculationResults {
-    flex: 0 0 320px;
-    width: auto;
-    min-width: 260px;
-    align-self: flex-start;
   }
 }
 

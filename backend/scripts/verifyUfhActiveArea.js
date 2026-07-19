@@ -7,8 +7,9 @@ import { warmupReferenceCache, getReferenceBundle, toCalcRuntimeContext } from '
 import { validateAndNormalizeInput } from '../src/api/validate.js';
 import { buildReport } from '../src/report/public.js';
 import { resolveUfhActiveFloorAreaM2 } from '../src/logic/ufhActiveFloorArea.js';
+import { applyUnderfloorHeatingRecommendations } from '../src/matching/warmFloor.js';
 import { assertAt, assertDefined } from './fixtures/scriptAssert.js';
-import { buildObjectMeta, buildRoom } from './fixtures/verifyFixtures.js';
+import { buildObjectMeta, buildRoom, buildUfhReport, buildUfhRoom } from './fixtures/verifyFixtures.js';
 
 let passed = 0;
 let failed = 0;
@@ -175,6 +176,64 @@ try {
     && /** @type {{ code?: string }} */ (err).code === 'UNDERFLOOR_HEATING_FURNITURE_AREA_INVALID';
 }
 check(validationRejected, 'валидация: S_meb >= areaM2 → 400');
+
+const coverageCatalog = ctx.recommendations.byCode.WARN_UFH_COVERAGE_LOW;
+check(coverageCatalog != null, 'справочник: WARN_UFH_COVERAGE_LOW присутствует');
+check(
+  (coverageCatalog?.resolutionSteps?.length ?? 0) === 4
+    && coverageCatalog?.resolutionSteps?.[0]?.title === 'Добавьте радиатор или конвектор',
+  'WARN_UFH_COVERAGE_LOW: 4 resolutionSteps, первый — «Добавьте радиатор или конвектор»',
+);
+
+const coverageReport = buildUfhReport({
+  rooms: [
+    buildUfhRoom('r_cov', 'Комната 1', 1, {
+      heatFluxUpWatts: 1707.4,
+      roomHeatLossWatts: 2347.9754161118362,
+      heatFluxCoverageRatio: 0.727,
+      heatFluxCoverageStatus: 'low',
+      heatedAreaM2: 12,
+      roomAreaM2: 12,
+      pipeSpacingMm: 150,
+    }),
+    buildUfhRoom('r_cov2', 'Комната 2', 1, {
+      heatFluxUpWatts: 948.2,
+      roomHeatLossWatts: 1369.062776089469,
+      heatFluxCoverageRatio: 0.693,
+      heatFluxCoverageStatus: 'low',
+      heatedAreaM2: 8,
+      roomAreaM2: 8,
+      pipeSpacingMm: 150,
+    }),
+  ],
+  totalHeatFluxUpWatts: 2655.6,
+  totalHeatFluxDownWatts: 0,
+  circuitSupplyC: 40,
+  circuitReturnC: 30,
+  circuitMeanC: 35,
+  circuitSource: 'finish_preset',
+  isMixingNodeRequired: false,
+});
+applyUnderfloorHeatingRecommendations(coverageReport, ctx.recommendations);
+const coverageRecs = (coverageReport.resolvedRecommendations ?? []).filter(
+  (r) => r.code === 'WARN_UFH_COVERAGE_LOW',
+);
+check(coverageRecs.length === 2, 'coverage low: 2× WARN_UFH_COVERAGE_LOW (по комнатам)');
+check(
+  coverageRecs.every((r) => (r.resolutionSteps?.length ?? 0) === 4),
+  'coverage low: resolutionSteps прокинуты в resolvedRecommendations',
+);
+check(
+  coverageRecs[0]?.text.includes('≈1707 Вт') === true
+    && coverageRecs[0]?.text.includes('≈2348 Вт') === true
+    && !coverageRecs[0]?.text.includes('2347.975'),
+  'coverage low: мощность в тексте WARN округлена до целых Вт',
+);
+check(
+  coverageRecs[1]?.text.includes('≈948 Вт') === true
+    && coverageRecs[1]?.text.includes('≈1369 Вт') === true,
+  'coverage low: Комната 2 — округлённые Вт в тексте',
+);
 
 console.log(`\nИтого: ${passed} OK, ${failed} FAIL`);
 if (failed > 0) process.exit(1);

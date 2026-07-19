@@ -80,6 +80,13 @@ properties:
     type: string
     enum: [section, panel]
     description: Базис ціни / типу приладу з каталогу.
+  unitPriceUah:
+    type: number
+    nullable: true
+    minimum: 0
+    description: >
+      Ціна з каталогу (UAH): за секцію (priceBasis=section) або за панель цілком
+      (priceBasis=panel). Для комерційної смети report.commercial.
   panelLengthMm:
     type: number
     nullable: true

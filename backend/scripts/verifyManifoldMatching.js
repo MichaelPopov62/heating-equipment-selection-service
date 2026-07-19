@@ -16,6 +16,7 @@ import {
   MANIFOLD_FAILURE_CODE_INTERNAL,
   MANIFOLD_FAILURE_CODE_INPUT,
 } from '../src/matching/manifold.js';
+import { logger } from '../src/utils/logger.js';
 import { assertAt } from './fixtures/scriptAssert.js';
 import {
   buildObjectMeta,
@@ -531,30 +532,80 @@ function ufhRoom(roomId, roomName, loopsCount) {
 }
 
 // 13) pickManifoldsWithCore: throw → ok:false, без пробросу
+// INTERNAL: у лог передається Error (stack); INPUT — лише payload без Error.
 {
-  const report = pickManifoldsWithCore(() => {
-    throw new Error('simulated manifold crash');
-  }, {});
-  assert.equal(report.ok, false);
-  assert.equal(report.failureCode, MANIFOLD_FAILURE_CODE_INTERNAL);
-  assert.deepEqual(report.underfloor, []);
-  assert.equal(report.radiator, null);
-  assert.equal(report.boilerManifold, null);
-  assert.ok(report.warnings.some((w) => w.includes('MANIFOLD_INTERNAL')));
-  assert.ok(report.warnings.some((w) => w.includes('simulated manifold crash')));
+  /** @type {Array<{ msg: string, payload: unknown, rest: unknown[] }>} */
+  const warnCalls = [];
+  const origWarn = logger.warn;
+  logger.warn = (msg, _meta, ...rest) => {
+    const payload = rest[0];
+    warnCalls.push({ msg: String(msg), payload, rest });
+  };
+  try {
+    const report = pickManifoldsWithCore(() => {
+      throw new Error('simulated manifold crash');
+    }, {});
+    assert.equal(report.ok, false);
+    assert.equal(report.failureCode, MANIFOLD_FAILURE_CODE_INTERNAL);
+    assert.deepEqual(report.underfloor, []);
+    assert.equal(report.radiator, null);
+    assert.equal(report.boilerManifold, null);
+    assert.ok(report.warnings.some((w) => w.includes('MANIFOLD_INTERNAL')));
+    assert.ok(report.warnings.some((w) => w.includes('simulated manifold crash')));
+
+    const internalLog = warnCalls.find((c) => c.msg === 'matching.manifold.fail');
+    assert.ok(internalLog, 'INTERNAL: matching.manifold.fail logged');
+    assert.equal(
+      /** @type {{ code?: string }} */ (internalLog.payload)?.code,
+      MANIFOLD_FAILURE_CODE_INTERNAL,
+    );
+    assert.ok(
+      internalLog.rest.some((a) => a instanceof Error),
+      'INTERNAL: Error (stack) passed to logger.warn',
+    );
+  } finally {
+    logger.warn = origWarn;
+  }
 }
 
-// 14) INPUT_INVALID через err.code
+// 14) INPUT_INVALID через err.code — лог без Error/stack
 {
-  /** @type {Error & { code?: string }} */
-  const err = new Error('bad floor map');
-  err.code = MANIFOLD_FAILURE_CODE_INPUT;
-  const report = pickManifoldsWithCore(() => {
-    throw err;
-  }, {});
-  assert.equal(report.ok, false);
-  assert.equal(report.failureCode, MANIFOLD_FAILURE_CODE_INPUT);
-  assert.deepEqual(report.underfloor, []);
+  /** @type {Array<{ msg: string, payload: unknown, rest: unknown[] }>} */
+  const warnCalls = [];
+  const origWarn = logger.warn;
+  logger.warn = (msg, _meta, ...rest) => {
+    warnCalls.push({ msg: String(msg), payload: rest[0], rest });
+  };
+  try {
+    /** @type {Error & { code?: string }} */
+    const err = new Error('bad floor map');
+    err.code = MANIFOLD_FAILURE_CODE_INPUT;
+    const report = pickManifoldsWithCore(() => {
+      throw err;
+    }, {});
+    assert.equal(report.ok, false);
+    assert.equal(report.failureCode, MANIFOLD_FAILURE_CODE_INPUT);
+    assert.deepEqual(report.underfloor, []);
+
+    const inputLog = warnCalls.find((c) => c.msg === 'matching.manifold.fail');
+    assert.ok(inputLog, 'INPUT: matching.manifold.fail logged');
+    assert.equal(
+      /** @type {{ code?: string, message?: string | null }} */ (inputLog.payload)?.code,
+      MANIFOLD_FAILURE_CODE_INPUT,
+    );
+    assert.equal(
+      /** @type {{ message?: string | null }} */ (inputLog.payload)?.message,
+      'bad floor map',
+    );
+    assert.equal(
+      inputLog.rest.some((a) => a instanceof Error),
+      false,
+      'INPUT: Error/stack must not be passed to logger.warn',
+    );
+    assert.equal(inputLog.rest.length, 1, 'INPUT: only payload arg after meta');
+  } finally {
+    logger.warn = origWarn;
+  }
 }
 
 console.log('verify:manifold-matching OK');

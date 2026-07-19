@@ -9,12 +9,82 @@ const LOW_VELOCITY_RE = /низкая скорость/iu;
 const PARASITIC_DOWN_RE = /паразитн[а-яёіїєґ]*\s+поток\s+вниз/iu;
 const SURFACE_PRESET_OVERRIDE_RE =
   /пресет режима ТП ограничил максимальн[а-яёіїєґ]* температуру поверхности/iu;
+/** «расчётные» / «расчетные»; ≈ может быть заменён на ~ в части окружений. */
+const COVERAGE_LOW_RE =
+  /отдача\s+ТП\s+[≈~].+не\s+покрывает\s+расч[её]тн/iu;
 
 export const UFH_WARN_LOW_VELOCITY_CODE = 'WARN_UFH_LOOP_LOW_VELOCITY_UNRESOLVED';
 export const UFH_WARN_PARASITIC_DOWN_CODE = 'WARN_UFH_PARASITIC_DOWN_HEATED';
 export const UFH_WARN_MIXING_NODE_CODE = 'WARN_UFH_MIXING_NODE_REQUIRED';
 export const UFH_WARN_SURFACE_PRESET_OVERRIDE_CODE =
   'WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE';
+export const UFH_WARN_SURFACE_PRESET_OVERRIDE_UFH_ONLY_CODE =
+  'WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE_UFH_ONLY';
+export const UFH_WARN_COVERAGE_LOW_CODE = 'WARN_UFH_COVERAGE_LOW';
+export const UFH_WARN_COVERAGE_LOW_UFH_ONLY_CODE = 'WARN_UFH_COVERAGE_LOW_UFH_ONLY';
+
+/** Коды WARN покрытия теплопотерь (mixed / ufh_only). */
+export const UFH_COVERAGE_LOW_CODES = [
+  UFH_WARN_COVERAGE_LOW_CODE,
+  UFH_WARN_COVERAGE_LOW_UFH_ONLY_CODE,
+] as const;
+
+/** Коды WARN лимита поверхности пресетом (mixed / ufh_only). */
+export const UFH_SURFACE_PRESET_OVERRIDE_CODES = [
+  UFH_WARN_SURFACE_PRESET_OVERRIDE_CODE,
+  UFH_WARN_SURFACE_PRESET_OVERRIDE_UFH_ONLY_CODE,
+] as const;
+
+/**
+ * Fallback шагов устранения, если API ещё отдаёт WARN без resolutionSteps
+ * (устаревший Mongo до seed). SSOT текстов — recommendations.json.
+ */
+export const UFH_COVERAGE_LOW_RESOLUTION_STEPS_FALLBACK = [
+  {
+    title: 'Добавьте радиатор или конвектор',
+    detail:
+      'Перейдите в режим «ТП + радиаторы» и добавьте в комнату радиатор или конвектор. Дефицит теплопотерь (разница между расчётными потерями и отдачей ТП) закрывается прибором; лимит температуры поверхности пола при этом не ужесточается.',
+  },
+  {
+    title: 'Уменьшите шаг укладки трубы',
+    detail:
+      'Перейдите с большего шага (например 200 мм) на 150 или 100 мм. Меньший шаг снижает сопротивление внедрения трубы, повышает q↑ и долю покрытия теплопотерь тёплым полом.',
+  },
+  {
+    title: 'Замените тип чистового покрытия',
+    detail:
+      'Смена финиша на более теплопроводный (например ламинат/ПВХ → плитка/керамогранит) снижает сопротивление покрытия и повышает полезную отдачу ТП вверх — пересчитайте после выбора покрытия.',
+  },
+  {
+    title: 'Снизьте теплопотери ограждений',
+    detail:
+      'Уточните утепление стен/окон, ориентацию и площади ограждений. Меньшие расчётные потери комнаты повышают коэффициент покрытия при той же отдаче ТП.',
+  },
+] as const;
+
+/** Fallback для режима «только ТП» — без «добавьте радиатор» первым шагом. */
+export const UFH_COVERAGE_LOW_UFH_ONLY_RESOLUTION_STEPS_FALLBACK = [
+  {
+    title: 'Уменьшите шаг укладки трубы',
+    detail:
+      'Перейдите с большего шага (например 200 мм) на 150 или 100 мм. Меньший шаг повышает q↑ и долю покрытия теплопотерь тёплым полом.',
+  },
+  {
+    title: 'Замените тип чистового покрытия',
+    detail:
+      'Смена финиша на более теплопроводный (например ламинат/ПВХ → плитка/керамогранит) снижает сопротивление покрытия и повышает полезную отдачу ТП вверх.',
+  },
+  {
+    title: 'Снизьте теплопотери ограждений',
+    detail:
+      'Уточните утепление стен/окон, ориентацию и площади ограждений. Меньшие расчётные потери повышают коэффициент покрытия при той же отдаче ТП.',
+  },
+  {
+    title: 'Перейдите в режим «ТП + радиаторы»',
+    detail:
+      'Если усилить пол недостаточно, смените пресет на смешанную систему. В режиме «только ТП» секции радиаторов в отчёте не появляются.',
+  },
+] as const;
 
 /**
  * Предупреждение о низкой скорости в петле ТП (v &lt; 0.2 м/с).
@@ -53,6 +123,15 @@ export function isUfhSurfacePresetOverrideWarning(warning: string): boolean {
 }
 
 /**
+ * Предупреждение: отдача ТП не покрывает расчётные теплопотери комнаты.
+ *
+ * @param warning
+ */
+export function isUfhCoverageLowWarning(warning: string): boolean {
+  return COVERAGE_LOW_RE.test(warning);
+}
+
+/**
  * Убирает из списка комнаты строки, дублирующие warnings петель и агрегатные блоки.
  *
  * @param warnings
@@ -65,7 +144,8 @@ export function filterRoomWarningsExcludingLoops(
       !LOOP_WARNING_RE.test(w)
       && !ROOM_LOOP_WARNING_RE.test(w)
       && !isUfhParasiticDownWarning(w)
-      && !isUfhSurfacePresetOverrideWarning(w),
+      && !isUfhSurfacePresetOverrideWarning(w)
+      && !isUfhCoverageLowWarning(w),
   );
 }
 
@@ -87,6 +167,7 @@ export function filterGlobalWarningsExcludingStructured(
     if (isUfhParasiticDownWarning(w)) return false;
     if (isUfhMixingNodeWarning(w)) return false;
     if (isUfhSurfacePresetOverrideWarning(w)) return false;
+    if (isUfhCoverageLowWarning(w)) return false;
     return true;
   });
 }
@@ -148,6 +229,40 @@ export function collectSurfacePresetOverrideWarnings(
       if (!isUfhSurfacePresetOverrideWarning(w) || seen.has(w)) continue;
       seen.add(w);
       out.push(w);
+    }
+  }
+  return out;
+}
+
+/**
+ * Собирает уникальные тексты WARN «ТП не покрывает теплопотери».
+ * Источники: room.warnings и структурированные resolvedRecommendations.
+ *
+ * @param rooms
+ * @param resolvedRecommendations
+ */
+export function collectCoverageLowWarnings(
+  rooms: readonly { warnings: readonly string[] }[],
+  resolvedRecommendations: readonly { code: string; text: string }[] = [],
+): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  const push = (w: string) => {
+    if (!w || seen.has(w)) return;
+    seen.add(w);
+    out.push(w);
+  };
+  for (const room of rooms) {
+    for (const w of room.warnings) {
+      if (isUfhCoverageLowWarning(w)) push(w);
+    }
+  }
+  for (const r of resolvedRecommendations) {
+    if (
+      (UFH_COVERAGE_LOW_CODES as readonly string[]).includes(r.code)
+      || isUfhCoverageLowWarning(r.text)
+    ) {
+      push(r.text);
     }
   }
   return out;

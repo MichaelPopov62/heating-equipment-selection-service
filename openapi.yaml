@@ -745,12 +745,17 @@ components:
       $ref: ./components/schemas/RadiatorsProposalLineReport.yaml
     RadiatorsMatchingReport:
       $ref: ./components/schemas/RadiatorsMatchingReport.yaml
+    FinancialBomLine:
+      $ref: ./components/schemas/FinancialBomLine.yaml
+    CommercialBomReport:
+      $ref: ./components/schemas/CommercialBomReport.yaml
     CalcOkResponse:
       $ref: ./components/schemas/CalcOkResponse.yaml
     CalcReport:
       $ref: ./components/schemas/CalcReport.yaml
     CalcReportMeta:
       $ref: ./components/schemas/CalcReportMeta.yaml
+
     HotWaterReport:
       $ref: ./components/schemas/HotWaterReport.yaml
     HeatLossElementReport:

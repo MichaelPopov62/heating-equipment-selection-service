@@ -37,6 +37,8 @@ import { useSurveyStepNavigation } from './hooks/useSurveyStepNavigation';
 import { useSurveySession } from './surveySession/useSurveySession';
 import { surveyDraftToSessionSnapshot } from './surveySession/surveyDraftBridge';
 import { RecommendationsBlock } from './components/RecommendationsBlock/RecommendationsBlock';
+import { CatalogEquipmentReference } from './components/CatalogEquipmentReference/CatalogEquipmentReference';
+import { FinancialSummaryTable } from './components/FinancialSummary/FinancialSummaryTable';
 import {
   HOT_WATER_BOILER_MATCHING_SCHEME_ENUM,
   SCHEME_BOILER_MAX_COMBI,
@@ -329,6 +331,7 @@ export function AppSurveyContent({
     apiUnderfloorHeatingFromReport,
     apiUniboxesFromReport,
     apiHydraulicsFromReport,
+    apiCommercialBomFromReport,
     displayedRadiatorSectionsTotal,
     apiCatalogSource,
     apiAutomationHints,
@@ -336,6 +339,7 @@ export function AppSurveyContent({
     calcReport,
     isCalcMatchingScheme,
     quickEstimate.radiatorsSections,
+    ufhPresetId,
   );
 
   const applySurveyDraftState = useCallback(
@@ -698,6 +702,7 @@ export function AppSurveyContent({
                 thermalRegimeRecommendationHintText={
                   thermalRegimeRecommendationHintText
                 }
+                ufhOnlyMode={ufhPresetId === 'ufh_only'}
                 boilerMatching={apiBoilerFromReport}
                 objectType={objectMeta.objectType}
                 catalogSource={apiCatalogSource}
@@ -769,6 +774,52 @@ export function AppSurveyContent({
                 onBackToResults={() => {
                   navigateToResultsSection(RESULTS_SECTION_IDS.hydraulics);
                 }}
+              />
+            )}
+
+            {currentStep === 'technicalResult' && (
+              <RecommendationsBlock
+                quickEstimate={quickEstimate}
+                apiHeatLoss={apiHeatLoss}
+                apiHotWaterFromReport={apiHotWaterFromReport}
+                hotWaterFixtures={hotWaterForm.fixtures}
+                waterHeaterScheme={waterHeaterForm.hotWaterBoilerPowerMatchingScheme}
+                apiBoilerFromReport={apiBoilerFromReport}
+                apiBoilerKw={apiBoilerKw}
+                apiRadiatorsFromReport={apiRadiatorsFromReport}
+                apiIndirectWhFromReport={apiIndirectWhFromReport}
+                apiElectricWhFromReport={apiElectricWhFromReport}
+                apiUnderfloorHeatingFromReport={apiUnderfloorHeatingFromReport}
+                apiUniboxesFromReport={apiUniboxesFromReport}
+                displayedRadiatorSectionsTotal={displayedRadiatorSectionsTotal}
+                apiCatalogSource={apiCatalogSource}
+                apiAutomationHints={apiAutomationHints}
+                objectType={objectMeta.objectType}
+                onApplyScheme={handleWaterHeaterSchemeChange}
+                apiHydraulicsFromReport={apiHydraulicsFromReport}
+                calcLoading={calcLoading}
+                reportIsStale={reportIsStale}
+                uiPhase={uiPhase}
+                onNavigateToSurveyStep={navigateToSurveyStep}
+              />
+            )}
+
+            {currentStep === 'dataReference' && (
+              <CatalogEquipmentReference
+                snapshot={catalogSnap}
+                loading={catalogSnapLoading}
+                error={catalogSnapError}
+                onRetry={() => {
+                  void reloadCatalog();
+                }}
+              />
+            )}
+
+            {currentStep === 'financialResult' && (
+              <FinancialSummaryTable
+                commercial={apiCommercialBomFromReport}
+                calcLoading={calcLoading}
+                reportIsStale={reportIsStale}
               />
             )}
 
@@ -850,36 +901,6 @@ export function AppSurveyContent({
             </div>
           </section>
         </main>
-
-        <RecommendationsBlock
-          {...(styles.calculationResults ? { className: styles.calculationResults } : {})}
-          quickEstimate={quickEstimate}
-          apiHeatLoss={apiHeatLoss}
-          apiHotWaterFromReport={apiHotWaterFromReport}
-          hotWaterFixtures={hotWaterForm.fixtures}
-          waterHeaterScheme={waterHeaterForm.hotWaterBoilerPowerMatchingScheme}
-          apiBoilerFromReport={apiBoilerFromReport}
-          apiBoilerKw={apiBoilerKw}
-          apiRadiatorsFromReport={apiRadiatorsFromReport}
-          apiIndirectWhFromReport={apiIndirectWhFromReport}
-          apiElectricWhFromReport={apiElectricWhFromReport}
-          apiUnderfloorHeatingFromReport={apiUnderfloorHeatingFromReport}
-          apiUniboxesFromReport={apiUniboxesFromReport}
-          displayedRadiatorSectionsTotal={displayedRadiatorSectionsTotal}
-          apiCatalogSource={apiCatalogSource}
-          apiAutomationHints={apiAutomationHints}
-          objectType={objectMeta.objectType}
-          catalogSnap={catalogSnap}
-          catalogSnapLoading={catalogSnapLoading}
-          catalogSnapError={catalogSnapError}
-          onRetryLoadCatalog={() => void reloadCatalog()}
-          onApplyScheme={handleWaterHeaterSchemeChange}
-          apiHydraulicsFromReport={apiHydraulicsFromReport}
-          calcLoading={calcLoading}
-          reportIsStale={reportIsStale}
-          uiPhase={uiPhase}
-          onNavigateToSurveyStep={navigateToSurveyStep}
-        />
       </div>
 
       <Footer version={`v${__APP_VERSION__}`} />

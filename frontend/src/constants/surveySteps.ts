@@ -2,7 +2,8 @@
  * Назначение: порядок шагов анкеты (UI-навигация и валидация черновика).
  * Описание: SSOT для боковой навигации, migrateSurveyDraft и isSurveyStep.
  * Порядок: object → warmFloor → rooms → hotWater → boiler → radiators →
- * waterHeater → hydraulics → summary (ТП до помещений: флаг / ufhPresetId).
+ * waterHeater → hydraulics → technicalResult → dataReference → financialResult
+ * (ТП до помещений: флаг / ufhPresetId).
  */
 
 import type { SurveyCurrentStep } from '../types/surveyStep';
@@ -17,7 +18,9 @@ const SURVEY_STEP_NAV_LABELS: Record<SurveyCurrentStep, string> = {
   radiators: 'Радиаторы',
   waterHeater: 'Водонагреватель',
   hydraulics: 'Гидравлика',
-  summary: 'Итог',
+  technicalResult: 'Результат технический',
+  dataReference: 'Справочник данных',
+  financialResult: 'Итог финансовый',
 };
 
 /** Заголовок блока globalMeta; для шагов без записи — «Параметры объекта». */
@@ -29,6 +32,9 @@ const SURVEY_STEP_GLOBAL_META_TITLES: Partial<Record<SurveyCurrentStep, string>>
   waterHeater: 'Водонагреватель и сценарий ГВС',
   warmFloor: 'Тёплый пол и низкотемпературный контур',
   hydraulics: 'Гидравлика и разводка',
+  technicalResult: 'Технический результат расчёта',
+  dataReference: 'Справочник оборудования каталога',
+  financialResult: 'Итог финансовый по расчёту',
 };
 
 const DEFAULT_GLOBAL_META_TITLE = 'Параметры объекта';
@@ -43,7 +49,9 @@ export const SURVEY_STEPS: readonly SurveyCurrentStep[] = [
   'radiators',
   'waterHeater',
   'hydraulics',
-  'summary',
+  'technicalResult',
+  'dataReference',
+  'financialResult',
 ];
 
 /** Пункты боковой навигации (порядок = SURVEY_STEPS). */

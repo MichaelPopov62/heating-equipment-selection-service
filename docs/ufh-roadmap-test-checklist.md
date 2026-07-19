@@ -80,8 +80,9 @@
 
 - [ ] `heatingEmittersMode: ufh_only`, график котла 40/30
 - [ ] `isMixingNodeRequired` = **false** (котёл 40, контур ТП ≤ 40)
-- [ ] Радиаторы не подбираются
+- [ ] Радиаторы не подбираются (`skippedReason: ufh_only`); в UI нет черновых секций
 - [ ] `matching.boiler.requiredKw` от `totalHeatFluxUpWatts` (с запасом), не от envelope `heatLoss`
+- [ ] При дефиците покрытия — `WARN_UFH_COVERAGE_LOW_UFH_ONLY` (не «добавьте радиатор» первым шагом)
 
 ---
 
@@ -113,6 +114,7 @@
 - [ ] `requiredHeatFluxUpWm2` = Q_потерь / 5
 - [ ] `resolvedPipeSpacingMm` при необходимости &lt; `requestedPipeSpacingMm`
 - [ ] `WARN_UFH_ACTIVE_AREA_INSUFFICIENT` при q_треб &gt; maxAllowable
+- [ ] `WARN_UFH_COVERAGE_LOW` при `heatFluxCoverageRatio` &lt; 0.95: в UI блок + кнопка «Устранение предупреждения»; первый шаг — «Добавьте радиатор или конвектор»; в тексте WARN мощности в целых Вт
 - [ ] Длина петли `loopLengthM` ≈ `heatedAreaM2 / (resolvedPipeSpacingMm/1000) × layoutFactor / loopsCount` (layoutFactor=1.1; maxUfhLoopLengthM=80)
 - [ ] В отчёте комнаты есть `pipeMetersPerSqM` и `loopLengthLayoutFactor`
 - [ ] `ufhTerminalControl=unibox` при area≤20 → SKU в matching.uniboxes; коллектор без этого outlet

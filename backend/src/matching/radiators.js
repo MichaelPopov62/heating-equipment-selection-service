@@ -112,6 +112,7 @@ export function pickRadiatorsWithProposalLines({
       byRoom: [],
       emittersSummary: emptyRadiatorsEmittersSummary(),
       totalSections: null,
+      skippedReason: /** @type {'ufh_only'} */ ('ufh_only'),
       roomEmitterDiffs: [],
       warnings: [skipMsg],
       radiatorSelectionNotes: [],

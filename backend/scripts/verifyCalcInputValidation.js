@@ -94,6 +94,47 @@ assertThrowsCode(
   'legacy living больше не поддерживается → ROOM_TYPE_INVALID',
 );
 
+console.log('\n=== room.type normalization (trim / case / synonym) ===');
+
+{
+  const trimmed = validateAndNormalizeInput(
+    minimalBody({
+      type: /** @type {import('../src/types/shared-types.js').RoomType} */ (
+        /** @type {unknown} */ ('  гостиная  ')
+      ),
+    }),
+    ctx,
+  );
+  const room = assertDefined(trimmed.building?.rooms?.[0], 'trimmed.rooms[0]');
+  tally(logCheck(room.type === 'гостиная', 'trim spaces «  гостиная  » → гостиная'));
+}
+
+{
+  const upper = validateAndNormalizeInput(
+    minimalBody({
+      type: /** @type {import('../src/types/shared-types.js').RoomType} */ (
+        /** @type {unknown} */ ('ГОСТИНАЯ')
+      ),
+    }),
+    ctx,
+  );
+  const room = assertDefined(upper.building?.rooms?.[0], 'upper.rooms[0]');
+  tally(logCheck(room.type === 'гостиная', 'case «ГОСТИНАЯ» → гостиная'));
+}
+
+{
+  const synonym = validateAndNormalizeInput(
+    minimalBody({
+      type: /** @type {import('../src/types/shared-types.js').RoomType} */ (
+        /** @type {unknown} */ ('гостинная')
+      ),
+    }),
+    ctx,
+  );
+  const room = assertDefined(synonym.building?.rooms?.[0], 'synonym.rooms[0]');
+  tally(logCheck(room.type === 'гостиная', 'синоним «гостинная» → гостиная'));
+}
+
 console.log('\n=== AJV coerceTypes: false ===');
 
 assertThrowsCode(

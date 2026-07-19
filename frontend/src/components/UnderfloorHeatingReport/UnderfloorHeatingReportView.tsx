@@ -15,15 +15,20 @@ import {
 } from '../../utils/format';
 import { selectUfhZonePumps } from '../../utils/ufhHydraulicsPumps';
 import {
+  collectCoverageLowWarnings,
   collectLowVelocityLoopWarnings,
   collectParasiticDownWarnings,
   collectSurfacePresetOverrideWarnings,
   filterGlobalWarningsExcludingStructured,
   filterRoomWarningsExcludingLoops,
+  UFH_COVERAGE_LOW_CODES,
+  UFH_COVERAGE_LOW_RESOLUTION_STEPS_FALLBACK,
+  UFH_COVERAGE_LOW_UFH_ONLY_RESOLUTION_STEPS_FALLBACK,
+  UFH_SURFACE_PRESET_OVERRIDE_CODES,
+  UFH_WARN_COVERAGE_LOW_UFH_ONLY_CODE,
   UFH_WARN_LOW_VELOCITY_CODE,
   UFH_WARN_MIXING_NODE_CODE,
   UFH_WARN_PARASITIC_DOWN_CODE,
-  UFH_WARN_SURFACE_PRESET_OVERRIDE_CODE,
 } from '../../utils/ufhWarningDisplay';
 import { HydraulicsPumpCard } from '../HydraulicsProposal/HydraulicsPumpCard';
 import { UfhMixingNodeSpecCard } from './UfhMixingNodeSpecCard';
@@ -44,6 +49,7 @@ type ResolutionDialogKind =
   | 'parasitic'
   | 'mixing'
   | 'surfacePreset'
+  | 'coverage'
   | null;
 
 /**
@@ -94,9 +100,17 @@ export function UnderfloorHeatingReportView({
     () =>
       underfloorHeating.resolvedRecommendations.find(
         (r) =>
-          r.code === UFH_WARN_SURFACE_PRESET_OVERRIDE_CODE
+          (UFH_SURFACE_PRESET_OVERRIDE_CODES as readonly string[]).includes(r.code)
           && r.resolutionSteps != null
           && r.resolutionSteps.length > 0,
+      ) ?? null,
+    [underfloorHeating.resolvedRecommendations],
+  );
+
+  const coverageRec = useMemo(
+    () =>
+      underfloorHeating.resolvedRecommendations.find((r) =>
+        (UFH_COVERAGE_LOW_CODES as readonly string[]).includes(r.code),
       ) ?? null,
     [underfloorHeating.resolvedRecommendations],
   );
@@ -116,6 +130,15 @@ export function UnderfloorHeatingReportView({
     [underfloorHeating.rooms],
   );
 
+  const coverageWarnings = useMemo(
+    () =>
+      collectCoverageLowWarnings(
+        underfloorHeating.rooms,
+        underfloorHeating.resolvedRecommendations,
+      ),
+    [underfloorHeating.rooms, underfloorHeating.resolvedRecommendations],
+  );
+
   const structuredOther = useMemo(
     () =>
       underfloorHeating.resolvedRecommendations.filter(
@@ -123,7 +146,8 @@ export function UnderfloorHeatingReportView({
           r.code !== UFH_WARN_LOW_VELOCITY_CODE
           && r.code !== UFH_WARN_PARASITIC_DOWN_CODE
           && r.code !== UFH_WARN_MIXING_NODE_CODE
-          && r.code !== UFH_WARN_SURFACE_PRESET_OVERRIDE_CODE,
+          && !(UFH_SURFACE_PRESET_OVERRIDE_CODES as readonly string[]).includes(r.code)
+          && !(UFH_COVERAGE_LOW_CODES as readonly string[]).includes(r.code),
       ),
     [underfloorHeating.resolvedRecommendations],
   );
@@ -149,12 +173,20 @@ export function UnderfloorHeatingReportView({
   const parasiticSteps = parasiticRec?.resolutionSteps ?? [];
   const mixingSteps = mixingRec?.resolutionSteps ?? [];
   const surfacePresetSteps = surfacePresetRec?.resolutionSteps ?? [];
+  const coverageSteps: readonly ParsedUfhResolutionStep[] =
+    coverageRec?.resolutionSteps != null && coverageRec.resolutionSteps.length > 0
+      ? coverageRec.resolutionSteps
+      : coverageRec?.code === UFH_WARN_COVERAGE_LOW_UFH_ONLY_CODE
+        ? UFH_COVERAGE_LOW_UFH_ONLY_RESOLUTION_STEPS_FALLBACK
+        : UFH_COVERAGE_LOW_RESOLUTION_STEPS_FALLBACK;
   const showVelocityResolve =
     lowVelocityWarnings.length > 0 && velocitySteps.length > 0;
   const showParasiticResolve =
     parasiticWarnings.length > 0 && parasiticSteps.length > 0;
   const showSurfacePresetResolve =
     surfacePresetWarnings.length > 0 && surfacePresetSteps.length > 0;
+  /** Как у смесительного узла: при наличии WARN кнопка всегда (шаги из API или fallback). */
+  const showCoverageResolve = coverageWarnings.length > 0;
 
   const dialogSteps: readonly ParsedUfhResolutionStep[] =
     resolutionKind === 'parasitic'
@@ -165,7 +197,9 @@ export function UnderfloorHeatingReportView({
           ? mixingSteps
           : resolutionKind === 'surfacePreset'
             ? surfacePresetSteps
-            : [];
+            : resolutionKind === 'coverage'
+              ? coverageSteps
+              : [];
 
   return (
     <div>
@@ -187,7 +221,9 @@ export function UnderfloorHeatingReportView({
                 : ''}
           {underfloorHeating.isMixingNodeRequired
             ? ' · требуется смесительный узел'
-            : ''}
+            : underfloorHeating.circuitSource === 'ufh_mode_preset'
+              ? ' · смесительный узел не требуется (прямое подключение)'
+              : ''}
         </p>
       )}
 
@@ -452,6 +488,27 @@ export function UnderfloorHeatingReportView({
                   className={styles.resolveButton}
                   onClick={() => {
                     setResolutionKind('surfacePreset');
+                  }}
+                >
+                  Устранение предупреждения
+                </button>
+              )}
+            </div>
+          )}
+
+          {coverageWarnings.length > 0 && (
+            <div className={styles.velocityWarnBlock} role="status">
+              <ul className={styles.warningsList}>
+                {coverageWarnings.map((w, i) => (
+                  <li key={`ufh-coverage-${i}`}>{w}</li>
+                ))}
+              </ul>
+              {showCoverageResolve && (
+                <button
+                  type="button"
+                  className={styles.resolveButton}
+                  onClick={() => {
+                    setResolutionKind('coverage');
                   }}
                 >
                   Устранение предупреждения

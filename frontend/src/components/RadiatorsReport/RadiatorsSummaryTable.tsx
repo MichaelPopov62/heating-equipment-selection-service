@@ -1,5 +1,5 @@
 /**
- * Призначення: компактний підсумок радіаторів для сайдбара «Итог».
+ * Призначення: компактний підсумок радіаторів для сайдбару «Итог».
  * Опис: Ключові цифри; деталі — у модалці кроку «Радіатори».
  */
 
@@ -7,6 +7,7 @@ import {
   formatRadiatorsEmittersSummaryLabel,
   type ParsedRadiatorsMatching,
 } from '../../utils/parseRadiatorsMatchingFromReport';
+import { isRadiatorsMatchingSkipped } from '../../utils/radiatorsSkip';
 import { RESULTS_SECTION_IDS } from '../../constants/surveyResultsSections';
 import { SurveyStepLink } from '../SurveyNavigation/SurveyStepLink';
 import { hasRadiatorsReportContent } from './hasRadiatorsReportContent';
@@ -27,6 +28,26 @@ export function RadiatorsSummaryTable({
 }: RadiatorsSummaryTableProps) {
   if (!hasRadiatorsReportContent(radiators) || radiators == null) {
     return null;
+  }
+
+  if (isRadiatorsMatchingSkipped(radiators)) {
+    return (
+      <div
+        id={RESULTS_SECTION_IDS.radiators}
+        className={styles.wrap}
+        aria-labelledby="radiators-summary-title"
+      >
+        <h3 id="radiators-summary-title" className={styles.title}>
+          Радиаторы (итог)
+        </h3>
+        <p className={styles.hint}>
+          Режим «только тёплый пол» — подбор радиаторов не выполняется. Секции
+          приборов не требуются. Детали — на шаге{' '}
+          <SurveyStepLink step="radiators">«Радиаторы»</SurveyStepLink>
+          .
+        </p>
+      </div>
+    );
   }
 
   const emittersLabel = formatRadiatorsEmittersSummaryLabel(radiators.emittersSummary);

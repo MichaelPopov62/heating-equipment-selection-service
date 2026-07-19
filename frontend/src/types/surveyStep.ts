@@ -1,7 +1,7 @@
 /**
  * Назначение: Тип шагов мастера анкеты.
  * Описание: Union SurveyCurrentStep; порядок и навигация — constants/surveySteps.ts
- * (SURVEY_STEPS: object → warmFloor → rooms → … → summary).
+ * (SURVEY_STEPS: object → … → technicalResult → dataReference → financialResult).
  */
 
 export type SurveyCurrentStep =
@@ -13,4 +13,6 @@ export type SurveyCurrentStep =
   | 'radiators'
   | 'waterHeater'
   | 'hydraulics'
-  | 'summary';
+  | 'technicalResult'
+  | 'dataReference'
+  | 'financialResult';

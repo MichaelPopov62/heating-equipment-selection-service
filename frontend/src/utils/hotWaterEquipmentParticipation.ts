@@ -118,19 +118,20 @@ export function resolveHotWaterEquipmentRowLabel(args: {
 
   if (kind === 'electric') {
     const electric = matching as ParsedWaterHeaterMatching | null;
-    if (
-      !isHotWaterEquipmentSchemeParticipant(scheme, 'electric')
-      && (electric == null
-        || (electric.requiredTankLiters <= 0
-          && !electric.hasCatalogSelection
-          && electric.warnings.length === 0))
-    ) {
+    const schemeUsesElectric = isHotWaterEquipmentSchemeParticipant(
+      scheme,
+      'electric',
+    );
+    // Поза схемами з ЕВН показуємо ЕБ лише при реальному fallback (модель або warnings).
+    // «Голі» requiredTankLiters без підбору — не участь (баг дзеркала літрів при 1К+БКН).
+    const hasRealElectricMatch =
+      electric != null
+      && (electric.hasCatalogSelection || electric.warnings.length > 0);
+    if (!schemeUsesElectric && !hasRealElectricMatch) {
       return NOT_PARTICIPATING;
     }
     if (electric == null) {
-      return isHotWaterEquipmentSchemeParticipant(scheme, 'electric')
-        ? PENDING
-        : NOT_PARTICIPATING;
+      return schemeUsesElectric ? PENDING : NOT_PARTICIPATING;
     }
     return formatElectricMatchingLabel(electric);
   }

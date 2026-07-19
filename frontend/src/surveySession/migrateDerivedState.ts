@@ -88,6 +88,10 @@ export function migrateDerivedState(
       ...draft,
       ufhPresetId: mutation.presetId,
       waterUnderfloorHeating: true,
+      // Узгодження з normalizeHeatingUfhPreset: не лишати 75/65 у чернетці при ufh_only.
+      ...(mutation.presetId === 'ufh_only'
+        ? { thermalRegimePreset: 'condensing_dt30_55_45' as const }
+        : {}),
     };
     return {
       ...next,

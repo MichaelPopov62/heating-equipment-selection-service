@@ -56,7 +56,9 @@ export function normalizeHeatingSystemThermalRegime(body) {
 
   if (!isHeatingThermalRegimePresetId(hs.thermalRegimePreset)) {
     const objectType = body.building?.objectMeta?.objectType;
-    if (hs.heatingEmittersMode !== 'ufh_only' && !hs.ufhPresetId) {
+    const isUfhOnly =
+      hs.heatingEmittersMode === 'ufh_only' || hs.ufhPresetId === 'ufh_only';
+    if (!isUfhOnly) {
       hs.thermalRegimePreset = defaultThermalRegimePresetForMatchingScheme(
         hs.hotWaterBoilerPowerMatchingScheme,
         objectType,
@@ -64,6 +66,7 @@ export function normalizeHeatingSystemThermalRegime(body) {
     }
   }
 
+  // Подача/зворот з радіаторного пресета; для ufh_only їх перезапише normalizeHeatingUfhPreset (40/30).
   const regimePresetId = hs.thermalRegimePreset;
   if (regimePresetId != null && isHeatingThermalRegimePresetId(regimePresetId)) {
     const p = HEATING_THERMAL_REGIME_PRESETS[regimePresetId];
@@ -104,11 +107,19 @@ function formatHeatingGraphLabel(hs) {
 
 /**
  * Высокотемпературный график (не подходит для устойчивой конденсации).
+ * Фактические supplyC/returnC приоритетнее лейбла thermalRegimePreset
+ * (после ufh_only нормализация пишет 40/30, пресет может ещё не совпадать).
  * @param {import('../types/shared-types.js').HeatingSystemInput | undefined} hs
  * @returns {boolean}
  */
 export function isHighTemperatureHeatingGraph(hs) {
   if (!hs || typeof hs !== 'object') return false;
+  const supply = Number(hs.supplyC);
+  const ret = Number(hs.returnC);
+  if (Number.isFinite(supply) && Number.isFinite(ret)) {
+    if (ret < 55 && supply < 65) return false;
+    if (ret >= 55 || supply >= 65) return true;
+  }
   if (hs.thermalRegimePreset === 'condensing_dt30_55_45') return false;
   if (
     hs.thermalRegimePreset === 'traditional_dt50_75_65' ||
@@ -116,8 +127,6 @@ export function isHighTemperatureHeatingGraph(hs) {
   ) {
     return true;
   }
-  const supply = Number(hs.supplyC);
-  const ret = Number(hs.returnC);
   if (Number.isFinite(ret) && ret >= 55) return true;
   if (Number.isFinite(supply) && supply >= 65) return true;
   return false;

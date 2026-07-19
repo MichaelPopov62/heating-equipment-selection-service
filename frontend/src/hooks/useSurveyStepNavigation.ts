@@ -1,5 +1,5 @@
 /**
- * Назначение: Навигация по шагам анкеты и к секциям сайдбара «Результаты».
+ * Назначение: Навигация по шагам анкеты и к секциям «Результат технический».
  * Описание: Переключение шага + прокрутка к форме; scroll к якорю итогов (ТП / ГВ / ВН).
  */
 
@@ -15,6 +15,17 @@ type UseSurveyStepNavigationParams = {
 };
 
 /**
+ * После смены шага ждём два кадра отрисовки, чтобы якоря technicalResult были в DOM.
+ *
+ * @param fn
+ */
+function afterNextPaint(fn: () => void): void {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(fn);
+  });
+}
+
+/**
  * @param params
  */
 export function useSurveyStepNavigation({
@@ -25,7 +36,7 @@ export function useSurveyStepNavigation({
   const navigateToSurveyStep = useCallback(
     (step: SurveyCurrentStep) => {
       setCurrentStep(step);
-      requestAnimationFrame(() => {
+      afterNextPaint(() => {
         mainColumnRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     },
@@ -33,17 +44,20 @@ export function useSurveyStepNavigation({
   );
 
   /**
-   * Прокрутка к секции в сайдбаре «Результаты» (кнопка «Назад к результатам»).
-   * Если секции ещё нет в DOM — к заголовку блока результатов.
+   * Переход на шаг «Результат технический» и прокрутка к секции
+   * (кнопка «Назад к результатам»). Если секции ещё нет — к заголовку блока.
+   *
+   * @param sectionId
    */
   const navigateToResultsSection = useCallback((sectionId: ResultsSectionId) => {
-    requestAnimationFrame(() => {
+    setCurrentStep('technicalResult');
+    afterNextPaint(() => {
       const el =
         document.getElementById(sectionId)
         ?? document.getElementById(RESULTS_ROOT_ID);
       el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
-  }, []);
+  }, [setCurrentStep]);
 
   return { mainColumnRef, navigateToSurveyStep, navigateToResultsSection };
 }

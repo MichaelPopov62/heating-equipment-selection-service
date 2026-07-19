@@ -1,6 +1,8 @@
 /**
- * Назначение: боковая панель рекомендаций по расчёту.
- * Описание: теплопотери, ГВ, ТП, summary; в «Рекомендация» — котёл, радиаторы, трубы.
+ * Назначение: блок технического результата расчёта (шаг анкеты technicalResult).
+ * Описание: теплопотери (таблица), ГВ, ТП, summary; в «Рекомендация» — котёл, радиаторы, трубы.
+ * Справочник каталога — шаг анкеты «Справочник данных» (CatalogEquipmentReference).
+ * Финансовый итог — шаг «Итог финансовый» (FinancialSummaryTable / report.commercial).
  */
 
 import type { MouseEvent } from 'react';
@@ -8,25 +10,22 @@ import type { RecommendationsBlockProps } from '../../types/recommendationsBlock
 import { isSurveyStep } from '../../constants/surveySteps';
 import { SCHEME_BOILER_MAX_COMBI } from '../../types/heatingMatching';
 import { getBoilerUiLabels } from '../../utils/boilerUiLabels';
-import {
-  formatAreaM2,
-  formatKw,
-} from '../../utils/format';
 import { BoilerProposalCard } from '../BoilerProposalCard/BoilerProposalCard';
 import { RadiatorProposalLineTable } from '../RadiatorProposalLineTable/RadiatorProposalLineTable';
-import { CatalogEquipmentReference } from '../CatalogEquipmentReference/CatalogEquipmentReference';
 import { UnderfloorHeatingSummaryTable } from '../UnderfloorHeatingReport/UnderfloorHeatingSummaryTable';
 import { HotWaterFixturesSummaryTable } from '../HotWaterReport/HotWaterFixturesSummaryTable';
 import { HotWaterSummaryTable } from '../HotWaterReport/HotWaterSummaryTable';
 import { hasHotWaterSummaryContent } from '../HotWaterReport/hasHotWaterSummaryContent';
 import { hasHotWaterFixturesContent } from '../../utils/countThermalFixtures';
 import { hasRadiatorsReportContent } from '../RadiatorsReport/hasRadiatorsReportContent';
+import { isRadiatorsMatchingSkipped } from '../../utils/radiatorsSkip';
 import { RadiatorsSummaryTable } from '../RadiatorsReport/RadiatorsSummaryTable';
 import { hasBoilerReportContent } from '../BoilerReport/hasBoilerReportContent';
 import { BoilerSummaryTable } from '../BoilerReport/BoilerSummaryTable';
 import { hasHydraulicsReportContent } from '../HydraulicsReport/hasHydraulicsReportContent';
 import { HydraulicsSummaryTable } from '../HydraulicsReport/HydraulicsSummaryTable';
 import { HydraulicsProposalTable } from '../HydraulicsReport/HydraulicsProposalTable';
+import { HeatLossSummaryTable } from '../HeatLossReport/HeatLossSummaryTable';
 import styles from './RecommendationsBlock.module.css';
 
 /**
@@ -67,10 +66,6 @@ export function RecommendationsBlock({
   apiCatalogSource,
   apiAutomationHints,
   objectType,
-  catalogSnap,
-  catalogSnapLoading,
-  catalogSnapError,
-  onRetryLoadCatalog,
   onApplyScheme,
   apiHydraulicsFromReport,
   calcLoading = false,
@@ -80,7 +75,7 @@ export function RecommendationsBlock({
 }: RecommendationsBlockProps) {
   const showRecalculating = calcLoading || reportIsStale || uiPhase === 'recalculating';
   return (
-    <aside className={[styles.root, className].filter(Boolean).join(' ')}>
+    <div className={[styles.root, className].filter(Boolean).join(' ')}>
       <section
         aria-labelledby="calculation-results-title"
         onClick={(e) => { handleSummaryNavigateClick(e, onNavigateToSurveyStep); }}
@@ -128,35 +123,11 @@ export function RecommendationsBlock({
         )}
 
         {/* Группа: Отопление */}
-        <div className={styles.summaryGroup} aria-labelledby="heating-loss-title">
-          <h3 id="heating-loss-title">Теплопотери</h3>
-          <div className={styles.hint} style={{ marginBottom: 8 }}>
-            {apiHeatLoss
-              ? 'Источник: расчёт API по ограждениям'
-              : 'Источник: быстрая оценка (100 Вт/м²)'}
-          </div>
-          <dl>
-            <dt>Общая площадь помещений</dt>
-            <dd>{formatAreaM2(quickEstimate.totalAreaM2)} <span>м²</span></dd>
-
-            <dt>Мощность помещений</dt>
-            <dd>
-              {formatKw(apiHeatLoss?.heatLossKw ?? quickEstimate.heatLossKw, 1)}{' '}
-              <span>кВт</span>
-            </dd>
-
-            <dt>Запас (15%)</dt>
-            <dd>
-              {formatKw(apiHeatLoss?.reserveKw ?? quickEstimate.reserveKw, 1)}{' '}
-              <span>кВт</span>
-            </dd>
-
-            <dt className={styles.totalLabel}>Итого по теплу</dt>
-            <dd className={styles.totalValue}>
-              {formatKw(apiHeatLoss?.totalHeatKw ?? quickEstimate.totalHeatKw, 1)}{' '}
-              <span>кВт</span>
-            </dd>
-          </dl>
+        <div className={styles.summaryGroup}>
+          <HeatLossSummaryTable
+            apiHeatLoss={apiHeatLoss}
+            quickEstimate={quickEstimate}
+          />
         </div>
 
         {hasHotWaterFixturesContent(hotWaterFixtures) && (
@@ -266,6 +237,7 @@ export function RecommendationsBlock({
           )}
 
           {apiRadiatorsFromReport != null
+            && !isRadiatorsMatchingSkipped(apiRadiatorsFromReport)
             && (apiRadiatorsFromReport.lineEconomy != null
               || apiRadiatorsFromReport.lineEfficient != null) && (
             <div className={styles.radiatorsRecBlock}>
@@ -285,18 +257,17 @@ export function RecommendationsBlock({
             </div>
           )}
 
+          {isRadiatorsMatchingSkipped(apiRadiatorsFromReport) && (
+            <p className={styles.hint} role="status">
+              Радиаторы по вариантам не подбираются: режим «только тёплый пол».
+            </p>
+          )}
+
           <HydraulicsProposalTable
             hydraulics={apiHydraulicsFromReport ?? null}
           />
         </div>
-
-        <CatalogEquipmentReference
-          snapshot={catalogSnap}
-          loading={catalogSnapLoading}
-          error={catalogSnapError}
-          onRetry={onRetryLoadCatalog}
-        />
       </section>
-    </aside>
+    </div>
   );
 }

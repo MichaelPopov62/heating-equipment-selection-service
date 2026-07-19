@@ -103,7 +103,13 @@ export function UnderfloorHeatingSummaryTable({
               </tr>
               <tr>
                 <td>Смесительный узел</td>
-                <td>{underfloorHeating.isMixingNodeRequired ? 'требуется' : 'не требуется'}</td>
+                <td>
+                  {underfloorHeating.isMixingNodeRequired
+                    ? 'требуется'
+                    : underfloorHeating.circuitSource === 'ufh_mode_preset'
+                      ? 'не требуется (прямое подключение, котёл 40/30)'
+                      : 'не требуется'}
+                </td>
               </tr>
               <tr>
                 <td>Насос контура ТП</td>

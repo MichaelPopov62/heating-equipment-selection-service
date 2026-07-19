@@ -93,3 +93,11 @@ properties:
   emitterKindDecisionNotes:
     type: array
     items: { type: string }
+  skippedReason:
+    type: string
+    nullable: true
+    enum: [ufh_only]
+    description: >-
+      Підбір радіаторів не виконувався (режим «тільки ТП»). byRoom порожній;
+      цифри секцій / emittersSummary не є результатом matching — UI не повинен
+      підставляти чернеткову оцінку секцій.

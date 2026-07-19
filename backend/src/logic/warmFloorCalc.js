@@ -300,10 +300,12 @@ export function calculateUnderfloorHeating(args) {
   }
 
   let mixingRequired = false;
-  if (modePreset?.technical.hasMixingNode === false) {
+  const mixingForcedOffByPreset =
+    modePreset != null && modePreset.technical.hasMixingNode === false;
+  if (modePreset != null && modePreset.technical.hasMixingNode === false) {
     if (roomReports.length > 0) {
       globalWarnings.push(
-        `Смесительный узел не требуется по пресету режима ТП «${modePreset.ui.title}» (прямое подключение).`,
+        `Смесительный узел не требуется по пресету режима ТП «${modePreset.ui.title}» (прямое подключение, котёл ${boilerSupplyC ?? '—'} °C).`,
       );
     }
   } else {
@@ -326,7 +328,11 @@ export function calculateUnderfloorHeating(args) {
       `Требуется насосно-смесительный узел: подача котла ${boilerSupplyC ?? '—'} °C выше температуры контура ТП ` +
         `(по комнатам ${roomReports.map((r) => `${r.circuitSupplyC}/${r.circuitReturnC}`).join(', ')} °C).`,
     );
-  } else if (roomReports.length > 0 && typeof boilerSupplyC === 'number') {
+  } else if (
+    !mixingForcedOffByPreset &&
+    roomReports.length > 0 &&
+    typeof boilerSupplyC === 'number'
+  ) {
     globalWarnings.push(
       `Смесительный узел не требуется: подача котла ${boilerSupplyC} °C не выше подачи контура ТП.`,
     );
