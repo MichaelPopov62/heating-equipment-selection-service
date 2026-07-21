@@ -1,58 +1,30 @@
 /**
- * Назначение: начальное состояние сессии анкеты.
+ * Назначение: пустое состояние сессии для cold open (Start State).
  */
 
 import { DEFAULT_HYDRAULICS_FORM } from '../types/hydraulics';
 import { createDefaultWaterHeaterFormValue } from '../utils/waterHeaterFormDefaults';
 import { createDefaultHotWaterFormValue } from '../utils/hotWaterFormDefaults';
-import { migrateLegacyRoomTypes } from '../utils/migrateLegacyRoomTypes';
-import {
-  createDefaultExternalWall,
-  migrateRoomEnvelopeFields,
-} from '../utils/roomEnvelopeFields';
-import { createDefaultWindowFormValue } from '../utils/roomWindowDefaults';
 import { recommendedThermalRegimePresetForScheme } from '../types/heatingThermalRegime';
 import { DEFAULT_RADIATOR_CONNECTION } from '../types/radiatorConnection';
 import { DEFAULT_RADIATOR_EMITTER_PREFERENCE } from '../types/radiatorEmitterPreference';
 import { buildCalcInputKeyFromDraft } from './buildCalcInputSnapshot';
 import { createInitialDraftSnapshot } from './migrateDerivedState';
-import { adaptFlatRoomsToWiringLayout } from './wiringLayoutV3';
-import type { SurveySessionState } from './types';
+import type { SurveyDraftSnapshot, SurveySessionState } from './types';
 
 /**
- * @returns {SurveySessionState}
+ * Минимальный snapshot без комнат — calc и persist не активны.
+ *
+ * @returns {SurveyDraftSnapshot}
  */
-export function createInitialSurveySessionState(): SurveySessionState {
+export function createEmptySurveyDraftSnapshot(): SurveyDraftSnapshot {
   const waterHeaterForm = createDefaultWaterHeaterFormValue();
   const thermalRegimePreset = recommendedThermalRegimePresetForScheme(
     waterHeaterForm.hotWaterBoilerPowerMatchingScheme,
     'house',
   );
 
-  const initialRooms = migrateRoomEnvelopeFields(
-      migrateLegacyRoomTypes([
-        {
-          id: 'r1',
-          name: 'Комната 1',
-          type: 'помещение',
-          floor: 1,
-          topBoundaryType: 'heated',
-          bottomBoundaryType: 'unheated',
-          areaM2: '',
-          heightM: 2.7,
-          floorPresetId: '',
-          ceilingPresetId: '',
-          roofPresetId: '',
-          externalWall1: createDefaultExternalWall(),
-          externalWall2: createDefaultExternalWall(),
-          ceilingAreaM2: '',
-          roofAreaM2: '',
-          windows: [createDefaultWindowFormValue('r1', 1)],
-        },
-      ]),
-    );
-
-  const draft = createInitialDraftSnapshot({
+  return createInitialDraftSnapshot({
     objectMeta: {
       objectType: 'house',
       apartmentStackPosition: 'middle_floor',
@@ -67,16 +39,21 @@ export function createInitialSurveySessionState(): SurveySessionState {
       boilerPlacementZone: 'kitchen',
       ventilationReserveMode: 'natural',
     },
-    rooms: initialRooms,
+    rooms: [],
     hotWaterForm: createDefaultHotWaterFormValue(),
     waterHeaterForm,
     thermalRegimePreset,
     radiatorConnection: DEFAULT_RADIATOR_CONNECTION,
     radiatorEmitterPreference: DEFAULT_RADIATOR_EMITTER_PREFERENCE,
     hydraulicsForm: { ...DEFAULT_HYDRAULICS_FORM },
-    wiringLayoutV3: adaptFlatRoomsToWiringLayout(initialRooms, 'auto'),
   });
+}
 
+/**
+ * @returns {SurveySessionState}
+ */
+export function createEmptySurveySessionState(): SurveySessionState {
+  const draft = createEmptySurveyDraftSnapshot();
   const calcInputKey = buildCalcInputKeyFromDraft(draft);
 
   return {

@@ -10,7 +10,7 @@
     "lint": "eslint \"src/**/*.js\" \"scripts/**/*.js\"",
     "lint:fix": "eslint \"src/**/*.js\" \"scripts/**/*.js\" --fix",
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty",
-    "verify": "npm run lint && npm run typecheck && npm run verify:calc-schema && npm run verify:calc-input-validation && npm run verify:seed-catalog && npm run verify:pipe-catalog && npm run verify:ufh-presets && npm run verify:radiator-sections && npm run verify:radiator-emitters && npm run verify:radiator-connection && npm run verify:radiator-emitter-kind && npm run verify:mixed-radiator-ufh && npm run verify:micro-load-radiator && npm run verify:reference-cache-invalidate && npm run verify:calc-runtime-context && npm run verify:project-calc-input && npm run verify:document-size-limits && npm run verify:extract-calculation-summary && npm run verify:projects-auth && npm run verify:water-heater-form && npm run verify:survey-draft-migration && npm run verify:hydraulics-pipeline && npm run verify:pick-pipe && npm run verify:pipe-catalog-pool-filter && npm run verify:circulation-flows && npm run verify:flow-delta-tk && npm run verify:builtin-boiler-pump && npm run verify:fit-pump-curve && npm run verify:pump-duty && npm run verify:ufh-loop-hydraulics && npm run verify:ufh-active-area && npm run verify:radiator-wiring-graph && npm run verify:manifold-matching && npm run verify:unibox-matching && npm run verify:room-design-air-temp && npm run verify:financial-bom",
+    "verify": "npm run lint && npm run typecheck && npm run verify:calc-schema && npm run verify:calc-input-validation && npm run verify:seed-catalog && npm run verify:pipe-catalog && npm run verify:ufh-presets && npm run verify:radiator-sections && npm run verify:radiator-emitters && npm run verify:radiator-connection && npm run verify:radiator-emitter-kind && npm run verify:mixed-radiator-ufh && npm run verify:micro-load-radiator && npm run verify:reference-cache-invalidate && npm run verify:calc-runtime-context && npm run verify:project-calc-input && npm run verify:document-size-limits && npm run verify:extract-calculation-summary && npm run verify:projects-auth && npm run verify:project-share && npm run verify:project-pdf && npm run verify:water-heater-form && npm run verify:survey-draft-migration && npm run verify:hydraulics-pipeline && npm run verify:pick-pipe && npm run verify:pipe-catalog-pool-filter && npm run verify:circulation-flows && npm run verify:flow-delta-tk && npm run verify:builtin-boiler-pump && npm run verify:fit-pump-curve && npm run verify:pump-duty && npm run verify:ufh-loop-hydraulics && npm run verify:ufh-active-area && npm run verify:radiator-wiring-graph && npm run verify:manifold-matching && npm run verify:unibox-matching && npm run verify:room-design-air-temp && npm run verify:financial-bom",
     "verify:calc-schema": "node scripts/verifyCalcInputSchema.js",
     "verify:calc-input-validation": "node scripts/verifyCalcInputValidation.js",
     "verify:seed-catalog": "node scripts/verifySeedCatalog.js",
@@ -28,6 +28,8 @@
     "verify:document-size-limits": "node scripts/verifyDocumentSizeLimits.js",
     "verify:extract-calculation-summary": "node scripts/verifyExtractCalculationSummary.js",
     "verify:projects-auth": "node scripts/verifyProjectsAuth.js",
+    "verify:project-share": "node scripts/verifyProjectShare.js",
+    "verify:project-pdf": "node scripts/verifyProjectPdf.js",
     "verify:water-heater-form": "node scripts/verifyWaterHeaterFormUtils.js",
     "verify:survey-draft-migration": "node scripts/verifySurveyDraftMigration.js",
     "verify:hydraulics-pipeline": "node scripts/verifyHydraulicsPipeline.js",
@@ -73,6 +75,8 @@
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.2.0",
     "jose": "^6.0.11",
-    "mongoose": "^9.5.0"
+    "mongoose": "^9.5.0",
+    "puppeteer": "^24.22.0",
+    "puppeteer-core": "^24.22.0"
   }
 }

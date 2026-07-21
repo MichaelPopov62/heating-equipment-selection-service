@@ -1,0 +1,18 @@
+type: object
+required: [ok, shareToken, sharePublishedAt, publicPath, project]
+properties:
+  ok:
+    type: boolean
+    enum: [true]
+  shareToken:
+    type: string
+    description: Непрозрачный токен публичной ссылки (не Mongo ObjectId).
+  sharePublishedAt:
+    type: string
+    format: date-time
+  publicPath:
+    type: string
+    description: Путь вида /s/{shareToken} для клиентского UI.
+    example: /s/xYz...
+  project:
+    $ref: ProjectDetail.yaml

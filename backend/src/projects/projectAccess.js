@@ -12,7 +12,7 @@ import {
 
 /**
  * @param {string} ownerSub
- * @returns {Record<string, unknown>}
+ * @returns {import('mongoose').QueryFilter<import('../types/shared-types.js').ProjectMongoDoc>}
  */
 export function buildProjectOwnerFilter(ownerSub) {
   if (!isProjectsAuthRequired()) {
@@ -34,7 +34,7 @@ export function buildProjectOwnerFilter(ownerSub) {
 /**
  * @param {import('mongoose').Types.ObjectId} projectId
  * @param {string} ownerSub
- * @returns {Promise<Record<string, unknown> | null>}
+ * @returns {Promise<import('../types/shared-types.js').ProjectMongoDoc | null>}
  */
 export async function findOwnedProjectLean(projectId, ownerSub) {
   return Project.findOne({ _id: projectId, ...buildProjectOwnerFilter(ownerSub) }).lean();
@@ -43,7 +43,7 @@ export async function findOwnedProjectLean(projectId, ownerSub) {
 /**
  * @param {import('mongoose').Types.ObjectId} projectId
  * @param {string} ownerSub
- * @returns {Promise<import('mongoose').Document | null>}
+ * @returns {Promise<import('mongoose').HydratedDocument<import('../types/shared-types.js').ProjectMongoDoc> | null>}
  */
 export async function findOwnedProjectDoc(projectId, ownerSub) {
   return Project.findOne({ _id: projectId, ...buildProjectOwnerFilter(ownerSub) });

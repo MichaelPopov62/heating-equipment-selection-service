@@ -636,6 +636,212 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
+  /api/v1/projects/{id}/pdf:
+    get:
+      summary: Download project estimate PDF
+      description: >
+        Серверная генерация PDF (Chromium). Источник — последний сохранённый расчёт.
+        Без window.open на клиенте. Query includeTechnical=1 добавляет техблок.
+      operationId: downloadProjectPdf
+      security:
+        - ProjectsBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: includeTechnical
+          in: query
+          required: false
+          schema: { type: string, enum: ["0", "1", "true", "false"] }
+      responses:
+        "200":
+          description: PDF file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: PDF_REPORT_REQUIRED / PDF_COMMERCIAL_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: PROJECT_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: PDF_BROWSER_MISSING / PDF_RENDER_TIMEOUT / MongoDB
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/projects/{id}/share:
+    post:
+      summary: Publish or refresh public share link for a project
+      description: >
+        Создаёт shareToken (если ещё нет) и сохраняет immutable whitelist-снимок
+        последнего или указанного расчёта. Без JWT клиенту недоступно.
+      operationId: publishProjectShare
+      security:
+        - ProjectsBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectSharePublishBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectSharePublishResponse"
+        "400":
+          description: SHARE_REPORT_REQUIRED / SHARE_COMMERCIAL_REQUIRED / VALIDATION_ERROR
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: PROJECT_NOT_FOUND / CALCULATION_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB недоступна
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    delete:
+      summary: Revoke public share link
+      operationId: revokeProjectShare
+      security:
+        - ProjectsBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectShareRevokeResponse"
+        "404":
+          description: PROJECT_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB недоступна
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/public/shares/{shareToken}:
+    get:
+      summary: Get public read-only share presentation
+      description: >
+        Без JWT. Возвращает только whitelist сметы/оборудования. Не отдаёт survey,
+        lastCalcInput, ownerId. Только GET.
+      operationId: getPublicShare
+      parameters:
+        - name: shareToken
+          in: path
+          required: true
+          schema: { type: string, minLength: 16, maxLength: 128 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicShareResponse"
+        "404":
+          description: SHARE_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: PUBLIC_SHARE_RATE_LIMIT_EXCEEDED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB недоступна
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/public/shares/{shareToken}/pdf:
+    get:
+      summary: Download public share estimate PDF
+      description: >
+        Без JWT. PDF только из shareSnapshot. Rate limit как у GET share.
+      operationId: downloadPublicSharePdf
+      parameters:
+        - name: shareToken
+          in: path
+          required: true
+          schema: { type: string, minLength: 16, maxLength: 128 }
+        - name: includeTechnical
+          in: query
+          required: false
+          schema: { type: string, enum: ["0", "1", "true", "false"] }
+      responses:
+        "200":
+          description: PDF file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: PDF_COMMERCIAL_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: SHARE_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: PUBLIC_SHARE_RATE_LIMIT_EXCEEDED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: PDF_BROWSER_MISSING / PDF_RENDER_TIMEOUT / MongoDB
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
   /api/v1/projects/{projectId}/calculations/{calcId}:
     get:
       summary: Get saved calculation with full report
@@ -830,3 +1036,15 @@ components:
       $ref: ./components/schemas/CalculationsListResponse.yaml
     CalculationGetResponse:
       $ref: ./components/schemas/CalculationGetResponse.yaml
+    ProjectSharePublishBody:
+      $ref: ./components/schemas/ProjectSharePublishBody.yaml
+    ProjectSharePublishResponse:
+      $ref: ./components/schemas/ProjectSharePublishResponse.yaml
+    ProjectShareRevokeResponse:
+      $ref: ./components/schemas/ProjectShareRevokeResponse.yaml
+    ProjectShareSnapshot:
+      $ref: ./components/schemas/ProjectShareSnapshot.yaml
+    PublicSharePayload:
+      $ref: ./components/schemas/PublicSharePayload.yaml
+    PublicShareResponse:
+      $ref: ./components/schemas/PublicShareResponse.yaml

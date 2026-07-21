@@ -9,10 +9,16 @@ import type {
   ProjectCalcResponse,
   ProjectCreateResponse,
   ProjectGetResponse,
+  ProjectSharePublishResponse,
+  ProjectShareRevokeResponse,
   ProjectsListResponse,
 } from '../types/projectsApi';
 import type { SurveyDraft } from '../types/surveyDraft';
 import { parseApiErrorMessage } from '../utils/apiError';
+import {
+  downloadBlobFile,
+  filenameFromContentDisposition,
+} from '../utils/downloadBlobFile';
 import { isRecord } from '../utils/jsonGuards';
 import { getProjectsAuthHeaders } from './projectsAuthHeaders';
 
@@ -162,4 +168,80 @@ export async function getProjectCalculation(
     throw new Error('Некорректный ответ расчёта');
   }
   return data as CalculationGetResponse;
+}
+
+/**
+ * Публикация / обновление публичной ссылки (owner JWT).
+ *
+ * @param projectId
+ * @param body
+ */
+export async function publishProjectShare(
+  projectId: string,
+  body?: { calculationId?: string },
+): Promise<ProjectSharePublishResponse> {
+  const res = await fetch(`/api/v1/projects/${encodeURIComponent(projectId)}/share`, {
+    method: 'POST',
+    headers: projectsFetchHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(body ?? {}),
+  });
+  const data = await parseJson(res);
+  if (!res.ok) {
+    throw new Error(parseApiErrorMessage(data, `Ошибка API: HTTP ${res.status}`));
+  }
+  if (!isRecord(data) || data.ok !== true || typeof data.shareToken !== 'string') {
+    throw new Error('Некорректный ответ публикации ссылки');
+  }
+  return data as ProjectSharePublishResponse;
+}
+
+/**
+ * Отзыв публичной ссылки.
+ *
+ * @param projectId
+ */
+export async function revokeProjectShare(
+  projectId: string,
+): Promise<ProjectShareRevokeResponse> {
+  const res = await fetch(`/api/v1/projects/${encodeURIComponent(projectId)}/share`, {
+    method: 'DELETE',
+    headers: projectsFetchHeaders(),
+  });
+  const data = await parseJson(res);
+  if (!res.ok) {
+    throw new Error(parseApiErrorMessage(data, `Ошибка API: HTTP ${res.status}`));
+  }
+  if (!isRecord(data) || data.ok !== true) {
+    throw new Error('Некорректный ответ отзыва ссылки');
+  }
+  return data as ProjectShareRevokeResponse;
+}
+
+/**
+ * Скачать PDF сметы проекта (серверная генерация).
+ *
+ * @param projectId
+ * @param opts
+ */
+export async function downloadProjectPdf(
+  projectId: string,
+  opts?: { includeTechnical?: boolean },
+): Promise<void> {
+  const q = new URLSearchParams();
+  if (opts?.includeTechnical) q.set('includeTechnical', '1');
+  const qs = q.toString();
+  const res = await fetch(
+    `/api/v1/projects/${encodeURIComponent(projectId)}/pdf${qs ? `?${qs}` : ''}`,
+    { headers: projectsFetchHeaders({ Accept: 'application/pdf' }) },
+  );
+  if (!res.ok) {
+    const data = await parseJson(res);
+    throw new Error(parseApiErrorMessage(data, `Не удалось скачать PDF: HTTP ${res.status}`));
+  }
+  const blob = await res.blob();
+  const filename = filenameFromContentDisposition(
+    res.headers.get('Content-Disposition'),
+    `Смета_${projectId}.pdf`,
+  );
+  downloadBlobFile(blob, filename);
 }

@@ -1,0 +1,8 @@
+type: object
+required: [ok, share]
+properties:
+  ok:
+    type: boolean
+    enum: [true]
+  share:
+    $ref: PublicSharePayload.yaml

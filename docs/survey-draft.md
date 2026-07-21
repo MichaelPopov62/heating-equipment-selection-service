@@ -1,5 +1,14 @@
 # Survey draft (черновик анкеты)
 
+## Start State vs DRAFT_LOADED
+
+См. [`start-state.md`](start-state.md).
+
+- Cold open → `SESSION_RESET` → Start Screen (без persist, без calc).
+- Hash / localStorage / file / project → `DRAFT_LOADED` → режим `survey`.
+- «Начать новый расчёт» → `SURVEY_STARTED` → дефолтный draft из `createDefaultSurveyDraft.ts`.
+- Локальный ключ: `heatcalc:survey-draft:v1` (`surveyDraftStorage.ts`).
+
 ## SSOT
 
 - `frontend/src/types/surveyDraft.ts` — `SURVEY_DRAFT_SCHEMA_VERSION` (**4**), тип `SurveyDraft`

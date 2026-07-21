@@ -28,6 +28,14 @@ export function decideCalcAction(
     return canAutoCalcFromDraft(next.draft) ? 'schedule' : 'none';
   }
 
+  if (mutation.type === 'SESSION_RESET') {
+    return 'abort_only';
+  }
+
+  if (mutation.type === 'SURVEY_STARTED') {
+    return 'none';
+  }
+
   const keyChanged = prev.calcInputKey !== next.calcInputKey;
   const canAuto = canAutoCalcFromDraft(next.draft);
   const wasCanAuto = canAutoCalcFromDraft(prev.draft);

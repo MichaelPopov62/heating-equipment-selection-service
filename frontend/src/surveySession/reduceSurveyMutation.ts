@@ -3,6 +3,8 @@
  */
 
 import type { SurveyDraftSnapshot, SurveyMutation } from './types';
+import { createDefaultSurveyDraftSnapshot } from './createDefaultSurveyDraft';
+import { createEmptySurveyDraftSnapshot } from './createEmptySurveySessionState';
 import { normalizeHotWaterForm } from '../utils/normalizeHotWaterForm';
 import { normalizeWaterHeaterForm } from '../utils/normalizeWaterHeaterForm';
 
@@ -112,6 +114,10 @@ export function reduceSurveyMutation(
       return { ...draft, hydraulicsForm: mutation.hydraulicsForm };
     case 'DRAFT_LOADED':
       return structuredClone(mutation.draft);
+    case 'SESSION_RESET':
+      return createEmptySurveyDraftSnapshot();
+    case 'SURVEY_STARTED':
+      return createDefaultSurveyDraftSnapshot();
     case 'RUN_CALC_MANUAL':
       return draft;
     default: {

@@ -38,6 +38,8 @@ export type { SurveySessionContextValue } from './surveySessionContext';
 export type SurveySessionProviderProps = {
   initialState: SurveySessionState;
   windowPresets: EnvelopePreset[];
+  /** Calc только в режиме survey (Start/resolving — false). */
+  calcEnabled?: boolean;
   children: ReactNode;
 };
 
@@ -47,6 +49,7 @@ export type SurveySessionProviderProps = {
 export function SurveySessionProvider({
   initialState,
   windowPresets,
+  calcEnabled = true,
   children,
 }: SurveySessionProviderProps) {
   const [session, setSession] = useState<SurveySessionState>(initialState);
@@ -78,7 +81,7 @@ export function SurveySessionProvider({
     [],
   );
 
-  const canAutoCalc = canAutoCalcFromDraft(session.draft);
+  const canAutoCalc = calcEnabled && canAutoCalcFromDraft(session.draft);
 
   const {
     calcLoading,
@@ -127,8 +130,14 @@ export function SurveySessionProvider({
           scheduleFreshCalc();
         });
       }
+
+      if (mutation.type === 'SESSION_RESET' || mutation.type === 'SURVEY_STARTED') {
+        queueMicrotask(() => {
+          abortInFlightCalc();
+        });
+      }
     },
-    [handleCalcAction, scheduleFreshCalc],
+    [handleCalcAction, scheduleFreshCalc, abortInFlightCalc],
   );
 
   const setReportFromProject = useCallback((report: CalcReportJson | null) => {

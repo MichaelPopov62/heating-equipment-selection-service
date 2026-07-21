@@ -1,0 +1,93 @@
+.fab {
+  position: fixed;
+  right: 80px;
+  bottom: 50px;
+  z-index: 40;
+  border: 1px solid #5a6a7a;
+  background: #1b2430;
+  color: #d7e0ea;
+  font: 600 12px/1.2 ui-monospace, Consolas, monospace;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.fab:hover {
+  opacity: 1;
+}
+
+.panel {
+  position: fixed;
+  right: 12px;
+  bottom: 56px;
+  z-index: 50;
+  width: min(480px, calc(100vw - 24px));
+  max-height: min(70vh, 560px);
+  overflow: auto;
+  background: #0f141b;
+  color: #d7e0ea;
+  border: 1px solid #3a4654;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
+  font: 13px/1.4 system-ui, sans-serif;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.close {
+  border: 0;
+  background: transparent;
+  color: #9ab;
+  cursor: pointer;
+}
+
+.hint {
+  margin: 0 0 10px;
+  color: #8a9aaa;
+  font-size: 12px;
+}
+
+.hint code {
+  color: #cde;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.actions button {
+  border: 1px solid #3a4654;
+  background: #1b2430;
+  color: #d7e0ea;
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pre {
+  margin: 0;
+  max-height: 280px;
+  overflow: auto;
+  background: #080b10;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

@@ -1,0 +1,15 @@
+# Пример compose для API с PDF (Chromium в образе).
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    environment:
+      PDF_BROWSER_EXECUTABLE: /usr/bin/chromium
+      PDF_RENDER_TIMEOUT_MS: "30000"
+      PDF_MAX_CONCURRENT: "2"
+      PUPPETEER_SKIP_DOWNLOAD: "true"

@@ -30,6 +30,44 @@ export type ProjectDetail = ProjectListItem & {
   survey?: unknown;
   lastCalcInput?: unknown;
   lastCalculation?: CalculationListItem;
+  shareToken?: string;
+  sharePublishedAt?: string;
+  publicPath?: string;
+};
+
+export type ProjectSharePublishResponse = {
+  ok: true;
+  shareToken: string;
+  sharePublishedAt: string;
+  publicPath: string;
+  project: ProjectDetail;
+};
+
+export type ProjectShareRevokeResponse = {
+  ok: true;
+  revoked: true;
+  project: ProjectDetail;
+};
+
+export type PublicSharePayload = {
+  shareToken: string;
+  schemaVersion: 1;
+  clientName: string;
+  label?: string;
+  objectType?: 'house' | 'apartment';
+  publishedAt: string;
+  reportGeneratedAt?: string;
+  catalogSource?: 'file' | 'mongo';
+  temps?: unknown;
+  commercial: unknown;
+  matching: Record<string, unknown>;
+  calculations: Record<string, unknown>;
+  warnings?: string[];
+};
+
+export type PublicShareResponse = {
+  ok: true;
+  share: PublicSharePayload;
 };
 
 export type CalculationListItem = {

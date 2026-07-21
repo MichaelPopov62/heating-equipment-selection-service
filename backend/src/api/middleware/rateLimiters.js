@@ -93,3 +93,13 @@ export const projectsReadRateLimiter = createLimiter({
   windowMs: 15 * 60 * 1000,
   max: envLimit('RATE_LIMIT_PROJECTS_READ_PER_15M', 120),
 });
+
+/**
+ * Публичные share GET — только IP (без JWT).
+ * @returns {import('express').RequestHandler}
+ */
+export const publicShareReadRateLimiter = createLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: envLimit('RATE_LIMIT_PUBLIC_SHARE_PER_15M', 120),
+  code: 'PUBLIC_SHARE_RATE_LIMIT_EXCEEDED',
+});

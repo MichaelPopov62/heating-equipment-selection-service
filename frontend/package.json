@@ -10,8 +10,9 @@
     "typecheck": "tsc -b --pretty",
     "preview": "vite preview",
     "verify:survey-session": "node scripts/verifySurveySessionPipeline.mjs",
+    "verify:start-state": "node scripts/verifyStartState.mjs",
     "verify:dead-code": "knip --treat-config-hints-as-errors",
-    "verify": "npm run lint && npm run typecheck && npm run verify:dead-code && npm run build && npm run verify:survey-session"
+    "verify": "npm run lint && npm run typecheck && npm run verify:dead-code && npm run build && npm run verify:survey-session && npm run verify:start-state"
   },
   "dependencies": {
     "@tabler/icons-react": "^3.41.1",

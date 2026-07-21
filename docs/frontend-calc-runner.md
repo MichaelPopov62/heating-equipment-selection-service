@@ -2,7 +2,7 @@
 
 Документ описывает слой клиента: единая сессия анкеты, вызов `POST /api/v1/calc`, хранение отчёта и синхронизация с формой.
 
-См. также: [`survey-draft.md`](survey-draft.md), [`hydraulics-pipeline.md`](hydraulics-pipeline.md) § SurveySession.
+См. также: [`survey-draft.md`](survey-draft.md), [`start-state.md`](start-state.md), [`hydraulics-pipeline.md`](hydraulics-pipeline.md) § SurveySession.
 
 ---
 
@@ -20,7 +20,9 @@
 | Ключ изменений входа | `buildCalcInputKeyFromDraft` в том же модуле |
 | Парсинг отчёта для UI | `frontend/src/hooks/useCalcReport.ts` |
 
-`main.tsx` оборачивает приложение в `QueryProvider` (`@tanstack/react-query`). `App.tsx` — справочники и `SurveySessionProvider`. **`calcReport` не хранится в `App.tsx`** — компоненты читают `report` из контекста сессии.
+`main.tsx` оборачивает приложение в `QueryProvider` (`@tanstack/react-query`). `App.tsx` — справочники, `SurveySessionProvider`, bootstrap (`AppRoot`). **`calcReport` не хранится в `App.tsx`** — компоненты читают `report` из контекста сессии.
+
+**Calc guard:** `POST /api/v1/calc` активен только при `bootstrapMode === 'survey'` (`SurveySessionProvider.calcEnabled`). В Start/resolving calc не выполняется.
 
 ---
 
@@ -96,7 +98,7 @@ const {
 - Перед POST сравнивается `JSON.stringify(payload)` с последним успешным — дубликаты не уходят
 - При dedup (`CALC_SKIP_DEDUP`) вызывается `applyCalcSkippedDedup` → `uiPhase` снова `stable`/`idle`
   (иначе баннер «Обновление расчёта…» зависал бы при неизменном payload)
-- `runApiCalc` (кнопка «Отправить расчёт на сервер» в `calcApiBar`, только `import.meta.env.DEV`) — `useMutation`, сброс dedup и немедленный POST; production UI без бара, клиент опирается на автопересчёт
+- `runApiCalc` (кнопка «POST /api/v1/calc» в **DevPanel**, только при `isDevToolsEnabled`) — `useMutation`, сброс dedup и немедленный POST; production UI без DevPanel, клиент опирается на автопересчёт
 - `abortInFlightCalc` — `queryClient.cancelQueries({ queryKey: ['calc'] })`
 
 ### UI блока «Тёплый пол»

@@ -1,0 +1,6 @@
+type: object
+properties:
+  calculationId:
+    type: string
+    description: >
+      ObjectId сохранённого расчёта. Если не задан — берётся последний расчёт проекта.

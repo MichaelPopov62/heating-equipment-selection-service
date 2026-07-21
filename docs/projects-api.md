@@ -2,6 +2,20 @@
 
 CRUD клиентских проектов и сохранённых расчётов в MongoDB. Реализация: `backend/src/api/projectsRoutes.js`, модели `Project` / `Calculation`.
 
+Публичные ссылки на смету: [`client-share-and-layers.md`](client-share-and-layers.md).
+
+| Метод | Путь | Auth |
+|-------|------|------|
+| POST | `/api/v1/projects/{id}/share` | JWT (owner) |
+| DELETE | `/api/v1/projects/{id}/share` | JWT (owner) |
+| GET | `/api/v1/projects/{id}/pdf` | JWT (owner) — скачать PDF сметы |
+| GET | `/api/v1/public/shares/{shareToken}` | нет (read-only whitelist) |
+| GET | `/api/v1/public/shares/{shareToken}/pdf` | нет — скачать PDF |
+
+Поля `Project`: `shareToken`, `sharePublishedAt`, `shareSnapshot`. Verify: `npm run verify:project-share`, `npm run verify:project-pdf`.
+
+PDF: серверный Chromium, см. [`client-share-and-layers.md`](client-share-and-layers.md). Query `includeTechnical=1` добавляет техблок.
+
 ## Безопасность (production)
 
 - **JWT обязателен** при `NODE_ENV=production` (`Authorization: Bearer <token>`, claim `sub` = `ownerId` проекта).
@@ -159,11 +173,17 @@ cd backend && npm run verify:extract-calculation-summary
 
 ## Связанные файлы
 
+- `backend/src/api/projectsRoutes.js` — CRUD, share publish/revoke, owner PDF
+- `backend/src/api/publicSharesRoutes.js` — public GET share + PDF
+- `backend/src/api/middleware/rateLimiters.js` — rate limit
 - `backend/src/projects/documentSizeLimits.js` — лимиты survey/calcInput/BSON
+- `backend/src/projects/buildShareSnapshot.js`, `shareToken.js`, `serializeShare.js` — share snapshot
+- `backend/src/projects/renderEstimatePdf.js` — PDF (см. [`project-pdf.md`](project-pdf.md))
 - `backend/src/api/runCalculation.js` — общий calc-пайплайн с `POST /api/v1/calc`
 - `components/schemas/ProjectCalcBody.yaml` — OpenAPI
 - `components/schemas/ProjectDetail.yaml` — `lastCalcInput` в ответе GET project
-- `frontend/src/hooks/useSurveyProject.ts` — UI-хук: файлы, hash-URL, диалог проектов
+- `frontend/src/hooks/useSurveyProject.ts` — UI: проекты, share, PDF, Dev JSON/hash
+- `frontend/src/services/projectsApi.ts`, `publicShareApi.ts`, `projectsAuthHeaders.ts`
 - `frontend/src/query/mutations/useProjectMutations.ts` — React Query: save/load проекта и расчётов
 - `frontend/src/query/queries/useProjectsListQuery.ts` — список проектов при открытии диалога
 - `frontend/src/query/queries/useProjectCalculationsQuery.ts` — список расчётов выбранного проекта

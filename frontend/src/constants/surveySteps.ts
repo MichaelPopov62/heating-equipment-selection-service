@@ -72,16 +72,6 @@ export function isSurveyStep(v: unknown): v is SurveyCurrentStep {
 }
 
 /**
- * Шаги, на которых в DEV показывается панель ручного POST /api/v1/calc
- * (все кроме «Объект»). В production UI бар скрыт — расчёт идёт автоматически.
- *
- * @param step
- */
-export function isCalcApiBarStep(step: SurveyCurrentStep): boolean {
-  return step !== 'object';
-}
-
-/**
  * Заголовок секции globalMeta для текущего шага.
  *
  * @param step

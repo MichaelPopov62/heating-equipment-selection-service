@@ -47,5 +47,8 @@ const calculationSchema = new Schema(
 
 calculationSchema.index({ projectId: 1, createdAt: -1 });
 
+/** @type {import('mongoose').Model<import('../types/shared-types.js').CalculationMongoDoc>} */
 export const Calculation =
-  mongoose.models.Calculation ?? mongoose.model('Calculation', calculationSchema);
+  /** @type {import('mongoose').Model<import('../types/shared-types.js').CalculationMongoDoc>} */ (
+    mongoose.models.Calculation ?? mongoose.model('Calculation', calculationSchema)
+  );

@@ -24,6 +24,18 @@ const projectSchema = new Schema(
     survey: { type: Schema.Types.Mixed, required: false },
     /** Последний нормализованный вход POST /calc (для повторного расчёта). */
     lastCalcInput: { type: Schema.Types.Mixed, required: false },
+    /**
+     * Непрозрачный токен публичной ссылки `/s/{shareToken}`.
+     * Не равен Mongo ObjectId; отсутствует — ссылка не опубликована.
+     */
+    shareToken: { type: String, required: false, trim: true, sparse: true, unique: true },
+    /** Когда снимок опубликован / обновлён. */
+    sharePublishedAt: { type: Date, required: false },
+    /**
+     * Immutable whitelist для публичной страницы (commercial + matching slice).
+     * Без survey / lastCalcInput / ownerId.
+     */
+    shareSnapshot: { type: Schema.Types.Mixed, required: false },
   },
   {
     timestamps: true,
@@ -36,5 +48,8 @@ projectSchema.index({ updatedAt: -1 });
 projectSchema.index({ clientName: 1 });
 projectSchema.index({ ownerId: 1, updatedAt: -1 });
 
+/** @type {import('mongoose').Model<import('../types/shared-types.js').ProjectMongoDoc>} */
 export const Project =
-  mongoose.models.Project ?? mongoose.model('Project', projectSchema);
+  /** @type {import('mongoose').Model<import('../types/shared-types.js').ProjectMongoDoc>} */ (
+    mongoose.models.Project ?? mongoose.model('Project', projectSchema)
+  );

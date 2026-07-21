@@ -1,0 +1,11 @@
+type: object
+required: [ok, revoked, project]
+properties:
+  ok:
+    type: boolean
+    enum: [true]
+  revoked:
+    type: boolean
+    enum: [true]
+  project:
+    $ref: ProjectDetail.yaml

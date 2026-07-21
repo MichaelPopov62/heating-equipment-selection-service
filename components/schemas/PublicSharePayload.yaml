@@ -1,0 +1,46 @@
+type: object
+required:
+  - shareToken
+  - schemaVersion
+  - clientName
+  - publishedAt
+  - commercial
+  - matching
+  - calculations
+properties:
+  shareToken:
+    type: string
+  schemaVersion:
+    type: integer
+    enum: [1]
+  clientName:
+    type: string
+  label:
+    type: string
+  objectType:
+    type: string
+    enum: [house, apartment]
+  publishedAt:
+    type: string
+    format: date-time
+  reportGeneratedAt:
+    type: string
+    format: date-time
+  catalogSource:
+    type: string
+    enum: [file, mongo]
+  temps:
+    type: object
+    additionalProperties: true
+  commercial:
+    $ref: CommercialBomReport.yaml
+  matching:
+    type: object
+    additionalProperties: true
+  calculations:
+    type: object
+    additionalProperties: true
+  warnings:
+    type: array
+    items:
+      type: string

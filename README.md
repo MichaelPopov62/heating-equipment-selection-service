@@ -11,7 +11,10 @@ REST API и фронтенд для подбора теплового обору
 | [`docs/type-safety.md`](docs/type-safety.md)                   | Строгая типобезопасность: tsc/checkJs, ESLint, CI gate              |
 | [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md) | Frontend: SurveySession, React Query, calc, справочники             |
 | [`docs/survey-draft.md`](docs/survey-draft.md)                 | Черновик анкеты (schema v4), загрузка и миграция                    |
-| [`docs/projects-api.md`](docs/projects-api.md)                 | REST API проектов и сохранённых расчётов                            |
+| [`docs/projects-api.md`](docs/projects-api.md)                 | REST API проектов, share, PDF и сохранённых расчётов                |
+| [`docs/start-state.md`](docs/start-state.md)                   | Start Screen, bootstrap, localStorage черновика                     |
+| [`docs/client-share-and-layers.md`](docs/client-share-and-layers.md) | Клиент vs Dev, публичная ссылка, PDF                          |
+| [`docs/project-pdf.md`](docs/project-pdf.md)                   | Серверная генерация PDF (Chromium)                                  |
 | [`docs/calc-runtime-context.md`](docs/calc-runtime-context.md) | CalcRuntimeContext: DI справочников в calc-пайплайне                |
 | [`docs/room-exterior-layout.md`](docs/room-exterior-layout.md) | Положение помещения: угловое / фасад / внутреннее (стена в коридор) |
 
@@ -31,13 +34,15 @@ npm run start          # http://localhost:3001
 
 Calc-пайплайн HTTP: `runCalculation(body)` (`api/runCalculation.js`); внутри — `getReferenceBundle()` → `toCalcRuntimeContext()` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })` → `matchEquipment({ …, ctx })`. On-demand сброс кэша: `POST /api/v1/system/invalidate-reference-cache` (см. docs).
 
-Эндпоинты: `GET /health`, `GET /api/v1/catalog`, `GET /api/v1/presets/envelope`, `POST /api/v1/calc`, проекты — `/api/v1/projects/*` (нужен MongoDB). Контракт — `openapi.yaml`; валидация calc — `docs/calc-input-validation.md`; проекты — `docs/projects-api.md`.
+Эндпоинты: `GET /health`, `GET /api/v1/catalog`, `GET /api/v1/presets/envelope`, `POST /api/v1/calc`, проекты — `/api/v1/projects/*`, публичная ссылка — `/api/v1/public/shares/{shareToken}` (нужен MongoDB). Контракт — `openapi.yaml`; валидация calc — `docs/calc-input-validation.md`; проекты и share — `docs/projects-api.md`, `docs/client-share-and-layers.md`.
 
 ## Frontend
 
 React + Vite + TypeScript + **React Query** (`@tanstack/react-query`, слой `frontend/src/query/`). Запуск: `cd frontend && npm install && npm run dev`.
 
-Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md). Карта папок: [`docs/project-structure.md`](docs/project-structure.md). Детальные таблицы frontend — [`Plan.md`](Plan.md) § `frontend/`.
+Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md), [`docs/start-state.md`](docs/start-state.md). Карта папок: [`docs/project-structure.md`](docs/project-structure.md). Детальные таблицы frontend — [`Plan.md`](Plan.md) § `frontend/`.
+
+Точка входа: `App.tsx` — редактор анкеты или read-only страница `/s/{shareToken}` (`SharePresentationPage`). Bootstrap start/survey — [`docs/start-state.md`](docs/start-state.md).
 
 В анкете для каждого помещения задаётся **положение относительно наружного контура** (`roomExteriorLayout`: угловое, на фасаде, внутреннее со стеной в коридор) — см. [`docs/room-exterior-layout.md`](docs/room-exterior-layout.md).
 

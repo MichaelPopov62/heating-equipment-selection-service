@@ -1,69 +1,75 @@
 /**
- * Назначение: Компонент шапки приложения.
- * Описание: Имя клиента, меню сохранения/экспорта и действия с проектами и расчётами.
+ * Назначение: клиентская шапка — публичная ссылка и скачивание PDF (без pop-up).
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { ShareLinkToast } from '../ShareLinkToast/ShareLinkToast';
 import styles from './Header.module.css';
-
-export type HeaderMenuId = 'save' | 'export';
 
 export type HeaderProps = {
   logo?: React.ReactNode;
   title: string;
+  /** start — только «Проекты»; survey — полная клиентская панель. */
+  variant?: 'start' | 'survey';
   clientName: string;
   onClientNameChange: (value: string) => void;
   projectId?: string | null;
   statusMessage?: string | null;
   statusError?: string | null;
-  onOpenFile: () => void;
-  onSaveFile: () => void;
-  onSaveServer: () => void;
-  onSaveServerWithCalc: () => void;
-  onExportText: () => void;
-  onExportShare: () => void;
-  onExportLink: () => void;
+  /** Есть ли отчёт с commercial для PDF. */
+  canPrintPdf?: boolean;
+  /** Есть ли projectId и отчёт для публикации ссылки. */
+  canPublishShare?: boolean;
+  /** Публикация публичной ссылки в процессе. */
+  shareBusy?: boolean;
+  /** Toast «ссылка скопирована» под кнопкой «Ссылка». */
+  shareToastOpen?: boolean;
+  onDismissShareToast?: () => void;
   onOpenProjects: () => void;
+  /** Выход на стартовый экран (без skeleton). */
+  onExit: () => void;
+  onCopyPublicLink: () => void;
+  onPrintPdf: (includeTechnical: boolean) => void;
 };
 
 export function Header({
   logo,
   title,
+  variant = 'survey',
   clientName,
   onClientNameChange,
   projectId,
   statusMessage,
   statusError,
-  onOpenFile,
-  onSaveFile,
-  onSaveServer,
-  onSaveServerWithCalc,
-  onExportText,
-  onExportShare,
-  onExportLink,
+  canPrintPdf = false,
+  canPublishShare = false,
+  shareBusy = false,
+  shareToastOpen = false,
+  onDismissShareToast,
   onOpenProjects,
+  onExit,
+  onCopyPublicLink,
+  onPrintPdf,
 }: HeaderProps) {
-  const [openMenu, setOpenMenu] = useState<HeaderMenuId | null>(null);
+  const [pdfMenuOpen, setPdfMenuOpen] = useState(false);
   const controlsRef = useRef<HTMLDivElement>(null);
 
-  const closeMenus = useCallback(() => { setOpenMenu(null); }, []);
-
-  const toggleMenu = useCallback((id: HeaderMenuId) => {
-    setOpenMenu((prev) => (prev === id ? null : id));
+  const closeMenus = useCallback(() => {
+    setPdfMenuOpen(false);
   }, []);
 
   useEffect(() => {
-    if (!openMenu) return;
+    if (!pdfMenuOpen) return;
 
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target;
       if (target instanceof Node && controlsRef.current?.contains(target)) return;
-      setOpenMenu(null);
+      setPdfMenuOpen(false);
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpenMenu(null);
+      if (e.key === 'Escape') setPdfMenuOpen(false);
     };
 
     document.addEventListener('pointerdown', onPointerDown);
@@ -72,15 +78,7 @@ export function Header({
       document.removeEventListener('pointerdown', onPointerDown);
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [openMenu]);
-
-  const runMenuAction = useCallback(
-    (action: () => void) => {
-      action();
-      closeMenus();
-    },
-    [closeMenus],
-  );
+  }, [pdfMenuOpen]);
 
   return (
     <header className={styles.header}>
@@ -95,7 +93,7 @@ export function Header({
             {projectId ? (
               <>
                 {' '}
-                · <span className={styles.projectId}>проект {projectId.slice(-6)}</span>
+                · <span className={styles.projectId}>проект сохранён</span>
               </>
             ) : null}
           </p>
@@ -113,85 +111,20 @@ export function Header({
       </div>
 
       <div ref={controlsRef} className={styles.controls} aria-label="Панель управления">
-        <input
-          type="text"
-          className={styles.clientInput}
-          value={clientName}
-          onChange={(e) => { onClientNameChange(e.target.value); }}
-          placeholder="Имя клиента"
-          maxLength={200}
-          autoComplete="off"
-          aria-label="Имя клиента"
-        />
-
-        <button
-          type="button"
-          className={styles.secondaryButton}
-          onClick={() => {
-            closeMenus();
-            onOpenFile();
-          }}
-        >
-          Открыть
-        </button>
-
-        <div className={styles.menu}>
-          <button
-            type="button"
-            className={`${styles.secondaryButton} ${openMenu === 'save' ? styles.menuTriggerActive : ''}`}
-            aria-expanded={openMenu === 'save'}
-            aria-haspopup="menu"
-            onClick={() => { toggleMenu('save'); }}
-          >
-            Сохранить
-          </button>
-          {openMenu === 'save' ? (
-            <div className={styles.menuPanel} role="menu">
-              <button type="button" role="menuitem" onClick={() => { runMenuAction(onSaveFile); }}>
-                В файл (JSON)
-              </button>
-              <button type="button" role="menuitem" onClick={() => { runMenuAction(onSaveServer); }}>
-                На сервер
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => { runMenuAction(onSaveServerWithCalc); }}
-              >
-                На сервер + расчёт
-              </button>
-            </div>
-          ) : null}
-        </div>
-
-        <div className={styles.menu}>
-          <button
-            type="button"
-            className={
-              openMenu === 'export'
-                ? `${styles.primaryButton} ${styles.menuTriggerActivePrimary}`
-                : styles.secondaryButton
-            }
-            aria-expanded={openMenu === 'export'}
-            aria-haspopup="menu"
-            onClick={() => { toggleMenu('export'); }}
-          >
-            Экспорт
-          </button>
-          {openMenu === 'export' ? (
-            <div className={styles.menuPanel} role="menu">
-              <button type="button" role="menuitem" onClick={() => { runMenuAction(onExportText); }}>
-                Текстовый файл
-              </button>
-              <button type="button" role="menuitem" onClick={() => { runMenuAction(onExportShare); }}>
-                Поделиться…
-              </button>
-              <button type="button" role="menuitem" onClick={() => { runMenuAction(onExportLink); }}>
-                Ссылка (копировать)
-              </button>
-            </div>
-          ) : null}
-        </div>
+        {variant === 'survey' ? (
+          <input
+            type="text"
+            className={styles.clientInput}
+            value={clientName}
+            onChange={(e) => {
+              onClientNameChange(e.target.value);
+            }}
+            placeholder="Имя клиента"
+            maxLength={200}
+            autoComplete="off"
+            aria-label="Имя клиента"
+          />
+        ) : null}
 
         <button
           type="button"
@@ -203,6 +136,90 @@ export function Header({
         >
           Проекты
         </button>
+
+        {variant === 'survey' ? (
+          <>
+            <div className={styles.shareLinkWrap}>
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                disabled={!canPublishShare || shareBusy}
+                aria-busy={shareBusy}
+                title={
+                  shareBusy
+                    ? 'Публикация публичной ссылки…'
+                    : canPublishShare
+                      ? 'Скопировать публичную ссылку на смету'
+                      : 'Сначала сохраните проект с расчётом на сервере (Dev) или опубликуйте ссылку'
+                }
+                onClick={() => {
+                  closeMenus();
+                  onCopyPublicLink();
+                }}
+              >
+                {shareBusy ? 'Публикация…' : 'Ссылка'}
+              </button>
+              {onDismissShareToast ? (
+                <ShareLinkToast open={shareToastOpen} onDismiss={onDismissShareToast} />
+              ) : null}
+            </div>
+
+            <div className={styles.menu}>
+              <button
+                type="button"
+                className={
+                  pdfMenuOpen
+                    ? `${styles.primaryButton} ${styles.menuTriggerActivePrimary}`
+                    : styles.primaryButton
+                }
+                disabled={!canPrintPdf}
+                aria-expanded={pdfMenuOpen}
+                aria-haspopup="menu"
+                onClick={() => {
+                  setPdfMenuOpen((v) => !v);
+                }}
+              >
+                PDF / Скачать
+              </button>
+              {pdfMenuOpen ? (
+                <div className={styles.menuPanel} role="menu">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      onPrintPdf(false);
+                      closeMenus();
+                    }}
+                  >
+                    Финансовый итог (PDF)
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      onPrintPdf(true);
+                      closeMenus();
+                    }}
+                  >
+                    Финансы + технический расчёт (PDF)
+                  </button>
+                </div>
+              ) : null}
+            </div>
+
+            <button
+              type="button"
+              className={styles.secondaryButton}
+              title="Выйти на стартовый экран"
+              onClick={() => {
+                closeMenus();
+                onExit();
+              }}
+            >
+              Выйти
+            </button>
+          </>
+        ) : null}
       </div>
     </header>
   );

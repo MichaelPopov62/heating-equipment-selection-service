@@ -6,8 +6,8 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { Header } from './components/Header/Header';
+import type { HeaderProps } from './components/Header/Header';
 import { Footer } from './components/Footer/Footer';
-import Logo from './components/Logo/Logo';
 import styles from './App.module.css';
 import { ObjectMetaForm } from './components/ObjectMetaForm/ObjectMetaForm';
 import type { ObjectMetaValue, EnvelopePreset } from './types/envelope';
@@ -21,21 +21,18 @@ import {
   getWaterHeaterSchemeOptions,
   isApartmentLargeForIndirectScheme,
 } from './utils/waterHeaterSchemeOptions';
-import { buildCalcPayloadFromDraft } from './surveySession/buildCalcInputSnapshot';
+import { useSurveyStepNavigation } from './hooks/useSurveyStepNavigation';
 import { HydraulicsSection } from './components/HydraulicsSection/HydraulicsSection';
 import type { HydraulicsFormValue } from './types/hydraulics';
 import type { WiringSystemType } from './surveySession/wiringLayoutV3';
 import {
-  isCalcApiBarStep,
   SURVEY_STEP_NAV_ITEMS,
   surveyStepGlobalMetaTitle,
 } from './constants/surveySteps';
 import { RESULTS_SECTION_IDS } from './constants/surveyResultsSections';
 import type { SurveyCurrentStep } from './types/surveyStep';
 import { useCalcReport } from './hooks/useCalcReport';
-import { useSurveyStepNavigation } from './hooks/useSurveyStepNavigation';
 import { useSurveySession } from './surveySession/useSurveySession';
-import { surveyDraftToSessionSnapshot } from './surveySession/surveyDraftBridge';
 import { RecommendationsBlock } from './components/RecommendationsBlock/RecommendationsBlock';
 import { CatalogEquipmentReference } from './components/CatalogEquipmentReference/CatalogEquipmentReference';
 import { FinancialSummaryTable } from './components/FinancialSummary/FinancialSummaryTable';
@@ -54,9 +51,6 @@ import { RadiatorsSurveyForm } from './components/RadiatorsSurveyForm/RadiatorsS
 import { WarmFloorSection } from './components/WarmFloorSection/WarmFloorSection';
 import { useRoomsOrchestration } from './hooks/useRoomsOrchestration';
 import { useSurveyEstimates } from './hooks/useSurveyEstimates';
-import { useSurveyProject } from './hooks/useSurveyProject';
-import { ProjectsDialog } from './components/ProjectsDialog/ProjectsDialog';
-import type { SurveyDraft } from './types/surveyDraft';
 import type { UfhModePresetId, UfhModePresetCard } from './types/ufhModePreset';
 import type { UnderfloorHeatingBasePreset, FlooringFinishMaterial } from './types/underfloorHeating';
 import { useCatalogEquipmentQuery } from './query/queries/useCatalogEquipmentQuery';
@@ -66,7 +60,7 @@ const CALC_SCHEME_VALUES: readonly HotWaterBoilerPowerMatchingScheme[] = [
 ];
 
 export type AppSurveyContentProps = {
-  windowPresets: EnvelopePreset[];
+  projectChrome: HeaderProps;
   wallPresets: EnvelopePreset[];
   windowPresetsList: EnvelopePreset[];
   floorPresets: EnvelopePreset[];
@@ -92,7 +86,7 @@ function isCalcMatchingScheme(
 }
 
 export function AppSurveyContent({
-  windowPresets,
+  projectChrome,
   wallPresets,
   windowPresetsList,
   floorPresets,
@@ -117,8 +111,6 @@ export function AppSurveyContent({
     uiPhase,
     calcLoading,
     calcError,
-    canAutoCalc,
-    setReportFromProject,
     state: sessionState,
   } = useSurveySession();
 
@@ -300,23 +292,7 @@ export function AppSurveyContent({
     windowPresets: windowPresetsList,
   });
 
-  const { isRoomsComplete, quickEstimate } = useSurveyEstimates(rooms);
-
-  const buildCalcPayload = useCallback(
-    () => buildCalcPayloadFromDraft(draft, windowPresets),
-    [draft, windowPresets],
-  );
-
-  /** Почему не уходит fetch на /api/v1/calc (тогда в Network пусто). */
-  const autoCalcBlockedReason = useMemo(() => {
-    if (!isRoomsComplete) {
-      return 'У каждого помещения задайте площадь и высоту числом больше 0 — иначе запрос к API не отправляется.';
-    }
-    if (!canAutoCalc) {
-      return 'Нет данных для теплопотерь: укажите площадь наружной стены (№1 или №2) или окно с шириной/высотой проёма, либо потолок/кровлю (по верхней границе). Пока этого нет, автозапрос к серверу отключён.';
-    }
-    return null;
-  }, [canAutoCalc, isRoomsComplete]);
+  const { quickEstimate } = useSurveyEstimates(rooms);
 
   const reportIsStale = uiPhase === 'recalculating';
 
@@ -340,18 +316,6 @@ export function AppSurveyContent({
     isCalcMatchingScheme,
     quickEstimate.radiatorsSections,
     ufhPresetId,
-  );
-
-  const applySurveyDraftState = useCallback(
-    (loaded: SurveyDraft) => {
-      dispatch({
-        type: 'DRAFT_LOADED',
-        draft: surveyDraftToSessionSnapshot(loaded),
-        lastCalcReport: loaded.lastCalcReport ?? null,
-      });
-      thermalRegimeTouchedRef.current = true;
-    },
-    [dispatch],
   );
 
   /** Смена схемы из подсказок отчёта или формы водонагревателя. */
@@ -387,58 +351,6 @@ export function AppSurveyContent({
     [dispatch],
   );
 
-  const surveyProject = useSurveyProject({
-    getDraftParams: () => ({
-      currentStep: draft.currentStep,
-      objectMeta: draft.objectMeta,
-      rooms: draft.rooms,
-      temps: draft.temps,
-      hotWaterForm: draft.hotWaterForm,
-      waterHeaterForm: draft.waterHeaterForm,
-      waterUnderfloorHeating: draft.waterUnderfloorHeating,
-      underfloorDistributionPreset: draft.underfloorDistributionPreset,
-      thermalRegimePreset: draft.thermalRegimePreset,
-      radiatorConnection: draft.radiatorConnection,
-      radiatorEmitterPreference: draft.radiatorEmitterPreference,
-      ufhPresetId: draft.ufhPresetId,
-      hydraulicsForm: draft.hydraulicsForm,
-      wiringLayoutV3: draft.wiringLayoutV3,
-      lastCalcReport: calcReport,
-    }),
-    applyDraft: applySurveyDraftState,
-    buildCalcPayload,
-    canRunCalc: canAutoCalc,
-    setCalcReport: setReportFromProject,
-  });
-
-  const {
-    clientName,
-    setClientName,
-    projectId,
-    statusMessage,
-    statusError,
-    fileInputRef,
-    projectsOpen,
-    setProjectsOpen,
-    projectsLoading,
-    projectList,
-    calculations,
-    saveToFile,
-    saveToServer,
-    openFilePicker,
-    handleFileSelected,
-    exportTextFile,
-    exportShare,
-    exportLink,
-    openProjectsPanel,
-    loadProjectById,
-    loadCalculationById,
-    startNewProject,
-    refreshProjectList,
-  } = surveyProject;
-
-  const showCalcApiBar = isCalcApiBarStep(currentStep);
-
   const { hotWaterBoilerPowerMatchingScheme } = waterHeaterForm;
 
   // Если схема стала недоступна (малая квартира) — сброс на max-комби.
@@ -470,45 +382,7 @@ export function AppSurveyContent({
 
   return (
     <div className={styles.appContainer}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="application/json,.json"
-        style={{ display: 'none' }}
-        onChange={(e) => {
-          void handleFileSelected(e.target.files?.[0]);
-          e.target.value = '';
-        }}
-      />
-      <Header
-        logo={<Logo />}
-        title="HeatCalc Pro"
-        clientName={clientName}
-        onClientNameChange={setClientName}
-        projectId={projectId}
-        statusMessage={statusMessage}
-        statusError={statusError}
-        onOpenFile={openFilePicker}
-        onSaveFile={saveToFile}
-        onSaveServer={() => void saveToServer(false)}
-        onSaveServerWithCalc={() => void saveToServer(true)}
-        onExportText={exportTextFile}
-        onExportShare={() => void exportShare()}
-        onExportLink={() => void exportLink()}
-        onOpenProjects={openProjectsPanel}
-      />
-      <ProjectsDialog
-        open={projectsOpen}
-        loading={projectsLoading}
-        projects={projectList}
-        calculations={calculations}
-        activeProjectId={projectId}
-        onClose={() => { setProjectsOpen(false); }}
-        onRefresh={() => void refreshProjectList()}
-        onNewProject={startNewProject}
-        onSelectProject={(id) => void loadProjectById(id)}
-        onSelectCalculation={(id) => void loadCalculationById(id)}
-      />
+      <Header {...projectChrome} variant="survey" />
 
       <div className={styles.layoutBody}>
         <aside className={styles.navigationSteps}>
@@ -847,56 +721,12 @@ export function AppSurveyContent({
               />
             )}
 
-            {import.meta.env.DEV && showCalcApiBar && (
-              <div className={styles.calcApiBar}>
-                {autoCalcBlockedReason != null ? (
-                  <p className={styles.calcApiBarWarn}>
-                    {autoCalcBlockedReason}
-                  </p>
-                ) : (
-                  <p className={styles.calcApiBarWarn}>
-                    Запрос <code>POST /api/v1/calc</code> уходит на тот же хост,
-                    что и страница (в dev — прокси Vite → порт 3001). Во вкладке
-                    Network выберите фильтр «Fetch/XHR» и при необходимости
-                    включите «Сохранять журнал».
-                  </p>
-                )}
-                <button
-                  type="button"
-                  className={styles.calcButton}
-                  disabled={!canAutoCalc || calcLoading}
-                  onClick={() => {
-                    dispatch({ type: 'RUN_CALC_MANUAL' });
-                  }}
-                >
-                  {calcLoading ? 'Расчёт…' : 'Отправить расчёт на сервер'}
-                </button>
-              </div>
-            )}
-
             <div style={{ marginTop: 16 }}>
               {calcLoading && <div className={styles.hint}>Расчёт…</div>}
               {calcError && (
                 <div style={{ marginTop: 8, color: 'crimson' }}>
                   {calcError}
                 </div>
-              )}
-              {import.meta.env.DEV && calcReport != null && (
-                <details style={{ marginTop: 8 }}>
-                  <summary>Показать отчёт (JSON)</summary>
-                  <pre
-                    style={{
-                      maxHeight: 320,
-                      overflow: 'auto',
-                      background: '#0b0f14',
-                      color: '#d7e0ea',
-                      padding: 12,
-                      borderRadius: 8,
-                    }}
-                  >
-                    {JSON.stringify(calcReport, null, 2)}
-                  </pre>
-                </details>
               )}
             </div>
           </section>

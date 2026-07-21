@@ -40,6 +40,11 @@ import {
   projectPatchFields,
   surveyAuditMeta,
 } from '../projects/projectChangeMeta.js';
+import { buildShareSnapshot } from '../projects/buildShareSnapshot.js';
+import { generateShareToken } from '../projects/shareToken.js';
+import { serializeProjectShareMeta } from '../projects/serializeShare.js';
+import { parseIncludeTechnicalQuery } from '../projects/parseIncludeTechnicalQuery.js';
+import { renderEstimatePdf } from '../projects/renderEstimatePdf.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -120,7 +125,7 @@ export function createProjectsRouter() {
           ? req.query.search.trim()
           : null;
 
-      /** @type {Record<string, unknown>} */
+      /** @type {import('mongoose').QueryFilter<import('../types/shared-types.js').ProjectMongoDoc>} */
       const filter = { ...buildProjectOwnerFilter(ownerSub) };
       if (search) {
         filter.clientName = {
@@ -129,10 +134,12 @@ export function createProjectsRouter() {
         };
       }
 
-      const [docs, total] = await Promise.all([
+      const [docsRaw, total] = await Promise.all([
         Project.find(filter).sort({ updatedAt: -1 }).skip(skip).limit(limit).lean(),
         Project.countDocuments(filter),
       ]);
+      /** @type {import('../types/shared-types.js').ProjectMongoDoc[]} */
+      const docs = docsRaw;
 
       const ids = docs.map((d) => d._id);
       const counts = await Calculation.aggregate([
@@ -165,12 +172,15 @@ export function createProjectsRouter() {
       await assertCanCreateProject(ownerSub);
 
       const payload = validateProjectCreateBody(req.body);
-      const doc = await Project.create({
+      /** @type {import('../types/shared-types.js').ProjectMongoDoc} */
+      const createDoc = {
         ownerId: ownerSub,
         clientName: payload.clientName,
-        label: payload.label,
-        survey: payload.survey,
-      });
+      };
+      if (payload.label !== undefined) createDoc.label = payload.label;
+      if (payload.survey !== undefined) createDoc.survey = payload.survey;
+
+      const doc = await Project.create(createDoc);
       logger.info('project.create', reqLogMeta(req), {
         projectId: String(doc._id),
         ownerId: ownerSub,
@@ -568,6 +578,278 @@ export function createProjectsRouter() {
         res.status(200).json({
           ok: true,
           calculation: serializeCalculationDetail(doc),
+        });
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  /**
+   * Скачать PDF сметы (owner). Источник — последний сохранённый расчёт проекта.
+   *
+   * @param {import('express').Request<{ id: string }>} req
+   * @param {import('express').Response} res
+   * @param {import('express').NextFunction} next
+   */
+  router.get(
+    '/api/v1/projects/:id/pdf',
+    projectsReadRateLimiter,
+    async (req, res, next) => {
+      try {
+        const ownerSub = ownerSubFromRequest(req);
+        const oid = parseObjectIdParam(asRouteParam(req.params.id));
+        if (!oid) {
+          res.status(400).json({
+            ok: false,
+            error: { message: 'Некорректный id проекта', code: 'VALIDATION_ERROR', statusCode: 400 },
+          });
+          return;
+        }
+
+        const project = await findOwnedProjectLean(oid, ownerSub);
+        if (!project) {
+          res.status(404).json({
+            ok: false,
+            error: { message: 'Проект не найден', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+          });
+          return;
+        }
+
+        const calcDoc = await Calculation.findOne({ projectId: oid }).sort({ createdAt: -1 }).lean();
+        if (!calcDoc || !/** @type {{ report?: unknown }} */ (calcDoc).report) {
+          res.status(400).json({
+            ok: false,
+            error: {
+              message: 'Нет сохранённого расчёта для PDF',
+              code: 'PDF_REPORT_REQUIRED',
+              statusCode: 400,
+            },
+          });
+          return;
+        }
+
+        const includeTechnical = parseIncludeTechnicalQuery(req.query.includeTechnical);
+        const snapshot = buildShareSnapshot({
+          clientName: String(project.clientName ?? ''),
+          label: project.label != null ? String(project.label) : null,
+          report: /** @type {{ report: unknown }} */ (calcDoc).report,
+        });
+
+        const started = Date.now();
+        const pdf = await renderEstimatePdf(snapshot, { includeTechnical });
+        logger.info('project.pdf.download', reqLogMeta(req), {
+          projectId: String(oid),
+          includeTechnical,
+          bytes: pdf.bytes,
+          ms: Date.now() - started,
+        });
+
+        res.status(200);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', pdf.contentDisposition);
+        res.setHeader('Content-Length', String(pdf.bytes));
+        res.send(pdf.buffer);
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  /**
+   * Публикация / обновление публичной ссылки (owner). Тело: { calculationId? } или берётся последний calc.
+   *
+   * @param {import('express').Request<{ id: string }>} req
+   * @param {import('express').Response<import('../types/shared-types.js').ProjectSharePublishResponse>} res
+   * @param {import('express').NextFunction} next
+   */
+  router.post(
+    '/api/v1/projects/:id/share',
+    projectsWriteRateLimiter,
+    async (req, res, next) => {
+      try {
+        const ownerSub = ownerSubFromRequest(req);
+        const oid = parseObjectIdParam(asRouteParam(req.params.id));
+        if (!oid) {
+          res.status(400).json({
+            ok: false,
+            error: { message: 'Некорректный id проекта', code: 'VALIDATION_ERROR', statusCode: 400 },
+          });
+          return;
+        }
+
+        const project = await findOwnedProjectDoc(oid, ownerSub);
+        if (!project) {
+          res.status(404).json({
+            ok: false,
+            error: { message: 'Проект не найден', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+          });
+          return;
+        }
+
+        const body = req.body && typeof req.body === 'object' ? req.body : {};
+        const calcIdRaw =
+          typeof /** @type {{ calculationId?: unknown }} */ (body).calculationId === 'string'
+            ? /** @type {{ calculationId: string }} */ (body).calculationId.trim()
+            : '';
+
+        /** @type {import('mongoose').Document | Record<string, unknown> | null} */
+        let calcDoc = null;
+        if (calcIdRaw) {
+          const calcOid = parseObjectIdParam(calcIdRaw);
+          if (!calcOid) {
+            res.status(400).json({
+              ok: false,
+              error: {
+                message: 'Некорректный calculationId',
+                code: 'VALIDATION_ERROR',
+                statusCode: 400,
+              },
+            });
+            return;
+          }
+          calcDoc = await Calculation.findOne({ _id: calcOid, projectId: oid }).lean();
+          if (!calcDoc) {
+            res.status(404).json({
+              ok: false,
+              error: {
+                message: 'Расчёт не найден',
+                code: 'CALCULATION_NOT_FOUND',
+                statusCode: 404,
+              },
+            });
+            return;
+          }
+        } else {
+          calcDoc = await Calculation.findOne({ projectId: oid }).sort({ createdAt: -1 }).lean();
+        }
+
+        if (!calcDoc || !/** @type {{ report?: unknown }} */ (calcDoc).report) {
+          res.status(400).json({
+            ok: false,
+            error: {
+              message: 'Нет сохранённого расчёта для публикации ссылки',
+              code: 'SHARE_REPORT_REQUIRED',
+              statusCode: 400,
+            },
+          });
+          return;
+        }
+
+        const projectPlain = project.toObject();
+
+        const snapshot = buildShareSnapshot({
+          clientName: String(projectPlain.clientName ?? ''),
+          label: projectPlain.label != null ? String(projectPlain.label) : null,
+          report: /** @type {{ report: unknown }} */ (calcDoc).report,
+        });
+
+        const existingToken =
+          typeof projectPlain.shareToken === 'string' && projectPlain.shareToken.trim()
+            ? projectPlain.shareToken.trim()
+            : null;
+        const shareToken = existingToken ?? generateShareToken();
+        const sharePublishedAt = new Date();
+
+        const updated = await Project.findOneAndUpdate(
+          { _id: oid, ...buildProjectOwnerFilter(ownerSub) },
+          {
+            $set: {
+              shareToken,
+              sharePublishedAt,
+              shareSnapshot: snapshot,
+            },
+          },
+          { new: true },
+        ).lean();
+
+        if (!updated) {
+          res.status(404).json({
+            ok: false,
+            error: { message: 'Проект не найден', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+          });
+          return;
+        }
+
+        const calculationsCount = await Calculation.countDocuments({ projectId: oid });
+        const shareMeta = serializeProjectShareMeta(updated);
+        if (!shareMeta) {
+          /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
+          const err = new Error('Не удалось сериализовать share');
+          err.statusCode = 500;
+          err.code = 'INTERNAL_ERROR';
+          throw err;
+        }
+
+        logger.info('project.share.publish', reqLogMeta(req), {
+          projectId: String(oid),
+          ownerId: ownerSub,
+          rotated: !existingToken,
+        });
+
+        res.status(200).json({
+          ok: true,
+          shareToken: shareMeta.shareToken,
+          sharePublishedAt: shareMeta.sharePublishedAt,
+          publicPath: shareMeta.publicPath,
+          project: serializeProjectDetail(updated, { calculationsCount }),
+        });
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  /**
+   * Отзыв публичной ссылки (owner).
+   *
+   * @param {import('express').Request<{ id: string }>} req
+   * @param {import('express').Response<import('../types/shared-types.js').ProjectShareRevokeResponse>} res
+   * @param {import('express').NextFunction} next
+   */
+  router.delete(
+    '/api/v1/projects/:id/share',
+    projectsWriteRateLimiter,
+    async (req, res, next) => {
+      try {
+        const ownerSub = ownerSubFromRequest(req);
+        const oid = parseObjectIdParam(asRouteParam(req.params.id));
+        if (!oid) {
+          res.status(400).json({
+            ok: false,
+            error: { message: 'Некорректный id проекта', code: 'VALIDATION_ERROR', statusCode: 400 },
+          });
+          return;
+        }
+
+        const project = await findOwnedProjectDoc(oid, ownerSub);
+        if (!project) {
+          res.status(404).json({
+            ok: false,
+            error: { message: 'Проект не найден', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+          });
+          return;
+        }
+
+        await Project.updateOne(
+          { _id: oid, ...buildProjectOwnerFilter(ownerSub) },
+          { $unset: { shareToken: 1, sharePublishedAt: 1, shareSnapshot: 1 } },
+        );
+
+        const refreshed = await findOwnedProjectLean(oid, ownerSub);
+        const calculationsCount = await Calculation.countDocuments({ projectId: oid });
+
+        logger.info('project.share.revoke', reqLogMeta(req), {
+          projectId: String(oid),
+          ownerId: ownerSub,
+        });
+
+        res.status(200).json({
+          ok: true,
+          revoked: true,
+          project: serializeProjectDetail(refreshed ?? { _id: oid, clientName: '' }, {
+            calculationsCount,
+          }),
         });
       } catch (err) {
         next(err);

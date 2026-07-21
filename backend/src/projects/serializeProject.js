@@ -5,9 +5,10 @@
  */
 import { sanitizeCalculationSummary } from './extractCalculationSummary.js';
 import { isPlainObject } from '../utils/isPlainObject.js';
+import { serializeProjectShareMeta } from './serializeShare.js';
 
 /**
- * @param {import('mongoose').Document | Record<string, unknown>} doc
+ * @param {import('mongoose').Document | import('../types/shared-types.js').ProjectMongoDoc | import('../types/shared-types.js').CalculationMongoDoc | Record<string, unknown>} doc
  * @returns {Record<string, unknown>}
  */
 function toPlainRecord(doc) {
@@ -20,7 +21,8 @@ function toPlainRecord(doc) {
     const plain = /** @type {{ toObject: () => unknown }} */ (doc).toObject();
     return isPlainObject(plain) ? plain : {};
   }
-  return isPlainObject(doc) ? doc : {};
+  if (isPlainObject(doc)) return doc;
+  return /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (doc));
 }
 
 /**
@@ -32,7 +34,7 @@ function formatTimestamp(value) {
 }
 
 /**
- * @param {import('mongoose').Document | Record<string, unknown>} doc
+ * @param {import('mongoose').Document | import('../types/shared-types.js').ProjectMongoDoc | Record<string, unknown>} doc
  * @returns {import('../types/shared-types.js').ProjectListItem}
  */
 export function serializeProjectListItem(doc) {
@@ -58,7 +60,7 @@ export function serializeProjectListItem(doc) {
 }
 
 /**
- * @param {import('mongoose').Document | Record<string, unknown>} doc
+ * @param {import('mongoose').Document | import('../types/shared-types.js').ProjectMongoDoc | Record<string, unknown>} doc
  * @param {{ calculationsCount?: number, lastCalculation?: import('../types/shared-types.js').CalculationListItem | null }} [extra]
  * @returns {import('../types/shared-types.js').ProjectDetail}
  */
@@ -86,11 +88,18 @@ export function serializeProjectDetail(doc, extra = {}) {
     detail.lastCalculation = extra.lastCalculation;
   }
 
+  const shareMeta = serializeProjectShareMeta(rec);
+  if (shareMeta) {
+    detail.shareToken = shareMeta.shareToken;
+    detail.sharePublishedAt = shareMeta.sharePublishedAt;
+    detail.publicPath = shareMeta.publicPath;
+  }
+
   return detail;
 }
 
 /**
- * @param {import('mongoose').Document | Record<string, unknown>} doc
+ * @param {import('mongoose').Document | import('../types/shared-types.js').CalculationMongoDoc | Record<string, unknown>} doc
  * @returns {import('../types/shared-types.js').CalculationListItem}
  */
 export function serializeCalculationListItem(doc) {
@@ -104,7 +113,7 @@ export function serializeCalculationListItem(doc) {
 }
 
 /**
- * @param {import('mongoose').Document | Record<string, unknown>} doc
+ * @param {import('mongoose').Document | import('../types/shared-types.js').CalculationMongoDoc | Record<string, unknown>} doc
  * @returns {import('../types/shared-types.js').CalculationDetail}
  */
 export function serializeCalculationDetail(doc) {

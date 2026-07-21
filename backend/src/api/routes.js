@@ -12,6 +12,7 @@ import { runCalculation } from './runCalculation.js';
 import { logger } from '../utils/logger.js';
 import { setNoStoreCacheHeaders } from '../utils/setNoStoreCacheHeaders.js';
 import { createProjectsRouter } from './projectsRoutes.js';
+import { createPublicSharesRouter } from './publicSharesRoutes.js';
 import { createSystemRouter } from './systemRoutes.js';
 import { calcRateLimiter } from './middleware/rateLimiters.js';
 
@@ -127,6 +128,7 @@ export async function createRoutes() {
    * @returns {Promise<void>}
    */
   router.use(createProjectsRouter());
+  router.use(createPublicSharesRouter());
 
   router.post('/api/v1/calc', calcRateLimiter, async (req, res, next) => {
     const logMeta = req.requestId ? { requestId: req.requestId } : null;

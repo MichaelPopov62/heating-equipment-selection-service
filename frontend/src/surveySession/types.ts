@@ -19,6 +19,9 @@ import type { WiringBranchV3, WiringLayoutV3, WiringSystemType } from './wiringL
 /** Фаза UI отчёта: все секции используют один флаг. */
 export type SurveyUiPhase = 'idle' | 'stable' | 'recalculating' | 'error';
 
+/** Режим bootstrap UI: resolving → start | survey. */
+export type AppBootstrapMode = 'resolving' | 'start' | 'survey' | 'error';
+
 /** Снимок полей анкеты в сессии. */
 export type SurveyDraftSnapshot = {
   currentStep: SurveyCurrentStep;
@@ -56,6 +59,8 @@ export type SurveyMutation =
   | { type: 'SET_RADIATOR_EMITTER_PREFERENCE'; preference: RadiatorEmitterPreference }
   | { type: 'SET_HYDRAULICS_FORM'; hydraulicsForm: HydraulicsFormValue }
   | { type: 'DRAFT_LOADED'; draft: SurveyDraftSnapshot; lastCalcReport?: CalcReportJson | null }
+  | { type: 'SESSION_RESET' }
+  | { type: 'SURVEY_STARTED' }
   | { type: 'RUN_CALC_MANUAL' };
 
 /** Действие calc-исполнителя после pipeline. */

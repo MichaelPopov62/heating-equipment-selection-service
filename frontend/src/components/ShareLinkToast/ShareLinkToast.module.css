@@ -1,0 +1,59 @@
+/* Назначение: Toast после копирования публичной ссылки (без URL на экране). */
+@import '../../styles/custom-media.css';
+
+.toast {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  min-width: 0;
+  padding: 14px 40px 14px 16px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  color: var(--text-h);
+  white-space: normal;
+}
+
+.title {
+  margin: 0;
+  font: 600 14px/1.35 var(--sans);
+}
+
+.body {
+  margin: 6px 0 0;
+  font: 400 13px/1.45 var(--sans);
+  color: var(--text);
+}
+
+.close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: 400 20px/1 var(--sans);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .close:hover,
+  .close:focus-visible {
+    background: var(--accent-bg);
+    color: var(--text-h);
+  }
+}
+
+@media (--tablet) {
+  .toast {
+    left: auto;
+    right: 0;
+    width: min(320px, calc(100vw - 40px));
+  }
+}

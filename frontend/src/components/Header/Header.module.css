@@ -130,9 +130,23 @@
 }
 
 .controls > button,
-.controls > .menu {
+.controls > .menu,
+.controls > .shareLinkWrap {
   min-width: 0;
   width: 100%;
+}
+
+.shareLinkWrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.shareLinkWrap > button {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .menu {
@@ -209,9 +223,15 @@
   color: white;
 }
 
-.primaryButton:active,
-.secondaryButton:active {
+.primaryButton:active:not(:disabled),
+.secondaryButton:active:not(:disabled) {
   transform: translateY(1px);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 @media (hover: hover) {
@@ -260,7 +280,8 @@
   }
 
   .controls > button,
-  .controls > .menu {
+  .controls > .menu,
+  .controls > .shareLinkWrap {
     flex: 1 1 calc(50% - 4px);
     width: auto;
   }
@@ -319,10 +340,12 @@
   }
 
   .controls > button,
-  .controls > .menu {
+  .controls > .menu,
+  .controls > .shareLinkWrap {
     flex: 0 0 auto;
   }
 
+  .shareLinkWrap > button,
   .menu > button,
   .primaryButton,
   .secondaryButton {

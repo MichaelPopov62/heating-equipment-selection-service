@@ -7,6 +7,7 @@
 | Область | Статус |
 |---------|--------|
 | REST API, calc, projects | выполнено |
+| Share + public API, серверный PDF | выполнено |
 | Климат (Nominatim + Meteostat bulk) | выполнено |
 | Теплопотери, ограждения, ГВС, гидравлика | выполнено |
 | Matching (котёл, радиаторы, ВН, БКН) | выполнено |
@@ -23,6 +24,10 @@
 | `SurveySession` — единый pipeline мутаций и calc-state | выполнено |
 | React Query (`@tanstack/react-query`) — справочники, calc, проекты | выполнено |
 | Проекты: файлы, hash-URL, Mongo CRUD | выполнено |
+| Start Screen, bootstrap, localStorage черновика | выполнено |
+| Публичная ссылка `/s/{shareToken}`, share snapshot | выполнено |
+| Серверный PDF сметы (Chromium) | выполнено |
+| Клиентский vs Dev слой (`DevPanel`) | выполнено |
 
 ## Структура сервиса по папкам
 
@@ -43,6 +48,9 @@
 |--------------|------------|
 | `src/index.js` | Точка входа: Express, CORS, requestId, логирование |
 | `src/api/` | HTTP-слой: роуты `/api/v1/calc`, `/catalog`, `/presets`, проекты; AJV-валидация |
+| `src/api/publicSharesRoutes.js` | Публичный GET share + PDF (`/api/v1/public/shares/…`) |
+| `src/api/middleware/rateLimiters.js` | Rate limit calc / projects / public shares |
+| `Dockerfile`, `docker-compose.pdf.yml` | Образ с Chromium для PDF-рендера |
 | `src/data/warmFloorAssemblyPresets.js` | **Базы ТП** (`usage: underfloor_heating_base`) — плита, XPS, стяжка, выравнивание |
 | `src/data/flooringFinishMaterials.js` | **Финишные покрытия** — керамика, винил, ламинат; δ, λ, лимит Tповерх |
 | `src/logic/warmFloorCalc.js` | Расчёт q↑/q↓, Tповерх, warnings; композиция base + finish |
@@ -59,7 +67,7 @@
 | `src/recommendations/` | Тексты рекомендаций по кодам `REC_*` / `WARN_*` |
 | `src/report/buildReport.js` | Сборка отчёта; вызов `calculateUnderfloorHeating` после теплопотерь |
 | `src/models/` | Mongoose-модели MongoDB (Product, Project, Calculation и др.) |
-| `src/projects/` | CRUD проектов; `resolveProjectCalcInput.js`, `extractCalculationSummary.js` |
+| `src/projects/` | CRUD, calc input, summary; **share** (`buildShareSnapshot`, `shareToken`); **PDF** (`buildEstimatePdfHtml`, `renderEstimatePdf`, …) |
 | `src/utils/` | Логер, MongoDB, математика, ограничения монтажа котлов |
 | `src/types/shared-types.d.ts` | JSDoc-типы API и отчёта |
 | `scripts/verifyCalcInputSchema.js` | Сверка CalcInput.yaml + AJV |
@@ -73,25 +81,49 @@
 | `scripts/verifyFitPumpCurve.js` | Аппроксимация H(Q) из паспортных точек |
 | `scripts/verifyManifoldMatching.js` | Подбор manifolds / boilerManifolds (house vs apartment) |
 
+Полный перечень `verify:*` (группы):
+
+| Группа | Скрипты (`npm run verify:…`) |
+|--------|------------------------------|
+| Calc / schema | `calc-schema`, `calc-input-validation`, `calc-runtime-context`, `reference-cache-invalidate` |
+| Projects / share / PDF | `project-calc-input`, `document-size-limits`, `extract-calculation-summary`, `projects-auth`, `project-share`, `project-pdf` |
+| Catalog / seed | `seed-catalog`, `pipe-catalog`, `pipe-catalog-pool-filter`, `financial-bom` |
+| Hydraulics / pumps | `hydraulics-pipeline`, `pick-pipe`, `circulation-flows`, `flow-delta-tk`, `builtin-boiler-pump`, `fit-pump-curve`, `pump-duty` |
+| Radiators | `radiator-sections`, `radiator-emitters`, `radiator-connection`, `radiator-emitter-kind`, `mixed-radiator-ufh`, `micro-load-radiator`, `radiator-wiring-graph` |
+| UFH | `ufh-presets`, `ufh-loop-hydraulics`, `ufh-active-area` |
+| Matching extras | `manifold-matching`, `unibox-matching`, `room-design-air-temp` |
+| Прочие скрипты (не в `verify`) | `scripts/verifyRoomExteriorLayoutHeatLoss.js` — room exterior layout |
+| Frontend-adjacent | `survey-draft-migration`, `water-heater-form` |
+
+SSOT списка — `backend/package.json` → скрипт `verify`.
+
 Сверка контракта: `openapi.yaml` ↔ `validate.js` ↔ `shared-types.d.ts`.
 
 ### `frontend/` — клиент (React + Vite + TypeScript + React Query)
 
-Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md), [`docs/frontend-query-inventory.md`](docs/frontend-query-inventory.md). Черновик анкеты: [`docs/survey-draft.md`](docs/survey-draft.md).
+Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md), [`docs/frontend-query-inventory.md`](docs/frontend-query-inventory.md), [`docs/start-state.md`](docs/start-state.md), [`docs/client-share-and-layers.md`](docs/client-share-and-layers.md). Черновик анкеты: [`docs/survey-draft.md`](docs/survey-draft.md).
 
 #### Точка входа и корень UI
 
 | Путь | Назначение |
 |------|------------|
 | `src/main.tsx` | `QueryProvider` → `App` (StrictMode) |
-| `src/App.tsx` | `useReferenceData` + `usePresetLists` + `SurveySessionProvider` |
-| `src/AppSurveyContent.tsx` | Шаги анкеты, формы, отчёт; навигация по `constants/surveySteps.ts` (`SURVEY_STEPS`); `useSurveySession`, `useCatalogEquipmentQuery`, `useSurveyProject` |
+| `src/App.tsx` | Share route `/s/{token}` → `SharePresentationPage`; иначе `SurveySessionProvider` + `AppRoot` |
+| `src/AppRoot.tsx` | Bootstrap (`start` / `survey` / `resolving` / `error`), Header, DevPanel, ProjectsDialog |
+| `src/AppSurveyContent.tsx` | Шаги анкеты, формы, отчёт; `useSurveySession`, `useCatalogEquipmentQuery` |
+
+#### Клиентский vs Dev слой
+
+| Слой | Где | Документ |
+|------|-----|----------|
+| Клиент (Header) | Публичная ссылка, PDF, проекты, выход | [`client-share-and-layers.md`](docs/client-share-and-layers.md) |
+| Developer | `DevPanel` — JSON, server save, hash, POST calc | `utils/isDevToolsEnabled.ts` |
 
 #### `src/constants/` — UI-конфиги (SSOT)
 
 | Путь | Назначение |
 |------|------------|
-| `surveySteps.ts` | `SURVEY_STEPS` (`object` → `warmFloor` → `rooms` → `hotWater` → `boiler` → `radiators` → `waterHeater` → `hydraulics` → `summary`), `SURVEY_STEP_NAV_ITEMS`, `isSurveyStep`, `isCalcApiBarStep` — порядок шагов, навигация, валидация `currentStep` при загрузке черновика |
+| `surveySteps.ts` | `SURVEY_STEPS` (`object` → `warmFloor` → `rooms` → `hotWater` → `boiler` → `radiators` → `waterHeater` → `hydraulics` → `technicalResult` → `dataReference` → `financialResult`), `SURVEY_STEP_NAV_ITEMS`, `isSurveyStep`, `isCalcApiBarStep` |
 | `roomTypes.ts` | `ROOM_TYPE_UI_OPTIONS` — селект типа помещения |
 | `compatLegacyIds.ts` | `LEGACY_COMBINED_WALL_PRESET_IDS` — compat-слой пресетов стен |
 
@@ -124,6 +156,8 @@ Compat-телеметрия: `utils/compatTelemetry.ts` (`[survey-compat]` в DE
 | `buildCalcInputSnapshot.ts` | `buildCalcPayloadFromDraft`, `buildCalcInputKeyFromDraft`, `canAutoCalcFromDraft` |
 | `wiringLayoutV3.ts`, `migrateDerivedState.ts` | Layout разводки, синхронизация ТП |
 | `surveyDraftBridge.ts` | `SurveyDraft` → `SurveyDraftSnapshot` при `DRAFT_LOADED` |
+| `resolveAppBootstrap.ts` | Hash / localStorage → `start` \| `survey` |
+| `createEmptySurveySessionState.ts`, `createDefaultSurveyDraft.ts` | SSOT пустого и дефолтного черновика |
 
 #### `src/hooks/` — UI-оркестрация (без прямого HTTP)
 
@@ -133,7 +167,10 @@ Compat-телеметрия: `utils/compatTelemetry.ts` (`[survey-compat]` в DE
 | `usePresetLists.ts` | Фильтрация пресетов ограждений по `kind` |
 | `useRoomsOrchestration.ts` | Синхронизация комнат с `objectMeta` |
 | `useSurveyEstimates.ts` | Локальные оценки до ответа API |
-| `useSurveyProject.ts` | Файлы, hash-URL, диалог проектов (поверх RQ mutations/queries) |
+| `useSurveyBootstrap.ts` | Режим UI: resolving / start / survey / error |
+| `useSurveyDraftPersistence.ts` | Debounced save черновика в localStorage |
+| `useSurveyProject.ts` | Проекты, share publish/revoke, PDF, Dev JSON/hash (поверх RQ) |
+| `useSurveyStepNavigation.ts` | Переход на шаг из сайдбара |
 
 #### `src/services/` — HTTP-клиенты (queryFn / mutationFn)
 
@@ -144,13 +181,22 @@ Compat-телеметрия: `utils/compatTelemetry.ts` (`[survey-compat]` в DE
 | `underfloorHeatingPresets.ts` | `GET /api/v1/presets/underfloor-heating` |
 | `ufhModePresets.ts` | `GET /api/v1/presets/underfloor-heating/modes` |
 | `catalog.ts` | `GET /api/v1/catalog` |
-| `projectsApi.ts` | CRUD `/api/v1/projects/*` |
+| `projectsApi.ts` | CRUD `/api/v1/projects/*`, share, PDF download |
+| `publicShareApi.ts` | GET public share + PDF для `/s/{token}` |
+| `surveyDraftStorage.ts` | localStorage черновика (`heatcalc:survey-draft:v1`) |
+| `projectsAuthHeaders.ts` | JWT-заголовки для projects API |
 | `buildCalcRequestPayload.ts` | Сборка тела CalcInput (вызывается из `buildCalcInputSnapshot`) |
 
 #### Компоненты, данные, утилиты
 
 | Путь | Назначение |
 |------|------------|
+| `src/components/StartScreen/` | Стартовый экран (cold open) |
+| `src/components/SharePresentationPage/` | Read-only презентация `/s/{shareToken}` |
+| `src/components/DevPanel/` | Панель разработчика |
+| `src/components/Header/` | Клиент: имя, ссылка, PDF, проекты, выход |
+| `src/components/ShareLinkToast/` | Toast после копирования публичной ссылки |
+| `src/components/AppBootstrapSkeleton/`, `BootstrapErrorScreen/`, `Spinner/` | Состояния bootstrap |
 | `src/components/WarmFloorSection/` | Режим emitters, карточки ТП |
 | `src/components/RoomsForm/RoomAccordionItem.tsx` | Основа ТП + финишное покрытие в комнате |
 | `src/components/RecommendationsBlock/` | Отчёт: теплопотери, котёл, радиаторы, ТП, гидравлика |

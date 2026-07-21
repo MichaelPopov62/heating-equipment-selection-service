@@ -1404,10 +1404,92 @@ export interface ProjectListItem {
   calculationsCount?: number;
 }
 
+/** Документ MongoDB `projects` (для Mongoose Model / QueryFilter). */
+export interface ProjectMongoDoc {
+  _id?: import('mongoose').Types.ObjectId;
+  ownerId: string;
+  clientName: string;
+  label?: string;
+  survey?: unknown;
+  lastCalcInput?: unknown;
+  shareToken?: string;
+  sharePublishedAt?: Date;
+  shareSnapshot?: unknown;
+  createdAt?: Date;
+  updatedAt?: Date;
+  /** Виртуальное / агрегированное поле только для сериализации списка. */
+  calculationsCount?: number;
+}
+
+/** Документ MongoDB `calculations`. */
+export interface CalculationMongoDoc {
+  _id?: import('mongoose').Types.ObjectId;
+  projectId: import('mongoose').Types.ObjectId;
+  calcInput: unknown;
+  report: unknown;
+  summary: unknown;
+  createdAt?: Date;
+}
+
+/** Whitelist-снимок для публичной страницы `/s/{shareToken}`. */
+export interface ProjectShareSnapshot {
+  schemaVersion: 1;
+  clientName: string;
+  label?: string;
+  objectType?: 'house' | 'apartment';
+  publishedAt: string;
+  reportGeneratedAt?: string;
+  catalogSource?: 'file' | 'mongo';
+  temps?: unknown;
+  commercial: unknown;
+  matching?: Record<string, unknown>;
+  calculations?: Record<string, unknown>;
+  warnings?: string[];
+}
+
 export interface ProjectDetail extends ProjectListItem {
   survey?: unknown;
   lastCalcInput?: CalcRequestBody;
   lastCalculation?: CalculationListItem;
+  /** Публичный токен (owner API); клиентскому UI отдавать только publicPath. */
+  shareToken?: string;
+  sharePublishedAt?: string;
+  publicPath?: string;
+}
+
+export interface ProjectSharePublishResponse {
+  ok: true;
+  shareToken: string;
+  sharePublishedAt: string;
+  publicPath: string;
+  project: ProjectDetail;
+}
+
+export interface ProjectShareRevokeResponse {
+  ok: true;
+  revoked: true;
+  project: ProjectDetail;
+}
+
+export interface PublicSharePayload {
+  shareToken: string;
+  schemaVersion: 1;
+  clientName: string;
+  label?: string;
+  objectType?: 'house' | 'apartment';
+  publishedAt: string;
+  reportGeneratedAt?: string;
+  catalogSource?: 'file' | 'mongo';
+  temps?: unknown;
+  commercial: unknown;
+  matching: Record<string, unknown>;
+  calculations: Record<string, unknown>;
+  warnings?: string[];
+}
+
+export interface PublicShareResponse {
+  ok: true;
+  share: PublicSharePayload;
 }
 
 export interface CalculationListItem {

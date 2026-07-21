@@ -1,0 +1,44 @@
+type: object
+required:
+  - schemaVersion
+  - clientName
+  - publishedAt
+  - commercial
+properties:
+  schemaVersion:
+    type: integer
+    enum: [1]
+  clientName:
+    type: string
+  label:
+    type: string
+  objectType:
+    type: string
+    enum: [house, apartment]
+  publishedAt:
+    type: string
+    format: date-time
+  reportGeneratedAt:
+    type: string
+    format: date-time
+  catalogSource:
+    type: string
+    enum: [file, mongo]
+  temps:
+    type: object
+    additionalProperties: true
+  commercial:
+    $ref: CommercialBomReport.yaml
+  matching:
+    type: object
+    additionalProperties: true
+    description: Срезы matching (boiler, radiators, …) без сырого input.
+  calculations:
+    type: object
+    additionalProperties: true
+    description: Срезы calculations (heatLoss, hotWater, …).
+  warnings:
+    type: array
+    items:
+      type: string
+    maxItems: 50

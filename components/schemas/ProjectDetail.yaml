@@ -12,3 +12,13 @@ allOf:
           не содержит calcInput и корневого building (например тело {} или только survey).
       lastCalculation:
         $ref: CalculationListItem.yaml
+      shareToken:
+        type: string
+        description: Непрозрачный токен публичной ссылки (owner API).
+      sharePublishedAt:
+        type: string
+        format: date-time
+      publicPath:
+        type: string
+        description: Путь /s/{shareToken} для клиентского UI.
+        example: /s/xYzAbCdEfGhIjKlMnOpQrSt

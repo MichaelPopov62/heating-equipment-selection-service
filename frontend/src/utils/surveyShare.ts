@@ -11,6 +11,8 @@ import { isRecord } from './jsonGuards';
 import { parseSurveyDraft } from './parseSurveyDraft';
 
 const URL_HASH_PREFIX = '#survey=';
+/** Макс. размер JSON в hash (~50 KB). */
+const MAX_HASH_JSON_BYTES = 51_200;
 
 /** Краткая текстовая сводка для экспорта / Share API. */
 export function buildSurveyTextSummary(
@@ -58,6 +60,10 @@ export function surveyDraftForUrlShare(draft: SurveyDraft): SurveyDraft {
   return rest;
 }
 
+/**
+ * @param draft
+ * @returns {string}
+ */
 export function encodeSurveyDraftToUrl(draft: SurveyDraft): string {
   const compact = surveyDraftForUrlShare(draft);
   const json = JSON.stringify(compact);
@@ -70,6 +76,10 @@ export function encodeSurveyDraftToUrl(draft: SurveyDraft): string {
   return `${base}${URL_HASH_PREFIX}${b64}`;
 }
 
+/**
+ * @param hash
+ * @returns {SurveyDraft | null}
+ */
 export function decodeSurveyDraftFromHash(hash: string): SurveyDraft | null {
   if (!hash.startsWith(URL_HASH_PREFIX)) return null;
   try {
@@ -79,32 +89,16 @@ export function decodeSurveyDraftFromHash(hash: string): SurveyDraft | null {
         '',
       ),
     );
+    if (json.length > MAX_HASH_JSON_BYTES) return null;
     return parseSurveyDraft(JSON.parse(json));
   } catch {
     return null;
   }
 }
 
-export async function shareSurveyText(title: string, text: string): Promise<boolean> {
-  if (typeof navigator.share === 'function') {
-    try {
-      await navigator.share({ title, text });
-      return true;
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') return false;
-      throw err;
-    }
-  }
-  // clipboard может отсутствовать в старых браузерах.
-  const clip: Clipboard | undefined = (navigator as { clipboard?: Clipboard })
-    .clipboard;
-  if (typeof clip?.writeText === 'function') {
-    await clip.writeText(text);
-    return true;
-  }
-  return false;
-}
-
+/**
+ * @param text
+ */
 export async function copyTextToClipboard(text: string): Promise<void> {
   const clip: Clipboard | undefined = (navigator as { clipboard?: Clipboard })
     .clipboard;

@@ -1,52 +1,80 @@
 /**
  * Назначение: Хук управления проектами анкеты.
- * Описание: Сохранение, загрузка, экспорт, share-ссылка и диалог проектов на сервере.
+ * Описание: Клиент — публичная ссылка и PDF; Dev — JSON/сервер/hash.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { useProjectMutations } from '../query/mutations/useProjectMutations';
 import { useProjectCalculationsQuery } from '../query/queries/useProjectCalculationsQuery';
 import { useProjectsListQuery } from '../query/queries/useProjectsListQuery';
+import {
+  publishProjectShare,
+  revokeProjectShare,
+  downloadProjectPdf,
+} from '../services/projectsApi';
+import { saveSurveyDraftToStorage } from '../services/surveyDraftStorage';
+import type { AppBootstrapMode } from '../surveySession/types';
 import type { CalcReportJson } from '../types/calcApi';
 import type { SurveyDraft } from '../types/surveyDraft';
 import { buildSurveyDraft } from '../utils/buildSurveyDraft';
 import { downloadJsonFile, downloadTextFile } from '../utils/fileDownload';
+import { parseCommercialBomFromReport } from '../utils/parseCommercialBomFromReport';
+import { buildPublicShareUrlFromToken } from '../utils/parseSharePath';
 import { parseSurveyDraft } from '../utils/parseSurveyDraft';
 import {
   buildSurveyTextSummary,
   copyTextToClipboard,
-  decodeSurveyDraftFromHash,
   encodeSurveyDraftToUrl,
-  shareSurveyText,
 } from '../utils/surveyShare';
 
 export type UseSurveyProjectParams = {
+  bootstrapMode: AppBootstrapMode;
+  clientName: string;
+  setClientName: (value: string) => void;
+  projectId: string | null;
+  setProjectId: (value: string | null) => void;
   /** Поля анкеты без clientName/projectId (их хранит хук). */
   getDraftParams: () => Omit<
     Parameters<typeof buildSurveyDraft>[0],
     'savedAt' | 'schemaVersion' | 'clientName' | 'projectId'
   >;
   applyDraft: (draft: SurveyDraft) => void;
+  enterSurveyMode: () => void;
+  resetToStart: () => void;
+  needsResetConfirm: () => boolean;
   buildCalcPayload: () => unknown;
   canRunCalc: boolean;
   setCalcReport: (report: CalcReportJson | null) => void;
+  runManualCalc: () => void;
 };
 
+/**
+ * @param params
+ */
 export function useSurveyProject({
+  bootstrapMode,
+  clientName,
+  setClientName,
+  projectId,
+  setProjectId,
   getDraftParams,
   applyDraft,
+  enterSurveyMode,
+  resetToStart,
+  needsResetConfirm,
   buildCalcPayload,
   canRunCalc,
   setCalcReport,
+  runManualCalc,
 }: UseSurveyProjectParams) {
-  const [clientName, setClientName] = useState('');
-  const [projectId, setProjectId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
   const [projectsOpen, setProjectsOpen] = useState(false);
+  const [publicPath, setPublicPath] = useState<string | null>(null);
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareToastOpen, setShareToastOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const hashAppliedRef = useRef(false);
 
   const {
     saveProjectMutation,
@@ -77,7 +105,9 @@ export function useSurveyProject({
   const showOk = useCallback((msg: string) => {
     setStatusError(null);
     setStatusMessage(msg);
-    window.setTimeout(() => { setStatusMessage(null); }, 4000);
+    window.setTimeout(() => {
+      setStatusMessage(null);
+    }, 4000);
   }, []);
 
   const showErr = useCallback((msg: string) => {
@@ -90,22 +120,14 @@ export function useSurveyProject({
       applyDraft(draft);
       setClientName(draft.clientName);
       setProjectId(draft.projectId ?? null);
+      saveSurveyDraftToStorage(draft);
+      enterSurveyMode();
     },
-    [applyDraft],
+    [applyDraft, enterSurveyMode, setClientName, setProjectId],
   );
 
-  useEffect(() => {
-    if (hashAppliedRef.current) return;
-    const draft = decodeSurveyDraftFromHash(window.location.hash);
-    if (!draft) return;
-    hashAppliedRef.current = true;
-    queueMicrotask(() => {
-      applyDraftAndMeta(draft);
-      showOk('Анкета загружена из ссылки');
-    });
-  }, [applyDraftAndMeta, showOk]);
-
   const saveToFile = useCallback(() => {
+    if (bootstrapMode !== 'survey') return;
     try {
       const draft = buildDraft();
       const safe = draft.clientName
@@ -113,11 +135,11 @@ export function useSurveyProject({
         .slice(0, 40);
       const date = draft.savedAt.slice(0, 10);
       downloadJsonFile(`heatcalc-${safe}-${date}.json`, draft);
-      showOk('Файл JSON сохранён');
+      showOk('Файл JSON сохранён (Dev)');
     } catch (e) {
       showErr(e instanceof Error ? e.message : 'Не удалось сохранить файл');
     }
-  }, [buildDraft, showOk, showErr]);
+  }, [bootstrapMode, buildDraft, showOk, showErr]);
 
   const openFilePicker = useCallback(() => {
     fileInputRef.current?.click();
@@ -141,6 +163,7 @@ export function useSurveyProject({
 
   const saveToServer = useCallback(
     async (withCalc: boolean) => {
+      if (bootstrapMode !== 'survey') return;
       try {
         const draft = buildDraft();
         const result = await saveProjectMutation.mutateAsync({
@@ -156,11 +179,11 @@ export function useSurveyProject({
           setCalcReport(result.report);
         }
         if (withCalc && result.report) {
-          showOk('Проект и расчёт сохранены на сервере');
+          showOk('Проект и расчёт сохранены на сервере (Dev)');
         } else if (withCalc && !canRunCalc) {
           showOk('Проект сохранён (расчёт пропущен: неполная анкета)');
         } else {
-          showOk('Проект сохранён на сервере');
+          showOk('Проект сохранён на сервере (Dev)');
         }
       } catch (e) {
         const msg = e instanceof Error ? e.message : 'Ошибка сохранения';
@@ -172,6 +195,7 @@ export function useSurveyProject({
       }
     },
     [
+      bootstrapMode,
       buildDraft,
       buildCalcPayload,
       canRunCalc,
@@ -179,12 +203,14 @@ export function useSurveyProject({
       projectId,
       saveProjectMutation,
       setCalcReport,
+      setProjectId,
       showOk,
       showErr,
     ],
   );
 
   const exportTextFile = useCallback(() => {
+    if (bootstrapMode !== 'survey') return;
     try {
       const draft = buildDraft();
       const report = getDraftParams().lastCalcReport ?? null;
@@ -193,37 +219,125 @@ export function useSurveyProject({
         .replace(/[^\p{L}\p{N}\-_]+/gu, '_')
         .slice(0, 40);
       downloadTextFile(`heatcalc-${safe}-summary.txt`, text);
-      showOk('Текстовая сводка скачана');
+      showOk('Текстовая сводка скачана (Dev)');
     } catch (e) {
       showErr(e instanceof Error ? e.message : 'Ошибка экспорта');
     }
-  }, [buildDraft, getDraftParams, showOk, showErr]);
+  }, [bootstrapMode, buildDraft, getDraftParams, showOk, showErr]);
 
-  const exportShare = useCallback(async () => {
-    try {
-      const draft = buildDraft();
-      const report = getDraftParams().lastCalcReport ?? null;
-      const text = buildSurveyTextSummary(draft, report);
-      const shared = await shareSurveyText(
-        `HeatCalc — ${draft.clientName}`,
-        text,
-      );
-      showOk(shared ? 'Сводка отправлена' : 'Сводка скопирована в буфер');
-    } catch (e) {
-      showErr(e instanceof Error ? e.message : 'Не удалось поделиться');
-    }
-  }, [buildDraft, getDraftParams, showOk, showErr]);
-
-  const exportLink = useCallback(async () => {
+  const exportHashLink = useCallback(async () => {
+    if (bootstrapMode !== 'survey') return;
     try {
       const draft = buildDraft();
       const url = encodeSurveyDraftToUrl(draft);
       await copyTextToClipboard(url);
-      showOk('Ссылка с анкетой скопирована (без отчёта)');
+      showOk('Hash-ссылка черновика скопирована (Dev, без отчёта)');
     } catch (e) {
       showErr(e instanceof Error ? e.message : 'Не удалось создать ссылку');
     }
-  }, [buildDraft, showOk, showErr]);
+  }, [bootstrapMode, buildDraft, showOk, showErr]);
+
+  const ensureProjectSaved = useCallback(async (): Promise<string> => {
+    const draft = buildDraft();
+    const result = await saveProjectMutation.mutateAsync({
+      projectId,
+      clientName,
+      draft,
+      withCalc: canRunCalc,
+      canRunCalc,
+      buildCalcPayload,
+    });
+    setProjectId(result.projectId);
+    if (result.report) {
+      setCalcReport(result.report);
+    }
+    return result.projectId;
+  }, [
+    buildDraft,
+    buildCalcPayload,
+    canRunCalc,
+    clientName,
+    projectId,
+    saveProjectMutation,
+    setCalcReport,
+    setProjectId,
+  ]);
+
+  const dismissShareToast = useCallback(() => {
+    setShareToastOpen(false);
+  }, []);
+
+  const copyPublicLink = useCallback(async () => {
+    if (bootstrapMode !== 'survey') return;
+    setShareBusy(true);
+    setShareToastOpen(false);
+    try {
+      if (!clientName.trim()) {
+        throw new Error('Укажите имя клиента перед публикацией ссылки');
+      }
+      const report = getDraftParams().lastCalcReport;
+      if (!report || !parseCommercialBomFromReport(report)) {
+        throw new Error('Нет финансового итога — дождитесь расчёта');
+      }
+
+      const id = await ensureProjectSaved();
+      const published = await publishProjectShare(id);
+      setPublicPath(published.publicPath);
+      const shareUrl = buildPublicShareUrlFromToken(published.shareToken);
+      await copyTextToClipboard(shareUrl);
+      setShareToastOpen(true);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Не удалось опубликовать ссылку';
+      if (msg.includes('MONGODB_UNAVAILABLE') || msg.includes('503')) {
+        showErr('MongoDB недоступна — публикация ссылки невозможна');
+      } else if (msg.includes('Буфер обмена')) {
+        showErr('Буфер обмена недоступен — скопируйте ссылку вручную из Dev');
+      } else {
+        showErr(msg);
+      }
+    } finally {
+      setShareBusy(false);
+    }
+  }, [
+    bootstrapMode,
+    clientName,
+    ensureProjectSaved,
+    getDraftParams,
+    showErr,
+  ]);
+
+  const revokeShare = useCallback(async () => {
+    if (!projectId) {
+      showErr('Нет projectId');
+      return;
+    }
+    try {
+      await revokeProjectShare(projectId);
+      setPublicPath(null);
+      showOk('Публичная ссылка отозвана (Dev)');
+    } catch (e) {
+      showErr(e instanceof Error ? e.message : 'Не удалось отозвать ссылку');
+    }
+  }, [projectId, showOk, showErr]);
+
+  const printPdf = useCallback(
+    (includeTechnical: boolean) => {
+      if (bootstrapMode !== 'survey') return;
+      if (!projectId) {
+        showErr('Сохраните проект на сервер, чтобы скачать PDF');
+        return;
+      }
+      void (async () => {
+        try {
+          await downloadProjectPdf(projectId, { includeTechnical });
+          showOk('PDF скачан');
+        } catch (e) {
+          showErr(e instanceof Error ? e.message : 'Не удалось скачать PDF');
+        }
+      })();
+    },
+    [bootstrapMode, projectId, showOk, showErr],
+  );
 
   const refreshProjectList = useCallback(async () => {
     try {
@@ -247,10 +361,13 @@ export function useSurveyProject({
         } else {
           setClientName(result.clientName);
           setProjectId(result.projectId);
+          enterSurveyMode();
         }
         if (result.report) {
           setCalcReport(result.report);
         }
+        setPublicPath(null);
+        setShareToastOpen(false);
         setProjectsOpen(false);
         showOk(`Загружен проект: ${result.clientName}`);
         void refetchCalculations();
@@ -260,9 +377,12 @@ export function useSurveyProject({
     },
     [
       applyDraftAndMeta,
+      enterSurveyMode,
       loadProjectMutation,
       refetchCalculations,
       setCalcReport,
+      setClientName,
+      setProjectId,
       showOk,
       showErr,
     ],
@@ -285,15 +405,44 @@ export function useSurveyProject({
     [projectId, loadCalculationMutation, setCalcReport, showOk, showErr],
   );
 
-  const startNewProject = useCallback(() => {
+  const exitToStart = useCallback(() => {
+    resetToStart();
+    setStatusMessage(null);
+    setStatusError(null);
+    setClientName('');
     setProjectId(null);
-    showOk('Новый проект — сохраните на сервер, чтобы получить id');
-  }, [showOk]);
+    setPublicPath(null);
+    setShareToastOpen(false);
+    setProjectsOpen(false);
+  }, [resetToStart, setClientName, setProjectId]);
+
+  /** Выход на Start Screen: без confirm, если проект уже на сервере. */
+  const exitProject = useCallback(() => {
+    if (!projectId && needsResetConfirm()) {
+      const ok = window.confirm(
+        'Выйти из проекта? Несохранённые данные текущей анкеты будут сброшены.',
+      );
+      if (!ok) return;
+    }
+    exitToStart();
+  }, [exitToStart, needsResetConfirm, projectId]);
+
+  const startNewProject = useCallback(() => {
+    if (needsResetConfirm()) {
+      const ok = window.confirm(
+        'Начать новый проект? Несохранённые данные текущей анкеты будут сброшены.',
+      );
+      if (!ok) return;
+    }
+    exitToStart();
+  }, [needsResetConfirm, exitToStart]);
+
+  const report = getDraftParams().lastCalcReport ?? null;
+  const canPrintPdf =
+    Boolean(projectId) && parseCommercialBomFromReport(report) != null;
+  const canPublishShare = Boolean(clientName.trim()) && canPrintPdf;
 
   return {
-    clientName,
-    setClientName,
-    projectId,
     statusMessage,
     statusError,
     fileInputRef,
@@ -302,17 +451,28 @@ export function useSurveyProject({
     projectsLoading,
     projectList,
     calculations,
+    publicPath,
+    shareBusy,
+    shareToastOpen,
+    dismissShareToast,
+    canPrintPdf,
+    canPublishShare,
     saveToFile,
     saveToServer,
     openFilePicker,
     handleFileSelected,
     exportTextFile,
-    exportShare,
-    exportLink,
+    exportHashLink,
+    copyPublicLink,
+    revokeShare,
+    printPdf,
+    exitProject,
     openProjectsPanel,
     loadProjectById,
     loadCalculationById,
     startNewProject,
     refreshProjectList,
+    buildDraft,
+    runManualCalc,
   };
 }

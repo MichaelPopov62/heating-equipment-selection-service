@@ -32,6 +32,9 @@ export function runSurveyMutationPipeline(
   if (mutation.type === 'DRAFT_LOADED') {
     thermalRegimeTouched = true;
   }
+  if (mutation.type === 'SESSION_RESET' || mutation.type === 'SURVEY_STARTED') {
+    thermalRegimeTouched = false;
+  }
 
   let draftInitializing = prev.draftInitializing;
   if (mutation.type === 'DRAFT_LOADED') {
@@ -48,6 +51,14 @@ export function runSurveyMutationPipeline(
     reportEpoch += 1;
     uiPhase = report != null ? 'stable' : 'idle';
     calcError = null;
+  }
+
+  if (mutation.type === 'SESSION_RESET' || mutation.type === 'SURVEY_STARTED') {
+    report = null;
+    reportEpoch += 1;
+    uiPhase = 'idle';
+    calcError = null;
+    draftInitializing = false;
   }
 
   const calcInputKey = buildCalcInputKeyFromDraft(draft);
