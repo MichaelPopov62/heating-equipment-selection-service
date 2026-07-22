@@ -1,0 +1,108 @@
+/**
+ * Назначение: базовые стили модальных окон.
+ */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: color-mix(in srgb, #08060d 55%, transparent);
+}
+
+.dialog {
+  width: min(100%, 440px);
+  max-height: min(90svh, 640px);
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.title {
+  margin: 0 0 8px;
+  font: 700 18px/1.25 var(--heading);
+  color: var(--text-h);
+}
+
+.description {
+  margin: 0 0 16px;
+  font: 400 14px/1.45 var(--sans);
+  color: var(--text);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.label {
+  font: 600 13px/1.2 var(--sans);
+  color: var(--text-h);
+}
+
+.input,
+.textarea {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: 500 14px/1.35 var(--sans);
+}
+
+.textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.primary,
+.secondary {
+  border-radius: 10px;
+  padding: 10px 16px;
+  font: 600 13px/1.2 var(--sans);
+  cursor: pointer;
+}
+
+.primary {
+  border: 1px solid var(--accent-border);
+  background: var(--accent);
+  color: #fff;
+}
+
+.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-h);
+}
+
+.statusOk {
+  margin: 0 0 12px;
+  font: 500 13px/1.4 var(--sans);
+  color: #15803d;
+}
+
+.statusErr {
+  margin: 0 0 12px;
+  font: 500 13px/1.4 var(--sans);
+  color: crimson;
+}

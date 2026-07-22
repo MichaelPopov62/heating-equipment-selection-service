@@ -28,6 +28,8 @@ import type { WiringSystemType } from './surveySession/wiringLayoutV3';
 import {
   SURVEY_STEP_NAV_ITEMS,
   surveyStepGlobalMetaTitle,
+  surveyStepHasGlobalMetaContent,
+  surveyStepHasWorkAreaContent,
 } from './constants/surveySteps';
 import { RESULTS_SECTION_IDS } from './constants/surveyResultsSections';
 import type { SurveyCurrentStep } from './types/surveyStep';
@@ -380,6 +382,21 @@ export function AppSurveyContent({
     waterHeaterForm,
   ]);
 
+  const hasGlobalMetaContent = surveyStepHasGlobalMetaContent(currentStep);
+  const hasWorkAreaContent = surveyStepHasWorkAreaContent(currentStep);
+
+  const calcStatusNode =
+    calcLoading || calcError ? (
+      <div className={styles.calcStatus}>
+        {calcLoading ? <div className={styles.hint}>Расчёт…</div> : null}
+        {calcError ? (
+          <div className={styles.calcError} role="alert">
+            {calcError}
+          </div>
+        ) : null}
+      </div>
+    ) : null;
+
   return (
     <div className={styles.appContainer}>
       <Header {...projectChrome} variant="survey" />
@@ -406,132 +423,137 @@ export function AppSurveyContent({
         </aside>
 
         <main ref={mainColumnRef} className={styles.mainColumn}>
-          {/* Секция с общими коэффициентами */}
-          <section
-            className={styles.globalMeta}
-            aria-labelledby="global-meta-title"
-          >
-            {/* Инпуты для города и материалов */}
-            <h2 id="global-meta-title">
-              {surveyStepGlobalMetaTitle(currentStep)}
-            </h2>
-            {currentStep === 'object' && (
-              <ObjectMetaForm
-                value={objectMeta}
-                wallPresets={wallPresets}
-                sftkInsulationPresets={sftkInsulationPresets}
-                ventilatedInsulationPresets={ventilatedInsulationPresets}
-                roofPresets={roofPresets}
-                loadingPresets={presetsLoading}
-                presetsError={presetsError}
-                onChange={setObjectMeta}
-              />
-            )}
+          {hasGlobalMetaContent ? (
+            <section
+              className={styles.globalMeta}
+              aria-labelledby="global-meta-title"
+            >
+              <h2 id="global-meta-title">
+                {surveyStepGlobalMetaTitle(currentStep)}
+              </h2>
+              {currentStep === 'object' && (
+                <ObjectMetaForm
+                  value={objectMeta}
+                  wallPresets={wallPresets}
+                  sftkInsulationPresets={sftkInsulationPresets}
+                  ventilatedInsulationPresets={ventilatedInsulationPresets}
+                  roofPresets={roofPresets}
+                  loadingPresets={presetsLoading}
+                  presetsError={presetsError}
+                  onChange={setObjectMeta}
+                />
+              )}
 
-            {currentStep === 'hotWater' && (
-              <p className={styles.hint} style={{ marginTop: 8 }}>
-                Тип объекта:{' '}
-                <strong>
-                  {objectMeta.objectType === 'apartment' ? 'Квартира' : 'Дом'}
-                </strong>
-                , этажность {objectMeta.floors}, комнат по плану:{' '}
-                {objectMeta.roomsCount}. Нормы расхода воды на человека и
-                коэффициент одновременности берутся из справочника бэкенда (по
-                типу объекта).
-              </p>
-            )}
+              {currentStep === 'hotWater' && (
+                <p className={styles.hint} style={{ marginTop: 8 }}>
+                  Тип объекта:{' '}
+                  <strong>
+                    {objectMeta.objectType === 'apartment' ? 'Квартира' : 'Дом'}
+                  </strong>
+                  , этажность {objectMeta.floors}, комнат по плану:{' '}
+                  {objectMeta.roomsCount}. Нормы расхода воды на человека и
+                  коэффициент одновременности берутся из справочника бэкенда (по
+                  типу объекта).
+                </p>
+              )}
 
-            {currentStep === 'boiler' && (
-              <p className={styles.hint} style={{ marginTop: 8 }}>
-                Задайте график подачи/обратки радиаторного контура (пресет под
-                тип котла). Подводка и тип приборов — на шаге «Радиаторы».
-                Сценарий ГВС и подбор БКН/электробойлера — на шаге
-                «Водонагреватель».
-              </p>
-            )}
+              {currentStep === 'boiler' && (
+                <p className={styles.hint} style={{ marginTop: 8 }}>
+                  Задайте график подачи/обратки радиаторного контура (пресет под
+                  тип котла). Подводка и тип приборов — на шаге «Радиаторы».
+                  Сценарий ГВС и подбор БКН/электробойлера — на шаге
+                  «Водонагреватель».
+                </p>
+              )}
 
-            {currentStep === 'radiators' && (
-              <p className={styles.hint} style={{ marginTop: 8 }}>
-                Подводка (боковая / нижняя) фильтрует панельный пул; тип
-                приборов задаётся один на весь объект. График 75/65 или 55/45 —
-                на шаге «Котёл».
-              </p>
-            )}
+              {currentStep === 'radiators' && (
+                <p className={styles.hint} style={{ marginTop: 8 }}>
+                  Подводка (боковая / нижняя) фильтрует панельный пул; тип
+                  приборов задаётся один на весь объект. График 75/65 или 55/45 —
+                  на шаге «Котёл».
+                </p>
+              )}
 
-            {currentStep === 'waterHeater' && (
-              <p className={styles.hint} style={{ marginTop: 8 }}>
-                Выберите стратегию ГВС: от этого зависят подбор бойлера
-                косвенного нагрева или электронакопителя и формула мощности
-                котла. Изменения пересчитываются автоматически.
-              </p>
-            )}
+              {currentStep === 'waterHeater' && (
+                <p className={styles.hint} style={{ marginTop: 8 }}>
+                  Выберите стратегию ГВС: от этого зависят подбор бойлера
+                  косвенного нагрева или электронакопителя и формула мощности
+                  котла. Изменения пересчитываются автоматически.
+                </p>
+              )}
 
-            {/* Температуры (MVP): относятся к объекту */}
-            {currentStep === 'object' && (
-              <div className={styles.tempRow}>
-                <label className={styles.tempField}>
-                  Внутри, °C
-                  <input
-                    type="number"
-                    value={temps.insideC}
-                    onChange={(e) =>
-                      { setTemps((prev) => ({
-                        ...prev,
-                        insideC: Number(e.target.value),
-                      })); }
-                    }
-                  />
-                </label>
-                <label className={styles.tempField}>
-                  Снаружи, °C
-                  <input
-                    type="number"
-                    value={temps.outsideC}
-                    onChange={(e) =>
-                      { setTemps((prev) => ({
-                        ...prev,
-                        outsideC: Number(e.target.value),
-                      })); }
-                    }
-                  />
-                </label>
-                <label className={styles.tempField}>
-                  Воздух в санузле, °C
-                  <input
-                    type="number"
-                    min={24}
-                    max={35}
-                    placeholder="≥24"
-                    value={temps.bathroomAirTempC ?? ''}
-                    onChange={(e) => {
-                      const raw = e.target.value.trim();
-                      setTemps((prev) => {
-                        if (raw === '') {
-                          const { bathroomAirTempC: _omit, ...rest } = prev;
-                          return rest;
-                        }
-                        const n = Number(raw);
-                        if (!Number.isFinite(n)) return prev;
-                        return {
+              {currentStep === 'object' && (
+                <div className={styles.tempRow}>
+                  <label className={styles.tempField}>
+                    Внутри, °C
+                    <input
+                      type="number"
+                      value={temps.insideC}
+                      onChange={(e) =>
+                        { setTemps((prev) => ({
                           ...prev,
-                          bathroomAirTempC: Math.max(24, Math.min(35, n)),
-                        };
-                      });
-                    }}
-                  />
-                </label>
-              </div>
-            )}
-            {currentStep === 'object' && (
-              <p className={styles.hint} style={{ marginTop: 8 }}>
-                «Воздух в санузле» — расчётная температура воздуха (не теплоноситель), не
-                ниже 24 °C. Пусто = max(внутри, 24). Можно задать выше (например 26–28).
-              </p>
-            )}
-          </section>
+                          insideC: Number(e.target.value),
+                        })); }
+                      }
+                    />
+                  </label>
+                  <label className={styles.tempField}>
+                    Снаружи, °C
+                    <input
+                      type="number"
+                      value={temps.outsideC}
+                      onChange={(e) =>
+                        { setTemps((prev) => ({
+                          ...prev,
+                          outsideC: Number(e.target.value),
+                        })); }
+                      }
+                    />
+                  </label>
+                  <label className={styles.tempField}>
+                    Воздух в санузле, °C
+                    <input
+                      type="number"
+                      min={24}
+                      max={35}
+                      placeholder="≥24"
+                      value={temps.bathroomAirTempC ?? ''}
+                      onChange={(e) => {
+                        const raw = e.target.value.trim();
+                        setTemps((prev) => {
+                          if (raw === '') {
+                            const { bathroomAirTempC: _omit, ...rest } = prev;
+                            return rest;
+                          }
+                          const n = Number(raw);
+                          if (!Number.isFinite(n)) return prev;
+                          return {
+                            ...prev,
+                            bathroomAirTempC: Math.max(24, Math.min(35, n)),
+                          };
+                        });
+                      }}
+                    />
+                  </label>
+                </div>
+              )}
+              {currentStep === 'object' && (
+                <p className={styles.hint} style={{ marginTop: 8 }}>
+                  «Воздух в санузле» — расчётная температура воздуха (не теплоноситель), не
+                  ниже 24 °C. Пусто = max(внутри, 24). Можно задать выше (например 26–28).
+                </p>
+              )}
+            </section>
+          ) : null}
 
-          {/* Основная рабочая область */}
-          <section className={styles.workArea}>
+          {hasWorkAreaContent ? (
+            <section
+              className={
+                hasGlobalMetaContent
+                  ? styles.workArea
+                  : `${styles.workArea} ${styles.workAreaStandalone}`
+              }
+            >
             {currentStep === 'rooms' && (
               <RoomsForm
                 value={rooms}
@@ -721,19 +743,15 @@ export function AppSurveyContent({
               />
             )}
 
-            <div style={{ marginTop: 16 }}>
-              {calcLoading && <div className={styles.hint}>Расчёт…</div>}
-              {calcError && (
-                <div style={{ marginTop: 8, color: 'crimson' }}>
-                  {calcError}
-                </div>
-              )}
-            </div>
-          </section>
+              {calcStatusNode}
+            </section>
+          ) : (
+            calcStatusNode
+          )}
         </main>
       </div>
 
-      <Footer version={`v${__APP_VERSION__}`} />
+      <Footer variant="app" />
     </div>
   );
 }

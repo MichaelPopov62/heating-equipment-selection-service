@@ -5,6 +5,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ShareLinkToast } from '../ShareLinkToast/ShareLinkToast';
+import { brandUk } from '../../i18n/uk/brand';
+import { headerUk } from '../../i18n/uk/header';
 import styles from './Header.module.css';
 
 export type HeaderProps = {
@@ -21,12 +23,18 @@ export type HeaderProps = {
   canPrintPdf?: boolean;
   /** Есть ли projectId и отчёт для публикации ссылки. */
   canPublishShare?: boolean;
+  /** Можно ли сохранить черновик (имя клиента). */
+  canSaveProject?: boolean;
+  /** Сохранение проекта на сервер в процессе. */
+  saveProjectBusy?: boolean;
   /** Публикация публичной ссылки в процессе. */
   shareBusy?: boolean;
   /** Toast «ссылка скопирована» под кнопкой «Ссылка». */
   shareToastOpen?: boolean;
   onDismissShareToast?: () => void;
   onOpenProjects: () => void;
+  /** Зберегти чернетку анкети на сервер (без обовʼязкового розрахунку). */
+  onSaveProject: () => void;
   /** Выход на стартовый экран (без skeleton). */
   onExit: () => void;
   onCopyPublicLink: () => void;
@@ -44,10 +52,13 @@ export function Header({
   statusError,
   canPrintPdf = false,
   canPublishShare = false,
+  canSaveProject = false,
+  saveProjectBusy = false,
   shareBusy = false,
   shareToastOpen = false,
   onDismissShareToast,
   onOpenProjects,
+  onSaveProject,
   onExit,
   onCopyPublicLink,
   onPrintPdf,
@@ -89,11 +100,11 @@ export function Header({
         <div className={styles.titles}>
           <h1 className={styles.title}>{title}</h1>
           <p className={styles.subtitle}>
-            Сервис расчёта и подбора отопительного оборудования
+            {brandUk.tagline}
             {projectId ? (
               <>
                 {' '}
-                · <span className={styles.projectId}>проект сохранён</span>
+                · <span className={styles.projectId}>{headerUk.projectSaved}</span>
               </>
             ) : null}
           </p>
@@ -110,7 +121,7 @@ export function Header({
         </div>
       </div>
 
-      <div ref={controlsRef} className={styles.controls} aria-label="Панель управления">
+      <div ref={controlsRef} className={styles.controls} aria-label={headerUk.controlsAria}>
         {variant === 'survey' ? (
           <input
             type="text"
@@ -119,10 +130,10 @@ export function Header({
             onChange={(e) => {
               onClientNameChange(e.target.value);
             }}
-            placeholder="Имя клиента"
+            placeholder={headerUk.clientNamePlaceholder}
             maxLength={200}
             autoComplete="off"
-            aria-label="Имя клиента"
+            aria-label={headerUk.clientNameAria}
           />
         ) : null}
 
@@ -134,11 +145,31 @@ export function Header({
             onOpenProjects();
           }}
         >
-          Проекты
+          {headerUk.projects}
         </button>
 
         {variant === 'survey' ? (
           <>
+            <button
+              type="button"
+              className={styles.secondaryButton}
+              disabled={!canSaveProject || saveProjectBusy}
+              aria-busy={saveProjectBusy}
+              title={
+                saveProjectBusy
+                  ? headerUk.saveProjectBusy
+                  : canSaveProject
+                    ? headerUk.saveProjectTitle
+                    : headerUk.saveProjectDisabled
+              }
+              onClick={() => {
+                closeMenus();
+                onSaveProject();
+              }}
+            >
+              {saveProjectBusy ? headerUk.saveProjectBusy : headerUk.saveProject}
+            </button>
+
             <div className={styles.shareLinkWrap}>
               <button
                 type="button"
@@ -147,17 +178,17 @@ export function Header({
                 aria-busy={shareBusy}
                 title={
                   shareBusy
-                    ? 'Публикация публичной ссылки…'
+                    ? headerUk.linkPublishing
                     : canPublishShare
-                      ? 'Скопировать публичную ссылку на смету'
-                      : 'Сначала сохраните проект с расчётом на сервере (Dev) или опубликуйте ссылку'
+                      ? headerUk.linkShareTitle
+                      : headerUk.linkShareDisabled
                 }
                 onClick={() => {
                   closeMenus();
                   onCopyPublicLink();
                 }}
               >
-                {shareBusy ? 'Публикация…' : 'Ссылка'}
+                {shareBusy ? headerUk.linkPublishing : headerUk.link}
               </button>
               {onDismissShareToast ? (
                 <ShareLinkToast open={shareToastOpen} onDismiss={onDismissShareToast} />
@@ -179,7 +210,7 @@ export function Header({
                   setPdfMenuOpen((v) => !v);
                 }}
               >
-                PDF / Скачать
+                {headerUk.pdfDownload}
               </button>
               {pdfMenuOpen ? (
                 <div className={styles.menuPanel} role="menu">
@@ -191,7 +222,7 @@ export function Header({
                       closeMenus();
                     }}
                   >
-                    Финансовый итог (PDF)
+                    {headerUk.pdfFinancial}
                   </button>
                   <button
                     type="button"
@@ -201,7 +232,7 @@ export function Header({
                       closeMenus();
                     }}
                   >
-                    Финансы + технический расчёт (PDF)
+                    {headerUk.pdfWithTechnical}
                   </button>
                 </div>
               ) : null}
@@ -210,13 +241,13 @@ export function Header({
             <button
               type="button"
               className={styles.secondaryButton}
-              title="Выйти на стартовый экран"
+              title={headerUk.exitTitle}
               onClick={() => {
                 closeMenus();
                 onExit();
               }}
             >
-              Выйти
+              {headerUk.exit}
             </button>
           </>
         ) : null}

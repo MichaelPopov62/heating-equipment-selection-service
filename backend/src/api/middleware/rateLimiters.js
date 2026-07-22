@@ -103,3 +103,10 @@ export const publicShareReadRateLimiter = createLimiter({
   max: envLimit('RATE_LIMIT_PUBLIC_SHARE_PER_15M', 120),
   code: 'PUBLIC_SHARE_RATE_LIMIT_EXCEEDED',
 });
+
+/** POST /api/v1/feedback — bug/contact формы футера. */
+export const feedbackRateLimiter = createLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: envLimit('RATE_LIMIT_FEEDBACK_PER_15M', 20),
+  code: 'FEEDBACK_RATE_LIMIT_EXCEEDED',
+});

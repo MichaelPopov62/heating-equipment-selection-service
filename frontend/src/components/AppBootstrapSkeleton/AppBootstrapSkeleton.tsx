@@ -38,7 +38,7 @@ export function AppBootstrapSkeleton({
         <Spinner label={statusLabel} />
       </main>
 
-      <Footer version={`v${__APP_VERSION__}`} />
+      <Footer variant="app" />
     </div>
   );
 }

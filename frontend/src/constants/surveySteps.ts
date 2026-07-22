@@ -80,6 +80,34 @@ export function surveyStepGlobalMetaTitle(step: SurveyCurrentStep): string {
   return SURVEY_STEP_GLOBAL_META_TITLES[step] ?? DEFAULT_GLOBAL_META_TITLE;
 }
 
+/** Шаги, на которых в globalMeta есть форма или подсказки (не пустой заголовок). */
+const SURVEY_STEPS_WITH_GLOBAL_META_CONTENT: ReadonlySet<SurveyCurrentStep> =
+  new Set(['object', 'hotWater', 'boiler', 'radiators', 'waterHeater']);
+
+/**
+ * Нужна ли секция globalMeta на шаге (есть содержимое, а не только заголовок).
+ *
+ * @param step
+ * @returns {boolean}
+ */
+export function surveyStepHasGlobalMetaContent(step: SurveyCurrentStep): boolean {
+  return SURVEY_STEPS_WITH_GLOBAL_META_CONTENT.has(step);
+}
+
+/** Шаг «Объект»: форма только в globalMeta, отдельная workArea не нужна. */
+const SURVEY_STEPS_WITH_WORK_AREA_CONTENT: ReadonlySet<SurveyCurrentStep> =
+  new Set(SURVEY_STEPS.filter((step) => step !== 'object'));
+
+/**
+ * Нужна ли секция workArea на шаге (есть форма/отчёт, а не только globalMeta).
+ *
+ * @param step
+ * @returns {boolean}
+ */
+export function surveyStepHasWorkAreaContent(step: SurveyCurrentStep): boolean {
+  return SURVEY_STEPS_WITH_WORK_AREA_CONTENT.has(step);
+}
+
 /**
  * Подпись шага для aria-label и UI-ссылок навигации.
  *

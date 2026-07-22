@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,13 +12,15 @@
     "verify:survey-session": "node scripts/verifySurveySessionPipeline.mjs",
     "verify:start-state": "node scripts/verifyStartState.mjs",
     "verify:dead-code": "knip --treat-config-hints-as-errors",
-    "verify": "npm run lint && npm run typecheck && npm run verify:dead-code && npm run build && npm run verify:survey-session && npm run verify:start-state"
+    "verify:footer-nav": "node scripts/verifyFooterNav.mjs",
+    "verify": "npm run lint && npm run typecheck && npm run verify:dead-code && npm run verify:footer-nav && npm run build && npm run verify:survey-session && npm run verify:start-state"
   },
   "dependencies": {
     "@tabler/icons-react": "^3.41.1",
     "@tanstack/react-query": "^5.101.2",
     "react": "^19.2.5",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.2.5",
+    "react-router-dom": "^7.18.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

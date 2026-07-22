@@ -1,0 +1,44 @@
+/**
+ * Назначение: стили банера cookie.
+ */
+
+.banner {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 900;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.text {
+  margin: 0;
+  flex: 1 1 240px;
+  font: 500 13px/1.45 var(--sans);
+  color: var(--text);
+}
+
+.link {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.button {
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  padding: 8px 14px;
+  background: var(--accent);
+  color: #fff;
+  font: 600 13px/1.2 var(--sans);
+  cursor: pointer;
+  white-space: nowrap;
+}

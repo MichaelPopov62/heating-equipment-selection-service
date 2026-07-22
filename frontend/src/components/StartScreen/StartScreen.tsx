@@ -1,26 +1,22 @@
 /**
- * Назначение: Стартовый экран при первом входе (Start State).
- * Описание: CTA — новый расчёт и проекты (JSON — только DevPanel).
+ * Назначение: Стартовый экран при первом входе (Start State, UA).
  */
 
 import { useEffect, useRef } from 'react';
 
+import { startScreenUk } from '../../i18n/uk/startScreen';
 import Logo from '../Logo/Logo';
 import { Footer } from '../Footer/Footer';
 import styles from './StartScreen.module.css';
 
 export type StartScreenProps = {
   onStartNew: () => void;
-  onOpenProjects: () => void;
 };
 
 /**
  * @param props
  */
-export function StartScreen({
-  onStartNew,
-  onOpenProjects,
-}: StartScreenProps) {
+export function StartScreen({ onStartNew }: StartScreenProps) {
   const startRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -33,12 +29,9 @@ export function StartScreen({
         <div className={styles.hero}>
           <Logo size={44} />
           <h1 id="start-screen-title" className={styles.title}>
-            Подбор отопления для дома и квартиры
+            {startScreenUk.title}
           </h1>
-          <p className={styles.lead}>
-            Заполните анкету объекта — сервис рассчитает теплопотери, подберёт котёл,
-            радиаторы, ГВС и гидравлику по каталогу оборудования.
-          </p>
+          <p className={styles.lead}>{startScreenUk.lead}</p>
         </div>
 
         <div className={styles.actions}>
@@ -48,19 +41,12 @@ export function StartScreen({
             className={styles.primaryButton}
             onClick={onStartNew}
           >
-            Начать новый расчёт
-          </button>
-          <button
-            type="button"
-            className={styles.secondaryButton}
-            onClick={onOpenProjects}
-          >
-            Открыть проект
+            {startScreenUk.startNew}
           </button>
         </div>
       </main>
 
-      <Footer version={`v${__APP_VERSION__}`} />
+      <Footer variant="app" />
     </div>
   );
 }

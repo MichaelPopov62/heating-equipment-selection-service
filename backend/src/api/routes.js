@@ -14,6 +14,7 @@ import { setNoStoreCacheHeaders } from '../utils/setNoStoreCacheHeaders.js';
 import { createProjectsRouter } from './projectsRoutes.js';
 import { createPublicSharesRouter } from './publicSharesRoutes.js';
 import { createSystemRouter } from './systemRoutes.js';
+import { createFeedbackRouter } from './feedbackRoutes.js';
 import { calcRateLimiter } from './middleware/rateLimiters.js';
 
 /**
@@ -129,6 +130,7 @@ export async function createRoutes() {
    */
   router.use(createProjectsRouter());
   router.use(createPublicSharesRouter());
+  router.use(createFeedbackRouter());
 
   router.post('/api/v1/calc', calcRateLimiter, async (req, res, next) => {
     const logMeta = req.requestId ? { requestId: req.requestId } : null;

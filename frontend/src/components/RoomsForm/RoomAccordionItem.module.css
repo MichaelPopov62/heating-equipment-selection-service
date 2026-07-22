@@ -65,22 +65,23 @@
 }
 
 .formGrid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 10px;
+  align-items: end;
 }
 
 .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex: 1 1 100%;
   min-width: 0;
 }
 
 .label {
-  font: 600 12px/1.2 var(--sans);
+  font: 600 12px/1.3 var(--sans);
   color: var(--text-h);
+  min-height: calc(1.3em * 2);
 }
 
 .control {
@@ -90,6 +91,12 @@
   background: var(--surface-1);
   color: var(--text);
   font: 500 13px/1.2 var(--sans);
+  min-height: 42px;
+  box-sizing: border-box;
+}
+
+select.control {
+  width: 100%;
 }
 
 .fieldRow {
@@ -107,13 +114,40 @@
 }
 
 .fieldGroupTitle {
-  font: 700 13px/1.2 var(--sans);
+  font: 700 13px/1.3 var(--sans);
   color: var(--text-h);
+  min-height: calc(1.3em * 2);
 }
 
 .fullWidth {
-  flex: 1 1 100%;
-  min-width: 100%;
+  grid-column: 1 / -1;
+}
+
+/* Пол (ограждение) + водяной ТП — две колонки, выровненные строки полей */
+.floorUfhRow {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.ufhColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ufhFieldsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: end;
+}
+
+.floorFieldWithUfh .control {
+  margin-top: 38px;
 }
 
 .hint {
@@ -158,8 +192,17 @@
     min-width: 320px;
   }
 
-  .field {
-    flex: 1 1 calc(50% - 5px);
-    min-width: 220px;
+  .formGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+  }
+
+  .floorUfhRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ufhFieldsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
   }
 }

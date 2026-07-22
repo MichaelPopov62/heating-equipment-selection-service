@@ -3,6 +3,13 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { brandUk } from './i18n/uk/brand';
+import { footerUk } from './i18n/uk/footer';
+import { paths } from './routing/paths';
+import { useAppChrome } from './shell/useAppChrome';
+import { consumePendingProjectNavigation } from './utils/pendingProjectNavigation';
 
 import { AppBootstrapSkeleton } from './components/AppBootstrapSkeleton/AppBootstrapSkeleton';
 import { BootstrapErrorScreen } from './components/BootstrapErrorScreen/BootstrapErrorScreen';
@@ -33,6 +40,8 @@ type AppRootProps = Omit<AppSurveyContentProps, 'projectChrome'> & {
  * @param props — справочники для AppSurveyContent
  */
 export function AppRoot(props: AppRootProps) {
+  const navigate = useNavigate();
+  const appChrome = useAppChrome();
   const {
     onBootstrapModeChange,
     ...surveyContentProps
@@ -147,9 +156,12 @@ export function AppRoot(props: AppRootProps) {
     calculations,
     canPrintPdf,
     canPublishShare,
+    canSaveProject,
+    saveProjectBusy,
     shareBusy,
     shareToastOpen,
     dismissShareToast,
+    saveProjectDraft,
     saveToFile,
     saveToServer,
     openFilePicker,
@@ -160,7 +172,7 @@ export function AppRoot(props: AppRootProps) {
     revokeShare,
     printPdf,
     exitProject,
-    openProjectsPanel,
+    openProjectsPanel: _openProjectsPanel,
     loadProjectById,
     loadCalculationById,
     startNewProject,
@@ -180,9 +192,46 @@ export function AppRoot(props: AppRootProps) {
     getDraftParams,
   });
 
+  const handleNewCalculation = useCallback(() => {
+    if (needsResetConfirm()) {
+      const ok = window.confirm(footerUk.confirmNewCalculation);
+      if (!ok) return;
+    }
+    beginSurvey();
+  }, [needsResetConfirm, beginSurvey]);
+
+  const handleOpenProjects = useCallback(() => {
+    void navigate(paths.projects);
+  }, [navigate]);
+
+  useEffect(() => {
+    appChrome.registerFooterActions({
+      onNewCalculation: handleNewCalculation,
+      onOpenProjects: handleOpenProjects,
+    });
+    return () => {
+      appChrome.unregisterFooterActions();
+    };
+  }, [appChrome, handleNewCalculation, handleOpenProjects]);
+
+  useEffect(() => {
+    if (bootstrapMode === 'resolving') return;
+    const pending = consumePendingProjectNavigation();
+    if (!pending) return;
+    if (pending.kind === 'newProject') {
+      handleNewCalculation();
+      return;
+    }
+    if (pending.kind === 'project') {
+      void loadProjectById(pending.projectId);
+      return;
+    }
+    void loadCalculationById(pending.calculationId);
+  }, [bootstrapMode, handleNewCalculation, loadProjectById, loadCalculationById]);
+
   const headerProps: HeaderProps = {
     logo: <Logo />,
-    title: 'HeatCalc Pro',
+    title: brandUk.name,
     clientName,
     onClientNameChange: setClientName,
     projectId,
@@ -190,10 +239,13 @@ export function AppRoot(props: AppRootProps) {
     statusError,
     canPrintPdf,
     canPublishShare,
+    canSaveProject,
+    saveProjectBusy,
     shareBusy,
     shareToastOpen,
     onDismissShareToast: dismissShareToast,
-    onOpenProjects: openProjectsPanel,
+    onOpenProjects: handleOpenProjects,
+    onSaveProject: saveProjectDraft,
     onExit: exitProject,
     onCopyPublicLink: () => {
       void copyPublicLink();
@@ -287,10 +339,7 @@ export function AppRoot(props: AppRootProps) {
       <div className={styles.appContainer}>
         {sharedFileInput}
         <Header {...headerProps} variant="start" />
-        <StartScreen
-          onStartNew={beginSurvey}
-          onOpenProjects={openProjectsPanel}
-        />
+        <StartScreen onStartNew={handleNewCalculation} />
         {sharedProjectsDialog}
         {devPanel}
       </div>

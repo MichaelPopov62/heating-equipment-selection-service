@@ -485,44 +485,49 @@ export function RoomAccordionItem({
             </div>
           </div>
 
-          {/* Пол (теплопотери) */}
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor={`floorPresetId-${room.id}`}>
-              Пол (ограждение)
-            </label>
-            <select
-              id={`floorPresetId-${room.id}`}
-              className={styles.control}
-              value={floorPresets.length === 0 ? '' : room.floorPresetId}
-              onChange={(e) => { updateRoom({ floorPresetId: e.target.value }); }}
-              disabled={floorPresets.length === 0}
-            >
-              {floorPresets.length === 0 ? (
-                <option value="">Нет пресетов</option>
-              ) : (
-                floorPresets.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {envelopePresetLabel(p)}
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
-
-          {waterUnderfloorHeating && (
-            <div className={`${styles.field} ${styles.fullWidth}`}>
-              <div className={styles.fieldGroupTitle}>Водяной тёплый пол</div>
-              <label className={styles.checkboxRow} htmlFor={`ufh-enabled-${room.id}`}>
-                <input
-                  id={`ufh-enabled-${room.id}`}
-                  type="checkbox"
-                  checked={ufhEnabled}
-                  onChange={(e) => { setUnderfloorEnabled(e.target.checked); }}
-                />
-                <span>Тёплый пол в этом помещении</span>
-              </label>
-              {ufhEnabled && (
-                <div className={styles.formGrid} style={{ marginTop: 8 }}>
+          {waterUnderfloorHeating ? (
+            <div className={`${styles.floorUfhRow} ${styles.fullWidth}`}>
+              <div
+                className={
+                  ufhEnabled
+                    ? `${styles.field} ${styles.floorFieldWithUfh}`
+                    : styles.field
+                }
+              >
+                <label className={styles.label} htmlFor={`floorPresetId-${room.id}`}>
+                  Пол (ограждение)
+                </label>
+                <select
+                  id={`floorPresetId-${room.id}`}
+                  className={styles.control}
+                  value={floorPresets.length === 0 ? '' : room.floorPresetId}
+                  onChange={(e) => { updateRoom({ floorPresetId: e.target.value }); }}
+                  disabled={floorPresets.length === 0}
+                >
+                  {floorPresets.length === 0 ? (
+                    <option value="">Нет пресетов</option>
+                  ) : (
+                    floorPresets.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {envelopePresetLabel(p)}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+              <div className={styles.ufhColumn}>
+                <div className={styles.fieldGroupTitle}>Водяной тёплый пол</div>
+                <label className={styles.checkboxRow} htmlFor={`ufh-enabled-${room.id}`}>
+                  <input
+                    id={`ufh-enabled-${room.id}`}
+                    type="checkbox"
+                    checked={ufhEnabled}
+                    onChange={(e) => { setUnderfloorEnabled(e.target.checked); }}
+                  />
+                  <span>Тёплый пол в этом помещении</span>
+                </label>
+                {ufhEnabled ? (
+                  <div className={styles.ufhFieldsGrid}>
                   <div className={styles.field}>
                     <label className={styles.label} htmlFor={`ufh-base-${room.id}`}>
                       Основа ТП (перекрытие + стяжка)
@@ -668,8 +673,32 @@ export function RoomAccordionItem({
                     Отдельно от «Пол (ограждение)»: Rλ,B = основа над контуром + финиш (керамика,
                     винил, ламинат). Лимит температуры поверхности задаётся покрытием.
                   </div>
-                </div>
-              )}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          ) : (
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor={`floorPresetId-${room.id}`}>
+                Пол (ограждение)
+              </label>
+              <select
+                id={`floorPresetId-${room.id}`}
+                className={styles.control}
+                value={floorPresets.length === 0 ? '' : room.floorPresetId}
+                onChange={(e) => { updateRoom({ floorPresetId: e.target.value }); }}
+                disabled={floorPresets.length === 0}
+              >
+                {floorPresets.length === 0 ? (
+                  <option value="">Нет пресетов</option>
+                ) : (
+                  floorPresets.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {envelopePresetLabel(p)}
+                    </option>
+                  ))
+                )}
+              </select>
             </div>
           )}
 

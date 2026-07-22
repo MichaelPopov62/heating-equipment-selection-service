@@ -48,37 +48,22 @@
   width: min(100%, 360px);
 }
 
-.primaryButton,
-.secondaryButton {
+.primaryButton {
   width: 100%;
   border-radius: 12px;
   padding: 12px 16px;
   font: 600 14px/1.2 var(--sans);
   cursor: pointer;
+  border: 1px solid var(--accent-border);
+  background: var(--accent);
+  color: #fff;
   transition:
     border-color 0.15s ease,
     background 0.15s ease;
 }
 
-.primaryButton {
-  border: 1px solid var(--accent-border);
-  background: var(--accent);
-  color: #fff;
-}
-
 .primaryButton:hover {
   filter: brightness(1.05);
-}
-
-.secondaryButton {
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text-h);
-}
-
-.secondaryButton:hover {
-  border-color: var(--accent-border);
-  background: var(--accent-bg);
 }
 
 @media (--tablet) {

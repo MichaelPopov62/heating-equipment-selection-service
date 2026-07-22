@@ -1,52 +1,164 @@
-/* Назначение: Стили подвала приложения.
-   Описание: Фон, выравнивание версии и копирайта в нижней части страницы. */
+/**
+ * Назначение: стили подвала HeatCalc Pro (prod SaaS, UA).
+ */
+
+@import '../../styles/custom-media.css';
+
 .footer {
   border-top: 1px solid var(--border);
   background:
     radial-gradient(1200px 400px at 20% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 60%),
     radial-gradient(900px 300px at 90% 10%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 55%),
     var(--surface);
+  margin-top: auto;
 }
 
 .inner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
   max-width: 1126px;
   margin: 0 auto;
+  padding: 28px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Бренд — лого и название слева (как в шапке, без дублирования слогана) */
+.brandBlock {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  max-width: 100%;
+}
+
+.logoSlot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+}
+
+.brandTitles {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+}
+
+.brandName {
+  margin: 0;
+  font: 700 18px/1.2 var(--heading);
+  letter-spacing: -0.2px;
+  color: var(--text-h);
+}
+
+/* Продукт · Довідка · Правова інформація · Контакти — в один ряд */
+.columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.groupTitle {
+  margin: 0 0 10px;
+  font: 700 13px/1.2 var(--sans);
+  color: var(--text-h);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.linkList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.linkButton,
+.linkAnchor {
+  display: inline;
+  padding: 0;
+  border: none;
+  background: none;
+  font: 500 14px/1.35 var(--sans);
   color: var(--text);
-  font: 500 12px/1.4 var(--sans);
-  flex-wrap: wrap;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.linkButton:hover,
+.linkAnchor:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* Служебная и юридическая информация — один центрированный блок */
+.meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-top: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
   text-align: center;
 }
 
-.left {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.version {
-  font-weight: 700;
-  color: var(--text-h);
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
-  background: color-mix(in srgb, var(--accent-bg) 45%, var(--surface));
-}
-
-.separator {
-  opacity: 0.6;
-}
-
-.note {
+.copyright,
+.versionLine,
+.buildLine {
+  margin: 0;
+  font: 500 12px/1.5 var(--sans);
+  color: var(--text);
   opacity: 0.9;
 }
 
-.right {
-  opacity: 0.8;
+.disclaimer {
+  margin: 8px 0 0;
+  font: 500 12px/1.45 var(--sans);
+  color: var(--text);
+  opacity: 0.85;
+  max-width: 720px;
 }
 
+@media (--narrow) {
+  .brandName {
+    font-size: 18px;
+  }
+}
+
+@media (--tablet) {
+  .inner {
+    padding: 32px 20px 24px;
+    gap: 28px;
+  }
+
+  .columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px;
+  }
+}
+
+@media (--desktop) {
+  .brand {
+    align-items: center;
+  }
+
+  .columns {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

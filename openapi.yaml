@@ -231,6 +231,42 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
+  /api/v1/feedback:
+    post:
+      summary: Submit bug report or contact message (footer modals)
+      operationId: submitFeedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackRequestBody"
+      responses:
+        "201":
+          description: Feedback stored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbackOkResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: Rate limit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
   /api/v1/calc:
     post:
       summary: Calculate report and match equipment
@@ -970,6 +1006,40 @@ components:
       $ref: ./components/schemas/HeatLossReport.yaml
     ReferenceDataSources:
       $ref: ./components/schemas/ReferenceDataSources.yaml
+    FeedbackRequestBody:
+      type: object
+      required: [type, message]
+      properties:
+        type:
+          type: string
+          enum: [bug, contact]
+        message:
+          type: string
+          maxLength: 4000
+        email:
+          type: string
+          maxLength: 200
+        name:
+          type: string
+          maxLength: 120
+        pageUrl:
+          type: string
+          maxLength: 2000
+        appVersion:
+          type: string
+          maxLength: 40
+        buildId:
+          type: string
+          maxLength: 80
+    FeedbackOkResponse:
+      type: object
+      required: [ok, id]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        id:
+          type: string
     HealthOkResponse:
       $ref: ./components/schemas/HealthOkResponse.yaml
     InvalidateReferenceCacheOkResponse:

@@ -1421,6 +1421,39 @@ export interface ProjectMongoDoc {
   calculationsCount?: number;
 }
 
+/** Вход POST /api/v1/feedback. */
+export interface FeedbackInput {
+  type: 'bug' | 'contact';
+  message: string;
+  email?: string;
+  name?: string;
+  pageUrl?: string;
+  appVersion?: string;
+  buildId?: string;
+}
+
+/** Ответ POST /api/v1/feedback. */
+export interface FeedbackOkResponse {
+  ok: true;
+  id: string;
+}
+
+/** Документ MongoDB `feedback`. */
+export interface FeedbackMongoDoc {
+  _id?: import('mongoose').Types.ObjectId;
+  type: 'bug' | 'contact';
+  message: string;
+  email?: string;
+  name?: string;
+  pageUrl?: string;
+  appVersion?: string;
+  buildId?: string;
+  ownerSub?: string;
+  clientIp?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 /** Документ MongoDB `calculations`. */
 export interface CalculationMongoDoc {
   _id?: import('mongoose').Types.ObjectId;

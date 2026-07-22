@@ -6,7 +6,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
 
 import { FinancialSummaryTable } from '../FinancialSummary/FinancialSummaryTable';
+import { Footer } from '../Footer/Footer';
 import Logo from '../Logo/Logo';
+import { brandUk } from '../../i18n/uk/brand';
 import { downloadPublicSharePdf, fetchPublicShare } from '../../services/publicShareApi';
 import type { PublicSharePayload } from '../../types/projectsApi';
 import { isRecord } from '../../utils/jsonGuards';
@@ -85,11 +87,12 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
       <div className={styles.page}>
         <header className={styles.top}>
           <Logo />
-          <h1 className={styles.brand}>HeatCalc Pro</h1>
+          <h1 className={styles.brand}>{brandUk.name}</h1>
         </header>
         <p className={styles.error} role="alert">
           {error ?? 'Смета не найдена'}
         </p>
+        <Footer variant="share" />
       </div>
     );
   }
@@ -100,7 +103,7 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
         <div className={styles.brandRow}>
           <Logo />
           <div>
-            <h1 className={styles.brand}>HeatCalc Pro</h1>
+            <h1 className={styles.brand}>{brandUk.name}</h1>
             <p className={styles.sub}>Финансовый итог по расчёту</p>
           </div>
         </div>
@@ -183,6 +186,7 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
       ) : null}
 
       <p className={styles.footnote}>Документ только для просмотра. Изменение анкеты недоступно.</p>
+      <Footer variant="share" />
     </div>
   );
 }

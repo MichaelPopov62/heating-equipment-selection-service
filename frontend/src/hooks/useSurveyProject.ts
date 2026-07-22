@@ -82,6 +82,8 @@ export function useSurveyProject({
     loadCalculationMutation,
   } = useProjectMutations();
 
+  const saveProjectBusy = saveProjectMutation.isPending;
+
   const {
     projectList,
     projectsLoading,
@@ -179,16 +181,16 @@ export function useSurveyProject({
           setCalcReport(result.report);
         }
         if (withCalc && result.report) {
-          showOk('Проект и расчёт сохранены на сервере (Dev)');
+          showOk('Проєкт і розрахунок збережено на сервері');
         } else if (withCalc && !canRunCalc) {
-          showOk('Проект сохранён (расчёт пропущен: неполная анкета)');
+          showOk('Проєкт збережено (розрахунок пропущено — неповна анкета)');
         } else {
-          showOk('Проект сохранён на сервере (Dev)');
+          showOk('Проєкт збережено на сервері');
         }
       } catch (e) {
-        const msg = e instanceof Error ? e.message : 'Ошибка сохранения';
+        const msg = e instanceof Error ? e.message : 'Помилка збереження';
         if (msg.includes('MONGODB_UNAVAILABLE') || msg.includes('503')) {
-          showErr('MongoDB недоступна — сохраните в JSON-файл');
+          showErr('MongoDB недоступна — збережіть JSON-файл (Dev)');
         } else {
           showErr(msg);
         }
@@ -441,6 +443,11 @@ export function useSurveyProject({
   const canPrintPdf =
     Boolean(projectId) && parseCommercialBomFromReport(report) != null;
   const canPublishShare = Boolean(clientName.trim()) && canPrintPdf;
+  const canSaveProject = Boolean(clientName.trim());
+
+  const saveProjectDraft = useCallback(() => {
+    void saveToServer(false);
+  }, [saveToServer]);
 
   return {
     statusMessage,
@@ -457,8 +464,11 @@ export function useSurveyProject({
     dismissShareToast,
     canPrintPdf,
     canPublishShare,
+    canSaveProject,
+    saveProjectBusy,
     saveToFile,
     saveToServer,
+    saveProjectDraft,
     openFilePicker,
     handleFileSelected,
     exportTextFile,
