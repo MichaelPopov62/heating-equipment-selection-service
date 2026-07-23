@@ -4,7 +4,7 @@
 
 import express from 'express';
 
-import { optionalProjectsAuth } from '../auth/optionalProjectsAuth.js';
+import { optionalAuth } from '../auth/optionalAuth.js';
 import { validateFeedbackBody } from '../feedback/validateFeedbackBody.js';
 import { feedbackRateLimiter } from './middleware/rateLimiters.js';
 import { Feedback } from '../models/Feedback.js';
@@ -22,7 +22,7 @@ export function createFeedbackRouter() {
    * @param {import('express').Response} res
    * @param {import('express').NextFunction} next
    */
-  router.post('/api/v1/feedback', feedbackRateLimiter, optionalProjectsAuth, async (req, res, next) => {
+  router.post('/api/v1/feedback', feedbackRateLimiter, optionalAuth, async (req, res, next) => {
     const logMeta = req.requestId ? { requestId: req.requestId } : null;
     try {
       const parsed = validateFeedbackBody(req.body);
@@ -42,8 +42,7 @@ export function createFeedbackRouter() {
 
       /** @type {Record<string, unknown>} */
       const docPayload = { ...parsed.data };
-      const ownerSub = req.projectsUser?.sub?.trim();
-      if (ownerSub) docPayload.ownerSub = ownerSub;
+      if (req.user?.id) docPayload.ownerSub = req.user.id;
       const clientIp = typeof req.ip === 'string' ? req.ip.slice(0, 64) : '';
       if (clientIp) docPayload.clientIp = clientIp;
 

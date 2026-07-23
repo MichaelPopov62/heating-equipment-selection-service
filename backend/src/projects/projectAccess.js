@@ -1,9 +1,12 @@
 /**
  * Назначение: фильтры доступа к проектам по ownerId (защита от IDOR).
- * Описание: Production — строго ownerId; dev без auth — legacy-документы без ownerId для dev-local.
+ * Описание: Production — строго ownerId (ObjectId ref User); dev без auth — legacy-документы без ownerId.
  */
 
-import { isProjectsAuthRequired, resolveProjectsDevOwnerId } from '../auth/projectsAuthConfig.js';
+import {
+  isProjectsAuthRequired,
+  resolveProjectsDevOwnerObjectId,
+} from '../auth/projectsAuthConfig.js';
 import { Project, Calculation } from '../models/public.js';
 import {
   resolveMaxCalculationsPerProject,
@@ -11,51 +14,50 @@ import {
 } from '../auth/projectsAuthConfig.js';
 
 /**
- * @param {string} ownerSub
+ * @param {import('mongoose').Types.ObjectId} ownerId
  * @returns {import('mongoose').QueryFilter<import('../types/shared-types.js').ProjectMongoDoc>}
  */
-export function buildProjectOwnerFilter(ownerSub) {
+export function buildProjectOwnerFilter(ownerId) {
   if (!isProjectsAuthRequired()) {
-    const devId = resolveProjectsDevOwnerId();
-    if (ownerSub === devId) {
+    const devOwnerId = resolveProjectsDevOwnerObjectId();
+    if (ownerId.equals(devOwnerId)) {
       return {
         $or: [
-          { ownerId: ownerSub },
+          { ownerId },
           { ownerId: { $exists: false } },
           { ownerId: null },
-          { ownerId: '' },
         ],
       };
     }
   }
-  return { ownerId: ownerSub };
+  return { ownerId };
 }
 
 /**
  * @param {import('mongoose').Types.ObjectId} projectId
- * @param {string} ownerSub
+ * @param {import('mongoose').Types.ObjectId} ownerId
  * @returns {Promise<import('../types/shared-types.js').ProjectMongoDoc | null>}
  */
-export async function findOwnedProjectLean(projectId, ownerSub) {
-  return Project.findOne({ _id: projectId, ...buildProjectOwnerFilter(ownerSub) }).lean();
+export async function findOwnedProjectLean(projectId, ownerId) {
+  return Project.findOne({ _id: projectId, ...buildProjectOwnerFilter(ownerId) }).lean();
 }
 
 /**
  * @param {import('mongoose').Types.ObjectId} projectId
- * @param {string} ownerSub
+ * @param {import('mongoose').Types.ObjectId} ownerId
  * @returns {Promise<import('mongoose').HydratedDocument<import('../types/shared-types.js').ProjectMongoDoc> | null>}
  */
-export async function findOwnedProjectDoc(projectId, ownerSub) {
-  return Project.findOne({ _id: projectId, ...buildProjectOwnerFilter(ownerSub) });
+export async function findOwnedProjectDoc(projectId, ownerId) {
+  return Project.findOne({ _id: projectId, ...buildProjectOwnerFilter(ownerId) });
 }
 
 /**
- * @param {string} ownerSub
+ * @param {import('mongoose').Types.ObjectId} ownerId
  * @returns {Promise<void>}
  */
-export async function assertCanCreateProject(ownerSub) {
+export async function assertCanCreateProject(ownerId) {
   const max = resolveMaxProjectsPerOwner();
-  const count = await Project.countDocuments(buildProjectOwnerFilter(ownerSub));
+  const count = await Project.countDocuments(buildProjectOwnerFilter(ownerId));
   if (count >= max) {
     const err = new Error(`Превышен лимит проектов (${max})`);
     /** @type {import('../types/shared-types.js').AppErrorLike} */

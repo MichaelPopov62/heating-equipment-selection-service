@@ -12,8 +12,8 @@ const { Schema } = mongoose;
  */
 const projectSchema = new Schema(
   {
-    /** Владелец проекта (JWT sub). Обязателен для новых записей. */
-    ownerId: { type: String, required: true, trim: true, index: true },
+    /** Владелец проекта — ссылка на users._id (не JWT sub). Обязателен для новых записей. */
+    ownerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     clientName: { type: String, required: true, trim: true, maxlength: 200 },
     /** Краткая подпись объекта (опционально). */
     label: { type: String, required: false, trim: true, maxlength: 200 },

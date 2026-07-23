@@ -12,14 +12,15 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { createRoutes } from './api/public.js';
 import { warmupReferenceCache } from './reference/public.js';
-import { assertProjectsAuthConfiguredForProduction } from './auth/projectsAuthConfig.js';
+import { assertAuthConfiguredForProduction, assertAuthConfiguredWhenEnabled } from './auth/projectsAuthConfig.js';
 import { isMongoBsonObjectTooLargeError } from './projects/documentSizeLimits.js';
 import { logger } from './utils/logger.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 loadEnv({ path: join(__dirname, '..', '.env') });
 
-assertProjectsAuthConfiguredForProduction();
+assertAuthConfiguredForProduction();
+assertAuthConfiguredWhenEnabled();
 if (process.exitCode === 1) {
   process.exit(1);
 }

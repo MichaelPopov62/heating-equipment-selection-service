@@ -1,0 +1,11 @@
+type: string
+enum:
+  - PROJECTS_AUTH_REQUIRED
+  - PROJECTS_AUTH_FORBIDDEN
+  - PROJECTS_AUTH_NOT_CONFIGURED
+description: |
+  Коды ошибок аутентификации API проектов (/api/v1/projects/*).
+
+  - PROJECTS_AUTH_REQUIRED (401) — отсутствует заголовок Authorization: Bearer JWT.
+  - PROJECTS_AUTH_FORBIDDEN (403) — недействительный, просроченный или неверный audience/issuer JWT.
+  - PROJECTS_AUTH_NOT_CONFIGURED (503) — сервер не настроен для проверки JWT (AUTH_JWKS_URI / AUTH_JWT_SECRET).

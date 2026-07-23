@@ -5,8 +5,8 @@
 
 import express from 'express';
 import { Project, Calculation } from '../models/public.js';
-import { requireProjectsAuth } from '../auth/requireProjectsAuth.js';
-import { resolveProjectsDevOwnerId } from '../auth/projectsAuthConfig.js';
+import { requireAuth } from '../auth/requireAuth.js';
+import { resolveProjectsDevOwnerObjectId } from '../auth/projectsAuthConfig.js';
 import {
   projectCalcRateLimiter,
   projectsReadRateLimiter,
@@ -62,11 +62,17 @@ async function mongoMiddleware(_req, _res, next) {
 }
 
 /**
+ * ObjectId владельца проекта: req.user.id (users._id) или dev-fallback без JWT.
+ *
  * @param {import('express').Request} req
- * @returns {string}
+ * @returns {import('mongoose').Types.ObjectId}
  */
-function ownerSubFromRequest(req) {
-  return req.projectsUser?.sub ?? resolveProjectsDevOwnerId();
+function ownerIdFromRequest(req) {
+  if (req.user?.id) {
+    const oid = parseObjectIdParam(req.user.id);
+    if (oid) return oid;
+  }
+  return resolveProjectsDevOwnerObjectId();
 }
 
 /**
@@ -108,7 +114,7 @@ function parseLimit(raw, fallback, max) {
 export function createProjectsRouter() {
   const router = express.Router();
 
-  router.use('/api/v1/projects', mongoMiddleware, requireProjectsAuth);
+  router.use('/api/v1/projects', mongoMiddleware, requireAuth);
 
   /**
    * @param {import('express').Request} req
@@ -117,7 +123,7 @@ export function createProjectsRouter() {
    */
   router.get('/api/v1/projects', projectsReadRateLimiter, async (req, res, next) => {
     try {
-      const ownerSub = ownerSubFromRequest(req);
+      const ownerId = ownerIdFromRequest(req);
       const limit = parseLimit(req.query.limit, 50, 100);
       const skip = parseLimit(req.query.skip, 0, 10_000);
       const search =
@@ -126,7 +132,7 @@ export function createProjectsRouter() {
           : null;
 
       /** @type {import('mongoose').QueryFilter<import('../types/shared-types.js').ProjectMongoDoc>} */
-      const filter = { ...buildProjectOwnerFilter(ownerSub) };
+      const filter = { ...buildProjectOwnerFilter(ownerId) };
       if (search) {
         filter.clientName = {
           $regex: search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
@@ -168,13 +174,13 @@ export function createProjectsRouter() {
    */
   router.post('/api/v1/projects', projectsWriteRateLimiter, async (req, res, next) => {
     try {
-      const ownerSub = ownerSubFromRequest(req);
-      await assertCanCreateProject(ownerSub);
+      const ownerId = ownerIdFromRequest(req);
+      await assertCanCreateProject(ownerId);
 
       const payload = validateProjectCreateBody(req.body);
       /** @type {import('../types/shared-types.js').ProjectMongoDoc} */
       const createDoc = {
-        ownerId: ownerSub,
+        ownerId: ownerId,
         clientName: payload.clientName,
       };
       if (payload.label !== undefined) createDoc.label = payload.label;
@@ -183,7 +189,7 @@ export function createProjectsRouter() {
       const doc = await Project.create(createDoc);
       logger.info('project.create', reqLogMeta(req), {
         projectId: String(doc._id),
-        ownerId: ownerSub,
+        ownerId: ownerId,
         survey: surveyAuditMeta(payload.survey),
       });
       res.status(201).json({
@@ -202,7 +208,7 @@ export function createProjectsRouter() {
    */
   router.get('/api/v1/projects/:id', projectsReadRateLimiter, async (req, res, next) => {
     try {
-      const ownerSub = ownerSubFromRequest(req);
+      const ownerId = ownerIdFromRequest(req);
       const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
         res.status(400).json({
@@ -212,7 +218,7 @@ export function createProjectsRouter() {
         return;
       }
 
-      const doc = await findOwnedProjectLean(oid, ownerSub);
+      const doc = await findOwnedProjectLean(oid, ownerId);
       if (!doc) {
         res.status(404).json({
           ok: false,
@@ -254,7 +260,7 @@ export function createProjectsRouter() {
    */
   router.put('/api/v1/projects/:id', projectsWriteRateLimiter, async (req, res, next) => {
     try {
-      const ownerSub = ownerSubFromRequest(req);
+      const ownerId = ownerIdFromRequest(req);
       const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
         res.status(400).json({
@@ -271,7 +277,7 @@ export function createProjectsRouter() {
       if (patch.survey !== undefined) update.survey = patch.survey;
 
       const doc = await Project.findOneAndUpdate(
-        { _id: oid, ...buildProjectOwnerFilter(ownerSub) },
+        { _id: oid, ...buildProjectOwnerFilter(ownerId) },
         { $set: update },
         { new: true },
       ).lean();
@@ -287,7 +293,7 @@ export function createProjectsRouter() {
       const calculationsCount = await Calculation.countDocuments({ projectId: oid });
       logger.info('project.update', reqLogMeta(req), {
         projectId: String(oid),
-        ownerId: ownerSub,
+        ownerId: ownerId,
         changedFields: projectPatchFields(/** @type {Record<string, unknown>} */ (patch)),
         ...(patch.survey !== undefined ? { survey: surveyAuditMeta(patch.survey) } : {}),
       });
@@ -308,7 +314,7 @@ export function createProjectsRouter() {
    */
   router.delete('/api/v1/projects/:id', projectsWriteRateLimiter, async (req, res, next) => {
     try {
-      const ownerSub = ownerSubFromRequest(req);
+      const ownerId = ownerIdFromRequest(req);
       const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
         res.status(400).json({
@@ -320,7 +326,7 @@ export function createProjectsRouter() {
 
       const deleted = await Project.findOneAndDelete({
         _id: oid,
-        ...buildProjectOwnerFilter(ownerSub),
+        ...buildProjectOwnerFilter(ownerId),
       });
 
       if (!deleted) {
@@ -334,7 +340,7 @@ export function createProjectsRouter() {
       const calcResult = await Calculation.deleteMany({ projectId: oid });
       logger.info('project.delete', reqLogMeta(req), {
         projectId: String(oid),
-        ownerId: ownerSub,
+        ownerId: ownerId,
         calculationsRemoved: calcResult.deletedCount ?? 0,
       });
 
@@ -364,8 +370,8 @@ export function createProjectsRouter() {
     /** @type {boolean | undefined} */
     let surveyInRequest;
     try {
-      const ownerSub = ownerSubFromRequest(req);
-      ownerIdForLog = ownerSub;
+      const ownerId = ownerIdFromRequest(req);
+      ownerIdForLog = String(ownerId);
       const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
         res.status(400).json({
@@ -375,7 +381,7 @@ export function createProjectsRouter() {
         return;
       }
 
-      const projectRaw = await findOwnedProjectDoc(oid, ownerSub);
+      const projectRaw = await findOwnedProjectDoc(oid, ownerId);
       if (!projectRaw) {
         res.status(404).json({
           ok: false,
@@ -387,12 +393,12 @@ export function createProjectsRouter() {
       /** @type {import('mongoose').Document & {
        *   survey?: unknown;
        *   lastCalcInput?: import('../types/shared-types.js').CalcRequestBody;
-       *   ownerId?: string;
+       *   ownerId?: import('mongoose').Types.ObjectId;
        * }} */
       const project = /** @type {import('mongoose').Document & {
        *   survey?: unknown;
        *   lastCalcInput?: import('../types/shared-types.js').CalcRequestBody;
-       *   ownerId?: string;
+       *   ownerId?: import('mongoose').Types.ObjectId;
        * }} */ (projectRaw);
 
       await assertCanCreateCalculation(oid);
@@ -417,7 +423,7 @@ export function createProjectsRouter() {
 
       logger.info('project.calc.start', logMeta, {
         projectId: projectIdForLog,
-        ownerId: ownerSub,
+        ownerId: ownerId,
         calcInputSource,
         surveyInRequest: saveSurvey,
         ...(saveSurvey ? { survey: surveyAuditMeta(body.survey) } : {}),
@@ -427,7 +433,7 @@ export function createProjectsRouter() {
       if (calcInputSource === 'lastCalcInput' && !saveSurvey) {
         logger.info('project.calc.reuseLastInput', logMeta, {
           projectId: projectIdForLog,
-          ownerId: ownerSub,
+          ownerId: ownerId,
         });
       }
 
@@ -446,14 +452,14 @@ export function createProjectsRouter() {
       const calcDoc = await Calculation.create(calculationDocPayload);
 
       if (!project.ownerId) {
-        project.ownerId = ownerSub;
+        project.ownerId = ownerId;
       }
       project.lastCalcInput = input;
       await project.save();
 
       logger.info('project.calc.done', logMeta, {
         projectId: projectIdForLog,
-        ownerId: ownerSub,
+        ownerId: ownerId,
         calculationId: String(calcDoc._id),
         calcInputSource,
         surveySaved: saveSurvey,
@@ -493,7 +499,7 @@ export function createProjectsRouter() {
    */
   router.get('/api/v1/projects/:id/calculations', projectsReadRateLimiter, async (req, res, next) => {
     try {
-      const ownerSub = ownerSubFromRequest(req);
+      const ownerId = ownerIdFromRequest(req);
       const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
         res.status(400).json({
@@ -503,7 +509,7 @@ export function createProjectsRouter() {
         return;
       }
 
-      const owned = await findOwnedProjectLean(oid, ownerSub);
+      const owned = await findOwnedProjectLean(oid, ownerId);
       if (!owned) {
         res.status(404).json({
           ok: false,
@@ -546,7 +552,7 @@ export function createProjectsRouter() {
     projectsReadRateLimiter,
     async (req, res, next) => {
       try {
-        const ownerSub = ownerSubFromRequest(req);
+        const ownerId = ownerIdFromRequest(req);
         const projectOid = parseObjectIdParam(asRouteParam(req.params.projectId));
         const calcOid = parseObjectIdParam(asRouteParam(req.params.calcId));
         if (!projectOid || !calcOid) {
@@ -557,7 +563,7 @@ export function createProjectsRouter() {
           return;
         }
 
-        const owned = await findOwnedProjectLean(projectOid, ownerSub);
+        const owned = await findOwnedProjectLean(projectOid, ownerId);
         if (!owned) {
           res.status(404).json({
             ok: false,
@@ -597,7 +603,7 @@ export function createProjectsRouter() {
     projectsReadRateLimiter,
     async (req, res, next) => {
       try {
-        const ownerSub = ownerSubFromRequest(req);
+        const ownerId = ownerIdFromRequest(req);
         const oid = parseObjectIdParam(asRouteParam(req.params.id));
         if (!oid) {
           res.status(400).json({
@@ -607,7 +613,7 @@ export function createProjectsRouter() {
           return;
         }
 
-        const project = await findOwnedProjectLean(oid, ownerSub);
+        const project = await findOwnedProjectLean(oid, ownerId);
         if (!project) {
           res.status(404).json({
             ok: false,
@@ -668,7 +674,7 @@ export function createProjectsRouter() {
     projectsWriteRateLimiter,
     async (req, res, next) => {
       try {
-        const ownerSub = ownerSubFromRequest(req);
+        const ownerId = ownerIdFromRequest(req);
         const oid = parseObjectIdParam(asRouteParam(req.params.id));
         if (!oid) {
           res.status(400).json({
@@ -678,7 +684,7 @@ export function createProjectsRouter() {
           return;
         }
 
-        const project = await findOwnedProjectDoc(oid, ownerSub);
+        const project = await findOwnedProjectDoc(oid, ownerId);
         if (!project) {
           res.status(404).json({
             ok: false,
@@ -752,7 +758,7 @@ export function createProjectsRouter() {
         const sharePublishedAt = new Date();
 
         const updated = await Project.findOneAndUpdate(
-          { _id: oid, ...buildProjectOwnerFilter(ownerSub) },
+          { _id: oid, ...buildProjectOwnerFilter(ownerId) },
           {
             $set: {
               shareToken,
@@ -783,7 +789,7 @@ export function createProjectsRouter() {
 
         logger.info('project.share.publish', reqLogMeta(req), {
           projectId: String(oid),
-          ownerId: ownerSub,
+          ownerId: ownerId,
           rotated: !existingToken,
         });
 
@@ -812,7 +818,7 @@ export function createProjectsRouter() {
     projectsWriteRateLimiter,
     async (req, res, next) => {
       try {
-        const ownerSub = ownerSubFromRequest(req);
+        const ownerId = ownerIdFromRequest(req);
         const oid = parseObjectIdParam(asRouteParam(req.params.id));
         if (!oid) {
           res.status(400).json({
@@ -822,7 +828,7 @@ export function createProjectsRouter() {
           return;
         }
 
-        const project = await findOwnedProjectDoc(oid, ownerSub);
+        const project = await findOwnedProjectDoc(oid, ownerId);
         if (!project) {
           res.status(404).json({
             ok: false,
@@ -832,16 +838,16 @@ export function createProjectsRouter() {
         }
 
         await Project.updateOne(
-          { _id: oid, ...buildProjectOwnerFilter(ownerSub) },
+          { _id: oid, ...buildProjectOwnerFilter(ownerId) },
           { $unset: { shareToken: 1, sharePublishedAt: 1, shareSnapshot: 1 } },
         );
 
-        const refreshed = await findOwnedProjectLean(oid, ownerSub);
+        const refreshed = await findOwnedProjectLean(oid, ownerId);
         const calculationsCount = await Calculation.countDocuments({ projectId: oid });
 
         logger.info('project.share.revoke', reqLogMeta(req), {
           projectId: String(oid),
-          ownerId: ownerSub,
+          ownerId: ownerId,
         });
 
         res.status(200).json({

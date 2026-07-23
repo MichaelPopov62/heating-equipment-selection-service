@@ -419,6 +419,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: PROJECTS_AUTH_REQUIRED — отсутствует Bearer JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: PROJECTS_AUTH_FORBIDDEN — недействительный JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
         "503":
           description: MongoDB недоступна (MONGODB_UNAVAILABLE)
           content:
@@ -445,6 +457,18 @@ paths:
                 $ref: "#/components/schemas/ProjectCreateResponse"
         "400":
           description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: PROJECTS_AUTH_REQUIRED — отсутствует Bearer JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: PROJECTS_AUTH_FORBIDDEN — недействительный JWT
           content:
             application/json:
               schema:
@@ -919,10 +943,22 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: >
-        Access JWT с claim sub (владелец проекта). Production — обязателен.
-        Dev — опционален, если PROJECTS_AUTH_ENABLED не задан.
+      description: |
+        Clerk OIDC access JWT (Bearer). Backend: JOSE + JWKS (RS256/ES256), без Clerk SDK.
+        Frontend: Clerk SDK → getToken() → Authorization header.
+        Identity: JWT.sub → users.providerUserId → users._id → projects.ownerId.
+
+        Runtime env (Clerk): AUTH_JWKS_URI, AUTH_ISSUER, AUTH_AUDIENCE, AUTH_PROVIDER=clerk.
+        AUTH_JWKS_URI и AUTH_JWT_SECRET взаимоисключающие — для runtime только JWKS.
+
+        Production и PROJECTS_AUTH_ENABLED=true: JWT обязателен; сервер не стартует без JWKS-конфига.
+
+        Dev без PROJECTS_AUTH_ENABLED: JWT опционален.
+
+        Коды ошибок — см. ProjectsAuthErrorCode.
   schemas:
+    ProjectsAuthErrorCode:
+      $ref: ./components/schemas/ProjectsAuthErrorCode.yaml
     CalcInput:
       $ref: ./components/schemas/CalcInput.yaml
     ErrorEnvelope:

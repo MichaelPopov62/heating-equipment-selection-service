@@ -18,7 +18,7 @@ PDF: серверный Chromium, см. [`client-share-and-layers.md`](client-sh
 
 ## Безопасность (production)
 
-- **JWT обязателен** при `NODE_ENV=production` (`Authorization: Bearer <token>`, claim `sub` = `ownerId` проекта).
+- **JWT обязателен** при `NODE_ENV=production` (`Authorization: Bearer <token>`). Цепочка: `JWT.sub` → `users.providerUserId` → `users._id` → `projects.ownerId` (ObjectId ref User).
 - Настройка: `AUTH_JWKS_URI` (Clerk/Auth0) или `AUTH_JWT_SECRET` (HS256); опционально `AUTH_ISSUER`, `AUTH_AUDIENCE`.
 - **IDOR:** все запросы фильтруются по `ownerId`; чужой ObjectId → `404 PROJECT_NOT_FOUND`.
 - **Rate limit:** calc и projects (см. `RATE_LIMIT_*` в `backend/.env.example`).
@@ -57,12 +57,36 @@ cd backend && npm run verify:document-size-limits
 
 ### Локальная разработка
 
-По умолчанию auth **выключен** (не production): используется `PROJECTS_DEV_OWNER_ID` (`dev-local`).  
+По умолчанию auth **выключен** (не production): используется фиксированный dev ObjectId (`PROJECTS_DEV_OWNER_ID` — hex 24 символа; по умолчанию `000000000000000000000001`).  
 `POST /api/v1/calc` — без auth, как раньше.
 
 Включить JWT локально: `PROJECTS_AUTH_ENABLED=true` + токен в `Authorization` или `VITE_PROJECTS_BEARER_TOKEN` на фронте.
 
 Verify: `cd backend && npm run verify:projects-auth`
+
+### Миграция legacy ownerId (PR-6)
+
+После деплоя PR-5 (`ownerId` = ObjectId ref User) старые проекты с `ownerId = JWT sub` (string) или `dev-local` нужно мигрировать:
+
+```bash
+cd backend
+# dry-run (по умолчанию, без записи)
+npm run migrate:project-owner-ids
+# запись в MongoDB
+npm run migrate:project-owner-ids -- --apply
+```
+
+Правила миграции:
+
+| Legacy `ownerId` | Действие |
+|------------------|----------|
+| уже ObjectId | skip |
+| отсутствует / `null` / `dev-local` | → dev ObjectId (`000000000000000000000001` или `PROJECTS_DEV_OWNER_ID`) |
+| JWT `sub` (string) | → `users._id` по `users.providerUserId` (при нескольких IdP — приоритет `AUTH_PROVIDER`, затем `clerk`) |
+| 24-char hex string | → ObjectId, если совпадает с `users._id` |
+| sub без User в БД | skip (orphaned), требует ручного разбора |
+
+Verify логики: `npm run verify:migrate-project-owner-ids`
 
 ---
 

@@ -1407,7 +1407,7 @@ export interface ProjectListItem {
 /** Документ MongoDB `projects` (для Mongoose Model / QueryFilter). */
 export interface ProjectMongoDoc {
   _id?: import('mongoose').Types.ObjectId;
-  ownerId: string;
+  ownerId: import('mongoose').Types.ObjectId;
   clientName: string;
   label?: string;
   survey?: unknown;
@@ -1419,6 +1419,20 @@ export interface ProjectMongoDoc {
   updatedAt?: Date;
   /** Виртуальное / агрегированное поле только для сериализации списка. */
   calculationsCount?: number;
+}
+
+/** Документ MongoDB `users` (аутентификация Фаза 1). */
+export interface UserMongoDoc {
+  _id?: import('mongoose').Types.ObjectId;
+  authProvider: import('./auth.js').AuthProvider;
+  providerUserId: string;
+  email: string;
+  emailVerified: boolean;
+  name?: string;
+  role: string;
+  subscription: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 /** Вход POST /api/v1/feedback. */

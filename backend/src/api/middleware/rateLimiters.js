@@ -1,6 +1,6 @@
 /**
  * Назначение: rate limiting для calc и projects API.
- * Описание: Ключ — sub пользователя или IP; в dev отключается через RATE_LIMIT_DISABLED.
+ * Описание: Ключ — users._id (req.user.id) или IP; в dev отключается через RATE_LIMIT_DISABLED.
  */
 
 import { rateLimit, ipKeyGenerator } from 'express-rate-limit';
@@ -10,10 +10,10 @@ import { isRateLimitDisabled } from '../../auth/projectsAuthConfig.js';
  * @param {import('express').Request} req
  * @returns {string}
  */
-function rateLimitKey(req) {
-  const sub = req.projectsUser?.sub;
-  if (typeof sub === 'string' && sub.trim()) {
-    return `user:${sub.trim()}`;
+export function resolveRateLimitKey(req) {
+  const userId = req.user?.id;
+  if (typeof userId === 'string' && userId.trim()) {
+    return `user:${userId.trim()}`;
   }
   return ipKeyGenerator(req.ip ?? '127.0.0.1');
 }
@@ -39,7 +39,7 @@ function createLimiter(opts) {
     max: opts.max,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: rateLimitKey,
+    keyGenerator: resolveRateLimitKey,
     handler: (_req, res) => {
       res.status(429).json({
         ok: false,
