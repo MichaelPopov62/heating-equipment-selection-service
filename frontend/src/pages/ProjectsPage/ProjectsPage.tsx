@@ -4,6 +4,7 @@
 
 import { Link, useNavigate } from 'react-router-dom';
 
+import { AuthSessionBar } from '../../components/AuthSessionBar/AuthSessionBar';
 import { Footer } from '../../components/Footer/Footer';
 import { projectsUk } from '../../i18n/uk/projects';
 import { useProjectsListQuery } from '../../query/queries/useProjectsListQuery';
@@ -30,6 +31,7 @@ export function ProjectsPage() {
           </Link>
         </div>
         <h1 className={styles.title}>{projectsUk.title}</h1>
+        <AuthSessionBar className={styles.sessionBar} />
         <div className={styles.toolbar}>
           <button
             type="button"

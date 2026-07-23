@@ -1,0 +1,30 @@
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border, #d8dee9);
+  border-radius: 0.5rem;
+  background: var(--color-surface-muted, #f8fafc);
+}
+
+.label {
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #475569);
+}
+
+.logout {
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--color-link, #0f766e);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.logout:hover {
+  color: var(--color-link-hover, #115e59);
+}

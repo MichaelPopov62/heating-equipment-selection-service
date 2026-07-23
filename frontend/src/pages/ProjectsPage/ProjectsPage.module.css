@@ -24,6 +24,10 @@
   color: var(--text-h);
 }
 
+.sessionBar {
+  margin-bottom: 16px;
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;

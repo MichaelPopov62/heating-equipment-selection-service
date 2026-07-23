@@ -18,11 +18,14 @@ PDF: серверный Chromium, см. [`client-share-and-layers.md`](client-sh
 
 ## Безопасность (production)
 
-- **JWT обязателен** при `NODE_ENV=production` (`Authorization: Bearer <token>`). Цепочка: `JWT.sub` → `users.providerUserId` → `users._id` → `projects.ownerId` (ObjectId ref User).
-- Настройка: `AUTH_JWKS_URI` (Clerk/Auth0) или `AUTH_JWT_SECRET` (HS256); опционально `AUTH_ISSUER`, `AUTH_AUDIENCE`.
-- **IDOR:** все запросы фильтруются по `ownerId`; чужой ObjectId → `404 PROJECT_NOT_FOUND`.
-- **Rate limit:** calc и projects (см. `RATE_LIMIT_*` в `backend/.env.example`).
-- **Квоты:** `PROJECTS_MAX_PER_OWNER`, `PROJECTS_MAX_CALCULATIONS_PER_PROJECT`.
+Полная документация auth (Clerk, env, pipeline, verify): **[`auth.md`](auth.md)**.
+
+Кратко:
+
+- **JWT обязателен** при `NODE_ENV=production` на `/api/v1/projects/*`.
+- Цепочка: `JWT.sub` → `users.providerUserId` → `users._id` → `projects.ownerId` (ObjectId).
+- **IDOR:** фильтр по `req.user.id`; чужой id → `404 PROJECT_NOT_FOUND`.
+- **Rate limit** и **квоты:** см. `backend/.env.example`.
 
 ### Лимиты размера payload и MongoDB
 
@@ -55,16 +58,13 @@ cd backend && npm run verify:document-size-limits
 
 **Замечание:** `report` содержит копию входа в `report.input`, а в `calculations` дополнительно хранится поле `calcInput` — дублирование учитывается при оценке BSON.
 
-### Локальная разработка
+### Локальная разработка и Clerk
 
-По умолчанию auth **выключен** (не production): используется фиксированный dev ObjectId (`PROJECTS_DEV_OWNER_ID` — hex 24 символа; по умолчанию `000000000000000000000001`).  
-`POST /api/v1/calc` — без auth, как раньше.
+См. [`auth.md` § Режимы локальной разработки](auth.md#режимы-локальной-разработки) и [`auth.md` § Настройка Clerk](auth.md#настройка-clerk-production).
 
-Включить JWT локально: `PROJECTS_AUTH_ENABLED=true` + токен в `Authorization` или `VITE_PROJECTS_BEARER_TOKEN` на фронте.
+`POST /api/v1/calc` — без auth. Verify auth: `npm run verify:auth-docs` (корень), `verify:projects-auth`, `verify:frontend-auth`.
 
-Verify: `cd backend && npm run verify:projects-auth`
-
-### Миграция legacy ownerId (PR-6)
+### Миграция legacy ownerId
 
 После деплоя PR-5 (`ownerId` = ObjectId ref User) старые проекты с `ownerId = JWT sub` (string) или `dev-local` нужно мигрировать:
 

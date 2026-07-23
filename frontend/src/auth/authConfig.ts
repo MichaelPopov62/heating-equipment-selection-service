@@ -15,6 +15,33 @@ export function isAuthRequiredInFrontend(): boolean {
 }
 
 /**
+ * Clerk publishable key — при наличии включается ClerkProvider и SignIn UI.
+ *
+ * @returns {string | null}
+ */
+export function getClerkPublishableKey(): string | null {
+  const key = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  return typeof key === 'string' && key.trim() ? key.trim() : null;
+}
+
+/**
+ * @returns {boolean}
+ */
+export function isClerkEnabled(): boolean {
+  return getClerkPublishableKey() != null;
+}
+
+/**
+ * Имя JWT template в Clerk Dashboard (audience = backend AUTH_AUDIENCE).
+ *
+ * @returns {string | null}
+ */
+export function getClerkJwtTemplate(): string | null {
+  const template = import.meta.env.VITE_CLERK_JWT_TEMPLATE;
+  return typeof template === 'string' && template.trim() ? template.trim() : null;
+}
+
+/**
  * URL hosted login (Clerk/Auth0). Якщо задано — LoginPage редиректить сюда.
  *
  * @returns {string | null}

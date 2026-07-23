@@ -75,7 +75,7 @@
 | `api/` | Роуты `/api/v1/*`, AJV, `runCalculation`, projects/system |
 | `api/publicSharesRoutes.js` | Публичный GET `/api/v1/public/shares/{shareToken}` (+ PDF) |
 | `api/middleware/rateLimiters.js` | Rate limit для calc, projects, public shares |
-| `auth/` | JWT / gate для `/api/v1/projects` |
+| `auth/` | JWT pipeline, `requireAuth`, конфиг Clerk/JWKS — см. [`auth.md`](auth.md) |
 | `logic/` | Теплопотери, стены, ГВС MVP, ТП (`warmFloorCalc`, `ufh*`) |
 | `hydraulics/` | Pure Pipeline: граф → трубы → насосы → proposal |
 | `matching/` | Котёл, радиаторы, ВН, БКН, manifolds, uniboxes |
@@ -158,6 +158,7 @@ main.tsx → QueryProvider → App.tsx
 | `src/components/StartScreen/` | Стартовый экран (cold open) |
 | `src/components/SharePresentationPage/` | Публичная страница `/s/{token}` |
 | `src/components/DevPanel/` | Панель разработчика (DEV / `VITE_DEV_TOOLS=1`) |
+| `src/auth/` | Clerk SDK, `AuthProvider`, `ProtectedRoute`, login — см. [`auth.md`](auth.md) |
 | `src/components/Header/` | Клиент: ссылка, PDF, выход; Dev — отдельно |
 | `src/components/` | Формы, отчёты, `ProjectsDialog/`, … |
 | `src/constants/` | SSOT шагов (`SURVEY_STEPS`), типы комнат, compat-id |
@@ -184,6 +185,7 @@ main.tsx → QueryProvider → App.tsx
 | [`frontend-calc-runner.md`](frontend-calc-runner.md) | SurveySession + React Query + calc |
 | [`frontend-query-inventory.md`](frontend-query-inventory.md) | Инвентарь query/mutations |
 | [`survey-draft.md`](survey-draft.md) | Черновик анкеты v4, compat, verify |
+| [`auth.md`](auth.md) | JWT auth Фаза 1: Clerk, pipeline, env, verify, миграция ownerId |
 | [`projects-api.md`](projects-api.md) | REST проектов, share, PDF, расчётов |
 | [`calc-runtime-context.md`](calc-runtime-context.md) | DI справочников в calc |
 | [`calc-input-validation.md`](calc-input-validation.md) | Валидация CalcInput |
@@ -207,4 +209,5 @@ main.tsx → QueryProvider → App.tsx
 3. Контракт полей → `openapi.yaml` + `backend/src/types/shared-types.d.ts`.
 4. Публичная ссылка → `SharePresentationPage` → `publicShareApi` → `api/publicSharesRoutes.js`.
 5. PDF → `projectsApi.downloadProjectPdf` / `downloadPublicSharePdf` → `backend/projects/renderEstimatePdf.js`.
-6. Перед merge → из корня `npm run verify` (см. [`type-safety.md`](type-safety.md)).
+6. Auth → [`auth.md`](auth.md) · Clerk frontend → JWKS backend → `req.user.id` → `projects.ownerId`.
+7. Перед merge → из корня `npm run verify` (см. [`type-safety.md`](type-safety.md)).

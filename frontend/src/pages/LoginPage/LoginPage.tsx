@@ -2,11 +2,12 @@
  * Назначение: страница входа (prod SaaS).
  */
 
+import { SignIn } from '@clerk/clerk-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { Footer } from '../../components/Footer/Footer';
-import { getAuthLoginUrl } from '../../auth/authConfig';
+import { getAuthLoginUrl, isClerkEnabled } from '../../auth/authConfig';
 import { useAuth } from '../../auth/useAuth';
 import { authUk } from '../../i18n/uk/auth';
 import { footerUk } from '../../i18n/uk/footer';
@@ -14,7 +15,7 @@ import { paths } from '../../routing/paths';
 import styles from './LoginPage.module.css';
 
 /**
- * Hosted login redirect или dev JWT.
+ * Clerk SignIn, hosted redirect или dev JWT.
  */
 export function LoginPage() {
   const { loginWithToken, isAuthenticated } = useAuth();
@@ -23,6 +24,7 @@ export function LoginPage() {
   const [token, setToken] = useState('');
   const hostedUrl = getAuthLoginUrl();
   const returnTo = searchParams.get('returnTo') || paths.home;
+  const clerkEnabled = isClerkEnabled();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -39,7 +41,16 @@ export function LoginPage() {
         <h1 className={styles.title}>{authUk.loginTitle}</h1>
         <p className={styles.lead}>{authUk.loginLead}</p>
 
-        {hostedUrl ? (
+        {clerkEnabled ? (
+          <div className={styles.clerkRoot}>
+            <SignIn
+              routing="path"
+              path={paths.login}
+              fallbackRedirectUrl={returnTo}
+              signUpUrl={paths.login}
+            />
+          </div>
+        ) : hostedUrl ? (
           <a href={hostedUrl} className={styles.primary}>
             {authUk.loginRedirect}
           </a>

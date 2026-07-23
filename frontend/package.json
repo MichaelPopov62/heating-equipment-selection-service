@@ -13,9 +13,11 @@
     "verify:start-state": "node scripts/verifyStartState.mjs",
     "verify:dead-code": "knip --treat-config-hints-as-errors",
     "verify:footer-nav": "node scripts/verifyFooterNav.mjs",
-    "verify": "npm run lint && npm run typecheck && npm run verify:dead-code && npm run verify:footer-nav && npm run build && npm run verify:survey-session && npm run verify:start-state"
+    "verify:frontend-auth": "node scripts/verifyFrontendAuth.mjs",
+    "verify": "npm run lint && npm run typecheck && npm run verify:dead-code && npm run verify:footer-nav && npm run verify:frontend-auth && npm run build && npm run verify:survey-session && npm run verify:start-state"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.61.9",
     "@tabler/icons-react": "^3.41.1",
     "@tanstack/react-query": "^5.101.2",
     "react": "^19.2.5",

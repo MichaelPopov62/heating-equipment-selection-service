@@ -14,7 +14,7 @@ export type AuthContextValue = {
   isAuthenticated: boolean;
   isAuthRequired: boolean;
   loginWithToken: (token: string) => void;
-  logout: () => void;
+  logout: () => void | Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

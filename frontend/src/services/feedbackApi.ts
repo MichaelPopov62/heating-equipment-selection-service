@@ -31,7 +31,7 @@ export async function submitFeedback(payload: FeedbackPayload): Promise<Feedback
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      ...getProjectsAuthHeaders(),
+      ...(await getProjectsAuthHeaders()),
     },
     body: JSON.stringify(payload),
   });
