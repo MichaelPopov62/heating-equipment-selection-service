@@ -937,6 +937,93 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
+  /api/v1/me:
+    get:
+      summary: Current user profile (role, subscription)
+      operationId: getMe
+      description: |
+        Фаза 2 authorization: профиль после JWT pipeline (req.user).
+        Tier не ограничивает точность calc, share или PDF.
+        Dev без PROJECTS_AUTH_ENABLED — синтетический профиль (devMode=true).
+      security:
+        - ProjectsBearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeOkResponse"
+        "401":
+          description: PROJECTS_AUTH_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: INVALID_USER_ROLE / INVALID_SUBSCRIPTION_TIER
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/admin/users/{id}:
+    patch:
+      summary: Update user role or subscription (admin only)
+      operationId: patchAdminUser
+      security:
+        - ProjectsBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: users._id (ObjectId hex)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUserPatchBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUserPatchResponse"
+        "400":
+          description: VALIDATION_FAILED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: PROJECTS_AUTH_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: ADMIN_REQUIRED / INVALID_USER_ROLE / INVALID_SUBSCRIPTION_TIER
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: USER_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB недоступна
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
 components:
   securitySchemes:
     ProjectsBearerAuth:
@@ -959,6 +1046,20 @@ components:
   schemas:
     ProjectsAuthErrorCode:
       $ref: ./components/schemas/ProjectsAuthErrorCode.yaml
+    AuthorizationErrorCode:
+      $ref: ./components/schemas/AuthorizationErrorCode.yaml
+    UserRole:
+      $ref: ./components/schemas/UserRole.yaml
+    SubscriptionTier:
+      $ref: ./components/schemas/SubscriptionTier.yaml
+    MeUser:
+      $ref: ./components/schemas/MeUser.yaml
+    MeOkResponse:
+      $ref: ./components/schemas/MeOkResponse.yaml
+    AdminUserPatchBody:
+      $ref: ./components/schemas/AdminUserPatchBody.yaml
+    AdminUserPatchResponse:
+      $ref: ./components/schemas/AdminUserPatchResponse.yaml
     CalcInput:
       $ref: ./components/schemas/CalcInput.yaml
     ErrorEnvelope:
@@ -1073,7 +1174,7 @@ components:
       properties:
         ok:
           type: boolean
-          const: true
+          enum: [true]
         id:
           type: string
     HealthOkResponse:
@@ -1154,3 +1255,5 @@ components:
       $ref: ./components/schemas/PublicSharePayload.yaml
     PublicShareResponse:
       $ref: ./components/schemas/PublicShareResponse.yaml
+    SharePublisherPresentation:
+      $ref: ./components/schemas/SharePublisherPresentation.yaml

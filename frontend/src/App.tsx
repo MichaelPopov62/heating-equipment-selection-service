@@ -3,6 +3,7 @@
  */
 
 import { ClerkProvider } from '@clerk/clerk-react';
+import { ukUA } from '@clerk/localizations';
 import { BrowserRouter } from 'react-router-dom';
 
 import { AuthProvider } from './auth/AuthProvider';
@@ -28,7 +29,7 @@ function App() {
     <AppErrorBoundary>
       <BrowserRouter>
         {clerkPublishableKey ? (
-          <ClerkProvider publishableKey={clerkPublishableKey}>
+          <ClerkProvider publishableKey={clerkPublishableKey} localization={ukUA}>
             <AppProviders />
           </ClerkProvider>
         ) : (

@@ -5,6 +5,7 @@
 export const paths = {
   home: '/',
   login: '/login',
+  signUp: '/sign-up',
   projects: '/projects',
   docs: '/docs',
   faq: '/faq',

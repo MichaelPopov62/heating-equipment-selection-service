@@ -44,3 +44,6 @@ properties:
     type: array
     items:
       type: string
+  publisherPresentation:
+    $ref: SharePublisherPresentation.yaml
+    description: Контакт публикатора для Pro/Marketplace (опционально).

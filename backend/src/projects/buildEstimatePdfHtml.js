@@ -191,6 +191,38 @@ function commercialTableHtml(commercial) {
 }
 
 /**
+ * @param {unknown} presentation
+ * @returns {string}
+ */
+function publisherPresentationHtml(presentation) {
+  const node = asObject(presentation);
+  if (!node) return '';
+
+  const tier = node.tier;
+  if (tier !== 'pro' && tier !== 'marketplace') return '';
+
+  const contactEmail = typeof node.contactEmail === 'string' ? node.contactEmail.trim() : '';
+  if (!contactEmail) return '';
+
+  const title = tier === 'marketplace' ? 'Контакт постачальника' : 'Контакт виконавця';
+  const contactName =
+    typeof node.contactName === 'string' && node.contactName.trim()
+      ? node.contactName.trim()
+      : '';
+
+  /** @type {string[]} */
+  const lines = [`<div>Email: <a href="mailto:${escapeHtml(contactEmail)}">${escapeHtml(contactEmail)}</a></div>`];
+  if (contactName) {
+    lines.unshift(`<div>${escapeHtml(contactName)}</div>`);
+  }
+
+  return `<div class="publisher-contact">
+  <h2>${escapeHtml(title)}</h2>
+  ${lines.join('\n  ')}
+</div>`;
+}
+
+/**
  * Собирает полный HTML документ сметы.
  *
  * @param {import('../types/shared-types.js').ProjectShareSnapshot | Record<string, unknown>} snapshot
@@ -262,6 +294,8 @@ export function buildEstimatePdfHtml(snapshot, opts = {}) {
     .card-muted { background: #f5f5f5; border-color: #ddd; }
     .muted { color: #666; margin: 0; }
     .note { color: #555; font-size: 11px; margin-top: 8px; }
+    .publisher-contact { border: 1px solid #c5d0de; border-radius: 6px; padding: 12px 14px; margin: 16px 0; background: #f0f7ff; }
+    .publisher-contact h2 { font-size: 14px; margin: 0 0 8px; color: #1e4d8c; }
     ul { margin: 8px 0 12px; padding-left: 18px; }
     @page { margin: 12mm; }
   </style>
@@ -275,6 +309,7 @@ export function buildEstimatePdfHtml(snapshot, opts = {}) {
     ${objectType ? `<div>Объект: ${escapeHtml(objectType)}</div>` : ''}
     ${publishedAt ? `<div>Дата: ${escapeHtml(publishedAt)}</div>` : ''}
   </div>
+  ${publisherPresentationHtml(snap.publisherPresentation)}
   ${mainBlock ? `<div class="cards">${mainBlock}</div>` : ''}
   <h2>Смета</h2>
   ${commercialTableHtml(snap.commercial)}

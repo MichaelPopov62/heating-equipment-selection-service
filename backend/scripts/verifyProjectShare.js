@@ -4,6 +4,7 @@
  */
 import { generateShareToken, normalizeShareTokenParam } from '../src/projects/shareToken.js';
 import { buildShareSnapshot } from '../src/projects/buildShareSnapshot.js';
+import { buildPublisherPresentationFromUser } from '../src/projects/buildPublisherPresentation.js';
 import { serializePublicShare, serializeProjectShareMeta } from '../src/projects/serializeShare.js';
 
 /** @param {boolean} ok @param {string} label */
@@ -104,6 +105,62 @@ const meta = serializeProjectShareMeta({
 });
 tally(logCheck(meta != null && meta.publicPath === `/s/${token}`, 'owner publicPath'));
 tally(logCheck(serializeProjectShareMeta({}) === null, 'без токена meta null'));
+
+/** @type {import('../src/types/auth.js').AuthUser} */
+const proUser = {
+  id: '507f1f77bcf86cd799439011',
+  authProvider: 'clerk',
+  providerUserId: 'clerk_1',
+  email: 'pro@example.com',
+  emailVerified: true,
+  role: 'user',
+  subscription: 'pro',
+  name: 'Pro User',
+};
+
+const proPresentation = buildPublisherPresentationFromUser(proUser);
+tally(
+  logCheck(
+    proPresentation != null &&
+      proPresentation.tier === 'pro' &&
+      proPresentation.contactEmail === 'pro@example.com' &&
+      proPresentation.contactName === 'Pro User',
+    'buildPublisherPresentationFromUser pro',
+  ),
+);
+
+const freePresentation = buildPublisherPresentationFromUser({
+  ...proUser,
+  subscription: 'free',
+});
+tally(logCheck(freePresentation === undefined, 'free tier → без publisherPresentation'));
+
+const snapshotPro = buildShareSnapshot({
+  clientName: 'Pro клиент',
+  report: fakeReport,
+  ...(proPresentation ? { publisherPresentation: proPresentation } : {}),
+});
+tally(
+  logCheck(
+    snapshotPro.publisherPresentation?.contactEmail === 'pro@example.com',
+    'snapshot с publisherPresentation',
+  ),
+);
+
+const pubPro = serializePublicShare(snapshotPro, token);
+tally(
+  logCheck(
+    pubPro.publisherPresentation?.tier === 'pro',
+    'public publisherPresentation probрос',
+  ),
+);
+tally(logCheck(!('ownerId' in pubPro), 'public без ownerId после pro'));
+
+const snapshotFree = buildShareSnapshot({
+  clientName: 'Free',
+  report: fakeReport,
+});
+tally(logCheck(snapshotFree.publisherPresentation === undefined, 'snapshot free без contact'));
 
 if (failed > 0) {
   console.error(`\nverify:project-share — ${failed} проверок провалено`);

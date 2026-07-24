@@ -15,6 +15,7 @@ import type {
 } from '../types/projectsApi';
 import type { SurveyDraft } from '../types/surveyDraft';
 import { parseApiErrorMessage } from '../utils/apiError';
+import { formatAuthApiErrorMessage } from '../utils/authApiError';
 import {
   downloadBlobFile,
   filenameFromContentDisposition,
@@ -24,6 +25,14 @@ import { getProjectsAuthHeaders } from './projectsAuthHeaders';
 
 async function parseJson(res: Response): Promise<unknown> {
   return res.json().catch(() => null);
+}
+
+/**
+ * @param data
+ * @param fallback
+ */
+function projectsApiError(data: unknown, fallback: string): string {
+  return formatAuthApiErrorMessage(parseApiErrorMessage(data, fallback));
 }
 
 /** @returns {Promise<Record<string, string>>} */
@@ -46,7 +55,7 @@ export async function listProjects(params?: {
   });
   const data = await parseJson(res);
   if (!res.ok) {
-    throw new Error(parseApiErrorMessage(data, `Ошибка API: HTTP ${res.status}`));
+    throw new Error(projectsApiError(data, `Ошибка API: HTTP ${res.status}`));
   }
   if (!isRecord(data) || data.ok !== true || !Array.isArray(data.projects)) {
     throw new Error('Некорректный ответ списка проектов');
@@ -66,7 +75,7 @@ export async function createProject(body: {
   });
   const data = await parseJson(res);
   if (!res.ok) {
-    throw new Error(parseApiErrorMessage(data, `Ошибка API: HTTP ${res.status}`));
+    throw new Error(projectsApiError(data, `Ошибка API: HTTP ${res.status}`));
   }
   if (!isRecord(data) || data.ok !== true) {
     throw new Error('Некорректный ответ создания проекта');
@@ -84,7 +93,7 @@ export async function getProject(
   });
   const data = await parseJson(res);
   if (!res.ok) {
-    throw new Error(parseApiErrorMessage(data, `Ошибка API: HTTP ${res.status}`));
+    throw new Error(projectsApiError(data, `Ошибка API: HTTP ${res.status}`));
   }
   if (!isRecord(data) || data.ok !== true) {
     throw new Error('Некорректный ответ проекта');
@@ -103,7 +112,7 @@ export async function updateProject(
   });
   const data = await parseJson(res);
   if (!res.ok) {
-    throw new Error(parseApiErrorMessage(data, `Ошибка API: HTTP ${res.status}`));
+    throw new Error(projectsApiError(data, `Ошибка API: HTTP ${res.status}`));
   }
   if (!isRecord(data) || data.ok !== true) {
     throw new Error('Некорректный ответ обновления проекта');
@@ -122,7 +131,7 @@ export async function postProjectCalc(
   });
   const data = await parseJson(res);
   if (!res.ok) {
-    throw new Error(parseApiErrorMessage(data, `Ошибка API: HTTP ${res.status}`));
+    throw new Error(projectsApiError(data, `Ошибка API: HTTP ${res.status}`));
   }
   if (!isRecord(data) || data.ok !== true) {
     throw new Error('Некорректный ответ расчёта проекта');
@@ -144,7 +153,7 @@ export async function listProjectCalculations(
   );
   const data = await parseJson(res);
   if (!res.ok) {
-    throw new Error(parseApiErrorMessage(data, `Ошибка API: HTTP ${res.status}`));
+    throw new Error(projectsApiError(data, `Ошибка API: HTTP ${res.status}`));
   }
   if (!isRecord(data) || data.ok !== true) {
     throw new Error('Некорректный ответ списка расчётов');
@@ -162,7 +171,7 @@ export async function getProjectCalculation(
   );
   const data = await parseJson(res);
   if (!res.ok) {
-    throw new Error(parseApiErrorMessage(data, `Ошибка API: HTTP ${res.status}`));
+    throw new Error(projectsApiError(data, `Ошибка API: HTTP ${res.status}`));
   }
   if (!isRecord(data) || data.ok !== true) {
     throw new Error('Некорректный ответ расчёта');
@@ -187,7 +196,7 @@ export async function publishProjectShare(
   });
   const data = await parseJson(res);
   if (!res.ok) {
-    throw new Error(parseApiErrorMessage(data, `Ошибка API: HTTP ${res.status}`));
+    throw new Error(projectsApiError(data, `Ошибка API: HTTP ${res.status}`));
   }
   if (!isRecord(data) || data.ok !== true || typeof data.shareToken !== 'string') {
     throw new Error('Некорректный ответ публикации ссылки');
@@ -209,7 +218,7 @@ export async function revokeProjectShare(
   });
   const data = await parseJson(res);
   if (!res.ok) {
-    throw new Error(parseApiErrorMessage(data, `Ошибка API: HTTP ${res.status}`));
+    throw new Error(projectsApiError(data, `Ошибка API: HTTP ${res.status}`));
   }
   if (!isRecord(data) || data.ok !== true) {
     throw new Error('Некорректный ответ отзыва ссылки');
@@ -236,7 +245,7 @@ export async function downloadProjectPdf(
   );
   if (!res.ok) {
     const data = await parseJson(res);
-    throw new Error(parseApiErrorMessage(data, `Не удалось скачать PDF: HTTP ${res.status}`));
+    throw new Error(projectsApiError(data, `Не удалось скачать PDF: HTTP ${res.status}`));
   }
   const blob = await res.blob();
   const filename = filenameFromContentDisposition(

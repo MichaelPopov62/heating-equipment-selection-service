@@ -1,0 +1,11 @@
+type: string
+enum:
+  - free
+  - pro
+  - marketplace
+description: |
+  Уровень подписки (MongoDB users.subscription, req.user.subscription).
+  Фаза 2: метка аккаунта; не ограничивает точность calc, share или PDF.
+  - free — частные лица (default).
+  - pro — мастера и проектанты.
+  - marketplace — бренды и дистрибьюторы.

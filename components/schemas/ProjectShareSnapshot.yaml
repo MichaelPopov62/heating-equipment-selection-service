@@ -42,3 +42,6 @@ properties:
     items:
       type: string
     maxItems: 50
+  publisherPresentation:
+    $ref: SharePublisherPresentation.yaml
+    description: Контакт публикатора для Pro/Marketplace (опционально).

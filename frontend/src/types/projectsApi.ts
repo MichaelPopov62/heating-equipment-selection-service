@@ -49,6 +49,13 @@ export type ProjectShareRevokeResponse = {
   project: ProjectDetail;
 };
 
+/** Контакт публикатора на публичной share (Pro/Marketplace). */
+export type SharePublisherPresentation = {
+  tier: 'pro' | 'marketplace';
+  contactEmail: string;
+  contactName?: string;
+};
+
 export type PublicSharePayload = {
   shareToken: string;
   schemaVersion: 1;
@@ -63,6 +70,7 @@ export type PublicSharePayload = {
   matching: Record<string, unknown>;
   calculations: Record<string, unknown>;
   warnings?: string[];
+  publisherPresentation?: SharePublisherPresentation;
 };
 
 export type PublicShareResponse = {

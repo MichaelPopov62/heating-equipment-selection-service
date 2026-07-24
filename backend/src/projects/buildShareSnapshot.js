@@ -30,6 +30,7 @@ function pickMatching(matching, key) {
  *   clientName: string,
  *   label?: string | null,
  *   report: unknown,
+ *   publisherPresentation?: import('../types/shared-types.js').SharePublisherPresentation,
  * }} args
  * @returns {import('../types/shared-types.js').ProjectShareSnapshot}
  */
@@ -112,6 +113,10 @@ export function buildShareSnapshot(args) {
   }
   if (meta && (meta.catalogSource === 'file' || meta.catalogSource === 'mongo')) {
     snapshot.catalogSource = meta.catalogSource;
+  }
+
+  if (args.publisherPresentation) {
+    snapshot.publisherPresentation = args.publisherPresentation;
   }
 
   return snapshot;

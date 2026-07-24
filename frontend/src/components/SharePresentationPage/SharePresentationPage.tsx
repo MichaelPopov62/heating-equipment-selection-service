@@ -8,6 +8,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { FinancialSummaryTable } from '../FinancialSummary/FinancialSummaryTable';
 import { Footer } from '../Footer/Footer';
 import Logo from '../Logo/Logo';
+import { PublisherContactBlock } from '../PublisherContactBlock/PublisherContactBlock';
 import { brandUk } from '../../i18n/uk/brand';
 import { downloadPublicSharePdf, fetchPublicShare } from '../../services/publicShareApi';
 import type { PublicSharePayload } from '../../types/projectsApi';
@@ -145,6 +146,10 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
           <strong>Опубликовано:</strong> {share.publishedAt.slice(0, 10)}
         </p>
       </section>
+
+      {share.publisherPresentation ? (
+        <PublisherContactBlock presentation={share.publisherPresentation} />
+      ) : null}
 
       {equipmentSummary.length > 0 ? (
         <section className={styles.equipment} aria-label="Оборудование">

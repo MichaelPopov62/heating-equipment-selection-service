@@ -12,6 +12,7 @@ import { DocsPage } from '../pages/DocsPage/DocsPage';
 import { FaqPage } from '../pages/FaqPage/FaqPage';
 import { LegalPage } from '../pages/LegalPage/LegalPage';
 import { LoginPage } from '../pages/LoginPage/LoginPage';
+import { SignUpPage } from '../pages/SignUpPage/SignUpPage';
 import { ProjectsPage } from '../pages/ProjectsPage/ProjectsPage';
 import { paths } from './paths';
 import { SurveyAppShell } from './SurveyAppShell';
@@ -24,7 +25,8 @@ export function AppRouter() {
     <>
       <Routes>
         <Route path="/s/:shareToken" element={<ShareRoute />} />
-        <Route path={paths.login} element={<LoginPage />} />
+        <Route path={`${paths.login}/*`} element={<LoginPage />} />
+        <Route path={`${paths.signUp}/*`} element={<SignUpPage />} />
         <Route path={paths.docs} element={<DocsPage />} />
         <Route path={paths.faq} element={<FaqPage />} />
         <Route path={paths.privacy} element={<LegalPage kind="privacy" />} />

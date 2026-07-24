@@ -68,5 +68,8 @@ export function serializePublicShare(snapshot, shareToken) {
     matching: snapshot.matching ?? {},
     calculations: snapshot.calculations ?? {},
     ...(snapshot.warnings ? { warnings: snapshot.warnings } : {}),
+    ...(snapshot.publisherPresentation
+      ? { publisherPresentation: snapshot.publisherPresentation }
+      : {}),
   };
 }

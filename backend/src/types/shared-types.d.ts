@@ -1429,8 +1429,8 @@ export interface UserMongoDoc {
   email: string;
   emailVerified: boolean;
   name?: string;
-  role: string;
-  subscription: string;
+  role: import('./auth.js').UserRole;
+  subscription: import('./auth.js').SubscriptionTier;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -1492,6 +1492,15 @@ export interface ProjectShareSnapshot {
   matching?: Record<string, unknown>;
   calculations?: Record<string, unknown>;
   warnings?: string[];
+  /** Контакт публикатора (Pro/Marketplace) при publish share. */
+  publisherPresentation?: SharePublisherPresentation;
+}
+
+/** Контакт публикатора на публичной share/PDF. */
+export interface SharePublisherPresentation {
+  tier: 'pro' | 'marketplace';
+  contactEmail: string;
+  contactName?: string;
 }
 
 export interface ProjectDetail extends ProjectListItem {
@@ -1532,6 +1541,7 @@ export interface PublicSharePayload {
   matching: Record<string, unknown>;
   calculations: Record<string, unknown>;
   warnings?: string[];
+  publisherPresentation?: SharePublisherPresentation;
 }
 
 export interface PublicShareResponse {

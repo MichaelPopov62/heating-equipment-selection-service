@@ -1,0 +1,35 @@
+.block {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: color-mix(in srgb, var(--accent-bg) 55%, var(--surface));
+}
+
+.title {
+  margin: 0 0 8px;
+  font: 700 15px/1.3 var(--heading);
+  color: var(--text-h);
+}
+
+.name {
+  margin: 0 0 4px;
+  font: 600 14px/1.35 var(--sans);
+  color: var(--text-h);
+}
+
+.emailRow {
+  margin: 0;
+  font: 500 13px/1.4 var(--sans);
+  color: var(--text);
+}
+
+.emailLink {
+  color: var(--accent);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.emailLink:hover {
+  text-decoration: underline;
+}

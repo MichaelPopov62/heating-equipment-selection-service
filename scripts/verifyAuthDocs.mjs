@@ -1,5 +1,5 @@
 /**
- * Назначение: verify документации auth (PR-8) — наличие SSOT и перекрёстных ссылок.
+ * Назначение: verify документации auth (PR-8, PR-16) — SSOT, Фаза 3, перекрёстные ссылки.
  * Запуск: npm run verify:auth-docs (из корня репозитория)
  */
 
@@ -18,8 +18,11 @@ function readRepo(rel) {
 const authDoc = readRepo('docs/auth.md');
 const projectsApi = readRepo('docs/projects-api.md');
 const projectStructure = readRepo('docs/project-structure.md');
+const clientShare = readRepo('docs/client-share-and-layers.md');
+const queryInventory = readRepo('docs/frontend-query-inventory.md');
 const openapi = readRepo('openapi.yaml');
 const rootPkg = JSON.parse(readRepo('package.json'));
+const frontendPkg = JSON.parse(readRepo('frontend/package.json'));
 
 const requiredSections = [
   '## Цепочка identity',
@@ -31,6 +34,10 @@ const requiredSections = [
   '## Коды ошибок auth',
   '## Verify и smoke-check',
   '## Roadmap Фазы 1',
+  '## Фаза 2 — Authorization',
+  '## Roadmap Фазы 2',
+  '## Фаза 3 — Frontend tier UX',
+  '## Roadmap Фазы 3',
 ];
 
 for (const section of requiredSections) {
@@ -40,16 +47,40 @@ for (const section of requiredSections) {
 assert.match(authDoc, /JWT\.sub → users\.providerUserId|providerUserId.*users\._id|req\.user\.id/s);
 assert.match(authDoc, /verify:projects-auth/);
 assert.match(authDoc, /verify:frontend-auth/);
+assert.match(authDoc, /verify:frontend-me/);
 assert.match(authDoc, /verify:migrate-project-owner-ids/);
 assert.match(authDoc, /VITE_CLERK_PUBLISHABLE_KEY/);
 assert.match(authDoc, /AUTH_JWKS_URI/);
+assert.match(authDoc, /\/sign-up\/\*/);
+assert.match(authDoc, /SignUpPage/);
+assert.match(authDoc, /resolveClerkJwtTemplateForApi|getToken\(\{ template \}\)/);
+assert.match(authDoc, /JWT без claim email/);
+
+assert.match(authDoc, /verify:authorization-policy/);
+assert.match(authDoc, /verify:me-endpoint/);
+assert.match(authDoc, /GET \/api\/v1\/me/);
+assert.match(authDoc, /marketplace/);
+assert.match(authDoc, /AccountBar/);
+assert.match(authDoc, /publisherPresentation/);
+assert.match(authDoc, /Smoke Phase 3/);
+assert.match(authDoc, /нет 403.*subscription|без gating/i);
 
 assert.match(projectsApi, /auth\.md/, 'projects-api.md должен ссылаться на auth.md');
+assert.match(projectsApi, /publisherPresentation/, 'projects-api.md — publisherPresentation');
 assert.match(projectStructure, /auth\.md/, 'project-structure.md должен ссылаться на auth.md');
+assert.match(projectStructure, /AccountBar/);
+assert.match(projectStructure, /meApi/);
+assert.match(clientShare, /publisherPresentation/);
+assert.match(clientShare, /PublisherContactBlock/);
+assert.match(queryInventory, /useMeQuery/);
+assert.match(queryInventory, /verify:frontend-me/);
 
+assert.match(openapi, /\/api\/v1\/me/);
 assert.match(openapi, /ProjectsBearerAuth/);
+assert.match(openapi, /SharePublisherPresentation/);
 assert.match(openapi, /users\._id → projects\.ownerId/);
 
 assert.match(String(rootPkg.scripts.verify), /verify:auth-docs/, 'корневой verify должен включать verify:auth-docs');
+assert.match(String(frontendPkg.scripts.verify), /verify:frontend-me/, 'frontend verify должен включать verify:frontend-me');
 
 console.log('verify:auth-docs OK');

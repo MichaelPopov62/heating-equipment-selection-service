@@ -12,6 +12,7 @@ import { useAppChrome } from './shell/useAppChrome';
 import { consumePendingProjectNavigation } from './utils/pendingProjectNavigation';
 
 import { AppBootstrapSkeleton } from './components/AppBootstrapSkeleton/AppBootstrapSkeleton';
+import { AccountBar } from './components/AccountBar/AccountBar';
 import { BootstrapErrorScreen } from './components/BootstrapErrorScreen/BootstrapErrorScreen';
 import { DevPanel } from './components/DevPanel/DevPanel';
 import { Header } from './components/Header/Header';
@@ -232,6 +233,7 @@ export function AppRoot(props: AppRootProps) {
   const headerProps: HeaderProps = {
     logo: <Logo />,
     title: brandUk.name,
+    accountSlot: <AccountBar compact />,
     clientName,
     onClientNameChange: setClientName,
     projectId,

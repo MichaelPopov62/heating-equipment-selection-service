@@ -37,7 +37,24 @@ tally(logCheck(paths.email?.isRequired === true, 'email обязателен'));
 tally(logCheck(paths.emailVerified?.isRequired === true, 'emailVerified обязателен'));
 tally(logCheck(paths.name?.isRequired !== true, 'name опционален'));
 tally(logCheck(paths.role?.defaultValue === 'user', "role default 'user'"));
+tally(
+  logCheck(
+    Array.isArray(paths.role?.enumValues) &&
+      paths.role.enumValues.includes('user') &&
+      paths.role.enumValues.includes('admin'),
+    'role enum user | admin',
+  ),
+);
 tally(logCheck(paths.subscription?.defaultValue === 'free', "subscription default 'free'"));
+tally(
+  logCheck(
+    Array.isArray(paths.subscription?.enumValues) &&
+      paths.subscription.enumValues.includes('free') &&
+      paths.subscription.enumValues.includes('pro') &&
+      paths.subscription.enumValues.includes('marketplace'),
+    'subscription enum free | pro | marketplace',
+  ),
+);
 
 /** @type {Array<[Record<string, number>, { unique?: boolean }]>} */
 const indexes = schema.indexes();

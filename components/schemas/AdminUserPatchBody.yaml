@@ -1,0 +1,8 @@
+type: object
+minProperties: 1
+properties:
+  role:
+    $ref: ./UserRole.yaml
+  subscription:
+    $ref: ./SubscriptionTier.yaml
+additionalProperties: false

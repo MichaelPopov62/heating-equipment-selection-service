@@ -153,13 +153,16 @@ main.tsx → QueryProvider → App.tsx
 | `src/surveySession/resolveAppBootstrap.ts` | Hash / localStorage → start \| survey |
 | `src/surveySession/createEmptySurveySessionState.ts`, `createDefaultSurveyDraft.ts` | SSOT пустого и дефолтного черновика |
 | `src/query/` | React Query: справочники, calc, проекты |
-| `src/services/` | HTTP-клиенты; `projectsApi`, `publicShareApi`, `surveyDraftStorage` |
+| `src/services/` | HTTP-клиенты; `meApi`, `projectsApi`, `publicShareApi`, `parsePublicShare`, `surveyDraftStorage` |
 | `src/hooks/` | `useSurveyBootstrap`, `useSurveyDraftPersistence`, `useSurveyProject`, … |
+| `src/components/AccountBar/` | Сессия: «Увійти», email, tier badge, logout |
+| `src/components/SubscriptionTierBadge/` | Badge подписки из `/me` |
+| `src/components/PublisherContactBlock/` | Контакт на public share (Pro/Marketplace) |
 | `src/components/StartScreen/` | Стартовый экран (cold open) |
 | `src/components/SharePresentationPage/` | Публичная страница `/s/{token}` |
 | `src/components/DevPanel/` | Панель разработчика (DEV / `VITE_DEV_TOOLS=1`) |
-| `src/auth/` | Clerk SDK, `AuthProvider`, `ProtectedRoute`, login — см. [`auth.md`](auth.md) |
-| `src/components/Header/` | Клиент: ссылка, PDF, выход; Dev — отдельно |
+| `src/auth/` | Clerk SDK, `AuthProvider`, `useAuthMeCacheSync`, `ProtectedRoute`, login — см. [`auth.md`](auth.md) |
+| `src/components/Header/` | Клиент: ссылка, PDF, `accountSlot`, hint pro/marketplace; Dev — отдельно |
 | `src/components/` | Формы, отчёты, `ProjectsDialog/`, … |
 | `src/constants/` | SSOT шагов (`SURVEY_STEPS`), типы комнат, compat-id |
 | `src/types/` | DTO/view-модели UI |
@@ -185,7 +188,7 @@ main.tsx → QueryProvider → App.tsx
 | [`frontend-calc-runner.md`](frontend-calc-runner.md) | SurveySession + React Query + calc |
 | [`frontend-query-inventory.md`](frontend-query-inventory.md) | Инвентарь query/mutations |
 | [`survey-draft.md`](survey-draft.md) | Черновик анкеты v4, compat, verify |
-| [`auth.md`](auth.md) | JWT auth Фаза 1: Clerk, pipeline, env, verify, миграция ownerId |
+| [`auth.md`](auth.md) | JWT auth Фазы 1–3: Clerk, tier UX, `/me`, share contact, verify |
 | [`projects-api.md`](projects-api.md) | REST проектов, share, PDF, расчётов |
 | [`calc-runtime-context.md`](calc-runtime-context.md) | DI справочников в calc |
 | [`calc-input-validation.md`](calc-input-validation.md) | Валидация CalcInput |
@@ -209,5 +212,5 @@ main.tsx → QueryProvider → App.tsx
 3. Контракт полей → `openapi.yaml` + `backend/src/types/shared-types.d.ts`.
 4. Публичная ссылка → `SharePresentationPage` → `publicShareApi` → `api/publicSharesRoutes.js`.
 5. PDF → `projectsApi.downloadProjectPdf` / `downloadPublicSharePdf` → `backend/projects/renderEstimatePdf.js`.
-6. Auth → [`auth.md`](auth.md) · Clerk frontend → JWKS backend → `req.user.id` → `projects.ownerId`.
+6. Auth / tier UX → [`auth.md`](auth.md) · `/me` → `AccountBar` · Pro share contact → `buildPublisherPresentation.js`.
 7. Перед merge → из корня `npm run verify` (см. [`type-safety.md`](type-safety.md)).

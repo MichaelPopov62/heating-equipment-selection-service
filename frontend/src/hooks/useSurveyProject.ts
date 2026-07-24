@@ -253,6 +253,9 @@ export function useSurveyProject({
     if (result.report) {
       setCalcReport(result.report);
     }
+    if (canRunCalc && !result.report) {
+      throw new Error('Не удалось сохранить расчёт на сервер');
+    }
     return result.projectId;
   }, [
     buildDraft,
@@ -325,20 +328,31 @@ export function useSurveyProject({
   const printPdf = useCallback(
     (includeTechnical: boolean) => {
       if (bootstrapMode !== 'survey') return;
-      if (!projectId) {
-        showErr('Сохраните проект на сервер, чтобы скачать PDF');
-        return;
-      }
       void (async () => {
         try {
-          await downloadProjectPdf(projectId, { includeTechnical });
+          const report = getDraftParams().lastCalcReport;
+          if (!report || !parseCommercialBomFromReport(report)) {
+            throw new Error('Нет финансового итога — дождитесь расчёта');
+          }
+          if (!canRunCalc) {
+            throw new Error('Анкета неполная — расчёт на сервер не сохранить');
+          }
+          const id = await ensureProjectSaved();
+          await downloadProjectPdf(id, { includeTechnical });
           showOk('PDF скачан');
         } catch (e) {
           showErr(e instanceof Error ? e.message : 'Не удалось скачать PDF');
         }
       })();
     },
-    [bootstrapMode, projectId, showOk, showErr],
+    [
+      bootstrapMode,
+      canRunCalc,
+      ensureProjectSaved,
+      getDraftParams,
+      showOk,
+      showErr,
+    ],
   );
 
   const refreshProjectList = useCallback(async () => {
@@ -440,14 +454,14 @@ export function useSurveyProject({
   }, [needsResetConfirm, exitToStart]);
 
   const report = getDraftParams().lastCalcReport ?? null;
-  const canPrintPdf =
-    Boolean(projectId) && parseCommercialBomFromReport(report) != null;
+  const hasFinancialReport = parseCommercialBomFromReport(report) != null;
+  const canPrintPdf = hasFinancialReport && canRunCalc;
   const canPublishShare = Boolean(clientName.trim()) && canPrintPdf;
   const canSaveProject = Boolean(clientName.trim());
 
   const saveProjectDraft = useCallback(() => {
-    void saveToServer(false);
-  }, [saveToServer]);
+    void saveToServer(canRunCalc);
+  }, [saveToServer, canRunCalc]);
 
   return {
     statusMessage,

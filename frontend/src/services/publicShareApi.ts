@@ -8,7 +8,7 @@ import {
   downloadBlobFile,
   filenameFromContentDisposition,
 } from '../utils/downloadBlobFile';
-import { isRecord } from '../utils/jsonGuards';
+import { parsePublicShareResponse } from './parsePublicShare';
 
 async function parseJson(res: Response): Promise<unknown> {
   return res.json().catch(() => null);
@@ -21,14 +21,13 @@ export async function fetchPublicShare(shareToken: string): Promise<PublicShareR
   const res = await fetch(`/api/v1/public/shares/${encodeURIComponent(shareToken)}`, {
     headers: { Accept: 'application/json' },
   });
-  const data = await parseJson(res);
+  const data: unknown = await res.json().catch(() => null);
   if (!res.ok) {
     throw new Error(parseApiErrorMessage(data, `Ошибка API: HTTP ${res.status}`));
   }
-  if (!isRecord(data) || data.ok !== true || !isRecord(data.share)) {
-    throw new Error('Некорректный ответ публичной ссылки');
-  }
-  return data as PublicShareResponse;
+
+  const parsed = parsePublicShareResponse(data);
+  return parsed;
 }
 
 /**

@@ -97,6 +97,19 @@ tally(logCheck(html.includes('Эффективный'), 'HTML карточка �
 tally(logCheck(html.includes('46') || html.includes('46500'), 'HTML итог'));
 tally(logCheck(!html.includes('Технический расчёт'), 'без technical по умолчанию'));
 
+const snapshotPro = buildShareSnapshot({
+  clientName: 'Pro PDF',
+  report: fakeReport,
+  publisherPresentation: {
+    tier: 'pro',
+    contactEmail: 'installer@example.com',
+    contactName: 'Монтажник',
+  },
+});
+const htmlPro = buildEstimatePdfHtml(snapshotPro, { includeTechnical: false });
+tally(logCheck(htmlPro.includes('installer@example.com'), 'PDF pro contact email'));
+tally(logCheck(htmlPro.includes('publisher-contact'), 'PDF publisher-contact block'));
+
 const htmlTech = buildEstimatePdfHtml(snapshot, { includeTechnical: true });
 tally(logCheck(htmlTech.includes('Технический расчёт'), 'с technical'));
 tally(logCheck(htmlTech.includes('Теплопотери'), 'technical теплопотери'));

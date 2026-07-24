@@ -15,6 +15,8 @@ import { createProjectsRouter } from './projectsRoutes.js';
 import { createPublicSharesRouter } from './publicSharesRoutes.js';
 import { createSystemRouter } from './systemRoutes.js';
 import { createFeedbackRouter } from './feedbackRoutes.js';
+import { createMeRouter } from './meRoutes.js';
+import { createAdminRouter } from './adminRoutes.js';
 import { calcRateLimiter } from './middleware/rateLimiters.js';
 
 /**
@@ -129,6 +131,8 @@ export async function createRoutes() {
    * @returns {Promise<void>}
    */
   router.use(createProjectsRouter());
+  router.use(createMeRouter());
+  router.use(createAdminRouter());
   router.use(createPublicSharesRouter());
   router.use(createFeedbackRouter());
 

@@ -29,11 +29,53 @@ export function mapAuthErrorToResponse(err) {
     message = 'Аутентификация проектов не настроена на сервере';
   } else if (code === 'MONGODB_UNAVAILABLE') {
     message = 'Не удалось подключиться к MongoDB.';
-  } else if (err instanceof Error && err.message && code === 'PROJECTS_AUTH_FORBIDDEN') {
+  } else if (err instanceof Error && err.message) {
     message = err.message;
   }
 
   return { statusCode, code, message };
+}
+
+/**
+ * @param {import('express').Request} req
+ * @param {import('express').Response<import('../types/shared-types.js').ErrorEnvelope>} res
+ * @param {{ statusCode?: number; code?: string; message?: string } | unknown} err
+ * @returns {void}
+ */
+export function respondAuthorizationError(req, res, err) {
+  const known =
+    err && typeof err === 'object'
+      ? /** @type {import('../types/shared-types.js').AppErrorLike} */ (err)
+      : null;
+  const statusCode = known?.statusCode === 403 ? 403 : 403;
+  const code =
+    typeof known?.code === 'string' && known.code.length > 0
+      ? known.code
+      : 'AUTHORIZATION_FORBIDDEN';
+  const message =
+    known instanceof Error && known.message
+      ? known.message
+      : typeof known?.message === 'string' && known.message
+        ? known.message
+        : 'Доступ запрещён';
+
+  /** @type {{ requestId?: string } | null} */
+  const logMeta = req.requestId ? { requestId: req.requestId } : null;
+
+  logger.warn('auth.authorization.failed', logMeta, {
+    statusCode,
+    code,
+    message,
+  });
+
+  res.status(statusCode).json({
+    ok: false,
+    error: {
+      message,
+      code,
+      statusCode,
+    },
+  });
 }
 
 /**

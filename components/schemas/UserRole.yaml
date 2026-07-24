@@ -1,0 +1,8 @@
+type: string
+enum:
+  - user
+  - admin
+description: |
+  Роль пользователя системы (MongoDB users.role, req.user.role).
+  - user — обычный пользователь (default).
+  - admin — служебные операции (PATCH subscription/role других users).

@@ -46,8 +46,9 @@ export function LoginPage() {
             <SignIn
               routing="path"
               path={paths.login}
+              signInUrl={paths.login}
+              signUpUrl={paths.signUp}
               fallbackRedirectUrl={returnTo}
-              signUpUrl={paths.login}
             />
           </div>
         ) : hostedUrl ? (

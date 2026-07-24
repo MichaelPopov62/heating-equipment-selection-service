@@ -1,0 +1,13 @@
+type: string
+enum:
+  - ADMIN_REQUIRED
+  - AUTHORIZATION_FORBIDDEN
+  - INVALID_USER_ROLE
+  - INVALID_SUBSCRIPTION_TIER
+description: |
+  Коды ошибок авторизации (Фаза 2), HTTP 403 (кроме отсутствия JWT — см. ProjectsAuthErrorCode).
+
+  - ADMIN_REQUIRED (403) — требуется role=admin.
+  - AUTHORIZATION_FORBIDDEN (403) — общий отказ authorization gate.
+  - INVALID_USER_ROLE (403) — недопустимое значение users.role.
+  - INVALID_SUBSCRIPTION_TIER (403) — недопустимое значение users.subscription.

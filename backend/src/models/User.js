@@ -9,6 +9,12 @@ const { Schema } = mongoose;
 /** @type {readonly ['clerk', 'auth0']} */
 const AUTH_PROVIDER_VALUES = ['clerk', 'auth0'];
 
+/** @type {readonly ['user', 'admin']} */
+const USER_ROLE_VALUES = ['user', 'admin'];
+
+/** @type {readonly ['free', 'pro', 'marketplace']} */
+const SUBSCRIPTION_TIER_VALUES = ['free', 'pro', 'marketplace'];
+
 const userSchema = new Schema(
   {
     /** Провайдер аутентификации (IdP). Соответствует AuthIdentity.provider. */
@@ -23,12 +29,20 @@ const userSchema = new Schema(
     email: { type: String, required: true, trim: true, lowercase: true, maxlength: 320 },
     emailVerified: { type: Boolean, required: true, default: false },
     name: { type: String, required: false, trim: true, maxlength: 200 },
-    /** Default 'user'; authorization logic — фаза 2. */
-    role: { type: String, required: true, trim: true, default: 'user', maxlength: 64 },
-    /** Default 'free'; subscription gates — фаза 2. */
+    /** Default 'user'; admin — служебные операции (Фаза 2). */
+    role: {
+      type: String,
+      required: true,
+      enum: USER_ROLE_VALUES,
+      trim: true,
+      default: 'user',
+      maxlength: 64,
+    },
+    /** Default 'free'; метка tier без quota-gates на calc (Фаза 2). */
     subscription: {
       type: String,
       required: true,
+      enum: SUBSCRIPTION_TIER_VALUES,
       trim: true,
       default: 'free',
       maxlength: 64,

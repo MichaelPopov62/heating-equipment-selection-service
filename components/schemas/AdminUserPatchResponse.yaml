@@ -1,0 +1,11 @@
+type: object
+required:
+  - ok
+  - user
+properties:
+  ok:
+    type: boolean
+    enum:
+      - true
+  user:
+    $ref: ./MeUser.yaml

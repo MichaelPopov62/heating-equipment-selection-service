@@ -1,10 +1,16 @@
 /**
- * @file Контракты аутентификации (Фаза 1): JWT identity vs system user.
+ * @file Контракты аутентификации (Фаза 1–2): JWT identity vs system user.
  * SSOT для AuthIdentity, AuthUser и RequestContext.
  */
 
 /** Провайдер аутентификации (IdP). */
 export type AuthProvider = 'clerk' | 'auth0';
+
+/** Роль пользователя системы (Фаза 2). */
+export type UserRole = 'user' | 'admin';
+
+/** Уровень подписки (Фаза 2; без quota-gates на calc/share/PDF). */
+export type SubscriptionTier = 'free' | 'pro' | 'marketplace';
 
 /**
  * Идентичность из cryptographically verified JWT.
@@ -32,10 +38,8 @@ export interface AuthUser {
   email: string;
   emailVerified: boolean;
   name?: string;
-  /** Default 'user' в фазе 1; authorization logic — фаза 2. */
-  role: string;
-  /** Default 'free' в фазе 1; subscription gates — фаза 2. */
-  subscription: string;
+  role: UserRole;
+  subscription: SubscriptionTier;
 }
 
 /**
@@ -56,4 +60,35 @@ export interface AuthConfigValidationResult {
   ok: boolean;
   mode: AuthJwtMode | null;
   errors: string[];
+}
+
+/** Публичный профиль GET /api/v1/me. */
+export interface MeUser {
+  id: string;
+  email: string;
+  emailVerified: boolean;
+  role: UserRole;
+  subscription: SubscriptionTier;
+  authProvider?: AuthProvider;
+  name?: string;
+  /** true — dev без PROJECTS_AUTH_ENABLED (синтетический профиль). */
+  devMode?: boolean;
+}
+
+/** Ответ GET /api/v1/me. */
+export interface MeOkResponse {
+  ok: true;
+  user: MeUser;
+}
+
+/** Тело PATCH /api/v1/admin/users/{id}. */
+export interface AdminUserPatchBody {
+  role?: UserRole;
+  subscription?: SubscriptionTier;
+}
+
+/** Ответ PATCH /api/v1/admin/users/{id}. */
+export interface AdminUserPatchResponse {
+  ok: true;
+  user: MeUser;
 }

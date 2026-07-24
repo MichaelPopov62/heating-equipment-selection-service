@@ -1,0 +1,18 @@
+type: object
+required:
+  - tier
+  - contactEmail
+properties:
+  tier:
+    type: string
+    enum:
+      - pro
+      - marketplace
+    description: Уровень подписки публикатора на момент publish.
+  contactEmail:
+    type: string
+    format: email
+    description: Email публикатора (из users.email).
+  contactName:
+    type: string
+    description: Имя публикатора (users.name), опционально.

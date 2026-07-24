@@ -31,6 +31,9 @@ export function isClerkEnabled(): boolean {
   return getClerkPublishableKey() != null;
 }
 
+/** Дефолт JWT template (совпадает с docs/auth.md и backend AUTH_AUDIENCE). */
+export const DEFAULT_CLERK_JWT_TEMPLATE = 'heatcalc-api';
+
 /**
  * Имя JWT template в Clerk Dashboard (audience = backend AUTH_AUDIENCE).
  *
@@ -39,6 +42,16 @@ export function isClerkEnabled(): boolean {
 export function getClerkJwtTemplate(): string | null {
   const template = import.meta.env.VITE_CLERK_JWT_TEMPLATE;
   return typeof template === 'string' && template.trim() ? template.trim() : null;
+}
+
+/**
+ * Template для getToken({ template }) — env или DEFAULT_CLERK_JWT_TEMPLATE.
+ * Session token без template не содержит claim email (backend mapJwtPayload → 403).
+ *
+ * @returns {string}
+ */
+export function resolveClerkJwtTemplateForApi(): string {
+  return getClerkJwtTemplate() ?? DEFAULT_CLERK_JWT_TEMPLATE;
 }
 
 /**

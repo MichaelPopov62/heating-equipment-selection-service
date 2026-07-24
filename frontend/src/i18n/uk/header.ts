@@ -8,7 +8,7 @@ export const headerUk = {
   projects: 'Проєкти',
   saveProject: 'Зберегти',
   saveProjectBusy: 'Збереження…',
-  saveProjectTitle: 'Зберегти чернетку анкети на сервер',
+  saveProjectTitle: 'Зберегти проєкт на сервер (разом із розрахунком, якщо анкета готова)',
   saveProjectDisabled: 'Спочатку вкажіть ім\'я клієнта',
   link: 'Посилання',
   linkPublishing: 'Публікація…',
@@ -21,4 +21,10 @@ export const headerUk = {
   exitTitle: 'Вийти на головний екран',
   projectSaved: 'проєкт збережено',
   controlsAria: 'Панель керування',
+  sharePublisherHintPro: 'На публічному посиланні відображатиметься ваш контакт (Pro)',
+  sharePublisherHintMarketplace:
+    'На публічному посиланні відображатиметься контакт бренду (Marketplace)',
+  publisherContactTitlePro: 'Контакт виконавця',
+  publisherContactTitleMarketplace: 'Контакт постачальника',
+  publisherContactEmailLabel: 'Email',
 } as const;

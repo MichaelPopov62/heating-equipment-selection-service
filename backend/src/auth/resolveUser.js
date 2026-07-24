@@ -2,7 +2,7 @@
  * Назначение: материализация AuthIdentity → AuthUser (MongoDB users).
  * Описание: find по (authProvider, providerUserId) или create один раз; без upsert на каждый request.
  */
-
+import { normalizeAuthUserAuthorization } from './authorizationPolicy.js';
 import { User } from '../models/public.js';
 import { ensureMongoReferenceConnection } from '../utils/mongoReferenceConnection.js';
 
@@ -16,7 +16,7 @@ export function userDocumentToAuthUser(doc) {
     throw new Error('User document без _id');
   }
 
-  return {
+  return normalizeAuthUserAuthorization({
     id,
     authProvider: doc.authProvider,
     providerUserId: doc.providerUserId,
@@ -25,7 +25,7 @@ export function userDocumentToAuthUser(doc) {
     ...(doc.name ? { name: doc.name } : {}),
     role: doc.role,
     subscription: doc.subscription,
-  };
+  });
 }
 
 /**

@@ -41,6 +41,7 @@ import {
   surveyAuditMeta,
 } from '../projects/projectChangeMeta.js';
 import { buildShareSnapshot } from '../projects/buildShareSnapshot.js';
+import { buildPublisherPresentationFromUser } from '../projects/buildPublisherPresentation.js';
 import { generateShareToken } from '../projects/shareToken.js';
 import { serializeProjectShareMeta } from '../projects/serializeShare.js';
 import { parseIncludeTechnicalQuery } from '../projects/parseIncludeTechnicalQuery.js';
@@ -636,10 +637,12 @@ export function createProjectsRouter() {
         }
 
         const includeTechnical = parseIncludeTechnicalQuery(req.query.includeTechnical);
+        const publisherPresentation = buildPublisherPresentationFromUser(req.user);
         const snapshot = buildShareSnapshot({
           clientName: String(project.clientName ?? ''),
           label: project.label != null ? String(project.label) : null,
           report: /** @type {{ report: unknown }} */ (calcDoc).report,
+          ...(publisherPresentation ? { publisherPresentation } : {}),
         });
 
         const started = Date.now();
@@ -744,10 +747,12 @@ export function createProjectsRouter() {
 
         const projectPlain = project.toObject();
 
+        const publisherPresentation = buildPublisherPresentationFromUser(req.user);
         const snapshot = buildShareSnapshot({
           clientName: String(projectPlain.clientName ?? ''),
           label: projectPlain.label != null ? String(projectPlain.label) : null,
           report: /** @type {{ report: unknown }} */ (calcDoc).report,
+          ...(publisherPresentation ? { publisherPresentation } : {}),
         });
 
         const existingToken =

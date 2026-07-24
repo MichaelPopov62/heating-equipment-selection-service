@@ -3,6 +3,7 @@
  */
 
 export const queryKeys = {
+  me: ['me', 'profile'] as const,
   envelopePresets: ['presets', 'envelope'] as const,
   underfloorHeatingPresets: ['presets', 'underfloor-heating'] as const,
   ufhModePresets: ['presets', 'ufh-modes'] as const,

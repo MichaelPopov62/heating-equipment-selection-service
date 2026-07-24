@@ -149,6 +149,20 @@
   text-align: center;
 }
 
+.sharePublisherHint {
+  margin: 4px 0 0;
+  font: 500 10px/1.35 var(--sans);
+  color: var(--text);
+  text-align: left;
+}
+
+.accountSlot {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
 .menu {
   position: relative;
   display: flex;
@@ -281,9 +295,15 @@
 
   .controls > button,
   .controls > .menu,
-  .controls > .shareLinkWrap {
+  .controls > .shareLinkWrap,
+  .controls > .accountSlot {
     flex: 1 1 calc(50% - 4px);
     width: auto;
+  }
+
+  .accountSlot {
+    flex: 1 1 100%;
+    grid-column: 1 / -1;
   }
 
   .primaryButton,
@@ -341,8 +361,13 @@
 
   .controls > button,
   .controls > .menu,
-  .controls > .shareLinkWrap {
+  .controls > .shareLinkWrap,
+  .controls > .accountSlot {
     flex: 0 0 auto;
+  }
+
+  .accountSlot {
+    grid-column: auto;
   }
 
   .shareLinkWrap > button,

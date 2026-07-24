@@ -12,7 +12,7 @@ CRUD клиентских проектов и сохранённых расчё�
 | GET | `/api/v1/public/shares/{shareToken}` | нет (read-only whitelist) |
 | GET | `/api/v1/public/shares/{shareToken}/pdf` | нет — скачать PDF |
 
-Поля `Project`: `shareToken`, `sharePublishedAt`, `shareSnapshot`. Verify: `npm run verify:project-share`, `npm run verify:project-pdf`.
+Поля `Project`: `shareToken`, `sharePublishedAt`, `shareSnapshot`. При publish для `subscription` **pro** или **marketplace** в snapshot добавляется `publisherPresentation` (контакт публикатора: email, optional name) — см. [`client-share-and-layers.md`](client-share-and-layers.md). Verify: `npm run verify:project-share`, `npm run verify:project-pdf`.
 
 PDF: серверный Chromium, см. [`client-share-and-layers.md`](client-share-and-layers.md). Query `includeTechnical=1` добавляет техблок.
 

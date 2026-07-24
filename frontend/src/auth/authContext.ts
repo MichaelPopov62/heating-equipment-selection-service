@@ -12,6 +12,8 @@ export type AuthUser = {
 export type AuthContextValue = {
   user: AuthUser | null;
   isAuthenticated: boolean;
+  /** GET /api/v1/me и projects API — только когда Bearer getter готов (Clerk isLoaded). */
+  isMeQueryEnabled: boolean;
   isAuthRequired: boolean;
   loginWithToken: (token: string) => void;
   logout: () => void | Promise<void>;

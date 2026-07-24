@@ -2,16 +2,19 @@
  * Назначение: клиентская шапка — публичная ссылка и скачивание PDF (без pop-up).
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { ShareLinkToast } from '../ShareLinkToast/ShareLinkToast';
 import { brandUk } from '../../i18n/uk/brand';
 import { headerUk } from '../../i18n/uk/header';
+import { useMeQuery } from '../../query/queries/useMeQuery';
 import styles from './Header.module.css';
 
 export type HeaderProps = {
-  logo?: React.ReactNode;
+  logo?: ReactNode;
   title: string;
+  /** Слот сессии (AccountBar) — перед кнопкой «Проєкти». */
+  accountSlot?: ReactNode;
   /** start — только «Проекты»; survey — полная клиентская панель. */
   variant?: 'start' | 'survey';
   clientName: string;
@@ -33,7 +36,7 @@ export type HeaderProps = {
   shareToastOpen?: boolean;
   onDismissShareToast?: () => void;
   onOpenProjects: () => void;
-  /** Зберегти чернетку анкети на сервер (без обовʼязкового розрахунку). */
+  /** Зберегти проєкт на сервер; при готовій анкеті — також розрахунок у MongoDB. */
   onSaveProject: () => void;
   /** Выход на стартовый экран (без skeleton). */
   onExit: () => void;
@@ -44,6 +47,7 @@ export type HeaderProps = {
 export function Header({
   logo,
   title,
+  accountSlot,
   variant = 'survey',
   clientName,
   onClientNameChange,
@@ -65,6 +69,14 @@ export function Header({
 }: HeaderProps) {
   const [pdfMenuOpen, setPdfMenuOpen] = useState(false);
   const controlsRef = useRef<HTMLDivElement>(null);
+  const { user: meUser } = useMeQuery();
+
+  const sharePublisherHint =
+    meUser?.subscription === 'pro'
+      ? headerUk.sharePublisherHintPro
+      : meUser?.subscription === 'marketplace'
+        ? headerUk.sharePublisherHintMarketplace
+        : null;
 
   const closeMenus = useCallback(() => {
     setPdfMenuOpen(false);
@@ -137,6 +149,8 @@ export function Header({
           />
         ) : null}
 
+        {accountSlot ? <div className={styles.accountSlot}>{accountSlot}</div> : null}
+
         <button
           type="button"
           className={styles.secondaryButton}
@@ -192,6 +206,9 @@ export function Header({
               </button>
               {onDismissShareToast ? (
                 <ShareLinkToast open={shareToastOpen} onDismiss={onDismissShareToast} />
+              ) : null}
+              {sharePublisherHint ? (
+                <p className={styles.sharePublisherHint}>{sharePublisherHint}</p>
               ) : null}
             </div>
 
