@@ -1,0 +1,66 @@
+/* Назначение: dock dev-кнопок — справа внизу, ряд: Dev | React Query, без glow-наложения. */
+
+.dock {
+  --dev-tools-btn-size: 40px;
+  --dev-tools-gap: 20px;
+
+  position: fixed;
+  right: var(--container-padding-inline);
+  bottom: 12px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--dev-tools-gap);
+  pointer-events: none;
+}
+
+.devSlot,
+.reactQuerySlot {
+  pointer-events: auto;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--dev-tools-btn-size);
+}
+
+/* React Query — ячейка 40×40; buttonPosition="relative" у TanStack */
+.reactQuerySlot {
+  width: var(--dev-tools-btn-size);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.reactQuerySlot :global(.tsqd-open-btn-container) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--dev-tools-btn-size);
+  height: var(--dev-tools-btn-size);
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 9999px;
+  box-shadow: none;
+}
+
+/* Размытый декоративный слой TanStack */
+.reactQuerySlot :global(.tsqd-open-btn-container) > div[aria-hidden='true'] {
+  display: none;
+}
+
+.reactQuerySlot :global(.tsqd-open-btn-container) button {
+  width: var(--dev-tools-btn-size);
+  height: var(--dev-tools-btn-size);
+  min-width: var(--dev-tools-btn-size);
+  min-height: var(--dev-tools-btn-size);
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}

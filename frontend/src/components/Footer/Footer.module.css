@@ -5,34 +5,32 @@
 @import '../../styles/custom-media.css';
 
 .footer {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  margin-top: auto;
+  padding: 28px var(--container-padding-inline) 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
   border-top: 1px solid var(--border);
   background:
     radial-gradient(1200px 400px at 20% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 60%),
     radial-gradient(900px 300px at 90% 10%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 55%),
     var(--surface);
-  margin-top: auto;
 }
 
-.inner {
-  max-width: 1126px;
-  margin: 0 auto;
-  padding: 28px 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-/* Бренд — лого и название слева (как в шапке, без дублирования слогана) */
+/* Бренд: по центру на mobile/tablet, слева на desktop */
 .brandBlock {
   width: 100%;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 .brand {
   display: inline-flex;
   align-items: flex-start;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 12px;
   text-decoration: none;
   color: inherit;
@@ -51,10 +49,10 @@
 .brandTitles {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 2px;
   min-width: 0;
-  text-align: left;
+  text-align: center;
 }
 
 .brandName {
@@ -132,7 +130,7 @@
   font: 500 12px/1.45 var(--sans);
   color: var(--text);
   opacity: 0.85;
-  max-width: 720px;
+  max-width: var(--container-prose-max-width);
 }
 
 @media (--narrow) {
@@ -142,8 +140,8 @@
 }
 
 @media (--tablet) {
-  .inner {
-    padding: 32px 20px 24px;
+  .footer {
+    padding: 32px var(--container-padding-inline) 24px;
     gap: 28px;
   }
 
@@ -154,8 +152,22 @@
 }
 
 @media (--desktop) {
+  .footer {
+    padding: 32px var(--container-padding-inline) 24px;
+  }
+
+  .brandBlock {
+    justify-content: flex-start;
+  }
+
   .brand {
     align-items: center;
+    justify-content: flex-start;
+  }
+
+  .brandTitles {
+    align-items: flex-start;
+    text-align: left;
   }
 
   .columns {

@@ -52,6 +52,14 @@
 .accPanel {
   padding-top: 10px;
   border-top: 1px solid var(--border);
+  text-align: left;
+}
+
+.formGrid,
+.field,
+.fieldGroup,
+.windowCard {
+  text-align: left;
 }
 
 .cardTitle {
@@ -85,6 +93,7 @@
 }
 
 .control {
+  width: 100%;
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px 12px;
@@ -95,22 +104,34 @@
   box-sizing: border-box;
 }
 
-select.control {
-  width: 100%;
-}
-
 .fieldRow {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 10px;
+  align-items: end;
 }
 
 .fieldGroup {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  flex: 1 1 100%;
-  min-width: 100%;
+  min-width: 0;
+}
+
+/* Потолок / кровля — пресет и площадь в одном блоке на всю ширину сетки */
+.envelopeSection {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.envelopeFieldsRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: end;
 }
 
 .fieldGroupTitle {
@@ -189,7 +210,7 @@ select.control {
 @media (--tablet) {
   .card {
     flex: 1 1 calc(50% - 6px);
-    min-width: 320px;
+    min-width: 0;
   }
 
   .formGrid {
@@ -204,5 +225,13 @@ select.control {
   .ufhFieldsGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: end;
+  }
+
+  .envelopeFieldsRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fieldRow {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 200px);
   }
 }

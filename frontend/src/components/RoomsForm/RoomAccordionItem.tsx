@@ -704,62 +704,108 @@ export function RoomAccordionItem({
 
           {/* Потолок (только если сверху холодно) */}
           {room.topBoundaryType === 'unheated' && (
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor={`ceilingPresetId-${room.id}`}>
-                Потолок (пресет)
-              </label>
-              <select
-                id={`ceilingPresetId-${room.id}`}
-                className={styles.control}
-                value={ceilingPresets.length === 0 ? '' : room.ceilingPresetId}
-                onChange={(e) => { updateRoom({ ceilingPresetId: e.target.value }); }}
-                disabled={ceilingPresets.length === 0}
-              >
-                {ceilingPresets.length === 0 ? (
-                  <option value="">Нет пресетов</option>
-                ) : (
-                  ceilingPresets.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {envelopePresetLabel(p)}
-                    </option>
-                  ))
-                )}
-              </select>
+            <div className={styles.envelopeSection}>
+              <div className={styles.fieldGroupTitle}>Потолок</div>
+              <div className={styles.envelopeFieldsRow}>
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor={`ceilingPresetId-${room.id}`}>
+                    Потолок (пресет)
+                  </label>
+                  <select
+                    id={`ceilingPresetId-${room.id}`}
+                    className={styles.control}
+                    value={ceilingPresets.length === 0 ? '' : room.ceilingPresetId}
+                    onChange={(e) => { updateRoom({ ceilingPresetId: e.target.value }); }}
+                    disabled={ceilingPresets.length === 0}
+                  >
+                    {ceilingPresets.length === 0 ? (
+                      <option value="">Нет пресетов</option>
+                    ) : (
+                      ceilingPresets.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {envelopePresetLabel(p)}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor={`ceiling-area-${room.id}`}>
+                    Площадь потолка, м²
+                  </label>
+                  <input
+                    id={`ceiling-area-${room.id}`}
+                    className={styles.control}
+                    type="number"
+                    min={0}
+                    step={0.1}
+                    value={room.ceilingAreaM2}
+                    onChange={(e) => { updateRoom({ ceilingAreaM2: toNumberOrEmpty(e.target.value) }); }}
+                    placeholder="например, 20"
+                  />
+                </div>
+              </div>
+              <div className={styles.hint}>
+                Используйте площадь потолка/перекрытия, через которое идут потери (над ним холодно).
+              </div>
             </div>
           )}
 
           {/* Кровля (только для мансарды) */}
           {room.topBoundaryType === 'roof' && (
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor={`roofPresetId-${room.id}`}>
-                Кровля (пресет)
-              </label>
-              <select
-                id={`roofPresetId-${room.id}`}
-                className={styles.control}
-                value={roofPresets.length === 0 ? '' : room.roofPresetId}
-                onChange={(e) => { updateRoom({ roofPresetId: e.target.value }); }}
-                disabled={roofPresets.length === 0}
-              >
-                {roofPresets.length === 0 ? (
-                  <option value="">Нет пресетов</option>
-                ) : (
-                  <>
-                    <option value="">Не учитывать кровлю</option>
-                    {roofPresets.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {envelopePresetLabel(p)}
-                      </option>
-                    ))}
-                  </>
-                )}
-              </select>
+            <div className={styles.envelopeSection}>
+              <div className={styles.fieldGroupTitle}>Кровля</div>
+              <div className={styles.envelopeFieldsRow}>
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor={`roofPresetId-${room.id}`}>
+                    Кровля (пресет)
+                  </label>
+                  <select
+                    id={`roofPresetId-${room.id}`}
+                    className={styles.control}
+                    value={roofPresets.length === 0 ? '' : room.roofPresetId}
+                    onChange={(e) => { updateRoom({ roofPresetId: e.target.value }); }}
+                    disabled={roofPresets.length === 0}
+                  >
+                    {roofPresets.length === 0 ? (
+                      <option value="">Нет пресетов</option>
+                    ) : (
+                      <>
+                        <option value="">Не учитывать кровлю</option>
+                        {roofPresets.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {envelopePresetLabel(p)}
+                          </option>
+                        ))}
+                      </>
+                    )}
+                  </select>
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor={`roof-area-${room.id}`}>
+                    Площадь скатов кровли (по поверхности), м²
+                  </label>
+                  <input
+                    id={`roof-area-${room.id}`}
+                    className={styles.control}
+                    type="number"
+                    min={0}
+                    step={0.1}
+                    value={room.roofAreaM2}
+                    onChange={(e) => { updateRoom({ roofAreaM2: toNumberOrEmpty(e.target.value) }); }}
+                    placeholder="например, 18.5"
+                  />
+                </div>
+              </div>
+              <div className={styles.hint}>
+                Для мансарды указывайте площадь наклонных скатов (а не площадь пола).
+              </div>
             </div>
           )}
 
           {/* Наружные / коридорные стены (СП 60.13330: до двух ориентированных фасадных сторон) */}
           {wallFieldConfigs.map(({ slot, label, hint, placeholder }) => (
-            <div key={slot} className={styles.fieldGroup}>
+            <div key={slot} className={`${styles.fieldGroup} ${styles.fullWidth}`}>
               <div className={styles.fieldGroupTitle}>{label}</div>
               <div className={styles.fieldRow}>
                 <div className={styles.field}>
@@ -804,48 +850,6 @@ export function RoomAccordionItem({
               <div className={styles.hint}>{hint}</div>
             </div>
           ))}
-
-          {room.topBoundaryType === 'unheated' && (
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor={`ceiling-area-${room.id}`}>
-                Площадь потолка, м²
-              </label>
-              <input
-                id={`ceiling-area-${room.id}`}
-                className={styles.control}
-                type="number"
-                min={0}
-                step={0.1}
-                value={room.ceilingAreaM2}
-                onChange={(e) => { updateRoom({ ceilingAreaM2: toNumberOrEmpty(e.target.value) }); }}
-                placeholder="например, 20"
-              />
-              <div className={styles.hint}>
-                Используйте площадь потолка/перекрытия, через которое идут потери (над ним холодно).
-              </div>
-            </div>
-          )}
-
-          {room.topBoundaryType === 'roof' && (
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor={`roof-area-${room.id}`}>
-                Площадь скатов кровли (по поверхности), м²
-              </label>
-              <input
-                id={`roof-area-${room.id}`}
-                className={styles.control}
-                type="number"
-                min={0}
-                step={0.1}
-                value={room.roofAreaM2}
-                onChange={(e) => { updateRoom({ roofAreaM2: toNumberOrEmpty(e.target.value) }); }}
-                placeholder="например, 18.5"
-              />
-              <div className={styles.hint}>
-                Для мансарды указывайте площадь наклонных скатов (а не площадь пола).
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Окна */}

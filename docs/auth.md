@@ -106,6 +106,31 @@ Startup gate (`backend/src/index.js`):
 Суффикс `/*` обязателен: Clerk path-routing использует подпути (`/sign-up/verify-email-address` и т.д.).  
 **Не** задавайте `signUpUrl={paths.login}` — регистрация не откроется.
 
+### Локализация и стили Clerk UI (PR-1)
+
+| Модуль | Назначение |
+|--------|------------|
+| `frontend/src/i18n/clerkUkLocalization.ts` | SSOT: merge `ukUA` + override `unstable__errors` и строк sign-in/sign-up (FAPI errors → украинский, без English fallback) |
+| `frontend/src/i18n/clerkAppearance.ts` | **SSOT стилей Clerk** — `variables` + `elements` для `ClerkProvider` (поля, пароль, OAuth, backdrop) |
+| `frontend/src/components/ClerkAuthWidget/` | Только layout-оболочка (`.shell`: фон, min-height, border); **без** override классов Clerk |
+| `frontend/src/i18n/uk/auth.ts` | Подсказки под виджетом: `loginClerkHint`, `signUpPasswordHint` |
+| `frontend/src/styles/clerkGlobal.css` | Минимум: CSS-переменные Clerk + fallback `modalBackdrop` (portal на `body`) |
+
+`ClerkProviderWithRouter` получает **единственный** `appearance={clerkAppearance}` и `localization={clerkUkLocalization}`.  
+`<SignIn />` / `<SignUp />` **не** дублируют `appearance` — тема наследуется от провайдера.
+
+#### Clerk appearance (SSOT) — правила
+
+1. **Все** стили SignIn/SignUp (padding полей, «глаз» пароля, центрирование label, OAuth, spinner, фон карточки) — только в `clerkAppearance.ts` через ключи `elements.*` (класс `cl-formFieldInput` → `formFieldInput`).
+2. **Запрещено** дублировать те же правила в `clerkGlobal.css`, `ClerkAuthWidget.module.css` или инъекцией CSS/JS (`MutationObserver`, inline `setProperty`).
+3. **`!important` в Clerk-стилях не использовать.** Допустимый минимум — только в **не-Clerk** CSS проекта, если иначе нельзя перебить сторонний виджет (сейчас Clerk обходится без `!important`).
+4. `clerkGlobal.css` — только `--clerk-color-*` и fallback portal backdrop; не править поля формы и OAuth. Mask-icon GitHub: **один** ключ `socialButtonsProviderIcon__github` с `light-dark(#08060d, #f3f4f6)` и `backgroundColor` (= `--text-h` из `index.css`; `variables.colorForeground` и `var(--text-h)` у Emotion до mask-icon не доходят). Без `providerIcon__github`, CSS-fallback и `@clerk/themes`.
+5. После изменения UI — ручной smoke (email, password + «глаз», sign-up) и `npm run verify:frontend-auth`.
+
+Редирект после успешного sign-in/sign-up — **только** через React Router (`useAuthRedirectAfterClerk` + `navigate(returnTo)`); `fallbackRedirectUrl` у `<SignIn />` / `<SignUp />` не используется. `ClerkProviderWithRouter` передаёт `routerPush` / `routerReplace` — без `window.location` reload после входа.
+
+После изменения ключей ошибок — прогнать QA-матрицу sign-in/sign-up (неверный email, неверный пароль, sign-up &lt; 8 символов) и `npm run verify:frontend-auth`.
+
 ---
 
 ## Переменные окружения

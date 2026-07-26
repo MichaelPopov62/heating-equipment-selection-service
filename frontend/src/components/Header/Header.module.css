@@ -2,14 +2,20 @@
    Описание: Бренд, поля ввода, выпадающее меню и адаптивное поведение header. */
 @import '../../styles/custom-media.css';
 
-/* Mobile-first: 316 → --narrow → --tablet — см. src/styles/custom-media.css */
+/* Mobile-first: base → --narrow → --tablet → --desktop — см. src/styles/custom-media.css */
+
+/* ========== MOBILE (base) ========== */
 
 .header {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 10px;
-  padding: 10px 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+  padding: 10px var(--container-padding-inline);
   border-bottom: 1px solid var(--border);
   background:
     radial-gradient(1200px 400px at 20% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 60%),
@@ -97,17 +103,19 @@
   color: #c44;
 }
 
-/* ≤316px: поле на всю ширину, кнопки сеткой 2×2 без наложения */
 .controls {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
   align-items: stretch;
 }
 
 .clientInput {
-  grid-column: 1 / -1;
+  flex: 1 1 100%;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -129,11 +137,30 @@
   border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
 
-.controls > button,
+.controls > button:not(.projectsButton),
 .controls > .menu,
 .controls > .shareLinkWrap {
+  flex: 0 0 calc((100% - 8px) / 2);
+  max-width: calc((100% - 8px) / 2);
   min-width: 0;
+}
+
+/* Mobile (<768): «Проєкти» по центру блока controls */
+.projectsButton {
+  flex: 1 1 100%;
+  max-width: min(280px, 100%);
+  margin-inline: auto;
+  align-self: center;
+}
+
+.accountSlot {
+  flex: 1 1 100%;
+  display: flex;
+  justify-content: flex-end;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .shareLinkWrap {
@@ -154,13 +181,7 @@
   font: 500 10px/1.35 var(--sans);
   color: var(--text);
   text-align: left;
-}
-
-.accountSlot {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: flex-end;
-  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .menu {
@@ -219,6 +240,8 @@
   background: var(--surface-2);
   color: var(--text-h);
   cursor: pointer;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .menuTriggerActive {
@@ -248,25 +271,8 @@
   cursor: not-allowed;
 }
 
-@media (hover: hover) {
-  .secondaryButton:hover,
-  .secondaryButton:focus-visible {
-    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
-    background: color-mix(in srgb, var(--accent-bg) 35%, var(--surface-2));
-  }
+/* ========== NARROW ≥317px ========== */
 
-  .primaryButton:hover,
-  .primaryButton:focus-visible {
-    filter: brightness(1.06);
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
-  }
-
-  .menuPanel button:hover {
-    background: color-mix(in srgb, var(--accent-bg) 40%, var(--surface-2));
-  }
-}
-
-/* Шире узкого mobile (≥317px) */
 @media (--narrow) {
   .title {
     font-size: 18px;
@@ -281,51 +287,36 @@
     flex: none;
   }
 
-  .controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
   .clientInput {
-    flex: 1 1 100%;
     padding: 10px 12px;
     font: 600 13px/1 var(--sans);
-  }
-
-  .controls > button,
-  .controls > .menu,
-  .controls > .shareLinkWrap,
-  .controls > .accountSlot {
-    flex: 1 1 calc(50% - 4px);
-    width: auto;
-  }
-
-  .accountSlot {
-    flex: 1 1 100%;
-    grid-column: 1 / -1;
   }
 
   .primaryButton,
   .secondaryButton {
-    padding: 10px 12px;
-    font: 600 13px/1 var(--sans);
+    padding: 10px 8px;
+    font: 600 13px/1.15 var(--sans);
   }
 }
 
-/* Планшет и шире (≥768px) */
+/* ========== TABLET ≥768px ========== */
+
 @media (--tablet) {
   .header {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 18px 20px;
+    gap: 12px 16px;
+    padding: 18px var(--container-padding-inline);
   }
 
   .brand {
+    flex: 1 1 220px;
     align-items: center;
     width: auto;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .titles {
@@ -346,28 +337,53 @@
   }
 
   .controls {
-    display: inline-flex;
-    flex-wrap: nowrap;
+    flex: 1 1 280px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
     align-items: center;
     gap: 10px;
     width: auto;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .clientInput {
-    flex: 0 1 auto;
-    width: auto;
-    min-width: 160px;
-  }
-
-  .controls > button,
-  .controls > .menu,
-  .controls > .shareLinkWrap,
-  .controls > .accountSlot {
-    flex: 0 0 auto;
+    flex: 1 1 100%;
+    order: -1;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-left: 0;
   }
 
   .accountSlot {
-    grid-column: auto;
+    flex: 1 1 100%;
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .controls > button:not(.projectsButton),
+  .controls > .menu,
+  .controls > .shareLinkWrap {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* 768: «Вийти» вправо, «Проєкти» под ней */
+  .exitButton {
+    margin-left: auto;
+  }
+
+  .projectsButton {
+    order: 100;
+    flex: 0 1 auto;
+    width: auto;
+    max-width: none;
+    margin-inline: 0 0;
+    margin-left: auto;
+    align-self: flex-end;
   }
 
   .shareLinkWrap > button,
@@ -382,7 +398,90 @@
     left: auto;
     right: 0;
     width: auto;
-    min-width: 220px;
-    white-space: nowrap;
+    max-width: min(220px, 100%);
+    min-width: 0;
+    white-space: normal;
+  }
+}
+
+/* ========== DESKTOP ≥1200px ========== */
+
+@media (--desktop) {
+  .header {
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 18px var(--container-padding-inline);
+  }
+
+  .brand {
+    flex: 0 1 auto;
+    max-width: min(52ch, 45%);
+  }
+
+  .controls {
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px 12px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .clientInput {
+    flex: 0 1 200px;
+    order: 0;
+    min-width: 0;
+    max-width: min(240px, 100%);
+    margin-left: 0;
+  }
+
+  .accountSlot {
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .controls > button:not(.projectsButton),
+  .controls > .menu,
+  .controls > .shareLinkWrap {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* 1200: сброс tablet/mobile-раскладки «Проєкти» / «Вийти» */
+  .projectsButton {
+    order: initial;
+    flex: 0 1 auto;
+    width: auto;
+    max-width: 100%;
+    margin-inline: initial;
+    margin-left: initial;
+    align-self: initial;
+  }
+
+  .exitButton {
+    margin-left: initial;
+  }
+}
+
+/* ========== HOVER (не брейкпоинт) ========== */
+
+@media (hover: hover) {
+  .secondaryButton:hover,
+  .secondaryButton:focus-visible {
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+    background: color-mix(in srgb, var(--accent-bg) 35%, var(--surface-2));
+  }
+
+  .primaryButton:hover,
+  .primaryButton:focus-visible {
+    filter: brightness(1.06);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+
+  .menuPanel button:hover {
+    background: color-mix(in srgb, var(--accent-bg) 40%, var(--surface-2));
   }
 }

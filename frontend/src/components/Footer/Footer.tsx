@@ -58,43 +58,41 @@ export function Footer({ variant = 'app' }: FooterProps) {
 
   return (
     <footer className={styles.footer} role="contentinfo">
-      <div className={styles.inner}>
-        <div className={styles.brandBlock}>
-          <Link to={paths.home} className={styles.brand}>
-            <div className={styles.logoSlot}>
-              <Logo size={34} />
-            </div>
-            <div className={styles.brandTitles}>
-              <h2 className={styles.brandName}>{brandUk.name}</h2>
-            </div>
-          </Link>
-        </div>
+      <div className={styles.brandBlock}>
+        <Link to={paths.home} className={styles.brand}>
+          <div className={styles.logoSlot}>
+            <Logo size={34} />
+          </div>
+          <div className={styles.brandTitles}>
+            <h2 className={styles.brandName}>{brandUk.name}</h2>
+          </div>
+        </Link>
+      </div>
 
-        <div className={styles.columns}>
-          {variant === 'app' ? (
-            <FooterLinkGroup
-              title={footerUk.groups.product}
-              links={productLinks}
-              onAction={handleAction}
-            />
-          ) : (
-            <FooterLinkGroup title={footerUk.groups.product} links={productLinks} />
-          )}
-          <FooterLinkGroup title={footerUk.groups.help} links={helpLinks} />
-          <FooterLinkGroup title={footerUk.groups.legal} links={legalLinks} />
-          <FooterContacts githubUrl={githubUrl} />
-        </div>
+      <div className={styles.columns}>
+        {variant === 'app' ? (
+          <FooterLinkGroup
+            title={footerUk.groups.product}
+            links={productLinks}
+            onAction={handleAction}
+          />
+        ) : (
+          <FooterLinkGroup title={footerUk.groups.product} links={productLinks} />
+        )}
+        <FooterLinkGroup title={footerUk.groups.help} links={helpLinks} />
+        <FooterLinkGroup title={footerUk.groups.legal} links={legalLinks} />
+        <FooterContacts githubUrl={githubUrl} />
+      </div>
 
-        <div className={styles.meta}>
-          <p className={styles.copyright}>{brandUk.copyright}</p>
-          <p className={styles.versionLine}>
-            {footerUk.versionLabel} {__APP_VERSION__}
-          </p>
-          <p className={styles.buildLine}>
-            {footerUk.buildLabel} {__APP_BUILD_DATE__}
-          </p>
-          <p className={styles.disclaimer}>{brandUk.disclaimer}</p>
-        </div>
+      <div className={styles.meta}>
+        <p className={styles.copyright}>{brandUk.copyright}</p>
+        <p className={styles.versionLine}>
+          {footerUk.versionLabel} {__APP_VERSION__}
+        </p>
+        <p className={styles.buildLine}>
+          {footerUk.buildLabel} {__APP_BUILD_DATE__}
+        </p>
+        <p className={styles.disclaimer}>{brandUk.disclaimer}</p>
       </div>
     </footer>
   );

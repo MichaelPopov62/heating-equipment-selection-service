@@ -1,13 +1,18 @@
 .fab {
-  position: fixed;
-  right: 80px;
-  bottom: 50px;
-  z-index: 40;
+  position: static;
+  box-sizing: border-box;
+  width: auto;
+  height: 40px;
+  min-height: 40px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid #5a6a7a;
   background: #1b2430;
   color: #d7e0ea;
-  font: 600 12px/1.2 ui-monospace, Consolas, monospace;
-  padding: 8px 12px;
+  font: 600 12px/1 ui-monospace, Consolas, monospace;
+  padding: 0 12px;
   border-radius: 6px;
   cursor: pointer;
   opacity: 0.85;
@@ -22,7 +27,7 @@
   right: 12px;
   bottom: 56px;
   z-index: 50;
-  width: min(480px, calc(100vw - 24px));
+  width: min(480px, calc(100svw - 24px));
   max-height: min(70vh, 560px);
   overflow: auto;
   background: #0f141b;

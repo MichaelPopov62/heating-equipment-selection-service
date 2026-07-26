@@ -1,0 +1,85 @@
+/* Назначение: единые токены и классы контейнеров контента (mobile-first).
+   Описание: padding, gap, radius и max-width по брейкпоинтам — header, layoutBody, footer, страницы. */
+@import './custom-media.css';
+
+:root {
+  /* Оболочка приложения (#root): на всю ширину viewport (317 / 768 / 1200) */
+  --shell-max-width: 100%;
+
+  /* Базовый контейнер контента */
+  --container-max-width: 100%;
+  --container-padding-inline: 12px;
+  --container-padding-block: 10px;
+  --container-gap: 12px;
+  --container-radius: 12px;
+  --container-card-padding: 10px;
+
+  /* Узкие колонки по типу страницы */
+  --container-prose-max-width: 720px;
+  --container-auth-max-width: 440px;
+  --container-share-max-width: 960px;
+  --container-hero-max-width: 420px;
+
+  /* Auth: дополнительный верхний отступ формы */
+  --container-auth-padding-block-start: 40px;
+
+  /* Обратная совместимость chrome (header, footer, cookie banner) */
+  --chrome-padding-inline: var(--container-padding-inline);
+}
+
+@media (--narrow) {
+  :root {
+    --container-padding-block: 12px;
+    --container-radius: 14px;
+    --container-card-padding: 12px;
+  }
+}
+
+@media (--tablet) {
+  :root {
+    --container-padding-inline: 20px;
+    --container-padding-block: 16px;
+    --container-gap: 16px;
+    --container-card-padding: 14px;
+  }
+}
+
+@media (--desktop) {
+  :root {
+    --container-padding-inline: 24px;
+  }
+}
+
+/* Базовый горизонтальный контейнер — header, layoutBody, footer, main */
+.contentContainer {
+  width: 100%;
+  max-width: var(--container-max-width);
+  min-width: 0;
+  margin-inline: auto;
+  padding-inline: var(--container-padding-inline);
+  box-sizing: border-box;
+}
+
+/* Main-области с вертикальными отступами */
+.contentContainerPadded {
+  width: 100%;
+  max-width: var(--container-max-width);
+  min-width: 0;
+  margin-inline: auto;
+  padding-inline: var(--container-padding-inline);
+  padding-block: var(--container-padding-block);
+  box-sizing: border-box;
+}
+
+/* Модификаторы ширины контента */
+.contentContainerProse {
+  max-width: min(var(--container-prose-max-width), 100%);
+}
+
+.contentContainerAuth {
+  max-width: min(var(--container-auth-max-width), 100%);
+}
+
+.contentContainerShare {
+  max-width: min(var(--container-share-max-width), 100%);
+}

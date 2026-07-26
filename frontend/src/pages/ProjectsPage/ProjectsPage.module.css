@@ -2,8 +2,6 @@
  * Назначение: стили страницы проектов.
  */
 
-@import '../../styles/custom-media.css';
-
 .page {
   min-height: 100svh;
   display: flex;
@@ -11,11 +9,8 @@
 }
 
 .main {
+  composes: contentContainer contentContainerProse contentContainerPadded from global;
   flex: 1;
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 24px 16px;
-  width: 100%;
 }
 
 .title {

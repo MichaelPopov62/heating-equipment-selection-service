@@ -7,6 +7,8 @@
   flex-direction: column;
   gap: 12px;
   margin-top: 12px;
+  min-width: 0;
+  overflow-x: clip;
 }
 
 .headerRow {
@@ -14,6 +16,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  min-width: 0;
 }
 
 .headerActions {
@@ -177,12 +180,12 @@
 @media (--tablet) {
   .card {
     flex: 1 1 calc(50% - 6px);
-    min-width: 320px;
+    min-width: 0;
   }
 
   .field {
     flex: 1 1 calc(50% - 5px);
-    min-width: 220px;
+    min-width: 0;
   }
 }
 

@@ -1,0 +1,21 @@
+/**
+ * Назначение: минимальные глобальные хуки Clerk (portals на body, вне #root).
+ * SSOT UI — frontend/src/i18n/clerkAppearance.ts (appearance на ClerkProvider).
+ * Здесь только CSS-переменные Clerk и fallback backdrop без !important.
+ */
+
+:root {
+  --clerk-color-background: var(--surface-2);
+  --clerk-color-modal-backdrop: transparent;
+}
+
+/**
+ * Fallback для portal backdrop на body (если appearance не доходит до portal).
+ * Без !important — приоритет у appearance.elements.modalBackdrop.
+ */
+.cl-modalBackdrop {
+  background: transparent;
+  display: none;
+  pointer-events: none;
+  opacity: 0;
+}

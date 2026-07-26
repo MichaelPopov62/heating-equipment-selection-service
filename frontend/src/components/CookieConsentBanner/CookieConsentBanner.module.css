@@ -4,10 +4,12 @@
 
 .banner {
   position: fixed;
-  left: 12px;
-  right: 12px;
+  inset-inline: var(--container-padding-inline);
   bottom: 12px;
   z-index: 900;
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: calc(100% - 2 * var(--container-padding-inline));
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -23,8 +25,10 @@
 .text {
   margin: 0;
   flex: 1 1 240px;
+  min-width: 0;
   font: 500 13px/1.45 var(--sans);
   color: var(--text);
+  overflow-wrap: anywhere;
 }
 
 .link {

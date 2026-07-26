@@ -29,4 +29,9 @@ export const authUk = {
     'JWT без email: налаштуйте Clerk JWT template (heatcalc-api) з claim email та VITE_CLERK_JWT_TEMPLATE.',
   authRequired: 'Потрібен вхід для доступу до цієї сторінки.',
   sessionActive: 'Ви авторизовані',
+  redirectingAfterLogin: 'Перенаправлення…',
+  loginClerkHint:
+    'Якщо з’явилось попередження — виправте дані та натисніть «Продовжити» ще раз.',
+  signUpPasswordHint:
+    'Пароль: щонайменше 8 символів. Регістр літер має значення.',
 } as const;

@@ -1,8 +1,7 @@
 .page {
+  composes: contentContainer contentContainerShare from global;
   min-height: 100vh;
-  padding: 24px 20px 48px;
-  max-width: 960px;
-  margin: 0 auto;
+  padding-block: 24px 48px;
   color: #1c242e;
   background:
     radial-gradient(1200px 480px at 10% -10%, #e8f1f8 0%, transparent 55%),

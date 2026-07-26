@@ -2,11 +2,10 @@
  * Назначение: Корень приложения — router + providers.
  */
 
-import { ClerkProvider } from '@clerk/clerk-react';
-import { ukUA } from '@clerk/localizations';
 import { BrowserRouter } from 'react-router-dom';
 
 import { AuthProvider } from './auth/AuthProvider';
+import { ClerkProviderWithRouter } from './auth/ClerkProviderWithRouter';
 import { getClerkPublishableKey } from './auth/authConfig';
 import { AppErrorBoundary } from './components/AppErrorBoundary/AppErrorBoundary';
 import { AppRouter } from './routing/AppRouter';
@@ -29,9 +28,9 @@ function App() {
     <AppErrorBoundary>
       <BrowserRouter>
         {clerkPublishableKey ? (
-          <ClerkProvider publishableKey={clerkPublishableKey} localization={ukUA}>
+          <ClerkProviderWithRouter publishableKey={clerkPublishableKey}>
             <AppProviders />
-          </ClerkProvider>
+          </ClerkProviderWithRouter>
         ) : (
           <AppProviders />
         )}

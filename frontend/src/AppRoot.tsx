@@ -15,6 +15,7 @@ import { AppBootstrapSkeleton } from './components/AppBootstrapSkeleton/AppBoots
 import { AccountBar } from './components/AccountBar/AccountBar';
 import { BootstrapErrorScreen } from './components/BootstrapErrorScreen/BootstrapErrorScreen';
 import { DevPanel } from './components/DevPanel/DevPanel';
+import { DevToolsDock } from './components/DevToolsDock/DevToolsDock';
 import { Header } from './components/Header/Header';
 import type { HeaderProps } from './components/Header/Header';
 import Logo from './components/Logo/Logo';
@@ -291,28 +292,33 @@ export function AppRoot(props: AppRootProps) {
     />
   );
 
-  const devPanel = isDevToolsEnabled() ? (
-    <DevPanel
-      projectId={projectId}
-      canRunCalc={canAutoCalc}
-      calcReport={calcReport}
-      buildCalcPayload={buildCalcPayload}
-      buildDraftJson={() => buildDraft()}
-      onSaveFile={saveToFile}
-      onSaveServer={(withCalc) => {
-        void saveToServer(withCalc);
-      }}
-      onOpenFile={openFilePicker}
-      onExportText={exportTextFile}
-      onExportHashLink={() => {
-        void exportHashLink();
-      }}
-      onRunManualCalc={runManualCalc}
-      onRevokeShare={() => {
-        void revokeShare();
-      }}
-    />
-  ) : null;
+  const devToolsDock =
+    import.meta.env.DEV || isDevToolsEnabled() ? (
+      <DevToolsDock>
+        {isDevToolsEnabled() ? (
+          <DevPanel
+            projectId={projectId}
+            canRunCalc={canAutoCalc}
+            calcReport={calcReport}
+            buildCalcPayload={buildCalcPayload}
+            buildDraftJson={() => buildDraft()}
+            onSaveFile={saveToFile}
+            onSaveServer={(withCalc) => {
+              void saveToServer(withCalc);
+            }}
+            onOpenFile={openFilePicker}
+            onExportText={exportTextFile}
+            onExportHashLink={() => {
+              void exportHashLink();
+            }}
+            onRunManualCalc={runManualCalc}
+            onRevokeShare={() => {
+              void revokeShare();
+            }}
+          />
+        ) : null}
+      </DevToolsDock>
+    ) : null;
 
   if (bootstrapMode === 'resolving') {
     return (
@@ -320,7 +326,7 @@ export function AppRoot(props: AppRootProps) {
         {sharedFileInput}
         <AppBootstrapSkeleton />
         {sharedProjectsDialog}
-        {devPanel}
+        {devToolsDock}
       </>
     );
   }
@@ -331,7 +337,7 @@ export function AppRoot(props: AppRootProps) {
         {sharedFileInput}
         <BootstrapErrorScreen onRetry={retryBootstrap} />
         {sharedProjectsDialog}
-        {devPanel}
+        {devToolsDock}
       </>
     );
   }
@@ -343,7 +349,7 @@ export function AppRoot(props: AppRootProps) {
         <Header {...headerProps} variant="start" />
         <StartScreen onStartNew={handleNewCalculation} />
         {sharedProjectsDialog}
-        {devPanel}
+        {devToolsDock}
       </div>
     );
   }
@@ -353,7 +359,7 @@ export function AppRoot(props: AppRootProps) {
       {sharedFileInput}
       <AppSurveyContent {...surveyContentProps} projectChrome={headerProps} />
       {sharedProjectsDialog}
-      {devPanel}
+      {devToolsDock}
     </>
   );
 }

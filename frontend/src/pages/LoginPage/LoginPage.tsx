@@ -2,13 +2,18 @@
  * Назначение: страница входа (prod SaaS).
  */
 
-import { SignIn } from '@clerk/clerk-react';
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { SignedOut, SignIn } from '@clerk/clerk-react';
+import { useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 
+import { AuthRedirectShell } from '../../components/AuthRedirectShell/AuthRedirectShell';
 import { Footer } from '../../components/Footer/Footer';
+import {
+  ClerkAuthWidget,
+} from '../../components/ClerkAuthWidget/ClerkAuthWidget';
 import { getAuthLoginUrl, isClerkEnabled } from '../../auth/authConfig';
 import { useAuth } from '../../auth/useAuth';
+import { useAuthRedirectAfterClerk } from '../../auth/useAuthRedirectAfterClerk';
 import { authUk } from '../../i18n/uk/auth';
 import { footerUk } from '../../i18n/uk/footer';
 import { paths } from '../../routing/paths';
@@ -18,19 +23,17 @@ import styles from './LoginPage.module.css';
  * Clerk SignIn, hosted redirect или dev JWT.
  */
 export function LoginPage() {
-  const { loginWithToken, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  const { loginWithToken } = useAuth();
   const [searchParams] = useSearchParams();
   const [token, setToken] = useState('');
   const hostedUrl = getAuthLoginUrl();
   const returnTo = searchParams.get('returnTo') || paths.home;
   const clerkEnabled = isClerkEnabled();
+  const redirectPending = useAuthRedirectAfterClerk(returnTo);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      void navigate(returnTo, { replace: true });
-    }
-  }, [isAuthenticated, navigate, returnTo]);
+  if (redirectPending) {
+    return <AuthRedirectShell />;
+  }
 
   return (
     <div className={styles.page}>
@@ -42,15 +45,18 @@ export function LoginPage() {
         <p className={styles.lead}>{authUk.loginLead}</p>
 
         {clerkEnabled ? (
-          <div className={styles.clerkRoot}>
-            <SignIn
-              routing="path"
-              path={paths.login}
-              signInUrl={paths.login}
-              signUpUrl={paths.signUp}
-              fallbackRedirectUrl={returnTo}
-            />
-          </div>
+          <>
+            <ClerkAuthWidget>
+              <SignedOut>
+                <SignIn
+                  routing="virtual"
+                  signInUrl={paths.login}
+                  signUpUrl={paths.signUp}
+                />
+              </SignedOut>
+            </ClerkAuthWidget>
+            <p className={styles.hint}>{authUk.loginClerkHint}</p>
+          </>
         ) : hostedUrl ? (
           <a href={hostedUrl} className={styles.primary}>
             {authUk.loginRedirect}
@@ -75,7 +81,6 @@ export function LoginPage() {
               className={styles.primary}
               onClick={() => {
                 loginWithToken(token);
-                void navigate(returnTo, { replace: true });
               }}
             >
               {authUk.loginDevSubmit}

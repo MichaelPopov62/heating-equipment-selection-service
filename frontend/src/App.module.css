@@ -5,17 +5,25 @@
 /* Mobile-first: 316 → --narrow → --tablet → --desktop — см. src/styles/custom-media.css */
 
 .appContainer {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
+  background: var(--bg);
 }
 
+/* Горизонталь — var(--container-padding-inline), как header и footer */
 .layoutBody {
+  composes: contentContainer from global;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 10px;
+  align-items: stretch;
+  gap: var(--container-gap);
+  overflow-x: clip;
+  padding-block: var(--container-padding-block);
   flex: 1;
 }
 
@@ -28,11 +36,12 @@
   gap: 14px;
   width: 100%;
   min-width: 0;
+  overflow-x: clip;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--container-radius);
   background: var(--surface);
   box-shadow: var(--shadow);
-  padding: 10px;
+  padding: var(--container-card-padding);
 }
 
 .stepList {
@@ -48,7 +57,8 @@
 
 .stepList > li {
   display: flex;
-  flex: 1 1 calc(50% - 3px);
+  flex: 0 0 calc((100% - 6px) / 2);
+  max-width: calc((100% - 6px) / 2);
   min-width: 0;
 }
 
@@ -79,6 +89,7 @@
   flex: 1 1 auto;
   width: 100%;
   min-width: 0;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -86,11 +97,14 @@
 
 .globalMeta,
 .workArea {
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--container-radius);
   background: var(--surface);
   box-shadow: var(--shadow);
-  padding: 10px;
+  padding: var(--container-card-padding);
 }
 
 .workArea {
@@ -124,7 +138,7 @@
   flex-direction: column;
   gap: 6px;
   flex: 1 1 140px;
-  min-width: 120px;
+  min-width: 0;
   font: 500 13px/1.2 var(--sans);
   color: var(--text-h);
 }
@@ -180,41 +194,26 @@
   cursor: not-allowed;
 }
 
-/* Шире узкого mobile (≥317px) */
+/* ========== NARROW ≥317px ========== */
+
 @media (--narrow) {
-  .layoutBody {
-    padding: 12px;
-  }
-
-  .navigationSteps,
-  .globalMeta,
-  .workArea {
-    padding: 12px;
-    border-radius: 14px;
-  }
-
   .stepButton {
     padding: 10px;
     font-size: 13px;
   }
 }
 
-/* Планшет и шире (≥768px) */
+/* ========== TABLET ≥768px ========== */
+
 @media (--tablet) {
   .layoutBody {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 16px;
-    padding: 16px;
-  }
-
-  .globalMeta,
-  .workArea {
-    padding: 14px;
   }
 }
 
-/* Desktop (≥1200px) */
+/* ========== DESKTOP ≥1200px ========== */
+
 @media (--desktop) {
   .navigationSteps {
     flex: 0 0 240px;

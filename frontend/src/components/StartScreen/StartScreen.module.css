@@ -5,20 +5,25 @@
 @import '../../styles/custom-media.css';
 
 .root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
 }
 
 .main {
+  composes: contentContainer from global;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 20px;
-  padding: 24px 16px 32px;
   text-align: center;
+  padding-block: 24px 32px;
 }
 
 .hero {
@@ -26,7 +31,7 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  max-width: 420px;
+  max-width: var(--container-hero-max-width);
 }
 
 .title {

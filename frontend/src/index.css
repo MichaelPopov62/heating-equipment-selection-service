@@ -1,6 +1,14 @@
 /* Назначение: Глобальные стили страницы.
    Описание: CSS-переменные темы, типографика, базовые стили body и общие утилиты. */
 @import './styles/custom-media.css';
+@import './styles/containers.css';
+@import './styles/clerkGlobal.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 :root {
   --text: #6b6375;
@@ -60,21 +68,29 @@
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
+  width: 100%;
+  max-width: var(--shell-max-width);
   margin: 0 auto;
+  box-sizing: border-box;
   text-align: center;
   border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
+  overflow-x: clip;
   background: var(--bg);
+}
+
+html {
+  overflow-x: clip;
+  width: 100%;
 }
 
 html,
 body {
   height: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 body {

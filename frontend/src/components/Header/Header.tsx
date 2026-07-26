@@ -153,7 +153,7 @@ export function Header({
 
         <button
           type="button"
-          className={styles.secondaryButton}
+          className={`${styles.secondaryButton} ${styles.projectsButton}`}
           onClick={() => {
             closeMenus();
             onOpenProjects();
@@ -257,7 +257,7 @@ export function Header({
 
             <button
               type="button"
-              className={styles.secondaryButton}
+              className={`${styles.secondaryButton} ${styles.exitButton}`}
               title={headerUk.exitTitle}
               onClick={() => {
                 closeMenus();
