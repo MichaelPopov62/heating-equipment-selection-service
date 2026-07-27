@@ -66,7 +66,7 @@ export function RadiatorsSurveyForm({
 
       <div className={styles.fieldBlock}>
         <label className={styles.fieldLabel} htmlFor="radiator-connection">
-          Подводка радиаторов
+          Підводка радіаторів
         </label>
         <select
           id="radiator-connection"
@@ -86,8 +86,8 @@ export function RadiatorsSurveyForm({
           ))}
         </select>
         <p className={styles.hint}>
-          Боковая — серии K/Klasik; нижняя — VK/VKP. Фильтрует панельный пул.
-          Тип прибора на весь объект задаётся отдельно. В API:{' '}
+          Бокова — серії K/Klasik; нижня — VK/VKP. Фільтрує панельний пул.
+          Тип приладу на весь об&apos;єкт задається окремо. В API:{' '}
           <code className={styles.inlineCode}>
             heatingSystem.radiatorConnection
           </code>
@@ -100,7 +100,7 @@ export function RadiatorsSurveyForm({
           className={styles.fieldLabel}
           htmlFor="radiator-emitter-preference"
         >
-          Тип радиаторов на объект
+          Тип радіаторів на об&apos;єкт
         </label>
         <select
           id="radiator-emitter-preference"
@@ -120,8 +120,8 @@ export function RadiatorsSurveyForm({
           ))}
         </select>
         <p className={styles.hint}>
-          Один тип приборов на все помещения (секции или панели). Авто —
-          Two-Pass по объекту. В API:{' '}
+          Один тип приладів на всі приміщення (секції або панелі). Авто —
+          Two-Pass по об&apos;єкту. В API:{' '}
           <code className={styles.inlineCode}>
             heatingSystem.radiatorEmitterPreference
           </code>
@@ -139,7 +139,7 @@ export function RadiatorsSurveyForm({
               setReportOpen(true);
             }}
           >
-            Отчёт по расчёту радиаторов
+            Звіт з розрахунку радіаторів
           </button>
           {onBackToResults != null && (
             <button
@@ -147,20 +147,20 @@ export function RadiatorsSurveyForm({
               className={reportActionsStyles.backButton}
               onClick={onBackToResults}
             >
-              Назад к результатам
+              Назад до результатів
             </button>
           )}
         </div>
         {calcLoading && (
           <p className={styles.hint} style={{ marginTop: 8 }} role="status">
-            Обновление расчёта…
+            Оновлення розрахунку…
           </p>
         )}
         {!canOpenReport && !calcLoading && (
           <p className={styles.hint} style={{ marginTop: 8 }}>
-            Отчёт появится после авторасчёта. Заполните помещения и ограждения;
-            при режиме «только тёплый пол» подбор радиаторов пропускается — в
-            отчёте будет пояснение после ответа сервера.
+            Звіт з&apos;явиться після авторозрахунку. Заповніть приміщення та огородження;
+            у режимі «лише тепла підлога» підбір радіаторів пропускається — у
+            звіті буде пояснення після відповіді сервера.
           </p>
         )}
       </div>

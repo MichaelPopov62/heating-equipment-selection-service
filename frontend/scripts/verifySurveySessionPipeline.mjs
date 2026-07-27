@@ -144,19 +144,19 @@ assert.ok(
   'bundle должен содержать коды типов разводки (HydraulicsSection)',
 );
 assert.ok(
-  mainBundle.includes('Тип разводки системы отопления'),
+  mainBundle.includes('Тип розводки системи опалення'),
   'bundle должен содержать подпись поля типа разводки',
 );
 assert.ok(
-  mainBundle.includes('оптимальный подбор системы'),
+  mainBundle.includes('оптимальний підбір системи'),
   'bundle должен содержать подпись radio auto',
 );
 assert.ok(
-  mainBundle.includes('Коллекторная лучевая'),
+  mainBundle.includes('Колекторна променева'),
   'bundle должен содержать подпись radio manifold',
 );
 assert.ok(
-  mainBundle.includes('Рекомендуется'),
+  mainBundle.includes('Рекомендовано'),
   'bundle должен содержать бейдж рекомендуемой схемы',
 );
 

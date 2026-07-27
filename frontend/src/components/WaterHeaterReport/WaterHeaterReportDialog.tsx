@@ -61,13 +61,13 @@ export function WaterHeaterReportDialog({
       >
         <div className={styles.header}>
           <h2 id="water-heater-report-dialog-title" className={styles.title}>
-            Отчёт по подбору водонагревателя
+            Звіт з підбору водонагрівача
           </h2>
           <button
             type="button"
             className={styles.closeIconButton}
             onClick={onClose}
-            aria-label="Закрыть"
+            aria-label="Закрити"
           >
             ✕
           </button>
@@ -77,13 +77,13 @@ export function WaterHeaterReportDialog({
           <WaterHeaterReportView indirect={indirect} electric={electric} />
         ) : (
           <p className={styles.empty}>
-            Нет данных подбора. Выберите схему на шаге «Водонагреватель» и
-            дождитесь авторасчёта.
+            Немає даних підбору. Оберіть схему на кроці «Водонагрівач» та
+            дочекайтеся авторозрахунку.
           </p>
         )}
 
         <button type="button" className={styles.closeButton} onClick={onClose}>
-          Закрыть
+          Закрити
         </button>
       </div>
     </div>

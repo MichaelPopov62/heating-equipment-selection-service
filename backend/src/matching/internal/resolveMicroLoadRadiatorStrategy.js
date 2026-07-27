@@ -50,8 +50,8 @@ export function resolveMicroLoadRadiatorStrategy({ rules, room, building, qRad }
     return {
       action: 'minimum_viable',
       sizingNotes: [
-        `Остаточная нагрузка ≈${Math.round(qRad)} Вт ниже порога ${threshold} Вт — `
-        + 'входная зона: подобран минимальный жизнеспособный радиатор (защита от промерзания / комфорт у двери).',
+        `Залишкове навантаження ≈${Math.round(qRad)} Вт нижче порогу ${threshold} Вт — `
+        + 'вхідна зона: підібрано мінімально життєздатний радіатор (захист від промерзання / комфорт біля дверей).',
       ],
     };
   }
@@ -59,8 +59,8 @@ export function resolveMicroLoadRadiatorStrategy({ rules, room, building, qRad }
   return {
     action: 'skip',
     sizingNotes: [
-      `Остаточная нагрузка ≈${Math.round(qRad)} Вт ниже порога ${threshold} Вт — `
-      + 'внутреннее помещение: радиатор не требуется (переток / микроколлектор гидравлики).',
+      `Залишкове навантаження ≈${Math.round(qRad)} Вт нижче порогу ${threshold} Вт — `
+      + 'внутрішнє приміщення: радіатор не потрібен (перетік / мікроколектор гідравліки).',
     ],
   };
 }

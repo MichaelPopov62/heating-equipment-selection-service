@@ -60,13 +60,13 @@ export function HydraulicsReportDialog({
       >
         <div className={styles.header}>
           <h2 id="hydraulics-report-dialog-title" className={styles.title}>
-            Отчёт по гидравлике
+            Звіт з гідравліки
           </h2>
           <button
             type="button"
             className={styles.closeIconButton}
             onClick={onClose}
-            aria-label="Закрыть"
+            aria-label="Закрити"
           >
             ✕
           </button>
@@ -79,13 +79,13 @@ export function HydraulicsReportDialog({
           />
         ) : (
           <p className={styles.empty}>
-            Нет данных гидравлики. Заполните помещения и ограждения, задайте
-            параметры разводки на шаге «Гидравлика», дождитесь авторасчёта.
+            Немає даних гідравліки. Заповніть приміщення та огорожі, задайте
+            параметри розводки на кроці «Гідравліка», дочекайтеся авторозрахунку.
           </p>
         )}
 
         <button type="button" className={styles.closeButton} onClick={onClose}>
-          Закрыть
+          Закрити
         </button>
       </div>
     </div>

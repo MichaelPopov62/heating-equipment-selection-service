@@ -19,7 +19,7 @@ export const UFH_CIRCUIT_PRESETS = Object.freeze({
     returnC: 35,
     deltaTK: 10,
     finishMaterialIds: Object.freeze(['ceramic_tile']),
-    label: '45/35 °C — плитка, керамогранит',
+    label: '45/35 °C — плитка, керамограніт',
   }),
   ufh_dt10_40_30: Object.freeze({
     id: 'ufh_dt10_40_30',
@@ -27,7 +27,7 @@ export const UFH_CIRCUIT_PRESETS = Object.freeze({
     returnC: 30,
     deltaTK: 10,
     finishMaterialIds: Object.freeze(['pvc_glue', 'pvc_click', 'laminate_click']),
-    label: '40/30 °C — ламинат, LVT/SPC, линолеум для ТП',
+    label: '40/30 °C — ламінат, LVT/SPC, лінолеум для ТП',
   }),
 });
 

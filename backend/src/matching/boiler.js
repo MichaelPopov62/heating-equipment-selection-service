@@ -128,18 +128,18 @@ function efficientProposalHeadlineSuffix(
   scheme,
 ) {
   if (electricSeparate) {
-    return 'конденсационный одноконтурный (отопление; ГВС отдельно)';
+    return 'конденсаційний одноконтурний (опалення; ГВП окремо)';
   }
   if (scheme === SCHEME_BOILER_COMBI_BUFFER_ELECTRIC) {
-    return 'конденсационный двухконтурный (max) + буферный ЭВН';
+    return 'конденсаційний двоконтурний (max) + буферний ЕВН';
   }
   if (scheme === SCHEME_BOILER_SINGLE_INDIRECT_SUM) {
-    return 'конденсационный одноконтурный + БКН';
+    return 'конденсаційний одноконтурний + БКН';
   }
   if (resolvedObjectType === 'apartment') {
-    return 'конденсационный одноконтурный (отопление; ГВС — по выбранной схеме)';
+    return 'конденсаційний одноконтурний (опалення; ГВП — за обраною схемою)';
   }
-  return 'конденсационный одноконтурный + БКН';
+  return 'конденсаційний одноконтурний + БКН';
 }
 
 /**
@@ -258,31 +258,31 @@ function buildHotWaterScenarioRecommendations(
       out.push({
         type: 'parallel_hot_water_high_flow_two_showers_electric_storage_water_heater',
         message:
-          'Учитывайте одновременный расход двух душей: мощность котла по расчёту только для отопления с запасом; проверьте допустимую скорость нагрева и запас по электросети для накопительного водонагревателя.',
+          'Враховуйте одночасний витрата двох душів: потужність котла за розрахунком лише для опалення з запасом; перевірте допустиму швидкість нагрівання та запас по електромережі для накопичувального водонагрівача.',
       });
     } else if (storageScenario && singleIndirectSumScheme) {
       out.push({
         type: 'parallel_hot_water_two_showers_single_indirect_sum',
         message:
-          'Учитывайте одновременный расход двух душей: при схеме «1К + БКН» требуемая мощность котла — сумма отопления с запасом и нагрева бака; проверьте объём БКН и время восстановления запаса горячей воды.',
+          'Враховуйте одночасний витрата двох душів: за схемою «1К + БКН» потрібна потужність котла — сума опалення з запасом і нагрівання бака; перевірте об’єм БКН і час відновлення запасу гарячої води.',
       });
     } else if (combiBufferElectricScheme) {
       out.push({
         type: 'parallel_hot_water_two_showers_combi_buffer_electric',
         message:
-          'Учитывайте одновременный расход двух душей: котёл подбирается по max(отопление с запасом, пик ГВС); буферный электробойлер сглаживает температурные скачки — проверьте объём буфера и мощность ТЭНа при длительном пике.',
+          'Враховуйте одночасний витрата двох душів: котел підбирається за max(опалення з запасом, пік ГВП); буферний електробойлер згладжує температурні стрибки — перевірте об’єм буфера та потужність ТЕНa при тривалому піку.',
       });
     } else if (storageScenario) {
       out.push({
         type: 'parallel_hot_water_two_showers_storage_boiler_not_from_peak_flow',
         message:
-          'Учитывайте одновременный расход двух душей: для дома с накопителем (БКН) расчётная мощность на горячую воду для котла берётся от нагрева бака за заданное время, а не от пика «пролива»; при необходимости увеличьте объём бака или согласуйте время восстановления запаса горячей воды.',
+          'Враховуйте одночасний витрата двох душів: для будинку з накопичувачем (БКН) розрахункова потужність на гарячу воду для котла береться від нагрівання бака за заданий час, а не від піку «проливу»; за потреби збільште об’єм бака або узгодьте час відновлення запасу гарячої води.',
       });
     } else {
       out.push({
         type: 'parallel_hot_water_high_flow_two_showers_combination_boiler_maximum_power_rule',
         message:
-          'Учитывайте одновременный расход двух душей: для двухконтурного котла с приоритетом горячей воды требуемая мощность берётся как максимум из отопления с запасом и расчёта горячей воды (без суммирования). При высоких пиках рассмотрите схему одноконтурного котла с БКН (поле heatingSystem.hotWaterBoilerPowerMatchingScheme).',
+          'Враховуйте одночасний витрата двох душів: для двоконтурного котла з пріоритетом гарячої води потрібна потужність береться як максимум з опалення з запасом і розрахунку гарячої води (без сумування). За високих піків розгляньте схему одноконтурного котла з БКН (поле heatingSystem.hotWaterBoilerPowerMatchingScheme).',
       });
     }
   }
@@ -301,7 +301,7 @@ function buildHotWaterScenarioRecommendations(
     const typicalKw = hintRules.comfortHotWaterTypicalBoilerKw;
     out.push({
       type: 'comfort_hot_water_typical_twenty_four_kilowatt_hint_combination_boiler',
-      message: `При двух санузлах с умеренным водоразбором и небольшой тепловой нагрузке на отопление часто выбирают котлы около ${typicalKw} кВт для комфорта горячей воды — сверьте с расчётной требуемой мощностью котла и паспортом.`,
+      message: `За двох санвузлів з помірним водорозбором і невеликим тепловим навантаженням на опалення часто обирають котли близько ${typicalKw} кВт для комфорту гарячої води — звірте з розрахунковою потрібною потужністю котла та паспортом.`,
     });
   }
 
@@ -351,31 +351,31 @@ function buildProposalObject(
 
   const tier = opts.tier;
   const tierHeadlineSuffix = opts.tierHeadlineSuffix ?? '';
-  let headline = kind === 'single' ? 'Одиночный котёл' : 'Каскадная котельная';
+  let headline = kind === 'single' ? 'Одиночний котел' : 'Каскадна котельня';
   if (tier === 'economy') {
     headline =
       kind === 'cascade'
-        ? `Эконом: каскад (${tierHeadlineSuffix})`
-        : `Эконом: один котёл (${tierHeadlineSuffix})`;
+        ? `Економ: каскад (${tierHeadlineSuffix})`
+        : `Економ: один котел (${tierHeadlineSuffix})`;
   }
   if (tier === 'efficient') {
     headline =
       kind === 'cascade'
-        ? `Эффективный: каскад (${tierHeadlineSuffix})`
-        : `Эффективный: один котёл (${tierHeadlineSuffix})`;
+        ? `Ефективний: каскад (${tierHeadlineSuffix})`
+        : `Ефективний: один котел (${tierHeadlineSuffix})`;
   }
 
   /** @type {string[]} */
   const advantages = [];
   if (kind === 'cascade' && unitsCount > 1) {
     advantages.push(
-      `Резервирование: при отказе одного аппарата остальные ${unitsCount - 1} продолжают отопление (с понижением мощности).`,
+      `Резервування: за відмови одного апарата інші ${unitsCount - 1} продовжують опалення (зі зниженням потужності).`,
     );
   }
   const eff = boiler.efficiencyPercent;
   if (eff != null && Number.isFinite(eff)) {
     advantages.push(
-      `Заявленный КПД до ${eff}% (по паспортным данным производителя; для конденсационных моделей часто приводят к ВНК).`,
+      `Заявлений ККД до ${eff}% (за паспортними даними виробника; для конденсаційних моделей часто приводять до ВНК).`,
     );
   }
 
@@ -383,7 +383,7 @@ function buildProposalObject(
   const notes = [];
   if (req > 50) {
     notes.push(
-      'Внимание! При такой расчётной мощности рекомендуется гидравлический разделитель (гидрострелка) и согласование с проектом.',
+      'Увага! За такої розрахункової потужності рекомендується гідравлічний роздільник (гідрострілка) та узгодження з проєктом.',
     );
   }
   if (opts.condensingDrainNote && isCondensingBoiler(boiler)) {
@@ -559,7 +559,7 @@ export function pickBoiler({
     boilersPositive.length > 0
   ) {
     warnings.push(
-      `В каталоге нет котлов с combustionType="${boilerCombustionType}" — подбор выполнен по полному списку.`,
+      `У каталозі немає котлів з combustionType="${boilerCombustionType}" — підбір виконано за повним списком.`,
     );
     boilersFiltered = boilersPositive;
     combustionTypeFilterApplied = null;
@@ -584,8 +584,8 @@ export function pickBoiler({
   if (countBeforeMounting > 0 && boilersFiltered.length === 0) {
     warnings.push(
       resolvedObjectType === 'apartment'
-        ? `Нет котлов в каталоге, подходящих для квартиры (настенные, номинал до ${boilerRules.mounting.maxApartmentNominalKw} кВт; напольные модели исключены).`
-        : 'Нет котлов, подходящих по типу монтажа и зоне установки (напольные — только при boilerPlacementZone=boiler_room и достаточном объёме котельной).',
+        ? `Немає котлів у каталозі, придатних для квартири (настінні, номінал до ${boilerRules.mounting.maxApartmentNominalKw} кВт; напольні моделі виключено).`
+        : 'Немає котлів, придатних за типом монтажу та зоною встановлення (напольні — лише при boilerPlacementZone=boiler_room і достатньому об’ємі котельні).',
     );
   }
 
@@ -626,7 +626,7 @@ export function pickBoiler({
         },
       );
       warnings.push(
-        `Минимальный одноконтурный котёл в каталоге (${Number(smallestSingleMax.toFixed(1))} кВт) существенно выше расчётной отопительной нагрузки (${Number(heatingLoadKw.toFixed(1))} кВт). Сохранена схема «1К + электробойлер»: котёл — только отопление, ГВС — накопитель. Для перехода на двухконтурный котёл см. рекомендацию REC_APT_SINGLE_TO_COMBI_OPTIMIZATION.`,
+        `Мінімальний одноконтурний котел у каталозі (${Number(smallestSingleMax.toFixed(1))} кВт) суттєво вищий за розрахункове опалювальне навантаження (${Number(heatingLoadKw.toFixed(1))} кВт). Збережено схему «1К + електробойлер»: котел — лише опалення, ГВП — накопичувач. Для переходу на двоконтурний котел див. рекомендацію REC_APT_SINGLE_TO_COMBI_OPTIMIZATION.`,
       );
     }
 
@@ -675,7 +675,7 @@ export function pickBoiler({
   ) {
     boilersFiltered = boilersAfterCombustion;
     warnings.push(
-      'Для схемы с электробойлером рекомендуется одноконтурный котёл, но в каталоге под требуемую мощность (с учётом фильтра камеры) найдены только двухконтурные модели. Подобрана двухконтурная модель в качестве вынужденного технологического резерва.',
+      'Для схеми з електробойлером рекомендується одноконтурний котел, але в каталозі під потрібну потужність (з урахуванням фільтра камери) знайдено лише двоконтурні моделі. Підібрано двоконтурну модель як вимушений технологічний резерв.',
     );
   } else if (
     circuitFilterModeEffective &&
@@ -684,8 +684,8 @@ export function pickBoiler({
   ) {
     warnings.push(
       circuitFilterModeEffective === 'double'
-        ? 'В каталоге нет двухконтурных котлов по фильтру — подбор по выбранной схеме невозможен.'
-        : 'В каталоге нет одноконтурных котлов по фильтру — подбор по схеме «1К + БКН» невозможен.',
+        ? 'У каталозі немає двоконтурних котлів за фільтром — підбір за обраною схемою неможливий.'
+        : 'У каталозі немає одноконтурних котлів за фільтром — підбір за схемою «1К + БКН» неможливий.',
     );
   }
 
@@ -713,37 +713,37 @@ export function pickBoiler({
   if (effectiveScheme === SCHEME_BOILER_MAX_COMBI) {
     const storageClause =
       dhwSupplyScenario === 'storage'
-        ? ' Для дома с накопителем мощность горячей воды в расчёте берётся от нагрева бака за заданное время (не от пика пролива).'
+        ? ' Для будинку з накопичувачем потужність гарячої води в розрахунку береться від нагрівання бака за заданий час (не від піку проливу).'
         : '';
     recommendations.push({
       type: 'combination_boiler_hot_water_priority_maximum_formula',
       message:
-        'Двухконтурный котёл с приоритетом горячей воды: расчётная требуемая мощность — максимум из отопительной нагрузки с запасом и расчётной мощности на горячую воду (без суммирования).' +
+        'Двоконтурний котел з пріоритетом гарячої води: розрахункова потрібна потужність — максимум з опалювального навантаження з запасом і розрахункової потужності на гарячу воду (без сумування).' +
         storageClause,
     });
   } else if (effectiveScheme === SCHEME_BOILER_COMBI_BUFFER_ELECTRIC) {
     recommendations.push({
       type: 'combination_boiler_buffer_electric_storage_maximum_formula',
       message:
-        'Двухконтурный котёл с буферным электробойлером: котёл греет проток ГВС — требуемая мощность max(отопление с запасом, пик ГВС); электробойлер — температурный буфер меньшего объёма для сглаживания «холодного плевка» и пиков.',
+        'Двоконтурний котел із буферним електробойлером: котел гріє проток ГВП — потрібна потужність max(опалення з запасом, пік ГВП); електробойлер — температурний буфер меншого об’єму для згладжування «холодного плевка» та піків.',
     });
   } else if (effectiveScheme === SCHEME_BOILER_SINGLE_BUFFER_ELECTRIC) {
     recommendations.push({
       type: 'single_circuit_boiler_buffer_electric_storage_heating_only',
       message:
-        'Одноконтурный котёл с буферным электробойлером: котёл подбирается только по отоплению с запасом; горячая вода — накопительный электробойлер по норме singleCircuitBufferElectricStorage.',
+        'Одноконтурний котел із буферним електробойлером: котел підбирається лише за опаленням з запасом; гаряча вода — накопичувальний електробойлер за нормою singleCircuitBufferElectricStorage.',
     });
   } else if (effectiveScheme === SCHEME_BOILER_SINGLE_INDIRECT_SUM) {
     recommendations.push({
       type: 'single_circuit_boiler_indirect_tank_sum_formula',
       message:
-        'Одноконтурный котёл с бойлером косвенного нагрева: расчётная требуемая мощность котла — сумма отопительной нагрузки с запасом и мощности нагрева бака за целевое время (не максимум и не пик проточки).',
+        'Одноконтурний котел із бойлером непрямого нагріву: розрахункова потрібна потужність котла — сума опалювального навантаження з запасом і потужності нагрівання бака за цільовий час (не максимум і не пік проточки).',
     });
   } else {
     recommendations.push({
       type: 'single_circuit_boiler_electric_storage_water_heater_heating_load_only',
       message:
-        'Схема с отдельным накопительным электрическим водонагревателем: котёл подбирается только по отопительной нагрузке с запасом; расчётная мощность на горячую воду к котлу не добавляется.',
+        'Схема з окремим накопичувальним електричним водонагрівачем: котел підбирається лише за опалювальним навантаженням з запасом; розрахункова потужність на гарячу воду до котла не додається.',
     });
   }
 
@@ -797,8 +797,8 @@ export function pickBoiler({
   if (!boilersFiltered.length) {
     warnings.push(
       boilersAll.length
-        ? 'В каталоге есть котлы, но ни у одного нет положительной powerKw.max — проверьте данные.'
-        : 'Каталог котлов пуст.',
+        ? 'У каталозі є котли, але жоден не має додатної powerKw.max — перевірте дані.'
+        : 'Каталог котлів порожній.',
     );
   } else if (requiredKw <= 0) {
     const fallback = boilersFiltered[0];
@@ -870,7 +870,7 @@ export function pickBoiler({
           effectiveScheme === SCHEME_BOILER_COMBI_BUFFER_ELECTRIC
         ) {
           warnings.push(
-            `Мощности проточного режима котла (${pk} кВт) может не хватить на одновременный жесткий пик ГВС зимой, рекомендуется ограничить расход.`,
+            `Потужності проточного режиму котла (${pk} кВт) може не вистачити на одночасний жорсткий пік ГВП взимку, рекомендується обмежити витрата.`,
           );
         } else {
           boilerUnderpoweredFromCatalog = true;
@@ -912,7 +912,7 @@ export function pickBoiler({
         boilersWithMax: boilersFiltered.length,
       });
       warnings.push(
-        'Не удалось сформировать каскад по каталогу — проверьте поля powerKw у котлов.',
+        'Не вдалося сформувати каскад за каталогом — перевірте поля powerKw у котлів.',
       );
     }
   }
@@ -959,7 +959,7 @@ export function pickBoiler({
       economyPool,
       requiredKw,
       'economy',
-      'традиционный / бюджетный',
+      'традиційний / бюджетний',
       {
         forceSingleUnit: forceSingleBoiler,
         heatingLoadKwForReserve: heatingLoadKw,
@@ -1030,21 +1030,21 @@ export function pickBoiler({
 
   if (!proposalEconomy && economyPool.length === 0 && requiredKw > 0) {
     warnings.push(
-      'В каталоге нет традиционных (не конденсационных) котлов для линии «Эконом».',
+      'У каталозі немає традиційних (не конденсаційних) котлів для лінії «Економ».',
     );
   }
   if (!proposalEfficient && requiredKw > 0) {
     if (!efficientCandidates.length) {
       warnings.push(
-        'В каталоге нет конденсационных котлов для линии «Эффективный».',
+        'У каталозі немає конденсаційних котлів для лінії «Ефективний».',
       );
     } else if (!efficientPool.length) {
       warnings.push(
         scheme === SCHEME_BOILER_ELECTRIC_SEPARATE
-          ? 'Для линии «Эффективный» нужны одноконтурные конденсационные котлы — после фильтра камеры они в каталоге не найдены.'
+          ? 'Для лінії «Ефективний» потрібні одноконтурні конденсаційні котли — після фільтра камери їх у каталозі не знайдено.'
           : combiBufferScheme
-            ? 'Для линии «Эффективный» (2К + буферный ЭВН) нужны двухконтурные конденсационные котлы — после фильтра камеры они в каталоге не найдены.'
-            : 'Для альтернативы «1К + БКН» нужны одноконтурные конденсационные котлы — после фильтра камеры они в каталоге не найдены.',
+            ? 'Для лінії «Ефективний» (2К + буферний ЕВН) потрібні двоконтурні конденсаційні котли — після фільтра камери їх у каталозі не знайдено.'
+            : 'Для альтернативи «1К + БКН» потрібні одноконтурні конденсаційні котли — після фільтра камери їх у каталозі не знайдено.',
       );
     }
   }
@@ -1093,7 +1093,7 @@ export function pickBoiler({
   }
   if (proposalEfficient && selectedWaterHeater?.type === 'indirect_floor') {
     proposalEfficient.notes.push(
-      'Для выбранного напольного БКН нужно дополнительное напольное пространство рядом с котлом.',
+      'Для обраного напольного БКН потрібен додатковий напольний простір біля котла.',
     );
   }
   if (
@@ -1102,14 +1102,14 @@ export function pickBoiler({
     scheme === SCHEME_BOILER_MAX_COMBI
   ) {
     proposalEfficient.notes.push(
-      'Линия «Эффективный» — конденсационный котёл по отоплению; для max-combi в квартире БКН в эту связку не входит.',
+      'Лінія «Ефективний» — конденсаційний котел за опаленням; для max-combi в квартирі БКН у цю зв’язку не входить.',
     );
   }
 
   if (heatingSystem?.heatingEmittersMode === 'ufh_only') {
     const hs = heatingSystem;
     const boilerModel =
-      typeof selected?.model === 'string' ? selected.model : 'котёл';
+      typeof selected?.model === 'string' ? selected.model : 'котел';
     const highTempGraph = isHighTemperatureHeatingGraph(hs);
     const nonCondensing = Boolean(selected && !isCondensingBoiler(selected));
 
@@ -1118,10 +1118,10 @@ export function pickBoiler({
         typeof hs.supplyC === 'number' && typeof hs.returnC === 'number'
           ? `${hs.supplyC}/${hs.returnC} °C`
           : hs.thermalRegimePreset === 'traditional_dt50_75_65'
-            ? 'традиционный 75/65'
+            ? 'традиційний 75/65'
             : hs.thermalRegimePreset === 'condensing_dt30_55_45'
               ? '55/45'
-              : 'не задан';
+              : 'не задано';
       pushRecommendation(
         warnings,
         resolvedRecommendations,

@@ -25,26 +25,26 @@ function sanitizeString(value, maxLen) {
  */
 export function validateFeedbackBody(body) {
   if (!body || typeof body !== 'object') {
-    return { ok: false, message: 'Ожидается JSON-объект', code: 'FEEDBACK_INVALID_BODY' };
+    return { ok: false, message: 'Очікується JSON-об\'єкт', code: 'FEEDBACK_INVALID_BODY' };
   }
 
   const raw = /** @type {Record<string, unknown>} */ (body);
   const type = typeof raw.type === 'string' ? raw.type.trim() : '';
   if (!TYPE_SET.has(type)) {
-    return { ok: false, message: 'type должен быть bug или contact', code: 'FEEDBACK_INVALID_TYPE' };
+    return { ok: false, message: 'type має бути bug або contact', code: 'FEEDBACK_INVALID_TYPE' };
   }
 
   const message = sanitizeString(raw.message, 4000);
   if (!message) {
-    return { ok: false, message: 'message обязателен', code: 'FEEDBACK_MESSAGE_REQUIRED' };
+    return { ok: false, message: 'message обов\'язковий', code: 'FEEDBACK_MESSAGE_REQUIRED' };
   }
 
   const emailRaw = sanitizeString(raw.email, 200);
   if (type === 'contact' && !emailRaw) {
-    return { ok: false, message: 'email обязателен для contact', code: 'FEEDBACK_EMAIL_REQUIRED' };
+    return { ok: false, message: 'email обов\'язковий для contact', code: 'FEEDBACK_EMAIL_REQUIRED' };
   }
   if (emailRaw && !EMAIL_RE.test(emailRaw)) {
-    return { ok: false, message: 'Некорректный email', code: 'FEEDBACK_EMAIL_INVALID' };
+    return { ok: false, message: 'Некоректний email', code: 'FEEDBACK_EMAIL_INVALID' };
   }
 
   const name = sanitizeString(raw.name, 120) ?? undefined;

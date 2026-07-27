@@ -198,14 +198,14 @@ function normalizeRoomTypesBeforeValidate(building) {
 
     if (next == null) {
       throwAppError(
-        `Неизвестный тип комнаты «${raw}» (room id=${roomId}). Допустимые значения — enum room.type в CalcInput.`,
+        `Невідомий тип приміщення «${raw}» (room id=${roomId}). Допустимі значення — enum room.type в CalcInput.`,
         'ROOM_TYPE_INVALID',
       );
     }
 
     if (compatSource != null) {
       compatWarnings.push(
-        `Тип комнаты «${roomId}»: «${compatSource}» нормализован до «${next}».`,
+        `Тип приміщення «${roomId}»: «${compatSource}» нормалізовано до «${next}».`,
       );
     }
 
@@ -225,7 +225,7 @@ function rejectLegacyHotWaterFields(body) {
 
   if (Object.prototype.hasOwnProperty.call(hw, 'coldWaterC')) {
     throwAppError(
-      'Поле hotWater.coldWaterC удалено. Задайте hotWater.coldWaterDesignSeason: «winter» (+5 °C) или «summer» (+15 °C).',
+      'Поле hotWater.coldWaterC видалено. Задайте hotWater.coldWaterDesignSeason: «winter» (+5 °C) або «summer» (+15 °C).',
       'HOT_WATER_LEGACY_FIELD',
     );
   }
@@ -233,7 +233,7 @@ function rejectLegacyHotWaterFields(body) {
   const fx = hw.fixtures;
   if (isPlainObject(fx) && Object.prototype.hasOwnProperty.call(fx, 'kitchen')) {
     throwAppError(
-      'Поле hotWater.fixtures.kitchen удалено. Используйте только kitchenSink.',
+      'Поле hotWater.fixtures.kitchen видалено. Використовуйте лише kitchenSink.',
       'HOT_WATER_LEGACY_FIELD',
     );
   }
@@ -278,7 +278,7 @@ export function validateAndNormalizeInput(input, ctx) {
       code: 'VALIDATION_ERROR',
       errors: short,
     });
-    throwAppError('Некорректные входные данные', 'VALIDATION_ERROR', details);
+    throwAppError('Некоректні вхідні дані', 'VALIDATION_ERROR', details);
   }
 
   /** @type {import('../types/shared-types.js').CalcRequestBody} */
@@ -339,7 +339,7 @@ export function validateAndNormalizeInput(input, ctx) {
   ) {
     if (!(clone.heatingSystem.returnC < clone.heatingSystem.supplyC)) {
       throwAppError(
-        'Некорректный heatingSystem: returnC должен быть меньше supplyC.',
+        'Некоректний heatingSystem: returnC має бути меншим за supplyC.',
         'HEATING_SYSTEM_INVALID',
       );
     }
@@ -351,7 +351,7 @@ export function validateAndNormalizeInput(input, ctx) {
     const effectiveColdC = season === 'summer' ? 15 : 5;
     if (!(effectiveColdC < clone.hotWater.hotWaterC)) {
       throwAppError(
-        'Некорректный hotWater: расчётная ХВ по сезону должна быть ниже hotWaterC.',
+        'Некоректний hotWater: розрахункова ХВ за сезоном має бути нижчою за hotWaterC.',
         'HOT_WATER_TEMPS_INVALID',
       );
     }
@@ -413,13 +413,13 @@ function normalizeUnderfloorHeatingBeforeValidate(input) {
     const { basePresetId, finishMaterialId } = composed;
     if (!getUnderfloorHeatingBasePresetById(basePresetId)) {
       throwAppError(
-        `Неизвестная база ТП "${basePresetId}" (roomId="${room.id}").`,
+        `Невідома база ТП "${basePresetId}" (roomId="${room.id}").`,
         'UNDERFLOOR_HEATING_BASE_INVALID',
       );
     }
     if (!getFlooringFinishMaterialById(finishMaterialId)) {
       throwAppError(
-        `Неизвестное финишное покрытие "${finishMaterialId}" (roomId="${room.id}").`,
+        `Невідоме фінішне покриття "${finishMaterialId}" (roomId="${room.id}").`,
         'UNDERFLOOR_HEATING_FINISH_INVALID',
       );
     }
@@ -431,13 +431,13 @@ function normalizeUnderfloorHeatingBeforeValidate(input) {
       const spacingNum = Number(rawSpacing);
       if (!Number.isFinite(spacingNum) || !Number.isInteger(spacingNum)) {
         throwAppError(
-          `pipeSpacingMm: ожидается целое 100, 150 или 200 (roomId="${room.id}").`,
+          `pipeSpacingMm: очікується ціле 100, 150 або 200 (roomId="${room.id}").`,
           'UNDERFLOOR_HEATING_PIPE_SPACING_INVALID',
         );
       }
       if (spacingNum !== 100 && spacingNum !== 150 && spacingNum !== 200) {
         throwAppError(
-          `pipeSpacingMm=${spacingNum}: допустимы только 100, 150 или 200 мм (roomId="${room.id}").`,
+          `pipeSpacingMm=${spacingNum}: допустимі лише 100, 150 або 200 мм (roomId="${room.id}").`,
           'UNDERFLOOR_HEATING_PIPE_SPACING_INVALID',
         );
       }
@@ -452,7 +452,7 @@ function normalizeUnderfloorHeatingBeforeValidate(input) {
       const furnitureNum = Number(ufh.furnitureOccupiedAreaM2);
       if (!Number.isFinite(furnitureNum) || furnitureNum < 0) {
         throwAppError(
-          `furnitureOccupiedAreaM2: ожидается число ≥ 0 (roomId="${room.id}").`,
+          `furnitureOccupiedAreaM2: очікується число ≥ 0 (roomId="${room.id}").`,
           'UNDERFLOOR_HEATING_FURNITURE_AREA_INVALID',
         );
       }
@@ -465,7 +465,7 @@ function normalizeUnderfloorHeatingBeforeValidate(input) {
       && furnitureOccupiedAreaM2 >= roomAreaM2
     ) {
       throwAppError(
-        `furnitureOccupiedAreaM2=${furnitureOccupiedAreaM2} м²: должно быть строго меньше площади комнаты ${roomAreaM2} м² (roomId="${room.id}").`,
+        `furnitureOccupiedAreaM2=${furnitureOccupiedAreaM2} м²: має бути строго меншим за площу приміщення ${roomAreaM2} м² (roomId="${room.id}").`,
         'UNDERFLOOR_HEATING_FURNITURE_AREA_INVALID',
       );
     }
@@ -477,7 +477,7 @@ function normalizeUnderfloorHeatingBeforeValidate(input) {
       && !isUfhTerminalControl(rawTerminal)
     ) {
       throwAppError(
-        `ufhTerminalControl: ожидается "collector" или "unibox" (roomId="${room.id}").`,
+        `ufhTerminalControl: очікується "collector" або "unibox" (roomId="${room.id}").`,
         'UNDERFLOOR_HEATING_TERMINAL_INVALID',
       );
     }
@@ -513,7 +513,7 @@ function assertEnvelopeFloorPresetsNotUnderfloorHeating(building) {
     const pid = typeof el.presetId === 'string' ? el.presetId.trim() : '';
     if (pid && ENVELOPE_FORBIDDEN_UFH_FLOOR_IDS.has(pid)) {
       throwAppError(
-        `presetId "${pid}" — пресет сборки ТП; для теплопотерь используйте envelopePresets (kind=floor), для ТП — room.underfloorHeating.`,
+        `presetId "${pid}" — пресет збірки ТП; для тепловтрат використовуйте envelopePresets (kind=floor), для ТП — room.underfloorHeating.`,
         'ENVELOPE_FLOOR_PRESET_MIXED_WITH_UFH',
       );
     }
@@ -636,8 +636,8 @@ function assertVentilationLegacyFieldsDisabled(clone) {
   if (!hasFlow && !hasN) return;
 
   throwAppError(
-    'Поля building.ventilation.flowM3PerHour и airChangesPerHour в MVP не используются. ' +
-      'Задайте building.objectMeta.ventilationReserveMode: natural (kVent 1.3) или recuperation (kVent 1.1).',
+    'Поля building.ventilation.flowM3PerHour і airChangesPerHour у MVP не використовуються. ' +
+      'Задайте building.objectMeta.ventilationReserveMode: natural (kVent 1.3) або recuperation (kVent 1.1).',
     'VENTILATION_LEGACY_FIELD',
   );
 }
@@ -687,7 +687,7 @@ function assertBoilerPlacementAndBoilerRoom(clone, appliances) {
     !['kitchen', 'living_zone', 'boiler_room'].includes(zone)
   ) {
     throwAppError(
-      'Для дома укажите building.objectMeta.boilerPlacementZone: kitchen, living_zone или boiler_room.',
+      'Для будинку вкажіть building.objectMeta.boilerPlacementZone: kitchen, living_zone або boiler_room.',
       'BOILER_PLACEMENT_REQUIRED',
     );
   }
@@ -700,7 +700,7 @@ function assertBoilerPlacementAndBoilerRoom(clone, appliances) {
   const hasMetaHeight = om.ceilingHeightM != null;
   if (hasMetaArea !== hasMetaHeight) {
     throwAppError(
-      'Укажите оба поля boilerRoomAreaM2 и ceilingHeightM либо добавьте комнату type=котельная в building.rooms.',
+      'Вкажіть обидва поля boilerRoomAreaM2 і ceilingHeightM або додайте приміщення type=котельная в building.rooms.',
       'BOILER_ROOM_METRICS_INCOMPLETE',
     );
   }
@@ -717,7 +717,7 @@ function assertBoilerPlacementAndBoilerRoom(clone, appliances) {
 
   if (!isBoilerRoomVolumeCompliant(metrics, mounting)) {
     throwAppError(
-      `Для напольного котла в выделенной котельной нужен объём не менее ${mounting.minBoilerRoomVolumeM3} м³ и высота не менее ${mounting.minBoilerRoomHeightM} м (комната type=${getBoilerRoomType(mounting)} в rooms или boilerRoomAreaM2×ceilingHeightM).`,
+      `Для напольного котла в окремій котельні потрібен об'єм не менше ${mounting.minBoilerRoomVolumeM3} м³ і висота не менше ${mounting.minBoilerRoomHeightM} м (приміщення type=${getBoilerRoomType(mounting)} в rooms або boilerRoomAreaM2×ceilingHeightM).`,
       'BOILER_ROOM_VOLUME_INVALID',
     );
   }
@@ -765,7 +765,7 @@ function assertBoilerDhwSchemeCompatibility(clone, appliances) {
     if (!isLarge) {
       hs.hotWaterBoilerPowerMatchingScheme = SCHEME_BOILER_MAX_COMBI;
       hs._normalizationWarnings = [
-        'Связка «Одноконтурный котёл + БКН» изменена на двухконтурную: для малых квартир БКН избыточен по габаритам.',
+        'Зв\'язка «Одноконтурний котел + БКН» змінено на двоконтурну: для малих квартир БКН надмірний за габаритами.',
       ];
       return;
     }
@@ -773,7 +773,7 @@ function assertBoilerDhwSchemeCompatibility(clone, appliances) {
     if (!hasSpace) {
       hs.hotWaterBoilerPowerMatchingScheme = SCHEME_BOILER_MAX_COMBI;
       hs._normalizationWarnings = [
-        'Связка «1К + БКН» изменена на двухконтурную: укажите наличие места под бойлер (objectMeta.indirectDhwSpaceAvailable).',
+        'Зв\'язка «1К + БКН» змінено на двоконтурну: вкажіть наявність місця під бойлер (objectMeta.indirectDhwSpaceAvailable).',
       ];
       return;
     }

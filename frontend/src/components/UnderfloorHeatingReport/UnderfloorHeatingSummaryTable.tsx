@@ -41,7 +41,7 @@ export function UnderfloorHeatingSummaryTable({
     uniboxes == null
       ? '—'
       : uniboxLoops === 0
-        ? 'нет петель'
+        ? 'немає петель'
         : `${selectedUniboxes} / ${uniboxLoops}`;
 
   const ufhPumps = selectUfhZonePumps(hydraulicsPumps);
@@ -62,12 +62,12 @@ export function UnderfloorHeatingSummaryTable({
       aria-labelledby="underfloor-heating-summary-title"
     >
       <h3 id="underfloor-heating-summary-title" className={styles.title}>
-        Тёплый пол (итог)
+        Тепла підлога (підсумок)
       </h3>
       {underfloorHeating.rooms.length === 0 ? (
         <p className={styles.hint}>
-          Режим ТП включён, но нет комнат с ТП. Детали — на шаге{' '}
-          <SurveyStepLink step="warmFloor">«Тёплый пол»</SurveyStepLink>
+          Режим ТП увімкнено, але немає приміщень з ТП. Деталі — на кроці{' '}
+          <SurveyStepLink step="warmFloor">«Тепла підлога»</SurveyStepLink>
           .
         </p>
       ) : (
@@ -75,8 +75,8 @@ export function UnderfloorHeatingSummaryTable({
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Показатель</th>
-                <th>Значение</th>
+                <th>Показник</th>
+                <th>Значення</th>
               </tr>
             </thead>
             <tbody>
@@ -88,35 +88,35 @@ export function UnderfloorHeatingSummaryTable({
                 </td>
               </tr>
               <tr>
-                <td>Σ q↑ (тепло вверх в помещение)</td>
+                <td>Σ q↑ (тепло вгору в приміщення)</td>
                 <td>{formatKw(underfloorHeating.totalHeatFluxUpWatts / 1000, 2)} кВт</td>
               </tr>
               <tr>
-                <td>Σ q↓ (тепло вниз, потери в перекрытие)</td>
+                <td>Σ q↓ (тепло вниз, втрати в перекриття)</td>
                 <td>
                   {formatKw(underfloorHeating.totalHeatFluxDownWatts / 1000, 2)} кВт
                 </td>
               </tr>
               <tr>
-                <td>Комнат с ТП</td>
+                <td>Приміщень з ТП</td>
                 <td>{underfloorHeating.rooms.length}</td>
               </tr>
               <tr>
-                <td>Смесительный узел</td>
+                <td>Змішувальний вузол</td>
                 <td>
                   {underfloorHeating.isMixingNodeRequired
-                    ? 'требуется'
+                    ? 'потрібно'
                     : underfloorHeating.circuitSource === 'ufh_mode_preset'
-                      ? 'не требуется (прямое подключение, котёл 40/30)'
-                      : 'не требуется'}
+                      ? 'не потрібно (пряме підключення, котел 40/30)'
+                      : 'не потрібно'}
                 </td>
               </tr>
               <tr>
-                <td>Насос контура ТП</td>
+                <td>Насос контуру ТП</td>
                 <td>{pumpLabel}</td>
               </tr>
               <tr>
-                <td>Унибоксы (подобрано / петель)</td>
+                <td>Унибокси (підібрано / петель)</td>
                 <td>{uniboxLabel}</td>
               </tr>
             </tbody>
@@ -125,15 +125,15 @@ export function UnderfloorHeatingSummaryTable({
       )}
       {underfloorHeating.rooms.length > 0 && (
         <p className={styles.hint}>
-          Детали расчёта по комнатам, унибоксам и насосу контура — на шаге{' '}
-          <SurveyStepLink step="warmFloor">«Тёплый пол»</SurveyStepLink>
+          Деталі розрахунку за приміщеннями, унибоксами та насосом контуру — на кроці{' '}
+          <SurveyStepLink step="warmFloor">«Тепла підлога»</SurveyStepLink>
           .
         </p>
       )}
       {hasWarnings && (
         <p className={styles.attention}>
-          Обратите внимание на рекомендации и предупреждения в карте{' '}
-          <SurveyStepLink step="warmFloor">«Тёплый пол»</SurveyStepLink>
+          Зверніть увагу на рекомендації та попередження в картці{' '}
+          <SurveyStepLink step="warmFloor">«Тепла підлога»</SurveyStepLink>
           .
         </p>
       )}

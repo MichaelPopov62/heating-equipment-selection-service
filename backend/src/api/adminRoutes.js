@@ -65,7 +65,7 @@ export function createAdminRouter() {
         res.status(400).json({
           ok: false,
           error: {
-            message: 'Некорректный id пользователя',
+            message: 'Некоректний id користувача',
             code: 'VALIDATION_FAILED',
             statusCode: 400,
           },
@@ -88,7 +88,7 @@ export function createAdminRouter() {
         res.status(404).json({
           ok: false,
           error: {
-            message: 'Пользователь не найден',
+            message: 'Користувача не знайдено',
             code: 'USER_NOT_FOUND',
             statusCode: 404,
           },

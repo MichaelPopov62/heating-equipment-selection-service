@@ -42,7 +42,7 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
     query.error instanceof Error
       ? query.error.message
       : query.isError
-        ? 'Ссылка недоступна'
+        ? 'Посилання недоступна'
         : null;
   const loading = query.isPending || query.isFetching;
 
@@ -66,7 +66,7 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
         try {
           await downloadPublicSharePdf(shareToken, { includeTechnical });
         } catch (e) {
-          window.alert(e instanceof Error ? e.message : 'Не удалось скачать PDF');
+          window.alert(e instanceof Error ? e.message : 'Не вдалося завантажити PDF');
         } finally {
           setPdfBusy(false);
         }
@@ -78,7 +78,7 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
   if (loading && !share) {
     return (
       <div className={styles.page}>
-        <p className={styles.status}>Загрузка сметы…</p>
+        <p className={styles.status}>Завантаження кошторису…</p>
       </div>
     );
   }
@@ -91,7 +91,7 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
           <h1 className={styles.brand}>{brandUk.name}</h1>
         </header>
         <p className={styles.error} role="alert">
-          {error ?? 'Смета не найдена'}
+          {error ?? 'Кошторис не знайдено'}
         </p>
         <Footer variant="share" />
       </div>
@@ -105,7 +105,7 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
           <Logo />
           <div>
             <h1 className={styles.brand}>{brandUk.name}</h1>
-            <p className={styles.sub}>Финансовый итог по расчёту</p>
+            <p className={styles.sub}>Фінансовий підсумок за розрахунком</p>
           </div>
         </div>
         <div className={styles.actions}>
@@ -117,7 +117,7 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
               onDownloadPdf(false);
             }}
           >
-            {pdfBusy ? 'Скачивание…' : 'Скачать PDF'}
+            {pdfBusy ? 'Завантаження…' : 'Завантажити PDF'}
           </button>
           <button
             type="button"
@@ -127,23 +127,23 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
               onDownloadPdf(true);
             }}
           >
-            PDF + технический расчёт
+            PDF + технічний розрахунок
           </button>
         </div>
       </header>
 
       <section className={styles.meta}>
         <p>
-          <strong>Клиент:</strong> {share.clientName}
+          <strong>Клієнт:</strong> {share.clientName}
         </p>
         {share.objectType ? (
           <p>
-            <strong>Объект:</strong>{' '}
-            {share.objectType === 'apartment' ? 'Квартира' : 'Дом'}
+            <strong>Об&apos;єкт:</strong>{' '}
+            {share.objectType === 'apartment' ? 'Квартира' : 'Будинок'}
           </p>
         ) : null}
         <p>
-          <strong>Опубликовано:</strong> {share.publishedAt.slice(0, 10)}
+          <strong>Опубліковано:</strong> {share.publishedAt.slice(0, 10)}
         </p>
       </section>
 
@@ -152,8 +152,8 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
       ) : null}
 
       {equipmentSummary.length > 0 ? (
-        <section className={styles.equipment} aria-label="Оборудование">
-          <h2 className={styles.h2}>Оборудование</h2>
+        <section className={styles.equipment} aria-label="Обладнання">
+          <h2 className={styles.h2}>Обладнання</h2>
           {equipmentSummary.map((block) => (
             <details key={block.title} className={styles.acc} open>
               <summary>{block.title}</summary>
@@ -167,8 +167,8 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
         </section>
       ) : null}
 
-      <section className={styles.bom} aria-label="Смета">
-        <h2 className={styles.h2}>Смета</h2>
+      <section className={styles.bom} aria-label="Кошторис">
+        <h2 className={styles.h2}>Кошторис</h2>
         <FinancialSummaryTable commercial={commercial} />
       </section>
 
@@ -179,7 +179,7 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
             className={styles.techToggle}
             onClick={() => { setTechOpen((v) => !v); }}
           >
-            {techOpen ? 'Скрыть технический расчёт' : 'Показать технический расчёт'}
+            {techOpen ? 'Приховати технічний розрахунок' : 'Показати технічний розрахунок'}
           </button>
           {techOpen ? (
             <div
@@ -190,7 +190,7 @@ export function SharePresentationPage({ shareToken }: SharePresentationPageProps
         </section>
       ) : null}
 
-      <p className={styles.footnote}>Документ только для просмотра. Изменение анкеты недоступно.</p>
+      <p className={styles.footnote}>Документ лише для перегляду. Зміна анкети недоступна.</p>
       <Footer variant="share" />
     </div>
   );
@@ -210,7 +210,7 @@ function buildEquipmentSummary(share: PublicSharePayload | null): EquipmentBlock
   if (boiler) {
     const lines: string[] = [];
     if (typeof boiler.requiredKw === 'number') {
-      lines.push(`Требуемая мощность: ${formatKw(boiler.requiredKw)} кВт`);
+      lines.push(`Потрібна потужність: ${formatKw(boiler.requiredKw)} кВт`);
     }
     const selected = isRecord(boiler.selected) ? boiler.selected : null;
     const proposal = isRecord(boiler.proposal) ? boiler.proposal : null;
@@ -221,7 +221,7 @@ function buildEquipmentSummary(share: PublicSharePayload | null): EquipmentBlock
       (selected && typeof selected.brand === 'string' ? selected.brand : null) ??
       (proposal && typeof proposal.brand === 'string' ? proposal.brand : null);
     if (model) lines.push(`Модель: ${[brand, model].filter(Boolean).join(' ')}`);
-    if (lines.length) blocks.push({ title: 'Котёл', lines });
+    if (lines.length) blocks.push({ title: 'Котел', lines });
   }
 
   const radiators = isRecord(matching.radiators) ? matching.radiators : null;
@@ -233,9 +233,9 @@ function buildEquipmentSummary(share: PublicSharePayload | null): EquipmentBlock
       lines.push(`Модель: ${[brand, chosen.model].filter(Boolean).join(' ')}`);
     }
     if (chosen && typeof chosen.totalSections === 'number') {
-      lines.push(`Секций: ${chosen.totalSections}`);
+      lines.push(`Секцій: ${chosen.totalSections}`);
     }
-    if (lines.length) blocks.push({ title: 'Радиаторы', lines });
+    if (lines.length) blocks.push({ title: 'Радіатори', lines });
   }
 
   return blocks;

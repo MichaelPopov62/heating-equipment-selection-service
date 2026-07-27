@@ -56,10 +56,10 @@ export function HotWaterSummaryTable({
 
   const electricNotParticipating =
     !isHotWaterEquipmentSchemeParticipant(scheme, 'electric')
-    && electricLabel.startsWith('Не участвует');
+    && electricLabel.startsWith('Не бере участі');
   const indirectNotParticipating =
     !isHotWaterEquipmentSchemeParticipant(scheme, 'indirect')
-    && indirectLabel.startsWith('Не участвует');
+    && indirectLabel.startsWith('Не бере участі');
 
   return (
     <div
@@ -68,25 +68,25 @@ export function HotWaterSummaryTable({
       aria-labelledby="hot-water-summary-title"
     >
       <h3 id="hot-water-summary-title" className={styles.title}>
-        Водонагреватель (итог)
+        Водонагрівач (підсумок)
       </h3>
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Оборудование</th>
-              <th>Результат подбора</th>
+              <th>Обладнання</th>
+              <th>Результат підбору</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Электробойлер (ЭБ)</td>
+              <td>Електробойлер (ЕБ)</td>
               <td className={electricNotParticipating ? styles.notParticipating : undefined}>
                 {electricLabel}
               </td>
             </tr>
             <tr>
-              <td>Бойлер косвенного нагрева (БКН)</td>
+              <td>Бойлер непрямого нагріву (БКН)</td>
               <td className={indirectNotParticipating ? styles.notParticipating : undefined}>
                 {indirectLabel}
               </td>
@@ -96,20 +96,20 @@ export function HotWaterSummaryTable({
       </div>
       {calcLoading && (
         <p className={styles.hint} role="status">
-          Обновление подбора…
+          Оновлення підбору…
         </p>
       )}
       <p className={styles.hint}>
-        Детали расчёта потребления — на шаге{' '}
-        <SurveyStepLink step="hotWater">«Горячая вода»</SurveyStepLink>
-        . Схема котёл/ГВС и карточки номенклатуры — в отчёте на шаге{' '}
-        <SurveyStepLink step="waterHeater">«Водонагреватель»</SurveyStepLink>
+        Деталі розрахунку споживання — на кроці{' '}
+        <SurveyStepLink step="hotWater">«Гаряча вода»</SurveyStepLink>
+        . Схема котел/ГВП і картки номенклатури — у звіті на кроці{' '}
+        <SurveyStepLink step="waterHeater">«Водонагрівач»</SurveyStepLink>
         .
       </p>
       {hasWarnings && (
         <p className={styles.attention}>
-          Обратите внимание на предупреждения подбора в отчёте на шаге{' '}
-          <SurveyStepLink step="waterHeater">«Водонагреватель»</SurveyStepLink>
+          Зверніть увагу на попередження підбору у звіті на кроці{' '}
+          <SurveyStepLink step="waterHeater">«Водонагрівач»</SurveyStepLink>
           .
         </p>
       )}

@@ -59,7 +59,7 @@ export async function assertCanCreateProject(ownerId) {
   const max = resolveMaxProjectsPerOwner();
   const count = await Project.countDocuments(buildProjectOwnerFilter(ownerId));
   if (count >= max) {
-    const err = new Error(`Превышен лимит проектов (${max})`);
+    const err = new Error(`Перевищено ліміт проєктів (${max})`);
     /** @type {import('../types/shared-types.js').AppErrorLike} */
     const appErr = err;
     appErr.code = 'PROJECT_QUOTA_EXCEEDED';
@@ -76,7 +76,7 @@ export async function assertCanCreateCalculation(projectId) {
   const max = resolveMaxCalculationsPerProject();
   const count = await Calculation.countDocuments({ projectId });
   if (count >= max) {
-    const err = new Error(`Превышен лимит расчётов на проект (${max})`);
+    const err = new Error(`Перевищено ліміт розрахунків на проєкт (${max})`);
     /** @type {import('../types/shared-types.js').AppErrorLike} */
     const appErr = err;
     appErr.code = 'CALCULATION_QUOTA_EXCEEDED';

@@ -86,25 +86,25 @@ function buildInterstoryUfhBasePreset({ id, name, xpsThicknessM }) {
   /** @type {UnderfloorHeatingAssemblyLayer[]} */
   const layers = [
     {
-      name: 'Железобетонная плита перекрытия',
+      name: 'Залізобетонна плита перекриття',
       thicknessM: 0.15,
       thermalConductivityWmK: 1.74,
       isHeatingLayer: false,
     },
     {
-      name: 'Теплоизоляция (XPS)',
+      name: 'Теплоізоляція (XPS)',
       thicknessM: xpsThicknessM,
       thermalConductivityWmK: 0.034,
       isHeatingLayer: false,
     },
     {
-      name: 'Стяжка ТП с трубами',
+      name: 'Стяжка ТП з трубами',
       thicknessM: 0.065,
       thermalConductivityWmK: 1.4,
       isHeatingLayer: true,
     },
     {
-      name: 'Самовыровнивающийся слой',
+      name: 'Самовирівнювальний шар',
       thicknessM: 0.005,
       thermalConductivityWmK: 1.1,
       isHeatingLayer: false,
@@ -114,7 +114,7 @@ function buildInterstoryUfhBasePreset({ id, name, xpsThicknessM }) {
     id,
     name,
     description:
-      `Водяной тёплый пол в стяжке 65 мм над плитой перекрытия; XPS ${xpsMm} мм под контуром. Финиш выбирается отдельно.`,
+      `Водяна тепла підлога в стяжці 65 мм над плитою перекриття; XPS ${xpsMm} мм під контуром. Фініш обирається окремо.`,
     usage: /** @type {const} */ ('underfloor_heating_base'),
     bottomBoundary: /** @type {const} */ ('heated'),
     layers,
@@ -126,22 +126,22 @@ function buildInterstoryUfhBasePreset({ id, name, xpsThicknessM }) {
 export const UNDERFLOOR_HEATING_BASE_PRESETS = [
   buildInterstoryUfhBasePreset({
     id: DEFAULT_UFH_BASE_PRESET_ID,
-    name: 'Межэтажная основа (ГОСТ): плита + XPS 30 мм + стяжка ТП 65 мм',
+    name: 'Міжповерхова основа (ДСТУ): плита + XPS 30 мм + стяжка ТП 65 мм',
     xpsThicknessM: 0.03,
   }),
   buildInterstoryUfhBasePreset({
     id: 'ufh_base_interstory_screed_65_xps50',
-    name: 'Межэтажная основа: плита + XPS 50 мм + стяжка ТП 65 мм',
+    name: 'Міжповерхова основа: плита + XPS 50 мм + стяжка ТП 65 мм',
     xpsThicknessM: 0.05,
   }),
   buildInterstoryUfhBasePreset({
     id: 'ufh_base_interstory_screed_65_xps80',
-    name: 'Межэтажная основа: плита + XPS 80 мм + стяжка ТП 65 мм',
+    name: 'Міжповерхова основа: плита + XPS 80 мм + стяжка ТП 65 мм',
     xpsThicknessM: 0.08,
   }),
   buildInterstoryUfhBasePreset({
     id: 'ufh_base_interstory_screed_65_xps100',
-    name: 'Межэтажная основа: плита + XPS 100 мм + стяжка ТП 65 мм',
+    name: 'Міжповерхова основа: плита + XPS 100 мм + стяжка ТП 65 мм',
     xpsThicknessM: 0.1,
   }),
 ];

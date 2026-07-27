@@ -29,11 +29,11 @@ export function useUfhModePresetsQuery(): UseUfhModePresetsQueryResult {
         const merged = mergeUfhModePresetsWithFallback(data.presets);
         const apiHasMixed = data.presets.some((p) => p.presetId === 'ufh_mixed_radiators');
         const warning = !apiHasMixed
-          ? 'Карточка «Тёплый пол + радиаторы» подставлена из локального справочника — выполните npm run seed в backend для синхронизации Mongo.'
+          ? 'Картку «Тепла підлога + радіатори» підставлено з локального довідника — виконайте npm run seed у backend для синхронізації Mongo.'
           : null;
         return { presets: merged, warning };
       } catch (e: unknown) {
-        const message = e instanceof Error ? e.message : 'Ошибка загрузки режимов ТП';
+        const message = e instanceof Error ? e.message : 'Помилка завантаження режимів ТП';
         return { presets: [...FALLBACK_UFH_MODE_PRESETS], warning: message };
       }
     },

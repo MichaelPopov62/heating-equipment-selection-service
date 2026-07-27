@@ -102,7 +102,7 @@ function formatHeatingGraphLabel(hs) {
   if (typeof s === 'number' && typeof r === 'number') {
     return `${s}/${r} °C`;
   }
-  return 'высокотемпературный';
+  return 'високотемпературний';
 }
 
 /**
@@ -167,9 +167,9 @@ export function alignHeatingGraphForCondensingBoiler(heatingSystem, selectedBoil
 
   const previousLabel = formatHeatingGraphLabel(heatingSystem);
   const model =
-    typeof selectedBoiler.model === 'string' ? selectedBoiler.model : 'котёл';
+    typeof selectedBoiler.model === 'string' ? selectedBoiler.model : 'котел';
   return (
-    `Подобран конденсационный котёл ${model}, а радиаторный график высокотемпературный (${previousLabel}). ` +
-    'При обратке выше ~55 °C конденсация и заявленный КПД могут не достигаться. Расчёт радиаторов выполнен по выбранному графику.'
+    `Підібрано конденсаційний котел ${model}, а радіаторний графік високотемпературний (${previousLabel}). ` +
+    'При звороті вище ~55 °C конденсація і заявлений ККД можуть не досягатися. Розрахунок радіаторів виконано за обраним графіком.'
   );
 }

@@ -72,13 +72,13 @@ export function UnderfloorHeatingReportDialog({
       >
         <div className={styles.header}>
           <h2 id="ufh-report-dialog-title" className={styles.title}>
-            Отчёт по расчёту ТП
+            Звіт з розрахунку ТП
           </h2>
           <button
             type="button"
             className={styles.closeIconButton}
             onClick={onClose}
-            aria-label="Закрыть"
+            aria-label="Закрити"
           >
             ✕
           </button>
@@ -94,13 +94,13 @@ export function UnderfloorHeatingReportDialog({
           <UniboxMatchingSection matching={uniboxMatching} />
         ) : (
           <p className={styles.empty}>
-            Нет данных расчёта ТП. Заполните помещения с тёплым полом и дождитесь
-            авторасчёта.
+            Немає даних розрахунку ТП. Заповніть приміщення з теплою підлогою та дочекайтеся
+            авторозрахунку.
           </p>
         )}
 
         <button type="button" className={styles.closeButton} onClick={onClose}>
-          Закрыть
+          Закрити
         </button>
       </div>
     </div>

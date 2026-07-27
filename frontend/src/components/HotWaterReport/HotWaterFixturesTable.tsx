@@ -12,6 +12,9 @@ export type HotWaterFixturesTableProps = {
   fixtures: HotWaterFormFixtures;
 };
 
+const WASHING_MACHINE_ROW_LABEL =
+  '\u041F\u0440\u0430\u043B\u043D\u0430 \u043C\u0430\u0448\u0438\u043D\u0430 (\u0442\u0435\u0445\u043F\u0440\u0438\u043C\u0456\u0449\u0435\u043D\u043D\u044F)';
+
 /**
  * @param props
  */
@@ -33,39 +36,39 @@ export function HotWaterFixturesTable({ fixtures }: HotWaterFixturesTableProps) 
             <td>{fx.bath}</td>
           </tr>
           <tr>
-            <th scope="row">Раковина (санузел)</th>
+            <th scope="row">Раковина (санвузол)</th>
             <td>{fx.sink}</td>
           </tr>
           <tr>
-            <th scope="row">Унитаз</th>
+            <th scope="row">Унітаз</th>
             <td>{fx.toilet}</td>
           </tr>
           <tr>
-            <th scope="row">Биде</th>
+            <th scope="row">Біде</th>
             <td>{fx.bidet}</td>
           </tr>
           <tr>
-            <th scope="row">Кухня — мойка / смеситель</th>
+            <th scope="row">Кухня — мийка / змішувач</th>
             <td>{fx.kitchenSink}</td>
           </tr>
           <tr>
-            <th scope="row">Кухня — посудомоечная машина</th>
+            <th scope="row">Кухня — посудомийна машина</th>
             <td>{fx.dishwasher}</td>
           </tr>
           <tr>
-            <th scope="row">Мойка (хозблок)</th>
+            <th scope="row">Мийка (побутовий блок)</th>
             <td>{fx.laundrySink}</td>
           </tr>
           <tr>
-            <th scope="row">Стиральная машина (техпомещение)</th>
+            <th scope="row">{WASHING_MACHINE_ROW_LABEL}</th>
             <td>{fx.washingMachine}</td>
           </tr>
           <tr className={styles.totalRow}>
-            <th scope="row">Итого точек с расходом ГВ (для расчёта пика)</th>
+            <th scope="row">Разом точок з витратою ГВ (для розрахунку піку)</th>
             <td>{thermalTotal}</td>
           </tr>
           <tr className={styles.totalRow}>
-            <th scope="row">Всего учтённых точек (с унитазом)</th>
+            <th scope="row">Усього врахованих точок (з унітазом)</th>
             <td>{allPointsTotal}</td>
           </tr>
         </tbody>

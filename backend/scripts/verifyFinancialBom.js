@@ -23,7 +23,7 @@ function assertOk(cond, msg) {
 
 assert.equal(FINANCIAL_LABOR_PERCENT, 40);
 assert.equal(FINANCIAL_CONSUMABLES_PERCENT, 15);
-assert.equal(MIXING_NODE_SELF_ASSEMBLY_NOTE, 'сборка самостоятельно');
+assert.equal(MIXING_NODE_SELF_ASSEMBLY_NOTE, 'монтаж самостійно');
 
 // --- collapse ---
 {
@@ -66,7 +66,7 @@ assert.equal(MIXING_NODE_SELF_ASSEMBLY_NOTE, 'сборка самостояте�
   assert.ok(first);
   assert.equal(first.qty, 500);
   assert.equal(first.lineTotalUah, 25000);
-  assert.deepEqual(first.scopePath, ['Дом', 'Тёплый пол']);
+  assert.deepEqual(first.scopePath, ['Будинок', 'Тепла підлога']);
   console.log('OK: collapse identical pipe lines');
 }
 
@@ -250,7 +250,7 @@ assert.equal(MIXING_NODE_SELF_ASSEMBLY_NOTE, 'сборка самостояте�
         pipeLineGroups: [
           {
             circuitId: 'heating',
-            label: 'Контур отопления (радиаторы)',
+            label: 'Контур опалення (радіатори)',
             pipeLines: [
               {
                 catalogPipeId: 'p1',
@@ -336,7 +336,7 @@ assert.equal(MIXING_NODE_SELF_ASSEMBLY_NOTE, 'сборка самостояте�
   assert.equal(mixing?.unitPriceUah, null);
 
   const rad = commercial.lines.find(
-    (l) => l.kind === 'equipment' && l.equipmentTypeLabel === 'Радиатор',
+    (l) => l.kind === 'equipment' && l.equipmentTypeLabel === 'Радіатор',
   );
   assertOk(rad != null, 'collapsed radiator line');
   assert.equal(rad?.qty, 2);

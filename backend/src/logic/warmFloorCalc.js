@@ -47,7 +47,7 @@ export function calculateUnderfloorHeating(args) {
   } = args;
 
   if (!ufhPresets?.byPresetId) {
-    throw new Error('Расчёт ТП: ufhPresets обязательны.');
+    throw new Error('Розрахунок ТП: ufhPresets обов\'язкові.');
   }
 
   if (!heatingSystem?.waterUnderfloorHeating && !heatingSystem?.ufhPresetId) {
@@ -112,14 +112,14 @@ export function calculateUnderfloorHeating(args) {
           returnC: heatingSystem.returnC,
           deltaTK: heatingSystem.supplyC - heatingSystem.returnC,
           finishMaterialIds: [finishMaterialId],
-          label: 'График из режима ufh_only',
+          label: 'Графік з режиму ufh_only',
         },
         source: 'finish_preset',
       };
     }
     if (!circuitResolved) {
       globalWarnings.push(
-        `Комната «${room.name}»: для финиша «${finishMaterialId}» не задан пресет контура ТП.`,
+        `Кімната «${room.name}»: для фінішу «${finishMaterialId}» не задано пресет контуру ТП.`,
       );
       continue;
     }
@@ -148,7 +148,7 @@ export function calculateUnderfloorHeating(args) {
     );
     if (heatingIdx < 0) {
       globalWarnings.push(
-        `Комната «${room.name}»: в базе ТП нет слоя isHeatingLayer.`,
+        `Кімната «${room.name}»: у базі ТП немає шару isHeatingLayer.`,
       );
       continue;
     }
@@ -213,7 +213,7 @@ export function calculateUnderfloorHeating(args) {
     });
 
     const roomWarnings = flux.roomWarnings.map(
-      (w) => `Комната «${room.name}»: ${w}`,
+      (w) => `Кімната «${room.name}»: ${w}`,
     );
 
     /** @type {import('../types/shared-types.js').UfhTerminalControl} */
@@ -295,7 +295,7 @@ export function calculateUnderfloorHeating(args) {
 
   if (roomReports.length === 0) {
     globalWarnings.push(
-      'Водяной тёплый пол включён в анкете, но ни в одной комнате не заданы basePresetId и finishMaterialId.',
+      'Водяну теплу підлогу увімкнено в анкеті, але жодній кімнаті не задано basePresetId і finishMaterialId.',
     );
   }
 
@@ -305,7 +305,7 @@ export function calculateUnderfloorHeating(args) {
   if (modePreset != null && modePreset.technical.hasMixingNode === false) {
     if (roomReports.length > 0) {
       globalWarnings.push(
-        `Смесительный узел не требуется по пресету режима ТП «${modePreset.ui.title}» (прямое подключение, котёл ${boilerSupplyC ?? '—'} °C).`,
+        `Змішувальний вузол не потрібен за пресетом режиму ТП «${modePreset.ui.title}» (пряме підключення, котел ${boilerSupplyC ?? '—'} °C).`,
       );
     }
   } else {
@@ -325,7 +325,7 @@ export function calculateUnderfloorHeating(args) {
 
   if (mixingRequired) {
     globalWarnings.push(
-      `Требуется насосно-смесительный узел: подача котла ${boilerSupplyC ?? '—'} °C выше температуры контура ТП ` +
+      `Потрібен насосно-змішувальний вузол: подача котла ${boilerSupplyC ?? '—'} °C вище температури контуру ТП ` +
         `(по комнатам ${roomReports.map((r) => `${r.circuitSupplyC}/${r.circuitReturnC}`).join(', ')} °C).`,
     );
   } else if (
@@ -334,7 +334,7 @@ export function calculateUnderfloorHeating(args) {
     typeof boilerSupplyC === 'number'
   ) {
     globalWarnings.push(
-      `Смесительный узел не требуется: подача котла ${boilerSupplyC} °C не выше подачи контура ТП.`,
+      `Змішувальний вузол не потрібен: подача котла ${boilerSupplyC} °C не вище подачі контуру ТП.`,
     );
   }
 

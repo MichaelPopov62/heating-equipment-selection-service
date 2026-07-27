@@ -13,7 +13,7 @@ import {
  */
 export function validateAdminUserPatchBody(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
-    const err = new Error('Тело запроса должно быть JSON-объектом');
+    const err = new Error('Тіло запиту має бути JSON-обʼєктом');
     /** @type {import('../types/shared-types.js').AppErrorLike} */
     const appErr = err;
     appErr.code = 'VALIDATION_FAILED';
@@ -33,7 +33,7 @@ export function validateAdminUserPatchBody(body) {
   }
 
   if (patch.role === undefined && patch.subscription === undefined) {
-    const err = new Error('Укажите role и/или subscription');
+    const err = new Error('Вкажіть role та/або subscription');
     /** @type {import('../types/shared-types.js').AppErrorLike} */
     const appErr = err;
     appErr.code = 'VALIDATION_FAILED';

@@ -14,12 +14,12 @@ import { throwAppError } from '../utils/createAppError.js';
  */
 function assertCalcInputLike(value) {
   if (!isPlainObject(value)) {
-    throwAppError('Вход расчёта должен быть объектом CalcInput.', 'CALC_INPUT_REQUIRED', 400);
+    throwAppError('Вхід розрахунку має бути обʼєктом CalcInput.', 'CALC_INPUT_REQUIRED', 400);
   }
   const building = value.building;
   if (!isPlainObject(building)) {
     throwAppError(
-      'Нет входа для расчёта: передайте calcInput или building, либо выполните первый расчёт с полным CalcInput.',
+      'Немає входу для розрахунку: передайте calcInput або building, або виконайте перший розрахунок із повним CalcInput.',
       'CALC_INPUT_REQUIRED',
       400,
     );
@@ -77,7 +77,7 @@ export function resolveProjectCalcInput(body, lastCalcInput) {
   }
 
   throwAppError(
-    'Нет входа для расчёта: передайте calcInput или building, либо выполните первый расчёт с полным CalcInput.',
+    'Немає входу для розрахунку: передайте calcInput або building, або виконайте перший розрахунок із повним CalcInput.',
     'CALC_INPUT_REQUIRED',
     400,
   );

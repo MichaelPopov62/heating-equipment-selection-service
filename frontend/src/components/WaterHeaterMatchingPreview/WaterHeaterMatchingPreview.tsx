@@ -41,11 +41,11 @@ export function WaterHeaterMatchingPreview({
         <h3 className={styles.title}>{sectionTitle}</h3>
       )}
       {calcLoading && (
-        <p className={styles.pending}>Обновление подбора…</p>
+        <p className={styles.pending}>Оновлення підбору…</p>
       )}
       {showPendingHint && !calcLoading && !hasPreview && (
         <p className={styles.pending}>
-          После расчёта здесь появятся карточки БКН и/или электробойлера.
+          Після розрахунку тут з&apos;являться картки БКН та/або електробойлера.
         </p>
       )}
       {(indirect != null || electric != null) && (
@@ -53,7 +53,7 @@ export function WaterHeaterMatchingPreview({
           {indirect != null && (
             <WaterHeaterProposalCard
               kind="indirect"
-              title="Бойлер косвенного нагрева (БКН)"
+              title="Бойлер непрямого нагріву (БКН)"
               titleDomId={`${idPrefix}-indirect-title`}
               data={indirect}
             />
@@ -61,7 +61,7 @@ export function WaterHeaterMatchingPreview({
           {electric != null && (
             <WaterHeaterProposalCard
               kind="electric"
-              title="Электробойлер"
+              title="Електробойлер"
               titleDomId={`${idPrefix}-electric-title`}
               data={electric}
             />

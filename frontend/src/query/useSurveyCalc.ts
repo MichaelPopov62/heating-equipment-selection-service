@@ -92,7 +92,7 @@ export function useSurveyCalc({
       return;
     }
     const message =
-      autoQuery.error instanceof Error ? autoQuery.error.message : 'Ошибка расчёта';
+      autoQuery.error instanceof Error ? autoQuery.error.message : 'Помилка розрахунку';
     onCalcErrorRef.current?.(message);
   }, [autoQuery.error, autoQuery.errorUpdatedAt, autoQuery.isFetching]);
 
@@ -107,7 +107,7 @@ export function useSurveyCalc({
       onCalcSuccessRef.current?.(report);
     },
     onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : 'Ошибка расчёта';
+      const message = error instanceof Error ? error.message : 'Помилка розрахунку';
       onCalcErrorRef.current?.(message);
     },
   });

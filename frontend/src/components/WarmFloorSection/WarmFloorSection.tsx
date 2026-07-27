@@ -62,11 +62,11 @@ export function WarmFloorSection({
 
   return (
     <div className={styles.root}>
-      <h3 className={styles.title}>Тёплый пол</h3>
+      <h3 className={styles.title}>Тепла підлога</h3>
       <p className={styles.hint} style={{ marginTop: 0 }}>
-        Выберите режим отопления. Для комбинации «тёплый пол в части комнат + радиаторы» —
-        карточка <strong>«Тёплый пол + радиаторы»</strong>; ТП включается по комнатам на шаге
-        «Помещения». Радиаторный график котла (75/65 или 55/45) — на шаге «Котёл».
+        Оберіть режим опалення. Для комбінації «тепла підлога в частині кімнат + радіатори» —
+        картка <strong>«Тепла підлога + радіатори»</strong>; ТП вмикається по кімнатах на кроці
+        «Приміщення». Радіаторний графік котла (75/65 або 55/45) — на кроці «Котел».
       </p>
 
       <UfhPresetCards
@@ -83,7 +83,7 @@ export function WarmFloorSection({
           checked={waterUnderfloorHeating}
           onChange={(e) => { onWaterUnderfloorChange(e.target.checked); }}
         />
-        <span>В проекте предусмотрен водяной тёплый пол (комнаты на шаге «Помещения»)</span>
+        <span>У проєкті передбачена водяна тепла підлога (кімнати на кроці «Приміщення»)</span>
       </label>
       {showDistribution && (
         <UfhDistributionSelect
@@ -100,7 +100,7 @@ export function WarmFloorSection({
             disabled={!canOpenReport}
             onClick={() => { setReportOpen(true); }}
           >
-            Отчёт по расчёту ТП
+            Звіт з розрахунку ТП
           </button>
           {onBackToResults != null && (
             <button
@@ -108,13 +108,13 @@ export function WarmFloorSection({
               className={reportActionsStyles.backButton}
               onClick={onBackToResults}
             >
-              Назад к результатам
+              Назад до результатів
             </button>
           )}
         </div>
         {!canOpenReport && (
           <p className={styles.hint} style={{ marginTop: 8 }}>
-            Отчёт появится после авторасчёта с включённым ТП в помещениях.
+            Звіт з&apos;явиться після авторозрахунку з увімкненим ТП у приміщеннях.
           </p>
         )}
       </div>

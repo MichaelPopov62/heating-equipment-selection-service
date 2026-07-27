@@ -24,8 +24,8 @@ export function HeatLossSummaryTable({
   const reserveKw = apiHeatLoss?.reserveKw ?? quickEstimate.reserveKw;
   const totalHeatKw = apiHeatLoss?.totalHeatKw ?? quickEstimate.totalHeatKw;
   const sourceHint = apiHeatLoss
-    ? 'Источник: расчёт API по ограждениям'
-    : 'Источник: быстрая оценка (100 Вт/м²)';
+    ? 'Джерело: розрахунок API за огородженнями'
+    : 'Джерело: швидка оцінка (100 Вт/м²)';
 
   return (
     <div
@@ -34,26 +34,26 @@ export function HeatLossSummaryTable({
       aria-labelledby="heating-loss-title"
     >
       <h3 id="heating-loss-title" className={styles.title}>
-        Теплопотери
+        Тепловтрати
       </h3>
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Показатель</th>
-              <th>Значение</th>
+              <th>Показник</th>
+              <th>Значення</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Общая площадь помещений</td>
+              <td>Загальна площа приміщень</td>
               <td>
                 {formatAreaM2(quickEstimate.totalAreaM2)}{' '}
                 <span className={styles.unit}>м²</span>
               </td>
             </tr>
             <tr>
-              <td>Мощность помещений</td>
+              <td>Потужність приміщень</td>
               <td>
                 {formatKw(heatLossKw, 1)}{' '}
                 <span className={styles.unit}>кВт</span>
@@ -67,7 +67,7 @@ export function HeatLossSummaryTable({
               </td>
             </tr>
             <tr className={styles.totalRow}>
-              <td>Итого по теплу</td>
+              <td>Разом за теплом</td>
               <td>
                 {formatKw(totalHeatKw, 1)}{' '}
                 <span className={styles.unit}>кВт</span>

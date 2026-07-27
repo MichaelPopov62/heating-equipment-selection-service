@@ -10,6 +10,10 @@ import type {
   ParsedHydraulicsPumpProposal,
 } from '../types/hydraulics';
 
+/** Fallback-підписи контурів (SSOT API — buildHydraulicsProposal.js). */
+const HYDRAULICS_HEATING_CIRCUIT_LABEL = 'Контур опалення (радіатори)';
+const HYDRAULICS_UFH_CIRCUIT_LABEL = 'Контур теплої підлоги';
+
 function num(v: unknown, fallback = 0): number {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
@@ -176,12 +180,12 @@ function buildPipeLineGroupsFromSegments(
   }> = [
     {
       circuitId: 'heating',
-      label: 'Контур отопления (радиаторы)',
+      label: HYDRAULICS_HEATING_CIRCUIT_LABEL,
       roles: ['main', 'branch'],
     },
     {
       circuitId: 'ufh',
-      label: 'Контур тёплого пола',
+      label: HYDRAULICS_UFH_CIRCUIT_LABEL,
       roles: ['ufh_loop'],
     },
   ];
@@ -212,7 +216,7 @@ function parsePipeLineGroup(raw: unknown): ParsedHydraulicsPipeLineGroup | null 
   if (pipeLines.length === 0) return null;
   return {
     circuitId,
-    label: str(g.label) || (circuitId === 'ufh' ? 'Контур тёплого пола' : 'Контур отопления (радиаторы)'),
+    label: str(g.label) || (circuitId === 'ufh' ? HYDRAULICS_UFH_CIRCUIT_LABEL : HYDRAULICS_HEATING_CIRCUIT_LABEL),
     pipeLines,
     estimatedPrice: num(g.estimatedPrice),
   };

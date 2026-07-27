@@ -18,7 +18,7 @@ export function normalizeUserRole(raw) {
   if (USER_ROLES.includes(/** @type {import('../types/auth.js').UserRole} */ (value))) {
     return /** @type {import('../types/auth.js').UserRole} */ (value);
   }
-  const err = new Error(`Недопустимая role пользователя: "${String(raw)}"`);
+  const err = new Error(`Недопустима role користувача: "${String(raw)}"`);
   /** @type {import('../types/shared-types.js').AppErrorLike} */
   const appErr = err;
   appErr.code = 'INVALID_USER_ROLE';
@@ -37,7 +37,7 @@ export function normalizeSubscriptionTier(raw) {
   ) {
     return /** @type {import('../types/auth.js').SubscriptionTier} */ (value);
   }
-  const err = new Error(`Недопустимый subscription tier: "${String(raw)}"`);
+  const err = new Error(`Недопустимий subscription tier: "${String(raw)}"`);
   /** @type {import('../types/shared-types.js').AppErrorLike} */
   const appErr = err;
   appErr.code = 'INVALID_SUBSCRIPTION_TIER';

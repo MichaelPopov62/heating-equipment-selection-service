@@ -39,14 +39,14 @@ export function HotWaterReportView({
       <div>
         {showFixtures && (
           <>
-            <h4 className={styles.sectionTitle}>Точки водоразбора (из анкеты)</h4>
+            <h4 className={styles.sectionTitle}>Точки водорозбору (з анкети)</h4>
             <HotWaterFixturesTable fixtures={form.fixtures} />
           </>
         )}
         <p className={styles.hint} role="status">
-          Расчётные показатели (пик расхода, мощность, бак) появятся после
-          авторасчёта. Заполните помещения и ограждения, если расчёт ещё не
-          запускался.
+          Розрахункові показники (пік витрати, потужність, бак) з&apos;являться після
+          авторасчунку. Заповніть приміщення та огородження, якщо розрахунок ще не
+          запускався.
         </p>
       </div>
     );
@@ -54,21 +54,21 @@ export function HotWaterReportView({
 
   const scenarioHint =
     hotWater.dhwSupplyScenario === 'storage'
-      ? 'Сценарий API: дом — накопитель (объём бака и мощность для котла от нагрева бака; пик расхода ниже — справочно).'
+      ? 'Сценарій API: дім — накопичувальний (об\'єм бака і потужність для котла від нагрівання бака; пік витрати нижче — довідково).'
       : hotWater.dhwSupplyScenario === 'flowThrough'
-        ? 'Сценарий API: квартира — проточный пик (мощность на нагрев от расхода и ΔT).'
-        : 'Сценарий ГВС из расчёта API.';
+        ? 'Сценарій API: квартира — проточний пік (потужність на нагрів від витрати та ΔT).'
+        : 'Сценарій ГВП з розрахунку API.';
 
   const recommendedTankLabel =
     hotWater.recommendedTankLiters === 0
-      ? 'Не применяется (проточный сценарий)'
+      ? 'Не застосовується (проточний сценарій)'
       : hotWater.recommendedTankLiters != null
         ? `${formatLiters(hotWater.recommendedTankLiters)} л`
         : '—';
 
   const coldSeasonLabel =
     hotWater.coldWaterDesignSeason === 'summer'
-      ? 'Лето (+15 °C)'
+      ? 'Літо (+15 °C)'
       : hotWater.coldWaterDesignSeason === 'winter'
         ? 'Зима (+5 °C)'
         : '—';
@@ -87,32 +87,32 @@ export function HotWaterReportView({
 
       {showFixtures && (
         <>
-          <h4 className={styles.sectionTitle}>Точки водоразбора (из анкеты)</h4>
+          <h4 className={styles.sectionTitle}>Точки водорозбору (з анкети)</h4>
           <HotWaterFixturesTable fixtures={form.fixtures} />
         </>
       )}
 
-      <h4 className={styles.sectionTitle}>Исходные параметры</h4>
+      <h4 className={styles.sectionTitle}>Вихідні параметри</h4>
       <dl className={styles.dl}>
         {hotWater.objectType != null && (
           <>
-            <dt>Тип объекта</dt>
-            <dd>{hotWater.objectType === 'apartment' ? 'Квартира' : 'Дом'}</dd>
+            <dt>Тип об&apos;єкта</dt>
+            <dd>{hotWater.objectType === 'apartment' ? 'Квартира' : 'Будинок'}</dd>
           </>
         )}
         {hotWater.residents != null && (
           <>
-            <dt>Число человек</dt>
+            <dt>Кількість людей</dt>
             <dd>{hotWater.residents}</dd>
           </>
         )}
         {hotWater.tropicalShower != null && (
           <>
-            <dt>Тропический душ</dt>
-            <dd>{hotWater.tropicalShower ? 'да (+30 % к объёму бака)' : 'нет'}</dd>
+            <dt>Тропічний душ</dt>
+            <dd>{hotWater.tropicalShower ? 'так (+30 % до об\'єму бака)' : 'ні'}</dd>
           </>
         )}
-        <dt>Расчётная ХВ</dt>
+        <dt>Розрахункова ХВ</dt>
         <dd>
           {coldSeasonLabel}
           {hotWater.designColdWaterC != null && (
@@ -136,11 +136,11 @@ export function HotWaterReportView({
         )}
       </dl>
 
-      <h4 className={styles.sectionTitle}>Расход и мощность</h4>
+      <h4 className={styles.sectionTitle}>Витрата і потужність</h4>
       <dl className={styles.dl}>
         {hotWater.sumFlowLpsRaw != null && (
           <>
-            <dt>Сумма расходов (без снижения)</dt>
+            <dt>Сума витрат (без зниження)</dt>
             <dd>
               {formatFlowLps(hotWater.sumFlowLpsRaw)} <span>л/с</span>
             </dd>
@@ -148,47 +148,47 @@ export function HotWaterReportView({
         )}
         {hotWater.simultaneityFactor != null && (
           <>
-            <dt>Коэффициент одновременности β</dt>
+            <dt>Коефіцієнт одночасності β</dt>
             <dd>
               {formatCoefficient(hotWater.simultaneityFactor)}
               {hotWater.simultaneityBaseNorm != null && (
                 <span className={styles.muted}>
                   {' '}
-                  (база нормы {formatCoefficient(hotWater.simultaneityBaseNorm)})
+                  (база норми {formatCoefficient(hotWater.simultaneityBaseNorm)})
                 </span>
               )}
             </dd>
           </>
         )}
-        <dt className={styles.totalLabel}>Пиковый расход горячей воды</dt>
+        <dt className={styles.totalLabel}>Пікова витрата гарячої води</dt>
         <dd className={styles.totalLabel}>
           {formatFlowLps(hotWater.peakFlowLps)} <span>л/с</span>
         </dd>
-        <dt className={styles.totalLabel}>Мощность на ГВ для подбора котла</dt>
+        <dt className={styles.totalLabel}>Потужність на ГВ для підбору котла</dt>
         <dd className={styles.totalLabel}>
           {formatKw(hotWater.hotWaterPowerKw)} <span>кВт</span>
         </dd>
         {hotWater.dhwSupplyScenario === 'storage'
           && hotWater.peakThermalPowerKw != null && (
             <>
-              <dt>Мощность при пиковом расходе (справочно)</dt>
+              <dt>Потужність при піковому витраті (довідково)</dt>
               <dd>
                 {formatKw(hotWater.peakThermalPowerKw)} <span>кВт</span>
-                <span className={styles.muted}> — не для формулы котла</span>
+                <span className={styles.muted}> — не для формули котла</span>
               </dd>
             </>
           )}
-        <dt>Рекомендуемый накопитель</dt>
+        <dt>Рекомендований накопичувач</dt>
         <dd>{recommendedTankLabel}</dd>
       </dl>
 
       {hotWater.dhwSupplyScenario === 'storage' && (
         <>
-          <h4 className={styles.sectionTitle}>Накопительный сценарий (дом)</h4>
+          <h4 className={styles.sectionTitle}>Накопичувальний сценарій (дім)</h4>
           <dl className={styles.dl}>
             {hotWater.storageTankLitersPerPersonBasis != null && (
               <>
-                <dt>Норма на человека</dt>
+                <dt>Норма на людину</dt>
                 <dd>
                   {formatLiters(hotWater.storageTankLitersPerPersonBasis)} л
                 </dd>
@@ -196,13 +196,13 @@ export function HotWaterReportView({
             )}
             {hotWater.sessionDemandLitersMixed != null && (
               <>
-                <dt>Сеансовый спрос (смешанная вода)</dt>
+                <dt>Сеансовий попит (змішана вода)</dt>
                 <dd>{formatLiters(hotWater.sessionDemandLitersMixed)} л</dd>
               </>
             )}
             {hotWater.dhwEquivalentTankLitersFromSession != null && (
               <>
-                <dt>Эквивалент бака по сеансу</dt>
+                <dt>Еквівалент бака за сеансом</dt>
                 <dd>
                   {formatLiters(hotWater.dhwEquivalentTankLitersFromSession)} л
                 </dd>
@@ -210,19 +210,19 @@ export function HotWaterReportView({
             )}
             {hotWater.dhwTankLitersCombinedRaw != null && (
               <>
-                <dt>Объём до округления по типоразмерам</dt>
+                <dt>Об&apos;єм до округлення за типорозмірами</dt>
                 <dd>{formatLiters(hotWater.dhwTankLitersCombinedRaw)} л</dd>
               </>
             )}
             {hotWater.storageHeatTimeMinutes != null && (
               <>
-                <dt>Время нагрева бака (норма)</dt>
-                <dd>{hotWater.storageHeatTimeMinutes} мин</dd>
+                <dt>Час нагрівання бака (норма)</dt>
+                <dd>{hotWater.storageHeatTimeMinutes} хв</dd>
               </>
             )}
             {hotWater.storageIndirectHeatPowerKw != null && (
               <>
-                <dt>Мощность нагрева бака</dt>
+                <dt>Потужність нагрівання бака</dt>
                 <dd>
                   {formatKw(hotWater.storageIndirectHeatPowerKw)} <span>кВт</span>
                 </dd>

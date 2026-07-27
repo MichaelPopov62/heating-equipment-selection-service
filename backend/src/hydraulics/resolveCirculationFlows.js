@@ -105,7 +105,7 @@ export function resolveCirculationFlows(dto) {
   if (mode === 'radiators_only') {
     pushZone({
       zoneId: 'boiler_primary',
-      label: 'Котловой контур (радиаторы)',
+      label: 'Котловий контур (радіатори)',
       pumpRole: 'main',
       designFlowM3PerHour: rad,
       heatLoadWatts: pRad,
@@ -118,7 +118,7 @@ export function resolveCirculationFlows(dto) {
       const qMain = flowFromHeatWatts(pUfh, dtBoiler);
       pushZone({
         zoneId: 'boiler_primary',
-        label: 'Котловой контур (питание смесительного узла)',
+        label: 'Котловий контур (живлення змішувального вузла)',
         pumpRole: 'main',
         designFlowM3PerHour: qMain,
         heatLoadWatts: pUfh,
@@ -127,7 +127,7 @@ export function resolveCirculationFlows(dto) {
       });
       pushZone({
         zoneId: 'ufh_floor',
-        label: 'Контур теплого пола',
+        label: 'Контур теплої підлоги',
         pumpRole: 'zone',
         designFlowM3PerHour: ufh,
         heatLoadWatts: pUfh,
@@ -144,7 +144,7 @@ export function resolveCirculationFlows(dto) {
       );
       pushZone({
         zoneId: 'boiler_primary',
-        label: 'Первичный контур (котёл → гидрострелка)',
+        label: 'Первинний контур (котел → гідрострілка)',
         pumpRole: 'main',
         designFlowM3PerHour: qPrimary,
         heatLoadWatts: pUfh,
@@ -153,7 +153,7 @@ export function resolveCirculationFlows(dto) {
       });
       pushZone({
         zoneId: 'ufh_floor_secondary',
-        label: 'Вторичный контур: теплый пол',
+        label: 'Вторинний контур: тепла підлога',
         pumpRole: 'zone',
         designFlowM3PerHour: ufh,
         heatLoadWatts: pUfh,
@@ -163,7 +163,7 @@ export function resolveCirculationFlows(dto) {
     } else {
       pushZone({
         zoneId: 'boiler_primary',
-        label: 'Котловой контур (теплый пол)',
+        label: 'Котловий контур (тепла підлога)',
         pumpRole: 'main',
         designFlowM3PerHour: ufh,
         heatLoadWatts: pUfh,
@@ -183,7 +183,7 @@ export function resolveCirculationFlows(dto) {
     );
     pushZone({
       zoneId: 'boiler_primary',
-      label: 'Первичный контур (котёл → гидрострелка)',
+      label: 'Первинний контур (котел → гідрострілка)',
       pumpRole: 'main',
       designFlowM3PerHour: qPrimary,
       heatLoadWatts: pTotal,
@@ -193,7 +193,7 @@ export function resolveCirculationFlows(dto) {
     if (rad > 0) {
       pushZone({
         zoneId: 'radiators_secondary',
-        label: 'Вторичный контур: радиаторы',
+        label: 'Вторинний контур: радіатори',
         pumpRole: 'zone',
         designFlowM3PerHour: rad,
         heatLoadWatts: pRad,
@@ -204,7 +204,7 @@ export function resolveCirculationFlows(dto) {
     if (ufh > 0) {
       pushZone({
         zoneId: 'ufh_floor_secondary',
-        label: 'Вторичный контур: теплый пол',
+        label: 'Вторинний контур: тепла підлога',
         pumpRole: 'zone',
         designFlowM3PerHour: ufh,
         heatLoadWatts: pUfh,
@@ -222,13 +222,13 @@ export function resolveCirculationFlows(dto) {
       && Math.abs(qMainThermal - qMainMixing) / qMainThermal > 0.05
     ) {
       warnings.push(
-        `Расход котлового контура по балансу мощностей (${qMainThermal} м³/ч) `
-        + `и по подмесу ТП (${qMainMixing} м³/ч) расходятся >5 % — использован тепловой баланс.`,
+        `Витрата котлового контуру за балансом потужностей (${qMainThermal} м³/ч) `
+        + `и по подмесу ТП (${qMainMixing} м³/ч) розходяться >5 % — використано тепловий баланс.`,
       );
     }
     pushZone({
       zoneId: 'boiler_primary',
-      label: 'Котловой контур (радиаторы + подмес ТП)',
+      label: 'Котловий контур (радіатори + підміш ТП)',
       pumpRole: 'main',
       designFlowM3PerHour: qMainThermal,
       heatLoadWatts: pRad + pUfh,
@@ -238,7 +238,7 @@ export function resolveCirculationFlows(dto) {
     if (ufh > 0) {
       pushZone({
         zoneId: 'ufh_floor',
-        label: 'Контур теплого пола (насос смесительного узла)',
+        label: 'Контур теплої підлоги (насос змішувального вузла)',
         pumpRole: 'zone',
         designFlowM3PerHour: ufh,
         heatLoadWatts: pUfh,
@@ -251,7 +251,7 @@ export function resolveCirculationFlows(dto) {
     const qCombined = round(rad + ufh, 3);
     pushZone({
       zoneId: 'boiler_primary',
-      label: 'Смешанная система (радиаторы + ТП)',
+      label: 'Змішана система (радіатори + ТП)',
       pumpRole: 'main',
       designFlowM3PerHour: qCombined,
       heatLoadWatts: pRad + pUfh,
@@ -269,17 +269,17 @@ export function resolveCirculationFlows(dto) {
     boilerZone.heatingFlowM3PerHour = qHeating;
     boilerZone.dhwPriorityFlowM3PerHour = qDhw;
     notes.push(
-      'Приоритет ГВС: при прогреве БКН контуры отопления отсекаются автоматикой котла.',
+      'Пріоритет ГВП: під час прогріву БКН контури опалення відсікаються автоматикою котла.',
     );
     if (qDhw > qHeating) {
       notes.push(
-        `Расчётный расход котлового насоса определён по змеевику БКН `
-        + `(${qDhw} м³/ч), а не по отоплению (${qHeating} м³/ч).`,
+        `Розрахунковий витрата котлового насоса визначено за змійовиком БКН `
+        + `(${qDhw} м³/ч), а не за опаленням (${qHeating} м³/ч).`,
       );
     }
     pushZone({
       zoneId: 'dhw_coil',
-      label: 'Змеевик БКН (режим прогрева)',
+      label: 'Змійовик БКН (режим прогріву)',
       pumpRole: 'dhw',
       designFlowM3PerHour: qDhw,
       heatLoadWatts: (dhw?.hotWaterPowerKw ?? 0) * 1000,

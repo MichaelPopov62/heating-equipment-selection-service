@@ -35,13 +35,13 @@ function segmentRoleLabel(
   if (isMainLine) return 'Транзит котла';
   switch (role) {
     case 'main':
-      return 'Магистраль';
+      return 'Магістраль';
     case 'branch':
-      return 'Ветка';
+      return 'Гілка';
     case 'ufh_loop':
       return 'Петля ТП';
     case 'dhw':
-      return 'ГВС';
+      return 'ГВП';
     default:
       return role;
   }
@@ -53,11 +53,11 @@ function segmentRoleLabel(
 function topologyLabel(topology: ParsedHydraulicsProposal['topology']): string | null {
   switch (topology) {
     case 'direct':
-      return 'Прямое подключение (суммарный расход контуров).';
+      return 'Пряме підключення (сума витрат контурів).';
     case 'mixing_valve':
-      return 'Смесительный узел ТП — насос контура пола в отчёте шага «Тёплый пол».';
+      return 'Змішувальний вузол ТП — насос контуру підлоги у звіті кроку «Тепла підлога».';
     case 'hydraulic_separator':
-      return 'Гидрострелка — первичный контур здесь; насос ТП в отчёте шага «Тёплый пол».';
+      return 'Гідрострелка — первинний контур тут; насос ТП у звіті кроку «Тепла підлога».';
     default:
       return null;
   }
@@ -76,14 +76,14 @@ function FlowContextBlock({ flowContext }: { flowContext: ParsedHydraulicsFlowCo
     <dl className={styles.summaryDl}>
       {hasGraph && (
         <>
-          <dt>Температурный график радиаторов</dt>
+          <dt>Температурний графік радіаторів</dt>
           <dd>
             {flowContext.supplyC}/{flowContext.returnC}{' '}
             <span className={styles.unit}>°C</span>
             {flowContext.thermalRegimeDeltaTK != null && (
               <span className={styles.hintInline}>
                 {' '}
-                (Δt графика {flowContext.thermalRegimeDeltaTK} K)
+                (Δt графіка {flowContext.thermalRegimeDeltaTK} K)
               </span>
             )}
           </dd>
@@ -91,14 +91,14 @@ function FlowContextBlock({ flowContext }: { flowContext: ParsedHydraulicsFlowCo
       )}
       {hasFlowDt && (
         <>
-          <dt>Δt для расчёта расхода (анкета)</dt>
+          <dt>Δt для розрахунку витрати (анкета)</dt>
           <dd>
             {flowContext.flowDeltaTK} <span className={styles.unit}>K</span>
             {flowContext.thermalRegimeDeltaTK != null
               && flowContext.flowDeltaTK !== flowContext.thermalRegimeDeltaTK && (
                 <span className={styles.hintInline}>
                   {' '}
-                  — отличается от Δt графика; расход Q = P/(c·Δt) считается по этому значению
+                  — відрізняється від Δt графіка; витрата Q = P/(c·Δt) рахується за цим значенням
                 </span>
             )}
           </dd>
@@ -131,17 +131,17 @@ function CalculationsSummary({
 
   return (
     <dl className={styles.summaryDl}>
-      <dt>Расчётный расход системы</dt>
+      <dt>Розрахунковий витрат системи</dt>
       <dd>
         {flow.toFixed(3)} <span className={styles.unit}>м³/ч</span>
       </dd>
-      <dt>Требуемый напор</dt>
+      <dt>Необхідний напір</dt>
       <dd>
         {head.toFixed(2)} <span className={styles.unit}>м</span>
       </dd>
       {calculations.deltaTSystemK != null && (
         <>
-          <dt>Δt расхода (из расчёта)</dt>
+          <dt>Δt витрати (з розрахунку)</dt>
           <dd>
             {calculations.deltaTSystemK} <span className={styles.unit}>K</span>
           </dd>
@@ -149,7 +149,7 @@ function CalculationsSummary({
       )}
       {calculations.mainLineLengthM != null && calculations.mainLineLengthM > 0 && (
         <>
-          <dt>Длина магистрали (анкета)</dt>
+          <dt>Довжина магістралі (анкета)</dt>
           <dd>
             {calculations.mainLineLengthM.toFixed(1)} <span className={styles.unit}>м</span>
           </dd>
@@ -158,7 +158,7 @@ function CalculationsSummary({
       {calculations.recommendedPipeDiameter != null
         && calculations.recommendedPipeDiameter.length > 0 && (
         <>
-          <dt>Ориентировочный DN (по расходу)</dt>
+          <dt>Орієнтовний DN (за витратою)</dt>
           <dd>{calculations.recommendedPipeDiameter}</dd>
         </>
       )}
@@ -187,11 +187,11 @@ function PipeLinesTable({
         <thead>
           <tr>
             <th>Модель</th>
-            <th>Материал</th>
+            <th>Матеріал</th>
             <th>Ø внутр.</th>
-            <th>Длина</th>
-            <th>Цена/м</th>
-            <th>Сумма</th>
+            <th>Довжина</th>
+            <th>Ціна/м</th>
+            <th>Сума</th>
           </tr>
         </thead>
         <tbody>
@@ -205,7 +205,7 @@ function PipeLinesTable({
               <td>
                 {line.totalLengthM.toFixed(1)} <span className={styles.unit}>м</span>
                 {line.edgeCount > 1 ? (
-                  <span className={styles.hintInline}> ({line.edgeCount} уч.)</span>
+                  <span className={styles.hintInline}> ({line.edgeCount} ділян.)</span>
                 ) : null}
               </td>
               <td>
@@ -224,7 +224,7 @@ function PipeLinesTable({
       </table>
       {footerPrice != null && footerPrice > 0 && (
         <p className={styles.tableFooter}>
-          Итого по контуру: <strong>{formatPriceUah(footerPrice)} грн</strong>
+          Разом за контуром: <strong>{formatPriceUah(footerPrice)} грн</strong>
         </p>
       )}
     </div>
@@ -243,9 +243,9 @@ function ProposalContent({
 }) {
   const sourceLine =
     catalogSource === 'mongo'
-      ? 'Подбор по каталогу из базы данных (MongoDB).'
+      ? 'Підбір за каталогом із бази даних (MongoDB).'
       : catalogSource === 'file'
-        ? 'Подбор по каталогу из файла (локальные данные API).'
+        ? 'Підбір за каталогом із файлу (локальні дані API).'
         : null;
 
   /** Зони ТП — лише в звіті кроку «Тёплый пол». */
@@ -262,17 +262,17 @@ function ProposalContent({
 
       {(proposal.designFlowM3PerHour > 0 || proposal.headRequiredM > 0) && (
         <dl className={styles.summaryDl}>
-          <dt>Расчётный расход контура (подбор)</dt>
+          <dt>Розрахунковий витрат контуру (підбір)</dt>
           <dd>
             {proposal.designFlowM3PerHour.toFixed(3)} <span className={styles.unit}>м³/ч</span>
           </dd>
-          <dt>Требуемый напор (подбор)</dt>
+          <dt>Необхідний напір (підбір)</dt>
           <dd>
             {proposal.headRequiredM.toFixed(2)} <span className={styles.unit}>м</span>
           </dd>
           {proposal.estimatedTotalPrice > 0 && (
             <>
-              <dt>Ориентировочная стоимость (трубы + насос)</dt>
+              <dt>Орієнтовна вартість (труби + насос)</dt>
               <dd className={styles.valueStrong}>
                 {formatPriceUah(proposal.estimatedTotalPrice)}{' '}
                 <span className={styles.unit}>грн</span>
@@ -302,14 +302,14 @@ function ProposalContent({
         ? proposal.pipeLineGroups.map((group: ParsedHydraulicsPipeLineGroup) => (
             <PipeLinesTable
               key={group.circuitId}
-              title={`Трубы — ${group.label}`}
+              title={`Труби — ${group.label}`}
               pipeLines={group.pipeLines}
               footerPrice={group.estimatedPrice}
             />
           ))
         : (
           <PipeLinesTable
-            title="Трубы (сводка по позициям каталога)"
+            title="Труби (зведення за позиціями каталогу)"
             pipeLines={proposal.pipeLines}
             {...(proposal.estimatedPipesPrice > 0
               ? { footerPrice: proposal.estimatedPipesPrice }
@@ -321,19 +321,19 @@ function ProposalContent({
         && proposal.estimatedPipesPrice > 0
         && proposal.pipeLineGroups.length > 1 && (
         <p className={styles.tableFooter}>
-          Итого по трубам: <strong>{formatPriceUah(proposal.estimatedPipesPrice)} грн</strong>
+          Разом за трубами: <strong>{formatPriceUah(proposal.estimatedPipesPrice)} грн</strong>
         </p>
       )}
 
       {proposal.pipeSegments.length > 0 && (
         <details className={styles.details}>
-          <summary>Детализация по участкам ({proposal.pipeSegments.length})</summary>
+          <summary>Деталізація за ділянками ({proposal.pipeSegments.length})</summary>
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Участок</th>
+                <th>Ділянка</th>
                 <th>Тип</th>
-                <th>Длина</th>
+                <th>Довжина</th>
                 <th>Труба</th>
                 <th>v</th>
                 <th>Δp</th>
@@ -356,7 +356,7 @@ function ProposalContent({
                     {seg.groupedRoomIds != null && seg.groupedRoomIds.length > 0 ? (
                       <span className={styles.hintInline}>
                         {' '}
-                        (коллектор: {seg.groupedRoomIds.join(', ')})
+                        (колектор: {seg.groupedRoomIds.join(', ')})
                       </span>
                     ) : null}
                   </td>
@@ -368,17 +368,17 @@ function ProposalContent({
                   <td>
                     {seg.velocityMps.toFixed(2)} <span className={styles.unit}>м/с</span>
                     {seg.velocityLimitExceeded === true ? (
-                      <span className={styles.hintInline}> (выше нормы)</span>
+                      <span className={styles.hintInline}> (вище норми)</span>
                     ) : null}
                     {seg.velocityBelowMin === true ? (
                       <span className={styles.hintInline}>
                         {seg.mainTransitGuardApplied === true
-                          ? ' (ниже нормы v, guard Dвн)'
-                          : ' (ниже нормы)'}
+                          ? ' (нижче норми v, guard Dвн)'
+                          : ' (нижче норми)'}
                       </span>
                     ) : null}
                     {seg.catalogPoolExhausted === true ? (
-                      <span className={styles.hintInline}> (нет Ø в каталоге)</span>
+                      <span className={styles.hintInline}> (немає Ø у каталозі)</span>
                     ) : null}
                   </td>
                   <td>
@@ -422,9 +422,9 @@ export function HydraulicsReportView({
   return (
     <div>
       <p className={styles.hint}>
-        Источник: расчёт API (Pure Pipeline) · подбор труб и насоса из каталога.
-        В блоке «Рекомендация» — компактная таблица труб без цен; здесь — полный расчёт
-        с ценами и детализацией по участкам.
+        Джерело: розрахунок API (Pure Pipeline) · підбір труб і насоса з каталогу.
+        У блоці «Рекомендація» — компактна таблиця труб без цін; тут — повний розрахунок
+        з цінами та деталізацією за ділянками.
       </p>
 
       {flowContext != null && <FlowContextBlock flowContext={flowContext} />}
@@ -441,15 +441,15 @@ export function HydraulicsReportView({
       ) : (
         calculations != null && (
           <p className={styles.hint}>
-            Подбор позиций каталога не сформирован — см. предупреждения ниже или проверьте каталог
-            труб/насосов.
+            Підбір позицій каталогу не сформовано — див. попередження нижче або перевірте каталог
+            труб/насосів.
           </p>
         )
       )}
 
       {allWarnings.length > 0 && (
         <>
-          <h4 className={styles.sectionTitle}>Предупреждения</h4>
+          <h4 className={styles.sectionTitle}>Попередження</h4>
           <ul className={styles.warningsList}>
             {allWarnings.map((w, i) => (
               <li key={`hyd-mw-${i}-${w.slice(0, 64)}`}>{w}</li>

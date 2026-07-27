@@ -43,7 +43,7 @@ export function HydraulicsSummaryTable({
     if (primaryPump == null) return null;
     const base = formatBrandModel(primaryPump.brand, primaryPump.model);
     if (primaryPump.pumpSource === 'catalog') {
-      return `${base} — доп. на котловую ветку (встроенный слаб)`;
+      return `${base} — дод. на котлову гілку (вбудований слабкий)`;
     }
     return base;
   })();
@@ -82,32 +82,32 @@ export function HydraulicsSummaryTable({
       aria-labelledby="hydraulics-summary-title"
     >
       <h3 id="hydraulics-summary-title" className={styles.title}>
-        Гидравлика (итог)
+        Гідравліка (підсумок)
       </h3>
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Показатель</th>
-              <th>Значение</th>
+              <th>Показник</th>
+              <th>Значення</th>
             </tr>
           </thead>
           <tbody>
             {flow > 0 && (
               <tr>
-                <td>Расчётный расход</td>
+                <td>Розрахункова витрата</td>
                 <td>{flow.toFixed(3)} м³/ч</td>
               </tr>
             )}
             {head > 0 && (
               <tr>
-                <td>Требуемый напор</td>
+                <td>Потрібний напір</td>
                 <td>{head.toFixed(2)} м</td>
               </tr>
             )}
             {deltaT != null && (
               <tr>
-                <td>Δt расхода</td>
+                <td>Δt витрати</td>
                 <td>{deltaT} K</td>
               </tr>
             )}
@@ -131,10 +131,10 @@ export function HydraulicsSummaryTable({
             )}
             {proposal != null && !proposal.hasPipeSelection && (
               <tr>
-                <td>Трубы</td>
+                <td>Труби</td>
                 <td>
                   {proposal.unavailableReason
-                    ?? 'Нет подходящих позиций в каталоге'}
+                    ?? 'Немає відповідних позицій у каталозі'}
                 </td>
               </tr>
             )}
@@ -142,14 +142,14 @@ export function HydraulicsSummaryTable({
         </table>
       </div>
       <p className={styles.hint}>
-        Полный расчёт, цены и участки — на шаге{' '}
-        <SurveyStepLink step="hydraulics">«Гидравлика»</SurveyStepLink>
-        . Подбор труб без цен — в блоке «Рекомендация».
+        Повний розрахунок, ціни та ділянки — на кроці{' '}
+        <SurveyStepLink step="hydraulics">«Гідравліка»</SurveyStepLink>
+        . Підбір труб без цін — у блоці «Рекомендація».
       </p>
       {hasWarnings && (
         <p className={styles.attention}>
-          Есть предупреждения по гидравлике — откройте отчёт на шаге{' '}
-          <SurveyStepLink step="hydraulics">«Гидравлика»</SurveyStepLink>
+          Є попередження щодо гідравліки — відкрийте звіт на кроці{' '}
+          <SurveyStepLink step="hydraulics">«Гідравліка»</SurveyStepLink>
           .
         </p>
       )}

@@ -21,15 +21,15 @@ export const DEFAULT_RADIATOR_EMITTER_PREFERENCE = 'auto';
 export const RADIATOR_EMITTER_PREFERENCE_SURVEY_UI_OPTIONS = Object.freeze([
   {
     value: /** @type {RadiatorEmitterPreference} */ ('auto'),
-    label: 'Авто (единый тип по объекту)',
+    label: 'Авто (єдиний тип за об\'єктом)',
   },
   {
     value: /** @type {RadiatorEmitterPreference} */ ('sectional'),
-    label: 'Только секционные',
+    label: 'Лише секційні',
   },
   {
     value: /** @type {RadiatorEmitterPreference} */ ('panel'),
-    label: 'Только панельные',
+    label: 'Лише панельні',
   },
 ]);
 
@@ -66,7 +66,7 @@ export function normalizeRadiatorEmitterPreference(value) {
  * @returns {string}
  */
 export function radiatorEmitterPreferenceLabel(preference) {
-  if (preference === 'sectional') return 'только секционные';
-  if (preference === 'panel') return 'только панельные';
-  return 'авто (единый тип по объекту)';
+  if (preference === 'sectional') return 'лише секційні';
+  if (preference === 'panel') return 'лише панельні';
+  return 'авто (єдиний тип за об\'єктом)';
 }

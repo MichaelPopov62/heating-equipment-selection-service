@@ -66,7 +66,7 @@ function indirectPoolForObjectType(list, objectType) {
     return {
       pool: list,
       wallFallbackWarning:
-        'Для квартиры предпочтителен настенный БКН (indirect_wall); в каталоге не найден — подобран другой тип, проверьте габариты.',
+        'Для квартири переважний настінний БКН (indirect_wall); у каталозі не знайдено — підібрано інший тип, перевірте габарити.',
     };
   }
   return { pool: [], wallFallbackWarning: null };
@@ -100,14 +100,14 @@ export function pickIndirectWaterHeater({
 
   if (!useIndirectDhw) {
     empty.skippedReason =
-      'БКН не подбирается: квартира/проточка, отдельный электробойлер или схема без котлового контура ГВС.';
+      'БКН не підбирається: квартира/проток, окремий електробойлер або схема без котлового контуру ГВП.';
     return empty;
   }
 
   const list = catalog?.indirectWaterHeaters ?? [];
   if (!Array.isArray(list) || list.length === 0) {
-    empty.warnings.push('В каталоге нет бойлеров косвенного нагрева (БКН).');
-    empty.skippedReason = 'Пустой каталог БКН.';
+    empty.warnings.push('У каталозі немає бойлерів непрямого нагріву (БКН).');
+    empty.skippedReason = 'Порожній каталог БКН.';
     return empty;
   }
 
@@ -146,7 +146,7 @@ export function pickIndirectWaterHeater({
   const resolvedRecommendations = [];
   if (selected && need > 0 && indirectTankVolumeLiters(selected) < need) {
     warnings.push(
-      `Подобранный БКН меньше расчётного минимума по объёму (${indirectTankVolumeLiters(selected)} л при потребности ≥ ${need} л) — ограничение каталога.`,
+      `Підібраний БКН менший за розрахунковий мінімум за об’ємом (${indirectTankVolumeLiters(selected)} л при потребі ≥ ${need} л) — обмеження каталогу.`,
     );
   }
 
@@ -223,7 +223,7 @@ export function attachIndirectBoilerCoupling(
     boilerNominalKw + rules.boilerBelowMinSourceToleranceKw < minSourceKw
   ) {
     indirectReport.warnings.push(
-      `По каталогу для выбранного БКН рекомендуется источник не ниже ~${minSourceKw.toFixed(1)} кВт; номинал котла (${boilerNominalKw.toFixed(1)} кВт) может быть недостаточен для штатного режима.`,
+      `За каталогом для обраного БКН рекомендується джерело не нижче ~${minSourceKw.toFixed(1)} кВт; номінал котла (${boilerNominalKw.toFixed(1)} кВт) може бути недостатнім для штатного режиму.`,
     );
   }
 
@@ -233,7 +233,7 @@ export function attachIndirectBoilerCoupling(
     coilKw < boilerNominalKw - rules.coilWeakerThanBoilerToleranceKw
   ) {
     indirectReport.warnings.push(
-      `Мощность змеевика БКН (${coilKw.toFixed(1)} кВт) ниже номинала котла (${boilerNominalKw.toFixed(1)} кВт): возможны тактование горелки и увеличенное время нагрева.`,
+      `Потужність змійовика БКН (${coilKw.toFixed(1)} кВт) нижча за номінал котла (${boilerNominalKw.toFixed(1)} кВт): можливі тактування пальника та збільшений час нагрівання.`,
     );
   }
 
@@ -265,7 +265,7 @@ export function attachIndirectBoilerCoupling(
       );
     } else if (tMin >= rules.heatTimeSoftHintMinutes) {
       indirectReport.warnings.push(
-        `Оценочное время полного нагрева бака ~${tMin} мин — ориентир для комфорта при приоритете ГВС (не норматив).`,
+        `Орієнтовний час повного нагрівання бака ~${tMin} хв — орієнтир для комфорту за пріоритету ГВП (не норматив).`,
       );
     }
   }

@@ -18,15 +18,15 @@
           "price": 48500,
           "mountingType": "wall",
           "connectionDiameters": [
-            "3/4 дюйма (отопление)",
-            "1/2 дюйма (ГВС)"
+            "3/4 дюйма (опалення)",
+            "1/2 дюйма (ГВП)"
           ],
           "circuitsCount": 2,
           "type": "condensing",
           "circulationPump": {
             "operatingModes": [
               {
-                "modeName": "Встроенный насос — скорость 3",
+                "modeName": "Вбудований насос — швидкість 3",
                 "speedIndex": 3,
                 "powerWatts": 40,
                 "coefficients": {
@@ -38,7 +38,7 @@
                 "qMaxM3h": 4.5
               },
               {
-                "modeName": "Встроенный насос — скорость 2",
+                "modeName": "Вбудований насос — швидкість 2",
                 "speedIndex": 2,
                 "powerWatts": 35,
                 "coefficients": {
@@ -50,7 +50,7 @@
                 "qMaxM3h": 4
               },
               {
-                "modeName": "Встроенный насос — скорость 1",
+                "modeName": "Вбудований насос — швидкість 1",
                 "speedIndex": 1,
                 "powerWatts": 30,
                 "coefficients": {
@@ -92,7 +92,7 @@
           "price": 35000,
           "mountingType": "wall",
           "connectionDiameters": [
-            "3/4″ (отопление)",
+            "3/4″ (опалення)",
             "1/2″ (ГВС)"
           ],
           "circuitsCount": 2,
@@ -100,7 +100,7 @@
           "circulationPump": {
             "operatingModes": [
               {
-                "modeName": "Baxi встроенный — скорость 1",
+                "modeName": "Baxi вбудований — швидкість 1",
                 "speedIndex": 1,
                 "powerWatts": 30,
                 "coefficients": {
@@ -112,7 +112,7 @@
                 "qMaxM3h": 0.6
               },
               {
-                "modeName": "Baxi встроенный — скорость 2",
+                "modeName": "Baxi вбудований — швидкість 2",
                 "speedIndex": 2,
                 "powerWatts": 40,
                 "coefficients": {
@@ -124,7 +124,7 @@
                 "qMaxM3h": 1
               },
               {
-                "modeName": "Baxi встроенный — скорость 3",
+                "modeName": "Baxi вбудований — швидкість 3",
                 "speedIndex": 3,
                 "powerWatts": 45,
                 "coefficients": {
@@ -170,7 +170,7 @@
               "weight_kg": 30
             }
           },
-          "positioning": "Надежный классический котел для квартир и небольших домов.",
+          "positioning": "Надійний класичний котел для квартир і невеликих будинків.",
           "tags": [
             "wall-mounted",
             "double-circuit",
@@ -375,13 +375,13 @@
           "isDoubleCircuit": true,
           "mountingType": "wall",
           "connectionDiameters": [
-            "3/4″ (отопление)",
+            "3/4″ (опалення)",
             "1/2″ (ГВС)"
           ],
           "circulationPump": {
             "operatingModes": [
               {
-                "modeName": "Baxi встроенный — скорость 1 (20%)",
+                "modeName": "Baxi вбудований — швидкість 1 (20%)",
                 "speedIndex": 1,
                 "powerWatts": 25,
                 "coefficients": {
@@ -393,7 +393,7 @@
                 "qMaxM3h": 0.6
               },
               {
-                "modeName": "Baxi встроенный — скорость 2 (40%)",
+                "modeName": "Baxi вбудований — швидкість 2 (40%)",
                 "speedIndex": 2,
                 "powerWatts": 35,
                 "coefficients": {
@@ -405,7 +405,7 @@
                 "qMaxM3h": 1.2
               },
               {
-                "modeName": "Baxi встроенный — скорость 3 (100%)",
+                "modeName": "Baxi вбудований — швидкість 3 (100%)",
                 "speedIndex": 3,
                 "powerWatts": 45,
                 "coefficients": {
@@ -609,7 +609,7 @@
           "circulationPump": {
             "operatingModes": [
               {
-                "modeName": "Встроенный насос — скорость 3",
+                "modeName": "Вбудований насос — швидкість 3",
                 "speedIndex": 3,
                 "powerWatts": 40,
                 "coefficients": {
@@ -621,7 +621,7 @@
                 "qMaxM3h": 4.5
               },
               {
-                "modeName": "Встроенный насос — скорость 2",
+                "modeName": "Вбудований насос — швидкість 2",
                 "speedIndex": 2,
                 "powerWatts": 35,
                 "coefficients": {
@@ -1018,7 +1018,7 @@
           "deltaT70": 193,
           "deltaT50": 125
         },
-        "material": "Алюминий",
+        "material": "Алюміній",
         "volumeLiters": 0.46,
         "dimensions": {
           "height": 590,
@@ -1035,7 +1035,7 @@
           "deltaT70": 178,
           "deltaT50": 115
         },
-        "material": "Алюминий",
+        "material": "Алюміній",
         "volumeLiters": 0.25,
         "dimensions": {
           "height": 557,
@@ -1052,7 +1052,7 @@
           "deltaT70": 205,
           "deltaT50": 132
         },
-        "material": "Биметалл",
+        "material": "Біметал",
         "volumeLiters": 0.2,
         "dimensions": {
           "height": 560,
@@ -1093,7 +1093,7 @@
           "made-in-italy",
           "low-inertia"
         ],
-        "description": "Литой алюминиевый радиатор с высокой теплоотдачей и антикоррозийным покрытием.",
+        "description": "Литий алюмінієвий радіатор з високою тепловіддачею та антикорозійним покриттям.",
         "price": 590,
         "priceBasis": "section"
       },
@@ -1132,7 +1132,7 @@
           "reinforced-structure",
           "universal-connection"
         ],
-        "description": "Высокопрочный алюминиевый радиатор, разработанный специально для обеспечения максимальной теплоотдачи при минимальных габаритах.",
+        "description": "Міцний алюмінієвий радіатор, розроблений для максимальної тепловіддачі при мінімальних габаритах.",
         "price": 720,
         "priceBasis": "section"
       },
@@ -1172,7 +1172,7 @@
           "extended-warranty",
           "high-efficiency"
         ],
-        "description": "Инновационный радиатор с полной внутренней защитой от коррозии. Подходит для систем с нестабильным качеством теплоносителя.",
+        "description": "Інноваційний радіатор з повним внутрішнім захистом від корозії. Підходить для систем із нестабільною якістю теплоносія.",
         "price": 1020,
         "priceBasis": "section"
       },
@@ -1210,7 +1210,7 @@
           "side-connection",
           "high-reliability"
         ],
-        "description": "Стальной панельный радиатор с боковым подключением. Оптимален для систем с принудительной циркуляцией.",
+        "description": "Сталевий панельний радіатор з боковим підключенням. Оптимальний для систем із примусовою циркуляцією.",
         "price": 4350,
         "priceBasis": "panel"
       },
@@ -1249,7 +1249,7 @@
           "built-in-valve",
           "modern-look"
         ],
-        "description": "Стальной панельный радиатор с нижним подключением и встроенным термоклапаном. Идеален для скрытой разводки труб.",
+        "description": "Сталевий панельний радіатор з нижнім підключенням і вбудованим термоклапаном. Ідеальний для прихованої розводки труб.",
         "price": 4580,
         "priceBasis": "panel"
       },
@@ -1286,7 +1286,7 @@
           "high-length",
           "maximum-area"
         ],
-        "description": "Длинный стальной панельный радиатор с боковым подключением. Идеально подходит для больших помещений с панорамными или низкими окнами.",
+        "description": "Довгий сталевий панельний радіатор з боковим підключенням. Ідеально підходить для великих приміщень з панорамними або низькими вікнами.",
         "price": 15322,
         "priceBasis": "panel"
       },
@@ -1323,7 +1323,7 @@
           "triple-panel",
           "high-density-power"
         ],
-        "description": "Сверхмощный трехпанельный радиатор (Тип 33) повышенной глубины. Выдает максимальный тепловой поток при относительно небольшой длине.",
+        "description": "Потужний трипанельний радіатор (тип 33) підвищеної глибини. Забезпечує максимальний тепловий потік при відносно невеликій довжині.",
         "price": 15239,
         "priceBasis": "panel"
       },
@@ -1362,7 +1362,7 @@
           "built-in-valve",
           "modern-look"
         ],
-        "description": "Стальной панельный радиатор увеличенной высоты с нижним подключением. Прекрасно интегрируется в современные интерьеры со скрытой разводкой.",
+        "description": "Сталевий панельний радіатор збільшеної висоти з нижнім підключенням. Добре інтегрується в сучасні інтер'єри з прихованою розводкою.",
         "price": 14921,
         "priceBasis": "panel"
       },
@@ -1399,7 +1399,7 @@
           "triple-panel",
           "low-profile-heavy"
         ],
-        "description": "Трехпанельный радиатор стандартной высоты 500 мм. Оптимальное решение для эффективного съема низкотемпературного тепла от конденсационных котлов.",
+        "description": "Трипанельний радіатор стандартної висоти 500 мм. Оптимальне рішення для ефективного зняття низькотемпературного тепла від конденсаційних котлів.",
         "price": 14692,
         "priceBasis": "panel"
       },
@@ -1436,7 +1436,7 @@
           "high-length",
           "classic-dimension"
         ],
-        "description": "Панельный радиатор высотой 600 мм с боковым подключением. Традиционная геометрия в сочетании с внушительной тепловой мощностью.",
+        "description": "Панельний радіатор висотою 600 мм з боковим підключенням. Традиційна геометрія в поєднанні з високою тепловою потужністю.",
         "price": 14561,
         "priceBasis": "panel"
       }
@@ -1537,55 +1537,55 @@
         "diameter": 16,
         "wallThickness": 2.2,
         "price": 120,
-        "category": "Отопление/Водоснабжение"
+        "category": "Опалення/Водопостачання"
       },
       {
         "id": "p-02",
         "brand": "Valtec",
-        "material": "Металлопластик",
+        "material": "Металопластик",
         "armuvannya": "алюміній",
         "operating temperature at 10 bar pressure": "0÷95 °C ",
         "operating temperature at 25 bar pressure": "0÷25 °C",
         "diameter": 16,
         "wallThickness": 2,
         "price": 75.9,
-        "category": "Отопление/Водоснабжение"
+        "category": "Опалення/Водопостачання"
       },
       {
         "id": "p-03",
         "brand": "Valtec",
-        "material": "Металлопластик",
+        "material": "Металопластик",
         "armuvannya": "алюміній",
         "operating temperature at 10 bar pressure": "0÷95 °C ",
         "operating temperature at 25 bar pressure": "0÷25 °C",
         "diameter": 20,
         "wallThickness": 2,
         "price": 101.98,
-        "category": "Отопление/Водоснабжение"
+        "category": "Опалення/Водопостачання"
       },
       {
         "id": "p-04",
         "brand": "Valtec",
-        "material": "Металлопластик",
+        "material": "Металопластик",
         "armuvannya": "алюміній",
         "operating temperature at 10 bar pressure": "0÷95 °C ",
         "operating temperature at 25 bar pressure": "0÷25 °C",
         "diameter": 26,
         "wallThickness": 3,
         "price": 215.61,
-        "category": "Отопление/Водоснабжение"
+        "category": "Опалення/Водопостачання"
       },
       {
         "id": "p-05",
         "brand": "Valtec",
-        "material": "Металлопластик",
+        "material": "Металопластик",
         "armuvannya": "алюміній",
         "operating temperature at 10 bar pressure": "0÷95 °C ",
         "operating temperature at 25 bar pressure": "0÷25 °C",
         "diameter": 32,
         "wallThickness": 3,
         "price": 303.62,
-        "category": "Отопление/Водоснабжение"
+        "category": "Опалення/Водопостачання"
       },
       {
         "id": "p-06",
@@ -1596,7 +1596,7 @@
         "diameter": 16,
         "wallThickness": 2.2,
         "price": 72.06,
-        "category": "Отопление/Водоснабжение/теплі поли"
+        "category": "Опалення/Водопостачання/тепла підлога"
       },
       {
         "id": "p-07",
@@ -1607,7 +1607,7 @@
         "diameter": 20,
         "wallThickness": 2.8,
         "price": 107.63,
-        "category": "Отопление/Водоснабжение/теплі поли"
+        "category": "Опалення/Водопостачання/тепла підлога"
       },
       {
         "id": "p-08",
@@ -1618,7 +1618,7 @@
         "diameter": 25,
         "wallThickness": 3.5,
         "price": 167.42,
-        "category": "Отопление/Водоснабжение/теплі поли"
+        "category": "Опалення/Водопостачання/тепла підлога"
       },
       {
         "id": "p-09",
@@ -1629,7 +1629,7 @@
         "diameter": 32,
         "wallThickness": 4.4,
         "price": 276.18,
-        "category": "Отопление/Водоснабжение/теплі поли"
+        "category": "Опалення/Водопостачання/тепла підлога"
       },
       {
         "id": "p-10",
@@ -2253,7 +2253,7 @@
       },
       "operatingModes": [
         {
-          "modeName": "Скорость 1",
+          "modeName": "Швидкість 1",
           "speedIndex": 1,
           "powerWatts": 25,
           "coefficients": {
@@ -2265,7 +2265,7 @@
           "qMaxM3h": 1.43
         },
         {
-          "modeName": "Скорость 2",
+          "modeName": "Швидкість 2",
           "speedIndex": 2,
           "powerWatts": 35,
           "coefficients": {
@@ -2277,7 +2277,7 @@
           "qMaxM3h": 1.804
         },
         {
-          "modeName": "Скорость 3",
+          "modeName": "Швидкість 3",
           "speedIndex": 3,
           "powerWatts": 45,
           "coefficients": {
@@ -2306,7 +2306,7 @@
       },
       "operatingModes": [
         {
-          "modeName": "Скорость 1",
+          "modeName": "Швидкість 1",
           "speedIndex": 1,
           "powerWatts": 50,
           "coefficients": {
@@ -2318,7 +2318,7 @@
           "qMaxM3h": 2.08
         },
         {
-          "modeName": "Скорость 2",
+          "modeName": "Швидкість 2",
           "speedIndex": 2,
           "powerWatts": 70,
           "coefficients": {
@@ -2330,7 +2330,7 @@
           "qMaxM3h": 2.624
         },
         {
-          "modeName": "Скорость 3",
+          "modeName": "Швидкість 3",
           "speedIndex": 3,
           "powerWatts": 90,
           "coefficients": {
@@ -2359,7 +2359,7 @@
       },
       "operatingModes": [
         {
-          "modeName": "Скорость 1",
+          "modeName": "Швидкість 1",
           "speedIndex": 1,
           "powerWatts": 110,
           "coefficients": {
@@ -2371,7 +2371,7 @@
           "qMaxM3h": 3.5
         },
         {
-          "modeName": "Скорость 2",
+          "modeName": "Швидкість 2",
           "speedIndex": 2,
           "powerWatts": 155,
           "coefficients": {
@@ -2383,7 +2383,7 @@
           "qMaxM3h": 4.2
         },
         {
-          "modeName": "Скорость 3",
+          "modeName": "Швидкість 3",
           "speedIndex": 3,
           "powerWatts": 165,
           "coefficients": {
@@ -2412,7 +2412,7 @@
       },
       "operatingModes": [
         {
-          "modeName": "Скорость 1",
+          "modeName": "Швидкість 1",
           "speedIndex": 1,
           "powerWatts": 74,
           "coefficients": {
@@ -2424,7 +2424,7 @@
           "qMaxM3h": 4.225
         },
         {
-          "modeName": "Скорость 2",
+          "modeName": "Швидкість 2",
           "speedIndex": 2,
           "powerWatts": 105,
           "coefficients": {
@@ -2436,7 +2436,7 @@
           "qMaxM3h": 5.33
         },
         {
-          "modeName": "Скорость 3",
+          "modeName": "Швидкість 3",
           "speedIndex": 3,
           "powerWatts": 135,
           "coefficients": {
@@ -2593,7 +2593,7 @@
       },
       "operatingModes": [
         {
-          "modeName": "Скорость 1",
+          "modeName": "Швидкість 1",
           "speedIndex": 1,
           "powerWatts": 26,
           "coefficients": {
@@ -2605,7 +2605,7 @@
           "qMaxM3h": 1.3
         },
         {
-          "modeName": "Скорость 2",
+          "modeName": "Швидкість 2",
           "speedIndex": 2,
           "powerWatts": 37,
           "coefficients": {
@@ -2617,7 +2617,7 @@
           "qMaxM3h": 1.64
         },
         {
-          "modeName": "Скорость 3",
+          "modeName": "Швидкість 3",
           "speedIndex": 3,
           "powerWatts": 48,
           "coefficients": {
@@ -2646,7 +2646,7 @@
       },
       "operatingModes": [
         {
-          "modeName": "Скорость 1",
+          "modeName": "Швидкість 1",
           "speedIndex": 1,
           "powerWatts": 46,
           "coefficients": {
@@ -2658,7 +2658,7 @@
           "qMaxM3h": 1.95
         },
         {
-          "modeName": "Скорость 2",
+          "modeName": "Швидкість 2",
           "speedIndex": 2,
           "powerWatts": 66,
           "coefficients": {
@@ -2670,7 +2670,7 @@
           "qMaxM3h": 2.46
         },
         {
-          "modeName": "Скорость 3",
+          "modeName": "Швидкість 3",
           "speedIndex": 3,
           "powerWatts": 84,
           "coefficients": {
@@ -2699,7 +2699,7 @@
       },
       "operatingModes": [
         {
-          "modeName": "Скорость 1",
+          "modeName": "Швидкість 1",
           "speedIndex": 1,
           "powerWatts": 26,
           "coefficients": {
@@ -2711,7 +2711,7 @@
           "qMaxM3h": 0.975
         },
         {
-          "modeName": "Скорость 2",
+          "modeName": "Швидкість 2",
           "speedIndex": 2,
           "powerWatts": 37,
           "coefficients": {
@@ -2723,7 +2723,7 @@
           "qMaxM3h": 1.23
         },
         {
-          "modeName": "Скорость 3",
+          "modeName": "Швидкість 3",
           "speedIndex": 3,
           "powerWatts": 48,
           "coefficients": {
@@ -2752,7 +2752,7 @@
       },
       "operatingModes": [
         {
-          "modeName": "Скорость 1",
+          "modeName": "Швидкість 1",
           "speedIndex": 1,
           "powerWatts": 41,
           "coefficients": {
@@ -2764,7 +2764,7 @@
           "qMaxM3h": 1.7
         },
         {
-          "modeName": "Скорость 2",
+          "modeName": "Швидкість 2",
           "speedIndex": 2,
           "powerWatts": 54,
           "coefficients": {
@@ -2776,7 +2776,7 @@
           "qMaxM3h": 2.3
         },
         {
-          "modeName": "Скорость 3",
+          "modeName": "Швидкість 3",
           "speedIndex": 3,
           "powerWatts": 78,
           "coefficients": {
@@ -2945,7 +2945,7 @@
       "connectionOutletsInch": "3/4"
     },
     {
-      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 4 виходи (VTc.589.EMNX.0604)",
+      "model": "Колектор з нержавіючої сталі з витратомірами VALTEC 1\" x 4 виходи (VTc.589.EMNX.0604)",
       "brand": "VALTEC",
       "article": "VTc.589.EMNX.0604",
       "price": 5129.16,
@@ -2964,7 +2964,7 @@
       }
     },
     {
-      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 5 виходів (VTc.589.EMNX.0605)",
+      "model": "Колектор з нержавіючої сталі з витратомірами VALTEC 1\" x 5 виходів (VTc.589.EMNX.0605)",
       "brand": "VALTEC",
       "article": "VTc.589.EMNX.0605",
       "price": 5930.69,
@@ -2983,7 +2983,7 @@
       }
     },
     {
-      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 6 виходів (VTc.589.EMNX.0606)",
+      "model": "Колектор з нержавіючої сталі з витратомірами VALTEC 1\" x 6 виходів (VTc.589.EMNX.0606)",
       "brand": "VALTEC",
       "article": "VTc.589.EMNX.0606",
       "price": 6997.3,
@@ -3002,7 +3002,7 @@
       }
     },
     {
-      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 7 виходів (VTc.589.EMNX.0607)",
+      "model": "Колектор з нержавіючої сталі з витратомірами VALTEC 1\" x 7 виходів (VTc.589.EMNX.0607)",
       "brand": "VALTEC",
       "article": "VTc.589.EMNX.0607",
       "price": 7897.79,
@@ -3021,7 +3021,7 @@
       }
     },
     {
-      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 8 виходів (VTc.589.EMNX.0608)",
+      "model": "Колектор з нержавіючої сталі з витратомірами VALTEC 1\" x 8 виходів (VTc.589.EMNX.0608)",
       "brand": "VALTEC",
       "article": "VTc.589.EMNX.0608",
       "price": 8840.23,
@@ -3040,7 +3040,7 @@
       }
     },
     {
-      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 9 виходів (VTc.589.EMNX.0609)",
+      "model": "Колектор з нержавіючої сталі з витратомірами VALTEC 1\" x 9 виходів (VTc.589.EMNX.0609)",
       "brand": "VALTEC",
       "article": "VTc.589.EMNX.0609",
       "price": 9761.93,
@@ -3059,7 +3059,7 @@
       }
     },
     {
-      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 10 виходів (VTc.589.EMNX.06010)",
+      "model": "Колектор з нержавіючої сталі з витратомірами VALTEC 1\" x 10 виходів (VTc.589.EMNX.06010)",
       "brand": "VALTEC",
       "article": "VTc.589.EMNX.06010",
       "price": 10726.37,
@@ -3078,7 +3078,7 @@
       }
     },
     {
-      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 11 виходів (VTc.589.EMNX.0611)",
+      "model": "Колектор з нержавіючої сталі з витратомірами VALTEC 1\" x 11 виходів (VTc.589.EMNX.0611)",
       "brand": "VALTEC",
       "article": "VTc.589.EMNX.0611",
       "price": 11650,
@@ -3097,7 +3097,7 @@
       }
     },
     {
-      "model": "Коллектор з нержавіючої сталі з витратомірами VALTEC 1\" x 12 виходів (VTc.589.EMNX.0612)",
+      "model": "Колектор з нержавіючої сталі з витратомірами VALTEC 1\" x 12 виходів (VTc.589.EMNX.0612)",
       "brand": "VALTEC",
       "article": "VTc.589.EMNX.0612",
       "price": 12580,

@@ -67,13 +67,13 @@ export function HotWaterReportDialog({
       >
         <div className={styles.header}>
           <h2 id="hot-water-report-dialog-title" className={styles.title}>
-            Отчёт по расчёту ГВ
+            Звіт із розрахунку ГВ
           </h2>
           <button
             type="button"
             className={styles.closeIconButton}
             onClick={onClose}
-            aria-label="Закрыть"
+            aria-label="Закрити"
           >
             ✕
           </button>
@@ -86,13 +86,13 @@ export function HotWaterReportDialog({
           />
         ) : (
           <p className={styles.empty}>
-            Укажите точки водоразбора на шаге «Горячая вода». Расчётные
-            показатели появятся после авторасчёта.
+            Вкажіть точки водорозбору на кроці «Гаряча вода». Розрахункові
+            показники з&apos;являться після авторасчунку.
           </p>
         )}
 
         <button type="button" className={styles.closeButton} onClick={onClose}>
-          Закрыть
+          Закрити
         </button>
       </div>
     </div>

@@ -13,8 +13,8 @@ export const DEFAULT_RADIATOR_CONNECTION = 'side';
 
 /** Подписи для select анкеты. */
 export const RADIATOR_CONNECTION_SURVEY_UI_OPTIONS = Object.freeze([
-  { value: /** @type {RadiatorConnection} */ ('side'), label: 'Боковая подводка (K / Klasik)' },
-  { value: /** @type {RadiatorConnection} */ ('bottom'), label: 'Нижняя подводка (VK / VKP)' },
+  { value: /** @type {RadiatorConnection} */ ('side'), label: 'Бічне підведення (K / Klasik)' },
+  { value: /** @type {RadiatorConnection} */ ('bottom'), label: 'Нижнє підведення (VK / VKP)' },
 ]);
 
 /**
@@ -40,5 +40,5 @@ export function normalizeRadiatorConnection(value) {
  * @returns {string}
  */
 export function radiatorConnectionLabel(connection) {
-  return connection === 'bottom' ? 'нижняя' : 'боковая';
+  return connection === 'bottom' ? 'нижнє' : 'бічне';
 }

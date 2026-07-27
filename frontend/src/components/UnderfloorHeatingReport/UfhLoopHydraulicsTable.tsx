@@ -22,13 +22,13 @@ type UfhLoopHydraulicsTableProps = {
 function resizeActionLabel(action: ParsedUfhLoopHydraulics['pipeResizeAction']): string {
   switch (action) {
     case 'upsized':
-      return 'Увеличен Ø';
+      return 'Збільшено Ø';
     case 'downsized':
-      return 'Уменьшен Ø';
+      return 'Зменшено Ø';
     case 'loops_adjusted':
-      return 'Скорректировано число петель';
+      return 'Скориговано число петель';
     default:
-      return 'Без изменений';
+      return 'Без змін';
   }
 }
 
@@ -64,23 +64,23 @@ export function UfhLoopHydraulicsTable({
   return (
     <div className={styles.root}>
       <h5 className={styles.title}>
-        Петли ТП — гидравлика ({loopsCount} {loopsCount === 1 ? 'контур' : 'контура'})
+        Петлі ТП — гідравліка ({loopsCount} {loopsCount === 1 ? 'контур' : 'контури'})
       </h5>
       {pipeResizeApplied && (
         <p className={styles.hint}>
-          Подбор Ø и/или число петель скорректированы автоматически (v 0,2–0,7 м/с, Δp ≤ 20 кПа).
+          Підбір Ø та/або число петель скориговано автоматично (v 0,2–0,7 м/с, Δp ≤ 20 кПа).
         </p>
       )}
       <table className={styles.table}>
         <thead>
           <tr>
             <th>Петля</th>
-            <th>Длина петли</th>
+            <th>Довжина петлі</th>
             <th>Q</th>
             <th>Ø</th>
             <th>v</th>
             <th>Δp</th>
-            <th>Оптимизация</th>
+            <th>Оптимізація</th>
           </tr>
         </thead>
         <tbody>

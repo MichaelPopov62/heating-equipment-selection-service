@@ -189,7 +189,7 @@ function applyHydraulicsPipeRecommendations({
       {
         designFlowM3PerHour: builtinDuty.designFlowM3PerHour,
         qMinM3h: builtinDuty.heatingCircuitMinFlowM3h,
-        catalogBoilerModel: builtinDuty.catalogBoilerModel ?? builtinDuty.catalogBoilerId ?? 'котёл',
+        catalogBoilerModel: builtinDuty.catalogBoilerModel ?? builtinDuty.catalogBoilerId ?? 'котел',
       },
     );
   }
@@ -231,7 +231,7 @@ export async function buildReport({ input, ctx }) {
     climate = await getDesignOutsideTempC(input.location);
     if (climate?.designOutsideTempC == null) {
       warnings.push(
-        'Не удалось определить расчётную наружную температуру по геолокации — задайте temps.outsideC вручную.',
+        'Не вдалося визначити розрахункову зовнішню температуру за геолокацією — задайте temps.outsideC вручну.',
       );
     }
   }
@@ -246,14 +246,14 @@ export async function buildReport({ input, ctx }) {
   };
   if (temps.insideC == null) {
     throw createAppError(
-      'Не задана внутренняя температура building.temps.insideC.',
+      'Не задано внутрішню температуру building.temps.insideC.',
       'INSIDE_TEMP_REQUIRED',
       400,
     );
   }
   if (temps.outsideC == null) {
     throw createAppError(
-      'Не задана наружная температура temps.outsideC и не получен климат.',
+      'Не задано зовнішню температуру temps.outsideC і не отримано клімат.',
       'OUTSIDE_TEMP_REQUIRED',
       400,
     );
@@ -484,7 +484,7 @@ export async function buildReport({ input, ctx }) {
     ) {
       underfloorHeating.warnings = [
         ...(underfloorHeating.warnings ?? []),
-        `Схема ТП (авто): при мощности котла > ${minBoilerKw} кВт выбрана гидравлическая стрелка.`,
+        `Схема ТП (авто): за потужності котла > ${minBoilerKw} кВт обрано гідравлічну стрілку.`,
       ];
     }
 
@@ -538,7 +538,7 @@ export async function buildReport({ input, ctx }) {
     manifoldsReport = buildEmptyManifoldsFailure({
       failureCode: 'MANIFOLD_INTERNAL',
       message:
-        'Смета коллекторов пуста; расчёт унибоксов и гидравлики продолжается.',
+        'Кошторис колекторів порожній; розрахунок унібоксів і гідравліки продовжується.',
       ...(known?.message ? { causeMessage: String(known.message) } : {}),
     });
   }
@@ -549,7 +549,7 @@ export async function buildReport({ input, ctx }) {
     });
     manifoldsReport = buildEmptyManifoldsFailure({
       failureCode: 'MANIFOLD_INTERNAL',
-      message: 'Некорректный ответ подбора коллекторов.',
+      message: 'Некоректна відповідь підбору колекторів.',
     });
   }
 
@@ -615,7 +615,7 @@ export async function buildReport({ input, ctx }) {
       + (matching?.uniboxes?.warnings?.length ?? 0),
   });
 
-  // 5) Гидравлика Pure Pipeline (после matching)
+  // 5) Гідравліка Pure Pipeline (после matching)
   logger.info('report.hydraulics.start', null);
   /** @type {import('../types/shared-types.js').HydraulicsReport} */
   let hydraulics;
@@ -656,12 +656,12 @@ export async function buildReport({ input, ctx }) {
     }, hydErr);
     const hydraulicsFailMessage =
       known?.message
-        ? `Гидравлика: ${known.message}`
-        : 'Гидравлика: не удалось выполнить pipeline.';
+        ? `Гідравліка: ${known.message}`
+        : 'Гідравліка: не вдалося виконати pipeline.';
     warnings.push(hydraulicsFailMessage);
     hydraulics = {
       schemaVersion: 1,
-      notes: ['Расчёт гидравлики pipeline не выполнен — см. warnings.'],
+      notes: ['Розрахунок гідравліки pipeline не виконано — див. warnings.'],
     };
     matching.hydraulics = {
       proposal: {
@@ -673,7 +673,7 @@ export async function buildReport({ input, ctx }) {
         estimatedPipesPrice: 0,
         estimatedPumpPrice: 0,
         estimatedTotalPrice: 0,
-        unavailableReason: known?.message ?? 'Расчёт гидравлики не выполнен.',
+        unavailableReason: known?.message ?? 'Розрахунок гідравліки не виконано.',
       },
       warnings: [hydraulicsFailMessage],
       pipes: [],

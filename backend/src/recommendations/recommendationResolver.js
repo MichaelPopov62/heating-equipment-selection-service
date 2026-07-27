@@ -66,7 +66,7 @@ export function pushRecommendation(
 ) {
   const resolved = resolveRecommendation(recommendations, code, vars);
   if (!resolved) {
-    warnings.push(`[${code}] Текст рекомендации не найден в справочнике.`);
+    warnings.push(`[${code}] Текст рекомендації не знайдено в довіднику.`);
     return null;
   }
   if (resolved.category === 'warnings') {

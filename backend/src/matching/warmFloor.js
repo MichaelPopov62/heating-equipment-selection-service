@@ -26,9 +26,9 @@ const PARASITIC_DOWN_WARN_WM2 = 5;
 export function buildWarmFloorMatchingNotes(heatingSystem) {
   if (!heatingSystem?.waterUnderfloorHeating) return [];
   return [
-    'Указан водяной тёплый пол: контур пола 45/35 °C (плитка) или 40/30 °C (ламинат/винил) задаётся по финишу комнаты. ' +
-      'Если подача котла (75/65 или 55/45) выше температуры контура ТП — нужен насосно-смесительный узел; ' +
-      'при совпадении температур (только ТП) смеситель не требуется.',
+    'Зазначено водяну теплу підлогу: контур підлоги 45/35 °C (плитка) або 40/30 °C (ламінат/вініл) задається за фінішем кімнати. ' +
+      'Якщо подача котла (75/65 або 55/45) вища за температуру контуру ТП — потрібен насосно-змішувальний вузол; ' +
+      'за збігу температур (лише ТП) змішувач не потрібен.',
   ];
 }
 
@@ -44,12 +44,12 @@ export function buildWarmFloorCalcMatchingNotes(report) {
   const notes = report.rooms.map((room) => {
     const finish = room.finishMaterialName ?? room.finishMaterialId ?? '—';
     const step = room.pipeSpacingMm ?? 150;
-    return `ТП «${room.roomName}» (${finish}, шаг ${step} мм): q↑≈${room.heatFluxUpWm2} Вт/м² (${room.heatFluxUpWatts} Вт), Tповерх≈${room.surfaceTempC} °C (лимит ${room.maxSurfaceTemperatureCelsius} °C), Rфиниш=${room.finishCoveringResistanceM2KW} м²·K/Вт.`;
+    return `ТП «${room.roomName}» (${finish}, крок ${step} мм): q↑≈${room.heatFluxUpWm2} Вт/м² (${room.heatFluxUpWatts} Вт), Tповерх≈${room.surfaceTempC} °C (ліміт ${room.maxSurfaceTemperatureCelsius} °C), Rфініш=${room.finishCoveringResistanceM2KW} м²·K/Вт.`;
   });
 
   if (report.totalHeatFluxUpWatts > 0) {
     notes.push(
-      `Суммарная полезная отдача ТП вверх: ≈${report.totalHeatFluxUpWatts} Вт; паразитный поток вниз: ≈${report.totalHeatFluxDownWatts} Вт (контур ${report.circuitSupplyC}/${report.circuitReturnC} °C).`,
+      `Сумарна корисна віддача ТП вгору: ≈${report.totalHeatFluxUpWatts} Вт; паразитний потік униз: ≈${report.totalHeatFluxDownWatts} Вт (контур ${report.circuitSupplyC}/${report.circuitReturnC} °C).`,
     );
   }
 

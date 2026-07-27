@@ -185,7 +185,7 @@ if (base && tile && laminate) {
     logCheck(
       (overrideRec?.resolutionSteps?.length ?? 0) === 4
         && overrideRec?.resolutionSteps?.[0]?.title
-          === 'Санитарно-комфортный лимит режима ТП',
+          === 'Санітарно-комфортний ліміт режиму ТП',
       'WARN_UFH_SURFACE_TEMP_PRESET_OVERRIDE + 4 resolutionSteps',
     ),
   );
@@ -269,7 +269,7 @@ if (base && tile && laminate) {
   );
   tally(
     logCheck(
-      lamCapFlux.roomWarnings.some((w) => w.includes('ограничена лимитом поверхности')),
+      lamCapFlux.roomWarnings.some((w) => w.includes('обмежена лімітом поверхні')),
       'ламинат cap → roomWarnings с текстом об ограничении',
     ),
   );
@@ -381,7 +381,7 @@ if (base && tile && laminate) {
         logCheck(
           parasiticRec != null
             && (parasiticRec.resolutionSteps?.length ?? 0) === 4
-            && parasiticRec.resolutionSteps?.[0]?.title === 'Увеличьте толщину утеплителя',
+            && parasiticRec.resolutionSteps?.[0]?.title === 'Збільште товщину утеплювача',
           'WARN_UFH_PARASITIC_DOWN_HEATED + 4 resolutionSteps',
         ),
       );
@@ -605,7 +605,7 @@ console.log('\n=== ufh_only: график котла 40/30 (не 75/65) ===');
     ),
   );
   const mixWarn = (ufhOnlyReport?.warnings ?? []).find((w) =>
-    w.includes('прямое подключение'),
+    w.includes('пряме підключення'),
   );
   const falseHighTempWarn = (ufhOnlyReport?.warnings ?? []).find(
     (w) => w.includes('не выше подачи контура') && w.includes('75'),

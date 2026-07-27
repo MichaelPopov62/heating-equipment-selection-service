@@ -121,7 +121,7 @@ export function ObjectMetaForm({
     <div className={styles.formGrid}>
       <div className={styles.field}>
         <label className={styles.label} htmlFor="objectType">
-          Тип объекта
+          Тип об&apos;єкта
         </label>
         <select
           id="objectType"
@@ -152,7 +152,7 @@ export function ObjectMetaForm({
             });
           }}
         >
-          <option value="house">Дом</option>
+          <option value="house">Будинок</option>
           <option value="apartment">Квартира</option>
         </select>
       </div>
@@ -160,7 +160,7 @@ export function ObjectMetaForm({
       {value.objectType === 'apartment' && (
         <div className={`${styles.field} ${styles.fullWidth}`}>
           <label className={styles.label} htmlFor="apartmentStackPosition">
-            Этаж квартиры в доме
+            Поверх квартири в будинку
           </label>
           <select
             id="apartmentStackPosition"
@@ -173,20 +173,20 @@ export function ObjectMetaForm({
               }); }
             }
           >
-            <option value="first_floor">Первый (снизу подвал / холод)</option>
-            <option value="middle_floor">Средний (между соседями)</option>
-            <option value="last_floor">Последний (сверху чердак / кровля)</option>
+            <option value="first_floor">Перший (знизу підвал / холод)</option>
+            <option value="middle_floor">Середній (між сусідами)</option>
+            <option value="last_floor">Останній (зверху горище / покрівля)</option>
           </select>
           <p className={styles.hint}>
-            Задаёт нижнюю и верхнюю границы помещений: пол и потолок в теплопотерях считаются
-            только там, где за границей холодная зона.
+            Задає нижню та верхню межі приміщень: підлога та стеля в тепловтратах враховуються
+            лише там, де за межею холодна зона.
           </p>
         </div>
       )}
 
       <div className={styles.field}>
         <label className={styles.label} htmlFor="floors">
-          Этажность объекта
+          Поверховість об&apos;єкта
         </label>
         <select
           id="floors"
@@ -207,7 +207,7 @@ export function ObjectMetaForm({
 
       <div className={styles.field}>
         <label className={styles.label} htmlFor="roomsCount">
-          Количество помещений ({ROOMS_COUNT_MIN}…{ROOMS_COUNT_MAX})
+          Кількість приміщень ({ROOMS_COUNT_MIN}…{ROOMS_COUNT_MAX})
         </label>
         <input
           id="roomsCount"
@@ -228,7 +228,7 @@ export function ObjectMetaForm({
 
       <div className={`${styles.field} ${styles.fullWidth}`}>
         <label className={styles.label} htmlFor="ventilationReserveMode">
-          Вентиляция и проветривание
+          Вентиляція та провітрювання
         </label>
         <select
           id="ventilationReserveMode"
@@ -242,15 +242,15 @@ export function ObjectMetaForm({
           }
         >
           <option value="natural">
-            Естественная вентиляция / ручное проветривание (kVent 1,3)
+            Природна вентиляція / ручне провітрювання (kVent 1,3)
           </option>
           <option value="recuperation">
-            Приточно-вытяжная с рекуператором (kVent 1,1)
+            Припливно-витяжна з рекуператором (kVent 1,1)
           </option>
         </select>
         <div className={styles.hint}>
-          Запас к теплопотерям через ограждения по каждому помещению; учитывается при подборе котла
-          и радиаторов.
+          Запас до тепловтрат через огороження по кожному приміщенню; враховується при підборі котла
+          та радіаторів.
         </div>
       </div>
 
@@ -258,7 +258,7 @@ export function ObjectMetaForm({
         <>
           <div className={`${styles.field} ${styles.fullWidth}`}>
             <label className={styles.label} htmlFor="boilerPlacementZone">
-              Планируемая установка котла
+              Заплановане встановлення котла
             </label>
             <select
               id="boilerPlacementZone"
@@ -271,13 +271,13 @@ export function ObjectMetaForm({
                 }); }
               }
             >
-              <option value="kitchen">Кухня (настенный)</option>
-              <option value="living_zone">Жилая зона (настенный)</option>
-              <option value="boiler_room">Выделенная котельная / топочная</option>
+              <option value="kitchen">Кухня (настінний)</option>
+              <option value="living_zone">Житлова зона (настінний)</option>
+              <option value="boiler_room">Окрема котельня / топочна</option>
             </select>
             <div className={styles.hint}>
-              Напольные котлы подбираются только при выборе котельной и объёме не менее 7,5 м³
-              (комната «Котельная» в списке помещений или площадь и высота ниже).
+              Напольні котли підбираються лише при виборі котельні та об&apos;ємі не менше 7,5 м³
+              (приміщення «Котельня» в списку приміщень або площа й висота нижче).
             </div>
           </div>
 
@@ -285,7 +285,7 @@ export function ObjectMetaForm({
             <>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="boilerRoomAreaM2">
-                  Площадь котельной, м²
+                  Площа котельні, м²
                 </label>
                 <input
                   id="boilerRoomAreaM2"
@@ -304,12 +304,12 @@ export function ObjectMetaForm({
                     void _omit;
                     onChange(rest);
                   }}
-                  placeholder="например, 3.5"
+                  placeholder="наприклад, 3.5"
                 />
               </div>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="ceilingHeightM">
-                  Высота потолка котельной, м
+                  Висота стелі котельні, м
                 </label>
                 <input
                   id="ceilingHeightM"
@@ -329,7 +329,7 @@ export function ObjectMetaForm({
                     void _omit;
                     onChange(rest);
                   }}
-                  placeholder="не менее 2,2"
+                  placeholder="не менше 2,2"
                 />
               </div>
             </>
@@ -339,7 +339,7 @@ export function ObjectMetaForm({
 
       <div className={`${styles.field} ${styles.fullWidth}`}>
         <label className={styles.label} htmlFor="wallPresetId">
-          Несущая стена (без утеплителя)
+          Несуча стіна (без утеплювача)
         </label>
         <select
           id="wallPresetId"
@@ -349,9 +349,9 @@ export function ObjectMetaForm({
           disabled={loadingPresets || wallPresets.length === 0}
         >
           {loadingPresets ? (
-            <option value="">Загрузка…</option>
+            <option value="">Завантаження…</option>
           ) : wallPresets.length === 0 ? (
-            <option value="">Нет пресетов для стен</option>
+            <option value="">Немає пресетів для стін</option>
           ) : (
             wallPresets.map((p) => (
               <option key={p.id} value={p.id}>
@@ -364,14 +364,14 @@ export function ObjectMetaForm({
           <div className={styles.hint}>{presetsError}</div>
         ) : (
           <div className={styles.hint}>
-            Пресеты несущего слоя — из справочника API (`/api/v1/presets/envelope`, kind=wall).
+            Пресети несучого шару — з довідника API (`/api/v1/presets/envelope`, kind=wall).
           </div>
         )}
       </div>
 
       <div className={`${styles.field} ${styles.fullWidth}`}>
         <label className={styles.label} htmlFor="wallThicknessMm">
-          Толщина несущей стены, мм
+          Товщина несучої стіни, мм
         </label>
         <input
           id="wallThicknessMm"
@@ -394,20 +394,20 @@ export function ObjectMetaForm({
           }}
           placeholder={
             thicknessOptions && thicknessOptions.length > 0
-              ? `например, ${thicknessOptions[0]}`
-              : 'например, 300'
+              ? `наприклад, ${thicknessOptions[0]}`
+              : 'наприклад, 300'
           }
         />
         {thicknessOptions && thicknessOptions.length > 0 && (
           <div className={styles.hint}>
-            Типовые толщины: {thicknessOptions.join(', ')} мм.
+            Типові товщини: {thicknessOptions.join(', ')} мм.
           </div>
         )}
       </div>
 
       <div className={`${styles.field} ${styles.fullWidth}`}>
         <label className={styles.label} htmlFor="facadeSystem">
-          Утепление фасада
+          Утеплення фасаду
         </label>
         <select
           id="facadeSystem"
@@ -415,13 +415,13 @@ export function ObjectMetaForm({
           value={facadeSystem}
           onChange={(e) => { onFacadeSystemChange(e.target.value as FacadeSystem); }}
         >
-          <option value="none">Без утеплителя</option>
-          <option value="sftk">СФТК (мокрый фасад) — ППС 16Ф</option>
-          <option value="ventilated">Открытый / вентилируемый фасад — минвата</option>
+          <option value="none">Без утеплювача</option>
+          <option value="sftk">СФТК (мокрий фасад) — ППС 16Ф</option>
+          <option value="ventilated">Відкритий / вентильований фасад — мінвата</option>
         </select>
         <div className={styles.hint}>
-          Пенополистирол допустим только в СФТК (слой защищён штукатуркой). В открытом виде — только
-          минеральная вата (СП 50.13330).
+          Пінополістирол допустимий лише в СФТК (шар захищений штукатуркою). У відкритому вигляді — лише
+          мінеральна вата (СП 50.13330).
         </div>
       </div>
 
@@ -429,7 +429,7 @@ export function ObjectMetaForm({
         <>
           <div className={`${styles.field} ${styles.fullWidth}`}>
             <label className={styles.label} htmlFor="insulationPresetId">
-              {facadeSystem === 'sftk' ? 'Утеплитель СФТК' : 'Минеральная вата'}
+              {facadeSystem === 'sftk' ? 'Утеплювач СФТК' : 'Мінеральна вата'}
             </label>
             <select
               id="insulationPresetId"
@@ -443,7 +443,7 @@ export function ObjectMetaForm({
               disabled={loadingPresets || activeInsulationPresets.length === 0}
             >
               {activeInsulationPresets.length === 0 ? (
-                <option value="">Нет пресетов утеплителя</option>
+                <option value="">Немає пресетів утеплювача</option>
               ) : (
                 activeInsulationPresets.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -456,7 +456,7 @@ export function ObjectMetaForm({
 
           <div className={`${styles.field} ${styles.fullWidth}`}>
             <label className={styles.label} htmlFor="insulationThicknessMm">
-              Толщина утеплителя, мм
+              Товщина утеплювача, мм
             </label>
             <input
               id="insulationThicknessMm"
@@ -479,13 +479,13 @@ export function ObjectMetaForm({
               }}
               placeholder={
                 insulationThicknessOptions && insulationThicknessOptions.length > 0
-                  ? `например, ${insulationThicknessOptions[0]}`
-                  : 'например, 100'
+                  ? `наприклад, ${insulationThicknessOptions[0]}`
+                  : 'наприклад, 100'
               }
             />
             {insulationThicknessOptions && insulationThicknessOptions.length > 0 && (
               <div className={styles.hint}>
-                Типовые толщины: {insulationThicknessOptions.join(', ')} мм.
+                Типові товщини: {insulationThicknessOptions.join(', ')} мм.
               </div>
             )}
           </div>
@@ -494,7 +494,7 @@ export function ObjectMetaForm({
 
       <div className={`${styles.field} ${styles.fullWidth}`}>
         <label className={styles.label} htmlFor="roofPresetId">
-          Кровля по умолчанию (пресет)
+          Покрівля за замовчуванням (пресет)
         </label>
         <select
           id="roofPresetId"
@@ -504,12 +504,12 @@ export function ObjectMetaForm({
           disabled={loadingPresets || roofPresets.length === 0}
         >
           {loadingPresets ? (
-            <option value="">Загрузка…</option>
+            <option value="">Завантаження…</option>
           ) : roofPresets.length === 0 ? (
-            <option value="">Нет пресетов для кровли</option>
+            <option value="">Немає пресетів для покрівлі</option>
           ) : (
             <>
-              <option value="">Не учитывать кровлю</option>
+              <option value="">Не враховувати покрівлю</option>
               {roofPresets.map((p) => (
                 <option key={p.id} value={p.id}>
                   {envelopePresetLabel(p)}
@@ -519,15 +519,15 @@ export function ObjectMetaForm({
           )}
         </select>
         <div className={styles.hint}>
-          Используется как значение по умолчанию для комнат с верхней границей «Кровля (мансарда)»,
-          если в комнате не выбран свой пресет.
+          Використовується як значення за замовчуванням для кімнат з верхньою межею «Покрівля (мансарда)»,
+          якщо в кімнаті не обрано свій пресет.
         </div>
       </div>
 
       <div className={`${styles.field} ${styles.fullWidth}`}>
         <div className={styles.hint}>
-          U наружной стены: несущий слой + утеплитель (если выбран) по слоям; β по ориентации — в
-          расчёте помещений.
+          U зовнішньої стіни: несучий шар + утеплювач (якщо обрано) по шарах; β за орієнтацією — у
+          розрахунку приміщень.
         </div>
       </div>
     </div>

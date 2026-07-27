@@ -17,7 +17,7 @@ export type SpinnerProps = {
  * @param props
  */
 export function Spinner({
-  label = 'Загрузка…',
+  label = 'Завантаження…',
   size = 32,
   className,
 }: SpinnerProps) {

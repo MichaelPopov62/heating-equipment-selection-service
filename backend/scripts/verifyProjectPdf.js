@@ -28,7 +28,7 @@ tally(logCheck(parseIncludeTechnicalQuery('0') === false, 'includeTechnical=0'))
 tally(
   logCheck(
     buildEstimatePdfFilename({ clientName: 'Иван / Тест', label: 'M-1' }) ===
-      'Смета_Иван_Тест_M-1.pdf',
+      'Кошторис_Иван_Тест_M-1.pdf',
     'filename sanitization',
   ),
 );
@@ -90,12 +90,12 @@ const snapshot = buildShareSnapshot({
 
 const html = buildEstimatePdfHtml(snapshot, { includeTechnical: false });
 tally(logCheck(html.includes('HeatCalc Pro'), 'HTML бренд'));
-tally(logCheck(html.includes('Финансовый итог'), 'HTML заголовок'));
+tally(logCheck(html.includes('Фінансовий підсумок'), 'HTML заголовок'));
 tally(logCheck(html.includes('ECO Home 24'), 'HTML основная позиция'));
-tally(logCheck(html.includes('Экономичный'), 'HTML карточка Экономичный'));
-tally(logCheck(html.includes('Эффективный'), 'HTML карточка Эффективный'));
+tally(logCheck(html.includes('Економічний'), 'HTML карточка Економічний'));
+tally(logCheck(html.includes('Ефективний'), 'HTML карточка Ефективний'));
 tally(logCheck(html.includes('46') || html.includes('46500'), 'HTML итог'));
-tally(logCheck(!html.includes('Технический расчёт'), 'без technical по умолчанию'));
+tally(logCheck(!html.includes('Технічний розрахунок'), 'без technical по умолчанию'));
 
 const snapshotPro = buildShareSnapshot({
   clientName: 'Pro PDF',
@@ -111,8 +111,8 @@ tally(logCheck(htmlPro.includes('installer@example.com'), 'PDF pro contact email
 tally(logCheck(htmlPro.includes('publisher-contact'), 'PDF publisher-contact block'));
 
 const htmlTech = buildEstimatePdfHtml(snapshot, { includeTechnical: true });
-tally(logCheck(htmlTech.includes('Технический расчёт'), 'с technical'));
-tally(logCheck(htmlTech.includes('Теплопотери'), 'technical теплопотери'));
+tally(logCheck(htmlTech.includes('Технічний розрахунок'), 'с technical'));
+tally(logCheck(htmlTech.includes('Тепловтрати'), 'technical тепловтрати'));
 
 let threwCommercial = false;
 try {

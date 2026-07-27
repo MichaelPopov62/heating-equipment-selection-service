@@ -68,13 +68,13 @@ export function exteriorWallsSectionHint(
 ): string {
   if (layout === 'internal') {
     return objectType === 'apartment'
-      ? 'Укажите площадь и ориентацию стены в общий коридор подъезда. Фасадных угловых стен нет; U — по параметрам объекта.'
-      : 'Укажите площадь и ориентацию стены в холодный коридор или тамбур. Фасадных угловых стен нет; U — по параметрам объекта.';
+      ? 'Вкажіть площу та орієнтацію стіни в загальний коридор під\'їзду. Фасадних кутових стін немає; U — за параметрами об\'єкта.'
+      : 'Вкажіть площу та орієнтацію стіни в холодний коридор або тамбур. Фасадних кутових стін немає; U — за параметрами об\'єкта.';
   }
   if (layout === 'facade') {
-    return 'Укажите площадь и ориентацию одной наружной фасадной стены; U — по несущему слою и утеплителю объекта.';
+    return 'Вкажіть площу та орієнтацію однієї зовнішньої фасадної стіни; U — за несучим шаром і утеплювачем об\'єкта.';
   }
-  return 'Укажите площади и ориентацию стен №1/№2; U — по несущему слою и утеплителю объекта.';
+  return 'Вкажіть площі та орієнтацію стін №1/№2; U — за несучим шаром і утеплювачем об\'єкта.';
 }
 
 /**
@@ -90,15 +90,15 @@ export function externalWallFieldConfigs(
   if (layout === 'internal') {
     const label =
       objectType === 'apartment'
-        ? 'Стена в общий коридор подъезда'
-        : 'Стена в холодный коридор / тамбур';
+        ? 'Стіна в загальний коридор під\'їзду'
+        : 'Стіна в холодний коридор / тамбур';
     return [
       {
         slot: 'externalWall1',
         label,
         hint:
-          'Площадь стены на неотапливаемый коридор (без фасадных угловых стен). Окна на фасад обычно отсутствуют.',
-        placeholder: 'например, 8',
+          'Площа стіни на неопалюваний коридор (без фасадних кутових стін). Вікна на фасад зазвичай відсутні.',
+        placeholder: 'наприклад, 8',
       },
     ];
   }
@@ -106,24 +106,24 @@ export function externalWallFieldConfigs(
     return [
       {
         slot: 'externalWall1',
-        label: 'Стена №1',
-        hint: 'Наружная фасадная стена (чистая площадь без проёма окна).',
-        placeholder: 'например, 20',
+        label: 'Стіна №1',
+        hint: 'Зовнішня фасадна стіна (чиста площа без прорізу вікна).',
+        placeholder: 'наприклад, 20',
       },
     ];
   }
   return [
     {
       slot: 'externalWall1',
-      label: 'Стена №1',
-      hint: 'Основная наружная стена (чистая площадь без проёма окна).',
-      placeholder: 'например, 20',
+      label: 'Стіна №1',
+      hint: 'Основна зовнішня стіна (чиста площа без прорізу вікна).',
+      placeholder: 'наприклад, 20',
     },
     {
       slot: 'externalWall2',
-      label: 'Стена №2',
-      hint: 'Для угловой/торцевой комнаты — вторая наружная стена на другую сторону света.',
-      placeholder: '0 — если одна стена',
+      label: 'Стіна №2',
+      hint: 'Для кутової/торцевої кімнати — друга зовнішня стіна на іншу сторону світу.',
+      placeholder: '0 — якщо одна стіна',
     },
   ];
 }
@@ -166,12 +166,12 @@ export function wallEnvelopeEntriesForRoom(room: RoomFormValue): WallEnvelopeEnt
     return [
       {
         wall: room.externalWall1,
-        label: 'Стена №1',
+        label: 'Стіна №1',
         construction: 'наружная стена',
       },
       {
         wall: room.externalWall2,
-        label: 'Стена №2',
+        label: 'Стіна №2',
         construction: 'наружная стена',
       },
     ];
@@ -180,7 +180,7 @@ export function wallEnvelopeEntriesForRoom(room: RoomFormValue): WallEnvelopeEnt
     return [
       {
         wall: room.externalWall1,
-        label: 'Стена в коридор',
+        label: 'Стіна в коридор',
         construction: INTERNAL_CORRIDOR_WALL_CONSTRUCTION,
       },
     ];
@@ -188,7 +188,7 @@ export function wallEnvelopeEntriesForRoom(room: RoomFormValue): WallEnvelopeEnt
   return [
     {
       wall: room.externalWall1,
-      label: 'Стена №1',
+      label: 'Стіна №1',
       construction: 'наружная стена',
     },
   ];

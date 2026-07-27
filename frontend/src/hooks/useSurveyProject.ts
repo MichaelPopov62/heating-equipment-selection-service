@@ -137,9 +137,9 @@ export function useSurveyProject({
         .slice(0, 40);
       const date = draft.savedAt.slice(0, 10);
       downloadJsonFile(`heatcalc-${safe}-${date}.json`, draft);
-      showOk('Файл JSON сохранён (Dev)');
+      showOk('Файл JSON збережено (Dev)');
     } catch (e) {
-      showErr(e instanceof Error ? e.message : 'Не удалось сохранить файл');
+      showErr(e instanceof Error ? e.message : 'Не вдалося зберегти файл');
     }
   }, [bootstrapMode, buildDraft, showOk, showErr]);
 
@@ -155,9 +155,9 @@ export function useSurveyProject({
         const raw: unknown = JSON.parse(text);
         const draft = parseSurveyDraft(raw);
         applyDraftAndMeta(draft);
-        showOk(`Загружено из файла: ${file.name}`);
+        showOk(`Завантажено з файлу: ${file.name}`);
       } catch (e) {
-        showErr(e instanceof Error ? e.message : 'Не удалось прочитать файл');
+        showErr(e instanceof Error ? e.message : 'Не вдалося прочитати файл');
       }
     },
     [applyDraftAndMeta, showOk, showErr],
@@ -221,9 +221,9 @@ export function useSurveyProject({
         .replace(/[^\p{L}\p{N}\-_]+/gu, '_')
         .slice(0, 40);
       downloadTextFile(`heatcalc-${safe}-summary.txt`, text);
-      showOk('Текстовая сводка скачана (Dev)');
+      showOk('Текстову зведенку завантажено (Dev)');
     } catch (e) {
-      showErr(e instanceof Error ? e.message : 'Ошибка экспорта');
+      showErr(e instanceof Error ? e.message : 'Помилка експорту');
     }
   }, [bootstrapMode, buildDraft, getDraftParams, showOk, showErr]);
 
@@ -233,9 +233,9 @@ export function useSurveyProject({
       const draft = buildDraft();
       const url = encodeSurveyDraftToUrl(draft);
       await copyTextToClipboard(url);
-      showOk('Hash-ссылка черновика скопирована (Dev, без отчёта)');
+      showOk('Hash-посилання чернетки скопійовано (Dev, без звіту)');
     } catch (e) {
-      showErr(e instanceof Error ? e.message : 'Не удалось создать ссылку');
+      showErr(e instanceof Error ? e.message : 'Не вдалося створити посилання');
     }
   }, [bootstrapMode, buildDraft, showOk, showErr]);
 
@@ -254,7 +254,7 @@ export function useSurveyProject({
       setCalcReport(result.report);
     }
     if (canRunCalc && !result.report) {
-      throw new Error('Не удалось сохранить расчёт на сервер');
+      throw new Error('Не вдалося зберегти розрахунок на сервер');
     }
     return result.projectId;
   }, [
@@ -278,11 +278,11 @@ export function useSurveyProject({
     setShareToastOpen(false);
     try {
       if (!clientName.trim()) {
-        throw new Error('Укажите имя клиента перед публикацией ссылки');
+        throw new Error('Вкажіть ім\'я клієнта перед публікацією посилання');
       }
       const report = getDraftParams().lastCalcReport;
       if (!report || !parseCommercialBomFromReport(report)) {
-        throw new Error('Нет финансового итога — дождитесь расчёта');
+        throw new Error('Немає фінансового підсумку — дочекайтеся розрахунку');
       }
 
       const id = await ensureProjectSaved();
@@ -292,11 +292,11 @@ export function useSurveyProject({
       await copyTextToClipboard(shareUrl);
       setShareToastOpen(true);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Не удалось опубликовать ссылку';
+      const msg = e instanceof Error ? e.message : 'Не вдалося опублікувати посилання';
       if (msg.includes('MONGODB_UNAVAILABLE') || msg.includes('503')) {
-        showErr('MongoDB недоступна — публикация ссылки невозможна');
-      } else if (msg.includes('Буфер обмена')) {
-        showErr('Буфер обмена недоступен — скопируйте ссылку вручную из Dev');
+        showErr('MongoDB недоступна — публікація посилання неможлива');
+      } else if (msg.includes('Буфер обміну')) {
+        showErr('Буфер обміну недоступний — скопіюйте посилання вручну з Dev');
       } else {
         showErr(msg);
       }
@@ -313,15 +313,15 @@ export function useSurveyProject({
 
   const revokeShare = useCallback(async () => {
     if (!projectId) {
-      showErr('Нет projectId');
+      showErr('Немає projectId');
       return;
     }
     try {
       await revokeProjectShare(projectId);
       setPublicPath(null);
-      showOk('Публичная ссылка отозвана (Dev)');
+      showOk('Публічне посилання відкликано (Dev)');
     } catch (e) {
-      showErr(e instanceof Error ? e.message : 'Не удалось отозвать ссылку');
+      showErr(e instanceof Error ? e.message : 'Не вдалося відкликати посилання');
     }
   }, [projectId, showOk, showErr]);
 
@@ -332,16 +332,16 @@ export function useSurveyProject({
         try {
           const report = getDraftParams().lastCalcReport;
           if (!report || !parseCommercialBomFromReport(report)) {
-            throw new Error('Нет финансового итога — дождитесь расчёта');
+            throw new Error('Немає фінансового підсумку — дочекайтеся розрахунку');
           }
           if (!canRunCalc) {
-            throw new Error('Анкета неполная — расчёт на сервер не сохранить');
+            throw new Error('Анкета неповна — розрахунок на сервер не зберегти');
           }
           const id = await ensureProjectSaved();
           await downloadProjectPdf(id, { includeTechnical });
-          showOk('PDF скачан');
+          showOk('PDF завантажено');
         } catch (e) {
-          showErr(e instanceof Error ? e.message : 'Не удалось скачать PDF');
+          showErr(e instanceof Error ? e.message : 'Не вдалося завантажити PDF');
         }
       })();
     },
@@ -359,7 +359,7 @@ export function useSurveyProject({
     try {
       await refetchProjects();
     } catch (e) {
-      showErr(e instanceof Error ? e.message : 'Не удалось загрузить проекты');
+      showErr(e instanceof Error ? e.message : 'Не вдалося завантажити проєкти');
     }
   }, [refetchProjects, showErr]);
 
@@ -385,10 +385,10 @@ export function useSurveyProject({
         setPublicPath(null);
         setShareToastOpen(false);
         setProjectsOpen(false);
-        showOk(`Загружен проект: ${result.clientName}`);
+        showOk(`Завантажено проєкт: ${result.clientName}`);
         void refetchCalculations();
       } catch (e) {
-        showErr(e instanceof Error ? e.message : 'Не удалось открыть проект');
+        showErr(e instanceof Error ? e.message : 'Не вдалося відкрити проєкт');
       }
     },
     [
@@ -413,9 +413,9 @@ export function useSurveyProject({
           calculationId: calcId,
         });
         setCalcReport(report);
-        showOk('Загружен сохранённый расчёт');
+        showOk('Завантажено збережений розрахунок');
       } catch (e) {
-        showErr(e instanceof Error ? e.message : 'Не удалось загрузить расчёт');
+        showErr(e instanceof Error ? e.message : 'Не вдалося завантажити розрахунок');
       }
     },
     [projectId, loadCalculationMutation, setCalcReport, showOk, showErr],
@@ -436,7 +436,7 @@ export function useSurveyProject({
   const exitProject = useCallback(() => {
     if (!projectId && needsResetConfirm()) {
       const ok = window.confirm(
-        'Выйти из проекта? Несохранённые данные текущей анкеты будут сброшены.',
+        'Вийти з проєкту? Незбережені дані поточної анкети будуть скинуті.',
       );
       if (!ok) return;
     }
@@ -446,7 +446,7 @@ export function useSurveyProject({
   const startNewProject = useCallback(() => {
     if (needsResetConfirm()) {
       const ok = window.confirm(
-        'Начать новый проект? Несохранённые данные текущей анкеты будут сброшены.',
+        'Почати новий проєкт? Незбережені дані поточної анкети будуть скинуті.',
       );
       if (!ok) return;
     }

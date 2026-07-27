@@ -42,8 +42,8 @@ export function decideObjectEmitterKind({
 
   if (forcedOverride === 'sectional' || forcedOverride === 'panel') {
     notes.push(
-      `Тип приборов зафиксирован с основной линии подбора: ${forcedOverride} `
-        + '(единый kind для economy/efficient).',
+      `Тип приладів зафіксовано з основної лінії підбору: ${forcedOverride} `
+        + '(єдиний kind для economy/efficient).',
     );
     return {
       resolvedEmitterKind: forcedOverride,
@@ -55,7 +55,7 @@ export function decideObjectEmitterKind({
 
   if (preference === 'sectional' || preference === 'panel') {
     notes.push(
-      `Тип приборов задан пользователем: heatingSystem.radiatorEmitterPreference=${preference}.`,
+      `Тип приладів задано користувачем: heatingSystem.radiatorEmitterPreference=${preference}.`,
     );
     return {
       resolvedEmitterKind: preference,
@@ -70,7 +70,7 @@ export function decideObjectEmitterKind({
 
   if (sectional === 0 && panel === 0) {
     notes.push(
-      'Нет голосов Pass 1 (все комнаты skip / без радиаторов) — fallback sectional.',
+      'Немає голосів Pass 1 (усі кімнати skip / без радіаторів) — fallback sectional.',
     );
     return {
       resolvedEmitterKind: 'sectional',
@@ -82,7 +82,7 @@ export function decideObjectEmitterKind({
 
   if (sectional === panel) {
     notes.push(
-      `Ничья голосов Pass 1 (sectional=${sectional}, panel=${panel}) — tie-break → ${tieBreakKind}.`,
+      `Нічия голосів Pass 1 (sectional=${sectional}, panel=${panel}) — tie-break → ${tieBreakKind}.`,
     );
     for (const v of votes) {
       notes.push(`  · ${v.roomName ?? v.roomId}: ${v.preferredKind} — ${v.reason}`);
@@ -97,7 +97,7 @@ export function decideObjectEmitterKind({
 
   const winner = sectional > panel ? 'sectional' : 'panel';
   notes.push(
-    `Majority Pass 1: sectional=${sectional}, panel=${panel} → объект ${winner}.`,
+    `Majority Pass 1: sectional=${sectional}, panel=${panel} → об’єкт ${winner}.`,
   );
   for (const v of votes) {
     notes.push(`  · ${v.roomName ?? v.roomId}: ${v.preferredKind} — ${v.reason}`);

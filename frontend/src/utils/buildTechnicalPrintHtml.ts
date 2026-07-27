@@ -56,7 +56,7 @@ function kvTable(title: string, rows: Array<[string, string]>): string {
     .join('');
   return `<h3>${escapeHtml(title)}</h3>
 <table class="tech">
-  <thead><tr><th>Показатель</th><th>Значение</th></tr></thead>
+  <thead><tr><th>Показник</th><th>Значення</th></tr></thead>
   <tbody>${body}</tbody>
 </table>`;
 }
@@ -123,9 +123,9 @@ export function buildTechnicalPrintHtml(calcReport: CalcReportJson | null | unde
   if (heatLoss && typeof heatLoss.totalWatts === 'number') {
     const heatLossKw = wattsToKilowatts(heatLoss.totalWatts);
     const rows: Array<[string, string]> = [
-      ['Мощность помещений', `${formatKw(heatLossKw, 1)} кВт`],
+      ['Потужність приміщень', `${formatKw(heatLossKw, 1)} кВт`],
       ['Запас', `${formatKw(heatLossReserveKw(heatLossKw), 1)} кВт`],
-      ['Итого с запасом', `${formatKw(heatLossTotalKw(heatLossKw), 1)} кВт`],
+      ['Разом із запасом', `${formatKw(heatLossTotalKw(heatLossKw), 1)} кВт`],
     ];
     const byRoom = Array.isArray(heatLoss.byRoom) ? heatLoss.byRoom : [];
     const roomRows: string[][] = [];
@@ -148,58 +148,58 @@ export function buildTechnicalPrintHtml(calcReport: CalcReportJson | null | unde
       if (watts == null) continue;
       roomRows.push([name, `${formatKw(wattsToKilowatts(watts), 2)} кВт`]);
     }
-    parts.push(kvTable('Теплопотери', rows));
+    parts.push(kvTable('Тепловтрати', rows));
     if (roomRows.length > 0) {
-      parts.push(dataTable('Теплопотери по помещениям', ['Помещение', 'Мощность'], roomRows));
+      parts.push(dataTable('Тепловтрати за приміщеннями', ['Приміщення', 'Потужність'], roomRows));
     }
   }
 
   const hotWater = parseHotWaterFromReport(calcReport);
   if (hotWater) {
     const rows: Array<[string, string]> = [
-      ['Пиковая мощность ГВС', `${formatKw(hotWater.hotWaterPowerKw)} кВт`],
-      ['Пиковый расход', `${hotWater.peakFlowLps.toLocaleString('uk-UA', { maximumFractionDigits: 3 })} л/с`],
+      ['Пікова потужність ГВП', `${formatKw(hotWater.hotWaterPowerKw)} кВт`],
+      ['Пікова витрата', `${hotWater.peakFlowLps.toLocaleString('uk-UA', { maximumFractionDigits: 3 })} л/с`],
     ];
     if (hotWater.recommendedTankLiters != null) {
-      rows.push(['Рекомендуемый бак', `${Math.round(hotWater.recommendedTankLiters)} л`]);
+      rows.push(['Рекомендований бак', `${Math.round(hotWater.recommendedTankLiters)} л`]);
     }
     if (hotWater.dhwSupplyScenario) {
       rows.push([
-        'Сценарий',
-        hotWater.dhwSupplyScenario === 'storage' ? 'накопительный' : 'проточный',
+        'Сценарій',
+        hotWater.dhwSupplyScenario === 'storage' ? 'накопичувальний' : 'проточний',
       ]);
     }
     if (hotWater.residents != null) {
-      rows.push(['Жильцы', String(hotWater.residents)]);
+      rows.push(['Мешканці', String(hotWater.residents)]);
     }
     if (hotWater.hotWaterC != null && hotWater.designColdWaterC != null) {
       rows.push([
-        'Температуры ГВ / ХВ',
+        'Температури ГВ / ХВ',
         `${hotWater.hotWaterC} / ${hotWater.designColdWaterC} °C`,
       ]);
     }
-    parts.push(kvTable('Горячая вода', rows));
+    parts.push(kvTable('Гаряча вода', rows));
   }
 
   const boiler = parseBoilerFromReport(calcReport, isCalcMatchingScheme);
   if (boiler?.summary) {
     const s = boiler.summary;
     const rows: Array<[string, string]> = [
-      ['Теплопотери', `${formatKw(s.heatLossKw)} кВт`],
-      [`Отопление ×${s.reserveFactor}`, `${formatKw(s.heatingLoadKw)} кВт`],
-      ['Мощность ГВС', `${formatKw(s.hotWaterPowerKw)} кВт`],
-      ['Требуемая мощность котла', `${formatKw(s.requiredKw)} кВт`],
+      ['Тепловтрати', `${formatKw(s.heatLossKw)} кВт`],
+      [`Опалення ×${s.reserveFactor}`, `${formatKw(s.heatingLoadKw)} кВт`],
+      ['Потужність ГВП', `${formatKw(s.hotWaterPowerKw)} кВт`],
+      ['Потрібна потужність котла', `${formatKw(s.requiredKw)} кВт`],
     ];
     const proposal =
       boiler.tierEconomy ?? boiler.legacyProposal ?? boiler.tierEfficient;
     if (proposal) {
-      rows.push(['Предложение', `${proposal.headline}: ${proposal.model}`]);
-      rows.push(['Номинал', `${formatKw(proposal.totalNominalKw)} кВт`]);
+      rows.push(['Пропозиція', `${proposal.headline}: ${proposal.model}`]);
+      rows.push(['Номінал', `${formatKw(proposal.totalNominalKw)} кВт`]);
     }
-    parts.push(kvTable('Котёл', rows));
+    parts.push(kvTable('Котел', rows));
     if (boiler.warnings.length > 0) {
       parts.push(
-        `<h3>Предупреждения котла</h3><ul>${boiler.warnings
+        `<h3>Попередження котла</h3><ul>${boiler.warnings
           .map((w) => `<li>${escapeHtml(w)}</li>`)
           .join('')}</ul>`,
       );
@@ -209,23 +209,23 @@ export function buildTechnicalPrintHtml(calcReport: CalcReportJson | null | unde
   const radiators = parseRadiatorsMatchingFromReport(calcReport);
   if (radiators && !isRadiatorsMatchingSkipped(radiators)) {
     const rows: Array<[string, string]> = [];
-    if (radiators.chosenModel) rows.push(['Модель (основная линия)', radiators.chosenModel]);
+    if (radiators.chosenModel) rows.push(['Модель (основна лінія)', radiators.chosenModel]);
     const emitters = formatRadiatorsEmittersSummaryLabel(radiators.emittersSummary);
-    if (emitters) rows.push(['Приборы', emitters]);
+    if (emitters) rows.push(['Прилади', emitters]);
     if (radiators.totalSections != null) {
-      rows.push(['Секций (осн.)', String(radiators.totalSections)]);
+      rows.push(['Секцій (осн.)', String(radiators.totalSections)]);
     }
     const eco = formatRadiatorsEmittersSummaryLabel(radiators.lineEconomy?.emittersSummary);
     const eff = formatRadiatorsEmittersSummaryLabel(radiators.lineEfficient?.emittersSummary);
-    if (eco) rows.push(['Линия «Эконом»', eco]);
-    if (eff) rows.push(['Линия «Эффективный»', eff]);
+    if (eco) rows.push(['Лінія «Економ»', eco]);
+    if (eff) rows.push(['Лінія «Ефективний»', eff]);
     if (radiators.inputs?.supplyC != null && radiators.inputs.returnC != null) {
       rows.push([
-        'График',
+        'Графік',
         `${radiators.inputs.supplyC}/${radiators.inputs.returnC} °C`,
       ]);
     }
-    parts.push(kvTable('Радиаторы', rows));
+    parts.push(kvTable('Радіатори', rows));
 
     const byRoomRows = radiators.byRoom
       .filter((r) => r.displayKind !== 'none')
@@ -246,14 +246,14 @@ export function buildTechnicalPrintHtml(calcReport: CalcReportJson | null | unde
     if (byRoomRows.length > 0) {
       parts.push(
         dataTable(
-          'Радиаторы по помещениям',
-          ['Помещение', 'Модель', 'Кол-во', 'Отдача'],
+          'Радіатори за приміщеннями',
+          ['Приміщення', 'Модель', 'К-сть', 'Віддача'],
           byRoomRows,
         ),
       );
     }
   } else if (radiators && isRadiatorsMatchingSkipped(radiators)) {
-    parts.push(kvTable('Радиаторы', [['Статус', 'не требуются (режим только ТП)']]));
+    parts.push(kvTable('Радіатори', [['Статус', 'не потрібні (режим лише ТП)']]));
   }
 
   const indirect = parseIndirectWaterHeaterMatchingFromReport(calcReport);
@@ -261,12 +261,12 @@ export function buildTechnicalPrintHtml(calcReport: CalcReportJson | null | unde
     const rows: Array<[string, string]> = [];
     if (indirect.selectedModel) rows.push(['Модель БКН', indirect.selectedModel]);
     if (indirect.volumeLiters != null) {
-      rows.push(['Объём', `${Math.round(indirect.volumeLiters)} л`]);
+      rows.push(['Об\'єм', `${Math.round(indirect.volumeLiters)} л`]);
     }
     if (indirect.coilPowerKw != null) {
-      rows.push(['Мощность змеевика', `${formatKw(indirect.coilPowerKw)} кВт`]);
+      rows.push(['Потужність змійовика', `${formatKw(indirect.coilPowerKw)} кВт`]);
     }
-    if (rows.length) parts.push(kvTable('Бойлер косвенного нагрева', rows));
+    if (rows.length) parts.push(kvTable('Бойлер непрямого нагріву', rows));
   }
 
   const electricWh = parseWaterHeaterMatchingFromReport(calcReport);
@@ -274,32 +274,32 @@ export function buildTechnicalPrintHtml(calcReport: CalcReportJson | null | unde
     const rows: Array<[string, string]> = [];
     if (electricWh.selectedModel) rows.push(['Модель', electricWh.selectedModel]);
     if (electricWh.volumeLiters != null) {
-      rows.push(['Объём', `${Math.round(electricWh.volumeLiters)} л`]);
+      rows.push(['Об\'єм', `${Math.round(electricWh.volumeLiters)} л`]);
     }
     if (electricWh.powerKw != null) {
-      rows.push(['Мощность', `${formatKw(electricWh.powerKw)} кВт`]);
+      rows.push(['Потужність', `${formatKw(electricWh.powerKw)} кВт`]);
     }
-    if (rows.length) parts.push(kvTable('Электронакопитель', rows));
+    if (rows.length) parts.push(kvTable('Електронакопичувач', rows));
   }
 
   const ufh = parseUnderfloorHeatingFromReport(calcReport);
   if (ufh && ufh.rooms.length > 0) {
     const rows: Array<[string, string]> = [
-      ['Комнат с ТП', String(ufh.rooms.length)],
+      ['Кімнат з ТП', String(ufh.rooms.length)],
     ];
     if (ufh.totalHeatFluxUpWatts > 0) {
       rows.push([
-        'Суммарный поток вверх',
+        'Сумарний потік вгору',
         `${formatKw(wattsToKilowatts(ufh.totalHeatFluxUpWatts))} кВт`,
       ]);
     }
     if (ufh.mixingNode) {
       rows.push([
-        'Смесительный узел',
-        `котёл ${ufh.mixingNode.boilerSupplyC ?? '—'} °C → контур ${ufh.mixingNode.floorCircuitSupplyC ?? '—'} °C`,
+        'Змішувальний вузол',
+        `котел ${ufh.mixingNode.boilerSupplyC ?? '—'} °C → контур ${ufh.mixingNode.floorCircuitSupplyC ?? '—'} °C`,
       ]);
     }
-    parts.push(kvTable('Тёплый пол', rows));
+    parts.push(kvTable('Тепла підлога', rows));
 
     const roomRows = ufh.rooms.map((r) => [
       r.roomName || r.roomId,
@@ -309,8 +309,8 @@ export function buildTechnicalPrintHtml(calcReport: CalcReportJson | null | unde
     ]);
     parts.push(
       dataTable(
-        'Тёплый пол по помещениям',
-        ['Помещение', 'Активная площадь', 'Поток вверх', 'Петли'],
+        'Тепла підлога за приміщеннями',
+        ['Приміщення', 'Активна площа', 'Потік вгору', 'Петлі'],
         roomRows,
       ),
     );
@@ -320,28 +320,28 @@ export function buildTechnicalPrintHtml(calcReport: CalcReportJson | null | unde
   if (hydraulics?.calculations) {
     const c = hydraulics.calculations;
     const rows: Array<[string, string]> = [
-      ['Расход', `${c.flowRateM3PerHour.toLocaleString('uk-UA', { maximumFractionDigits: 3 })} м³/ч`],
-      ['Требуемый напор', `${c.headRequiredM.toLocaleString('uk-UA', { maximumFractionDigits: 2 })} м`],
+      ['Витрата', `${c.flowRateM3PerHour.toLocaleString('uk-UA', { maximumFractionDigits: 3 })} м³/ч`],
+      ['Потрібний напір', `${c.headRequiredM.toLocaleString('uk-UA', { maximumFractionDigits: 2 })} м`],
     ];
     if (c.recommendedPipeDiameter) {
-      rows.push(['Рекомендуемый диаметр', c.recommendedPipeDiameter]);
+      rows.push(['Рекомендований діаметр', c.recommendedPipeDiameter]);
     }
     if (c.deltaTSystemK != null) {
-      rows.push(['ΔT системы', `${c.deltaTSystemK} K`]);
+      rows.push(['ΔT системи', `${c.deltaTSystemK} K`]);
     }
     const pump = hydraulics.proposal?.pumps[0] ?? hydraulics.proposal?.pump ?? null;
     if (pump) {
       const label = [pump.brand, pump.model].filter(Boolean).join(' ');
       if (label) rows.push(['Насос', label]);
     }
-    parts.push(kvTable('Гидравлика', rows));
+    parts.push(kvTable('Гідравліка', rows));
   }
 
   if (Array.isArray(calcReport.warnings) && calcReport.warnings.length > 0) {
     const warns = calcReport.warnings.filter((w): w is string => typeof w === 'string');
     if (warns.length > 0) {
       parts.push(
-        `<h3>Предупреждения</h3><ul>${warns
+        `<h3>Попередження</h3><ul>${warns
           .slice(0, 40)
           .map((w) => `<li>${escapeHtml(w)}</li>`)
           .join('')}</ul>`,
@@ -350,5 +350,5 @@ export function buildTechnicalPrintHtml(calcReport: CalcReportJson | null | unde
   }
 
   if (parts.length === 0) return '';
-  return `<h2>Технический расчёт</h2>${parts.join('\n')}`;
+  return `<h2>Технічний розрахунок</h2>${parts.join('\n')}`;
 }

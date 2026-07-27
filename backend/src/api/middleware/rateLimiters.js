@@ -44,7 +44,7 @@ function createLimiter(opts) {
       res.status(429).json({
         ok: false,
         error: {
-          message: 'Слишком много запросов',
+          message: 'Забагато запитів',
           code,
           statusCode: 429,
         },

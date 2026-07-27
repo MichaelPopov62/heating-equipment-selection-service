@@ -185,7 +185,7 @@ export function computeUfhRoomHeatFlux(args) {
   const roomWarnings = [];
   if (heatFluxUpLimitedBySurface) {
     roomWarnings.push(
-      `Отдача вверх ограничена лимитом поверхности ${round(maxSurfaceT, 1)} °C: q↑ снижен с ≈${round(heatFluxUpUncappedWm2, 0)} до ≈${round(heatFluxUpWm2, 0)} Вт/м² (Tповерх ≈${round(surfaceTempC, 1)} °C).`,
+      `Віддача вгору обмежена лімітом поверхні ${round(maxSurfaceT, 1)} °C: q↑ знижено з ≈${round(heatFluxUpUncappedWm2, 0)} до ≈${round(heatFluxUpWm2, 0)} Вт/м² (Tповерх ≈${round(surfaceTempC, 1)} °C).`,
     );
   }
   // Паразитный q↓ при heated: структурированный WARN_UFH_PARASITIC_DOWN_HEATED в matching/warmFloor.js

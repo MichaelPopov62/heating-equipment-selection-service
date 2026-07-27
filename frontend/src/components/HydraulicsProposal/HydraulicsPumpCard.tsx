@@ -22,18 +22,18 @@ export function HydraulicsPumpCard({ pump }: Props) {
       </h4>
       {pump.note && <p className={styles.hint}>{pump.note}</p>}
       <dl className={styles.dl}>
-        <dt>{pump.pumpSource === 'boiler_builtin' ? 'Котёл' : 'Модель'}</dt>
+        <dt>{pump.pumpSource === 'boiler_builtin' ? 'Котел' : 'Модель'}</dt>
         <dd className={styles.valueStrong}>
           {formatBrandModel(pump.brand, pump.model)}
         </dd>
-        <dt>Расчётный расход</dt>
+        <dt>Розрахунковий витрат</dt>
         <dd>
           {pump.designFlowM3PerHour.toFixed(3)}{' '}
           <span className={styles.unit}>м³/ч</span>
         </dd>
-        <dt>Режим работы</dt>
+        <dt>Режим роботи</dt>
         <dd>{pump.modeName}</dd>
-        <dt>Напор при расчётном расходе</dt>
+        <dt>Напір при розрахунковому витраті</dt>
         <dd>
           {pump.headAtDesignM.toFixed(2)} <span className={styles.unit}>м</span>{' '}
           <span className={styles.hintInline}>
@@ -42,13 +42,13 @@ export function HydraulicsPumpCard({ pump }: Props) {
         </dd>
         {pump.connectionNominalMm != null && (
           <>
-            <dt>Условный диаметр подключения</dt>
+            <dt>Умовний діаметр підключення</dt>
             <dd>DN{pump.connectionNominalMm}</dd>
           </>
         )}
         {pump.price > 0 && (
           <>
-            <dt>Цена в каталоге</dt>
+            <dt>Ціна в каталозі</dt>
             <dd className={styles.valueStrong}>
               {formatPriceUah(pump.price)}{' '}
               <span className={styles.unit}>грн</span>

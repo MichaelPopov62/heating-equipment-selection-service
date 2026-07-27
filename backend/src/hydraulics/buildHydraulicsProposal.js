@@ -7,12 +7,12 @@ import { round } from '../utils/math.js';
 
 /** @type {Record<string, string>} */
 const SEGMENT_ROLE_LABELS = {
-  main: 'Магистраль',
-  trunk: 'Магистраль (последовательная)',
-  branch: 'Ветка радиатора',
-  ufh_collector_transit: 'Транзит коллектора ТП',
+  main: 'Магістраль',
+  trunk: 'Магістраль (послідовна)',
+  branch: 'Гілка радіатора',
+  ufh_collector_transit: 'Транзит колектора ТП',
   ufh_loop: 'Петля ТП',
-  dhw: 'ГВС',
+  dhw: 'ГВП',
 };
 
 /** @type {string} */
@@ -128,15 +128,15 @@ function buildPumpProposal(resolved, catalog) {
       pumpRole: resolved.pumpRole,
       pumpSource: 'boiler_builtin',
       ...(resolved.catalogBoilerId ? { catalogBoilerId: resolved.catalogBoilerId } : {}),
-      brand: boiler?.model?.split(' ')[0] ?? 'Котёл',
-      model: boiler?.model ?? 'Встроенный насос',
+      brand: boiler?.model?.split(' ')[0] ?? 'Котел',
+      model: boiler?.model ?? 'Вбудований насос',
       price: 0,
       modeName: resolved.modeName,
       headAtDesignM: resolved.headAtDesignM,
       headRequiredM: resolved.headRequiredM,
       designFlowM3PerHour: resolved.designFlowM3PerHour,
       headMarginPercent: resolved.headMarginPercent,
-      note: resolved.note ?? 'Используется встроенный насос котла.',
+      note: resolved.note ?? 'Використовується вбудований насос котла.',
     };
   }
 
@@ -248,7 +248,7 @@ export function buildHydraulicsProposal({
   if (heatingLines.length > 0) {
     pipeLineGroups.push({
       circuitId: 'heating',
-      label: 'Контур отопления (радиаторы)',
+      label: 'Контур опалення (радіатори)',
       pipeLines: heatingLines,
       estimatedPrice: round(heatingLines.reduce((s, l) => s + l.linePrice, 0), 2),
     });
@@ -258,7 +258,7 @@ export function buildHydraulicsProposal({
   if (ufhLines.length > 0) {
     pipeLineGroups.push({
       circuitId: 'ufh',
-      label: 'Контур тёплого пола',
+      label: 'Контур теплої підлоги',
       pipeLines: ufhLines,
       estimatedPrice: round(ufhLines.reduce((s, l) => s + l.linePrice, 0), 2),
     });
@@ -297,18 +297,18 @@ export function buildHydraulicsProposal({
   const hasPipes = pipeSegments.length > 0;
 
   if (!hasPipes && !hasAnyPump) {
-    unavailableReason = 'Не удалось подобрать трубы и насос из каталога.';
+    unavailableReason = 'Не вдалося підібрати труби та насос з каталогу.';
   } else if (!hasPipes) {
-    unavailableReason = 'Трубы из каталога не подобраны — проверьте каталог pipes.';
+    unavailableReason = 'Труби з каталогу не підібрано — перевірте каталог pipes.';
   } else if (!hasAnyPump) {
     if (matching.builtinPumpDuty?.status === 'below_manufacturer_qmin') {
       pumpUnavailableReason =
-        `Встроенный насос котла учтён: расход ${matching.builtinPumpDuty.designFlowM3PerHour} м³/ч `
-        + `ниже заводского q_min=${matching.builtinPumpDuty.heatingCircuitMinFlowM3h} м³/ч — `
-        + 'отдельный насос из каталога не подбирается.';
+        `Вбудований насос котла враховано: витрата ${matching.builtinPumpDuty.designFlowM3PerHour} м³/год `
+        + `нижче заводського q_min=${matching.builtinPumpDuty.heatingCircuitMinFlowM3h} м³/год — `
+        + 'окремий насос з каталогу не підбирається.';
     } else {
       pumpUnavailableReason =
-        'Насос из каталога не подобран для расчётной рабочей точки — см. предупреждения.';
+        'Насос з каталогу не підібрано для розрахункової робочої точки — див. попередження.';
     }
   }
 

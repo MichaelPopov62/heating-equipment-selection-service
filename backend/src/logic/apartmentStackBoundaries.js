@@ -83,8 +83,8 @@ export function warnApartmentCeilingPresetMismatch(topBoundary, ceilingPresetId)
   if (topBoundary !== 'unheated') return null;
   if (ceilingPresetId === PRESET_CEILING_GKL_AIR_GAP) {
     return (
-      'Потолок ceiling_gkl_air_gap (U≈1.2) не подходит при холодной зоне сверху — выберите утеплённое перекрытие ' +
-      `(например ${PRESET_CEILING_APT_UNDER_ATTIC} или ${PRESET_CEILING_ATTIC_FALLBACK}).`
+      'Стеля ceiling_gkl_air_gap (U≈1.2) не підходить при холодній зоні зверху — оберіть утеплене перекриття ' +
+      `(наприклад ${PRESET_CEILING_APT_UNDER_ATTIC} або ${PRESET_CEILING_ATTIC_FALLBACK}).`
     );
   }
   return null;

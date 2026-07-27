@@ -62,7 +62,7 @@ export function useProjectMutations() {
     mutationFn: async (params: SaveProjectParams): Promise<SaveProjectResult> => {
       const name = params.clientName.trim();
       if (!name) {
-        throw new Error('Укажите имя клиента перед сохранением на сервер');
+        throw new Error('Вкажіть ім\'я клієнта перед збереженням на сервер');
       }
 
       let id = params.projectId;

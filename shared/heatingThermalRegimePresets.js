@@ -42,11 +42,11 @@ export const DEPRECATED_HEATING_THERMAL_REGIME_PRESETS = Object.freeze([
 /** Подписи для выпадающих списков UI — ключи совпадают с HEATING_THERMAL_REGIME_PRESETS. */
 const HEATING_THERMAL_REGIME_UI_LABELS = Object.freeze({
   traditional_high_dt70_95_85:
-    'Устаревший: 95/85 °C (только API, не для массового рынка)',
+    'Застарілий: 95/85 °C (лише API, не для масового ринку)',
   traditional_dt50_75_65:
-    'Традиционный котёл (газ/электро): 75/65 °C — базовый для радиаторов',
+    'Традиційний котел (газ/електро): 75/65 °C — базовий для радіаторів',
   condensing_dt30_55_45:
-    'Конденсационный котёл: 55/45 °C — низкотемпературный радиаторный режим',
+    'Конденсаційний котел: 55/45 °C — низькотемпературний радіаторний режим',
 });
 
 export const HEATING_THERMAL_REGIME_PRESETS = HEATING_THERMAL_REGIME_PRESETS_CONFIG;

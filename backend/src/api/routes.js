@@ -154,7 +154,7 @@ export async function createRoutes() {
    * @param {import('express').Response<import('../types/shared-types.js').ErrorEnvelope>} res
    */
   router.use((_req, res) =>
-    res.status(404).json({ ok: false, error: { message: 'Не найдено', code: 'NOT_FOUND', statusCode: 404 } }),
+    res.status(404).json({ ok: false, error: { message: 'Не знайдено', code: 'NOT_FOUND', statusCode: 404 } }),
   );
 
   return router;

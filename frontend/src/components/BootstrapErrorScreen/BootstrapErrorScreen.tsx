@@ -14,13 +14,13 @@ export type BootstrapErrorScreenProps = {
 export function BootstrapErrorScreen({ onRetry }: BootstrapErrorScreenProps) {
   return (
     <div className={styles.root} role="alert">
-      <h1 className={styles.title}>Не удалось инициализировать приложение</h1>
+      <h1 className={styles.title}>Не вдалося ініціалізувати застосунок</h1>
       <p className={styles.message}>
-        Превышено время ожидания загрузки черновика. Попробуйте снова или обновите страницу.
+        Перевищено час очікування завантаження чернетки. Спробуйте знову або оновіть сторінку.
       </p>
       <div className={styles.actions}>
         <button type="button" className={styles.primary} onClick={onRetry}>
-          Повторить
+          Повторити
         </button>
         <button
           type="button"
@@ -29,7 +29,7 @@ export function BootstrapErrorScreen({ onRetry }: BootstrapErrorScreenProps) {
             window.location.reload();
           }}
         >
-          Обновить страницу
+          Оновити сторінку
         </button>
       </div>
     </div>

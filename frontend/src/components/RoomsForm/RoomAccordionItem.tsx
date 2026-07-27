@@ -267,7 +267,7 @@ export function RoomAccordionItem({
   };
 
   return (
-    <article className={styles.card} aria-label={`Помещение ${index + 1}`}>
+    <article className={styles.card} aria-label={`Приміщення ${index + 1}`}>
       <button
         id={btnId}
         type="button"
@@ -278,7 +278,7 @@ export function RoomAccordionItem({
       >
         <div className={styles.accHeaderLeft}>
           <div className={styles.cardTitle}>
-            Помещение {index + 1}
+            Приміщення {index + 1}
             {room.name.trim() ? ` — ${room.name.trim()}` : ''}
           </div>
           <div className={styles.cardMeta}>
@@ -289,7 +289,7 @@ export function RoomAccordionItem({
           </div>
         </div>
         <div className={styles.accHeaderRight}>
-          {isOpen ? 'Свернуть' : 'Открыть'}
+          {isOpen ? 'Згорнути' : 'Відкрити'}
         </div>
       </button>
 
@@ -304,14 +304,14 @@ export function RoomAccordionItem({
           {/* Название */}
           <div className={styles.field}>
             <label className={styles.label} htmlFor={`name-${room.id}`}>
-              Название
+              Назва
             </label>
             <input
               id={`name-${room.id}`}
               className={styles.control}
               value={room.name}
               onChange={(e) => { updateRoom({ name: e.target.value }); }}
-              placeholder={`Комната ${index + 1}`}
+              placeholder={`Кімната ${index + 1}`}
             />
           </div>
 
@@ -350,7 +350,7 @@ export function RoomAccordionItem({
           {/* Этаж */}
           <div className={styles.field}>
             <label className={styles.label} htmlFor={`floor-${room.id}`}>
-              Этаж
+              Поверх
             </label>
             <select
               id={`floor-${room.id}`}
@@ -371,18 +371,18 @@ export function RoomAccordionItem({
           {/* Границы по вертикали */}
           {isApartment ? (
             <div className={`${styles.field} ${styles.fullWidth}`}>
-              <div className={styles.label}>Границы (квартира в доме)</div>
+              <div className={styles.label}>Межі (квартира в будинку)</div>
               <p className={styles.hint}>
-                Верх: {room.topBoundaryType === 'heated' ? 'тёплый контур' : 'холод / чердак'} · Низ:{' '}
-                {room.bottomBoundaryType === 'heated' ? 'тёплый контур' : 'холод / подвал'}.
-                Меняется на шаге «Объект» — «Этаж квартиры в доме».
+                Верх: {room.topBoundaryType === 'heated' ? 'теплий контур' : 'холод / горище'} · Низ:{' '}
+                {room.bottomBoundaryType === 'heated' ? 'теплий контур' : 'холод / підвал'}.
+                Змінюється на кроці «Об&apos;єкт» — «Поверх квартири в будинку».
               </p>
             </div>
           ) : (
             <>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor={`bottom-boundary-${room.id}`}>
-                  Нижняя граница
+                  Нижня межа
                 </label>
                 <select
                   id={`bottom-boundary-${room.id}`}
@@ -392,13 +392,13 @@ export function RoomAccordionItem({
                     { updateRoom({ bottomBoundaryType: e.target.value as BottomBoundaryType }); }
                   }
                 >
-                  <option value="heated">Снизу тёплое (пол не считать)</option>
-                  <option value="unheated">Снизу холод / подвал (пол)</option>
+                  <option value="heated">Знизу тепле (стать не враховувати)</option>
+                  <option value="unheated">Знизу холод / підвал (стать)</option>
                 </select>
               </div>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor={`top-boundary-${room.id}`}>
-                  Верхняя граница
+                  Верхня межа
                 </label>
                 <select
                   id={`top-boundary-${room.id}`}
@@ -408,9 +408,9 @@ export function RoomAccordionItem({
                     { updateRoom({ topBoundaryType: e.target.value as TopBoundaryType }); }
                   }
                 >
-                  <option value="heated">Сверху тёплое помещение (не считать потолок)</option>
-                  <option value="unheated">Сверху холодная зона / чердак (потолок)</option>
-                  <option value="roof">Кровля (мансарда)</option>
+                  <option value="heated">Зверху тепле приміщення (стелю не враховувати)</option>
+                  <option value="unheated">Зверху холодна зона / горище (стеля)</option>
+                  <option value="roof">Покрівля (мансарда)</option>
                 </select>
               </div>
             </>
@@ -419,7 +419,7 @@ export function RoomAccordionItem({
           {/* Площадь */}
           <div className={styles.field}>
             <label className={styles.label} htmlFor={`area-${room.id}`}>
-              Площадь, м²
+              Площа, м²
             </label>
             <input
               id={`area-${room.id}`}
@@ -437,7 +437,7 @@ export function RoomAccordionItem({
           {/* Высота */}
           <div className={styles.field}>
             <label className={styles.label} htmlFor={`height-${room.id}`}>
-              Высота, м
+              Висота, м
             </label>
             <input
               id={`height-${room.id}`}
@@ -455,7 +455,7 @@ export function RoomAccordionItem({
           {/* Положение относительно наружного контура */}
           <div className={styles.field}>
             <label className={styles.label} htmlFor={`room-layout-${room.id}`}>
-              Положение помещения
+              Розташування приміщення
             </label>
             <select
               id={`room-layout-${room.id}`}
@@ -466,19 +466,19 @@ export function RoomAccordionItem({
                 updateRoom(patchRoomForLayoutChange(nextLayout, room.externalWall2));
               }}
             >
-              <option value="facade">На фасаде (одна наружная стена)</option>
-              <option value="corner">Угловое / торцевое (две наружные стены)</option>
+              <option value="facade">На фасаді (одна зовнішня стіна)</option>
+              <option value="corner">Кутове / торцеве (дві зовнішні стіни)</option>
               <option value="internal">
                 {objectType === 'apartment'
-                  ? 'Внутреннее (стена в общий коридор подъезда)'
-                  : 'Внутреннее (стена в холодный коридор / тамбур)'}
+                  ? 'Внутрішнє (стіна в загальний коридор під\'їзду)'
+                  : 'Внутрішнє (стіна в холодний коридор / тамбур)'}
               </option>
             </select>
           </div>
 
           {/* Наружные стены — тип и утеплитель задаются на шаге «Объект» */}
           <div className={`${styles.field} ${styles.fullWidth}`}>
-            <div className={styles.label}>Наружные стены (объект)</div>
+            <div className={styles.label}>Зовнішні стіни (об&apos;єкт)</div>
             <div className={styles.hint}>{objectExternalWallsSummary}</div>
             <div className={styles.hint}>
               {exteriorWallsSectionHint(roomLayout, objectType)}
@@ -495,7 +495,7 @@ export function RoomAccordionItem({
                 }
               >
                 <label className={styles.label} htmlFor={`floorPresetId-${room.id}`}>
-                  Пол (ограждение)
+                  Підлога (огородження)
                 </label>
                 <select
                   id={`floorPresetId-${room.id}`}
@@ -505,7 +505,7 @@ export function RoomAccordionItem({
                   disabled={floorPresets.length === 0}
                 >
                   {floorPresets.length === 0 ? (
-                    <option value="">Нет пресетов</option>
+                    <option value="">Немає пресетів</option>
                   ) : (
                     floorPresets.map((p) => (
                       <option key={p.id} value={p.id}>
@@ -516,7 +516,7 @@ export function RoomAccordionItem({
                 </select>
               </div>
               <div className={styles.ufhColumn}>
-                <div className={styles.fieldGroupTitle}>Водяной тёплый пол</div>
+                <div className={styles.fieldGroupTitle}>Водяна тепла підлога</div>
                 <label className={styles.checkboxRow} htmlFor={`ufh-enabled-${room.id}`}>
                   <input
                     id={`ufh-enabled-${room.id}`}
@@ -524,13 +524,13 @@ export function RoomAccordionItem({
                     checked={ufhEnabled}
                     onChange={(e) => { setUnderfloorEnabled(e.target.checked); }}
                   />
-                  <span>Тёплый пол в этом помещении</span>
+                  <span>Тепла підлога в цьому приміщенні</span>
                 </label>
                 {ufhEnabled ? (
                   <div className={styles.ufhFieldsGrid}>
                   <div className={styles.field}>
                     <label className={styles.label} htmlFor={`ufh-base-${room.id}`}>
-                      Основа ТП (перекрытие + стяжка)
+                      Основа ТП (перекриття + стяжка)
                     </label>
                     <select
                       id={`ufh-base-${room.id}`}
@@ -544,9 +544,9 @@ export function RoomAccordionItem({
                       disabled={underfloorPresetsLoading || underfloorHeatingBases.length === 0}
                     >
                       {underfloorPresetsLoading ? (
-                        <option value="">Загрузка…</option>
+                        <option value="">Завантаження…</option>
                       ) : underfloorHeatingBases.length === 0 ? (
-                        <option value="">Нет баз ТП</option>
+                        <option value="">Немає баз ТП</option>
                       ) : (
                         underfloorHeatingBases.map((p) => (
                           <option key={p.id} value={p.id}>
@@ -558,7 +558,7 @@ export function RoomAccordionItem({
                   </div>
                   <div className={styles.field}>
                     <label className={styles.label} htmlFor={`ufh-finish-${room.id}`}>
-                      Финишное покрытие
+                      Фінішне покриття
                     </label>
                     <select
                       id={`ufh-finish-${room.id}`}
@@ -572,9 +572,9 @@ export function RoomAccordionItem({
                       disabled={underfloorPresetsLoading || flooringFinishes.length === 0}
                     >
                       {underfloorPresetsLoading ? (
-                        <option value="">Загрузка…</option>
+                        <option value="">Завантаження…</option>
                       ) : flooringFinishes.length === 0 ? (
-                        <option value="">Нет покрытий</option>
+                        <option value="">Немає покриттів</option>
                       ) : (
                         flooringFinishes.map((m) => (
                           <option key={m.id} value={m.id}>
@@ -586,7 +586,7 @@ export function RoomAccordionItem({
                   </div>
                   <div className={styles.field}>
                     <label className={styles.label} htmlFor={`ufh-spacing-${room.id}`}>
-                      Желаемый шаг укладки, мм
+                      Бажаний крок укладки, мм
                     </label>
                     <select
                       id={`ufh-spacing-${room.id}`}
@@ -609,9 +609,9 @@ export function RoomAccordionItem({
                     <label
                       className={styles.label}
                       htmlFor={`ufh-furniture-${room.id}`}
-                      title="Укажите площадь большой мебели, под которой не будет укладываться тёплый пол. Это защитит мебель от перегрева и позволит точнее рассчитать шаг трубы."
+                      title="Вкажіть площу великих меблів, під якими не буде укладатися тепла підлога. Це захистить меблі від перегріву та дозволить точніше розрахувати крок труби."
                     >
-                      Площадь, занятая мебелью (без ножек / низкая посадка), S<sub>meb</sub> (м²)
+                      Площа, зайнята меблями (без ніжок / низька посадка), S<sub>meb</sub> (м²)
                     </label>
                     <input
                       id={`ufh-furniture-${room.id}`}
@@ -630,7 +630,7 @@ export function RoomAccordionItem({
                   {showUfhTerminalControl && (
                     <div className={`${styles.field} ${styles.fullWidth}`}>
                       <span className={styles.label} id={`ufh-terminal-${room.id}-label`}>
-                        Регулирование контура ТП (площадь ≤ {UFH_TERMINAL_CONTROL_MAX_AREA_SQM} м²)
+                        Регулювання контуру ТП (площа ≤ {UFH_TERMINAL_CONTROL_MAX_AREA_SQM} м²)
                       </span>
                       <div
                         className={styles.control}
@@ -646,7 +646,7 @@ export function RoomAccordionItem({
                               { patchUnderfloor({ ufhTerminalControl: 'collector' }); }
                             }
                           />{' '}
-                          Коллектор тёплого пола
+                          Колектор теплої підлоги
                         </label>
                         <label>
                           <input
@@ -657,21 +657,21 @@ export function RoomAccordionItem({
                               { patchUnderfloor({ ufhTerminalControl: 'unibox' }); }
                             }
                           />{' '}
-                          Унибокс (локальный регулятор)
+                          Унібокс (локальний регулятор)
                         </label>
                       </div>
                       <div className={styles.hint}>
-                        Унибокс — для одной петли малой зоны; не занимает выход коллектора ТП.
+                        Унібокс — для однієї петлі малої зони; не займає вихід колектора ТП.
                       </div>
                     </div>
                   )}
                   <div className={`${styles.hint} ${styles.fullWidth}`}>
-                    Укажите площадь большой мебели, под которой не будет укладываться тёплый пол.
-                    Это защитит мебель от перегрева и позволит точнее рассчитать шаг трубы.
+                    Вкажіть площу великих меблів, під якими не буде укладатися тепла підлога.
+                    Це захистить меблі від перегріву та дозволить точніше розрахувати крок труби.
                   </div>
                   <div className={`${styles.hint} ${styles.fullWidth}`}>
-                    Отдельно от «Пол (ограждение)»: Rλ,B = основа над контуром + финиш (керамика,
-                    винил, ламинат). Лимит температуры поверхности задаётся покрытием.
+                    Окремо від «Підлога (огородження)»: Rλ,B = основа над контуром + фініш (кераміка,
+                    вініл, ламінат). Ліміт температури поверхні задається покриттям.
                   </div>
                   </div>
                 ) : null}
@@ -680,7 +680,7 @@ export function RoomAccordionItem({
           ) : (
             <div className={styles.field}>
               <label className={styles.label} htmlFor={`floorPresetId-${room.id}`}>
-                Пол (ограждение)
+                Підлога (огородження)
               </label>
               <select
                 id={`floorPresetId-${room.id}`}
@@ -690,7 +690,7 @@ export function RoomAccordionItem({
                 disabled={floorPresets.length === 0}
               >
                 {floorPresets.length === 0 ? (
-                  <option value="">Нет пресетов</option>
+                  <option value="">Немає пресетів</option>
                 ) : (
                   floorPresets.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -705,11 +705,11 @@ export function RoomAccordionItem({
           {/* Потолок (только если сверху холодно) */}
           {room.topBoundaryType === 'unheated' && (
             <div className={styles.envelopeSection}>
-              <div className={styles.fieldGroupTitle}>Потолок</div>
+              <div className={styles.fieldGroupTitle}>Стеля</div>
               <div className={styles.envelopeFieldsRow}>
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor={`ceilingPresetId-${room.id}`}>
-                    Потолок (пресет)
+                    Стеля (пресет)
                   </label>
                   <select
                     id={`ceilingPresetId-${room.id}`}
@@ -719,7 +719,7 @@ export function RoomAccordionItem({
                     disabled={ceilingPresets.length === 0}
                   >
                     {ceilingPresets.length === 0 ? (
-                      <option value="">Нет пресетов</option>
+                      <option value="">Немає пресетів</option>
                     ) : (
                       ceilingPresets.map((p) => (
                         <option key={p.id} value={p.id}>
@@ -731,7 +731,7 @@ export function RoomAccordionItem({
                 </div>
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor={`ceiling-area-${room.id}`}>
-                    Площадь потолка, м²
+                    Площа стелі, м²
                   </label>
                   <input
                     id={`ceiling-area-${room.id}`}
@@ -741,12 +741,12 @@ export function RoomAccordionItem({
                     step={0.1}
                     value={room.ceilingAreaM2}
                     onChange={(e) => { updateRoom({ ceilingAreaM2: toNumberOrEmpty(e.target.value) }); }}
-                    placeholder="например, 20"
+                    placeholder="наприклад, 20"
                   />
                 </div>
               </div>
               <div className={styles.hint}>
-                Используйте площадь потолка/перекрытия, через которое идут потери (над ним холодно).
+                Використовуйте площу стелі/перекриття, через яку йдуть втрати (над нею холодно).
               </div>
             </div>
           )}
@@ -754,11 +754,11 @@ export function RoomAccordionItem({
           {/* Кровля (только для мансарды) */}
           {room.topBoundaryType === 'roof' && (
             <div className={styles.envelopeSection}>
-              <div className={styles.fieldGroupTitle}>Кровля</div>
+              <div className={styles.fieldGroupTitle}>Покрівля</div>
               <div className={styles.envelopeFieldsRow}>
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor={`roofPresetId-${room.id}`}>
-                    Кровля (пресет)
+                    Покрівля (пресет)
                   </label>
                   <select
                     id={`roofPresetId-${room.id}`}
@@ -768,10 +768,10 @@ export function RoomAccordionItem({
                     disabled={roofPresets.length === 0}
                   >
                     {roofPresets.length === 0 ? (
-                      <option value="">Нет пресетов</option>
+                      <option value="">Немає пресетів</option>
                     ) : (
                       <>
-                        <option value="">Не учитывать кровлю</option>
+                        <option value="">Не враховувати покрівлю</option>
                         {roofPresets.map((p) => (
                           <option key={p.id} value={p.id}>
                             {envelopePresetLabel(p)}
@@ -783,7 +783,7 @@ export function RoomAccordionItem({
                 </div>
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor={`roof-area-${room.id}`}>
-                    Площадь скатов кровли (по поверхности), м²
+                    Площа скатів покрівлі (за поверхнею), м²
                   </label>
                   <input
                     id={`roof-area-${room.id}`}
@@ -793,12 +793,12 @@ export function RoomAccordionItem({
                     step={0.1}
                     value={room.roofAreaM2}
                     onChange={(e) => { updateRoom({ roofAreaM2: toNumberOrEmpty(e.target.value) }); }}
-                    placeholder="например, 18.5"
+                    placeholder="наприклад, 18.5"
                   />
                 </div>
               </div>
               <div className={styles.hint}>
-                Для мансарды указывайте площадь наклонных скатов (а не площадь пола).
+                Для мансарди вкажіть площу нахилених скатів (а не площу підлоги).
               </div>
             </div>
           )}
@@ -810,7 +810,7 @@ export function RoomAccordionItem({
               <div className={styles.fieldRow}>
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor={`${slot}-area-${room.id}`}>
-                    Площадь, м²
+                    Площа, м²
                   </label>
                   <input
                     id={`${slot}-area-${room.id}`}
@@ -827,7 +827,7 @@ export function RoomAccordionItem({
                 </div>
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor={`${slot}-or-${room.id}`}>
-                    Ориентация
+                    Орієнтація
                   </label>
                   <select
                     id={`${slot}-or-${room.id}`}
@@ -854,19 +854,19 @@ export function RoomAccordionItem({
 
         {/* Окна */}
         <div className={styles.hint} style={{ marginTop: 12 }}>
-          Окна задаются отдельными строками: ширина проёма нужна для правила «радиатор ≥ 70% ширины окна».
-          Для <strong>разных типов или размеров</strong> нажмите «Добавить окно», а не увеличивайте поле
-          «Кол-во» — оно только для одинаковых копий одного окна.
+          Вікна задаються окремими рядками: ширина прорізу потрібна для правила «радіатор ≥ 70% ширини вікна».
+          Для <strong>різних типів або розмірів</strong> натисніть «Додати вікно», а не збільшуйте поле
+          «К-сть» — воно лише для однакових копій одного вікна.
         </div>
         <div className={styles.formGrid} style={{ marginTop: 8 }}>
           <div className={styles.field} style={{ gridColumn: '1 / -1' }}>
             <button type="button" className={styles.control} onClick={addWindow}>
-              Добавить окно
+              Додати вікно
             </button>
           </div>
           {room.windows.length === 0 ? (
             <div className={styles.hint} style={{ gridColumn: '1 / -1' }}>
-              Окна не добавлены.
+              Вікна не додано.
             </div>
           ) : (
             room.windows.map((w, wi) => {
@@ -882,13 +882,13 @@ export function RoomAccordionItem({
                 style={{ gridColumn: '1 / -1' }}
               >
                 <h4 className={styles.windowCardTitle}>
-                  Окно {wi + 1}
+                  Вікно {wi + 1}
                   {w.id ? ` (${w.id})` : ''}
                 </h4>
                 <div className={styles.formGrid}>
                   <div className={styles.field}>
                     <label className={styles.label} htmlFor={`win-preset-${room.id}-${wi}`}>
-                      Тип окна
+                      Тип вікна
                     </label>
                     <select
                       id={`win-preset-${room.id}-${wi}`}
@@ -898,7 +898,7 @@ export function RoomAccordionItem({
                     >
                       {windowPresets.length === 0 ? (
                         <option value={DEFAULT_WINDOW_PRESET_ID}>
-                          ПВХ двухкамерное (офлайн-справочник)
+                          ПВХ двокамерне (офлайн-довідник)
                         </option>
                       ) : (
                         windowPresets.map((p) => (
@@ -929,7 +929,7 @@ export function RoomAccordionItem({
 
                   <div className={styles.field}>
                     <label className={styles.label} htmlFor={`win-h-${room.id}-${wi}`}>
-                      Высота, мм
+                      Висота, мм
                     </label>
                     <input
                       id={`win-h-${room.id}-${wi}`}
@@ -946,7 +946,7 @@ export function RoomAccordionItem({
 
                   <div className={styles.field}>
                     <label className={styles.label} htmlFor={`win-or-${room.id}-${wi}`}>
-                      Ориентация
+                      Орієнтація
                     </label>
                     <select
                       id={`win-or-${room.id}-${wi}`}
@@ -966,7 +966,7 @@ export function RoomAccordionItem({
 
                   <div className={styles.field}>
                     <label className={styles.label} htmlFor={`win-count-${room.id}-${wi}`}>
-                      Кол-во одинаковых
+                      К-сть однакових
                     </label>
                     <input
                       id={`win-count-${room.id}-${wi}`}
@@ -979,7 +979,7 @@ export function RoomAccordionItem({
                     />
                     {windowCount != null && (
                       <p className={styles.windowCountHint}>
-                        {windowCount} копии с одним типом и размерами. Другой тип — кнопка «Добавить окно».
+                        {windowCount} копії з одним типом і розмірами. Інший тип — кнопка «Додати вікно».
                       </p>
                     )}
                   </div>
@@ -994,7 +994,7 @@ export function RoomAccordionItem({
                       className={styles.control}
                       onClick={() => { removeWindowAt(wi); }}
                     >
-                      Удалить окно
+                      Видалити вікно
                     </button>
                   </div>
                 </div>
@@ -1006,7 +1006,7 @@ export function RoomAccordionItem({
 
         {room.topBoundaryType === 'roof' && (
           <div className={styles.hint}>
-            Для мансарды верхняя граница считается как кровля (скаты), а не как потолок.
+            Для мансарди верхня межа враховується як покрівля (скати), а не як стеля.
           </div>
         )}
       </div>

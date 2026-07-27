@@ -346,8 +346,8 @@ function optimizeUfhLoopPipe({
       };
       pipeResizeAction = 'downsized';
       pipeResizeReason =
-        `Низкая скорость ${defaultMatch.velocityMps} м/с — `
-        + `рекомендован меньший Ø ${smallerCandidate.internalDiameterMm} мм.`;
+        `Низька швидкість ${defaultMatch.velocityMps} м/с — `
+        + `рекомендовано менший Ø ${smallerCandidate.internalDiameterMm} мм.`;
     }
   } else if (vHigh || dpHigh) {
     /** @type {import('./ufhLoopHydraulics.types.js').UfhLoopPipeCandidate | null} */
@@ -394,12 +394,12 @@ function optimizeUfhLoopPipe({
       pipeResizeAction = 'upsized';
       if (vHigh) {
         pipeResizeReason =
-          `Скорость ${defaultMatch.velocityMps} м/с выше порога ${thresholds.velocityMaxMps} м/с — `
-          + `рекомендован Ø ${best.internalDiameterMm} мм.`;
+          `Швидкість ${defaultMatch.velocityMps} м/с вище порогу ${thresholds.velocityMaxMps} м/с — `
+          + `рекомендовано Ø ${best.internalDiameterMm} мм.`;
       } else {
         pipeResizeReason =
-          `Потери ${defaultMatch.pressureDropKPa} кПа близки к лимиту — `
-          + `рекомендован Ø ${best.internalDiameterMm} мм.`;
+          `Втрати ${defaultMatch.pressureDropKPa} кПа близькі до ліміту — `
+          + `рекомендовано Ø ${best.internalDiameterMm} мм.`;
       }
     }
   }
@@ -459,7 +459,7 @@ export function validateUfhLoopHydraulics({
   };
 
   if (loopLengthM <= 0 || heatLoadWatts <= 0) {
-    warnings.push(`Петля ${loopId}: нулевая длина или нагрузка — гидравлика не рассчитана.`);
+    warnings.push(`Петля ${loopId}: нульова длина або навантаження — гідравліку не розраховано.`);
     return base;
   }
 
@@ -467,7 +467,7 @@ export function validateUfhLoopHydraulics({
   const pipesForPick = pool.length ? pool : pipes;
 
   if (!pipesForPick?.length) {
-    warnings.push(`Петля ${loopId}: каталог труб пуст — подбор невозможен.`);
+    warnings.push(`Петля ${loopId}: каталог труб порожній — підбір неможливий.`);
     return base;
   }
 
@@ -510,7 +510,7 @@ export function validateUfhLoopHydraulics({
   });
 
   if (!defaultMatch) {
-    warnings.push(`Петля ${loopId}: не удалось подобрать трубу из каталога.`);
+    warnings.push(`Петля ${loopId}: не вдалося підібрати трубу з каталогу.`);
     return base;
   }
 
@@ -536,17 +536,17 @@ export function validateUfhLoopHydraulics({
 
   if (finalMatch.velocityMps < thresholds.velocityMinMps) {
     warnings.push(
-      `Петля ${loopId}: низкая скорость ${finalMatch.velocityMps} м/с (< ${thresholds.velocityMinMps} м/с) — высокий риск завоздушивания контура.`,
+      `Петля ${loopId}: низька швидкість ${finalMatch.velocityMps} м/с (< ${thresholds.velocityMinMps} м/с) — високий ризик завоздушування контуру.`,
     );
   }
   if (finalMatch.velocityMps > thresholds.velocityMaxMps) {
     warnings.push(
-      `Петля ${loopId}: скорость ${finalMatch.velocityMps} м/с превышает шумовой порог ${thresholds.velocityMaxMps} м/с.`,
+      `Петля ${loopId}: швидкість ${finalMatch.velocityMps} м/с перевищує шумовий поріг ${thresholds.velocityMaxMps} м/с.`,
     );
   }
   if (finalMatch.pressureDropKPa > thresholds.maxPressureDropKPa) {
     warnings.push(
-      `Петля ${loopId}: потери давления ${finalMatch.pressureDropKPa} кПа превышают допустимые ${thresholds.maxPressureDropKPa} кПа — уменьшите длину петли или увеличьте число контуров.`,
+      `Петля ${loopId}: втрати тиску ${finalMatch.pressureDropKPa} кПа перевищують допустимі ${thresholds.maxPressureDropKPa} кПа — зменште довжину петлі або збільште число контурів.`,
     );
   }
   if (pipeResizeReason) {
@@ -603,8 +603,8 @@ function markLoopsCountAdjustment(loopHydraulics, loopsCount, minLoopsGeom) {
 
   const reason =
     loopsCount < minLoopsGeom
-      ? `Число петель снижено до ${loopsCount} (вместо ${minLoopsGeom}) для повышения скорости на петле.`
-      : `Число петель увеличено до ${loopsCount} (вместо ${minLoopsGeom}) для снижения потерь давления.`;
+      ? `Число петель зменшено до ${loopsCount} (замість ${minLoopsGeom}) для підвищення швидкості на петлі.`
+      : `Число петель збільшено до ${loopsCount} (замість ${minLoopsGeom}) для зменшення втрат тиску.`;
 
   for (const h of loopHydraulics) {
     if (h.pipeResizeAction === 'unchanged') {
@@ -788,7 +788,7 @@ export function resolveUfhRoomLoopsHydraulics({
       const extraWarnings = [];
       if (resolutionStatus === 'unresolved_pressure') {
         extraWarnings.push(
-          `Комната ${roomId}: не удалось уложиться в ${thresholds.maxPressureDropKPa} кПа на петлю при допустимом числе контуров — требуется проектная проработка.`,
+          `Кімната ${roomId}: не вдалося вкластися в ${thresholds.maxPressureDropKPa} кПа на петлю за допустимого числа контурів — потрібна проєктна опрацювання.`,
         );
       }
       return {
@@ -831,7 +831,7 @@ export function resolveUfhRoomLoopsHydraulics({
       }),
       pipeResizeApplied: false,
       extraWarnings: [
-        `Комната ${roomId}: не удалось подобрать конфигурацию петель — требуется проектная проработка.`,
+        `Кімната ${roomId}: не вдалося підібрати конфігурацію петель — потрібна проєктна опрацювання.`,
       ],
     };
   })();
@@ -994,7 +994,7 @@ export function enrichUnderfloorHeatingLoopHydraulics(
     }
 
     const prefixed = resolved.warnings.map(
-      (w) => `Комната «${room.roomName}»: ${w}`,
+      (w) => `Кімната «${room.roomName}»: ${w}`,
     );
     room.warnings = [...(room.warnings ?? []), ...prefixed];
     underfloorHeating.warnings = [...(underfloorHeating.warnings ?? []), ...prefixed];

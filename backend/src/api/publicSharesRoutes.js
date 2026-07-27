@@ -67,7 +67,7 @@ export function createPublicSharesRouter() {
         if (!token) {
           res.status(404).json({
             ok: false,
-            error: { message: 'Ссылка не найдена', code: 'SHARE_NOT_FOUND', statusCode: 404 },
+            error: { message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND', statusCode: 404 },
           });
           return;
         }
@@ -84,7 +84,7 @@ export function createPublicSharesRouter() {
         if (!doc || !snapshot || typeof snapshot.clientName !== 'string') {
           res.status(404).json({
             ok: false,
-            error: { message: 'Ссылка не найдена', code: 'SHARE_NOT_FOUND', statusCode: 404 },
+            error: { message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND', statusCode: 404 },
           });
           return;
         }
@@ -124,7 +124,7 @@ export function createPublicSharesRouter() {
         if (!token) {
           res.status(404).json({
             ok: false,
-            error: { message: 'Ссылка не найдена', code: 'SHARE_NOT_FOUND', statusCode: 404 },
+            error: { message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND', statusCode: 404 },
           });
           return;
         }
@@ -141,7 +141,7 @@ export function createPublicSharesRouter() {
         if (!doc || !snapshot || typeof snapshot.clientName !== 'string') {
           res.status(404).json({
             ok: false,
-            error: { message: 'Ссылка не найдена', code: 'SHARE_NOT_FOUND', statusCode: 404 },
+            error: { message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND', statusCode: 404 },
           });
           return;
         }
@@ -150,7 +150,7 @@ export function createPublicSharesRouter() {
           res.status(400).json({
             ok: false,
             error: {
-              message: 'В снимке нет финансовой сметы',
+              message: 'У знімку немає фінансової смети',
               code: 'PDF_COMMERCIAL_REQUIRED',
               statusCode: 400,
             },

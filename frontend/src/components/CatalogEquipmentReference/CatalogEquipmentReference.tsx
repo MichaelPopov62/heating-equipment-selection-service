@@ -40,7 +40,7 @@ function formatPriceUah(price: number): string {
 }
 
 function formatBool(value: boolean): string {
-  return value ? 'да' : 'нет';
+  return value ? 'так' : 'ні';
 }
 
 /**
@@ -54,8 +54,8 @@ function boilerCircuitLabel(pool: CatalogBoilerItem['circuitPool']): string {
  * @param mounting
  */
 function boilerMountingLabel(mounting: CatalogBoilerItem['mountingType']): string {
-  if (mounting === 'wall') return 'настенный';
-  if (mounting === 'floor') return 'напольный';
+  if (mounting === 'wall') return 'настінний';
+  if (mounting === 'floor') return 'напольний';
   return '—';
 }
 
@@ -63,8 +63,8 @@ function boilerMountingLabel(mounting: CatalogBoilerItem['mountingType']): strin
  * @param type
  */
 function indirectTypeLabel(type: CatalogIndirectWaterHeaterType): string {
-  if (type === 'indirect_wall') return 'настенный';
-  if (type === 'indirect_floor') return 'напольный';
+  if (type === 'indirect_wall') return 'настінний';
+  if (type === 'indirect_floor') return 'напольний';
   return 'storage_indirect';
 }
 
@@ -100,8 +100,8 @@ export function CatalogEquipmentReference({
   if (loading && !snapshot) {
     return (
       <div className={styles.wrap} aria-live="polite">
-        <h3 className={styles.title}>Справочник каталога</h3>
-        <p className={styles.meta}>Загрузка…</p>
+        <h3 className={styles.title}>Довідник каталогу</h3>
+        <p className={styles.meta}>Завантаження…</p>
       </div>
     );
   }
@@ -109,7 +109,7 @@ export function CatalogEquipmentReference({
   if (error) {
     return (
       <div className={styles.wrap}>
-        <h3 className={styles.title}>Справочник каталога</h3>
+        <h3 className={styles.title}>Довідник каталогу</h3>
         <p className={styles.err}>{error}</p>
         {onRetry != null ? (
           <button
@@ -120,7 +120,7 @@ export function CatalogEquipmentReference({
             }}
             disabled={loading}
           >
-            {loading ? 'Загрузка…' : 'Повторить загрузку'}
+            {loading ? 'Завантаження…' : 'Повторити завантаження'}
           </button>
         ) : null}
       </div>
@@ -143,27 +143,27 @@ export function CatalogEquipmentReference({
   } = snapshot;
   const srcLabel =
     catalogSource === 'mongo'
-      ? 'MongoDB (+ недостающие позиции из файла при слиянии)'
+      ? 'MongoDB (+ недостатні позиції з файлу при злитті)'
       : 'файл test_data.json';
 
   return (
     <div className={styles.wrap}>
-      <h3 className={styles.title}>Справочник каталога</h3>
+      <h3 className={styles.title}>Довідник каталогу</h3>
       <p className={styles.meta}>
-        Источник: <strong>{srcLabel}</strong>. Полный перечень используется сервером для подбора;
-        коллекторы — номенклатура для будущего автоподбора и строк сметы.
+        Джерело: <strong>{srcLabel}</strong>. Повний перелік використовується сервером для підбору;
+        колектори — номенклатура для майбутнього автопідбору та рядків кошторису.
       </p>
       <ul className={styles.counts}>
         <li className={styles.countItem}>
-          <span className={styles.countLabel}>Котлы</span>
+          <span className={styles.countLabel}>Котли</span>
           <span className={styles.countValue}>{boilersTotal}</span>
         </li>
         <li className={styles.countItem}>
-          <span className={styles.countLabel}>Радиаторы</span>
+          <span className={styles.countLabel}>Радіатори</span>
           <span className={styles.countValue}>{radiators.length}</span>
         </li>
         <li className={styles.countItem}>
-          <span className={styles.countLabel}>ЭВН</span>
+          <span className={styles.countLabel}>ЕВН</span>
           <span className={styles.countValue}>{waterHeaters.length}</span>
         </li>
         <li className={styles.countItem}>
@@ -171,27 +171,27 @@ export function CatalogEquipmentReference({
           <span className={styles.countValue}>{indirectWaterHeaters.length}</span>
         </li>
         <li className={styles.countItem}>
-          <span className={styles.countLabel}>Трубы</span>
+          <span className={styles.countLabel}>Труби</span>
           <span className={styles.countValue}>{pipes.length}</span>
         </li>
         <li className={styles.countItem}>
-          <span className={styles.countLabel}>Коллекторы</span>
+          <span className={styles.countLabel}>Колектори</span>
           <span className={styles.countValue}>{manifolds.length}</span>
         </li>
         <li className={styles.countItem}>
-          <span className={styles.countLabel}>Котельные коллекторы</span>
+          <span className={styles.countLabel}>Котельні колектори</span>
           <span className={styles.countValue}>{boilerManifolds.length}</span>
         </li>
         <li className={styles.countItem}>
-          <span className={styles.countLabel}>Унибоксы</span>
+          <span className={styles.countLabel}>Унибокси</span>
           <span className={styles.countValue}>{uniboxes.length}</span>
         </li>
       </ul>
 
       <details className={styles.block} open={boilers.length > 0 && boilers.length <= 16}>
-        <summary>Котлы ({boilers.length}) — 1К / 2К</summary>
+        <summary>Котли ({boilers.length}) — 1К / 2К</summary>
         {boilers.length === 0 ? (
-          <p className={styles.meta}>В каталоге нет котлов.</p>
+          <p className={styles.meta}>У каталозі немає котлів.</p>
         ) : (
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -201,10 +201,10 @@ export function CatalogEquipmentReference({
                   <th>Модель</th>
                   <th>Контур</th>
                   <th>Тип</th>
-                  <th>Мощность, кВт</th>
+                  <th>Потужність, кВт</th>
                   <th>Монтаж</th>
                   <th>Артикул</th>
-                  <th>Цена</th>
+                  <th>Ціна</th>
                 </tr>
               </thead>
               <tbody>
@@ -230,7 +230,7 @@ export function CatalogEquipmentReference({
 
       <details className={styles.block} open={radiators.length > 0 && radiators.length <= 12}>
         <summary>
-          Радиаторы ({radiators.length}) — модели и роль в каталоге
+          Радіатори ({radiators.length}) — моделі та роль у каталозі
         </summary>
         <ul className={styles.radiatorList}>
           {radiators.map((r, i) => {
@@ -242,7 +242,7 @@ export function CatalogEquipmentReference({
             const bits = [
               brand && `бренд: ${brand}`,
               type && `тип: ${type}`,
-              construction && `конструкция: ${construction}`,
+              construction && `конструкція: ${construction}`,
               article && `арт.: ${article}`,
             ].filter(Boolean);
             return (
@@ -265,10 +265,10 @@ export function CatalogEquipmentReference({
         open={waterHeaters.length > 0 && waterHeaters.length <= 12}
       >
         <summary>
-          Водонагреватели ЭВН ({waterHeaters.length}) — электронакопители
+          Водонагрівачі ЕВН ({waterHeaters.length}) — електронакопичувачі
         </summary>
         {waterHeaters.length === 0 ? (
-          <p className={styles.meta}>В каталоге нет электронакопителей.</p>
+          <p className={styles.meta}>У каталозі немає електронакопичувачів.</p>
         ) : (
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -277,8 +277,8 @@ export function CatalogEquipmentReference({
                   <th>Бренд</th>
                   <th>Модель</th>
                   <th>Тип</th>
-                  <th>Объёмы</th>
-                  <th>Цены по вариантам</th>
+                  <th>Об&apos;єми</th>
+                  <th>Ціни за варіантами</th>
                 </tr>
               </thead>
               <tbody>
@@ -302,10 +302,10 @@ export function CatalogEquipmentReference({
         open={indirectWaterHeaters.length > 0 && indirectWaterHeaters.length <= 12}
       >
         <summary>
-          БКН ({indirectWaterHeaters.length}) — бойлеры косвенного нагрева
+          БКН ({indirectWaterHeaters.length}) — бойлери непрямого нагріву
         </summary>
         {indirectWaterHeaters.length === 0 ? (
-          <p className={styles.meta}>В каталоге нет бойлеров косвенного нагрева.</p>
+          <p className={styles.meta}>У каталозі немає бойлерів непрямого нагріву.</p>
         ) : (
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -314,11 +314,11 @@ export function CatalogEquipmentReference({
                   <th>Бренд</th>
                   <th>Модель</th>
                   <th>Тип</th>
-                  <th>Объём, л</th>
-                  <th>Змеевик, кВт</th>
-                  <th>Мин. источник, кВт</th>
+                  <th>Об&apos;єм, л</th>
+                  <th>Змійовик, кВт</th>
+                  <th>Мін. джерело, кВт</th>
                   <th>Артикул</th>
-                  <th>Цена</th>
+                  <th>Ціна</th>
                 </tr>
               </thead>
               <tbody>
@@ -342,10 +342,10 @@ export function CatalogEquipmentReference({
 
       <details className={styles.block} open={manifolds.length > 0 && manifolds.length <= 8}>
         <summary>
-          Коллекторы ТП / радиаторов ({manifolds.length}) — для подбора и сметы
+          Колектори ТП / радіаторів ({manifolds.length}) — для підбору та кошторису
         </summary>
         {manifolds.length === 0 ? (
-          <p className={styles.meta}>В каталоге нет коллекторов.</p>
+          <p className={styles.meta}>У каталозі немає колекторів.</p>
         ) : (
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -353,12 +353,12 @@ export function CatalogEquipmentReference({
                 <tr>
                   <th>Бренд</th>
                   <th>Артикул</th>
-                  <th>Выходы</th>
-                  <th>Назначение</th>
-                  <th>Расходомеры</th>
-                  <th>Подключение</th>
-                  <th>Габариты</th>
-                  <th>Цена</th>
+                  <th>Виходи</th>
+                  <th>Призначення</th>
+                  <th>Витратоміри</th>
+                  <th>Підключення</th>
+                  <th>Габарити</th>
+                  <th>Ціна</th>
                 </tr>
               </thead>
               <tbody>
@@ -384,10 +384,10 @@ export function CatalogEquipmentReference({
 
       <details className={styles.block} open={boilerManifolds.length > 0}>
         <summary>
-          Котельные коллекторы ({boilerManifolds.length}) — для подбора и сметы
+          Котельні колектори ({boilerManifolds.length}) — для підбору та кошторису
         </summary>
         {boilerManifolds.length === 0 ? (
-          <p className={styles.meta}>В каталоге нет котельных коллекторов.</p>
+          <p className={styles.meta}>У каталозі немає котельних колекторів.</p>
         ) : (
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -395,12 +395,12 @@ export function CatalogEquipmentReference({
                 <tr>
                   <th>Бренд</th>
                   <th>Артикул</th>
-                  <th>Контуры</th>
+                  <th>Контури</th>
                   <th>Макс. кВт</th>
-                  <th>Изоляция</th>
-                  <th>Подключение</th>
-                  <th>Габариты</th>
-                  <th>Цена</th>
+                  <th>Ізоляція</th>
+                  <th>Підключення</th>
+                  <th>Габарити</th>
+                  <th>Ціна</th>
                 </tr>
               </thead>
               <tbody>
@@ -426,10 +426,10 @@ export function CatalogEquipmentReference({
 
       <details className={styles.block} open={uniboxes.length > 0 && uniboxes.length <= 12}>
         <summary>
-          Унибоксы ({uniboxes.length}) — локальные регуляторы петли ТП
+          Унибокси ({uniboxes.length}) — локальні регулятори петлі ТП
         </summary>
         {uniboxes.length === 0 ? (
-          <p className={styles.meta}>В каталоге нет унибоксов.</p>
+          <p className={styles.meta}>У каталозі немає унибоксів.</p>
         ) : (
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -439,11 +439,11 @@ export function CatalogEquipmentReference({
                   <th>Бренд</th>
                   <th>Модель</th>
                   <th>Тип</th>
-                  <th>Площадь</th>
+                  <th>Площа</th>
                   <th>Петля</th>
-                  <th>Подключение</th>
+                  <th>Підключення</th>
                   <th>Kv</th>
-                  <th>Цена</th>
+                  <th>Ціна</th>
                 </tr>
               </thead>
               <tbody>
@@ -469,9 +469,9 @@ export function CatalogEquipmentReference({
       </details>
 
       <details className={styles.block} open={pipes.length > 0}>
-        <summary>Трубы ({pipes.length})</summary>
+        <summary>Труби ({pipes.length})</summary>
         {pipes.length === 0 ? (
-          <p className={styles.meta}>В каталоге нет позиций труб.</p>
+          <p className={styles.meta}>У каталозі немає позицій труб.</p>
         ) : (
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -479,11 +479,11 @@ export function CatalogEquipmentReference({
                 <tr>
                   <th>ID</th>
                   <th>Бренд</th>
-                  <th>Материал</th>
+                  <th>Матеріал</th>
                   <th>Ø, мм</th>
-                  <th>Стенка</th>
-                  <th>Цена</th>
-                  <th>Назначение</th>
+                  <th>Стінка</th>
+                  <th>Ціна</th>
+                  <th>Призначення</th>
                 </tr>
               </thead>
               <tbody>

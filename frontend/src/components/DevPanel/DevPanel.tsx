@@ -67,7 +67,7 @@ export function DevPanel({
         setJsonText(JSON.stringify(data, null, 2));
         setView(id);
       } catch (e) {
-        setJsonText(e instanceof Error ? e.message : 'Ошибка сериализации');
+        setJsonText(e instanceof Error ? e.message : 'Помилка серіалізації');
         setView(id);
       }
     },
@@ -82,7 +82,7 @@ export function DevPanel({
         onClick={() => {
           setOpen(true);
         }}
-        title="Панель разработчика"
+        title="Панель розробника"
       >
         Dev
       </button>
@@ -90,7 +90,7 @@ export function DevPanel({
   }
 
   return (
-    <aside className={styles.panel} aria-label="Панель разработчика">
+    <aside className={styles.panel} aria-label="Панель розробника">
       <div className={styles.head}>
         <strong>Developer</strong>
         <button
@@ -101,19 +101,19 @@ export function DevPanel({
             setView(null);
           }}
         >
-          Закрыть
+          Закрити
         </button>
       </div>
       <p className={styles.hint}>
-        Клиент этот слой не видит. Project id:{' '}
+        Клієнт цей шар не бачить. Project id:{' '}
         <code>{projectId ?? '—'}</code>
       </p>
       <div className={styles.actions}>
         <button type="button" onClick={onOpenFile}>
-          Открыть JSON
+          Відкрити JSON
         </button>
         <button type="button" onClick={onSaveFile}>
-          Сохранить JSON
+          Зберегти JSON
         </button>
         <button
           type="button"
@@ -129,10 +129,10 @@ export function DevPanel({
             onSaveServer(true);
           }}
         >
-          На сервер + расчёт
+          На сервер + розрахунок
         </button>
         <button type="button" onClick={onExportText}>
-          TXT сводка
+          TXT зведення
         </button>
         <button type="button" onClick={onExportHashLink}>
           Hash #survey=
@@ -142,7 +142,7 @@ export function DevPanel({
         </button>
         {onRevokeShare ? (
           <button type="button" onClick={onRevokeShare}>
-            Отозвать share
+            Відкликати share
           </button>
         ) : null}
       </div>

@@ -15,13 +15,13 @@ export function crossValidateHydraulicsPipelineInput(dto) {
   if (mode === 'ufh_only') {
     if (dto.circuits.radiators?.consumers?.length) {
       throw validationError(
-        'ufh_only: контур radiators не должен присутствовать',
+        'ufh_only: контур radiators не повинен бути присутнім',
         'circuits.radiators',
       );
     }
     if (!dto.circuits.underfloor?.rooms?.length) {
       throw validationError(
-        'ufh_only: обязателен circuits.underfloor.rooms',
+        'ufh_only: обов’язковий circuits.underfloor.rooms',
         'circuits.underfloor',
       );
     }
@@ -29,7 +29,7 @@ export function crossValidateHydraulicsPipelineInput(dto) {
 
   if (mode === 'radiators_only' && dto.circuits.underfloor?.rooms?.length) {
     throw validationError(
-      'radiators_only: circuits.underfloor не ожидается',
+      'radiators_only: circuits.underfloor не очікується',
       'circuits.underfloor',
     );
   }
@@ -39,7 +39,7 @@ export function crossValidateHydraulicsPipelineInput(dto) {
     const hasUfh = (dto.circuits.underfloor?.rooms?.length ?? 0) > 0;
     if (!hasRad && !hasUfh) {
       throw validationError(
-        'mixed: нужен хотя бы один контур radiators или underfloor',
+        'mixed: потрібен хоча б один контур radiators або underfloor',
         'circuits',
       );
     }
@@ -48,7 +48,7 @@ export function crossValidateHydraulicsPipelineInput(dto) {
   for (const c of dto.circuits.radiators?.consumers ?? []) {
     if (c.heatLoadWatts > 0 && !(c.flowRateM3PerHour > 0)) {
       throw validationError(
-        `radiators consumer ${c.roomId}: flowRateM3PerHour обязателен при heatLoadWatts > 0`,
+        `radiators consumer ${c.roomId}: flowRateM3PerHour обов’язковий при heatLoadWatts > 0`,
         `circuits.radiators.consumers`,
       );
     }
@@ -66,7 +66,7 @@ export function crossValidateHydraulicsPipelineInput(dto) {
       const relErr = Math.abs(c.flowRateM3PerHour - expected) / expected;
       if (relErr > 0.02) {
         throw validationError(
-          `radiators consumer ${c.roomId}: flowRateM3PerHour ${c.flowRateM3PerHour} не согласован с flowDeltaTK=${flowDt} (ожид. ≈${expected})`,
+          `radiators consumer ${c.roomId}: flowRateM3PerHour ${c.flowRateM3PerHour} не узгоджено з flowDeltaTK=${flowDt} (очікув. ≈${expected})`,
           'circuits.radiators.consumers',
         );
       }
@@ -89,7 +89,7 @@ export function crossValidateHydraulicsPipelineInput(dto) {
   for (const r of dto.circuits.underfloor?.rooms ?? []) {
     if (r.heatLoadWatts > 0 && !(r.flowRateM3PerHour > 0)) {
       throw validationError(
-        `underfloor room ${r.roomId}: flowRateM3PerHour обязателен при heatLoadWatts > 0`,
+        `underfloor room ${r.roomId}: flowRateM3PerHour обов’язковий при heatLoadWatts > 0`,
         'circuits.underfloor.rooms',
       );
     }

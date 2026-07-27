@@ -132,7 +132,7 @@ export function uniboxFitsDemand(unibox, demand) {
 export function validateUniboxLoopDemand(demand, meta = {}) {
   const roomId = meta.roomId ? String(meta.roomId) : '';
   const loopId = meta.loopId ? String(meta.loopId) : '';
-  const loc = [roomId && `комната ${roomId}`, loopId && `петля ${loopId}`]
+  const loc = [roomId && `кімната ${roomId}`, loopId && `петля ${loopId}`]
     .filter(Boolean)
     .join(', ');
   const prefix = loc ? `${loc}: ` : '';
@@ -141,14 +141,14 @@ export function validateUniboxLoopDemand(demand, meta = {}) {
     return {
       ok: false,
       code: 'UNIBOX_LOOP_LENGTH',
-      message: `${prefix}длина петли должна быть > 0 м (сейчас ${demand.loopLengthM}).`,
+      message: `${prefix}довжина петлі має бути > 0 м (зараз ${demand.loopLengthM}).`,
     };
   }
   if (!(demand.areaSqM > 0)) {
     return {
       ok: false,
       code: 'UNIBOX_AREA',
-      message: `${prefix}площадь зоны должна быть > 0 м² (сейчас ${demand.areaSqM}).`,
+      message: `${prefix}площа зони має бути > 0 м² (зараз ${demand.areaSqM}).`,
     };
   }
   if (
@@ -158,7 +158,7 @@ export function validateUniboxLoopDemand(demand, meta = {}) {
     return {
       ok: false,
       code: 'UNIBOX_CIRCUIT_TEMP',
-      message: `${prefix}температуры подачи/обратки контура ТП должны быть конечными числами.`,
+      message: `${prefix}температури подачі/звороту контуру ТП мають бути скінченними числами.`,
     };
   }
   if (!(demand.circuitReturnC < demand.circuitSupplyC)) {
@@ -166,7 +166,7 @@ export function validateUniboxLoopDemand(demand, meta = {}) {
       ok: false,
       code: 'UNIBOX_DT',
       message:
-        `${prefix}обратка теплоносителя (${demand.circuitReturnC} °C) должна быть < подачи ` +
+        `${prefix}зворот теплоносія (${demand.circuitReturnC} °C) має бути < подачі ` +
         `(${demand.circuitSupplyC} °C).`,
     };
   }
@@ -174,14 +174,14 @@ export function validateUniboxLoopDemand(demand, meta = {}) {
     return {
       ok: false,
       code: 'UNIBOX_FLOW',
-      message: `${prefix}расход петли должен быть > 0 л/ч (сейчас ${demand.flowLph}).`,
+      message: `${prefix}витрата петлі має бути > 0 л/год (зараз ${demand.flowLph}).`,
     };
   }
   if (!Number.isFinite(demand.roomAirTempC)) {
     return {
       ok: false,
       code: 'UNIBOX_AIR_TEMP',
-      message: `${prefix}расчётная T воздуха помещения (roomAirTempC) должна быть конечным числом.`,
+      message: `${prefix}розрахункова T повітря приміщення (roomAirTempC) має бути скінченним числом.`,
     };
   }
   if (demand.requiredFit !== UNIBOX_REQUIRED_FIT) {
@@ -189,8 +189,8 @@ export function validateUniboxLoopDemand(demand, meta = {}) {
       ok: false,
       code: 'UNIBOX_FIT',
       message:
-        `${prefix}для ТП PEX нужен fit=${UNIBOX_REQUIRED_FIT} ` +
-        `(сейчас ${String(demand.requiredFit)}).`,
+        `${prefix}для ТП PEX потрібен fit=${UNIBOX_REQUIRED_FIT} ` +
+        `(зараз ${String(demand.requiredFit)}).`,
     };
   }
   return { ok: true };
@@ -339,20 +339,20 @@ export function hasUnderfloorManifoldCascade(manifolds) {
  * @returns {string}
  */
 function buildNoMatchWarning(loopId, required, surveyInsideC) {
-  let airSrc = `T воздуха=${required.roomAirTempC} °C (анкета temps.insideC)`;
+  let airSrc = `T повітря=${required.roomAirTempC} °C (анкета temps.insideC)`;
   if (required.roomAirTempSource === 'bathroom_field') {
-    airSrc = `T воздуха=${required.roomAirTempC} °C (temps.bathroomAirTempC)`;
+    airSrc = `T повітря=${required.roomAirTempC} °C (temps.bathroomAirTempC)`;
   } else if (required.roomAirTempSource === 'preset') {
     airSrc =
-      `T воздуха=${required.roomAirTempC} °C (пол 24 °C для «санузел»); ` +
+      `T повітря=${required.roomAirTempC} °C (поверх 24 °C для «санузел»); ` +
       `анкета temps.insideC=${surveyInsideC} °C`;
   }
   const typePart = required.roomType ? `тип «${required.roomType}», ` : '';
   return (
-    `Нет унибокса под петлю ${loopId} (${typePart}` +
-    `площадь ${required.areaSqM} м², длина ${required.loopLengthM} м, ` +
-    `подача ${required.circuitSupplyC} °C, обратка ${required.circuitReturnC} °C, ` +
-    `${airSrc}, расход ${required.flowLph} л/ч, ` +
+    `Немає унібокса під петлю ${loopId} (${typePart}` +
+    `площа ${required.areaSqM} м², довжина ${required.loopLengthM} м, ` +
+    `подача ${required.circuitSupplyC} °C, зворот ${required.circuitReturnC} °C, ` +
+    `${airSrc}, витрата ${required.flowLph} л/ч, ` +
     `P=${required.systemPressureBar} бар, Kv>${required.minKvM3h.toFixed(3)}, ` +
     `fit=${required.requiredFit}).`
   );
@@ -418,7 +418,7 @@ export function pickUniboxes({
   if (manifolds && manifolds.ok === false) {
     const codePart = manifolds.failureCode ? ` (${manifolds.failureCode})` : '';
     warnings.push(
-      'Подбор унибоксов выполняется без сигнала каскада коллекторов: '
+      'Підбір унібоксів виконується без сигналу каскаду колекторів: '
         + `matching.manifolds.ok=false${codePart}.`,
     );
   }
@@ -427,19 +427,19 @@ export function pickUniboxes({
   // UNIBOX_MAX_LOOPS_FOR_MATCHING — м'яке попередження від 4 петель (не skip), бо вибір в анкеті явний.
   if (demands.length >= UNIBOX_MAX_LOOPS_FOR_MATCHING) {
     warnings.push(
-      `Выбрано ${demands.length} зон с унибоксом (ориентир до ${UNIBOX_MAX_LOOPS_FOR_MATCHING}); ` +
-        'проверьте гидравлику и целесообразность локальных регуляторов.',
+      `Обрано ${demands.length} зон з унібоксом (орієнтир до ${UNIBOX_MAX_LOOPS_FOR_MATCHING}); ` +
+        'перевірте гідравліку та доцільність локальних регуляторів.',
     );
   }
 
   if (!pool.length) {
-    warnings.push('В каталоге нет унибоксов для подбора петель тёплого пола.');
+    warnings.push('У каталозі немає унібоксів для підбору петель теплої підлоги.');
     const byLoop = demands.map((d) => ({
       roomId: d.roomId,
       loopId: d.loopId,
       required: d.required,
       selected: null,
-      warnings: ['Нет позиций unibox в каталоге.'],
+      warnings: ['Немає позицій unibox у каталозі.'],
     }));
     logger.warn('matching.unibox.emptyCatalog', null, { loopDemands: demands.length });
     return { byLoop, warnings };

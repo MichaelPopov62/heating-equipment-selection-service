@@ -33,9 +33,9 @@ export function buildEmptyManifoldsFailure({ failureCode, message, causeMessage 
   const summary =
     typeof message === 'string' && message.trim()
       ? message.trim()
-      : 'Смета коллекторов пуста; расчёт унибоксов и гидравлики продолжается.';
+      : 'Кошторис колекторів порожній; розрахунок унібоксів і гідравліки продовжується.';
   /** @type {string[]} */
-  const warnings = [`Коллекторы: подбор не выполнен (${code}). ${summary}`];
+  const warnings = [`Колектори: підбір не виконано (${code}). ${summary}`];
   if (typeof causeMessage === 'string' && causeMessage.trim()) {
     warnings.push(`Причина: ${causeMessage.trim()}`);
   }
@@ -108,7 +108,7 @@ export function pickManifoldsWithCore(core, args = {}) {
     return buildEmptyManifoldsFailure({
       failureCode,
       message:
-        'Смета коллекторов пуста; расчёт унибоксов и гидравлики продолжается.',
+        'Кошторис колекторів порожній; розрахунок унібоксів і гідравліки продовжується.',
       ...(errMessage ? { causeMessage: errMessage } : {}),
     });
   }
@@ -152,8 +152,8 @@ export function splitOutletsForCascade(
 function buildUfhCascadeWarning(unitCount, parts) {
   const splitLabel = parts.join('+');
   return (
-    `Превышен лимит петель на один узел (max ${UFH_MANIFOLD_MAX_OUTLETS_PER_NODE}). `
-    + `Система автоматически разделена на ${unitCount} коллектора (${splitLabel}).`
+    `Перевищено ліміт петель на один вузол (max ${UFH_MANIFOLD_MAX_OUTLETS_PER_NODE}). `
+    + `Систему автоматично розділено на ${unitCount} колектори (${splitLabel}).`
   );
 }
 
@@ -186,8 +186,8 @@ export function pickDistributionManifold({ catalog, application, requiredOutlets
       selected: null,
       warnings: [
         application === 'underfloor'
-          ? 'В каталоге нет коллекторов для тёплого пола.'
-          : 'В каталоге нет коллекторов для радиаторного контура.',
+          ? 'У каталозі немає колекторів для теплої підлоги.'
+          : 'У каталозі немає колекторів для радіаторного контуру.',
       ],
     };
   }
@@ -213,10 +213,10 @@ export function pickDistributionManifold({ catalog, application, requiredOutlets
     return a.price - b.price;
   })[0];
   if (!fallback) {
-    return { selected: null, warnings: ['В каталоге нет подходящих коллекторов.'] };
+    return { selected: null, warnings: ['У каталозі немає підходящих колекторів.'] };
   }
   warnings.push(
-    `Подобран коллектор ${fallback.model} (${fallback.outletsCount} вых.) при потребности ${need} — ограничение каталога.`,
+    `Підібрано колектор ${fallback.model} (${fallback.outletsCount} вих.) при потребі ${need} — обмеження каталогу.`,
   );
   return { selected: fallback, warnings };
 }
@@ -248,7 +248,7 @@ export function pickBoilerManifold({ catalog, requiredCircuits, requiredPowerKw 
     });
     return {
       selected: null,
-      warnings: ['В каталоге нет котельных коллекторов.'],
+      warnings: ['У каталозі немає котельних колекторів.'],
     };
   }
 
@@ -274,13 +274,13 @@ export function pickBoilerManifold({ catalog, requiredCircuits, requiredPowerKw 
     return a.price - b.price;
   })[0];
   if (!fallback) {
-    return { selected: null, warnings: ['В каталоге нет подходящих котельных коллекторов.'] };
+    return { selected: null, warnings: ['У каталозі немає підходящих котельних колекторів.'] };
   }
 
   /** @type {string[]} */
   const parts = [];
   if (fallback.circuitsCount < needCircuits) {
-    parts.push(`контуров ${fallback.circuitsCount} < ${needCircuits}`);
+    parts.push(`контурів ${fallback.circuitsCount} < ${needCircuits}`);
   }
   if (fallback.maxPowerKw < needKw) {
     parts.push(`макс. ${fallback.maxPowerKw} кВт < ${needKw} кВт`);
@@ -294,7 +294,7 @@ export function pickBoilerManifold({ catalog, requiredCircuits, requiredPowerKw 
     deficits: parts,
   });
   warnings.push(
-    `Подобран котельный коллектор ${fallback.model} с дефицитом (${parts.join('; ') || 'ограничение каталога'}).`,
+    `Підібрано котельний колектор ${fallback.model} з дефіцитом (${parts.join('; ') || 'обмеження каталогу'}).`,
   );
   return { selected: fallback, warnings };
 }

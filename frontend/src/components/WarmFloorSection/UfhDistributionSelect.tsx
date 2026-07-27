@@ -18,7 +18,7 @@ export function UfhDistributionSelect({ value, onChange, disabled = false }: Pro
   return (
     <div className={styles.fieldBlock}>
       <label className={styles.fieldLabel} htmlFor="ufh-distribution-preset">
-        Схема подключения контура ТП
+        Схема підключення контуру ТП
       </label>
       <select
         id="ufh-distribution-preset"
@@ -34,8 +34,8 @@ export function UfhDistributionSelect({ value, onChange, disabled = false }: Pro
         ))}
       </select>
       <p className={styles.hint}>
-        При <code className={styles.inlineCode}>Авто</code> сервер выберет НСУ (квартира / малый дом)
-        или гидрострелку (крупный объект, мощность котла &gt; 50 кВт).
+        При <code className={styles.inlineCode}>Авто</code> сервер обере НЗУ (квартира / невеликий будинок)
+        або гідравлічну стрілку (великий об&apos;єкт, потужність котла &gt; 50 кВт).
       </p>
     </div>
   );

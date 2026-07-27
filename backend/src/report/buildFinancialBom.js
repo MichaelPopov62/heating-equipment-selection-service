@@ -12,14 +12,14 @@
 export const FINANCIAL_BOM_SCHEMA_VERSION = 1;
 export const FINANCIAL_LABOR_PERCENT = 40;
 export const FINANCIAL_CONSUMABLES_PERCENT = 15;
-export const MIXING_NODE_SELF_ASSEMBLY_NOTE = 'сборка самостоятельно';
+export const MIXING_NODE_SELF_ASSEMBLY_NOTE = 'монтаж самостійно';
 
 const CATEGORY_LABEL = /** @type {Record<FinancialBomCategoryId, string>} */ ({
-  boiler_room: 'Котельная / СУ',
-  radiators: 'Радиаторное отопление',
-  ufh: 'Тёплый пол',
-  hydraulics_heating: 'Гидравлика',
-  works: 'Работы',
+  boiler_room: 'Котельня / СУ',
+  radiators: 'Радіаторне опалення',
+  ufh: 'Тепла підлога',
+  hydraulics_heating: 'Гідравліка',
+  works: 'Роботи',
 });
 
 /**
@@ -52,7 +52,7 @@ function readBrand(obj) {
  * @returns {string}
  */
 function objectLabel(objectType) {
-  return objectType === 'apartment' ? 'Квартира' : 'Дом';
+  return objectType === 'apartment' ? 'Квартира' : 'Будинок';
 }
 
 /**
@@ -188,7 +188,7 @@ function pushBoiler(objectType, matching, out) {
       id: `boiler:${proposal.model}`,
       kind: 'equipment',
       objectType,
-      equipmentTypeLabel: 'Котёл',
+      equipmentTypeLabel: 'Котел',
       brand,
       model: proposal.model,
       qty: units,
@@ -219,7 +219,7 @@ function pushWaterHeaters(objectType, matching, out) {
         id: `waterHeater:${wh.selected.model}:${wh.chosenVariant.volumeLiters ?? ''}`,
         kind: 'equipment',
         objectType,
-        equipmentTypeLabel: 'Электронакопитель',
+        equipmentTypeLabel: 'Електронакопичувач',
         brand: readBrand(wh.selected),
         model: wh.selected.model,
         qty: 1,
@@ -244,7 +244,7 @@ function pushWaterHeaters(objectType, matching, out) {
         id: `indirectWaterHeater:${bkn.selected.model}`,
         kind: 'equipment',
         objectType,
-        equipmentTypeLabel: 'Бойлер косвенного нагрева',
+        equipmentTypeLabel: 'Бойлер непрямого нагріву',
         brand: readBrand(bkn.selected),
         model: bkn.selected.model,
         qty: 1,
@@ -304,7 +304,7 @@ function pushRadiators(objectType, matching, rooms, out) {
     }
 
     const meta = rooms.get(str(row.roomId));
-    const floorLabel = meta ? `Этаж ${meta.floor}` : '';
+    const floorLabel = meta ? `Поверх ${meta.floor}` : '';
     const roomName = str(row.roomName) || meta?.name || str(row.roomId);
 
     out.push(
@@ -312,7 +312,7 @@ function pushRadiators(objectType, matching, rooms, out) {
         id: `radiator:${modelLabel}:${applianceUnitPrice ?? 'x'}`,
         kind: 'equipment',
         objectType,
-        equipmentTypeLabel: 'Радиатор',
+        equipmentTypeLabel: 'Радіатор',
         brand: '',
         model: modelLabel,
         qty: units,
@@ -340,7 +340,7 @@ function pushManifolds(objectType, matching, out) {
     const floor = floorBlock?.floor;
     const floorLabel =
       typeof floor === 'number' && Number.isFinite(floor)
-        ? `Этаж ${Math.trunc(floor)}`
+        ? `Поверх ${Math.trunc(floor)}`
         : '';
     for (const unit of floorBlock?.units ?? []) {
       const sel = unit?.selected;
@@ -354,14 +354,14 @@ function pushManifolds(objectType, matching, out) {
           id: `manifold.ufh:${sel.model}:${sel.article ?? unit.index}`,
           kind: 'equipment',
           objectType,
-          equipmentTypeLabel: 'Коллектор ТП',
+          equipmentTypeLabel: 'Колектор ТП',
           brand: readBrand(sel),
           model: sel.model,
           qty: 1,
           qtyUnit: 'pcs',
           unitPriceUah: price,
           lineTotalUah: price,
-          scopePath: scope(objectType, 'ufh', [floorLabel, 'Коллектор ТП']),
+          scopePath: scope(objectType, 'ufh', [floorLabel, 'Колектор ТП']),
           categoryId: 'ufh',
           source: 'matching.manifolds.underfloor',
         }),
@@ -380,7 +380,7 @@ function pushManifolds(objectType, matching, out) {
         id: `manifold.radiator:${rad.model}`,
         kind: 'equipment',
         objectType,
-        equipmentTypeLabel: 'Коллектор радиаторов',
+        equipmentTypeLabel: 'Колектор радіаторів',
         brand: readBrand(rad),
         model: rad.model,
         qty: 1,
@@ -405,7 +405,7 @@ function pushManifolds(objectType, matching, out) {
         id: `manifold.boiler:${bm.model}`,
         kind: 'equipment',
         objectType,
-        equipmentTypeLabel: 'Котельный коллектор',
+        equipmentTypeLabel: 'Котельний колектор',
         brand: readBrand(bm),
         model: bm.model,
         qty: 1,
@@ -435,7 +435,7 @@ function pushUniboxes(objectType, matching, rooms, out) {
         ? money(sel.price)
         : null;
     const meta = rooms.get(str(row.roomId));
-    const floorLabel = meta ? `Этаж ${meta.floor}` : '';
+    const floorLabel = meta ? `Поверх ${meta.floor}` : '';
     const roomName = meta?.name || str(row.roomId);
     const catalogId = str(sel.id);
     out.push(
@@ -443,7 +443,7 @@ function pushUniboxes(objectType, matching, rooms, out) {
         id: `unibox:${catalogId || sel.model}`,
         kind: 'equipment',
         objectType,
-        equipmentTypeLabel: 'Унибокс',
+        equipmentTypeLabel: 'Унібокс',
         brand: readBrand(sel),
         model: sel.model,
         qty: 1,
@@ -589,7 +589,7 @@ function pushMixingNodeNote(objectType, ufh, out) {
       id: 'ufh:mixingNode:self_assembly',
       kind: 'note',
       objectType,
-      equipmentTypeLabel: 'Смесительный узел ТП',
+      equipmentTypeLabel: 'Змішувальний вузол ТП',
       brand: '',
       model: MIXING_NODE_SELF_ASSEMBLY_NOTE,
       qty: 1,
@@ -622,14 +622,14 @@ function pushLaborAndConsumables(objectType, equipmentTotalUah, out) {
       id: 'works:labor',
       kind: 'labor',
       objectType,
-      equipmentTypeLabel: 'Монтажные работы',
+      equipmentTypeLabel: 'Монтажні роботи',
       brand: '',
-      model: `${FINANCIAL_LABOR_PERCENT}% от стоимости оборудования`,
+      model: `${FINANCIAL_LABOR_PERCENT}% від вартості обладнання`,
       qty: 1,
       qtyUnit: 'lot',
       unitPriceUah: laborTotal,
       lineTotalUah: laborTotal,
-      scopePath: scope(objectType, 'works', ['Монтажные работы']),
+      scopePath: scope(objectType, 'works', ['Монтажні роботи']),
       categoryId: 'works',
       source: 'commercial.rates.labor',
     }),
@@ -640,14 +640,14 @@ function pushLaborAndConsumables(objectType, equipmentTotalUah, out) {
       id: 'works:consumables',
       kind: 'consumable',
       objectType,
-      equipmentTypeLabel: 'Расходные материалы',
+      equipmentTypeLabel: 'Витратні матеріали',
       brand: '',
-      model: `${FINANCIAL_CONSUMABLES_PERCENT}% от стоимости оборудования`,
+      model: `${FINANCIAL_CONSUMABLES_PERCENT}% від вартості обладнання`,
       qty: 1,
       qtyUnit: 'lot',
       unitPriceUah: consumablesTotal,
       lineTotalUah: consumablesTotal,
-      scopePath: scope(objectType, 'works', ['Расходные материалы']),
+      scopePath: scope(objectType, 'works', ['Витратні матеріали']),
       categoryId: 'works',
       source: 'commercial.rates.consumables',
     }),

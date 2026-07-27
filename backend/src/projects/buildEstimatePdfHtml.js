@@ -106,13 +106,13 @@ function proposalCardHtml(title, card) {
   const lines = [`<div><strong>${escapeHtml(name)}</strong></div>`];
   if (card.totalNominalKw != null) {
     lines.push(
-      `<div>Номинал: ${escapeHtml(
+      `<div>Номінал: ${escapeHtml(
         card.totalNominalKw.toLocaleString('uk-UA', { maximumFractionDigits: 1 }),
       )} кВт</div>`,
     );
   }
   if (card.price != null) {
-    lines.push(`<div>Ориентир цены: ${escapeHtml(money(card.price))}</div>`);
+    lines.push(`<div>Орієнтир ціни: ${escapeHtml(money(card.price))}</div>`);
   }
   return `<div class="card">
   <h3>${escapeHtml(title)}</h3>
@@ -126,7 +126,7 @@ function proposalCardHtml(title, card) {
  */
 function commercialTableHtml(commercial) {
   const bom = asObject(commercial);
-  if (!bom) return '<p>Нет финансовой сметы.</p>';
+  if (!bom) return '<p>Немає фінансової кошторису.</p>';
   const lines = Array.isArray(bom.lines) ? bom.lines : [];
   const totals = asObject(bom.totals) ?? {};
 
@@ -161,33 +161,33 @@ function commercialTableHtml(commercial) {
   <thead>
     <tr>
       <th>Тип</th>
-      <th>Позиция</th>
-      <th>Кол-во</th>
-      <th>Цена</th>
-      <th>Сумма</th>
+      <th>Позиція</th>
+      <th>К-сть</th>
+      <th>Ціна</th>
+      <th>Сума</th>
     </tr>
   </thead>
   <tbody>${rows}</tbody>
   <tfoot>
     <tr>
-      <td colspan="4">Оборудование</td>
+      <td colspan="4">Обладнання</td>
       <td>${escapeHtml(money(totals.equipmentTotalUah))}</td>
     </tr>
     <tr>
-      <td colspan="4">Работы</td>
+      <td colspan="4">Роботи</td>
       <td>${escapeHtml(money(totals.laborTotalUah))}</td>
     </tr>
     <tr>
-      <td colspan="4">Расходники</td>
+      <td colspan="4">Витратні матеріали</td>
       <td>${escapeHtml(money(totals.consumablesTotalUah))}</td>
     </tr>
     <tr>
-      <td colspan="4">Итого</td>
+      <td colspan="4">Разом</td>
       <td>${escapeHtml(money(totals.grandTotalUah))}</td>
     </tr>
   </tfoot>
 </table>
-<p class="note">Итого по основной (рекомендуемой) линии. Карточки ниже — альтернативные схемы, не меняют сумму сметы.</p>`;
+<p class="note">Разом за основною (рекомендованою) лінією. Картки нижче — альтернативні схеми, не змінюють суму кошторису.</p>`;
 }
 
 /**
@@ -233,7 +233,7 @@ export function buildEstimatePdfHtml(snapshot, opts = {}) {
   const snap = asObject(snapshot);
   if (!snap) {
     /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
-    const err = new Error('Нет данных для PDF');
+    const err = new Error('Немає даних для PDF');
     err.statusCode = 400;
     err.code = 'PDF_SNAPSHOT_REQUIRED';
     throw err;
@@ -241,16 +241,16 @@ export function buildEstimatePdfHtml(snapshot, opts = {}) {
 
   if (!isPlainObject(snap.commercial)) {
     /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
-    const err = new Error('В снимке нет финансовой сметы (commercial)');
+    const err = new Error('У знімку немає фінансової кошторису (commercial)');
     err.statusCode = 400;
     err.code = 'PDF_COMMERCIAL_REQUIRED';
     throw err;
   }
 
-  const clientName = typeof snap.clientName === 'string' ? snap.clientName : 'Клиент';
+  const clientName = typeof snap.clientName === 'string' ? snap.clientName : 'Клієнт';
   const label = typeof snap.label === 'string' ? snap.label : '';
   const objectType =
-    snap.objectType === 'apartment' ? 'Квартира' : snap.objectType === 'house' ? 'Дом' : '';
+    snap.objectType === 'apartment' ? 'Квартира' : snap.objectType === 'house' ? 'Будинок' : '';
   const publishedAt =
     typeof snap.publishedAt === 'string' ? snap.publishedAt.slice(0, 10) : '';
 
@@ -261,20 +261,20 @@ export function buildEstimatePdfHtml(snapshot, opts = {}) {
   const efficient = boiler ? readProposalCard(asObject(boiler.proposalEfficient)) : null;
 
   const mainBlock = mainProposal
-    ? proposalCardHtml('Рекомендуемый комплект (основная линия)', mainProposal)
+    ? proposalCardHtml('Рекомендований комплект (основна лінія)', mainProposal)
     : '';
 
-  const altCards = [proposalCardHtml('Экономичный', economy), proposalCardHtml('Эффективный', efficient)]
+  const altCards = [proposalCardHtml('Економічний', economy), proposalCardHtml('Ефективний', efficient)]
     .filter(Boolean)
     .join('\n');
 
   const technical =
     opts.includeTechnical === true ? buildTechnicalPdfHtml(snap) : '';
 
-  const title = 'Финансовый итог — HeatCalc Pro';
+  const title = 'Фінансовий підсумок — HeatCalc Pro';
 
   return `<!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
   <meta charset="utf-8" />
   <title>${escapeHtml(title)}</title>
@@ -304,19 +304,19 @@ export function buildEstimatePdfHtml(snapshot, opts = {}) {
   <div class="brand">HeatCalc Pro</div>
   <h1>${escapeHtml(title)}</h1>
   <div class="meta">
-    <div>Клиент: ${escapeHtml(clientName)}</div>
-    ${label ? `<div>Проект: ${escapeHtml(label)}</div>` : ''}
-    ${objectType ? `<div>Объект: ${escapeHtml(objectType)}</div>` : ''}
+    <div>Клієнт: ${escapeHtml(clientName)}</div>
+    ${label ? `<div>Проєкт: ${escapeHtml(label)}</div>` : ''}
+    ${objectType ? `<div>Об'єкт: ${escapeHtml(objectType)}</div>` : ''}
     ${publishedAt ? `<div>Дата: ${escapeHtml(publishedAt)}</div>` : ''}
   </div>
   ${publisherPresentationHtml(snap.publisherPresentation)}
   ${mainBlock ? `<div class="cards">${mainBlock}</div>` : ''}
-  <h2>Смета</h2>
+  <h2>Кошторис</h2>
   ${commercialTableHtml(snap.commercial)}
   ${
     altCards
-      ? `<h2>Альтернативные схемы котла</h2>
-  <p class="note">Сравнение с основной линией. Сумма таблицы выше не пересчитывается.</p>
+      ? `<h2>Альтернативні схеми котла</h2>
+  <p class="note">Порівняння з основною лінією. Суму таблиці вище не перераховується.</p>
   <div class="cards">${altCards}</div>`
       : ''
   }

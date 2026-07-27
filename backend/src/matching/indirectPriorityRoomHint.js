@@ -27,8 +27,8 @@ export function appendIndirectPriorityRoomWarnings(indirectReport, heatLoss) {
     if ((r.envelopeWatts ?? 0) > (worst.envelopeWatts ?? 0)) worst = r;
   }
   const kw = (worst.envelopeWatts ?? 0) / 1000;
-  const label = worst.name ?? worst.id ?? 'помещение';
+  const label = worst.name ?? worst.id ?? 'приміщення';
   indirectReport.warnings.push(
-    `При приоритете ГВС и длительном нагреве бака (~${t} мин) проверьте остывание самого нагруженного помещения по ограждениям («${label}», ~${kw.toFixed(2)} кВт); при необходимости увеличьте мощность котла или змеевик БКН.`,
+    `За пріоритету ГВП та тривалого нагрівання бака (~${t} хв) перевірте охолодження найнавантаженішого приміщення за огородженнями («${label}», ~${kw.toFixed(2)} кВт); за потреби збільште потужність котла або змійовик БКН.`,
   );
 }

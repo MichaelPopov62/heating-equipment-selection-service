@@ -23,10 +23,10 @@ export function UniboxMatchingSection({ matching }: Props) {
 
   return (
     <div className={styles.wrap} style={{ marginTop: 12 }}>
-      <h3 className={styles.title}>Унибоксы (подбор по петлям ТП)</h3>
+      <h3 className={styles.title}>Унибокси (підбір за петлями ТП)</h3>
       <p className={styles.meta}>
-        Локальный регулятор петли: фильтр по паспортным лимитам (площадь, длина, T, P, Kv, eurocone).
-        До 3 петель с унибоксом — без предупреждения; от 4 — пересмотр гидравлики. Каскад коллекторов не блокирует подбор.
+        Локальний регулятор петлі: фільтр за паспортними лімітами (площа, довжина, T, P, Kv, eurocone).
+        До 3 петель з унибоксом — без попередження; від 4 — перегляд гідравліки. Каскад колекторів не блокує підбір.
       </p>
 
       {warnings.length > 0 && (
@@ -38,20 +38,20 @@ export function UniboxMatchingSection({ matching }: Props) {
       )}
 
       {byLoop.length === 0 ? (
-        <p className={styles.meta}>Нет строк подбора (гейт или нет петель с длиной &gt; 0).</p>
+        <p className={styles.meta}>Немає рядків підбору (гейт або немає петель з довжиною &gt; 0).</p>
       ) : (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>
               <tr>
                 <th>Петля</th>
-                <th>Площадь / длина</th>
-                <th>T под/обр / воздух</th>
+                <th>Площа / довжина</th>
+                <th>T под/обр / повітря</th>
                 <th>Модель</th>
                 <th>Тип</th>
-                <th>Подключение</th>
+                <th>Підключення</th>
                 <th>Kv</th>
-                <th>Цена</th>
+                <th>Ціна</th>
               </tr>
             </thead>
             <tbody>

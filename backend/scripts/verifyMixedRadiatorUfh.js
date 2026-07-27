@@ -127,7 +127,7 @@ const skipOk = expectedLoad.skipRadiator === true;
 const designWattsOk = r2rad?.radiatorDesignWatts === 0;
 const modelOk = r2rad?.radiatorModel === '—';
 const sectionsOk = r2rad?.sections == null;
-const noteOk = (r2rad?.sizingNotes ?? []).some((n) => n.includes('радиатор не требуется'));
+const noteOk = (r2rad?.sizingNotes ?? []).some((n) => n.includes('радіатор не потрібен'));
 const ufhCoversOk =
   typeof r2ufh?.heatFluxUpWatts === 'number'
   && typeof r2hl?.designWatts === 'number'

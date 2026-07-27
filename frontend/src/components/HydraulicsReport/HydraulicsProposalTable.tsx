@@ -48,11 +48,11 @@ export function HydraulicsProposalTable({
         aria-labelledby="hydraulics-proposal-table-title"
       >
         <h4 id="hydraulics-proposal-table-title" className={styles.title}>
-          Гидравлика · трубы
+          Гідравліка · труби
         </h4>
         <p className={styles.empty} role="status">
           {proposal.unavailableReason
-            ?? 'Нет подходящих позиций труб в каталоге. Полный расчёт — на шаге «Гидравлика».'}
+            ?? 'Немає відповідних позицій труб у каталозі. Повний розрахунок — на кроці «Гідравліка».'}
         </p>
       </div>
     );
@@ -69,16 +69,16 @@ export function HydraulicsProposalTable({
       aria-labelledby="hydraulics-proposal-table-title"
     >
       <h4 id="hydraulics-proposal-table-title" className={styles.title}>
-        Гидравлика · трубы
+        Гідравліка · труби
       </h4>
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
             <tr>
               <th>Модель</th>
-              <th>Материал</th>
+              <th>Матеріал</th>
               <th>Ø внутр.</th>
-              <th>Длина</th>
+              <th>Довжина</th>
             </tr>
           </thead>
           <tbody>

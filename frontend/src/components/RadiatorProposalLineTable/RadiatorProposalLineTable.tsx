@@ -44,7 +44,7 @@ export function RadiatorProposalLineTable({
     <div className={styles.wrap}>
       <p className={styles.caption} id={`${tableId}-caption`}>
         {caption}
-        {graphLabel != null ? ` · график ${graphLabel}` : ''}
+        {graphLabel != null ? ` · графік ${graphLabel}` : ''}
         {emittersLabel != null ? ` · ${emittersLabel}` : ''}
       </p>
       {line.byRoom.length > 0 ? (
@@ -54,10 +54,10 @@ export function RadiatorProposalLineTable({
         >
           <thead>
             <tr>
-              <th scope="col">Помещение</th>
-              <th scope="col">Прибор</th>
-              <th scope="col">Кол-во</th>
-              <th scope="col">Отдача, Вт</th>
+              <th scope="col">Приміщення</th>
+              <th scope="col">Прилад</th>
+              <th scope="col">Кількість</th>
+              <th scope="col">Віддача, Вт</th>
             </tr>
           </thead>
           <tbody>
@@ -81,16 +81,16 @@ export function RadiatorProposalLineTable({
                   }
                   title={
                     row.equipmentKindChangedVsEconomy
-                      ? 'Тип прибора отличается от варианта «Эконом»'
+                      ? 'Тип приладу відрізняється від варіанта «Економ»'
                       : undefined
                   }
                 >
                   <td>
                     {row.roomName}
                     {row.equipmentKindChangedVsEconomy ? (
-                      <span className={styles.kindChangedMark} aria-label="Тип прибора отличается от варианта Эконом">
+                      <span className={styles.kindChangedMark} aria-label="Тип приладу відрізняється від варіанта Економ">
                         {' '}
-                        ≠эконом
+                        ≠економ
                       </span>
                     ) : null}
                   </td>
@@ -103,7 +103,7 @@ export function RadiatorProposalLineTable({
           </tbody>
         </table>
       ) : (
-        <p className={styles.unavailable}>Нет данных по помещениям.</p>
+        <p className={styles.unavailable}>Немає даних за приміщеннями.</p>
       )}
     </div>
   );

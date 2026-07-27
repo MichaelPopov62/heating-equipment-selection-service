@@ -141,11 +141,11 @@ export function pickPumpForSystem({
     : headRequiredM * (1 + dutyRules.pumpHeadMarginPercent / 100);
 
   if (q <= 0 || headRequiredM <= 0) {
-    return { pump: null, warnings: ['Насос не подобран: нулевой расход или напор.'] };
+    return { pump: null, warnings: ['Насос не підібрано: нульовий витрата або напір.'] };
   }
 
   if (!pumps?.length) {
-    return { pump: null, warnings: ['Каталог насосов пуст — подбор невозможен.'] };
+    return { pump: null, warnings: ['Каталог насосів порожній — підбір неможливий.'] };
   }
 
   /** @type {import('./types.js').HydraulicsPumpMatch | null} */
@@ -174,8 +174,8 @@ export function pickPumpForSystem({
       if (evalResult.softQMinApplied) {
         const modeQMin = mode.qMinM3h ?? 0;
         candWarnings.push(
-          `Расход Q=${q} м³/ч ниже паспортного q_min=${modeQMin} м³/ч режима «${mode.modeName}» — `
-          + 'допущена работа у левого края кривой (зона смесительного узла).',
+          `Витрата Q=${q} м³/ч нижче паспортного q_min=${modeQMin} м³/ч режиму «${mode.modeName}» — `
+          + 'допущено роботу біля лівого краю кривої (зона змішувального вузла).',
         );
       }
 
@@ -200,13 +200,13 @@ export function pickPumpForSystem({
 
   if (!best) {
     const marginHint = skipHeadOversizedCheck
-      ? `H≥${round(headTarget, 2)} м (без потолка запаса по напору)`
-      : `H≥${round(headTarget, 2)} м (запас по напору ${dutyRules.pumpHeadMarginPercent}…${dutyRules.pumpMaxHeadMarginPercent} %)`;
+      ? `H≥${round(headTarget, 2)} м (без стелі запасу за напором)`
+      : `H≥${round(headTarget, 2)} м (запас за напором ${dutyRules.pumpHeadMarginPercent}…${dutyRules.pumpMaxHeadMarginPercent} %)`;
     warnings.push(
-      `Не найден насос для Q=${q} м³/ч и ${marginHint} `
+      `Не знайдено насос для Q=${q} м³/ч и ${marginHint} `
       + `(допустимая зона: Q≤${dutyRules.pumpDutyQMaxUtilizationPercent} % Q_max режима`
-      + (softQMin ? ', soft qMin для зоны смесителя' : '')
-      + ') — расширьте каталог или снизьте сопротивления.',
+      + (softQMin ? ', soft qMin для зони змішувача' : '')
+      + ') — розширте каталог або зменште опори.',
     );
     return { pump: null, warnings };
   }

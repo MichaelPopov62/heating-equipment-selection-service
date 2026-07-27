@@ -47,16 +47,16 @@ function readJsonString(value: unknown, fallback = ''): string {
  */
 export function migrateSurveyDraft(raw: unknown): SurveyDraft {
   if (!isRecord(raw)) {
-    throw new Error('Файл проекта: ожидается JSON-объект');
+    throw new Error('Файл проєкту: очікується JSON-об\'єкт');
   }
   if (!isRecord(raw.objectMeta) || !Array.isArray(raw.rooms) || !isRecord(raw.temps)) {
-    throw new Error('Файл проекта: неполный черновик анкеты');
+    throw new Error('Файл проєкту: неповний чернетка анкети');
   }
 
   const storedVersion = Number(raw.schemaVersion);
   if (Number.isFinite(storedVersion) && storedVersion > SURVEY_DRAFT_SCHEMA_VERSION) {
     throw new Error(
-      `Неподдерживаемая schemaVersion: ${storedVersion} (максимум ${SURVEY_DRAFT_SCHEMA_VERSION})`,
+      `Непідтримувана schemaVersion: ${storedVersion} (максимум ${SURVEY_DRAFT_SCHEMA_VERSION})`,
     );
   }
 
@@ -109,7 +109,7 @@ export function migrateSurveyDraft(raw: unknown): SurveyDraft {
   const clientName =
     typeof raw.clientName === 'string' && raw.clientName.trim()
       ? raw.clientName.trim()
-      : 'Без имени';
+      : 'Без імені';
 
   const thermalRegimePreset = (() => {
     const preset = readJsonString(raw.thermalRegimePreset) as HeatingThermalRegimePreset;

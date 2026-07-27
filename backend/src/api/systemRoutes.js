@@ -33,7 +33,7 @@ export function createSystemRouter() {
           ok: false,
           error: {
             message:
-              'SYSTEM_INTERNAL_TOKEN не задан на сервере — инвалидация кэша недоступна.',
+              'SYSTEM_INTERNAL_TOKEN не задано на сервері — інвалідація кешу недоступна.',
             code: 'SYSTEM_TOKEN_NOT_CONFIGURED',
             statusCode: 503,
           },
@@ -48,7 +48,7 @@ export function createSystemRouter() {
         res.status(403).json({
           ok: false,
           error: {
-            message: 'Неверный или отсутствующий X-System-Token.',
+            message: 'Невірний або відсутній X-System-Token.',
             code: 'SYSTEM_TOKEN_FORBIDDEN',
             statusCode: 403,
           },

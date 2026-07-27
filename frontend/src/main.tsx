@@ -12,7 +12,7 @@ import { QueryProvider } from './query/QueryProvider';
 
 const rootEl = document.getElementById('root');
 if (!rootEl) {
-  throw new Error('Не найден элемент #root для монтирования приложения');
+  throw new Error('Не знайдено елемент #root для монтування застосунку');
 }
 
 createRoot(rootEl).render(

@@ -51,10 +51,10 @@ export function ufhPumpSummaryLabel(
   ufhPumps: readonly ParsedHydraulicsPumpProposal[],
 ): string {
   if (!mixingRequired) {
-    return 'не требуется (насос котла)';
+    return 'не потрібен (насос котла)';
   }
   if (ufhPumps.length === 0) {
-    return 'требуется, не подобран';
+    return 'потрібен, не підібрано';
   }
   return ufhPumps
     .map((p) => `${p.brand} ${p.model}`.trim())

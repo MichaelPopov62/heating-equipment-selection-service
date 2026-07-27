@@ -55,13 +55,13 @@ export function UfhWarningResolutionDialog({
       >
         <div className={styles.header}>
           <h2 id="ufh-warning-resolution-title" className={styles.title}>
-            Устранение предупреждения
+            Усунення попередження
           </h2>
           <button
             type="button"
             className={styles.closeIconButton}
             onClick={onClose}
-            aria-label="Закрыть"
+            aria-label="Закрити"
           >
             ✕
           </button>
@@ -77,12 +77,12 @@ export function UfhWarningResolutionDialog({
             ))}
           </ol>
         ) : (
-          <p className={styles.hint}>Шаги устранения не заданы в справочнике.</p>
+          <p className={styles.hint}>Кроки усунення не задані в довіднику.</p>
         )}
 
         <div className={styles.footer}>
           <button type="button" className={styles.closeButton} onClick={onClose}>
-            Закрыть
+            Закрити
           </button>
         </div>
       </div>

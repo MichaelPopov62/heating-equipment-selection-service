@@ -26,14 +26,14 @@ export function assertExternalWalls(building) {
 
   const presetId = String(ew.presetId ?? '').trim();
   if (!presetId) {
-    throw fieldError('EXTERNAL_WALLS_PRESET_REQUIRED', 'Укажите building.objectMeta.externalWalls.presetId');
+    throw fieldError('EXTERNAL_WALLS_PRESET_REQUIRED', 'Вкажіть building.objectMeta.externalWalls.presetId');
   }
 
   const wallPreset = getEnvelopePresetById(presetId);
   if (!wallPreset || wallPreset.kind !== 'wall') {
     throw fieldError(
       'EXTERNAL_WALLS_INVALID_PRESET',
-      `externalWalls.presetId="${presetId}" должен ссылаться на пресет kind=wall (несущий слой без утеплителя). Утеплитель задаётся отдельно через facadeSystem + insulationPresetId.`,
+      `externalWalls.presetId="${presetId}" має посилатися на пресет kind=wall (несучий шар без утеплювача). Утеплювач задається окремо через facadeSystem + insulationPresetId.`,
     );
   }
 
@@ -46,7 +46,7 @@ export function assertExternalWalls(building) {
   if (!FACADE_SYSTEMS.includes(/** @type {string} */ (facadeSystem))) {
     throw fieldError(
       'EXTERNAL_WALLS_FACADE_SYSTEM',
-      `facadeSystem должен быть одним из: ${FACADE_SYSTEMS.join(', ')}.`,
+      `facadeSystem має бути одним із: ${FACADE_SYSTEMS.join(', ')}.`,
     );
   }
 
@@ -62,14 +62,14 @@ export function assertExternalWalls(building) {
   if (!insulId) {
     throw fieldError(
       'EXTERNAL_WALLS_INSULATION_REQUIRED',
-      `При facadeSystem="${facadeSystem}" укажите insulationPresetId.`,
+      `При facadeSystem="${facadeSystem}" вкажіть insulationPresetId.`,
     );
   }
 
   if (insulThickness == null || !Number.isFinite(Number(insulThickness)) || Number(insulThickness) <= 0) {
     throw fieldError(
       'EXTERNAL_WALLS_INSULATION_THICKNESS',
-      `При facadeSystem="${facadeSystem}" укажите insulationThicknessMm (мм).`,
+      `При facadeSystem="${facadeSystem}" вкажіть insulationThicknessMm (мм).`,
     );
   }
 
@@ -77,7 +77,7 @@ export function assertExternalWalls(building) {
   if (t < INSULATION_THICKNESS_BOUNDS.min || t > INSULATION_THICKNESS_BOUNDS.max) {
     throw fieldError(
       'EXTERNAL_WALLS_INSULATION_THICKNESS',
-      `insulationThicknessMm должна быть в диапазоне ${INSULATION_THICKNESS_BOUNDS.min}…${INSULATION_THICKNESS_BOUNDS.max} мм.`,
+      `insulationThicknessMm має бути в діапазоні ${INSULATION_THICKNESS_BOUNDS.min}…${INSULATION_THICKNESS_BOUNDS.max} мм.`,
     );
   }
   ew.insulationThicknessMm = t;
@@ -86,7 +86,7 @@ export function assertExternalWalls(building) {
   if (!insulPreset || insulPreset.kind !== 'insulation') {
     throw fieldError(
       'EXTERNAL_WALLS_INSULATION_PRESET',
-      `insulationPresetId="${insulId}" должен ссылаться на пресет kind=insulation.`,
+      `insulationPresetId="${insulId}" має посилатися на пресет kind=insulation.`,
     );
   }
 
@@ -94,7 +94,7 @@ export function assertExternalWalls(building) {
     if (!isSftkInsulationPresetId(insulId)) {
       throw fieldError(
         'EXTERNAL_WALLS_SFTK_INSULATION',
-        `Для СФТК («мокрый фасад») допустим только ППС 16Ф (ПСБ-С 25Ф): insulationPresetId="${INSUL_SFTK_PPS16F_ID}". ППС-25/35 в открытом виде не применяются.`,
+        `Для СФТК («мокрий фасад») допустимий лише ППС 16Ф (ПСБ-С 25Ф): insulationPresetId="${INSUL_SFTK_PPS16F_ID}". ППС-25/35 у відкритому вигляді не застосовуються.`,
       );
     }
   }
@@ -103,7 +103,7 @@ export function assertExternalWalls(building) {
     if (!isMineralWoolInsulationPresetId(insulId)) {
       throw fieldError(
         'EXTERNAL_WALLS_VENTILATED_INSULATION',
-        'Для открытого/вентилируемого фасада допустима только минеральная вата (insul_minwool_*).',
+        'Для відкритого/вентильованого фасаду допустима лише мінеральна вата (insul_minwool_*).',
       );
     }
   }
@@ -111,7 +111,7 @@ export function assertExternalWalls(building) {
   if (wallPreset.uModel && (ew.thicknessMm == null || !(Number(ew.thicknessMm) > 0))) {
     throw fieldError(
       'EXTERNAL_WALLS_WALL_THICKNESS',
-      'При утеплённом фасаде задайте thicknessMm несущей стены для расчёта U по слоям.',
+      'При утепленому фасаді задайте thicknessMm несучої стіни для розрахунку U по шарах.',
     );
   }
 
@@ -121,7 +121,7 @@ export function assertExternalWalls(building) {
     if (elPreset.startsWith('insul_')) {
       throw fieldError(
         'ENVELOPE_WALL_INSULATION_PRESET',
-        `Элемент стены roomId="${el.roomId}": presetId="${elPreset}" — это утеплитель (kind=insulation), укажите пресет несущей стены.`,
+        `Елемент стіни roomId="${el.roomId}": presetId="${elPreset}" — це утеплювач (kind=insulation), вкажіть пресет несучої стіни.`,
       );
     }
   }

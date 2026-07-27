@@ -17,8 +17,8 @@ import { formatKw, formatLiters } from './format';
 
 export type HotWaterEquipmentKind = 'electric' | 'indirect';
 
-const NOT_PARTICIPATING = 'Не участвует в расчёте';
-const PENDING = '— (ожидается расчёт)';
+const NOT_PARTICIPATING = 'Не бере участі в розрахунку';
+const PENDING = '— (очікується розрахунок)';
 
 /**
  * @param scheme
@@ -61,9 +61,9 @@ function formatElectricMatchingLabel(
     }
   }
   if (parts.length === 0 && matching.warnings.length > 0) {
-    return matching.warnings[0] ?? 'Подбор без позиции каталога';
+    return matching.warnings[0] ?? 'Підбір без позиції каталогу';
   }
-  return parts.length > 0 ? parts.join(' · ') : 'Подбор выполнен';
+  return parts.length > 0 ? parts.join(' · ') : 'Підбір виконано';
 }
 
 /**
@@ -89,9 +89,9 @@ function formatIndirectMatchingLabel(
     }
   }
   if (parts.length === 0 && matching.warnings.length > 0) {
-    return matching.warnings[0] ?? 'Подбор без позиции каталога';
+    return matching.warnings[0] ?? 'Підбір без позиції каталогу';
   }
-  return parts.length > 0 ? parts.join(' · ') : 'Подбор выполнен';
+  return parts.length > 0 ? parts.join(' · ') : 'Підбір виконано';
 }
 
 /**

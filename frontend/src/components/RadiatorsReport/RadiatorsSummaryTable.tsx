@@ -38,12 +38,12 @@ export function RadiatorsSummaryTable({
         aria-labelledby="radiators-summary-title"
       >
         <h3 id="radiators-summary-title" className={styles.title}>
-          Радиаторы (итог)
+          Радіатори (підсумок)
         </h3>
         <p className={styles.hint}>
-          Режим «только тёплый пол» — подбор радиаторов не выполняется. Секции
-          приборов не требуются. Детали — на шаге{' '}
-          <SurveyStepLink step="radiators">«Радиаторы»</SurveyStepLink>
+          Режим «лише тепла підлога» — підбір радіаторів не виконується. Секції
+          приладів не потрібні. Деталі — на кроці{' '}
+          <SurveyStepLink step="radiators">«Радіатори»</SurveyStepLink>
           .
         </p>
       </div>
@@ -61,16 +61,16 @@ export function RadiatorsSummaryTable({
 
   const connectionLabel =
     radiators.inputs?.radiatorConnection === 'bottom'
-      ? 'нижняя'
+      ? 'нижня'
       : radiators.inputs?.radiatorConnection === 'side'
-        ? 'боковая'
+        ? 'бокова'
         : null;
 
   const kindLabel =
     radiators.resolvedEmitterKind === 'panel'
-      ? 'панельные'
+      ? 'панельні'
       : radiators.resolvedEmitterKind === 'sectional'
-        ? 'секционные'
+        ? 'секційні'
         : null;
 
   const onlySkipWarnings =
@@ -87,12 +87,12 @@ export function RadiatorsSummaryTable({
       aria-labelledby="radiators-summary-title"
     >
       <h3 id="radiators-summary-title" className={styles.title}>
-        Радиаторы (итог)
+        Радіатори (підсумок)
       </h3>
       {onlySkipWarnings ? (
         <p className={styles.hint}>
-          Подбор радиаторов пропущен или ещё без комнат в отчёте. Детали — на шаге{' '}
-          <SurveyStepLink step="radiators">«Радиаторы»</SurveyStepLink>
+          Підбір радіаторів пропущено або ще без приміщень у звіті. Деталі — на кроці{' '}
+          <SurveyStepLink step="radiators">«Радіатори»</SurveyStepLink>
           .
         </p>
       ) : (
@@ -100,13 +100,13 @@ export function RadiatorsSummaryTable({
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Показатель</th>
-                <th>Значение</th>
+                <th>Показник</th>
+                <th>Значення</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Приборы / секции</td>
+                <td>Прилади / секції</td>
                 <td>{instrumentsLabel}</td>
               </tr>
               {radiators.chosenModel != null && radiators.chosenModel.length > 0 && (
@@ -117,19 +117,19 @@ export function RadiatorsSummaryTable({
               )}
               {graphLabel != null && (
                 <tr>
-                  <td>График</td>
+                  <td>Графік</td>
                   <td>{graphLabel}</td>
                 </tr>
               )}
               {connectionLabel != null && (
                 <tr>
-                  <td>Подводка</td>
+                  <td>Підводка</td>
                   <td>{connectionLabel}</td>
                 </tr>
               )}
               {kindLabel != null && (
                 <tr>
-                  <td>Тип приборов</td>
+                  <td>Тип приладів</td>
                   <td>{kindLabel}</td>
                 </tr>
               )}
@@ -138,14 +138,14 @@ export function RadiatorsSummaryTable({
         </div>
       )}
       <p className={styles.hint}>
-        Полный расчёт и предупреждения — на шаге{' '}
-        <SurveyStepLink step="radiators">«Радиаторы»</SurveyStepLink>
-        . Таблицы по вариантам рядом с котлом — в блоке «Рекомендация».
+        Повний розрахунок і попередження — на кроці{' '}
+        <SurveyStepLink step="radiators">«Радіатори»</SurveyStepLink>
+        . Таблиці за варіантами поруч із котлом — у блоці «Рекомендація».
       </p>
       {hasWarnings && (
         <p className={styles.attention}>
-          Есть предупреждения по радиаторам — откройте отчёт на шаге{' '}
-          <SurveyStepLink step="radiators">«Радиаторы»</SurveyStepLink>
+          Є попередження щодо радіаторів — відкрийте звіт на кроці{' '}
+          <SurveyStepLink step="radiators">«Радіатори»</SurveyStepLink>
           .
         </p>
       )}

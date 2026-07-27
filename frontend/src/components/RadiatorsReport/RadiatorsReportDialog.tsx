@@ -58,13 +58,13 @@ export function RadiatorsReportDialog({
       >
         <div className={styles.header}>
           <h2 id="radiators-report-dialog-title" className={styles.title}>
-            Отчёт по расчёту радиаторов
+            Звіт із розрахунку радіаторів
           </h2>
           <button
             type="button"
             className={styles.closeIconButton}
             onClick={onClose}
-            aria-label="Закрыть"
+            aria-label="Закрити"
           >
             ✕
           </button>
@@ -74,14 +74,14 @@ export function RadiatorsReportDialog({
           <RadiatorsReportView radiators={radiators} />
         ) : (
           <p className={styles.empty}>
-            Нет данных подбора радиаторов. Заполните помещения и ограждения,
-            задайте подводку и тип приборов, дождитесь авторасчёта. При режиме
-            «только тёплый пол» (ufh_only) подбор радиаторов пропускается.
+            Немає даних підбору радіаторів. Заповніть приміщення та огородження,
+            задайте підводку та тип приладів, дочекайтеся авторасчунку. У режимі
+            «лише тепла підлога» (ufh_only) підбір радіаторів пропускається.
           </p>
         )}
 
         <button type="button" className={styles.closeButton} onClick={onClose}>
-          Закрыть
+          Закрити
         </button>
       </div>
     </div>

@@ -38,10 +38,10 @@ export function assertCalcInputJsonSize(calcInput) {
   try {
     serialized = JSON.stringify(calcInput);
   } catch {
-    throwPayloadTooLarge('Слишком большой или невалидный вход расчёта (calcInput).', 'CALC_INPUT_TOO_LARGE');
+    throwPayloadTooLarge('Занадто великий або невалідний вхід розрахунку (calcInput).', 'CALC_INPUT_TOO_LARGE');
   }
   if (serialized.length > MAX_CALC_INPUT_JSON_CHARS) {
-    throwPayloadTooLarge('Слишком большой вход расчёта (calcInput).', 'CALC_INPUT_TOO_LARGE');
+    throwPayloadTooLarge('Занадто великий вхід розрахунку (calcInput).', 'CALC_INPUT_TOO_LARGE');
   }
 }
 
@@ -65,7 +65,7 @@ export function assertCalculationDocumentSize(doc) {
   const bytes = estimateCalculationDocBsonBytes(doc);
   if (bytes > MAX_CALCULATION_DOC_BSON_BYTES) {
     throwPayloadTooLarge(
-      `Документ расчёта слишком большой для сохранения (${bytes} байт, лимит ${MAX_CALCULATION_DOC_BSON_BYTES}).`,
+      `Документ розрахунку занадто великий для збереження (${bytes} байт, ліміт ${MAX_CALCULATION_DOC_BSON_BYTES}).`,
       'CALCULATION_DOCUMENT_TOO_LARGE',
     );
   }

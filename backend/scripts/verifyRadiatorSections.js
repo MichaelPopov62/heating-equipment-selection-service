@@ -298,8 +298,8 @@ function isCondensingBoilerSelected(boiler) {
 function hasCondensingHighGraphWarning(warnings) {
   return (warnings ?? []).some(
     (w) =>
-      /конденсацион/i.test(w) &&
-      (/высокотемператур/i.test(w) || /traditional_dt50_75_65/i.test(w)),
+      /конденсацій/i.test(w) &&
+      (/високотемператур/i.test(w) || /traditional_dt50_75_65/i.test(w)),
   );
 }
 

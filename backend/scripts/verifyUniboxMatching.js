@@ -414,7 +414,7 @@ const threeLoopsPick = pickUniboxes({
   roomAirTempC: 20,
 });
 assert.equal(threeLoopsPick.byLoop.length, 3);
-assert.ok(!threeLoopsPick.warnings.some((w) => w.includes('унибоксом')));
+assert.ok(!threeLoopsPick.warnings.some((w) => w.includes('унібоксом')));
 
 // ≥4 петель з явним unibox — підбір триває, м'яке попередження
 const fourLoopsRoom = buildUfhReport({
@@ -440,7 +440,7 @@ const tooMany = pickUniboxes({
   roomAirTempC: 20,
 });
 assert.equal(tooMany.byLoop.length, 4);
-assert.ok(tooMany.warnings.some((w) => w.includes('унибоксом')));
+assert.ok(tooMany.warnings.some((w) => w.includes('унібоксом')));
 
 // Каскад коллекторов не блокує явні unibox-зони
 assert.equal(
@@ -579,7 +579,7 @@ const degraded = /** @type {import('../src/types/shared-types.js').ManifoldsMatc
   underfloor: [],
   radiator: null,
   boilerManifold: null,
-  warnings: ['Коллекторы: подбор не выполнен (MANIFOLD_INTERNAL).'],
+  warnings: ['Колектори: підбір не виконано (MANIFOLD_INTERNAL).'],
 });
 assert.equal(hasUnderfloorManifoldCascade(degraded), false);
 
@@ -591,16 +591,16 @@ const degradedPick = pickUniboxes({
   rooms: [{ id: 'r1', type: 'гостиная' }],
 });
 assert.ok(degradedPick.byLoop.length >= 1);
-assert.ok(!degradedPick.warnings.some((w) => w.includes('Унибоксы не подбираются: каскад')));
+assert.ok(!degradedPick.warnings.some((w) => w.includes('Унібокси не підбираються: каскад')));
 const degradedInfo = degradedPick.warnings.find((w) =>
-  w.includes('Подбор унибоксов выполняется без сигнала каскада коллекторов'),
+  w.includes('Підбір унібоксів виконується без сигналу каскаду колекторів'),
 );
 assert.ok(degradedInfo, 'блок-рівень warning про soft-fail колекторів');
 assert.ok(degradedInfo.includes('manifolds.ok=false'));
 assert.ok(degradedInfo.includes('MANIFOLD_INTERNAL'));
 const byLoopWarnFlat = degradedPick.byLoop.flatMap((r) => r.warnings);
 assert.ok(
-  !byLoopWarnFlat.some((w) => w.includes('без сигнала каскада')),
+  !byLoopWarnFlat.some((w) => w.includes('без сигналу каскаду')),
   'degraded-warning лише в matching.uniboxes.warnings, не в byLoop',
 );
 assert.ok(assertAt(degradedPick.byLoop, 0).selected);
@@ -643,7 +643,7 @@ const zeroFlowPick = pickUniboxes({
 assert.equal(zeroFlowPick.byLoop.length, 1);
 assert.equal(assertAt(zeroFlowPick.byLoop, 0).selected, null);
 assert.ok(
-  assertAt(zeroFlowPick.byLoop, 0).warnings.some((w) => w.includes('расход') || w.includes('л/ч')),
+  assertAt(zeroFlowPick.byLoop, 0).warnings.some((w) => w.includes('витрат') || w.includes('л/год') || w.includes('л/ч')),
 );
 
 // --- Пул лише з validated catalog.uniboxes (omit опціональних полів, без NaN) ---

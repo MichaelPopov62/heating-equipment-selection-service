@@ -205,24 +205,24 @@ export function UnderfloorHeatingReportView({
     <div>
       {underfloorHeating.rooms.length === 0 ? (
         <p className={styles.hint}>
-          Режим ТП включён в анкете, но нет комнат с включённым тёплым полом.
-          На шаге «Помещения» отметьте «Тёплый пол в этом помещении» и задайте основу + финиш.
+          Режим ТП увімкнено в анкеті, але немає приміщень з увімкненою теплою підлогою.
+          На кроці «Приміщення» відмітьте «Тепла підлога в цьому приміщенні» та задайте основу + фініш.
         </p>
       ) : (
         <p className={styles.hint}>
-          Источник: расчёт API (warmFloorCalc) · контур{' '}
+          Джерело: розрахунок API (warmFloorCalc) · контур{' '}
           {underfloorHeating.circuitSupplyC}/{underfloorHeating.circuitReturnC} °C
           {underfloorHeating.circuitSource === 'mixed_default'
-            ? ' (типичный смесительный узел)'
+            ? ' (типовий змішувальний вузол)'
             : underfloorHeating.circuitSource === 'finish_preset'
-              ? ' (по финишу покрытия)'
+              ? ' (за фінішем покриття)'
               : underfloorHeating.circuitSource === 'ufh_mode_preset'
-                ? ' (пресет режима ТП)'
+                ? ' (пресет режиму ТП)'
                 : ''}
           {underfloorHeating.isMixingNodeRequired
-            ? ' · требуется смесительный узел'
+            ? ' · потрібен змішувальний вузол'
             : underfloorHeating.circuitSource === 'ufh_mode_preset'
-              ? ' · смесительный узел не требуется (прямое подключение)'
+              ? ' · змішувальний вузол не потрібен (пряме підключення)'
               : ''}
         </p>
       )}
@@ -249,13 +249,13 @@ export function UnderfloorHeatingReportView({
                   setResolutionKind('mixing');
                 }}
               >
-                Устранение предупреждения
+                Усунення попередження
               </button>
             </div>
           )}
 
           <div className={styles.pumpBlock}>
-            <h4 className={styles.roomTitle}>Насос контура ТП</h4>
+            <h4 className={styles.roomTitle}>Насос контуру ТП</h4>
             {underfloorHeating.isMixingNodeRequired ? (
               ufhPumps.length > 0 ? (
                 ufhPumps.map((p) => (
@@ -263,29 +263,29 @@ export function UnderfloorHeatingReportView({
                 ))
               ) : (
                 <p className={styles.hint}>
-                  Смесительный узел требуется, но зональный насос контура ТП не
-                  подобран — проверьте каталог насосов и warnings гидравлики.
+                  Потрібен змішувальний вузол, але зональний насос контуру ТП не
+                  підібрано — перевірте каталог насосів і попередження гідравліки.
                 </p>
               )
             ) : (
               <p className={styles.hint}>
-                Отдельный насос контура ТП не требуется — циркуляция обеспечивается
-                насосом котла.
+                Окремий насос контуру ТП не потрібен — циркуляцію забезпечує
+                насос котла.
               </p>
             )}
           </div>
 
           {underfloorHeating.underfloorHydraulics != null && (
             <dl className={styles.dl} style={{ marginTop: 10 }}>
-              <dt>Гидравлика контура ТП</dt>
+              <dt>Гідравліка контуру ТП</dt>
               <dd>
-                Δt = {underfloorHeating.underfloorHydraulics.deltaTK} K, расход{' '}
+                Δt = {underfloorHeating.underfloorHydraulics.deltaTK} K, витрата{' '}
                 {underfloorHeating.underfloorHydraulics.flowRateM3PerHour} м³/ч
               </dd>
             </dl>
           )}
           <dl className={styles.dl} style={{ marginTop: 10 }}>
-            <dt>Суммарная отдача вверх</dt>
+            <dt>Сумарна віддача вгору</dt>
             <dd>
               {formatKw(underfloorHeating.totalHeatFluxUpWatts / 1000, 2)}{' '}
               <span>кВт</span>
@@ -294,7 +294,7 @@ export function UnderfloorHeatingReportView({
                 ({formatWatts(underfloorHeating.totalHeatFluxUpWatts)} Вт)
               </span>
             </dd>
-            <dt>Паразитный поток вниз</dt>
+            <dt>Паразитний потік вниз</dt>
             <dd>
               {formatKw(underfloorHeating.totalHeatFluxDownWatts / 1000, 2)}{' '}
               <span>кВт</span>
@@ -313,22 +313,22 @@ export function UnderfloorHeatingReportView({
                 <dl className={styles.dl}>
                   <dt>Основа</dt>
                   <dd>{room.basePresetName}</dd>
-                  <dt>Финиш</dt>
+                  <dt>Фініш</dt>
                   <dd>{room.finishMaterialName}</dd>
                   {(room.roomAreaM2 != null
                     || room.furnitureOccupiedAreaM2 != null
                     || room.heatedAreaM2 != null) && (
                     <>
-                      <dt>Площади</dt>
+                      <dt>Площі</dt>
                       <dd>
                         {room.roomAreaM2 != null && (
-                          <>комната {room.roomAreaM2.toFixed(1)} м²</>
+                          <>приміщення {room.roomAreaM2.toFixed(1)} м²</>
                         )}
                         {room.furnitureOccupiedAreaM2 != null
                           && room.furnitureOccupiedAreaM2 > 0 && (
                           <>
                             {room.roomAreaM2 != null ? ' · ' : ''}
-                            мебель {room.furnitureOccupiedAreaM2.toFixed(1)} м²
+                            меблі {room.furnitureOccupiedAreaM2.toFixed(1)} м²
                           </>
                         )}
                         {room.heatedAreaM2 != null && (
@@ -338,13 +338,13 @@ export function UnderfloorHeatingReportView({
                                 && room.furnitureOccupiedAreaM2 > 0))
                               ? ' · '
                               : ''}
-                            активная {room.heatedAreaM2.toFixed(1)} м²
+                            активна {room.heatedAreaM2.toFixed(1)} м²
                           </>
                         )}
                       </dd>
                     </>
                   )}
-                  <dt>Шаг трубы</dt>
+                  <dt>Крок труби</dt>
                   <dd>
                     {room.pipeSpacingMm} мм
                     {room.requestedPipeSpacingMm != null
@@ -352,32 +352,32 @@ export function UnderfloorHeatingReportView({
                       && room.pipeSpacingResolution === 'tightened' && (
                         <span className={styles.muted}>
                           {' '}
-                          (запрошено {room.requestedPipeSpacingMm} мм →{' '}
+                          (запитано {room.requestedPipeSpacingMm} мм →{' '}
                           {room.resolvedPipeSpacingMm} мм)
                         </span>
                       )}
                   </dd>
                   {room.requiredHeatFluxUpWm2 != null && (
                     <>
-                      <dt>Требуемый поток вверх</dt>
+                      <dt>Потрібний потік вгору</dt>
                       <dd>{formatHeatFluxWm2(room.requiredHeatFluxUpWm2)}</dd>
                     </>
                   )}
-                  <dt>Поток вверх / вниз</dt>
+                  <dt>Потік вгору / вниз</dt>
                   <dd>
                     {formatHeatFluxWm2(room.heatFluxUpWm2)}
                     {' / '}
                     {formatHeatFluxWm2(room.heatFluxDownWm2)}
                     <span className={styles.muted}>
                       {' '}
-                      (лимит {formatHeatFluxWm2(room.maxAllowableHeatFluxUpWm2)})
+                      (ліміт {formatHeatFluxWm2(room.maxAllowableHeatFluxUpWm2)})
                     </span>
                   </dd>
-                  <dt>Мощность вверх / вниз</dt>
+                  <dt>Потужність вгору / вниз</dt>
                   <dd>
                     {formatWatts(room.heatFluxUpWatts)} / {formatWatts(room.heatFluxDownWatts)}
                   </dd>
-                  <dt>Температура поверхности</dt>
+                  <dt>Температура поверхні</dt>
                   <dd>
                     {formatTempC(room.surfaceTempC)}
                     <span className={styles.muted}>
@@ -392,22 +392,22 @@ export function UnderfloorHeatingReportView({
                   {(room.finishMaxSurfaceTemperatureCelsius != null
                     || room.presetMaxSurfaceTemperatureCelsius != null) && (
                     <>
-                      <dt>Лимиты Tпов</dt>
+                      <dt>Ліміти Tпов</dt>
                       <dd>
                         {room.finishMaxSurfaceTemperatureCelsius != null && (
-                          <>финиш {formatTempC(room.finishMaxSurfaceTemperatureCelsius)}</>
+                          <>фініш {formatTempC(room.finishMaxSurfaceTemperatureCelsius)}</>
                         )}
                         {room.presetMaxSurfaceTemperatureCelsius != null && (
                           <>
                             {room.finishMaxSurfaceTemperatureCelsius != null ? ' · ' : ''}
-                            пресет режима{' '}
+                            пресет режиму{' '}
                             {formatTempC(room.presetMaxSurfaceTemperatureCelsius)}
                           </>
                         )}
                       </dd>
                     </>
                   )}
-                  <dt>R покрытия / заделки</dt>
+                  <dt>R покриття / укладки</dt>
                   <dd>
                     {room.coveringResistanceM2KW.toFixed(3)} /{' '}
                     {room.pipeEmbedmentResistanceM2KW.toFixed(3)} м²·К/Вт
@@ -448,7 +448,7 @@ export function UnderfloorHeatingReportView({
                     setResolutionKind('velocity');
                   }}
                 >
-                  Устранение предупреждения
+                  Усунення попередження
                 </button>
               )}
             </div>
@@ -469,7 +469,7 @@ export function UnderfloorHeatingReportView({
                     setResolutionKind('parasitic');
                   }}
                 >
-                  Устранение предупреждения
+                  Усунення попередження
                 </button>
               )}
             </div>
@@ -490,7 +490,7 @@ export function UnderfloorHeatingReportView({
                     setResolutionKind('surfacePreset');
                   }}
                 >
-                  Устранение предупреждения
+                  Усунення попередження
                 </button>
               )}
             </div>
@@ -511,7 +511,7 @@ export function UnderfloorHeatingReportView({
                     setResolutionKind('coverage');
                   }}
                 >
-                  Устранение предупреждения
+                  Усунення попередження
                 </button>
               )}
             </div>
@@ -521,7 +521,7 @@ export function UnderfloorHeatingReportView({
 
       {structuredOther.length > 0 && (
         <div className={styles.structuredBlock}>
-          <h4 className={styles.roomTitle}>Рекомендации и предупреждения</h4>
+          <h4 className={styles.roomTitle}>Рекомендації та попередження</h4>
           <ul className={styles.structuredList}>
             {structuredOther.map((rec, i) => (
               <li key={`ufh-rec-${rec.code}-${i}`} className={styles.structuredItem}>

@@ -24,7 +24,7 @@ export function WaterHeaterReportView({
       idPrefix="wh-report"
       indirect={indirect}
       electric={electric}
-      sectionTitle="Результат подбора"
+      sectionTitle="Результат підбору"
     />
   );
 }

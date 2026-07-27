@@ -16,7 +16,7 @@ export type AppBootstrapSkeletonProps = {
  * @param props
  */
 export function AppBootstrapSkeleton({
-  statusLabel = 'Загрузка приложения…',
+  statusLabel = 'Завантаження застосунку…',
 }: AppBootstrapSkeletonProps) {
   return (
     <div className={styles.root} role="status" aria-live="polite" aria-busy="true">

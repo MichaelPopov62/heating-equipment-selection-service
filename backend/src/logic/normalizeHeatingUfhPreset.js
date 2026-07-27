@@ -65,7 +65,7 @@ export function normalizeHeatingUfhPreset(body, ufhPresets) {
 
   if (preset.technical.requiresCondensingBoiler) {
     normWarnings.push(
-      `Режим «${preset.ui.title}» рассчитан на конденсационный котёл (низкотемпературный контур ${preset.technical.supplyC}/${preset.technical.returnC} °C).`,
+      `Режим «${preset.ui.title}» розрахований на конденсаційний котел (низькотемпературний контур ${preset.technical.supplyC}/${preset.technical.returnC} °C).`,
     );
   }
 

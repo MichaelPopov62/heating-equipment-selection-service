@@ -81,18 +81,18 @@ export function formatRadiatorsEmittersSummaryLabel(
   if (summary == null) return null;
   const parts: string[] = [];
   if (summary.panelUnits > 0) {
-    parts.push(`панельные: ${summary.panelUnits} шт.`);
+    parts.push(`панельні: ${summary.panelUnits} шт.`);
   }
   if (summary.sectionalUnits > 0) {
     parts.push(
-      `секционные: ${summary.sectionalSections} сек. (${summary.sectionalUnits} приб.)`,
+      `секційні: ${summary.sectionalSections} сек. (${summary.sectionalUnits} прил.)`,
     );
   }
   if (summary.totalDeliverableWatts > 0) {
     parts.push(`Σ ≈ ${Math.round(summary.totalDeliverableWatts)} Вт`);
   }
   if (parts.length === 0) {
-    return summary.roomsSkipped > 0 ? 'приборы не требуются' : null;
+    return summary.roomsSkipped > 0 ? 'прилади не потрібні' : null;
   }
   return parts.join(' · ');
 }

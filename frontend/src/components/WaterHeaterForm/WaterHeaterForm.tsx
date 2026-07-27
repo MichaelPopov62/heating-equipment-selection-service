@@ -87,18 +87,18 @@ export function WaterHeaterForm({
 
   return (
     <div className={styles.root}>
-      <h2 className={styles.title}>Водонагреватель и сценарий ГВС</h2>
+      <h2 className={styles.title}>Водонагрівач і сценарій ГВП</h2>
       <p className={styles.hint}>
-        Выберите, как обеспечивается горячая вода: через двухконтурный котёл,
-        бойлер косвенного нагрева (БКН) или электронакопитель. Потребление воды
-        (жильцы, точки) задаётся на шаге «Горячая вода»; здесь — только
-        стратегия подбора оборудования.
+        Оберіть, як забезпечується гаряча вода: через двоконтурний котел,
+        бойлер непрямого нагріву (БКН) або електронакопичувач. Споживання води
+        (мешканці, точки) задається на кроці «Гаряча вода»; тут — лише
+        стратегія підбору обладнання.
       </p>
 
       <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Сценарий связки котёл / ГВС</h3>
+        <h3 className={styles.sectionTitle}>Сценарій зв&apos;язки котел / ГВП</h3>
         <label className={styles.label} htmlFor="water-heater-scheme">
-          Как котёл связан с горячей водой
+          Як котел пов&apos;язаний із гарячою водою
         </label>
         <select
           id="water-heater-scheme"
@@ -121,7 +121,7 @@ export function WaterHeaterForm({
           <code className={styles.inlineCode}>
             heatingSystem.hotWaterBoilerPowerMatchingScheme
           </code>
-          . Модель и объём подбираются автоматически по расчёту.
+          . Модель і об&apos;єм підбираються автоматично за розрахунком.
         </p>
 
         {showIndirectCheckbox && (
@@ -137,21 +137,21 @@ export function WaterHeaterForm({
               }
             />
             <span>
-              Есть техпомещение или ниша под бойлер косвенного нагрева (БКН).
-              Без этой отметки для квартиры подбор БКН не выполняется.
+              Є техприміщення або ніша під бойлер непрямого нагріву (БКН).
+              Без цієї позначки для квартири підбір БКН не виконується.
             </span>
           </label>
         )}
       </div>
 
       <p className={styles.hint}>
-        Детали расчёта потребления (расход, мощность, объём бака) — на шаге
-        «Горячая вода», кнопка «Отчёт по расчёту ГВ».
+        Деталі розрахунку споживання (витрата, потужність, об&apos;єм бака) — на кроці
+        «Гаряча вода», кнопка «Звіт з розрахунку ГВ».
       </p>
 
       {validation.warnings.length > 0 && (
         <div className={styles.warningsSection} role="status">
-          <h3 className={styles.sectionTitle}>Подсказки</h3>
+          <h3 className={styles.sectionTitle}>Підказки</h3>
           <ul className={styles.warningsList}>
             {validation.warnings.map((w) => (
               <li key={w}>{w}</li>
@@ -168,7 +168,7 @@ export function WaterHeaterForm({
             disabled={!canOpenReport}
             onClick={() => { setReportOpen(true); }}
           >
-            Отчёт по подбору водонагревателя
+            Звіт з підбору водонагрівача
           </button>
           {onBackToResults != null && (
             <button
@@ -176,18 +176,18 @@ export function WaterHeaterForm({
               className={reportActionsStyles.backButton}
               onClick={onBackToResults}
             >
-              Назад к результатам
+              Назад до результатів
             </button>
           )}
         </div>
         {calcLoading && (
           <p className={styles.hint} style={{ marginTop: 8 }} role="status">
-            Обновление подбора…
+            Оновлення підбору…
           </p>
         )}
         {!canOpenReport && !calcLoading && (
           <p className={styles.hint} style={{ marginTop: 8 }}>
-            Отчёт появится после авторасчёта с выбранной схемой ГВС.
+            Звіт з&apos;явиться після авторозрахунку з обраною схемою ГВП.
           </p>
         )}
       </div>

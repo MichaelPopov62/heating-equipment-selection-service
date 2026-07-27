@@ -176,21 +176,21 @@ export function assertRoomExteriorLayoutWalls(building) {
 
     if (layout === 'internal') {
       if (facadeWallCount > 0) {
-        message = `Комната "${room.name}" (${room.id}): layout=internal, но задано фасадных стен: ${facadeWallCount}.`;
+        message = `Приміщення "${room.name}" (${room.id}): layout=internal, але задано фасадних стін: ${facadeWallCount}.`;
       } else if (internalWallCount !== 1) {
-        message = `Комната "${room.name}" (${room.id}): layout=internal требует ровно одну стену в корidor, получено: ${internalWallCount}.`;
+        message = `Приміщення "${room.name}" (${room.id}): layout=internal вимагає рівно одну стіну в коридор, отримано: ${internalWallCount}.`;
       }
     } else if (layout === 'facade') {
       if (internalWallCount > 0) {
-        message = `Комната "${room.name}" (${room.id}): layout=facade не допускает стену в корidor.`;
+        message = `Приміщення "${room.name}" (${room.id}): layout=facade не допускає стіну в коридор.`;
       } else if (facadeWallCount !== 1) {
-        message = `Комната "${room.name}" (${room.id}): layout=facade требует одну фасадную стену, получено: ${facadeWallCount}.`;
+        message = `Приміщення "${room.name}" (${room.id}): layout=facade вимагає одну фасадну стіну, отримано: ${facadeWallCount}.`;
       }
     } else if (layout === 'corner') {
       if (internalWallCount > 0) {
-        message = `Комната "${room.name}" (${room.id}): layout=corner не допускает стену в корidor.`;
+        message = `Приміщення "${room.name}" (${room.id}): layout=corner не допускає стіну в коридор.`;
       } else if (facadeWallCount !== 2) {
-        message = `Комната "${room.name}" (${room.id}): layout=corner требует две фасадные стены, получено: ${facadeWallCount}.`;
+        message = `Приміщення "${room.name}" (${room.id}): layout=corner вимагає дві фасадні стіни, отримано: ${facadeWallCount}.`;
       }
     }
 

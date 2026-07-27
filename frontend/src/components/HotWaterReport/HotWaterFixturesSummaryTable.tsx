@@ -35,10 +35,10 @@ export function HotWaterFixturesSummaryTable({
       </h3>
       <HotWaterFixturesTable fixtures={fixtures} />
       <p className={styles.hint}>
-        Значения из анкеты шага{' '}
-        <SurveyStepLink step="hotWater">«Горячая вода»</SurveyStepLink>
-        ; при изменении анкеты таблица обновляется сразу. Полный расчёт расхода и
-        мощности — в отчёте на том же шаге (после авторасчёта).
+        Значення з анкети кроку{' '}
+        <SurveyStepLink step="hotWater">«Гаряча вода»</SurveyStepLink>
+        ; при зміні анкети таблиця оновлюється одразу. Повний розрахунок витрати та
+        потужності — у звіті на тому ж кроці (після авторасчунку).
       </p>
     </div>
   );

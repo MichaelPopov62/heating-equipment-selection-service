@@ -76,5 +76,5 @@ export function thermalRegimeRecommendationHint(scheme, objectType, selectedPres
     recommended === 'condensing_dt30_55_45' ? '55/45 °C' : '75/65 °C';
   const selLabel =
     selectedPreset === 'condensing_dt30_55_45' ? '55/45 °C' : '75/65 °C';
-  return `Для выбранной схемы котла рекомендуем график ${recLabel} (сейчас ${selLabel}). Расчёт выполняется по вашему выбору.`;
+  return `Для обраної схеми котла рекомендуємо графік ${recLabel} (зараз ${selLabel}). Розрахунок виконується за вашим вибором.`;
 }

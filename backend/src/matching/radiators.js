@@ -106,7 +106,7 @@ export function pickRadiatorsWithProposalLines({
   const deltaTSystemK = hydraulics?.deltaTSystemK;
   if (heatingSystem?.heatingEmittersMode === 'ufh_only') {
     const skipMsg =
-      'Подбор радиаторов пропущен: выбран режим отопления только теплым полом (heatingEmittersMode=ufh_only).';
+      'Підбір радіаторів пропущено: обрано режим опалення лише теплою підлогою (heatingEmittersMode=ufh_only).';
     return {
       chosen: null,
       byRoom: [],
@@ -166,7 +166,7 @@ export function pickRadiatorsWithProposalLines({
   } else {
     lineEconomy = unavailableRadiatorProposalLine(
       'economy',
-      'Линия «Эконом» недоступна: в каталоге нет традиционных котлов для этой схемы.',
+      'Лінія «Економ» недоступна: у каталозі немає традиційних котлів для цієї схеми.',
     );
   }
 
@@ -195,7 +195,7 @@ export function pickRadiatorsWithProposalLines({
   } else {
     lineEfficient = unavailableRadiatorProposalLine(
       'efficient',
-      'Линия «Эффективный» недоступна: в каталоге нет конденсационных котлов для этой схемы.',
+      'Лінія «Ефективний» недоступна: у каталозі немає конденсаційних котлів для цієї схеми.',
     );
   }
 
@@ -209,8 +209,8 @@ export function pickRadiatorsWithProposalLines({
   for (const diff of roomEmitterDiffs) {
     if (!diff.equipmentKindChanged) continue;
     kindChangeWarnings.push(
-      `[${diff.roomName}] Тип прибора различается между линиями «Эконом» (${diff.economyDisplayKind}) `
-        + `и «Эффективный» (${diff.efficientDisplayKind}) — нарушение инварианта единого kind.`,
+      `[${diff.roomName}] Тип приладу відрізняється між лініями «Економ» (${diff.economyDisplayKind}) `
+        + `та «Ефективний» (${diff.efficientDisplayKind}) — порушення інваріанта єдиного kind.`,
     );
   }
 

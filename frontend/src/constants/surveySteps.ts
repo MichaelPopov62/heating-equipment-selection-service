@@ -10,34 +10,34 @@ import type { SurveyCurrentStep } from '../types/surveyStep';
 
 /** Подписи пунктов боковой навигации. */
 const SURVEY_STEP_NAV_LABELS: Record<SurveyCurrentStep, string> = {
-  object: 'Объект',
-  rooms: 'Помещения',
-  hotWater: 'Горячая вода',
-  boiler: 'Котёл',
-  warmFloor: 'Тёплый пол',
-  radiators: 'Радиаторы',
-  waterHeater: 'Водонагреватель',
-  hydraulics: 'Гидравлика',
-  technicalResult: 'Результат технический',
-  dataReference: 'Справочник данных',
-  financialResult: 'Итог финансовый',
+  object: 'Об\'єкт',
+  rooms: 'Приміщення',
+  hotWater: 'Гаряча вода',
+  boiler: 'Котел',
+  warmFloor: 'Тепла підлога',
+  radiators: 'Радіатори',
+  waterHeater: 'Водонагрівач',
+  hydraulics: 'Гідравліка',
+  technicalResult: 'Результат технічний',
+  dataReference: 'Довідник даних',
+  financialResult: 'Підсумок фінансовий',
 };
 
 /** Заголовок блока globalMeta; для шагов без записи — «Параметры объекта». */
 const SURVEY_STEP_GLOBAL_META_TITLES: Partial<Record<SurveyCurrentStep, string>> = {
-  rooms: 'Параметры помещений',
-  hotWater: 'Объект и горячая вода',
-  boiler: 'Котёл: температурный график отопления',
-  radiators: 'Радиаторы: подводка и тип приборов',
-  waterHeater: 'Водонагреватель и сценарий ГВС',
-  warmFloor: 'Тёплый пол и низкотемпературный контур',
-  hydraulics: 'Гидравлика и разводка',
-  technicalResult: 'Технический результат расчёта',
-  dataReference: 'Справочник оборудования каталога',
-  financialResult: 'Итог финансовый по расчёту',
+  rooms: 'Параметри приміщень',
+  hotWater: 'Об\'єкт і гаряча вода',
+  boiler: 'Котел: температурний графік опалення',
+  radiators: 'Радіатори: підведення і тип приладів',
+  waterHeater: 'Водонагрівач і сценарій ГВП',
+  warmFloor: 'Тепла підлога і низькотемпературний контур',
+  hydraulics: 'Гідравліка і розводка',
+  technicalResult: 'Технічний результат розрахунку',
+  dataReference: 'Довідник обладнання каталогу',
+  financialResult: 'Підсумок фінансовий за розрахунком',
 };
 
-const DEFAULT_GLOBAL_META_TITLE = 'Параметры объекта';
+const DEFAULT_GLOBAL_META_TITLE = 'Параметри об\'єкта';
 
 /** Канонический порядок шагов survey (SSOT для migrateSurveyDraft и навигации). */
 export const SURVEY_STEPS: readonly SurveyCurrentStep[] = [

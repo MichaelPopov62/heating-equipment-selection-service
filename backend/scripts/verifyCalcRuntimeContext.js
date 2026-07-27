@@ -104,7 +104,7 @@ assertThrows(
         })
       ),
     ),
-  'ufhPresets обязательны',
+  'ufhPresets обов\'язкові',
   'calculateUnderfloorHeating без ufhPresets → throw',
 );
 

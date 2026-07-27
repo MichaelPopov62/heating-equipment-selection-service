@@ -36,7 +36,7 @@ export function pickWaterHeater({ hotWater, catalog }) {
     return {
       selected: null,
       chosenVariant: null,
-      warnings: ['В каталоге нет водонагревателей.'],
+      warnings: ['У каталозі немає водонагрівачів.'],
       requiredTankLiters: Number(hotWater?.recommendedTankLiters) || 0,
     };
   }
@@ -81,7 +81,7 @@ export function pickWaterHeater({ hotWater, catalog }) {
     }
     best = largest;
     if (best && need > 0 && best.variant.volumeLiters < need) {
-      warnings.push('Подобранный водонагреватель меньше расчётного объёма (ограничение каталога).');
+      warnings.push('Підібраний водонагрівач менший за розрахунковий об’єм (обмеження каталогу).');
     }
   }
 

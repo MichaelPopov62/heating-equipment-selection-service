@@ -36,6 +36,6 @@ export function resolveKVent(mode) {
  */
 export function ventilationReserveModeLabel(mode) {
   return mode === 'recuperation'
-    ? 'приточно-вытяжная с рекуператором'
-    : 'естественная вентиляция / проветривание';
+    ? 'приточно-витяжна з рекуператором'
+    : 'природна вентиляція / провітрювання';
 }

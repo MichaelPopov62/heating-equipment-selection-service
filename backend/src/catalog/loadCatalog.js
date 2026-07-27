@@ -183,8 +183,8 @@ async function loadCatalogJsonFromFile() {
     const code = err && typeof err === 'object' ? /** @type {NodeJS.ErrnoException} */ (err).code : null;
     if (code === 'ENOENT') {
       throw new Error(
-        `Файл каталога не найден: ${p}. Скопируйте backend/test_data.json.example → test_data.json ` +
-          'или задайте CATALOG_FILE_PATH / SEED_CATALOG_PATH.',
+        `Файл каталогу не знайдено: ${p}. Скопіюйте backend/test_data.json.example → test_data.json ` +
+          'або задайте CATALOG_FILE_PATH / SEED_CATALOG_PATH.',
         { cause: err },
       );
     }
@@ -200,14 +200,14 @@ async function loadCatalogJsonFromMongo() {
   const connected = await ensureMongoReferenceConnection();
   if (!connected) {
     throw new Error(
-      'CATALOG_SOURCE=mongo|auto: не заданы MONGODB_URI или параметры подключения к MongoDB.',
+      'CATALOG_SOURCE=mongo|auto: не задані MONGODB_URI або параметри підключення до MongoDB.',
     );
   }
 
   const docs = await Product.find({}).sort({ kind: 1, catalogKey: 1 }).lean();
   if (!docs.length) {
     throw new Error(
-      'Каталог в MongoDB пуст (коллекция products). Выполните: cd backend && npm run seed',
+      'Каталог у MongoDB порожній (колекція products). Виконайте: cd backend && npm run seed',
     );
   }
 
@@ -267,12 +267,12 @@ async function loadCatalogJsonFromMongo() {
 
   if (countBoilersInProductsJson(envelope) < 1) {
     throw new Error(
-      'В MongoDB нет котлов (kind=boiler). Выполните: cd backend && npm run seed',
+      'У MongoDB немає котлів (kind=boiler). Виконайте: cd backend && npm run seed',
     );
   }
 
   if (countProductRowsInEnvelope(envelope) < 1) {
-    throw new Error('Каталог в MongoDB не содержит номенклатуры products.');
+    throw new Error('Каталог у MongoDB не містить номенклатури products.');
   }
 
   return envelope;

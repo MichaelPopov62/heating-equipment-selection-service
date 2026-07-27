@@ -63,13 +63,13 @@ export function BoilerReportDialog({
       >
         <div className={styles.header}>
           <h2 id="boiler-report-dialog-title" className={styles.title}>
-            Отчёт по подбору котла
+            Звіт із підбору котла
           </h2>
           <button
             type="button"
             className={styles.closeIconButton}
             onClick={onClose}
-            aria-label="Закрыть"
+            aria-label="Закрити"
           >
             ✕
           </button>
@@ -83,13 +83,13 @@ export function BoilerReportDialog({
           />
         ) : (
           <p className={styles.empty}>
-            Нет данных подбора котла. Заполните помещения и ограждения, задайте
-            график отопления и сценарий ГВС, дождитесь авторасчёта.
+            Немає даних підбору котла. Заповніть приміщення та огородження, задайте
+            графік опалення та сценарій ГВП, дочекайтеся авторасчунку.
           </p>
         )}
 
         <button type="button" className={styles.closeButton} onClick={onClose}>
-          Закрыть
+          Закрити
         </button>
       </div>
     </div>

@@ -406,7 +406,7 @@ function ufhRoom(roomId, roomName, loopsCount) {
   assert.equal(ufh12.units.length, 1);
   assert.equal(assertAt(ufh12.units, 0).requiredOutlets, 12);
   assert.equal(assertAt(ufh12.units, 0).selected?.model, 'Ufh-12-FM');
-  assert.ok(!report.warnings.some((w) => w.includes('Превышен лимит петель')));
+  assert.ok(!report.warnings.some((w) => w.includes('Перевищено ліміт петель')));
 }
 
 // 9) 14 петель → каскад 7+7, warning, два SKU
@@ -440,8 +440,8 @@ function ufhRoom(roomId, roomName, loopsCount) {
   assert.ok(
     report.warnings.some(
       (w) =>
-        w.includes('Превышен лимит петель на один узел (max 12)')
-        && w.includes('на 2 коллектора')
+        w.includes('Перевищено ліміт петель на один вузол (max 12)')
+        && w.includes('на 2 колектори')
         && w.includes('7+7'),
     ),
   );
@@ -474,7 +474,7 @@ function ufhRoom(roomId, roomName, loopsCount) {
     units.map((u) => u.requiredOutlets),
     [9, 8, 8],
   );
-  assert.ok(report.warnings.some((w) => w.includes('на 3 коллектора') && w.includes('9+8+8')));
+  assert.ok(report.warnings.some((w) => w.includes('на 3 колектори') && w.includes('9+8+8')));
 }
 
 // 11) порожній каталог underfloor — штатний ok:true + selected null (не soft-fail)
@@ -502,7 +502,7 @@ function ufhRoom(roomId, roomName, loopsCount) {
   assert.equal(report.failureCode, undefined);
   assert.equal(report.underfloor.length, 1);
   assert.equal(assertAt(assertAt(report.underfloor, 0).units, 0).selected, null);
-  assert.ok(report.warnings.some((w) => w.includes('нет коллекторов')));
+  assert.ok(report.warnings.some((w) => w.includes('немає колекторів')));
 }
 
 // 12) soft-fail builders

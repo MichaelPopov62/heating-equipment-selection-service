@@ -23,7 +23,7 @@ async function resolveBrowserExecutable() {
   if (fromEnv) {
     if (!fs.existsSync(fromEnv)) {
       /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
-      const err = new Error(`Chromium не найден: ${fromEnv}`);
+      const err = new Error(`Chromium не знайдено: ${fromEnv}`);
       err.statusCode = 503;
       err.code = 'PDF_BROWSER_MISSING';
       throw err;
@@ -54,7 +54,7 @@ async function resolveBrowserExecutable() {
 
   /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
   const err = new Error(
-    'Не найден Chromium для PDF. Задайте PDF_BROWSER_EXECUTABLE или установите puppeteer.',
+    'Не знайдено Chromium для PDF. Задайте PDF_BROWSER_EXECUTABLE або встановіть puppeteer.',
   );
   err.statusCode = 503;
   err.code = 'PDF_BROWSER_MISSING';
@@ -103,7 +103,7 @@ export async function renderPdfFromHtml(html) {
       throw e;
     }
     /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
-    const err = new Error(`Не удалось сформировать PDF: ${msg}`);
+    const err = new Error(`Не вдалося сформувати PDF: ${msg}`);
     err.statusCode = 503;
     err.code =
       /timeout/i.test(msg) ? 'PDF_RENDER_TIMEOUT' : 'PDF_RENDER_FAILED';

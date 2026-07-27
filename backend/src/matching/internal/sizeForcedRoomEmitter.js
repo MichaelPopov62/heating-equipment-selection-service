@@ -137,13 +137,13 @@ function sizeForcedSectional(args) {
       const sizingNotes = [...win.sizingNotes];
       if (unitsCount > 1) {
         sizingNotes.push(
-          `Эскалация: ${unitsCount} секционных прибора(ов) в помещении `
-            + `(нагрузка ≈${Math.round(qPerUnit)} Вт на прибор).`,
+          `Ескалація: ${unitsCount} секційних приладів у приміщенні `
+            + `(навантаження ≈${Math.round(qPerUnit)} Вт на прилад).`,
         );
       }
       if (windowOpeningWidthMm == null) {
         sizingNotes.push(
-          'Глухая комната (нет оконного проёма) — правило ≥70% ширины окна не применяется.',
+          'Глуха кімната (немає віконного прорізу) — правило ≥70% ширини вікна не застосовується.',
         );
       }
       if (hWarn) sizingNotes.push(hWarn);
@@ -201,8 +201,8 @@ function sizeForcedSectional(args) {
 
   if (chosen.underpowered) {
     chosen.sizingNotes.push(
-      `Секционный радиатор не покрывает 100% теплопотерь при lock типа. `
-        + `Нехватка: ${chosen.deficitWatts} Вт.`,
+      `Секційний радіатор не покриває 100% тепловтрат при lock типу. `
+        + `Нестача: ${chosen.deficitWatts} Вт.`,
     );
   }
 
@@ -281,23 +281,23 @@ function sizeForcedPanel(args) {
     const sizingNotes = [];
     if (unitsCount > 1) {
       sizingNotes.push(
-        `Эскалация: ${unitsCount} панельных прибора(ов) в помещении `
-          + `(нагрузка ≈${Math.round(qPerUnit)} Вт на прибор).`,
+        `Ескалація: ${unitsCount} панельних приладів у приміщенні `
+          + `(навантаження ≈${Math.round(qPerUnit)} Вт на прилад).`,
       );
     }
     if (windowOpeningWidthMm == null) {
       sizingNotes.push(
-        'Глухая комната (нет оконного проёма) — правило ≥70% ширины окна не применяется.',
+        'Глуха кімната (немає віконного прорізу) — правило ≥70% ширини вікна не застосовується.',
       );
     } else if (panelPick.windowLengthFilterApplied === false && widthOk === false) {
       sizingNotes.push(
-        'Панель выбрана по тепловой мощности, но суммарно не закрывает ≥70% ширины окна.',
+        'Панель обрана за тепловою потужністю, але сумарно не закриває ≥70% ширини вікна.',
       );
     }
     if (panelPick.underpowered || underpowered) {
       sizingNotes.push(
-        `Панельный радиатор не покрывает 100% теплопотерь при lock типа. `
-          + `Нехватка: ${deficitWatts} Вт.`,
+        `Панельний радіатор не покриває 100% тепловтрат при lock типу. `
+          + `Нестача: ${deficitWatts} Вт.`,
       );
     }
     const hWarn = underwindowHeightWarning(openingHeightMm ?? null, radiatorHeightMm);
@@ -403,7 +403,7 @@ export function pickMinimumViableForcedKind(args) {
     const hWarn = underwindowHeightWarning(openingHeightMm ?? null, radiatorHeightMm);
     /** @type {string[]} */
     const sizingNotes = [
-      'Минимальный прибор: панель наименьшей длины из каталога (входная зона, forced panel).',
+      'Мінімальний прилад: панель найменшої довжини з каталогу (вхідна зона, forced panel).',
     ];
     if (hWarn) sizingNotes.push(hWarn);
     return {
@@ -451,7 +451,7 @@ export function pickMinimumViableForcedKind(args) {
   const hWarn = underwindowHeightWarning(openingHeightMm ?? null, radiatorHeightMm);
   /** @type {string[]} */
   const sizingNotes = [
-    `Минимальный прибор: 1 секция ${smallest.radiator.model} `
+    `Мінімальний прилад: 1 секція ${smallest.radiator.model} `
       + `(≈${Math.round(smallest.adjustedWatts)} Вт; forced sectional).`,
   ];
   if (hWarn) sizingNotes.push(hWarn);

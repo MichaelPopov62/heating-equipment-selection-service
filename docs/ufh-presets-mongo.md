@@ -2,6 +2,10 @@
 
 Справочник режимов водяного тёплого пола: технические лимиты + человекочитаемый UI. Отдельно от баз конструкции (`warmFloorAssemblyPresets`) и финишей (`flooringFinishMaterials`).
 
+> **Мова UI (PR-1, 2026-07-27):** поля `ui.title`, `ui.badge`, `ui.description` у `backend/data/underfloor_heating_presets.json` та `name`/`description` у `warmFloorAssemblyPresets.js` — **українською**. Технічні `presetId`, `finishMaterialId` — без змін. Деталі: [`language-policy.md`](language-policy.md).
+>
+> Labels контуру ТП: `shared/ufhCircuitPresets.js` — UA (post-close fix, §18).
+
 ---
 
 ## Три слоя ТП (не один источник)

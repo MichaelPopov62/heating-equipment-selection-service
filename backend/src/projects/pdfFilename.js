@@ -27,11 +27,11 @@ function sanitizeSegment(raw) {
  * @returns {string}
  */
 export function buildEstimatePdfFilename(meta) {
-  const client = sanitizeSegment(meta.clientName || 'Клиент');
+  const client = sanitizeSegment(meta.clientName || 'Клієнт');
   const label = meta.label != null && String(meta.label).trim()
     ? sanitizeSegment(String(meta.label))
     : null;
-  return label ? `Смета_${client}_${label}.pdf` : `Смета_${client}.pdf`;
+  return label ? `Кошторис_${client}_${label}.pdf` : `Кошторис_${client}.pdf`;
 }
 
 /**

@@ -182,16 +182,16 @@ export function matchEquipment({
       const envelopeRounded = Math.round(heatingLoad.envelopeHeatLossWatts);
       if (heatingLoad.boilerHeatingLoadWatts < heatingLoad.envelopeHeatLossWatts) {
         boiler.warnings.push(
-          `Режим «только тёплый пол»: для подбора котла использована отдача ТП ${ufhRounded} Вт при теплопотерях ограждения ${envelopeRounded} Вт — возможен дефицит покрытия.`,
+          `Режим «лише тепла підлога»: для підбору котла використано віддачу ТП ${ufhRounded} Вт при тепловтратах огородження ${envelopeRounded} Вт — можливий дефіцит покриття.`,
         );
       } else if (heatingLoad.boilerHeatingLoadWatts !== heatingLoad.envelopeHeatLossWatts) {
         boiler.warnings.push(
-          `Режим «только тёплый пол»: мощность котла по отдаче ТП (${ufhRounded} Вт), не по теплопотерям ограждения (${envelopeRounded} Вт).`,
+          `Режим «лише тепла підлога»: потужність котла за віддачею ТП (${ufhRounded} Вт), не за тепловтратами огородження (${envelopeRounded} Вт).`,
         );
       }
     } else {
       boiler.warnings.push(
-        'Режим «только тёплый пол»: отдача ТП не рассчитана — подбор котла выполнен по теплопотерям ограждения.',
+        'Режим «лише тепла підлога»: віддача ТП не розрахована — підбір котла виконано за тепловтратами огородження.',
       );
     }
   }
@@ -211,7 +211,7 @@ export function matchEquipment({
     boiler.selected?.isDoubleCircuit === true
   ) {
     boiler.warnings.unshift(
-      'Двухконтурный котёл с бойлером косвенного нагрева допускается, но гидравлически часто сложнее (приоритет ГВС, согласование контуров). Для типовой связки «1К + БКН» выберите отдельную схему суммирования мощностей.',
+      'Двоконтурний котел із бойлером непрямого нагріву допускається, але гідравлічно часто складніше (пріоритет ГВП, узгодження контурів). Для типової зв’язки «1К + БКН» оберіть окрему схему сумування потужностей.',
     );
   }
 
@@ -254,14 +254,14 @@ export function matchEquipment({
     waterHeater = pickWaterHeater({ hotWater: hwForBoiler, catalog });
     if ((waterHeater.requiredTankLiters ?? 0) > 0) {
       waterHeater.warnings.unshift(
-        `Электробойлер подобран как температурный буфер объёмом ${waterHeater.requiredTankLiters} л для сглаживания температурных скачков ГВС двухконтурного котла.`,
+        `Електробойлер підібрано як температурний буфер об’ємом ${waterHeater.requiredTankLiters} л для згладжування температурних стрибків ГВП двоконтурного котла.`,
       );
     }
   } else if (scheme === SCHEME_BOILER_SINGLE_BUFFER_ELECTRIC) {
     waterHeater = pickWaterHeater({ hotWater: hwForBoiler, catalog });
     if ((waterHeater.requiredTankLiters ?? 0) > 0) {
       waterHeater.warnings.unshift(
-        `Электробойлер подобран как буфер/накопитель объёмом ${waterHeater.requiredTankLiters} л (схема 1К + буферный ЭВН).`,
+        `Електробойлер підібрано як буфер/накопичувач об’ємом ${waterHeater.requiredTankLiters} л (схема 1К + буферний ЕВН).`,
       );
     }
   } else if (
@@ -284,8 +284,8 @@ export function matchEquipment({
       waterHeater = pickWaterHeater({ hotWater: hwForBoiler, catalog });
       const noIndirectInCatalog = !catalog?.indirectWaterHeaters?.length;
       const prefix = noIndirectInCatalog
-        ? 'В каталоге нет БКН — показан запасной подбор электронакопителя.'
-        : 'БКН по расчётному объёму не найден — показан запасной подбор электронакопителя.';
+        ? 'У каталозі немає БКН — показано запасний підбір електронакопичувача.'
+        : 'БКН за розрахунковим об’ємом не знайдено — показано запасний підбір електронакопичувача.';
       waterHeater.warnings.unshift(prefix);
     }
   }

@@ -53,20 +53,20 @@ export function BoilerSummaryTable({
       aria-labelledby="boiler-summary-title"
     >
       <h3 id="boiler-summary-title" className={styles.title}>
-        Котёл (итог)
+        Котел (підсумок)
       </h3>
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Показатель</th>
-              <th>Значение</th>
+              <th>Показник</th>
+              <th>Значення</th>
             </tr>
           </thead>
           <tbody>
             {requiredKw != null && (
               <tr>
-                <td>Требуемая мощность</td>
+                <td>Потрібна потужність</td>
                 <td>{formatKw(requiredKw)} кВт</td>
               </tr>
             )}
@@ -74,26 +74,26 @@ export function BoilerSummaryTable({
               <tr>
                 <td>
                   {labels?.condensingRequiredLabel
-                    ?? 'Линия конденсации'}
+                    ?? 'Лінія конденсації'}
                 </td>
                 <td>{formatKw(summary.requiredKwForCondensingLine)} кВт</td>
               </tr>
             )}
             {economyLabel != null && (
               <tr>
-                <td>Вариант 1 · эконом</td>
+                <td>Варіант 1 · економ</td>
                 <td>{economyLabel}</td>
               </tr>
             )}
             {efficientLabel != null && (
               <tr>
-                <td>Вариант 2 · эффективный</td>
+                <td>Варіант 2 · ефективний</td>
                 <td>{efficientLabel}</td>
               </tr>
             )}
             {legacyLabel != null && (
               <tr>
-                <td>Подбор</td>
+                <td>Підбір</td>
                 <td>{legacyLabel}</td>
               </tr>
             )}
@@ -101,14 +101,14 @@ export function BoilerSummaryTable({
         </table>
       </div>
       <p className={styles.hint}>
-        Полный расчёт и карточки подбора — на шаге{' '}
-        <SurveyStepLink step="boiler">«Котёл»</SurveyStepLink>
-        . Сравнение вариантов в блоке «Рекомендация».
+        Повний розрахунок і картки підбору — на кроці{' '}
+        <SurveyStepLink step="boiler">«Котел»</SurveyStepLink>
+        . Порівняння варіантів у блоці «Рекомендація».
       </p>
       {hasWarnings && (
         <p className={styles.attention}>
-          Есть предупреждения по котлу — откройте отчёт на шаге{' '}
-          <SurveyStepLink step="boiler">«Котёл»</SurveyStepLink>
+          Є попередження щодо котла — відкрийте звіт на кроці{' '}
+          <SurveyStepLink step="boiler">«Котел»</SurveyStepLink>
           .
         </p>
       )}

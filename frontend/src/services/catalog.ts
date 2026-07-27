@@ -37,7 +37,7 @@ export type {
 
 /** Типичная подсказка при недоступном upstream в dev (см. frontend/vite.config.ts). */
 const CATALOG_BACKEND_HINT =
-  'Запустите API-сервер из каталога backend (npm run start). В режиме разработки Vite проксирует запросы /api на http://localhost:3001 — пока backend не слушает этот порт, браузер может получить ошибку шлюза (502).';
+  'Запустіть API-сервер з каталогу backend (npm run start). У режимі розробки Vite проксіює запити /api на http://localhost:3001 — поки backend не слухає цей порт, браузер може отримати помилку шлюзу (502).';
 
 export type CatalogEquipmentSnapshot = {
   catalogSource: 'file' | 'mongo';
@@ -70,9 +70,9 @@ function catalogFailureMessage(status: number, raw: unknown): string {
     if (m) return m;
   }
   if (status === 502 || status === 503 || status === 504) {
-    return `Шлюз получил недопустимый ответ при запросе каталога (HTTP ${status}). ${CATALOG_BACKEND_HINT}`;
+    return `Шлюз отримав недопустиму відповідь при запиті каталогу (HTTP ${status}). ${CATALOG_BACKEND_HINT}`;
   }
-  return `Не удалось загрузить каталог (HTTP ${status}). ${CATALOG_BACKEND_HINT}`;
+  return `Не вдалося завантажити каталог (HTTP ${status}). ${CATALOG_BACKEND_HINT}`;
 }
 
 /**
@@ -93,7 +93,7 @@ async function loadCatalogEquipmentFromApi(): Promise<CatalogEquipmentSnapshot> 
     });
   } catch {
     throw new Error(
-      `Запрос каталога не дошёл до сервера (сеть или CORS). ${CATALOG_BACKEND_HINT}`,
+      `Запит каталогу не дійшов до сервера (мережа або CORS). ${CATALOG_BACKEND_HINT}`,
     );
   }
   const raw: unknown = await res.json().catch(() => null);
@@ -101,7 +101,7 @@ async function loadCatalogEquipmentFromApi(): Promise<CatalogEquipmentSnapshot> 
     throw new Error(catalogFailureMessage(res.status, raw));
   }
   if (!raw || typeof raw !== 'object' || (raw as { ok?: unknown }).ok !== true) {
-    throw new Error('Некорректный ответ API каталога');
+    throw new Error('Некоректна відповідь API каталогу');
   }
   const data = raw as {
     catalog?: unknown;

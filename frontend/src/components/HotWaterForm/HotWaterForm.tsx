@@ -60,12 +60,12 @@ export function HotWaterForm({
 
   return (
     <div className={styles.root}>
-      <h2 className={styles.title}>Горячее водоснабжение</h2>
+      <h2 className={styles.title}>Гаряче водопостачання</h2>
       <p className={styles.hint}>
-        Тип объекта задаётся на шаге «Объект»: для{' '}
-        <strong>квартиры</strong> считается проточный сценарий (мощность от пикового расхода); для{' '}
-        <strong>дома</strong> — накопительный (объём бака без суммирования суточной нормы с объёмом
-        ванны; мощность для котла — от нагрева бака за время, не от «пролива»).
+        Тип об&apos;єкта задається на кроці «Об&apos;єкт»: для{' '}
+        <strong>квартири</strong> рахується проточний сценарій (потужність від пікової витрати); для{' '}
+        <strong>будинку</strong> — накопичувальний (об&apos;єм бака без сумування добової норми з об&apos;ємом
+        ванни; потужність для котла — від нагрівання бака за час, не від «проливу»).
       </p>
 
       <div className={styles.row}>
@@ -77,7 +77,7 @@ export function HotWaterForm({
               onChange={(e) => { onChange({ ...value, tropicalShower: e.target.checked }); }}
             />
             <span>
-              Усиленный («тропический») душ — увеличивает расчётный объём накопительного /
+              Посилений («тропічний») душ — збільшує розрахунковий об&apos;єм накопичувального /
               буферного бака на 30&nbsp;%
             </span>
           </label>
@@ -87,7 +87,7 @@ export function HotWaterForm({
       <div className={styles.row}>
         <div className={styles.field}>
           <label className={styles.label} htmlFor="hw-residents">
-            Число человек
+            Кількість осіб
           </label>
           <input
             id="hw-residents"
@@ -101,7 +101,7 @@ export function HotWaterForm({
         </div>
         <div className={styles.field}>
           <span className={styles.label} id="hw-cold-season-label">
-            Расчётная температура холодной воды
+            Розрахункова температура холодної води
           </span>
           <div className={styles.seasonChoice} role="group" aria-labelledby="hw-cold-season-label">
             <label className={styles.radioLabel}>
@@ -120,7 +120,7 @@ export function HotWaterForm({
                 checked={value.coldWaterDesignSeason === 'summer'}
                 onChange={() => { onChange({ ...value, coldWaterDesignSeason: 'summer' }); }}
               />
-              Лето (+15&nbsp;°C)
+              Літо (+15&nbsp;°C)
             </label>
           </div>
         </div>
@@ -141,17 +141,17 @@ export function HotWaterForm({
         </div>
       </div>
 
-      <h3 className={styles.subheading}>Точки по помещениям</h3>
+      <h3 className={styles.subheading}>Точки за приміщеннями</h3>
 
       <div className={styles.fixtureSection}>
         <h4 className={styles.fixtureSectionTitle}>Кухня</h4>
         <p className={styles.fixtureSectionHint}>
-          Укажите, какие точки водоразбора с горячей водой есть на кухне.
+          Вкажіть, які точки водорозбору з гарячою водою є на кухні.
         </p>
         <div className={styles.fixturesGrid}>
           <div className={styles.fixtureField}>
             <label className={styles.label} htmlFor="fx-kitchen-sink">
-              Мойка / смеситель
+              Мийка / змішувач
             </label>
             <input
               id="fx-kitchen-sink"
@@ -165,7 +165,7 @@ export function HotWaterForm({
           </div>
           <div className={styles.fixtureField}>
             <label className={styles.label} htmlFor="fx-dishwasher">
-              Посудомоечная машина
+              Посудомийна машина
             </label>
             <input
               id="fx-dishwasher"
@@ -181,9 +181,9 @@ export function HotWaterForm({
       </div>
 
       <div className={styles.fixtureSection}>
-        <h4 className={styles.fixtureSectionTitle}>Санузел</h4>
+        <h4 className={styles.fixtureSectionTitle}>Санітарний вузол</h4>
         <p className={styles.fixtureSectionHint}>
-          Точки в ванной / совмещённом санузле (можно суммарно по всем санузлам объекта).
+          Точки у ванній / суміщеному санвузлі (можна сумарно за всі санвузли об&apos;єкта).
         </p>
         <div className={styles.fixturesGrid}>
           <div className={styles.fixtureField}>
@@ -230,7 +230,7 @@ export function HotWaterForm({
           </div>
           <div className={styles.fixtureField}>
             <label className={styles.label} htmlFor="fx-toilet">
-              Унитаз
+              Унітаз
             </label>
             <input
               id="fx-toilet"
@@ -244,7 +244,7 @@ export function HotWaterForm({
           </div>
           <div className={styles.fixtureField}>
             <label className={styles.label} htmlFor="fx-bidet">
-              Биде
+              Біде
             </label>
             <input
               id="fx-bidet"
@@ -260,14 +260,14 @@ export function HotWaterForm({
       </div>
 
       <div className={styles.fixtureSection}>
-        <h4 className={styles.fixtureSectionTitle}>Хозблок / техпомещение / прачечная</h4>
+        <h4 className={styles.fixtureSectionTitle}>Госпблок / техприміщення / пральня</h4>
         <p className={styles.fixtureSectionHint}>
-          Точки в подсобке, котельной, прачечной и т.п.
+          Точки у підсобці, котельні, пральні тощо.
         </p>
         <div className={styles.fixturesGrid}>
           <div className={styles.fixtureField}>
             <label className={styles.label} htmlFor="fx-laundry">
-              Мойка
+              Мийка
             </label>
             <input
               id="fx-laundry"
@@ -281,7 +281,7 @@ export function HotWaterForm({
           </div>
           <div className={styles.fixtureField}>
             <label className={styles.label} htmlFor="fx-washer">
-              Стиральная машина
+              Прална машина
             </label>
             <input
               id="fx-washer"
@@ -304,7 +304,7 @@ export function HotWaterForm({
             disabled={!canOpenReport}
             onClick={() => { setReportOpen(true); }}
           >
-            Отчёт по расчёту ГВ
+            Звіт з розрахунку ГВ
           </button>
           {onBackToResults != null && (
             <button
@@ -312,19 +312,19 @@ export function HotWaterForm({
               className={reportActionsStyles.backButton}
               onClick={onBackToResults}
             >
-              Назад к результатам
+              Назад до результатів
             </button>
           )}
         </div>
         {calcLoading && (
           <p className={styles.hint} style={{ marginTop: 8 }} role="status">
-            Обновление расчёта…
+            Оновлення розрахунку…
           </p>
         )}
         {!canOpenReport && !calcLoading && (
           <p className={styles.hint} style={{ marginTop: 8 }}>
-            Укажите точки водоразбора — отчёт и таблица в «Результатах» появятся
-            сразу; расчёт мощности — после авторасчёта.
+            Вкажіть точки водорозбору — звіт і таблиця в «Результатах» з&apos;являться
+            одразу; розрахунок потужності — після авторозрахунку.
           </p>
         )}
       </div>

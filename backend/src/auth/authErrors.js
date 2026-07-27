@@ -24,11 +24,11 @@ export function mapAuthErrorToResponse(err) {
   }
 
   /** @type {string} */
-  let message = 'Недействительный или просроченный токен';
+  let message = 'Недійсний або прострочений токен';
   if (statusCode === 503 && code === 'PROJECTS_AUTH_NOT_CONFIGURED') {
-    message = 'Аутентификация проектов не настроена на сервере';
+    message = 'Аутентифікація проєктів не налаштована на сервері';
   } else if (code === 'MONGODB_UNAVAILABLE') {
-    message = 'Не удалось подключиться к MongoDB.';
+    message = 'Не вдалося підключитися до MongoDB.';
   } else if (err instanceof Error && err.message) {
     message = err.message;
   }
@@ -57,7 +57,7 @@ export function respondAuthorizationError(req, res, err) {
       ? known.message
       : typeof known?.message === 'string' && known.message
         ? known.message
-        : 'Доступ запрещён';
+        : 'Доступ заборонено';
 
   /** @type {{ requestId?: string } | null} */
   const logMeta = req.requestId ? { requestId: req.requestId } : null;

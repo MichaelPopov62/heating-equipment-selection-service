@@ -103,7 +103,7 @@ export function calculateHeatLossForBuilding({ temps, building }) {
   const normalizedElements = allElements.map((el) => {
     const room = roomsById.get(el.roomId);
     if (!room) {
-      const err = new Error(`Неизвестная комната roomId="${el.roomId}"`);
+      const err = new Error(`Невідоме приміщення roomId="${el.roomId}"`);
       /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
       const appErr = err;
       appErr.statusCode = 400;
@@ -136,7 +136,7 @@ export function calculateHeatLossForBuilding({ temps, building }) {
 
     if (uValue == null) {
       const err = new Error(
-        `Некорректный элемент ограждения: не задан uValue и не удалось вывести его из presetId/thickness (roomId="${el.roomId}", construction="${el.construction}")`,
+        `Некоректний елемент огородження: не задано uValue і не вдалося вивести його з presetId/thickness (roomId="${el.roomId}", construction="${el.construction}")`,
       );
       /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
       const appErr = err;

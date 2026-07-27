@@ -23,26 +23,26 @@ export function UfhPresetCards({
   error = null,
 }: Props) {
   if (loading) {
-    return <p className={styles.hint}>Загрузка режимов тёплого пола…</p>;
+    return <p className={styles.hint}>Завантаження режимів теплої підлоги…</p>;
   }
 
   return (
     <div className={styles.root}>
       {error != null && (
         <p className={styles.error} role="status">
-          {error} — показаны локальные подписи.
+          {error} — показано локальні підписи.
         </p>
       )}
-      <div className={styles.grid} role="radiogroup" aria-label="Режим отопления">
+      <div className={styles.grid} role="radiogroup" aria-label="Режим опалення">
         <button
           type="button"
           className={`${styles.card} ${selectedPresetId == null ? styles.cardSelected : ''}`}
           onClick={() => { onSelect(null); }}
         >
-          <span className={styles.cardTitle}>Только радиаторы</span>
-          <span className={styles.cardBadge}>Классика</span>
+          <span className={styles.cardTitle}>Лише радіатори</span>
+          <span className={styles.cardBadge}>Класика</span>
           <span className={styles.cardDesc}>
-            Водяной тёплый пол не выбран как режим отопления.
+            Водяна тепла підлога не обрана як режим опалення.
           </span>
         </button>
         {ufhPresetCardsForUi(presets).map((p) => (

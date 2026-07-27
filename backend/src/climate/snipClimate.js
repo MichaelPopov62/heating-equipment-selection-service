@@ -137,7 +137,7 @@ async function loadStationsLite() {
         jsonText = gunzipSync(gz).toString('utf8');
       } catch {
         throwAppError(
-          'Не удалось распаковать stations/lite.json.gz',
+          'Не вдалося розпакувати stations/lite.json.gz',
           'METEOSTAT_STATIONS_LITE_GUNZIP_FAILED',
           502,
         );
@@ -147,7 +147,7 @@ async function loadStationsLite() {
       const parsed = JSON.parse(jsonText);
       if (!Array.isArray(parsed)) {
         throwAppError(
-          'Некорректный формат stations/lite.json.gz (ожидался массив)',
+          'Некоректний формат stations/lite.json.gz (очікувався масив)',
           'METEOSTAT_STATIONS_LITE_BAD_FORMAT',
           502,
         );
@@ -263,7 +263,7 @@ export async function getDesignOutsideTempFromMeteostat({ lat, lon }) {
   if (!candidates.length) {
     logger.warn('climate.meteostat.stations.none', null, { lat: Number(lat), lon: Number(lon) });
     throwAppError(
-      'Не найдена станция Meteostat рядом с указанными координатами',
+      'Не знайдено станцію Meteostat поблизу вказаних координат',
       'METEOSTAT_NO_STATION',
       502,
     );
@@ -337,7 +337,7 @@ export async function getDesignOutsideTempFromMeteostat({ lat, lon }) {
   }
 
   throwAppError(
-    'Недостаточно данных Meteostat для расчёта пятидневки',
+    'Недостатньо даних Meteostat для розрахунку п\'ятиденки',
     'METEOSTAT_INSUFFICIENT_DATA',
     502,
   );

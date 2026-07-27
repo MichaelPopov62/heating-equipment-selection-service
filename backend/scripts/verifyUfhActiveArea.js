@@ -181,8 +181,8 @@ const coverageCatalog = ctx.recommendations.byCode.WARN_UFH_COVERAGE_LOW;
 check(coverageCatalog != null, 'справочник: WARN_UFH_COVERAGE_LOW присутствует');
 check(
   (coverageCatalog?.resolutionSteps?.length ?? 0) === 4
-    && coverageCatalog?.resolutionSteps?.[0]?.title === 'Добавьте радиатор или конвектор',
-  'WARN_UFH_COVERAGE_LOW: 4 resolutionSteps, первый — «Добавьте радиатор или конвектор»',
+    && coverageCatalog?.resolutionSteps?.[0]?.title === 'Додайте радіатор або конвектор',
+  'WARN_UFH_COVERAGE_LOW: 4 resolutionSteps, перший — «Додайте радіатор або конвектор»',
 );
 
 const coverageReport = buildUfhReport({

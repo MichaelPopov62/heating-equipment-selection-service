@@ -388,7 +388,7 @@ export function AppSurveyContent({
   const calcStatusNode =
     calcLoading || calcError ? (
       <div className={styles.calcStatus}>
-        {calcLoading ? <div className={styles.hint}>Расчёт…</div> : null}
+        {calcLoading ? <div className={styles.hint}>Розрахунок…</div> : null}
         {calcError ? (
           <div className={styles.calcError} role="alert">
             {calcError}
@@ -403,7 +403,7 @@ export function AppSurveyContent({
 
       <div className={styles.layoutBody}>
         <aside className={styles.navigationSteps}>
-          <nav aria-label="Этапы анкеты">
+          <nav aria-label="Етапи анкети">
             {/* Навигация по шагам (пока без роутинга) */}
             <ul className={styles.stepList}>
               {SURVEY_STEP_NAV_ITEMS.map(({ step, label }) => (
@@ -446,46 +446,46 @@ export function AppSurveyContent({
 
               {currentStep === 'hotWater' && (
                 <p className={styles.hint} style={{ marginTop: 8 }}>
-                  Тип объекта:{' '}
+                  Тип об&apos;єкта:{' '}
                   <strong>
-                    {objectMeta.objectType === 'apartment' ? 'Квартира' : 'Дом'}
+                    {objectMeta.objectType === 'apartment' ? 'Квартира' : 'Будинок'}
                   </strong>
-                  , этажность {objectMeta.floors}, комнат по плану:{' '}
-                  {objectMeta.roomsCount}. Нормы расхода воды на человека и
-                  коэффициент одновременности берутся из справочника бэкенда (по
-                  типу объекта).
+                  , поверховість {objectMeta.floors}, кімнат за планом:{' '}
+                  {objectMeta.roomsCount}. Норми витрати води на особу та
+                  коефіцієнт одночасності беруться з довідника бекенду (за
+                  типом об&apos;єкта).
                 </p>
               )}
 
               {currentStep === 'boiler' && (
                 <p className={styles.hint} style={{ marginTop: 8 }}>
-                  Задайте график подачи/обратки радиаторного контура (пресет под
-                  тип котла). Подводка и тип приборов — на шаге «Радиаторы».
-                  Сценарий ГВС и подбор БКН/электробойлера — на шаге
-                  «Водонагреватель».
+                  Задайте графік подачі/звороту радіаторного контуру (пресет під
+                  тип котла). Підводка та тип приладів — на кроці «Радіатори».
+                  Сценарій ГВП і підбір БКН/електробойлера — на кроці
+                  «Водонагрівач».
                 </p>
               )}
 
               {currentStep === 'radiators' && (
                 <p className={styles.hint} style={{ marginTop: 8 }}>
-                  Подводка (боковая / нижняя) фильтрует панельный пул; тип
-                  приборов задаётся один на весь объект. График 75/65 или 55/45 —
-                  на шаге «Котёл».
+                  Підводка (бокова / нижня) фільтрує панельний пул; тип
+                  приладів задається один на весь об&apos;єкт. Графік 75/65 або 55/45 —
+                  на кроці «Котел».
                 </p>
               )}
 
               {currentStep === 'waterHeater' && (
                 <p className={styles.hint} style={{ marginTop: 8 }}>
-                  Выберите стратегию ГВС: от этого зависят подбор бойлера
-                  косвенного нагрева или электронакопителя и формула мощности
-                  котла. Изменения пересчитываются автоматически.
+                  Оберіть стратегію ГВП: від цього залежать підбір бойлера
+                  непрямого нагріву або електронакопичувача та формула потужності
+                  котла. Зміни перераховуються автоматично.
                 </p>
               )}
 
               {currentStep === 'object' && (
                 <div className={styles.tempRow}>
                   <label className={styles.tempField}>
-                    Внутри, °C
+                    Всередині, °C
                     <input
                       type="number"
                       value={temps.insideC}
@@ -498,7 +498,7 @@ export function AppSurveyContent({
                     />
                   </label>
                   <label className={styles.tempField}>
-                    Снаружи, °C
+                    Зовні, °C
                     <input
                       type="number"
                       value={temps.outsideC}
@@ -511,7 +511,7 @@ export function AppSurveyContent({
                     />
                   </label>
                   <label className={styles.tempField}>
-                    Воздух в санузле, °C
+                    Повітря в санвузлі, °C
                     <input
                       type="number"
                       min={24}
@@ -539,8 +539,8 @@ export function AppSurveyContent({
               )}
               {currentStep === 'object' && (
                 <p className={styles.hint} style={{ marginTop: 8 }}>
-                  «Воздух в санузле» — расчётная температура воздуха (не теплоноситель), не
-                  ниже 24 °C. Пусто = max(внутри, 24). Можно задать выше (например 26–28).
+                  «Повітря в санвузлі» — розрахункова температура повітря (не теплоносій), не
+                  нижче 24 °C. Порожньо = max(всередині, 24). Можна задати вище (наприклад 26–28).
                 </p>
               )}
             </section>
@@ -627,7 +627,7 @@ export function AppSurveyContent({
                 }}
                 radiatorsDisabledReason={
                   ufhPresetId === 'ufh_only'
-                    ? 'Режим «только тёплый пол» (ufh_only): подбор радиаторов на сервере пропускается. Значения подводки и типа приборов сохраняются в черновике и уходят в heatingSystem, но на matching.radiators не влияют, пока выбран этот режим.'
+                    ? 'Режим «лише тепла підлога» (ufh_only): підбір радіаторів на сервері пропускається. Значення підводки та типу приладів зберігаються в чернетці й потрапляють у heatingSystem, але на matching.radiators не впливають, поки обрано цей режим.'
                     : null
                 }
                 radiatorsMatching={apiRadiatorsFromReport}

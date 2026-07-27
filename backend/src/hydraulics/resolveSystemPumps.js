@@ -74,7 +74,7 @@ function resolvePumpForZone({
   if (q <= 0 || h <= 0) {
     return {
       match: null,
-      warnings: [`[${zone.label}] Насос не подобран: нулевой расход или напор.`],
+      warnings: [`[${zone.label}] Насос не підібрано: нульовий витрата або напір.`],
     };
   }
 
@@ -128,7 +128,7 @@ function resolvePumpForZone({
             modeName: evalResult.modeName,
             headAtDesignM: evalResult.headAtDesignM,
             headMarginPercent: evalResult.headMarginPercent ?? 0,
-            note: 'Используется встроенный насос котла.',
+            note: 'Використовується вбудований насос котла.',
           },
           warnings,
           ...(builtinPumpDuty !== undefined ? { builtinPumpDuty } : {}),
@@ -138,8 +138,8 @@ function resolvePumpForZone({
       if (evalResult.dutyStatus === 'below_manufacturer_qmin') {
         const qMin = evalResult.heatingCircuitMinFlowM3h ?? 0;
         warnings.push(
-          `[${zone.label}] Расход Q=${q} м³/ч ниже заводского минимума встроенного насоса `
-          + `(q_min=${qMin} м³/ч) — риск тактования и перегрева теплообменника.`,
+          `[${zone.label}] Витрата Q=${q} м³/ч нижче заводського мінімуму вбудованого насоса `
+          + `(q_min=${qMin} м³/ч) — ризик тактування та перегріву теплообмінника.`,
         );
         if (isWallMountedBoiler(boilerRecord)) {
           return {
@@ -150,8 +150,8 @@ function resolvePumpForZone({
         }
       } else {
         warnings.push(
-          `[${zone.label}] Встроенный насос котла не перекрывает рабочую точку `
-          + `(Q=${q} м³/ч, H=${round(h, 2)} м) — подбор из каталога.`,
+          `[${zone.label}] Вбудований насос котла не перекриває робочу точку `
+          + `(Q=${q} м³/ч, H=${round(h, 2)} м) — підбір з каталогу.`,
         );
       }
     }
@@ -190,7 +190,7 @@ function resolvePumpForZone({
       headMarginPercent: pump.headMarginPercent,
       warnings: pump.warnings,
       ...(zone.pumpRole === 'main'
-        ? { note: 'Доп. насос на котловую ветку (встроенный слаб).' }
+        ? { note: 'Дод. насос на котлову гілку (вбудований слабкий).' }
         : {}),
     },
     warnings,

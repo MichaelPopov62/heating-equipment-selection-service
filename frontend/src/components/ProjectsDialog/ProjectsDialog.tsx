@@ -49,21 +49,21 @@ export function ProjectsDialog({
         onClick={(e) => { e.stopPropagation(); }}
       >
         <h2 id="projects-dialog-title" className={styles.title}>
-          Проекты клиентов
+          Проєкти клієнтів
         </h2>
         <div className={styles.toolbar}>
           <button type="button" className={styles.itemButton} onClick={onRefresh}>
-            Обновить список
+            Оновити список
           </button>
           <button type="button" className={styles.itemButton} onClick={onNewProject}>
-            Новый проект
+            Новий проєкт
           </button>
         </div>
         {loading ? (
-          <p className={styles.muted}>Загрузка…</p>
+          <p className={styles.muted}>Завантаження…</p>
         ) : projects.length === 0 ? (
           <p className={styles.muted}>
-            Нет сохранённых проектов. Укажите имя клиента и нажмите «Сохранить → На сервер».
+            Немає збережених проєктів. Вкажіть ім&apos;я клієнта та натисніть «Зберегти → На сервер».
           </p>
         ) : (
           <ul className={styles.list}>
@@ -76,7 +76,7 @@ export function ProjectsDialog({
                 >
                   {p.clientName}
                   <span className={styles.itemMeta}>
-                    {p.calculationsCount ?? 0} расчёт(ов) · обновлён{' '}
+                    {p.calculationsCount ?? 0} розрахунк(ів) · оновлено{' '}
                     {new Date(p.updatedAt).toLocaleString('ru-RU')}
                   </span>
                 </button>
@@ -86,7 +86,7 @@ export function ProjectsDialog({
         )}
         {activeProjectId && calculations.length > 0 ? (
           <section className={styles.calcSection}>
-            <h3 className={styles.calcTitle}>Расчёты текущего проекта</h3>
+            <h3 className={styles.calcTitle}>Розрахунки поточного проєкта</h3>
             <ul className={styles.list}>
               {calculations.map((c) => (
                 <li key={c.id}>
@@ -100,7 +100,7 @@ export function ProjectsDialog({
                       : new Date(c.createdAt).toLocaleString('ru-RU')}
                     <span className={styles.itemMeta}>
                       {c.summary.heatLossKw != null
-                        ? `теплопотери ${c.summary.heatLossKw} кВт`
+                        ? `тепловтрати ${c.summary.heatLossKw} кВт`
                         : ''}
                       {c.summary.boilerModel ? ` · ${c.summary.boilerModel}` : ''}
                     </span>
@@ -111,7 +111,7 @@ export function ProjectsDialog({
           </section>
         ) : null}
         <button type="button" className={`${styles.itemButton} ${styles.closeButton}`} onClick={onClose}>
-          Закрыть
+          Закрити
         </button>
       </div>
     </div>

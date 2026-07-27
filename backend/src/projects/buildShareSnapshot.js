@@ -38,7 +38,7 @@ export function buildShareSnapshot(args) {
   const report = asObject(args.report);
   if (!report) {
     /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
-    const err = new Error('Нет отчёта для публикации ссылки');
+    const err = new Error('Немає звіту для публікації посилання');
     err.statusCode = 400;
     err.code = 'SHARE_REPORT_REQUIRED';
     throw err;
@@ -47,7 +47,7 @@ export function buildShareSnapshot(args) {
   const commercial = report.commercial;
   if (!isPlainObject(commercial)) {
     /** @type {Error & import('../types/shared-types.js').AppErrorLike} */
-    const err = new Error('В отчёте нет финансовой сметы (commercial)');
+    const err = new Error('У звіті немає фінансової смети (commercial)');
     err.statusCode = 400;
     err.code = 'SHARE_COMMERCIAL_REQUIRED';
     throw err;
@@ -93,7 +93,7 @@ export function buildShareSnapshot(args) {
   /** @type {import('../types/shared-types.js').ProjectShareSnapshot} */
   const snapshot = {
     schemaVersion: 1,
-    clientName: String(args.clientName ?? '').trim() || 'Клиент',
+    clientName: String(args.clientName ?? '').trim() || 'Клієнт',
     publishedAt: new Date().toISOString(),
     commercial,
     matching: matchingSlice,

@@ -34,17 +34,17 @@ export function RadiatorsReportView({ radiators }: RadiatorsReportViewProps) {
   return (
     <div>
       <p className={styles.hint}>
-        Подбор по matching.radiators. Таблицы рядом с котлом в блоке «Рекомендация»
-        остаются для сравнения вариантов; здесь — полный расчёт.
+        Підбір за matching.radiators. Таблиці поруч із котлом у блоці «Рекомендація»
+        залишаються для порівняння варіантів; тут — повний розрахунок.
       </p>
 
       {showInputs ? (
         <>
-          <h4 className={styles.sectionTitle}>Исходные параметры</h4>
+          <h4 className={styles.sectionTitle}>Вихідні параметри</h4>
           <dl className={styles.dl}>
             {inputs.supplyC != null && inputs.returnC != null && (
               <>
-                <dt>График подача / обратка</dt>
+                <dt>Графік подача / зворотка</dt>
                 <dd>
                   {inputs.supplyC}/{inputs.returnC} °C
                 </dd>
@@ -58,15 +58,15 @@ export function RadiatorsReportView({ radiators }: RadiatorsReportViewProps) {
             )}
             {inputs.flowDeltaTK != null && (
               <>
-                <dt>Δt расхода</dt>
+                <dt>Δt витрати</dt>
                 <dd>{inputs.flowDeltaTK} K</dd>
               </>
             )}
             {inputs.radiatorConnection != null && (
               <>
-                <dt>Подводка</dt>
+                <dt>Підводка</dt>
                 <dd>
-                  {inputs.radiatorConnection === 'bottom' ? 'нижняя' : 'боковая'}
+                  {inputs.radiatorConnection === 'bottom' ? 'нижня' : 'бокова'}
                   <span className={styles.muted}>
                     {' '}
                     ({inputs.radiatorConnection})
@@ -76,13 +76,13 @@ export function RadiatorsReportView({ radiators }: RadiatorsReportViewProps) {
             )}
             {inputs.radiatorEmitterPreference != null && (
               <>
-                <dt>Тип приборов (анкета)</dt>
+                <dt>Тип приладів (анкета)</dt>
                 <dd>
                   {inputs.radiatorEmitterPreference === 'auto'
                     ? 'авто (Two-Pass)'
                     : inputs.radiatorEmitterPreference === 'panel'
-                      ? 'панельные'
-                      : 'секционные'}
+                      ? 'панельні'
+                      : 'секційні'}
                   <span className={styles.muted}>
                     {' '}
                     ({inputs.radiatorEmitterPreference})
@@ -92,11 +92,11 @@ export function RadiatorsReportView({ radiators }: RadiatorsReportViewProps) {
             )}
             {radiators.resolvedEmitterKind != null && (
               <>
-                <dt>Тип приборов (результат)</dt>
+                <dt>Тип приладів (результат)</dt>
                 <dd>
                   {radiators.resolvedEmitterKind === 'panel'
-                    ? 'панельные'
-                    : 'секционные'}
+                    ? 'панельні'
+                    : 'секційні'}
                 </dd>
               </>
             )}
@@ -109,29 +109,29 @@ export function RadiatorsReportView({ radiators }: RadiatorsReportViewProps) {
         || radiators.totalSections != null
         || radiators.byRoom.length > 0 ? (
         <>
-          <h4 className={styles.sectionTitle}>Агрегаты по объекту</h4>
+          <h4 className={styles.sectionTitle}>Агрегати за об&apos;єктом</h4>
           <dl className={styles.dl}>
             {radiators.chosenModel != null && radiators.chosenModel.length > 0 && (
               <>
-                <dt>Модель (подбор)</dt>
+                <dt>Модель (підбір)</dt>
                 <dd>{radiators.chosenModel}</dd>
               </>
             )}
             {emittersLabel != null && (
               <>
-                <dt>Приборы</dt>
+                <dt>Прилади</dt>
                 <dd>{emittersLabel}</dd>
               </>
             )}
             {radiators.totalSections != null && (
               <>
-                <dt>Секции (без панелей)</dt>
+                <dt>Секції (без панелей)</dt>
                 <dd>{radiators.totalSections} шт.</dd>
               </>
             )}
             {radiators.byRoom.length > 0 && (
               <>
-                <dt>Комнат в подборе</dt>
+                <dt>Приміщень у підборі</dt>
                 <dd>{radiators.byRoom.length}</dd>
               </>
             )}
@@ -141,16 +141,16 @@ export function RadiatorsReportView({ radiators }: RadiatorsReportViewProps) {
 
       {hasProposalLines && (
         <>
-          <h4 className={styles.sectionTitle}>Линии эконом / эффективный</h4>
+          <h4 className={styles.sectionTitle}>Лінії економ / ефективний</h4>
           <div className={styles.proposalLinesGrid}>
             <RadiatorProposalLineTable
               line={radiators.lineEconomy}
-              caption="Вариант 1 · эконом"
+              caption="Варіант 1 · економ"
               tableId="radiators-report-line-economy"
             />
             <RadiatorProposalLineTable
               line={radiators.lineEfficient}
-              caption="Вариант 2 · эффективный"
+              caption="Варіант 2 · ефективний"
               tableId="radiators-report-line-efficient"
             />
           </div>
@@ -159,7 +159,7 @@ export function RadiatorsReportView({ radiators }: RadiatorsReportViewProps) {
 
       {radiators.warnings.length > 0 && (
         <>
-          <h4 className={styles.sectionTitle}>Предупреждения</h4>
+          <h4 className={styles.sectionTitle}>Попередження</h4>
           <ul className={styles.warningsList}>
             {radiators.warnings.map((w, i) => (
               <li key={`rad-report-w-${i}-${w.slice(0, 64)}`}>{w}</li>

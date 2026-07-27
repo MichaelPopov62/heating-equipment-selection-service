@@ -37,20 +37,20 @@ export function BoilerReportView({
   return (
     <div>
       <p className={styles.hint}>
-        Подбор по matching.boiler. В блоке «Рекомендация» — компактная таблица
-        вариантов котла; здесь — полный расчёт и карточки подбора.
+        Підбір за matching.boiler. У блоці «Рекомендація» — компактна таблиця
+        варіантів котла; тут — повний розрахунок і картки підбору.
       </p>
 
       {summary != null && labels != null && (
         <>
           <h4 className={styles.sectionTitle}>{labels.summaryHeadline}</h4>
           <dl className={styles.dl}>
-            <dt>Теплопотери здания</dt>
+            <dt>Тепловтрати будівлі</dt>
             <dd>
               {formatKw(summary.heatLossKw)} <span>кВт</span>
             </dd>
             <dt>
-              Запас на отопление (×{formatCoefficient(summary.reserveFactor)})
+              Запас на опалення (×{formatCoefficient(summary.reserveFactor)})
             </dt>
             <dd>
               {formatKw(summary.heatingLoadKw)} <span>кВт</span>
@@ -68,7 +68,7 @@ export function BoilerReportView({
               && summary.requiredKwForCondensingLine != null && (
               <>
                 <dt>
-                  Запас на отопление для линии «Эффективный» (×
+                  Запас на опалення для лінії «Ефективний» (×
                   {formatCoefficient(summary.condensingHeatingReserveFactor)})
                 </dt>
                 <dd>
@@ -89,7 +89,7 @@ export function BoilerReportView({
 
       {boiler.warnings.length > 0 && (
         <>
-          <h4 className={styles.sectionTitle}>Предупреждения</h4>
+          <h4 className={styles.sectionTitle}>Попередження</h4>
           <ul className={styles.warningsList}>
             {boiler.warnings.map((w, i) => (
               <li key={`boiler-report-w-${i}-${w.slice(0, 64)}`}>{w}</li>
@@ -100,10 +100,10 @@ export function BoilerReportView({
 
       {hasTiers && (
         <>
-          <h4 className={styles.sectionTitle}>Варианты подбора</h4>
+          <h4 className={styles.sectionTitle}>Варіанти підбору</h4>
           <p className={styles.hint}>
-            Два варианта под один и тот же расчёт — сравнение по бюджету и режимам
-            ГВС.
+            Два варіанти під один і той самий розрахунок — порівняння за бюджетом і режимами
+            ГВП.
           </p>
           <div className={styles.cardsRow}>
             {boiler.tierEconomy != null && (
@@ -113,7 +113,7 @@ export function BoilerReportView({
                   catalogSource={catalogSource}
                   sectionTitle={
                     labels?.proposalEconomyTitle
-                    ?? 'Вариант 1 · эконом класс'
+                    ?? 'Варіант 1 · економ клас'
                   }
                   titleDomId="boiler-report-proposal-economy"
                 />
@@ -126,7 +126,7 @@ export function BoilerReportView({
                   catalogSource={catalogSource}
                   sectionTitle={
                     labels?.proposalEfficientTitle
-                    ?? 'Вариант 2 · эффективный / конденсационный'
+                    ?? 'Варіант 2 · ефективний / конденсаційний'
                   }
                   titleDomId="boiler-report-proposal-efficient"
                 />
@@ -138,7 +138,7 @@ export function BoilerReportView({
 
       {showLegacy && boiler.legacyProposal != null && (
         <>
-          <h4 className={styles.sectionTitle}>Подбор котла</h4>
+          <h4 className={styles.sectionTitle}>Підбір котла</h4>
           <BoilerProposalCard
             proposal={boiler.legacyProposal}
             catalogSource={catalogSource}

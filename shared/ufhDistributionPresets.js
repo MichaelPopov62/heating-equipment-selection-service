@@ -14,9 +14,9 @@ export const UFH_DISTRIBUTION_PRESET_IDS = Object.freeze([
 
 /** @type {Readonly<Record<UfhDistributionPreset, string>>} */
 export const UFH_DISTRIBUTION_PRESET_LABELS = Object.freeze({
-  auto: 'Авто по масштабу объекта',
-  collector_mixing_valve: 'Насосно-смесительный узел на коллекторе',
-  hydraulic_separator: 'Гидравлическая стрелка + зональные контуры',
+  auto: 'Авто за масштабом об\'єкта',
+  collector_mixing_valve: 'Насосно-змішувальний вузол на колекторі',
+  hydraulic_separator: 'Гідравлічна стрілка + зональні контури',
 });
 
 /** Варианты для select анкеты. */

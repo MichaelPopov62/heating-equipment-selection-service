@@ -117,7 +117,7 @@ export function RoomsForm({
   return (
     <div className={styles.root}>
       <div className={styles.headerRow}>
-        <h2 className={styles.title}>Помещения</h2>
+        <h2 className={styles.title}>Приміщення</h2>
         {value.length > 1 && (
           <div className={styles.headerActions}>
             <button
@@ -125,7 +125,7 @@ export function RoomsForm({
               className={styles.smallButton}
               onClick={copyFirstRoomSettings}
             >
-              Скопировать из первой комнаты
+              Скопіювати з першої кімнати
             </button>
           </div>
         )}

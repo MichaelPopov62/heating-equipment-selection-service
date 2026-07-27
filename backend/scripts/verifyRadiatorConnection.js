@@ -27,7 +27,7 @@ async function main() {
   ok = check(normalizeRadiatorConnection(undefined) === 'side', 'undefined → side') && ok;
   ok = check(normalizeRadiatorConnection('bottom') === 'bottom', 'bottom preserved') && ok;
   ok = check(normalizeRadiatorConnection('x') === DEFAULT_RADIATOR_CONNECTION, 'junk → side') && ok;
-  ok = check(radiatorConnectionLabel('bottom') === 'нижняя', 'label bottom') && ok;
+  ok = check(radiatorConnectionLabel('bottom') === 'нижнє', 'label bottom') && ok;
 
   /** @type {import('../src/types/shared-types.js').CalcRequestBody} */
   const body = {
@@ -49,7 +49,7 @@ async function main() {
     ) && ok;
 
   const notesBottom = buildRadiatorConnectionSelectionNotes('bottom');
-  ok = check(notesBottom.length === 1 && /нижняя/i.test(assertAt(notesBottom, 0, 'notesBottom[0]')), 'notes bottom') && ok;
+  ok = check(notesBottom.length === 1 && /нижн/i.test(assertAt(notesBottom, 0, 'notesBottom[0]')), 'notes bottom') && ok;
   ok = check(buildRadiatorConnectionSelectionNotes(null).length === 0, 'notes empty if unset') && ok;
 
   await warmupReferenceCache();

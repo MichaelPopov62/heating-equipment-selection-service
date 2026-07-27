@@ -20,26 +20,26 @@ export function buildSurveyTextSummary(
   report?: CalcReportJson | null,
 ): string {
   const lines: string[] = [
-    `Клиент: ${draft.clientName}`,
-    `Объект: ${draft.objectMeta.objectType}, этажей ${draft.objectMeta.floors}, помещений ${draft.rooms.length}`,
-    `Температуры: внутри ${draft.temps.insideC} °C, снаружи ${draft.temps.outsideC} °C` +
+    `Клієнт: ${draft.clientName}`,
+    `Об'єкт: ${draft.objectMeta.objectType}, поверхів ${draft.objectMeta.floors}, приміщень ${draft.rooms.length}`,
+    `Температури: всередині ${draft.temps.insideC} °C, зовні ${draft.temps.outsideC} °C` +
       (typeof draft.temps.bathroomAirTempC === 'number'
-        ? `, воздух санузла ${draft.temps.bathroomAirTempC} °C`
+        ? `, повітря санвузла ${draft.temps.bathroomAirTempC} °C`
         : ''),
-    `Сохранено: ${draft.savedAt}`,
+    `Збережено: ${draft.savedAt}`,
   ];
   const calculations = report && isRecord(report.calculations) ? report.calculations : null;
   const heatLoss =
     calculations && isRecord(calculations.heatLoss) ? calculations.heatLoss : null;
   if (heatLoss && typeof heatLoss.totalWatts === 'number') {
     lines.push(
-      `Теплопотери: ${formatKw(wattsToKilowatts(heatLoss.totalWatts))} кВт`,
+      `Тепловтрати: ${formatKw(wattsToKilowatts(heatLoss.totalWatts))} кВт`,
     );
   }
   const matching = report && isRecord(report.matching) ? report.matching : null;
   const boiler = matching && isRecord(matching.boiler) ? matching.boiler : null;
   if (boiler && typeof boiler.requiredKw === 'number') {
-    lines.push(`Котёл: требуется ${formatKw(boiler.requiredKw)} кВт`);
+    lines.push(`Котел: потрібно ${formatKw(boiler.requiredKw)} кВт`);
   }
   const selected = boiler && isRecord(boiler.selected) ? boiler.selected : null;
   const proposal = boiler && isRecord(boiler.proposal) ? boiler.proposal : null;
@@ -48,7 +48,7 @@ export function buildSurveyTextSummary(
     (proposal && typeof proposal.model === 'string' ? proposal.model : null);
   if (model) lines.push(`Модель: ${model}`);
   if (report && Array.isArray(report.warnings) && report.warnings.length > 0) {
-    lines.push(`Предупреждений: ${report.warnings.length}`);
+    lines.push(`Попереджень: ${report.warnings.length}`);
   }
   return lines.join('\n');
 }
@@ -106,5 +106,5 @@ export async function copyTextToClipboard(text: string): Promise<void> {
     await clip.writeText(text);
     return;
   }
-  throw new Error('Буфер обмена недоступен в этом браузере');
+  throw new Error('Буфер обміну недоступний у цьому браузері');
 }

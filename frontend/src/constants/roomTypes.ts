@@ -11,16 +11,16 @@ const CANONICAL_ROOM_TYPE_SET: ReadonlySet<string> = new Set(CANONICAL_ROOM_TYPE
 
 /** Подписи для `<select>` типа помещения (порядок = CANONICAL_ROOM_TYPES). */
 const ROOM_TYPE_LABELS: Record<RoomType, string> = {
-  прихожая: 'Прихожая',
-  тамбур: 'Тамбур / входная зона',
-  гостиная: 'Гостиная',
+  прихожая: 'Прихожа',
+  тамбур: 'Тамбур / вхідна зона',
+  гостиная: 'Вітальня',
   коридор: 'Коридор',
   спальня: 'Спальня',
   кухня: 'Кухня',
-  санузел: 'Санузел',
-  тех: 'Техническое',
-  котельная: 'Котельная',
-  помещение: 'Помещение',
+  санузел: 'Санітарний вузол',
+  тех: 'Технічне',
+  котельная: 'Котельня',
+  помещение: 'Приміщення',
 };
 
 /**
@@ -46,7 +46,7 @@ export function parseCanonicalRoomTypeFromSelect(v: string): RoomType | null {
 export const ROOM_TYPE_UI_OPTIONS: ReadonlyArray<{ value: RoomType; label: string }> =
   CANONICAL_ROOM_TYPES.map((value) => {
     if (!isCanonicalRoomType(value)) {
-      throw new Error(`ROOM_TYPE_UI_OPTIONS: неканонический type «${value}»`);
+      throw new Error(`ROOM_TYPE_UI_OPTIONS: неканонічний type «${value}»`);
     }
     return {
       value,

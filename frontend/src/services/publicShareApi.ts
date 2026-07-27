@@ -23,7 +23,7 @@ export async function fetchPublicShare(shareToken: string): Promise<PublicShareR
   });
   const data: unknown = await res.json().catch(() => null);
   if (!res.ok) {
-    throw new Error(parseApiErrorMessage(data, `Ошибка API: HTTP ${res.status}`));
+    throw new Error(parseApiErrorMessage(data, `Помилка API: HTTP ${res.status}`));
   }
 
   const parsed = parsePublicShareResponse(data);
@@ -49,12 +49,12 @@ export async function downloadPublicSharePdf(
   );
   if (!res.ok) {
     const data = await parseJson(res);
-    throw new Error(parseApiErrorMessage(data, `Не удалось скачать PDF: HTTP ${res.status}`));
+    throw new Error(parseApiErrorMessage(data, `Не вдалося завантажити PDF: HTTP ${res.status}`));
   }
   const blob = await res.blob();
   const filename = filenameFromContentDisposition(
     res.headers.get('Content-Disposition'),
-    'Смета.pdf',
+    'Кошторис.pdf',
   );
   downloadBlobFile(blob, filename);
 }

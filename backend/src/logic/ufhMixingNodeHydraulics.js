@@ -43,9 +43,9 @@ export function computeUfhMixingNodeSpec(args) {
 
   /** @type {string[]} */
   const notes = [
-    `Ориентир расхода контура ТП: не менее ${flowRateM3PerHour} м³/ч (Δt = ${dt} K).`,
-    `Насос контура ТП: напор не менее ${headMetersMin} м.в.ст.`,
-    `Трёхходовой смесительный клапан: Kvs от ${valveKvsMin} м³/ч (Δp ≈ ${valvePressureDropBar} бар).`,
+    `Орієнтир витрати контуру ТП: не менше ${flowRateM3PerHour} м³/ч (Δt = ${dt} K).`,
+    `Насос контуру ТП: напір не менше ${headMetersMin} м.в.ст.`,
+    `Триходовий змішувальний клапан: Kvs від ${valveKvsMin} м³/ч (Δp ≈ ${valvePressureDropBar} бар).`,
   ];
 
   return {

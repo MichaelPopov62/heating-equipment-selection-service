@@ -60,7 +60,7 @@ export function runHydraulicsPipeline({ dto, catalog }) {
 
   if (dto.layout.mainLineLengthM > 40) {
     notes.push(
-      'Длинная магистраль: на реальном проекте обязательно считать сопротивления и насос.',
+      'Довга магістраль: на реальному проєкті обов’язково рахувати опори та насос.',
     );
   }
 
@@ -70,25 +70,25 @@ export function runHydraulicsPipeline({ dto, catalog }) {
       : null;
   if (typeof minBoilerKw === 'number' && dto.source.requiredKw > minBoilerKw) {
     notes.push(
-      'При такой расчётной мощности котлового контура рекомендуется гидравлический разделитель (гидрострелка) и проектная проработка коллекторной схемы.',
+      'За такої розрахункової потужності котлового контуру рекомендується гідравлічний роздільник (гідрострілка) та проєктна опрацювання колекторної схеми.',
     );
   }
 
   if (dto.meta.heatingEmittersMode === 'ufh_only') {
     notes.push(
-      'Расчёт магистрали выполнен по расходу подсистемы водяного теплого пола (underfloorHydraulics).',
+      'Розрахунок магістралі виконано за витратою підсистеми водяної теплої підлоги (underfloorHydraulics).',
     );
   }
 
   if (pumpResult.topology === 'direct' && dto.meta.heatingEmittersMode === 'mixed') {
     notes.push(
-      'Смешанная система: расход котлового насоса = сумма расходов радиаторов и ТП.',
+      'Змішана система: витрата котлового насоса = сума витрат радіаторів і ТП.',
     );
   }
 
   if (pressure.criticalLoop) {
     notes.push(
-      `Критическое циркуляционное кольцо: «${pressure.criticalLoop.label}» — Δp ${pressure.criticalPressureDropKPa ?? pressure.criticalLoop.pressureDropKPa} кПа (H≈${pressure.headRequiredM} м).`,
+      `Критичне циркуляційне кільце: «${pressure.criticalLoop.label}» — Δp ${pressure.criticalPressureDropKPa ?? pressure.criticalLoop.pressureDropKPa} кПа (H≈${pressure.headRequiredM} м).`,
     );
   }
 

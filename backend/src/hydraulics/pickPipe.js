@@ -355,7 +355,7 @@ export function pickPipesForGraph({ graph, catalog, dto }) {
         const minInternal = match.trunkTaperFloorMm
           ?? resolveMinInternalDiameterMm(edge, dto.rules);
         warnings.push(
-          `Участок ${edge.id}: в каталоге нет трубы с Dвн ≥ ${minInternal} мм.`,
+          `Ділянка ${edge.id}: у каталозі немає труби з Dвн ≥ ${minInternal} мм.`,
         );
       } else {
         pipes.push(match);
@@ -363,35 +363,35 @@ export function pickPipesForGraph({ graph, catalog, dto }) {
         const vMin = resolveVelocityMinForEdge(edge, dto.rules);
         if (match.velocityLimitExceeded) {
           warnings.push(
-            `Участок ${edge.id}: скорость ${match.velocityMps} м/с выше лимита ${vMax} м/с — подобран максимальный Ø каталога.`,
+            `Ділянка ${edge.id}: швидкість ${match.velocityMps} м/с вище ліміту ${vMax} м/с — підібрано максимальний Ø каталогу.`,
           );
         } else if (match.velocityBelowMin) {
           if (match.mainTransitGuardApplied) {
             warnings.push(
-              `Участок ${edge.id}: скорость ${match.velocityMps} м/с ниже минимума ${vMin} м/с `
-              + `— применён guard Dвн ≥ ${dto.rules.mainTransitMinInternalDiameterMm} мм.`,
+              `Ділянка ${edge.id}: швидкість ${match.velocityMps} м/с нижче мінімуму ${vMin} м/с `
+              + `— застосовано guard Dвн ≥ ${dto.rules.mainTransitMinInternalDiameterMm} мм.`,
             );
           } else if (
             edge.segmentRole === 'trunk'
             && match.trunkTaperFromDownstreamMm != null
           ) {
             warnings.push(
-              `Участок ${edge.id}: скорость ${match.velocityMps} м/с ниже минимума ${vMin} м/с `
-              + `— удержан Ø ≥ ${match.trunkTaperFromDownstreamMm} мм downstream (без отката к guard 12 мм).`,
+              `Ділянка ${edge.id}: швидкість ${match.velocityMps} м/с нижче мінімуму ${vMin} м/с `
+              + `— утримано Ø ≥ ${match.trunkTaperFromDownstreamMm} мм downstream (без відкату до guard 12 мм).`,
             );
           } else {
             warnings.push(
-              `Участок ${edge.id}: скорость ${match.velocityMps} м/с ниже минимума ${vMin} м/с — подобран минимальный Ø.`,
+              `Ділянка ${edge.id}: швидкість ${match.velocityMps} м/с нижче мінімуму ${vMin} м/с — підібрано мінімальний Ø.`,
             );
           }
         } else if (match.velocityMps > vMax) {
           warnings.push(
-            `Участок ${edge.id}: скорость ${match.velocityMps} м/с выше лимита ${vMax} м/с — проверьте каталог.`,
+            `Ділянка ${edge.id}: швидкість ${match.velocityMps} м/с вище ліміту ${vMax} м/с — перевірте каталог.`,
           );
         }
       }
     } else if (edge.designFlowM3PerHour > 0) {
-      warnings.push(`Участок ${edge.id}: не удалось подобрать трубу из каталога.`);
+      warnings.push(`Ділянка ${edge.id}: не вдалося підібрати трубу з каталогу.`);
     }
   }
 

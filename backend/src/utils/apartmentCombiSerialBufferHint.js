@@ -177,7 +177,7 @@ export function appendApartmentSingleOversizeCombiHint(hints, {
     type: 'apartment_single_oversized_suggest_combi',
     message:
       rec?.text ??
-      'Рассмотрите двухконтурный котёл вместо избыточного одноконтурного — ГВС через встроенный контур котла.',
+      'Розгляньте двоконтурний котел замість надлишкового одноконтурного — ГВП через вбудований контур котла.',
     suggestedScheme: SCHEME_BOILER_MAX_COMBI,
   });
 }

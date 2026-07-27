@@ -58,7 +58,7 @@ export function buildHydraulicsGraph(dto) {
     nodes.push({ id, kind, label, ...extra });
   };
 
-  pushNode('boiler', 'boiler', 'Котёл');
+  pushNode('boiler', 'boiler', 'Котел');
   let upstreamId = 'boiler';
 
   const mode = dto.meta.heatingEmittersMode;
@@ -75,7 +75,7 @@ export function buildHydraulicsGraph(dto) {
   const primaryMainFlow = resolvePrimaryMainLineFlowM3h(dto);
 
   if (needsSeparator) {
-    pushNode('hydraulic_separator', 'hydraulic_separator', 'Гидрострелка');
+    pushNode('hydraulic_separator', 'hydraulic_separator', 'Гідрострілка');
     edges.push({
       id: 'e_boiler_separator',
       from: upstreamId,
@@ -94,7 +94,7 @@ export function buildHydraulicsGraph(dto) {
     || mode !== 'ufh_only'
     || needsMixingNode
   ) {
-    pushNode('main_collector', 'main_collector', 'Магистраль / коллектор');
+    pushNode('main_collector', 'main_collector', 'Магістраль / колектор');
     edges.push({
       id: 'e_boiler_main',
       from: upstreamId,
@@ -124,7 +124,7 @@ export function buildHydraulicsGraph(dto) {
 
     if (needsMixingNode) {
       if (!nodes.some((n) => n.id === 'mixing_node')) {
-        pushNode('mixing_node', 'mixing_node', 'Насосно-смесительный узел');
+        pushNode('mixing_node', 'mixing_node', 'Насосно-змішувальний вузол');
       }
       edges.push({
         id: 'e_main_to_mixing',
@@ -166,7 +166,7 @@ export function buildHydraulicsGraph(dto) {
       if (collectorRooms.length > 0) {
         const collectorId = ufhCollectorNodeId(floor);
         if (!nodes.some((n) => n.id === collectorId)) {
-          pushNode(collectorId, 'ufh_collector', `Коллектор ТП, этаж ${floor}`, {
+          pushNode(collectorId, 'ufh_collector', `Колектор ТП, поверх ${floor}`, {
             floor,
           });
         }
@@ -251,7 +251,7 @@ export function buildHydraulicsGraph(dto) {
 
   const dhw = dto.circuits.dhw;
   if (dhw && dhw.peakFlowLps > 0 && dhw.scenario === 'flowThrough') {
-    pushNode('dhw_load', 'dhw_load', 'Пиковая нагрузка ГВС');
+    pushNode('dhw_load', 'dhw_load', 'Пікове навантаження ГВП');
     const flowM3h = (dhw.peakFlowLps * 3600) / 1000;
     edges.push({
       id: 'e_boiler_dhw',
@@ -270,7 +270,7 @@ export function buildHydraulicsGraph(dto) {
     && dhw.scenario === 'storage'
   ) {
     const coilNodeId = 'indirect_coil';
-    pushNode(coilNodeId, 'indirect_coil', 'Змеевик БКН');
+    pushNode(coilNodeId, 'indirect_coil', 'Змійовик БКН');
     const coilFlow = thermalLoadToFlow({
       heatLoadWatts: dhw.hotWaterPowerKw * 1000,
       deltaTK: dto.source.deltaTK,

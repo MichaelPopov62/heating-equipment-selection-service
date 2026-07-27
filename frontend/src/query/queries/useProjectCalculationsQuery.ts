@@ -33,7 +33,7 @@ export function useProjectCalculationsQuery({
     queryKey: queryKeys.projectCalculations(projectId ?? ''),
     queryFn: () => {
       if (projectId == null || projectId.length === 0) {
-        throw new Error('projectId обязателен для списка расчётов');
+        throw new Error('projectId обов\'язковий для списку розрахунків');
       }
       return listProjectCalculations(projectId, { limit });
     },

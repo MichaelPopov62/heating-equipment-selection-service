@@ -230,7 +230,7 @@ function buildManifoldRadiatorGraph(ctx) {
   ctx.pushNode(
     RAD_DISTRIBUTION_MANIFOLD_NODE_ID,
     'radiator_distribution_manifold',
-    'Коллектор радиаторов',
+    'Колектор радіаторів',
     { roomIds: consumers.map((c) => c.roomId) },
   );
 

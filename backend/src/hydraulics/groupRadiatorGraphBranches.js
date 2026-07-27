@@ -50,7 +50,7 @@ export function partitionRadiatorConsumersForGraph({ consumers, grouping }) {
  */
 export function buildMicroManifoldLabel(microConsumers) {
   const names = microConsumers.map((c) => c.roomName).join(', ');
-  return `Коллектор малых контуров (${microConsumers.length} комн.): ${names}`;
+  return `Колектор малих контурів (${microConsumers.length} кімн.): ${names}`;
 }
 
 /**

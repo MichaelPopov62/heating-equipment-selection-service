@@ -307,8 +307,8 @@ export function pickRadiators({
   const radiatorSelectionNotes = [];
   if (panelPoolRaw.length > 0) {
     radiatorSelectionNotes.push(
-      `В каталоге ${panelPoolRaw.length} панельных позиций (priceBasis=panel): `
-        + 'подбор по длине SKU и мощности на прибор; секции в отчёте не применяются.',
+      `У каталозі ${panelPoolRaw.length} панельних позицій (priceBasis=panel): `
+        + 'підбір за довжиною SKU і потужністю на прилад; секції у звіті не застосовуються.',
     );
   }
   if (
@@ -317,18 +317,18 @@ export function pickRadiators({
     && panelPoolRaw.length > 0
   ) {
     radiatorSelectionNotes.push(
-      'Для нижней подводки в каталоге нет панелей VKP/нижнего подключения — '
-        + 'рассмотрите секционные модели или дополните каталог.',
+      'Для нижньої підводки в каталозі немає панелей VKP/нижнього підключення — '
+        + 'розгляньте секційні моделі або доповніть каталог.',
     );
   }
   if (radiatorConnection === 'bottom' && panelPoolRaw.length === 0) {
     radiatorSelectionNotes.push(
-      'Запрошена нижняя подводка, но панельных моделей в каталоге нет.',
+      'Запрошено нижню підводку, але панельних моделей у каталозі немає.',
     );
   }
 
   radiatorSelectionNotes.push(
-    `Предпочтение типа приборов: ${radiatorEmitterPreferenceLabel(radiatorEmitterPreference)} `
+    `Перевага типу приладів: ${radiatorEmitterPreferenceLabel(radiatorEmitterPreference)} `
       + `(heatingSystem.radiatorEmitterPreference=${radiatorEmitterPreference}).`,
   );
 
@@ -350,12 +350,12 @@ export function pickRadiators({
     const relOut = atLow / refWatts;
     const sectionScale = relOut > 0 ? 1 / relOut : 0;
     radiatorSelectionNotes.push(
-      `Конденсационный контур: при ориентировочном графике ${lowSupplyC}/${lowReturnC} °C и ${insideC} °C `
-        + `в помещении средний температурный напор радиатора ≈ ${round(lowTargetDeltaT, 1)} К `
-        + `(для сравнения — типичный паспорт ΔT≈70 К при ~90/70 °C). По степенной модели (n≈1,3) `
-        + `удельная теплоотдача падает ≈в ${relOut > 0 ? (1 / relOut).toFixed(1) : '—'} раз — `
-        + `ориентировочно требуется ≈в ${sectionScale > 0 ? sectionScale.toFixed(1) : '—'} раз `
-        + 'больше секций/поверхности прибора, чем в высокотемпературной системе.',
+      `Конденсаційний контур: за орієнтовним графіком ${lowSupplyC}/${lowReturnC} °C і ${insideC} °C `
+        + `в приміщенні середній температурний напір радіатора ≈ ${round(lowTargetDeltaT, 1)} К `
+        + `(для порівняння — типовий паспорт ΔT≈70 К при ~90/70 °C). За степеневою моделлю (n≈1,3) `
+        + `питома тепловіддача падає ≈у ${relOut > 0 ? (1 / relOut).toFixed(1) : '—'} раз — `
+        + `орієнтовно потрібно ≈у ${sectionScale > 0 ? sectionScale.toFixed(1) : '—'} раз `
+        + 'більше секцій/поверхні приладу, ніж у високотемпературній системі.',
     );
   }
 
@@ -366,8 +366,8 @@ export function pickRadiators({
   const applyUfhRadiatorOffset = isMixedRadiatorsUfhHeatingMode(heatingSystem);
   if (applyUfhRadiatorOffset && ufhHeatFluxByRoomId.size > 0) {
     radiatorSelectionNotes.push(
-      'Смешанный режим (радиаторы + ТП): нагрузка на радиатор уменьшается на отдачу тёплого пола '
-        + 'вверх (heatFluxUpWatts) по каждой комнате с ТП — без двойного учёта мощности.',
+      'Змішаний режим (радіатори + ТП): навантаження на радіатор зменшується на віддачу теплої підлоги '
+        + 'вгору (heatFluxUpWatts) по кожній кімнаті з ТП — без подвійного обліку потужності.',
     );
   }
 
@@ -404,7 +404,7 @@ export function pickRadiators({
       byRoom: [],
       emittersSummary: summarizeRadiatorEmitters([]),
       totalSections: null,
-      warnings: ['В каталоге нет радиаторов.'],
+      warnings: ['У каталозі немає радіаторів.'],
       inputs: emptyInputs,
       radiatorSelectionNotes,
       resolvedEmitterKind: null,
@@ -637,7 +637,7 @@ export function pickRadiators({
             flowRateM3PerHour: radiatorFlowM3h(prep.qRad),
             radiatorModel: '—',
             warnings: [
-              `Не удалось подобрать минимальный ${resolvedKind} радиатор для входной зоны.`,
+              `Не вдалося підібрати мінімальний ${resolvedKind} радіатор для вхідної зони.`,
             ],
             sizingNotes: [...prep.mixedNotes, ...prep.microNotes],
           }),
@@ -721,7 +721,7 @@ export function pickRadiators({
           flowRateM3PerHour: radiatorFlowM3h(prep.qRad),
           radiatorModel: '—',
           warnings: [
-            `Не удалось подобрать ${resolvedKind} радиатор из каталога (forced kind).`,
+            `Не вдалося підібрати ${resolvedKind} радіатор з каталогу (forced kind).`,
           ],
           sizingNotes: prep.mixedNotes,
         }),
@@ -750,9 +750,9 @@ export function pickRadiators({
     if (sized.underpowered) {
       underpoweredRoomIds.add(prep.roomId);
       roomWarnings.push(
-        `В помещении «${prep.roomName}» секционный/панельный прибор типа «${resolvedKind}» `
-          + `не покрывает 100% теплопотерь. Нехватка: ${sized.deficitWatts} Вт `
-          + `(нагрузка ${Math.round(prep.qRad)} Вт, отдача ${emitter.deliverableWatts} Вт).`,
+        `У приміщенні «${prep.roomName}» секційний/панельний прилад типу «${resolvedKind}» `
+          + `не покриває 100% тепловтрат. Нестача: ${sized.deficitWatts} Вт `
+          + `(навантаження ${Math.round(prep.qRad)} Вт, віддача ${emitter.deliverableWatts} Вт).`,
       );
     }
 
@@ -833,19 +833,19 @@ export function pickRadiators({
     && returnC >= 55
   ) {
     warnings.push(
-      'Для извлечения КПД конденсационного котла рекомендуется более низкий график теплоносителя '
-        + '(например 55/45°C или тёплый пол) — при текущих supply/return расчёт радиаторов консервативен.',
+      'Для вилучення ККД конденсаційного котла рекомендується нижчий графік теплоносія '
+        + '(наприклад 55/45°C або тепла підлога) — за поточних supply/return розрахунок радіаторів консервативний.',
     );
   }
 
   if (sectionWidthMm == null && maxWindowWidthByRoom.size > 0 && !panelPoolRaw.length) {
     warnings.push(
-      'Невозможно проверить правило 70% ширины окна: у выбранного радиатора нет dimensions.width/sectionWidthMm.',
+      'Неможливо перевірити правило 70% ширини вікна: у обраного радіатора немає dimensions.width/sectionWidthMm.',
     );
   }
   if (sectionWidthMm != null && maxWindowWidthByRoom.size === 0) {
     warnings.push(
-      'Невозможно проверить правило 70% ширины окна: в анкете не задано openingWidthMm для окон.',
+      'Неможливо перевірити правило 70% ширини вікна: в анкеті не задано openingWidthMm для вікон.',
     );
   }
   for (const item of byRoom) {

@@ -12,11 +12,11 @@ export async function fetchUfhModePresets(): Promise<UfhModePresetsResponse> {
     headers: { Accept: 'application/json' },
   });
   if (!res.ok) {
-    throw new Error(`HTTP ${res.status} при загрузке режимов ТП`);
+    throw new Error(`HTTP ${res.status} під час завантаження режимів ТП`);
   }
   const json = (await res.json()) as UfhModePresetsResponse;
   if (!json.ok || !Array.isArray(json.presets)) {
-    throw new Error('Некорректный ответ API режимов ТП');
+    throw new Error('Некоректна відповідь API режимів ТП');
   }
   return json;
 }

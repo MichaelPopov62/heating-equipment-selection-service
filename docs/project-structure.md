@@ -4,7 +4,8 @@
 
 Правила кода и бизнес-контекст: [`.cursorrules`](../.cursorrules).  
 Контракт API: [`openapi.yaml`](../openapi.yaml).  
-Типобезопасность / verify gate: [`type-safety.md`](type-safety.md).
+Типобезопасность / verify gate: [`type-safety.md`](type-safety.md).  
+**Мова UI (user-facing):** [`language-policy.md`](language-policy.md) — українська; whitelist enum/calc payload.
 
 В заголовке большинства исходников есть блок «Назначение / Описание».
 

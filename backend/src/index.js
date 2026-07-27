@@ -156,7 +156,7 @@ function handleApiError(err, req, res, _next) {
   let statusCode = err?.statusCode ?? err?.status ?? 500;
   let code = err?.code ?? 'ERR';
   let clientMessage =
-    statusCode >= 500 ? 'Внутренняя ошибка сервера' : err?.message ?? 'Ошибка запроса';
+    statusCode >= 500 ? 'Внутрішня помилка сервера' : err?.message ?? 'Помилка запиту';
   /** @type {import('./types/shared-types.js').ErrorDetailsAjvItem[] | undefined} */
   const details =
     statusCode >= 500
@@ -168,15 +168,15 @@ function handleApiError(err, req, res, _next) {
     if (err.type === 'entity.too.large') {
       statusCode = 413;
       code = 'PAYLOAD_TOO_LARGE';
-      clientMessage = 'Слишком большой запрос';
+      clientMessage = 'Занадто великий запит';
     } else if (err instanceof SyntaxError && 'body' in err) {
       statusCode = 400;
       code = 'BAD_JSON';
-      clientMessage = 'Некорректный JSON';
+      clientMessage = 'Некоректний JSON';
     } else if (isMongoBsonObjectTooLargeError(err)) {
       statusCode = 413;
       code = 'CALCULATION_DOCUMENT_TOO_LARGE';
-      clientMessage = 'Документ расчёта слишком большой для сохранения';
+      clientMessage = 'Документ розрахунку занадто великий для збереження';
     }
   }
 
@@ -227,6 +227,6 @@ server.on('error', (err) => {
     return;
   }
 
-  process.stderr.write(`Ошибка сервера: ${err?.message ?? String(err)}\n`);
+  process.stderr.write(`Помилка сервера: ${err?.message ?? String(err)}\n`);
   process.exitCode = 1;
 });

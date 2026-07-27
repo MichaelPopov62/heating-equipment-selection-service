@@ -39,7 +39,7 @@ export function createMeRouter() {
       res.status(401).json({
         ok: false,
         error: {
-          message: 'Требуется Authorization: Bearer <JWT>',
+          message: 'Потрібен Authorization: Bearer <JWT>',
           code: 'PROJECTS_AUTH_REQUIRED',
           statusCode: 401,
         },

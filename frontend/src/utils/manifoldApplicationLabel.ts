@@ -6,8 +6,8 @@
 import type { ManifoldApplication } from '../services/catalogTypes';
 
 const LABELS: Record<ManifoldApplication, string> = {
-  radiator: 'Радиаторный контур',
-  underfloor: 'Тёплый пол',
+  radiator: 'Радіаторний контур',
+  underfloor: 'Тепла підлога',
 };
 
 /**

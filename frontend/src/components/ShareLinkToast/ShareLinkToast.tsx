@@ -34,13 +34,13 @@ export function ShareLinkToast({ open, onDismiss }: ShareLinkToastProps) {
         type="button"
         className={styles.close}
         onClick={onDismiss}
-        aria-label="Закрыть уведомление"
+        aria-label="Закрити сповіщення"
       >
         ×
       </button>
-      <p className={styles.title}>✓ Ссылка скопирована</p>
+      <p className={styles.title}>✓ Посилання скопійовано</p>
       <p className={styles.body}>
-        Вставьте её в WhatsApp, Telegram или другой мессенджер (Ctrl+V).
+        Вставте його в WhatsApp, Telegram або інший месенджер (Ctrl+V).
       </p>
     </div>
   );

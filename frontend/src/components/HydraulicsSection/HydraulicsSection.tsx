@@ -73,15 +73,15 @@ export function HydraulicsSection({
   return (
     <div className={styles.root}>
       <p className={styles.hint}>
-        Укажите тип разводки, длину магистрали котёл → коллектор и подводы коллектор →
-        радиатор. Δt — для расчёта расхода радиаторного контура (может отличаться от
-        номинального графика 75/65 или 55/45). Диаметры труб и насос подбираются
-        автоматически — полный расчёт с ценами и участками открывается кнопкой
-        «Отчёт по гидравлике»; краткий итог — в правой колонке.
+        Вкажіть тип розводки, довжину магістралі котел → колектор і підводи колектор →
+        радіатор. Δt — для розрахунку витрати радіаторного контуру (може відрізнятися від
+        номінального графіка 75/65 або 55/45). Діаметри труб і насос підбираються
+        автоматично — повний розрахунок з цінами та ділянками відкривається кнопкою
+        «Звіт з гідравліки»; короткий підсумок — у правій колонці.
       </p>
 
       <fieldset className={styles.wiringFieldset}>
-        <legend className={styles.wiringLegend}>Тип разводки системы отопления</legend>
+        <legend className={styles.wiringLegend}>Тип розводки системи опалення</legend>
         <div className={styles.wiringOptions} role="presentation">
           {WIRING_SYSTEM_TYPE_OPTIONS.map((opt) => {
             const inputId = `wiring-system-${opt.value}`;
@@ -105,7 +105,7 @@ export function HydraulicsSection({
                   <span className={styles.wiringOptionTitleRow}>
                     <span className={styles.wiringOptionTitle}>{opt.label}</span>
                     {opt.recommended ? (
-                      <span className={styles.wiringRecommendedBadge}>Рекомендуется</span>
+                      <span className={styles.wiringRecommendedBadge}>Рекомендовано</span>
                     ) : null}
                   </span>
                   <span className={styles.wiringOptionDesc}>{opt.description}</span>
@@ -117,7 +117,7 @@ export function HydraulicsSection({
       </fieldset>
 
       <label className={styles.field}>
-        Длина магистрали котёл → коллектор, м
+        Довжина магістралі котел → колектор, м
         <input
           type="number"
           min={0}
@@ -133,7 +133,7 @@ export function HydraulicsSection({
       </label>
 
       <label className={styles.field}>
-        Δt системы отопления (радиаторы), K
+        Δt системи опалення (радіатори), K
         <input
           type="number"
           min={1}
@@ -150,7 +150,7 @@ export function HydraulicsSection({
       </label>
 
       <label className={styles.field}>
-        Предпочтение материала труб (опционально)
+        Перевага матеріалу труб (опційно)
         <select
           value={value.pipeMaterialPreference}
           onChange={(e) =>
@@ -160,9 +160,9 @@ export function HydraulicsSection({
             }); }
           }
         >
-          <option value="">Авто (из каталога)</option>
+          <option value="">Авто (з каталогу)</option>
           <option value="pex">PEX</option>
-          <option value="metal_plastic">Металлопластик</option>
+          <option value="metal_plastic">Металопластик</option>
           <option value="steel">Сталь</option>
         </select>
       </label>
@@ -170,12 +170,12 @@ export function HydraulicsSection({
       {branches.length > 0 ? (
         <div className={styles.branchesBlock}>
           <h4 className={styles.branchesTitle}>
-            Подводы коллектор → радиатор, м
+            Підводи колектор → радіатор, м
           </h4>
           {isSequentialWiring(wiringSystemType) ? (
             <p className={styles.branchesHint}>
-              Порядок строк задаёт последовательность радиаторов на магистрали (от котла
-              к дальнему прибору).
+              Порядок рядків задає послідовність радіаторів на магістралі (від котла
+              до дальнього приладу).
             </p>
           ) : null}
           <table className={styles.branchesTable}>
@@ -184,8 +184,8 @@ export function HydraulicsSection({
                 {isSequentialWiring(wiringSystemType) ? (
                   <th className={styles.colOrder}>Порядок</th>
                 ) : null}
-                <th>Помещение</th>
-                <th className={styles.colLength}>Длина, м</th>
+                <th>Приміщення</th>
+                <th className={styles.colLength}>Довжина, м</th>
               </tr>
             </thead>
             <tbody>
@@ -199,7 +199,7 @@ export function HydraulicsSection({
                           className={styles.orderBtn}
                           disabled={index === 0}
                           onClick={() => { onBranchReorder(branch.roomId, 'up'); }}
-                          aria-label={`Выше: ${resolveRoomLabel(rooms, branch.roomId)}`}
+                          aria-label={`Вище: ${resolveRoomLabel(rooms, branch.roomId)}`}
                         >
                           ↑
                         </button>
@@ -208,7 +208,7 @@ export function HydraulicsSection({
                           className={styles.orderBtn}
                           disabled={index === branches.length - 1}
                           onClick={() => { onBranchReorder(branch.roomId, 'down'); }}
-                          aria-label={`Ниже: ${resolveRoomLabel(rooms, branch.roomId)}`}
+                          aria-label={`Нижче: ${resolveRoomLabel(rooms, branch.roomId)}`}
                         >
                           ↓
                         </button>
@@ -238,8 +238,8 @@ export function HydraulicsSection({
         </div>
       ) : (
         <p className={styles.branchesEmpty}>
-          Добавьте помещения на шаге «Помещения», чтобы задать длины подводов к
-          радиаторам.
+          Додайте приміщення на кроці «Приміщення», щоб задати довжини підводів до
+          радіаторів.
         </p>
       )}
 
@@ -253,7 +253,7 @@ export function HydraulicsSection({
               setReportOpen(true);
             }}
           >
-            Отчёт по гидравлике
+            Звіт з гідравліки
           </button>
           {onBackToResults != null && (
             <button
@@ -261,19 +261,19 @@ export function HydraulicsSection({
               className={reportActionsStyles.backButton}
               onClick={onBackToResults}
             >
-              Назад к результатам
+              Назад до результатів
             </button>
           )}
         </div>
         {calcLoading && (
           <p className={styles.hint} style={{ marginTop: 8 }} role="status">
-            Обновление расчёта…
+            Оновлення розрахунку…
           </p>
         )}
         {!canOpenReport && !calcLoading && (
           <p className={styles.hint} style={{ marginTop: 8 }}>
-            Отчёт появится после авторасчёта. Заполните помещения и ограждения,
-            задайте длины разводки.
+            Звіт з&apos;явиться після авторозрахунку. Заповніть приміщення та огородження,
+            задайте довжини розводки.
           </p>
         )}
       </div>

@@ -59,7 +59,7 @@ export function resolveMixedRadiatorRoomLoad(args) {
 
   if (qRad <= 0) {
     sizingNotes.push(
-      `Отдача ТП ≈${Math.round(ufhW)} Вт покрывает расчётную нагрузку ≈${Math.round(qFull)} Вт — радиатор не требуется.`,
+      `Віддача ТП ≈${Math.round(ufhW)} Вт покриває розрахункове навантаження ≈${Math.round(qFull)} Вт — радіатор не потрібен.`,
     );
     return {
       qRad: 0,
@@ -71,7 +71,7 @@ export function resolveMixedRadiatorRoomLoad(args) {
   }
 
   sizingNotes.push(
-    `С учётом ТП (≈${Math.round(ufhW)} Вт): остаточная нагрузка на радиатор ≈${Math.round(qRad)} Вт (из ≈${Math.round(qFull)} Вт).`,
+    `З урахуванням ТП (≈${Math.round(ufhW)} Вт): залишкове навантаження на радіатор ≈${Math.round(qRad)} Вт (з ≈${Math.round(qFull)} Вт).`,
   );
 
   return {

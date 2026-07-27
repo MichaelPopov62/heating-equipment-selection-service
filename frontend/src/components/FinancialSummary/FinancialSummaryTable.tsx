@@ -51,7 +51,7 @@ function qtyUnitLabel(unit: ParsedFinancialBomLine['qtyUnit']): string {
  * @param objectType
  */
 function objectTypeLabel(objectType: 'house' | 'apartment'): string {
-  return objectType === 'apartment' ? 'Квартира' : 'Дом';
+  return objectType === 'apartment' ? 'Квартира' : 'Будинок';
 }
 
 /**
@@ -106,7 +106,7 @@ function buildRenderRows(lines: ParsedFinancialBomLine[]): RenderRow[] {
   }
 
   if (works.length > 0) {
-    rows.push({ type: 'group', key: 'g:works', label: 'Работы' });
+    rows.push({ type: 'group', key: 'g:works', label: 'Роботи' });
     for (const line of works) {
       rows.push({ type: 'line', key: line.id, line });
     }
@@ -129,15 +129,15 @@ export function FinancialSummaryTable({
     return (
       <div className={styles.wrap} aria-labelledby="financial-summary-title">
         <h3 id="financial-summary-title" className={styles.title}>
-          Итог финансовый
+          Підсумок фінансовий
         </h3>
         {showRecalculating ? (
           <p className={styles.stale} role="status">
-            Идёт пересчёт…
+            Триває перерахунок…
           </p>
         ) : null}
         <p className={styles.empty} role="status">
-          Нет актуальной сметы. Заполните анкету и дождитесь расчёта.
+          Немає актуальної кошторису. Заповніть анкету та дочекайтеся розрахунку.
         </p>
       </div>
     );
@@ -149,28 +149,28 @@ export function FinancialSummaryTable({
   return (
     <div className={styles.wrap} aria-labelledby="financial-summary-title">
       <h3 id="financial-summary-title" className={styles.title}>
-        Итог финансовый
+        Підсумок фінансовий
       </h3>
       {showRecalculating ? (
         <p className={styles.stale} role="status">
-          Идёт пересчёт — суммы могут обновиться…
+          Триває перерахунок — суми можуть оновитися…
         </p>
       ) : null}
       <p className={styles.meta}>
-        Валюта: {commercial.currency}. Монтаж {rates.laborPercentOfEquipment}% и
-        расходники {rates.consumablesPercentOfEquipment}% от стоимости
-        оборудования.
+        Валюта: {commercial.currency}. Монтаж {rates.laborPercentOfEquipment}% і
+        витратні матеріали {rates.consumablesPercentOfEquipment}% від вартості
+        обладнання.
       </p>
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Тип объекта</th>
-              <th>Тип оборудования</th>
+              <th>Тип об&apos;єкта</th>
+              <th>Тип обладнання</th>
               <th>Марка (модель)</th>
-              <th>Количество</th>
-              <th>Цена, грн</th>
-              <th>Сумма, грн</th>
+              <th>Кількість</th>
+              <th>Ціна, грн</th>
+              <th>Сума, грн</th>
             </tr>
           </thead>
           <tbody>
@@ -205,7 +205,7 @@ export function FinancialSummaryTable({
               );
             })}
             <tr className={styles.totalsRow}>
-              <td colSpan={3}>Всего по оборудованию</td>
+              <td colSpan={3}>Разом за обладнанням</td>
               <td className={styles.num}>
                 {formatQty(totals.equipmentQtyPcs)}
                 <span className={styles.unit}>шт</span>
@@ -215,20 +215,20 @@ export function FinancialSummaryTable({
             </tr>
             <tr className={styles.totalsRow}>
               <td colSpan={5}>
-                Монтажные работы ({rates.laborPercentOfEquipment}%)
+                Монтажні роботи ({rates.laborPercentOfEquipment}%)
               </td>
               <td className={styles.num}>{formatMoney(totals.laborTotalUah)}</td>
             </tr>
             <tr className={styles.totalsRow}>
               <td colSpan={5}>
-                Расходные материалы ({rates.consumablesPercentOfEquipment}%)
+                Витратні матеріали ({rates.consumablesPercentOfEquipment}%)
               </td>
               <td className={styles.num}>
                 {formatMoney(totals.consumablesTotalUah)}
               </td>
             </tr>
             <tr className={styles.grandRow}>
-              <td colSpan={5}>Общая стоимость объекта</td>
+              <td colSpan={5}>Загальна вартість об&apos;єкта</td>
               <td className={styles.num}>{formatMoney(totals.grandTotalUah)}</td>
             </tr>
           </tbody>

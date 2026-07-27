@@ -27,7 +27,7 @@ export function WaterHeaterProposalCard(props: WaterHeaterProposalCardProps) {
       </h4>
       {data.hasCatalogSelection ? (
         <dl className={styles.dl}>
-          <dt>Модель (подбор)</dt>
+          <dt>Модель (підбір)</dt>
           <dd className={styles.valueStrong}>
             {data.selectedModel
               ? formatBrandModel(data.brand, data.selectedModel)
@@ -35,7 +35,7 @@ export function WaterHeaterProposalCard(props: WaterHeaterProposalCardProps) {
           </dd>
           {data.volumeLiters != null && (
             <>
-              <dt>Объём бака</dt>
+              <dt>Об&apos;єм бака</dt>
               <dd>
                 {formatLiters(data.volumeLiters)}{' '}
                 <span className={styles.unit}>л</span>
@@ -44,7 +44,7 @@ export function WaterHeaterProposalCard(props: WaterHeaterProposalCardProps) {
           )}
           {data.requiredTankLiters > 0 && (
             <>
-              <dt>Расчётный минимум (подбор)</dt>
+              <dt>Розрахунковий мінімум (підбір)</dt>
               <dd>
                 {formatLiters(data.requiredTankLiters)}{' '}
                 <span className={styles.unit}>л</span>
@@ -55,7 +55,7 @@ export function WaterHeaterProposalCard(props: WaterHeaterProposalCardProps) {
             <>
               {data.coilPowerKw != null && (
                 <>
-                  <dt>Мощность змеевика (каталог)</dt>
+                  <dt>Потужність змійовика (каталог)</dt>
                   <dd>
                     {formatKw(data.coilPowerKw, 1)}{' '}
                     <span className={styles.unit}>кВт</span>
@@ -64,33 +64,33 @@ export function WaterHeaterProposalCard(props: WaterHeaterProposalCardProps) {
               )}
               {data.effectiveHeatPowerKw != null && (
                 <>
-                  <dt>Эффективная мощность нагрева (min котёл, змеевик)</dt>
+                  <dt>Ефективна потужність нагріву (мін. котел, змійовик)</dt>
                   <dd>
                     {formatKw(data.effectiveHeatPowerKw)}{' '}
                     <span className={styles.unit}>кВт</span>
                   </dd>
                 </>
               )}
-              <dt>Время полного нагрева бака (оценка)</dt>
+              <dt>Час повного нагріву бака (оцінка)</dt>
               <dd>
                 {data.heatTimeMinutesFullTank != null ? (
                   <>
                     ~{data.heatTimeMinutesFullTank}{' '}
-                    <span className={styles.unit}>мин</span>
+                    <span className={styles.unit}>хв</span>
                     <span className={styles.hintInline}>
                       {' '}
-                      при приоритете ГВС и указанной эффективной мощности; не норматив.
+                      за пріоритету ГВП і зазначеної ефективної потужності; не норматив.
                     </span>
                   </>
                 ) : (
-                  '— (нет данных по мощности котла/змеевика)'
+                  '— (немає даних про потужність котла/змійовика)'
                 )}
               </dd>
             </>
           )}
           {kind === 'electric' && data.powerKw != null && (
             <>
-              <dt>Мощность нагрева (каталог)</dt>
+              <dt>Потужність нагріву (каталог)</dt>
               <dd>
                 {formatKw(data.powerKw, 1)}{' '}
                 <span className={styles.unit}>кВт</span>
@@ -99,7 +99,7 @@ export function WaterHeaterProposalCard(props: WaterHeaterProposalCardProps) {
           )}
           {data.price != null && (
             <>
-              <dt>Цена в каталоге</dt>
+              <dt>Ціна в каталозі</dt>
               <dd className={styles.valueStrong}>
                 {formatPriceUah(data.price)}{' '}
                 <span className={styles.unit}>грн</span>
@@ -110,8 +110,8 @@ export function WaterHeaterProposalCard(props: WaterHeaterProposalCardProps) {
       ) : (
         <p className={styles.emptyHint}>
           {kind === 'indirect'
-            ? (data.skippedReason ?? 'БКН из каталога не выбран.')
-            : 'Электробойлер из каталога не выбран.'}
+            ? (data.skippedReason ?? 'БКН з каталогу не обрано.')
+            : 'Електробойлер з каталогу не обрано.'}
         </p>
       )}
       {data.warnings.length > 0 && (

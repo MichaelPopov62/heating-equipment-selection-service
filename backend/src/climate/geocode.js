@@ -38,7 +38,7 @@ export async function geocodeAddress(address) {
 
   if (!resp.ok) {
     logger.warn('climate.geocode.fail', null, { status: resp.status });
-    throwAppError('Не удалось выполнить геокодинг адреса', 'GEOCODE_FAILED', 502);
+    throwAppError('Не вдалося виконати геокодування адреси', 'GEOCODE_FAILED', 502);
   }
 
   /** @type {unknown} */

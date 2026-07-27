@@ -15,9 +15,9 @@ export function buildRadiatorConnectionSelectionNotes(radiatorConnection) {
   }
   const label = radiatorConnectionLabel(radiatorConnection);
   return [
-    `Подводка радиаторов: ${label} (heatingSystem.radiatorConnection=${radiatorConnection}). `
-      + 'Фильтрует панельный пул (K/Klasik vs VK/VKP). '
-      + 'Тип прибора на объект задаётся radiatorEmitterPreference / Two-Pass Orchestrator — '
-      + 'локальный flip section↔panel в комнате запрещён.',
+    `Підводка радіаторів: ${label} (heatingSystem.radiatorConnection=${radiatorConnection}). `
+      + 'Фільтрує панельний пул (K/Klasik vs VK/VKP). '
+      + 'Тип приладу на об’єкт задається radiatorEmitterPreference / Two-Pass Orchestrator — '
+      + 'локальний flip section↔panel у кімнаті заборонено.',
   ];
 }

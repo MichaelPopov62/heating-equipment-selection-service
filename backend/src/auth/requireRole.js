@@ -21,7 +21,7 @@ export function requireRole(...allowedRoles) {
       respondAuthorizationError(req, res, {
         statusCode: 403,
         code: 'ADMIN_REQUIRED',
-        message: 'Admin API недоступен без включённой JWT-аутентификации',
+        message: 'Admin API недоступний без увімкненої JWT-аутентифікації',
       });
       return;
     }
@@ -30,7 +30,7 @@ export function requireRole(...allowedRoles) {
       res.status(401).json({
         ok: false,
         error: {
-          message: 'Требуется Authorization: Bearer <JWT>',
+          message: 'Потрібен Authorization: Bearer <JWT>',
           code: 'PROJECTS_AUTH_REQUIRED',
           statusCode: 401,
         },
@@ -43,7 +43,7 @@ export function requireRole(...allowedRoles) {
         respondAuthorizationError(req, res, {
           statusCode: 403,
           code: 'ADMIN_REQUIRED',
-          message: 'Недостаточно прав (требуется role=admin)',
+          message: 'Недостатньо прав (потрібна role=admin)',
         });
         return;
       }

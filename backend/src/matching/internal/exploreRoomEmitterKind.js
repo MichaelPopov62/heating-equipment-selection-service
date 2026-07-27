@@ -81,7 +81,7 @@ export function exploreRoomEmitterKindVote(args) {
   if (radiatorConnection === 'bottom' && panelPick) {
     return {
       preferredKind: 'panel',
-      reason: 'Нижняя подводка: локально предпочтительна панель (голос Pass 1).',
+      reason: 'Нижня підводка: локально переважна панель (голос Pass 1).',
     };
   }
 
@@ -96,7 +96,7 @@ export function exploreRoomEmitterKindVote(args) {
       return {
         preferredKind: 'panel',
         reason:
-          'Панель закрывает ≥70% ширины окна; секции после правила окна — нет (голос Pass 1).',
+          'Панель закриває ≥70% ширини вікна; секції після правила вікна — ні (голос Pass 1).',
       };
     }
     if (
@@ -107,7 +107,7 @@ export function exploreRoomEmitterKindVote(args) {
       return {
         preferredKind: 'panel',
         reason:
-          `Секционный вариант >${maxSectionsBeforeMultiUnit} секций `
+          `Секційний варіант >${maxSectionsBeforeMultiUnit} секцій `
           + `(${sectionalWin.sections}) — голос за панель.`,
       };
     }
@@ -116,21 +116,21 @@ export function exploreRoomEmitterKindVote(args) {
   if (!sectionalThermal && panelPick) {
     return {
       preferredKind: 'panel',
-      reason: 'В пуле нет подходящих секций — голос за панель.',
+      reason: 'У пулі немає підходящих секцій — голос за панель.',
     };
   }
 
   if (sectionalThermal) {
     return {
       preferredKind: 'sectional',
-      reason: 'Локально предпочтительны секции (голос Pass 1).',
+      reason: 'Локально переважні секції (голос Pass 1).',
     };
   }
 
   if (panelPick) {
     return {
       preferredKind: 'panel',
-      reason: 'Только панель доступна в каталоге (голос Pass 1).',
+      reason: 'Лише панель доступна в каталозі (голос Pass 1).',
     };
   }
 
@@ -209,8 +209,8 @@ export function applyWindowWidthRulesSectional(roomCtx) {
     sections = Math.min(Math.max(minSectionsForWindow, prev), maxSectionsHeuristic);
     if (sections > prev) {
       sizingNotes.push(
-        `Для правила ≥70% ширины окна число секций увеличено с ${prev} до ${sections} `
-          + `(тепловая нагрузка с kVent=${ventilationReserveFactor} уже была покрыта меньшим числом).`,
+        `Для правила ≥70% ширини вікна число секцій збільшено з ${prev} до ${sections} `
+          + `(теплове навантаження з kVent=${ventilationReserveFactor} уже було покрито меншою кількістю).`,
       );
     }
   }
@@ -235,7 +235,7 @@ export function applyWindowWidthRulesSectional(roomCtx) {
     }
     if (s > sections) {
       sizingNotes.push(
-        `Дополнительно увеличено число секций до ${s} для подхода к покрытию ≥70% ширины окна.`,
+        `Додатково збільшено число секцій до ${s} для наближення до покриття ≥70% ширини вікна.`,
       );
       sections = s;
       radiatorWidthMm = sections * sectionWidthMm;

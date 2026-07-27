@@ -16,7 +16,7 @@ function toNumber(value, fieldName) {
     typeof value === 'string' ? Number(value.replace(',', '.')) : Number(value);
   if (!Number.isFinite(n)) {
     throw new Error(
-      `Поле "${fieldName}" должно быть числом. Получено: ${String(value)}`,
+      `Поле "${fieldName}" має бути числом. Отримано: ${String(value)}`,
     );
   }
   return n;
@@ -31,30 +31,30 @@ function toNumber(value, fieldName) {
  */
 function calculateElementLoss(element, defaultDeltaT) {
   if (!element || typeof element !== 'object') {
-    throw new Error('Элемент ограждения должен быть объектом.');
+    throw new Error('Елемент огородження має бути об\'єктом.');
   }
 
   const areaM2 = toNumber(element.areaM2, 'areaM2');
   if (areaM2 <= 0) {
-    throw new Error(`Площадь areaM2 должна быть > 0. Получено: ${areaM2}`);
+    throw new Error(`Площа areaM2 має бути > 0. Отримано: ${areaM2}`);
   }
 
   if (element.uValue == null) {
     throw new Error(
-      'element.uValue обязателен. Резолвинг U — в heatlossByRooms (пресеты envelopePresets, wallAssembly).',
+      'element.uValue обов\'язковий. Резолвинг U — в heatlossByRooms (пресети envelopePresets, wallAssembly).',
     );
   }
   const uValue = toNumber(element.uValue, 'uValue');
 
   // U = 0 допустим: «теплый пол» между жилыми этажами — теплопотери не считаем (см. пресеты пола).
   if (uValue < 0) {
-    throw new Error(`U не может быть отрицательным. Получено: ${uValue}`);
+    throw new Error(`U не може бути від'ємним. Отримано: ${uValue}`);
   }
 
   const heatLossFactorRaw = element.heatLossFactor ?? 1;
   const heatLossFactor = toNumber(heatLossFactorRaw, 'heatLossFactor');
   if (heatLossFactor <= 0) {
-    throw new Error(`heatLossFactor должен быть > 0. Получено: ${heatLossFactor}`);
+    throw new Error(`heatLossFactor має бути > 0. Отримано: ${heatLossFactor}`);
   }
 
   const deltaT =
@@ -97,7 +97,7 @@ function calculateElementLoss(element, defaultDeltaT) {
  */
 export function calculateHeatLoss(input) {
   if (!input || typeof input !== 'object') {
-    throw new Error('Входные данные должны быть объектом.');
+    throw new Error('Вхідні дані мають бути об\'єктом.');
   }
 
   const insideTempC = toNumber(input.insideTempC, 'insideTempC');
@@ -105,7 +105,7 @@ export function calculateHeatLoss(input) {
   const deltaT = insideTempC - outsideTempC;
 
   if (!Array.isArray(input.elements)) {
-    throw new Error('Поле "elements" должно быть массивом.');
+    throw new Error('Поле "elements" має бути масивом.');
   }
 
   const elementLosses = input.elements.map((el) => calculateElementLoss(el, deltaT));

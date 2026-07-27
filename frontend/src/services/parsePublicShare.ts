@@ -38,7 +38,7 @@ export function parseSharePublisherPresentation(
  */
 export function parsePublicSharePayload(node: unknown): PublicSharePayload {
   if (!isRecord(node)) {
-    throw new Error('Некорректный ответ публичной ссылки');
+    throw new Error('Некоректна відповідь публічного посилання');
   }
 
   const shareToken = node.shareToken;
@@ -46,19 +46,19 @@ export function parsePublicSharePayload(node: unknown): PublicSharePayload {
   const publishedAt = node.publishedAt;
 
   if (typeof shareToken !== 'string' || !shareToken.trim()) {
-    throw new Error('Некорректный shareToken');
+    throw new Error('Некоректний shareToken');
   }
   if (typeof clientName !== 'string' || !clientName.trim()) {
-    throw new Error('Некорректный clientName');
+    throw new Error('Некоректний clientName');
   }
   if (typeof publishedAt !== 'string' || !publishedAt.trim()) {
-    throw new Error('Некорректный publishedAt');
+    throw new Error('Некоректний publishedAt');
   }
   if (node.schemaVersion !== 1) {
-    throw new Error('Неподдерживаемая schemaVersion');
+    throw new Error('Непідтримувана schemaVersion');
   }
   if (!('commercial' in node)) {
-    throw new Error('Нет commercial в публичной ссылке');
+    throw new Error('Немає commercial у публічному посиланні');
   }
 
   const matching = isRecord(node.matching) ? node.matching : {};
@@ -108,7 +108,7 @@ export function parsePublicSharePayload(node: unknown): PublicSharePayload {
  */
 export function parsePublicShareResponse(data: unknown): { ok: true; share: PublicSharePayload } {
   if (!isRecord(data) || data.ok !== true || !('share' in data)) {
-    throw new Error('Некорректный ответ публичной ссылки');
+    throw new Error('Некоректна відповідь публічного посилання');
   }
 
   return {

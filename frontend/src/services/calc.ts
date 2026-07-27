@@ -8,7 +8,7 @@ import { isRecord } from '../utils/jsonGuards';
 
 /** Типичная подсказка при недоступном backend в dev (см. frontend/vite.config.ts). */
 export const CALC_BACKEND_HINT =
-  'Запустите API: `cd backend && npm run start` (или из корня: `npm run dev:full` — API + UI). В dev Vite проксирует /api на http://localhost:3001; без backend браузер получает HTTP 502.';
+  'Запустіть API: `cd backend && npm run start` (або з кореня: `npm run dev:full` — API + UI). У dev Vite проксіює /api на http://localhost:3001; без backend браузер отримує HTTP 502.';
 
 /** Сообщение при сетевой ошибке fetch (бэкенд не слушает порт или прокси оборвал соединение). */
 function networkCalcErrorMessage(cause: unknown): string {
@@ -20,19 +20,19 @@ function networkCalcErrorMessage(cause: unknown): string {
       m.includes('networkerror') ||
       m.includes('load failed')
     ) {
-      return `Сервер расчёта недоступен (${cause.message}). ${hint}`;
+      return `Сервер розрахунку недоступний (${cause.message}). ${hint}`;
     }
   }
-  return cause instanceof Error ? cause.message : 'Ошибка расчёта';
+  return cause instanceof Error ? cause.message : 'Помилка розрахунку';
 }
 
 function parseCalcOkPayload(data: unknown): CalcOkPayload {
   if (!isRecord(data) || data.ok !== true) {
-    throw new Error('Некорректный ответ API при расчёте');
+    throw new Error('Некоректна відповідь API при розрахунку');
   }
   const reportRaw = data.report;
   if (!isRecord(reportRaw)) {
-    throw new Error('Некорректный ответ API при расчёте: нет объекта report');
+    throw new Error('Некоректна відповідь API при розрахунку: немає об\'єкта report');
   }
   return { ok: true, report: reportRaw };
 }
@@ -57,10 +57,10 @@ export async function postCalc(payload: unknown): Promise<CalcOkPayload> {
   if (!res.ok) {
     if (res.status === 502 || res.status === 503 || res.status === 504) {
       throw new Error(
-        `Сервер расчёта недоступен (HTTP ${res.status}). ${CALC_BACKEND_HINT}`,
+        `Сервер розрахунку недоступний (HTTP ${res.status}). ${CALC_BACKEND_HINT}`,
       );
     }
-    let msg = `Ошибка API: HTTP ${res.status}`;
+    let msg = `Помилка API: HTTP ${res.status}`;
     if (isRecord(data)) {
       const errNode = data.error;
       if (isRecord(errNode)) {

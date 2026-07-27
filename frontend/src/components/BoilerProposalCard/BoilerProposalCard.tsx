@@ -60,7 +60,7 @@ export interface BoilerProposalView {
 }
 
 function companionRoleLabel(role: EquipmentBundleCompanionView['role']): string {
-  return role === 'water_heater' ? 'Электробойлер' : 'БКН';
+  return role === 'water_heater' ? 'Електробойлер' : 'БКН';
 }
 
 function formatCompanionLine(c: EquipmentBundleCompanionView): string {
@@ -72,15 +72,15 @@ function formatCompanionLine(c: EquipmentBundleCompanionView): string {
 }
 
 function mountingLabel(m?: string): string | null {
-  if (m === 'wall') return 'настенный';
-  if (m === 'floor') return 'напольный';
+  if (m === 'wall') return 'настінний';
+  if (m === 'floor') return 'напольний';
   return null;
 }
 
 export function BoilerProposalCard({
   proposal,
   catalogSource,
-  sectionTitle = 'Рекомендуемое решение',
+  sectionTitle = 'Рекомендоване рішення',
   titleDomId = 'boiler-proposal-title',
 }: {
   proposal: BoilerProposalView;
@@ -93,21 +93,21 @@ export function BoilerProposalCard({
   const mount = mountingLabel(proposal.mountingType);
   const qtyLabel =
     proposal.kind === 'cascade'
-      ? `${proposal.unitsCount} ед. (каскад)`
-      : `${proposal.unitsCount} ед.`;
+      ? `${proposal.unitsCount} од. (каскад)`
+      : `${proposal.unitsCount} од.`;
 
   const sourceLine =
     catalogSource === 'mongo'
-      ? 'Подбор по каталогу из базы данных (MongoDB).'
+      ? 'Підбір за каталогом із бази даних (MongoDB).'
       : catalogSource === 'file'
-        ? 'Подбор по каталогу из файла (локальные данные API).'
+        ? 'Підбір за каталогом із файлу (локальні дані API).'
         : null;
 
   const { heatingLoadKw: heatPart, hotWaterPowerKw: dhwPart } =
     proposal.powerRequirementBreakdown;
 
   const reserveLabel =
-    proposal.kind === 'single' ? 'Запас по отоплению' : 'Запас по номиналу к расчёту';
+    proposal.kind === 'single' ? 'Запас за опаленням' : 'Запас за номіналом до розрахунку';
   const reservePctFormatted =
     proposal.kind === 'single' && Number.isInteger(proposal.nominalReservePercent)
       ? String(proposal.nominalReservePercent)
@@ -128,29 +128,29 @@ export function BoilerProposalCard({
       {sourceLine != null && <p className={styles.catalogSource}>{sourceLine}</p>}
       <div className={styles.powerBlock}>
         <p className={styles.powerPeak}>
-          Необходимая мощность:{' '}
+          Необхідна потужність:{' '}
           <strong>{formatKw(proposal.requiredKw)} кВт</strong>
         </p>
         <p className={styles.powerSub}>
-          ── из них на отопление: <strong>{formatKw(heatPart)} кВт</strong>
+          ── з них на опалення: <strong>{formatKw(heatPart)} кВт</strong>
         </p>
         <p className={styles.powerSub}>
-          ── из них на горячую воду (ГВС):{' '}
+          ── з них на гарячу воду (ГВП):{' '}
           <strong>{formatKw(dhwPart)} кВт</strong>
         </p>
       </div>
       <p className={styles.solutionLine}>
-        Предложенное решение: {proposal.headline} —{' '}
+        Запропоноване рішення: {proposal.headline} —{' '}
         <strong>{formatKw(proposal.totalNominalKw, 1)} кВт</strong>
       </p>
       <p className={styles.heatingReserveLine}>
         {reserveLabel}: {reservePctSigned}%
         {modulationCapped ? (
-          <span className={styles.modHint}> (ограничено модуляцией)</span>
+          <span className={styles.modHint}> (обмежено модуляцією)</span>
         ) : null}
       </p>
       <dl className={styles.dl}>
-        <dt>Котёл</dt>
+        <dt>Котел</dt>
         <dd>{proposal.model}</dd>
         {proposal.equipmentBundleCompanions?.map((c, i) => (
           <div key={`${c.role}-${i}-${c.model}`} className={styles.companionPair}>
@@ -158,28 +158,28 @@ export function BoilerProposalCard({
             <dd>{formatCompanionLine(c)}</dd>
           </div>
         ))}
-        <dt>Количество</dt>
+        <dt>Кількість</dt>
         <dd>{qtyLabel}</dd>
         {proposal.estimatedTotalPrice != null && (
           <>
-            <dt>Ориентировочная стоимость котла</dt>
+            <dt>Орієнтовна вартість котла</dt>
             <dd>
               {formatPriceUah(proposal.estimatedTotalPrice)}{' '}
               грн
-              {proposal.unitsCount > 1 ? ' (все единицы)' : ''}
+              {proposal.unitsCount > 1 ? ' (усі одиниці)' : ''}
             </dd>
           </>
         )}
         {proposal.equipmentBundleTotalPrice != null && (
           <>
-            <dt className={styles.bundleTotalLabel}>Итого по варианту</dt>
+            <dt className={styles.bundleTotalLabel}>Разом за варіантом</dt>
             <dd className={styles.bundleTotalValue}>
               {formatPriceUah(proposal.equipmentBundleTotalPrice)} грн
               {proposal.equipmentBundlePriceBreakdown != null && (
                 <ul className={styles.bundleBreakdown}>
                   {proposal.equipmentBundlePriceBreakdown.boilerPrice != null && (
                     <li>
-                      Котёл:{' '}
+                      Котел:{' '}
                       {formatPriceUah(
                         proposal.equipmentBundlePriceBreakdown.boilerPrice,
                       )}{' '}
@@ -189,7 +189,7 @@ export function BoilerProposalCard({
                   {proposal.equipmentBundlePriceBreakdown.waterHeaterPrice !=
                     null && (
                     <li>
-                      Электробойлер:{' '}
+                      Електробойлер:{' '}
                       {formatPriceUah(
                         proposal.equipmentBundlePriceBreakdown.waterHeaterPrice,
                       )}{' '}
@@ -220,14 +220,14 @@ export function BoilerProposalCard({
         )}
         {proposal.connectionDiameters != null && proposal.connectionDiameters.length > 0 && (
           <>
-            <dt>Присоединение</dt>
+            <dt>Приєднання</dt>
             <dd>{proposal.connectionDiameters.join(', ')}</dd>
           </>
         )}
       </dl>
       {proposal.advantages.length > 0 && (
         <div className={styles.block}>
-          <div className={styles.blockTitle}>Преимущества</div>
+          <div className={styles.blockTitle}>Переваги</div>
           <ul className={styles.list}>
             {proposal.advantages.map((t, i) => (
               <li key={`${i}-${t.slice(0, 40)}`}>{t}</li>

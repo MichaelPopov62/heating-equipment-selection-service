@@ -80,26 +80,26 @@ export function RecommendationsBlock({
         aria-labelledby="calculation-results-title"
         onClick={(e) => { handleSummaryNavigateClick(e, onNavigateToSurveyStep); }}
       >
-        <h2 id="calculation-results-title">Результаты расчета</h2>
+        <h2 id="calculation-results-title">Результати розрахунку</h2>
 
         {apiCatalogSource != null && (
           <p className={styles.hint} style={{ marginTop: 8, marginBottom: 0 }}>
             {apiCatalogSource === 'mongo'
-              ? 'Подбор оборудования выполнен по каталогу из базы данных (MongoDB).'
-              : 'Подбор по файловому каталогу. Для использования БД: CATALOG_SOURCE=auto (или mongo), переменные MONGODB_* и коллекция Product после seed.'}
+              ? 'Підбір обладнання виконано за каталогом із бази даних (MongoDB).'
+              : 'Підбір за файловим каталогом. Для використання БД: CATALOG_SOURCE=auto (або mongo), змінні MONGODB_* і колекція Product після seed.'}
           </p>
         )}
 
         {showRecalculating && (
           <p className={styles.hint} role="status" aria-live="polite">
-            Обновление расчёта на сервере… Показаны данные предыдущего ответа до завершения пересчёта.
+            Оновлення розрахунку на сервері… Показано дані попередньої відповіді до завершення перерахунку.
           </p>
         )}
 
         {apiAutomationHints.length > 0 && (
           <div className={styles.boilerCalcSummary} role="status" aria-live="polite">
             <h3 className={styles.boilerCalcSummaryTitle}>
-              Рекомендации по схеме котёл / ГВС
+              Рекомендації щодо схеми котел / ГВП
             </h3>
             <ul className={styles.automationHintsList}>
               {apiAutomationHints.map((h, i) => (
@@ -113,7 +113,7 @@ export function RecommendationsBlock({
                         if (h.suggestedScheme != null) onApplyScheme(h.suggestedScheme);
                       }}
                     >
-                      Применить схему в анкете
+                      Застосувати схему в анкеті
                     </button>
                   )}
                 </li>
@@ -241,16 +241,16 @@ export function RecommendationsBlock({
             && (apiRadiatorsFromReport.lineEconomy != null
               || apiRadiatorsFromReport.lineEfficient != null) && (
             <div className={styles.radiatorsRecBlock}>
-              <h4 className={styles.radiatorsRecTitle}>Радиаторы · по вариантам</h4>
+              <h4 className={styles.radiatorsRecTitle}>Радіатори · за варіантами</h4>
               <div className={styles.radiatorsProposalLinesGrid}>
                 <RadiatorProposalLineTable
                   line={apiRadiatorsFromReport.lineEconomy}
-                  caption="Вариант 1 · эконом"
+                  caption="Варіант 1 · економ"
                   tableId="radiators-line-economy"
                 />
                 <RadiatorProposalLineTable
                   line={apiRadiatorsFromReport.lineEfficient}
-                  caption="Вариант 2 · эффективный"
+                  caption="Варіант 2 · ефективний"
                   tableId="radiators-line-efficient"
                 />
               </div>
@@ -259,7 +259,7 @@ export function RecommendationsBlock({
 
           {isRadiatorsMatchingSkipped(apiRadiatorsFromReport) && (
             <p className={styles.hint} role="status">
-              Радиаторы по вариантам не подбираются: режим «только тёплый пол».
+              Радіатори за варіантами не підбираються: режим «лише тепла підлога».
             </p>
           )}
 

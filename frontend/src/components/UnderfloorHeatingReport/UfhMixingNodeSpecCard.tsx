@@ -19,12 +19,12 @@ export function UfhMixingNodeSpecCard({ mixingNode }: Props) {
       : null;
 
   return (
-    <div className={styles.root} role="region" aria-label="Смесительный узел ТП">
-      <h4 className={styles.title}>Смесительный узел</h4>
+    <div className={styles.root} role="region" aria-label="Змішувальний вузол ТП">
+      <h4 className={styles.title}>Змішувальний вузол</h4>
       <dl className={styles.dl}>
         {mixingNode.boilerSupplyC != null && mixingNode.floorCircuitSupplyC != null && (
           <>
-            <dt>Котёл → пол</dt>
+            <dt>Котел → підлога</dt>
             <dd>
               {mixingNode.boilerSupplyC} °C → {mixingNode.floorCircuitSupplyC} °C
             </dd>
@@ -32,13 +32,13 @@ export function UfhMixingNodeSpecCard({ mixingNode }: Props) {
         )}
         {distributionLabel != null && (
           <>
-            <dt>Схема распределения</dt>
+            <dt>Схема розподілу</dt>
             <dd>{distributionLabel}</dd>
           </>
         )}
         {mixingNode.flowRateM3PerHour != null && (
           <>
-            <dt>Расход контура</dt>
+            <dt>Витрата контуру</dt>
             <dd>
               {mixingNode.flowRateM3PerHour} <span>м³/ч</span>
               {mixingNode.deltaTK != null && (
@@ -49,7 +49,7 @@ export function UfhMixingNodeSpecCard({ mixingNode }: Props) {
         )}
         {mixingNode.headMetersMin != null && (
           <>
-            <dt>Напор насоса (мин.)</dt>
+            <dt>Напір насоса (мін.)</dt>
             <dd>
               {mixingNode.headMetersMin} <span>м.в.ст.</span>
             </dd>
@@ -57,7 +57,7 @@ export function UfhMixingNodeSpecCard({ mixingNode }: Props) {
         )}
         {mixingNode.valveKvsMin != null && (
           <>
-            <dt>Kvs клапана (мин.)</dt>
+            <dt>Kvs клапана (мін.)</dt>
             <dd>
               {mixingNode.valveKvsMin} <span>м³/ч</span>
             </dd>

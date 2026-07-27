@@ -47,7 +47,7 @@ export function buildMatchingAutomationHints({
       hints.push({
         type: 'suggest_single_indirect_sum',
         message:
-          `Пиковая тепловая мощность проточного режима (${peak.toFixed(1)} кВт) высокая — для дома с БКН рекомендуется схема «одноконтурный котёл + БКН» с суммированием мощностей отопления и нагрева бака.`,
+          `Пікова теплова потужність проточного режиму (${peak.toFixed(1)} кВт) висока — для будинку з БКН рекомендується схема «одноконтурний котел + БКН» з сумуванням потужностей опалення та нагрівання бака.`,
         suggestedScheme: SCHEME_BOILER_SINGLE_INDIRECT_SUM,
       });
     }
@@ -55,7 +55,7 @@ export function buildMatchingAutomationHints({
       hints.push({
         type: 'suggest_combi_budget',
         message:
-          'При умеренном водоразборе и пике ГВС до ~24 кВт двухконтурный котёл по правилу max(отопление, ГВС) часто компактнее и дешевле — сверьте с проектом.',
+          'За помірного водорозбору та піку ГВП до ~24 кВт двоконтурний котел за правилом max(опалення, ГВП) часто компактніший і дешевший — звірте з проєктом.',
         suggestedScheme: SCHEME_BOILER_MAX_COMBI,
       });
     }
@@ -71,7 +71,7 @@ export function buildMatchingAutomationHints({
       hints.push({
         type: 'apartment_bkn_small_not_recommended',
         message:
-          'Для малых квартир БКН обычно избыточен — рассмотрите двухконтурный котёл или схему с электробойлером.',
+          'Для малих квартир БКН зазвичай надлишковий — розгляньте двоконтурний котел або схему з електробойлером.',
         suggestedScheme: SCHEME_BOILER_MAX_COMBI,
       });
     }
@@ -85,7 +85,7 @@ export function buildMatchingAutomationHints({
       hints.push({
         type: 'apartment_suggest_bkn_large',
         message:
-          'Для большой квартиры с высоким пиком ГВС может подойти схема «1К + БКН» при наличии места под бойлер — укажите indirectDhwSpaceAvailable.',
+          'Для великої квартири з високим піком ГВП може підійти схема «1К + БКН» за наявності місця під бойлер — вкажіть indirectDhwSpaceAvailable.',
         suggestedScheme: SCHEME_BOILER_SINGLE_INDIRECT_SUM,
       });
     }
@@ -96,7 +96,7 @@ export function buildMatchingAutomationHints({
     ) {
       hints.push({
         type: 'apartment_electric_storage_volume',
-        message: `Объём электробойлера рассчитан по норме ${hotWaterReport.recommendedTankLiters} л (50 л на проживающего, минимум 50 л).`,
+        message: `Об’єм електробойлера розраховано за нормою ${hotWaterReport.recommendedTankLiters} л (50 л на мешканця, мінімум 50 л).`,
       });
     }
   }

@@ -51,7 +51,7 @@ const BASE_RULES = {
 /** @type {import('../src/catalog/types.js').PumpOperatingModeNormalized[]} */
 const LUNA_MODES = [
   {
-    modeName: 'Baxi встроенный — скорость 1 (20%)',
+    modeName: 'Baxi вбудований — швидкість 1 (20%)',
     speedIndex: 1,
     powerWatts: 25,
     coefficients: { a: -1.667, b: 0.167, c: 1.3 },
@@ -59,7 +59,7 @@ const LUNA_MODES = [
     qMaxM3h: 0.6,
   },
   {
-    modeName: 'Baxi встроенный — скорость 2 (40%)',
+    modeName: 'Baxi вбудований — швидкість 2 (40%)',
     speedIndex: 2,
     powerWatts: 35,
     coefficients: { a: -0.833, b: -0.667, c: 2.6 },
@@ -67,7 +67,7 @@ const LUNA_MODES = [
     qMaxM3h: 1.2,
   },
   {
-    modeName: 'Baxi встроенный — скорость 3 (100%)',
+    modeName: 'Baxi вбудований — швидкість 3 (100%)',
     speedIndex: 3,
     powerWatts: 45,
     coefficients: { a: -0.85, b: -1.15, c: 6.5 },
@@ -79,7 +79,7 @@ const LUNA_MODES = [
 /** @type {import('../src/catalog/types.js').PumpOperatingModeNormalized[]} */
 const ECO_MODES = [
   {
-    modeName: 'Baxi встроенный — скорость 1',
+    modeName: 'Baxi вбудований — швидкість 1',
     speedIndex: 1,
     powerWatts: 30,
     coefficients: { a: -1.667, b: 0.167, c: 2.0 },
@@ -87,7 +87,7 @@ const ECO_MODES = [
     qMaxM3h: 0.6,
   },
   {
-    modeName: 'Baxi встроенный — скорость 2',
+    modeName: 'Baxi вбудований — швидкість 2',
     speedIndex: 2,
     powerWatts: 40,
     coefficients: { a: -0.833, b: -0.667, c: 3.5 },
@@ -95,7 +95,7 @@ const ECO_MODES = [
     qMaxM3h: 1.0,
   },
   {
-    modeName: 'Baxi встроенный — скорость 3',
+    modeName: 'Baxi вбудований — швидкість 3',
     speedIndex: 3,
     powerWatts: 45,
     coefficients: { a: -1.429, b: -0.571, c: 4.0 },
@@ -192,7 +192,7 @@ function runCase(boilerModel, operatingModes, designFlow) {
         },
         operatingModes: [
           {
-            modeName: 'Скорость 3',
+            modeName: 'Швидкість 3',
             speedIndex: 3,
             powerWatts: 45,
             coefficients: { a: -0.45, b: -0.06, c: 4.0 },
@@ -229,7 +229,7 @@ function runCase(boilerModel, operatingModes, designFlow) {
           circulationPump: {
             operatingModes: [
               {
-                modeName: 'Встроенный насос — скорость 3',
+                modeName: 'Вбудований насос — швидкість 3',
                 speedIndex: 3,
                 powerWatts: 40,
                 coefficients: { a: -0.45, b: 0.12, c: 6.0 },

@@ -50,7 +50,7 @@ function kvTable(title, rows) {
     .join('');
   return `<h3>${escapeHtml(title)}</h3>
 <table class="tech">
-  <thead><tr><th>Показатель</th><th>Значение</th></tr></thead>
+  <thead><tr><th>Показник</th><th>Значення</th></tr></thead>
   <tbody>${body}</tbody>
 </table>`;
 }
@@ -92,11 +92,11 @@ export function buildTechnicalPdfHtml(snapshotOrReport) {
     const reserve = heatLossKw * 0.15;
     /** @type {Array<[string, string]>} */
     const rows = [
-      ['Мощность помещений', `${formatKw(heatLossKw)} кВт`],
+      ['Потужність приміщень', `${formatKw(heatLossKw)} кВт`],
       ['Запас', `${formatKw(reserve)} кВт`],
-      ['Итого с запасом', `${formatKw(heatLossKw + reserve)} кВт`],
+      ['Разом із запасом', `${formatKw(heatLossKw + reserve)} кВт`],
     ];
-    parts.push(kvTable('Теплопотери', rows));
+    parts.push(kvTable('Тепловтрати', rows));
     const byRoom = Array.isArray(heatLoss.byRoom) ? heatLoss.byRoom : [];
     /** @type {string[][]} */
     const roomRows = [];
@@ -120,24 +120,24 @@ export function buildTechnicalPdfHtml(snapshotOrReport) {
       roomRows.push([name, `${formatKwFromWatts(watts, 2)} кВт`]);
     }
     if (roomRows.length > 0) {
-      parts.push(dataTable('Теплопотери по помещениям', ['Помещение', 'Мощность'], roomRows));
+      parts.push(dataTable('Тепловтрати за приміщеннями', ['Приміщення', 'Потужність'], roomRows));
     }
   }
 
   const hotWater = calculations ? asObject(calculations.hotWater) : null;
   if (hotWater && typeof hotWater.hotWaterPowerKw === 'number') {
     /** @type {Array<[string, string]>} */
-    const rows = [['Пиковая мощность ГВС', `${formatKw(hotWater.hotWaterPowerKw)} кВт`]];
+    const rows = [['Пікова потужність ГВП', `${formatKw(hotWater.hotWaterPowerKw)} кВт`]];
     if (typeof hotWater.peakFlowLps === 'number') {
       rows.push([
-        'Пиковый расход',
+        'Пікова витрата',
         `${hotWater.peakFlowLps.toLocaleString('uk-UA', { maximumFractionDigits: 3 })} л/с`,
       ]);
     }
     if (typeof hotWater.recommendedTankLiters === 'number') {
-      rows.push(['Рекомендуемый бак', `${Math.round(hotWater.recommendedTankLiters)} л`]);
+      rows.push(['Рекомендований бак', `${Math.round(hotWater.recommendedTankLiters)} л`]);
     }
-    parts.push(kvTable('Горячая вода', rows));
+    parts.push(kvTable('Гаряча вода', rows));
   }
 
   const boiler = matching ? asObject(matching.boiler) : null;
@@ -145,38 +145,38 @@ export function buildTechnicalPdfHtml(snapshotOrReport) {
     /** @type {Array<[string, string]>} */
     const rows = [];
     if (typeof boiler.requiredKw === 'number') {
-      rows.push(['Требуемая мощность котла', `${formatKw(boiler.requiredKw)} кВт`]);
+      rows.push(['Потрібна потужність котла', `${formatKw(boiler.requiredKw)} кВт`]);
     }
     const proposal = asObject(boiler.proposal);
     if (proposal && typeof proposal.model === 'string') {
-      rows.push(['Предложение (основное)', proposal.model]);
+      rows.push(['Пропозиція (основна)', proposal.model]);
       if (typeof proposal.totalNominalKw === 'number') {
-        rows.push(['Номинал', `${formatKw(proposal.totalNominalKw)} кВт`]);
+        rows.push(['Номінал', `${formatKw(proposal.totalNominalKw)} кВт`]);
       }
     }
-    if (rows.length) parts.push(kvTable('Котёл', rows));
+    if (rows.length) parts.push(kvTable('Котел', rows));
   }
 
   const radiators = matching ? asObject(matching.radiators) : null;
   if (radiators) {
     if (radiators.skipped === true || radiators.status === 'skipped') {
-      parts.push(kvTable('Радиаторы', [['Статус', 'не требуются (режим только ТП)']]));
+      parts.push(kvTable('Радіатори', [['Статус', 'не потрібні (режим лише ТП)']]));
     } else {
       /** @type {Array<[string, string]>} */
       const rows = [];
       if (typeof radiators.chosenModel === 'string') {
-        rows.push(['Модель (основная линия)', radiators.chosenModel]);
+        rows.push(['Модель (основна лінія)', radiators.chosenModel]);
       }
       if (typeof radiators.totalSections === 'number') {
-        rows.push(['Секций (осн.)', String(radiators.totalSections)]);
+        rows.push(['Секцій (осн.)', String(radiators.totalSections)]);
       }
-      if (rows.length) parts.push(kvTable('Радиаторы', rows));
+      if (rows.length) parts.push(kvTable('Радіатори', rows));
     }
   }
 
   const ufh = calculations ? asObject(calculations.underfloorHeating) : null;
   if (ufh && Array.isArray(ufh.rooms) && ufh.rooms.length > 0) {
-    parts.push(kvTable('Тёплый пол', [['Комнат с ТП', String(ufh.rooms.length)]]));
+    parts.push(kvTable('Тепла підлога', [['Кімнат з ТП', String(ufh.rooms.length)]]));
   }
 
   const hydraulicsCalc = calculations ? asObject(calculations.hydraulics) : null;
@@ -185,24 +185,24 @@ export function buildTechnicalPdfHtml(snapshotOrReport) {
     const rows = [];
     if (typeof hydraulicsCalc.flowRateM3PerHour === 'number') {
       rows.push([
-        'Расход',
+        'Витрата',
         `${hydraulicsCalc.flowRateM3PerHour.toLocaleString('uk-UA', { maximumFractionDigits: 3 })} м³/ч`,
       ]);
     }
     if (typeof hydraulicsCalc.headRequiredM === 'number') {
       rows.push([
-        'Требуемый напор',
+        'Потрібний напір',
         `${hydraulicsCalc.headRequiredM.toLocaleString('uk-UA', { maximumFractionDigits: 2 })} м`,
       ]);
     }
-    if (rows.length) parts.push(kvTable('Гидравлика', rows));
+    if (rows.length) parts.push(kvTable('Гідравліка', rows));
   }
 
   if (Array.isArray(root.warnings) && root.warnings.length > 0) {
     const warns = root.warnings.filter((w) => typeof w === 'string').slice(0, 40);
     if (warns.length > 0) {
       parts.push(
-        `<h3>Предупреждения</h3><ul>${warns
+        `<h3>Попередження</h3><ul>${warns
           .map((w) => `<li>${escapeHtml(w)}</li>`)
           .join('')}</ul>`,
       );
@@ -210,5 +210,5 @@ export function buildTechnicalPdfHtml(snapshotOrReport) {
   }
 
   if (parts.length === 0) return '';
-  return `<h2>Технический расчёт</h2>${parts.join('\n')}`;
+  return `<h2>Технічний розрахунок</h2>${parts.join('\n')}`;
 }

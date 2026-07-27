@@ -37,10 +37,10 @@ export class AppErrorBoundary extends Component<
     if (this.state.hasError) {
       return (
         <div className={styles.root} role="alert">
-          <h1 className={styles.title}>Не удалось загрузить приложение</h1>
+          <h1 className={styles.title}>Не вдалося завантажити застосунок</h1>
           <p className={styles.message}>
-            Обновите страницу. Если ошибка повторяется — очистите локальный черновик
-            или обратитесь в поддержку.
+            Оновіть сторінку. Якщо помилка повторюється — очистіть локальну чернетку
+            або зверніться до підтримки.
           </p>
           <button
             type="button"
@@ -49,7 +49,7 @@ export class AppErrorBoundary extends Component<
               window.location.reload();
             }}
           >
-            Обновить страницу
+            Оновити сторінку
           </button>
         </div>
       );

@@ -1,5 +1,9 @@
 # Отчёт и итог гидравлики (UI)
 
+> **Мова UI (PR-6, 2026-07-27):** user-facing тексти — **українською**; [`language-policy.md`](language-policy.md).
+>
+> Fallback-підписи контурів у `frontend/src/utils/parseHydraulicsProposalFromReport.ts` — UA; SSOT API — `backend/src/hydraulics/buildHydraulicsProposal.js`.
+
 ## Разделение ответственности
 
 | Слой | Компоненты | Содержимое |
