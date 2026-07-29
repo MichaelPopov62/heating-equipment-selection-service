@@ -46,7 +46,6 @@
     "verify:hydraulics-pipeline": "node scripts/verifyHydraulicsPipeline.js",
     "verify:pick-pipe": "node scripts/verifyPickPipe.js",
     "verify:pipe-catalog-pool-filter": "node scripts/verifyPipeCatalogPoolFilter.js",
-    "verify:hydraulics-pipeline-input": "node scripts/verifyHydraulicsPipeline.js",
     "verify:circulation-flows": "node scripts/verifyCirculationFlows.js",
     "verify:flow-delta-tk": "node scripts/verifyFlowDeltaTK.js",
     "verify:builtin-boiler-pump": "node scripts/verifyBuiltinBoilerPump.js",
@@ -65,7 +64,7 @@
   "keywords": [],
   "author": "Michael Popov <romantikzizni@gmail.com>",
   "license": "ISC",
-  "description": "",
+  "description": "REST API подбора теплового оборудования: calc, matching, hydraulics, projects, PDF",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/cors": "^2.8.19",

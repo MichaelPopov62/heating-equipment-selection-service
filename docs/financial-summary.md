@@ -10,7 +10,7 @@
 | Вызов | `buildReport.js` после hydraulics, поле `report.commercial` |
 | Контракт | OpenAPI `CommercialBomReport` / `FinancialBomLine` |
 | Verify | `npm run verify:financial-bom` (входит в `backend` `verify`) |
-| UI | `FinancialSummaryTable` + `parseCommercialBomFromReport` |
+| UI | `frontend/src/components/FinancialSummary/FinancialSummaryTable.tsx` + `frontend/src/utils/parseCommercialBomFromReport.ts`, шаг `financialResult` |
 
 ## Правила
 

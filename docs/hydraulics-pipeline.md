@@ -28,15 +28,15 @@
 
 Кратко:
 
-1. `reduceSurveyMutation` — черновик
+1. `reduceSurveyMutation` — SurveyDraft
 2. `migrateDerivedState` — синхронизация ТП, layout v3 (`wiringLayoutV3`)
 3. `buildCalcInputKeyFromDraft` — ключ calc
 4. `decideCalcAction` — schedule / abort / manual
 5. `useSurveyCalc` — HTTP-исполнитель calc (React Query)
 
-Черновик: `SURVEY_DRAFT_SCHEMA_VERSION=4`, поля `hydraulicsForm`, `wiringLayoutV3`. Verify: `cd frontend && npm run verify:survey-session`.
+SurveyDraft: `SURVEY_DRAFT_SCHEMA_VERSION=4`, поля `hydraulicsForm`, `wiringLayoutV3`. Verify: `cd frontend && npm run verify:survey-session`.
 
-**UI анкеты (шаг «Гидравлика»):** `HydraulicsSection` — вертикальный radio-список типа разводки (4 схемы с пояснениями под каждым пунктом; `auto` — «Рекомендуется»), длина магистрали котёл → коллектор, таблица подводов коллектор → радиатор по комнатам; для `two-pipe-dead-end` / `two-pipe-pass` — порядок строк (кнопки ↑↓). Полный расчёт — `HydraulicsReportDialog` / `HydraulicsReportView`; сайдбар — `HydraulicsSummaryTable`; в «Рекомендации» — `HydraulicsProposalTable`. Подписи — `wiringSystemTypeLabels.ts`. См. [`survey-draft.md`](survey-draft.md) § UI шага «Гидравлика», [`hydraulics-survey-report.md`](hydraulics-survey-report.md).
+**UI анкеты (шаг «Гидравлика»):** `HydraulicsSection` — вертикальный radio-список типа разводки (4 схемы с пояснениями под каждым пунктом; `auto` — «Рекомендуется»), длина магистрали котёл → коллектор, таблица подводов коллектор → радиатор по комнатам; для `two-pipe-dead-end` / `two-pipe-pass` — порядок строк (кнопки ↑↓). Полный расчёт — `HydraulicsReportDialog` / `HydraulicsReportView`; на шаге `technicalResult` — `HydraulicsSummaryTable` и `HydraulicsProposalTable`. Подписи — `wiringSystemTypeLabels.ts`. См. [`survey-draft.md`](survey-draft.md) § UI шага «Гидравлика», [`hydraulics-survey-report.md`](hydraulics-survey-report.md).
 
 ### Схемы разводки радиаторов (`wiringLayoutV3` → граф)
 
@@ -51,13 +51,13 @@
 
 **Подбор trunk (dead-end / pass):** `pickTrunkChain.js` — каскад от downstream к upstream. На участке с максимальным Q — минимальный Ø при `v ≤ mainMax`. При `v < mainMin` **не** откатываться к guard 12 мм: удерживать `Dвн ≥ Ø` следующего downstream-участка (магистраль только заужается, не расширяется).
 
-Подбор труб (`pickPipe.js` + `pipeCatalogPoolFilter.js`): **сначала guard Dвн** (`mainTransitMinInternalDiameterMm` / `branchMinInternalDiameterMm` из `appliances.hydraulics` v4), затем трёхрежимный fallback внутри отфильтрованного пула — (1) минимальный Ø при `v ≤ vMax`; (2) при перегрузке — max Ø + `velocityLimitExceeded`; (3) при микропотоке — min Ø из guard-пула + `velocityBelowMin`. На транзите котла (`isMainLine: true`) guard **приоритетнее** `mainMin`.
+Подбор труб (`pickPipe.js` + `pipeCatalogPoolFilter.js`): **сначала guard Dвн** (`mainTransitMinInternalDiameterMm` / `branchMinInternalDiameterMm` из `appliances.hydraulics`, **`schemaVersion: 5`**), затем трёхрежимный fallback внутри отфильтрованного пула — (1) минимальный Ø при `v ≤ vMax`; (2) при перегрузке — max Ø + `velocityLimitExceeded`; (3) при микропотоке — min Ø из guard-пула + `velocityBelowMin`. На транзите котла (`isMainLine: true`) guard **приоритетнее** `mainMin`.
 
 Группировка микроветок (`groupRadiatorGraphBranches.js` + `buildGraph.js`): комнаты с `flow < minFlowM3PerHourForIndividualBranch` или `heatLoad < minHeatLoadWattsForIndividualBranch` объединяются в узел `radiator_manifold` (`rad_micro_manifold`); комнаты с нулевой нагрузкой (`skipRadiator` от ТП или **Ф5 skip** внутренних микрокомнат) не попадают в граф. `Σ designFlow` по веткам графа = `circuits.radiators.totalFlowRateM3PerHour`.
 
 ### Ф5 «Тамбур» — микронагрузка на радиатор
 
-Порог и типы входных зон — `appliances.radiator.microLoad` (v2): `minDesignWattsThreshold` (150 Вт), `entryRoomTypes` (`прихожая`, `коридор`, `тамбур`).
+Порог и типы входных зон — `appliances.radiator` (`schemaVersion: 3`), блок `microLoad`: `minDesignWattsThreshold` (150 Вт), `entryRoomTypes` (`прихожая`, `коридор`, `тамбур`).
 
 | Условие | Действие |
 |---------|----------|
@@ -103,7 +103,7 @@
 
 ### Вне scope этого пайплайна: НСУ (`collector_mixing_valve`)
 
-Ветка `resolveCirculationFlows` для смесительного узла ТП использует `qMainThermal = (pRad + pUfh) / (c·ΔT_boiler)`. Если upstream когда-либо передаст несбалансированные `pRad`/`pUfh` (двойной учёт теплопотерь), расход первички завысится. Для mixed+offset с гидрострелкой (типовой кейс verify) баланс `pRad + pUfh = heatLoss.totalWatts` подтверждён — отдельная задача, если появится отчёт с НСУ и расхождением мощностей.
+Ветка `resolveCirculationFlows` для смесительного узла ТП использует `qMainThermal = (pRad + pUfh) / (c·ΔT_boiler)`. Инвариант upstream: `pRad + pUfh = heatLoss.totalWatts`; его подтверждает verify-кейс mixed+offset с гидрострелкой. Нарушение инварианта завысит расход первичного контура.
 
 ## Маппинг upstream → DTO
 
@@ -164,7 +164,7 @@
 
 ## Правила `appliances.hydraulics`
 
-Документ MongoDB / `backend/data/appliances.json`, **`schemaVersion: 4`** (`branchMin`, `radiatorBranchGrouping`, `mainTransitMinInternalDiameterMm`, `branchMinInternalDiameterMm`). После изменения — `cd backend && npm run seed` и рестарт API (или TTL `REFERENCE_CACHE_TTL_MS`).
+Документ MongoDB / `backend/data/appliances.json`, **`schemaVersion: 5`**. Полный набор полей — в JSON и в таблице ниже (§ «Правила `appliances.hydraulics`»). После изменения — `cd backend && npm run seed` и рестарт API (или TTL `REFERENCE_CACHE_TTL_MS`, либо `POST /api/v1/system/invalidate-reference-cache`).
 
 Поля попадают в `HydraulicsPipelineInput.rules` и в runtime через `CalcRuntimeContext`.
 

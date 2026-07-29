@@ -91,11 +91,13 @@ SSOT по ТЗ: два слоя кнопок, **серверный PDF** (ска
 
 | Слой | Путь |
 |------|------|
-| Frontend — маршрут share | `frontend/src/App.tsx` → `SharePresentationPage` |
+| Frontend — маршрут share | `frontend/src/routing/AppRouter.tsx` → `SharePresentationPage` |
+| Frontend — пути SPA | `frontend/src/routing/paths.ts`, `SurveyAppShell.tsx` |
 | Frontend — контакт Pro/Marketplace | `frontend/src/components/PublisherContactBlock/` |
 | Frontend — клиент (Header) | `frontend/src/components/Header/Header.tsx` |
 | Frontend — сессия / tier | `frontend/src/components/AccountBar/`, `SubscriptionTierBadge/` |
 | Frontend — Dev | `frontend/src/components/DevPanel/DevPanel.tsx`, `frontend/src/utils/isDevToolsEnabled.ts` |
+| Frontend — Dev shell | `frontend/src/components/DevToolsDock/DevToolsDock.tsx` |
 | Frontend — toast ссылки | `frontend/src/components/ShareLinkToast/ShareLinkToast.tsx` |
 | Frontend — API share/PDF | `frontend/src/services/publicShareApi.ts`, `parsePublicShare.ts`, `projectsApi.ts` |
 | Frontend — профиль `/me` | `frontend/src/services/meApi.ts`, `query/queries/useMeQuery.ts` |

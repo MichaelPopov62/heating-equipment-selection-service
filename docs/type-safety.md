@@ -48,11 +48,11 @@ cd backend && npm run verify # lint + typecheck + domain verify:*
 ## CI
 
 Workflow `verify` запускает: `verifyNoTypeBypass` → shared typecheck → backend verify → frontend verify  
-(`frontend verify` = lint + typecheck + knip + **build** + `verify:survey-session`, который проверяет строки в `dist/`).
+(`frontend verify` = lint + typecheck + knip + footer/auth/me verify + **build** + survey-session/start-state verify).
 
 ## Связанные документы
 
 - [project-structure.md](project-structure.md) — карта папок репозитория
 - [frontend-calc-runner.md](frontend-calc-runner.md) — приёмка frontend
-- [survey-draft.md](survey-draft.md) — verify черновика
+- [survey-draft.md](survey-draft.md) — verify SurveyDraft
 - [calc-runtime-context.md](calc-runtime-context.md) — DI справочников

@@ -1,16 +1,9 @@
 # Глобальный тип излучателей (sectional / panel) — Two-Pass Orchestrator
 
-## Вводная (обязательная)
+## Реализация
 
-Реализация ведётся **только как production-пакет**: полный контракт, оркестратор,
-эскалация (включая несколько приборов в комнате), рекомендации, UI, гидравлика
-и verify в **одном** релизе.
-
-Запрещено:
-- минимальный / MVP-срез «сначала только lock без эскалации»;
-- заглушки, пустые enum, TODO/FIXME «на будущее»;
-- откладывание `unitsCount > 1`, warning дефицита или единообразия линий
-  economy/efficient на следующий этап.
+Контракт, оркестратор, эскалация нескольких приборов в комнате, рекомендации,
+UI, гидравлика и verify работают как единый production-поток.
 
 ## Проблема
 
@@ -35,7 +28,7 @@
 Подводка фильтрует панельный пул (K/Klasik vs VK/VKP) и **не** переключает тип прибора.
 
 Нормализация: `normalizeRadiatorEmitterPreference` (пустое/неизвестное → `auto`)
-в `normalizeHeatingSystemThermalRegime`. Черновики без поля → `auto`.
+в `normalizeHeatingSystemThermalRegime`. SurveyDraft без поля → `auto`.
 
 Shared: `shared/radiatorEmitterPreference.js`.
 
@@ -94,10 +87,10 @@ Shared: `shared/radiatorEmitterPreference.js`.
 ## UI
 
 Анкета (шаг «Радиаторы», `RadiatorsSurveyForm`): preference рядом с подводкой.  
-Полный расчёт — `RadiatorsReportView` в модалке; KPI — `RadiatorsSummaryTable` в сайдбаре.  
-В блоке «Рекомендация» — только `RadiatorProposalLineTable` рядом с котлом (не полный `dl`).  
+Полный расчёт — `RadiatorsReportView` в модалке; KPI — `RadiatorsSummaryTable` на шаге `technicalResult`.
+На этом же шаге расположен `RadiatorProposalLineTable` рядом с котлом (не полный `dl`).
 График подачи/обратки (`thermalRegimePreset`) — на шаге «Котёл».  
-При `ufh_only` оба селекта disabled; значения в черновике сохраняются.  
+При `ufh_only` оба селекта disabled; значения в SurveyDraft сохраняются.
 В отчёте — единый тип по объекту; `unitsCount` в колонке количества.  
 См. [`radiators-survey-report.md`](radiators-survey-report.md).
 

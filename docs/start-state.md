@@ -2,7 +2,7 @@
 
 ## Назначение
 
-При **первом входе** (нет локального черновика, hash, загруженного проекта) пользователь видит **Start Screen** — три действия без полной анкеты и без автоматического calc.
+При **первом входе** (нет сохранённого SurveyDraft в localStorage, hash, загруженного проекта) пользователь видит **Start Screen** с основным действием «Почати новий розрахунок», без полной анкеты и автоматического calc. Проекты открываются через Header/Footer и маршрут `/projects`.
 
 ## Режимы UI (`AppBootstrapMode`)
 
@@ -10,7 +10,7 @@
 |-------|-------|-----|
 | `resolving` | Первые ~200 ms после mount | `AppBootstrapSkeleton` + `Spinner` |
 | `start` | Cold open | `StartScreen` + Header (`variant=start`) |
-| `survey` | Черновик / «Начать» / import / project | `AppSurveyContent` |
+| `survey` | SurveyDraft / «Начать» / import / project | `AppSurveyContent` |
 | `error` | Timeout bootstrap 3 s | `BootstrapErrorScreen` |
 
 ## Критерий Start State
@@ -57,7 +57,7 @@ SSOT дефолтов:
 | Событие | Skeleton / «Загрузка…» |
 |---------|------------------------|
 | Первое открытие сайта | ✅ `resolving` → `AppBootstrapSkeleton` (~200 ms) |
-| Загрузка сохранённого проекта с сервера | ⚠️ отдельная задача (in-place, без bootstrap skeleton) |
+| Загрузка сохранённого проекта с сервера | Переход `/projects` → `pendingProjectNavigation` → загрузка in-place, без bootstrap skeleton |
 | Перерасчёт после изменения параметров | локальный `calcLoading` / «Расчёт…» в секциях |
 | **Выход из проекта (Exit)** | ❌ сразу Start Screen |
 | **Новый проект** | ❌ сразу Start Screen |
@@ -81,15 +81,15 @@ Exit и «Новый проект» **не** вызывают `retryBootstrap()`
 
 Confirm: если `projectId` уже есть (проект на сервере) — выход **без** диалога; иначе при несохранённых данных — confirm.
 
-Проект в MongoDB **не удаляется**; очищается только локальная сессия и `localStorage` черновика.
+Проект в MongoDB **не удаляется**; очищается только локальная сессия и `localStorage` (`heatcalc:survey-draft:v1`).
 
 ## «Новый проект»
 
 `startNewProject` → confirm (если report / заполненные rooms) → **`exitToStart()`** (та же очистка, без skeleton).
 
-Клиентский Header: **Проекты**, **Ссылка** (публичная `/s/{shareToken}` + toast под кнопкой), **PDF / Скачать**, **Выйти**. JSON и server-save — только **DevPanel** (`isDevToolsEnabled`).
+Header в режиме `start`: **Проекты** и AccountBar. В режиме `survey`: **Проекты**, **Ссылка** (публичная `/s/{shareToken}` + toast), **PDF / Скачать**, **Выйти**. JSON и server-save — только **DevPanel** (`isDevToolsEnabled`).
 
-Публичная страница: pathname `/s/{token}` → `SharePresentationPage` (без анкеты). См. [`client-share-and-layers.md`](client-share-and-layers.md).
+Публичная страница: маршрут `/s/:shareToken` в `frontend/src/routing/AppRouter.tsx` → `SharePresentationPage` (без анкеты). См. [`client-share-and-layers.md`](client-share-and-layers.md).
 
 ## Verify
 
@@ -111,6 +111,9 @@ cd frontend && npm run verify
 | Bootstrap hook | `frontend/src/hooks/useSurveyBootstrap.ts` |
 | Resolve hash/storage | `frontend/src/surveySession/resolveAppBootstrap.ts` |
 | Режимы UI | `frontend/src/AppRoot.tsx`, тип `AppBootstrapMode` в `surveySession/types.ts` |
+| Маршруты | `frontend/src/routing/AppRouter.tsx`, `paths.ts`, `SurveyAppShell.tsx` |
+| Проекты | `frontend/src/pages/ProjectsPage/`, `frontend/src/utils/pendingProjectNavigation.ts` |
+| Общие действия | `frontend/src/shell/AppChromeProvider.tsx` |
 | Start / skeleton / error | `frontend/src/components/StartScreen/`, `AppBootstrapSkeleton/`, `BootstrapErrorScreen/` |
 | localStorage | `frontend/src/services/surveyDraftStorage.ts`, `frontend/src/hooks/useSurveyDraftPersistence.ts` |
 | Пустой / дефолтный draft | `frontend/src/surveySession/createEmptySurveySessionState.ts`, `createDefaultSurveyDraft.ts` |

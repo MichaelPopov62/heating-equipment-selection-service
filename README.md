@@ -6,13 +6,15 @@ REST API и фронтенд для подбора теплового обору
 | -------------------------------------------------------------- | ------------------------------------------------------------------- |
 | [`openapi.yaml`](openapi.yaml)                                 | Контракт REST API                                                   |
 | [`.cursorrules`](.cursorrules)                                 | Правила backend/frontend, бизнес-логика, env, модули                |
-| [`Plan.md`](Plan.md)                                           | Статус MVP, детальные таблицы модулей, roadmap                      |
+| [`Plan.md`](Plan.md)                                           | Карта модулей backend/frontend                                      |
+| [`backend/README.md`](backend/README.md)                       | Backend: quick start, verify, маршруты                              |
 | [`docs/project-structure.md`](docs/project-structure.md)       | Карта папок и entrypoints (навигатор по репозиторию)               |
 | [`docs/type-safety.md`](docs/type-safety.md)                   | Строгая типобезопасность: tsc/checkJs, ESLint, CI gate              |
 | [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md) | Frontend: SurveySession, React Query, calc, справочники             |
-| [`docs/survey-draft.md`](docs/survey-draft.md)                 | Черновик анкеты (schema v4), загрузка и миграция                    |
+| [`docs/survey-draft.md`](docs/survey-draft.md)                 | Состояние анкеты (SurveyDraft v4), localStorage, project.survey   |
+| [`docs/start-state.md`](docs/start-state.md)                   | Start Screen, bootstrap, восстановление сессии                      |
+| [`docs/language-policy.md`](docs/language-policy.md)           | Политика UA для user-facing текстов                                 |
 | [`docs/projects-api.md`](docs/projects-api.md)                 | REST API проектов, share, PDF и сохранённых расчётов                |
-| [`docs/start-state.md`](docs/start-state.md)                   | Start Screen, bootstrap, localStorage черновика                     |
 | [`docs/client-share-and-layers.md`](docs/client-share-and-layers.md) | Клиент vs Dev, публичная ссылка, PDF                          |
 | [`docs/project-pdf.md`](docs/project-pdf.md)                   | Серверная генерация PDF (Chromium)                                  |
 | [`docs/calc-runtime-context.md`](docs/calc-runtime-context.md) | CalcRuntimeContext: DI справочников в calc-пайплайне                |
@@ -32,17 +34,17 @@ npm run start          # http://localhost:3001
 - Линт: `cd backend && npm run lint`
 - Полный backend gate: `cd backend && npm run verify` (lint + **typecheck** + все `verify:*`)
 
-Calc-пайплайн HTTP: `runCalculation(body)` (`api/runCalculation.js`); внутри — `getReferenceBundle()` → `toCalcRuntimeContext()` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })` → `matchEquipment({ …, ctx })`. On-demand сброс кэша: `POST /api/v1/system/invalidate-reference-cache` (см. docs).
+Calc-пайплайн HTTP: `runCalculation(body)` (`api/runCalculation.js`); внутри — `getReferenceBundle()` → `toCalcRuntimeContext()` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })`. On-demand сброс кэша: `POST /api/v1/system/invalidate-reference-cache`.
 
-Эндпоинты: `GET /health`, `GET /api/v1/catalog`, `GET /api/v1/presets/envelope`, `POST /api/v1/calc`, проекты — `/api/v1/projects/*`, публичная ссылка — `/api/v1/public/shares/{shareToken}` (нужен MongoDB). Контракт — `openapi.yaml`; валидация calc — `docs/calc-input-validation.md`; проекты и share — `docs/projects-api.md`, `docs/client-share-and-layers.md`.
+Подробнее: [`backend/README.md`](backend/README.md). Эндпоинты и auth — `openapi.yaml`, [`docs/auth.md`](docs/auth.md), [`docs/projects-api.md`](docs/projects-api.md). Валидация calc — [`docs/calc-input-validation.md`](docs/calc-input-validation.md).
 
 ## Frontend
 
 React + Vite + TypeScript + **React Query** (`@tanstack/react-query`, слой `frontend/src/query/`). Запуск: `cd frontend && npm install && npm run dev`.
 
-Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md), [`docs/start-state.md`](docs/start-state.md). Карта папок: [`docs/project-structure.md`](docs/project-structure.md). Детальные таблицы frontend — [`Plan.md`](Plan.md) § `frontend/`.
+Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md), [`docs/start-state.md`](docs/start-state.md). Карта папок: [`docs/project-structure.md`](docs/project-structure.md), [`Plan.md`](Plan.md).
 
-Точка входа: `App.tsx` — редактор анкеты или read-only страница `/s/{shareToken}` (`SharePresentationPage`). Bootstrap start/survey — [`docs/start-state.md`](docs/start-state.md).
+Точка входа SPA: `App.tsx` подключает providers и `AppRouter`; `/` открывает анкету через `SurveyAppShell`, `/projects` — список проектов, `/s/:shareToken` — read-only презентацию. Bootstrap start/survey — [`docs/start-state.md`](docs/start-state.md).
 
 В анкете для каждого помещения задаётся **положение относительно наружного контура** (`roomExteriorLayout`: угловое, на фасаде, внутреннее со стеной в коридор) — см. [`docs/room-exterior-layout.md`](docs/room-exterior-layout.md).
 
@@ -60,7 +62,7 @@ npm run verify
 node scripts/verifyNoTypeBypass.mjs   # запрет any / @ts-ignore / unsafe eslint-disable
 cd shared && npm run typecheck
 cd backend && npm run verify          # lint + typecheck (checkJs) + domain verify:*
-cd frontend && npm run verify         # lint + typecheck + knip + build + survey-session (нужен dist)
+cd frontend && npm run verify         # lint + typecheck + knip + nav/auth/me + build + session/start
 ```
 
 Отдельно:

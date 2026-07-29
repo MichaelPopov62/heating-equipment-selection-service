@@ -1,16 +1,10 @@
 # CalcRuntimeContext — контекст расчёта
 
-Единый **immutable** снимок справочников для одного вызова `POST /api/v1/calc` (или verify-скрипта). Все слои calc-пайплайна получают справочники **явно** через `ctx`, без глобальных sync-кэшей.
+Единый **immutable** снимок справочников для одного вызова `POST /api/v1/calc` (или verify-скрипта). Все слои calc-пайплайна получают справочники **явно** через `ctx` (`configCache.js` + `toCalcRuntimeContext`).
 
 ---
 
-## Проблема (историческая)
-
-Раньше `validateAndNormalizeInput`, `calculateUnderfloorHeating` и matching читали глобальный sync-кэш (`referenceCache.js`, `ufhPresetsCache.js`, `recommendationResolver`). В HTTP-пути кэш прогревался через `getReferenceBundle()`, но при прямом вызове без прогрева — необработанное исключение или тихий сбой.
-
-## Решение
-
-**Composition root** HTTP calc (`backend/src/api/runCalculation.js`):
+## Composition root
 
 ```javascript
 import { runCalculation } from './runCalculation.js';
@@ -145,13 +139,4 @@ cd backend && npm run verify:reference-cache-invalidate
 - `backend/src/api/runCalculation.js` — composition root HTTP calc (POST /api/v1/calc, POST /api/v1/projects/:id/calc)
 - `backend/src/reference/configCache.js` — TTL bundle + `deepFreeze`
 - `backend/src/reference/public.js` — barrel: `getReferenceBundle`, `toCalcRuntimeContext`, `assertCalcRuntimeContext`
-- `Plan.md` § «Поток расчёта» — диаграмма пайплайна
-
-## Чеклист PR
-
-- [ ] `grep` по `src/`: нет `getUfhPresets` / `getAppliances` / `set*Cache` / `referenceCache.js` / `ufhPresetsCache.js`
-- [ ] `matchEquipment({ …, ctx })`, `pickBoiler({ …, ctx })`
-- [ ] `pushRecommendation(…, ctx.recommendations, code, vars)`
-- [ ] после seed / правки Mongo — invalidate webhook или `AUTO_INVALIDATE_CACHE`
-- [ ] verify-скрипты передают `ctx`
-- [ ] `.cursorrules` и OpenAPI descriptions согласованы
+- `Plan.md` § «Поток calc» — краткая схема пайплайна

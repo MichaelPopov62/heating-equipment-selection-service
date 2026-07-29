@@ -1,6 +1,6 @@
 # Отчёт и итог радиаторов (UI)
 
-> **Мова UI (PR-6, 2026-07-27):** user-facing тексти — **українською**; [`language-policy.md`](language-policy.md).
+> **Мова UI:** user-facing тексти — **українською**; [`language-policy.md`](language-policy.md).
 
 ## Разделение ответственности
 
@@ -8,9 +8,9 @@
 |------|------------|------------|
 | Ввод | `RadiatorsSurveyForm` | `radiatorConnection`, `radiatorEmitterPreference` |
 | Полный расчёт | `RadiatorsReportDialog` → `RadiatorsReportView` | inputs, агрегаты, линии economy/efficient, warnings |
-| Сайдбар «Итог» | `RadiatorsSummaryTable` | KPI + `SurveyStepLink` на шаг «Радиаторы» |
-| Блок «Рекомендация» | `RadiatorProposalLineTable` | радиаторы по вариантам (отдельно от таблицы котлов) |
-| Блок «Рекомендация» | `BoilerProposalCard` × economy/efficient | котлы — см. [`boiler-survey-report.md`](boiler-survey-report.md) |
+| Шаг `technicalResult` | `RadiatorsSummaryTable` | KPI + `SurveyStepLink` на шаг «Радиаторы» |
+| Шаг `technicalResult` | `RadiatorProposalLineTable` | радиаторы по вариантам (отдельно от таблицы котлов) |
+| Шаг `technicalResult` | `BoilerProposalCard` × economy/efficient | котлы — см. [`boiler-survey-report.md`](boiler-survey-report.md) |
 
 Контракт API без изменений: `matching.radiators` → `parseRadiatorsMatchingFromReport`.
 

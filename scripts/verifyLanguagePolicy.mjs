@@ -160,7 +160,8 @@ assert.ok(
 
 const languagePolicy = await readRepo('docs/language-policy.md');
 assert.match(languagePolicy, /verify:language-policy/);
-assert.match(languagePolicy, /Post-close fix|§18/);
+assert.match(languagePolicy, /Smoke E2E UI|§10/);
+assert.doesNotMatch(languagePolicy, /PR-[0-9]/);
 
 await scanTree(path.join(root, 'frontend', 'src'), /\.(ts|tsx)$/);
 await scanTree(path.join(root, 'shared'), /\.(js|ts)$/);

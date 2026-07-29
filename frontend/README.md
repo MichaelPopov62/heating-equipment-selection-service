@@ -6,24 +6,30 @@ React + Vite + TypeScript + **@tanstack/react-query**. Точка входа: `s
 
 | Слой | Путь | Назначение |
 |------|------|------------|
-| Точка входа | `main.tsx`, `App.tsx`, `AppRoot.tsx`, `AppSurveyContent.tsx` | RQ-провайдер; share-route или bootstrap Start/survey |
-| Bootstrap | `hooks/useSurveyBootstrap.ts`, `surveySession/resolveAppBootstrap.ts` | Cold open → Start Screen или восстановление черновика |
-| Persistence | `services/surveyDraftStorage.ts`, `hooks/useSurveyDraftPersistence.ts` | localStorage черновика (debounce 400 ms) |
+| Точка входа | `main.tsx`, `App.tsx` | QueryProvider, BrowserRouter, auth и общие providers |
+| Маршрутизация | `src/routing/` | `AppRouter`, `SurveyAppShell`, канонические пути SPA |
+| Bootstrap | `hooks/useSurveyBootstrap.ts`, `surveySession/resolveAppBootstrap.ts` | Cold open → Start Screen или восстановление SurveyDraft |
+| Persistence | `services/surveyDraftStorage.ts`, `hooks/useSurveyDraftPersistence.ts` | localStorage SurveyDraft (debounce 400 ms) |
 | Сессия анкеты | `src/surveySession/` | `SurveySessionProvider`, `dispatch` → pipeline; `report` / `uiPhase` |
 | Серверные данные | `src/query/` | React Query: справочники, calc, проекты |
 | HTTP-клиенты | `src/services/` | `projectsApi`, `publicShareApi`, `calc`, справочники |
 | UI-оркестрация | `src/hooks/` | `useSurveyProject` (share, PDF, Dev), парсинг отчёта, оценки |
 | UI | `src/components/` | Формы, отчёты, `StartScreen`, `SharePresentationPage`, `DevPanel` |
+| Страницы | `src/pages/` | Login, SignUp, Projects, Docs, FAQ и legal |
+| Оболочка и тексты | `src/shell/`, `src/i18n/` | Header/Footer actions и украинская локализация |
 
-### Маршрутизация (`App.tsx`)
+### Маршрутизация (`src/routing/AppRouter.tsx`)
 
 ```text
-/s/{shareToken}  → SharePresentationPage (read-only)
-иначе            → SurveySessionProvider → AppRoot
-                     ├─ start     → StartScreen
-                     ├─ resolving → AppBootstrapSkeleton
-                     ├─ error     → BootstrapErrorScreen
-                     └─ survey    → AppSurveyContent
+/s/:shareToken                     → SharePresentationPage (read-only)
+/login, /sign-up                   → auth pages
+/docs, /faq, /privacy, /terms, ... → static pages
+/projects                          → SurveyAppShell → ProtectedRoute → ProjectsPage
+/                                  → SurveyAppShell → SurveySessionProvider → AppRoot
+                                       ├─ start     → StartScreen
+                                       ├─ resolving → AppBootstrapSkeleton
+                                       ├─ error     → BootstrapErrorScreen
+                                       └─ survey    → AppSurveyContent
 ```
 
 ### `src/query/`
@@ -33,7 +39,7 @@ React + Vite + TypeScript + **@tanstack/react-query**. Точка входа: `s
 | `QueryProvider.tsx` | Корневой `QueryClientProvider` |
 | `queryClient.ts`, `queryKeys.ts` | Конфигурация и ключи кэша |
 | `useDebouncedValue.ts` | Debounce автопересчёта (700 ms) |
-| `useReferenceData.ts` | Композиция справочников для `App.tsx` |
+| `useReferenceData.ts` | Композиция справочников для `SurveyAppShell.tsx` |
 | `useSurveyCalc.ts` | POST `/api/v1/calc` |
 | `queries/*` | envelope, underfloor, ufh-modes, catalog, projects |
 | `mutations/useProjectMutations.ts` | save/load проекта |
@@ -42,7 +48,7 @@ React + Vite + TypeScript + **@tanstack/react-query**. Точка входа: `s
 
 | Компонент | Назначение |
 |-----------|------------|
-| `StartScreen/` | Стартовый экран «Новый расчёт» / «Проекты» |
+| `StartScreen/` | Стартовый экран с действием «Почати новий розрахунок» |
 | `SharePresentationPage/` | Публичная презентация по `/s/{token}` |
 | `Header/` | Клиент: ссылка, PDF, выход (без JSON) |
 | `DevPanel/` | JSON, server save, hash — только DEV / `VITE_DEV_TOOLS=1` |
@@ -59,6 +65,10 @@ npm install
 npm run dev          # http://localhost:5173 (прокси /api → backend :3001)
 npm run build
 npm run lint
+npm run verify:dead-code
+npm run verify:footer-nav
+npm run verify:frontend-auth
+npm run verify:frontend-me
 npm run verify:survey-session
 npm run verify:start-state
 npm run verify           # полный gate

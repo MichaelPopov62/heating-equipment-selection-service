@@ -2,9 +2,9 @@
 
 Справочник режимов водяного тёплого пола: технические лимиты + человекочитаемый UI. Отдельно от баз конструкции (`warmFloorAssemblyPresets`) и финишей (`flooringFinishMaterials`).
 
-> **Мова UI (PR-1, 2026-07-27):** поля `ui.title`, `ui.badge`, `ui.description` у `backend/data/underfloor_heating_presets.json` та `name`/`description` у `warmFloorAssemblyPresets.js` — **українською**. Технічні `presetId`, `finishMaterialId` — без змін. Деталі: [`language-policy.md`](language-policy.md).
+> **Мова UI:** поля `ui.title`, `ui.badge`, `ui.description` у `backend/data/underfloor_heating_presets.json` та `name`/`description` у `warmFloorAssemblyPresets.js` — **українською**. Технічні `presetId`, `finishMaterialId` — без змін. Деталі: [`language-policy.md`](language-policy.md).
 >
-> Labels контуру ТП: `shared/ufhCircuitPresets.js` — UA (post-close fix, §18).
+> Labels контуру ТП: `shared/ufhCircuitPresets.js` — UA.
 
 ---
 
@@ -14,24 +14,16 @@
 |------|----------|------------|------|
 | **1. Конструкция комнаты** | `data/warmFloorAssemblyPresets.js` + `data/flooringFinishMaterials.js` | `room.underfloorHeating.{basePresetId, finishMaterialId}`; `GET …/underfloor-heating`, `/bases` | Физика: слои, Rλ,B, теплоотдача |
 | **2. Контур по финишу** | `shared/ufhCircuitPresets.js` | derive в `ufhCircuitResolve.js` | 45/35 для плитки, 40/30 для ламината/LVT (mixed) |
-| **3. Режим системы** | Mongo/file `underfloor_heating_presets` | `heatingSystem.ufhPresetId`; `GET …/modes` | ufh_only / mixed / direct_*; график котла, skip радиаторов, maxSurface |
+| **3. Режим системы** | Mongo/file `underfloor_heating_presets` | `heatingSystem.ufhPresetId`; `GET …/modes` | ufh_only / mixed; график котла, skip радиаторов, maxSurface |
 
 В `validate.js`:
 
 - **Фаза 4 (до AJV):** слой 1 — `normalizeUnderfloorHeatingBeforeValidate` (статический `data/`).
 - **Фаза 6 (после AJV):** слой 3 — `normalizeHeatingUfhPreset(body, ctx.ufhPresets)` из bundle.
-- **Cross-validation:** `assertUfhModeFinishCompatibility` — для `ufh_direct_tile` / `ufh_direct_laminate` финиш комнаты должен совпадать с `finishMaterialIds` контура из слоя 2.
 
 Слои **намеренно разделены** (разный lifecycle: деплой vs Mongo/seed). Риск — рассинхрон между слоями 2 и 3; см. verify ниже.
 
-### Согласованность direct-режимов
-
-| ufhPresetId | Контур (`ufhCircuitPresets`) | Допустимые `finishMaterialId` |
-|-------------|------------------------------|-------------------------------|
-| `ufh_direct_tile` | `ufh_dt10_45_35` (45/35) | `ceramic_tile` |
-| `ufh_direct_laminate` | `ufh_dt10_40_30` (40/30) | `pvc_glue`, `pvc_click`, `laminate_click` |
-
-`ufh_mixed_radiators` и `ufh_only` — контур по финишу комнаты (слой 2) или график из mode preset (`ufh_only`).
+`ufh_mixed_radiators` использует контур по финишу комнаты (слой 2), `ufh_only` — график из mode preset.
 
 ### `UFH_PRESETS_SOURCE`
 
@@ -64,14 +56,12 @@ returnC = supplyC − 10
 
 ---
 
-## Четыре обязательных пресета режима
+## Обязательные пресеты режима
 
 | presetId | UI (кратко) | maxSupply | maxSurface | hasMixingNode | requiresCondensingBoiler |
 |----------|-------------|-----------|------------|---------------|--------------------------|
 | `ufh_only` | Только ТП | 40 | 29 | false | **true** |
 | `ufh_mixed_radiators` | ТП + радиаторы | 45 | 29 | true | false |
-| `ufh_direct_tile` | Прямой ТП под плитку | 45 | 29 | false | false |
-| `ufh_direct_laminate` | Прямой ТП под ламинат | 40 | **27** | false | false |
 
 Константы ID: `shared/ufhModePresetIds.js`.
 
@@ -88,7 +78,7 @@ returnC = supplyC − 10
 ```json
 {
   "heatingSystem": {
-    "ufhPresetId": "ufh_direct_laminate",
+    "ufhPresetId": "ufh_mixed_radiators",
     "heatingEmittersMode": "mixed",
     "waterUnderfloorHeating": true
   }
@@ -97,7 +87,6 @@ returnC = supplyC − 10
 
 - `heatingEmittersMode` выводится из `ufhPresetId`, если не задан (`ufh_only` → `ufh_only`, иначе `mixed`).
 - Для `ufh_only`: нормализация **всегда** выставляет график котла **40/30** и `thermalRegimePreset = condensing_dt30_55_45` (даже если во входе был `traditional_dt50_75_65`); `heatingEmittersMode = ufh_only`.
-- Несовместимый финиш при `ufh_direct_*` → **400** `UFH_MODE_FINISH_MISMATCH`.
 
 ### Meta отчёта
 
@@ -123,7 +112,7 @@ returnC = supplyC − 10
 - Карточки режима: `UfhPresetCards`, загрузка `useUfhModePresetsQuery` (`frontend/src/query/`)
 - Секция: `WarmFloorSection` на шаге `warmFloor` (`SURVEY_STEPS`: после `object`, перед `rooms`); при `ufh_only` скрыта схема распределения ТП
 - Полный отчёт ТП + унибоксы + насос зоны ТП (при смесителе): кнопка «Отчёт по расчёту ТП»
-- Итог (сайдбар): `HotWaterSummaryTable` — ЭБ/БКН; `UnderfloorHeatingSummaryTable` — агрегаты ТП; ссылки `SurveyStepLink`
+- Шаг `technicalResult`: `UnderfloorHeatingSummaryTable` — агрегаты ТП; ссылки `SurveyStepLink`
 - Котловой насос — в блоке гидравлики «Итог» (`boiler_primary`), не в отчёте ТП
 - Payload: `buildCalcRequestPayload.ts` — `ufhPresetId`, `heatingEmittersMode`
 - Порядок шагов: [`frontend-calc-runner.md`](frontend-calc-runner.md) § «Шаги анкеты» / § «UI блока Тёплый пол»
@@ -136,4 +125,4 @@ returnC = supplyC − 10
 cd backend && npm run verify:ufh-presets
 ```
 
-Проверяет JSON, нормализацию, эталонные `technical`, согласованность `ufh_direct_*` с `shared/ufhCircuitPresets.js` и smoke-тест `maxSurface`.
+Проверяет JSON, нормализацию, эталонные `technical` и smoke-тест `maxSurface`.

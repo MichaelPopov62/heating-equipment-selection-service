@@ -7,7 +7,7 @@ description: >
   3) project.lastCalcInput, если в теле нет calcInput и корневого building
      (пустое тело {}, только survey, и т.п.).
 
-  Опционально survey — черновик анкеты для сохранения в проект (не подставляется в расчёт).
+  Опционально survey — SurveyDraft для сохранения в project (не подставляется в расчёт).
 
   Лимиты размера: survey и calcInput — до 512 KB JSON; сохраняемый документ calculations —
   до ~14 MB BSON (см. docs/projects-api.md).
@@ -19,4 +19,4 @@ allOf:
         $ref: CalcInput.yaml
       survey:
         type: object
-        description: Черновик анкеты UI; сохраняется в project.survey, не используется как CalcInput.
+        description: SurveyDraft UI; сохраняется в project.survey, не используется как CalcInput.

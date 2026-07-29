@@ -1,711 +1,169 @@
-# План проекта
+# Карта модулей проекта
 
-Полные правила backend/frontend — в [`.cursorrules`](.cursorrules). HTTP-контракт — [`openapi.yaml`](openapi.yaml).
+Правила backend/frontend — [`.cursorrules`](.cursorrules). HTTP-контракт — [`openapi.yaml`](openapi.yaml).
+Навигатор по репозиторию — [`docs/project-structure.md`](docs/project-structure.md). Backend quick start — [`backend/README.md`](backend/README.md).
 
-## Статус MVP (backend)
+---
 
-| Область | Статус |
-|---------|--------|
-| REST API, calc, projects | выполнено |
-| Share + public API, серверный PDF | выполнено |
-| Климат (Nominatim + Meteostat bulk) | выполнено |
-| Теплопотери, ограждения, ГВС, гидравлика | выполнено |
-| Matching (котёл, радиаторы, ВН, БКН) | выполнено |
-| Справочники (bundle + Mongo/file) | выполнено |
-| Runtime barrels `*/public.js` | выполнено |
-| Водяной ТП: композиция base + finish, `warmFloorCalc` | выполнено |
-| ТП: пресеты 45/35 и 40/30, смеситель, гидравлика узла | фаза 0 ✅ → фазы 1–8 |
-
-## Статус MVP (frontend)
-
-| Область | Статус |
-|---------|--------|
-| Анкета, формы, отчёт в UI | выполнено |
-| `SurveySession` — единый pipeline мутаций и calc-state | выполнено |
-| React Query (`@tanstack/react-query`) — справочники, calc, проекты | выполнено |
-| Проекты: файлы, hash-URL, Mongo CRUD | выполнено |
-| Start Screen, bootstrap, localStorage черновика | выполнено |
-| Публичная ссылка `/s/{shareToken}`, share snapshot | выполнено |
-| Серверный PDF сметы (Chromium) | выполнено |
-| Клиентский vs Dev слой (`DevPanel`) | выполнено |
-
-## Структура сервиса по папкам
-
-Краткий навигатор по репозиторию (entrypoint’ы без дублирования статуса MVP): [`docs/project-structure.md`](docs/project-structure.md).
-
-### Корень репозитория
+## Корень репозитория
 
 | Путь | Назначение |
 |------|------------|
-| `openapi.yaml` | Контракт REST API — источник правды для схем запросов и ответов |
-| `shared/` | Общие константы backend и frontend (схемы ГВС, тепловые режимы, типы комнат) |
-| `package.json` | Скрипты-обёртки для запуска backend и frontend |
-| `components/schemas/` | OpenAPI-схемы (CalcInput, CalcReport, RoomUnderfloorHeating, FlooringFinishMaterial и др.) |
+| `openapi.yaml` | Контракт REST API |
+| `components/schemas/` | Фрагменты OpenAPI (`CalcInput`, projects, share, …) |
+| `shared/` | Общие константы backend и frontend |
+| `backend/` | Node.js + Express: calc, matching, Mongo, seed, verify, PDF |
+| `frontend/` | React + Vite + TypeScript + React Query |
+| `docs/` | Доменная документация |
+| `scripts/` | Корневые verify-скрипты |
+| `Plan.md` / `README.md` / `.cursorrules` | Карта модулей, quick start, правила |
 
-### `backend/` — REST API (Node.js + Express)
+---
 
-| Папка / файл | Назначение |
-|--------------|------------|
-| `src/index.js` | Точка входа: Express, CORS, requestId, логирование |
-| `src/api/` | HTTP-слой: роуты `/api/v1/calc`, `/catalog`, `/presets`, проекты; AJV-валидация |
-| `src/api/publicSharesRoutes.js` | Публичный GET share + PDF (`/api/v1/public/shares/…`) |
-| `src/api/middleware/rateLimiters.js` | Rate limit calc / projects / public shares |
-| `Dockerfile`, `docker-compose.pdf.yml` | Образ с Chromium для PDF-рендера |
-| `src/data/warmFloorAssemblyPresets.js` | **Базы ТП** (`usage: underfloor_heating_base`) — плита, XPS, стяжка, выравнивание |
-| `src/data/flooringFinishMaterials.js` | **Финишные покрытия** — керамика, винил, ламинат; δ, λ, лимит Tповерх |
-| `src/logic/warmFloorCalc.js` | Расчёт q↑/q↓, Tповерх, warnings; композиция base + finish |
-| `src/logic/heatlossByRooms.js` | Теплопотери; **не** импортирует справочники ТП |
-| `src/logic/envelopePresets.js` | Ограждения (`usage: building_envelope`) |
-| `src/logic/` (прочее) | U стен, ориентация, ГВС; `hydraulics.js` — **deprecated**, только legacy-формулы |
-| `src/hydraulics/` | Pure Pipeline: граф, трубы, насосы, `runHydraulicsPipeline.js` |
-| `src/matching/warmFloor.js` | Текстовые подсказки matching + цифры из `underfloorHeating` отчёта |
-| `src/climate/` | Геокодинг (Nominatim) и климат (Meteostat bulk API) |
-| `src/matching/` | Подбор котлов, радиаторов, БКН, бойлеров, **коллекторов** (`manifold.js`), **унибоксов** (`unibox.js`) |
-| `src/catalog/` | Загрузка и валидация каталога `products` (MongoDB / JSON; в т.ч. manifolds / boilerManifolds) |
-| `src/dhw/` | Нормы ГВС, правила техники (`appliances`), формулы водоснабжения |
-| `src/reference/` | TTL-кэш справочников (каталог + нормы + appliances + recommendations) |
-| `src/recommendations/` | Тексты рекомендаций по кодам `REC_*` / `WARN_*` |
-| `src/report/buildReport.js` | Сборка отчёта; вызов `calculateUnderfloorHeating` после теплопотерь |
-| `src/models/` | Mongoose-модели MongoDB (Product, Project, Calculation и др.) |
-| `src/projects/` | CRUD, calc input, summary; **share** (`buildShareSnapshot`, `shareToken`); **PDF** (`buildEstimatePdfHtml`, `renderEstimatePdf`, …) |
-| `src/utils/` | Логер, MongoDB, математика, ограничения монтажа котлов |
-| `src/types/shared-types.d.ts` | JSDoc-типы API и отчёта |
-| `scripts/verifyCalcInputSchema.js` | Сверка CalcInput.yaml + AJV |
-| `scripts/verifyCalcInputValidation.js` | ROOM_TYPE_INVALID, coerceTypes: false |
-| `scripts/verifyUfhPresets.js` | Сверка underfloor_heating_presets + maxSurface smoke |
-| `scripts/verifyProjectCalcInput.js` | Fallback lastCalcInput для POST .../projects/:id/calc |
-| `scripts/verifyExtractCalculationSummary.js` | summary.objectType → enum house/apartment |
-| `scripts/verifyHydraulicsPipeline.js` | E2E гидравлика: фикстуры micro_branches, mixing_valve |
-| `scripts/verifyPickPipe.js` | Guard Dвн + fallback min/max Ø |
-| `scripts/verifyBuiltinBoilerPump.js` | Baxi circulationPump, below_manufacturer_qmin |
-| `scripts/verifyFitPumpCurve.js` | Аппроксимация H(Q) из паспортных точек |
-| `scripts/verifyManifoldMatching.js` | Подбор manifolds / boilerManifolds (house vs apartment) |
+## `backend/` — REST API
 
-Полный перечень `verify:*` (группы):
+Quick start: [`backend/README.md`](backend/README.md). Детальный навигатор: [`docs/project-structure.md`](docs/project-structure.md) § `backend/`.
+
+### Корень `backend/`
+
+| Путь | Назначение |
+|------|------------|
+| `src/index.js` | Express, CORS, Helmet, requestId, warmup bundle |
+| `README.md` | Quick start, маршруты, verify |
+| `package.json` | Зависимости, `npm run verify`, `npm run seed` |
+| `eslint.config.js` / `tsconfig.json` | Lint, checkJs/typecheck |
+| `.env.example` | Шаблон env (PORT, Mongo, CORS, auth, cache) |
+| `Dockerfile` / `docker-compose.pdf.yml` | Образ API + Chromium для PDF |
+| `data/` | JSON-эталоны справочников (seed → Mongo) |
+| `scripts/` | `seed.js`, `verify*.js`, `migrateProjectOwnerIds.js`, `fixtures/`, `utils/` |
+| `test_data.json.example` | Эталон каталога `products` (в git) |
+| `test_data.json` | Локальная копия каталога (gitignore) |
+
+### `backend/src/` — домены
+
+Barrels **`*/public.js`** (cross-domain imports): `api`, `catalog`, `hydraulics`, `matching`, `models`, `reference`, `report`.
+
+| Папка | Назначение |
+|-------|------------|
+| `api/` | HTTP `/api/v1/*`, AJV, `runCalculation`, rate limiters — см. таблицу ниже |
+| `auth/` | JWT pipeline, Clerk/JWKS, `requireAuth`, `requireRole`, tier — [`docs/auth.md`](docs/auth.md) |
+| `catalog/` | `loadCatalog` / `validateCatalog` (Mongo \| file \| auto) |
+| `climate/` | Nominatim geocode + Meteostat bulk (`geocode.js`, `snipClimate.js`) |
+| `data/` | Static UI-пресеты ТП: `warmFloorAssemblyPresets.js`, `flooringFinishMaterials.js` |
+| `dhw/` | `loadWaterNorms`, `loadAppliances`, `waterCalc`, валидация reference JSON |
+| `feedback/` | `validateFeedbackBody` для `POST /api/v1/feedback` |
+| `hydraulics/` | Pure Pipeline: граф → трубы → насосы → proposal |
+| `logic/` | Теплопотери, стены, ГВС, ТП (`warmFloorCalc`, `hotWater`, `ufh*`) |
+| `matching/` | Котёл, радиаторы, ВН, БКН, manifolds, uniboxes; `internal/` — sizing/helpers |
+| `models/` | Mongoose: runtime `public.js` → Product, Project, Calculation, User; discriminators — seed only |
+| `projects/` | CRUD, calc input, share snapshot, PDF, `projectAccess` |
+| `recommendations/` | Загрузка/валидация текстов `REC_*` / `WARN_*` |
+| `reference/` | TTL bundle + `toCalcRuntimeContext` (catalog, norms, appliances, recommendations, ufhPresets) |
+| `report/` | `buildReport`, `buildFinancialBom` → `commercial`, `automationHints` |
+| `types/` | `shared-types.d.ts`, `boiler-types.d.ts`, `auth.d.ts`, Express augment |
+| `ufh/` | Загрузка/валидация Mongo `underfloor_heating_presets` |
+| `utils/` | logger, Mongo URI, `createAppError`, boiler mounting, pump curve, apartment matching |
+
+### `backend/src/api/` — HTTP-слой
+
+| Файл | Назначение |
+|------|------------|
+| `routes.js` | Сборка роутеров, presets envelope/UFH, `POST /api/v1/calc` |
+| `runCalculation.js` | Composition root calc-пайплайна |
+| `validate.js` | AJV + cross-validation CalcInput |
+| `public.js` | Barrel: `createRoutes`, `validateAndNormalizeInput`, projects router |
+| `projectsRoutes.js` | CRUD проектов, calc, share, PDF |
+| `publicSharesRoutes.js` | Публичный GET share + PDF |
+| `meRoutes.js` | `GET /api/v1/me` |
+| `adminRoutes.js` | `PATCH /api/v1/admin/users/:id` |
+| `feedbackRoutes.js` | `POST /api/v1/feedback` |
+| `systemRoutes.js` | `POST /api/v1/system/invalidate-reference-cache` |
+| `middleware/rateLimiters.js` | Rate limit calc / projects / public shares |
+
+### Verify (`cd backend && npm run verify`)
+
+SSOT — `backend/package.json` → скрипт `verify`.
 
 | Группа | Скрипты (`npm run verify:…`) |
 |--------|------------------------------|
 | Calc / schema | `calc-schema`, `calc-input-validation`, `calc-runtime-context`, `reference-cache-invalidate` |
-| Projects / share / PDF | `project-calc-input`, `document-size-limits`, `extract-calculation-summary`, `projects-auth`, `project-share`, `project-pdf` |
-| Catalog / seed | `seed-catalog`, `pipe-catalog`, `pipe-catalog-pool-filter`, `financial-bom` |
+| Auth / identity | `user-model`, `auth-pipeline`, `auth-middleware`, `authorization-policy`, `authorization-middleware`, `me-endpoint`, `feedback`, `projects-auth`, `migrate-project-owner-ids` |
+| Projects / share / PDF | `project-calc-input`, `document-size-limits`, `extract-calculation-summary`, `project-share`, `project-pdf` |
+| Catalog / seed / language | `seed-catalog`, `catalog-language`, `pipe-catalog`, `pipe-catalog-pool-filter`, `financial-bom` |
 | Hydraulics / pumps | `hydraulics-pipeline`, `pick-pipe`, `circulation-flows`, `flow-delta-tk`, `builtin-boiler-pump`, `fit-pump-curve`, `pump-duty` |
 | Radiators | `radiator-sections`, `radiator-emitters`, `radiator-connection`, `radiator-emitter-kind`, `mixed-radiator-ufh`, `micro-load-radiator`, `radiator-wiring-graph` |
 | UFH | `ufh-presets`, `ufh-loop-hydraulics`, `ufh-active-area` |
 | Matching extras | `manifold-matching`, `unibox-matching`, `room-design-air-temp` |
-| Прочие скрипты (не в `verify`) | `scripts/verifyRoomExteriorLayoutHeatLoss.js` — room exterior layout |
 | Frontend-adjacent | `survey-draft-migration`, `water-heater-form` |
-
-SSOT списка — `backend/package.json` → скрипт `verify`.
-
-Сверка контракта: `openapi.yaml` ↔ `validate.js` ↔ `shared-types.d.ts`.
-
-### `frontend/` — клиент (React + Vite + TypeScript + React Query)
-
-Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md), [`docs/frontend-query-inventory.md`](docs/frontend-query-inventory.md), [`docs/start-state.md`](docs/start-state.md), [`docs/client-share-and-layers.md`](docs/client-share-and-layers.md). Черновик анкеты: [`docs/survey-draft.md`](docs/survey-draft.md).
-
-#### Точка входа и корень UI
-
-| Путь | Назначение |
-|------|------------|
-| `src/main.tsx` | `QueryProvider` → `App` (StrictMode) |
-| `src/App.tsx` | Share route `/s/{token}` → `SharePresentationPage`; иначе `SurveySessionProvider` + `AppRoot` |
-| `src/AppRoot.tsx` | Bootstrap (`start` / `survey` / `resolving` / `error`), Header, DevPanel, ProjectsDialog |
-| `src/AppSurveyContent.tsx` | Шаги анкеты, формы, отчёт; `useSurveySession`, `useCatalogEquipmentQuery` |
-
-#### Клиентский vs Dev слой
-
-| Слой | Где | Документ |
-|------|-----|----------|
-| Клиент (Header) | Публичная ссылка, PDF, проекты, выход | [`client-share-and-layers.md`](docs/client-share-and-layers.md) |
-| Developer | `DevPanel` — JSON, server save, hash, POST calc | `utils/isDevToolsEnabled.ts` |
-
-#### `src/constants/` — UI-конфиги (SSOT)
-
-| Путь | Назначение |
-|------|------------|
-| `surveySteps.ts` | `SURVEY_STEPS` (`object` → `warmFloor` → `rooms` → `hotWater` → `boiler` → `radiators` → `waterHeater` → `hydraulics` → `technicalResult` → `dataReference` → `financialResult`), `SURVEY_STEP_NAV_ITEMS`, `isSurveyStep`, `isCalcApiBarStep` |
-| `roomTypes.ts` | `ROOM_TYPE_UI_OPTIONS` — селект типа помещения |
-| `compatLegacyIds.ts` | `LEGACY_COMBINED_WALL_PRESET_IDS` — compat-слой пресетов стен |
-
-Compat-телеметрия: `utils/compatTelemetry.ts` (`[survey-compat]` в DEV). Политика freeze — `docs/survey-draft.md`.
-
-#### `src/query/` — React Query (серверные данные)
-
-| Путь | Назначение |
-|------|------------|
-| `QueryProvider.tsx` | `QueryClientProvider` + devtools (dev) |
-| `queryClient.ts`, `queryKeys.ts` | Дефолты кэша и реестр ключей |
-| `useDebouncedValue.ts` | Debounce 700 ms для автопересчёта calc |
-| `useReferenceData.ts` | Композиция справочных query для `App.tsx` |
-| `useSurveyCalc.ts` | POST `/api/v1/calc`: auto `useQuery` + ручная `useMutation` |
-| `queries/useEnvelopePresetsQuery.ts` | `GET /api/v1/presets/envelope` |
-| `queries/useUnderfloorHeatingPresetsQuery.ts` | `GET /api/v1/presets/underfloor-heating` (bases + finishes) |
-| `queries/useUfhModePresetsQuery.ts` | `GET /api/v1/presets/underfloor-heating/modes` |
-| `queries/useCatalogEquipmentQuery.ts` | `GET /api/v1/catalog` (+ `reloadCatalog`) |
-| `queries/useProjectsListQuery.ts` | Список проектов (диалог) |
-| `queries/useProjectCalculationsQuery.ts` | Список расчётов выбранного проекта |
-| `mutations/useProjectMutations.ts` | save/load проекта и расчётов |
-
-#### `src/surveySession/` — клиентское состояние анкеты (не React Query)
-
-| Путь | Назначение |
-|------|------------|
-| `SurveySessionProvider.tsx` | Контекст: `dispatch`, `report`, `uiPhase`, `useSurveyCalc` |
-| `surveySessionContext.ts`, `useSurveySession.ts` | Типы контекста и хук доступа |
-| `runSurveyMutationPipeline.ts` | `reduce` → `migrateDerivedState` → `decideCalcAction` |
-| `buildCalcInputSnapshot.ts` | `buildCalcPayloadFromDraft`, `buildCalcInputKeyFromDraft`, `canAutoCalcFromDraft` |
-| `wiringLayoutV3.ts`, `migrateDerivedState.ts` | Layout разводки, синхронизация ТП |
-| `surveyDraftBridge.ts` | `SurveyDraft` → `SurveyDraftSnapshot` при `DRAFT_LOADED` |
-| `resolveAppBootstrap.ts` | Hash / localStorage → `start` \| `survey` |
-| `createEmptySurveySessionState.ts`, `createDefaultSurveyDraft.ts` | SSOT пустого и дефолтного черновика |
-
-#### `src/hooks/` — UI-оркестрация (без прямого HTTP)
-
-| Путь | Назначение |
-|------|------------|
-| `useCalcReport.ts` | Парсинг JSON-отчёта для блоков UI |
-| `usePresetLists.ts` | Фильтрация пресетов ограждений по `kind` |
-| `useRoomsOrchestration.ts` | Синхронизация комнат с `objectMeta` |
-| `useSurveyEstimates.ts` | Локальные оценки до ответа API |
-| `useSurveyBootstrap.ts` | Режим UI: resolving / start / survey / error |
-| `useSurveyDraftPersistence.ts` | Debounced save черновика в localStorage |
-| `useSurveyProject.ts` | Проекты, share publish/revoke, PDF, Dev JSON/hash (поверх RQ) |
-| `useSurveyStepNavigation.ts` | Переход на шаг из сайдбара |
-
-#### `src/services/` — HTTP-клиенты (queryFn / mutationFn)
-
-| Путь | Назначение |
-|------|------------|
-| `calc.ts` | `POST /api/v1/calc` |
-| `envelopePresets.ts` | `GET /api/v1/presets/envelope` (+ fallback) |
-| `underfloorHeatingPresets.ts` | `GET /api/v1/presets/underfloor-heating` |
-| `ufhModePresets.ts` | `GET /api/v1/presets/underfloor-heating/modes` |
-| `catalog.ts` | `GET /api/v1/catalog` |
-| `projectsApi.ts` | CRUD `/api/v1/projects/*`, share, PDF download |
-| `publicShareApi.ts` | GET public share + PDF для `/s/{token}` |
-| `surveyDraftStorage.ts` | localStorage черновика (`heatcalc:survey-draft:v1`) |
-| `projectsAuthHeaders.ts` | JWT-заголовки для projects API |
-| `buildCalcRequestPayload.ts` | Сборка тела CalcInput (вызывается из `buildCalcInputSnapshot`) |
-
-#### Компоненты, данные, утилиты
-
-| Путь | Назначение |
-|------|------------|
-| `src/components/StartScreen/` | Стартовый экран (cold open) |
-| `src/components/SharePresentationPage/` | Read-only презентация `/s/{shareToken}` |
-| `src/components/DevPanel/` | Панель разработчика |
-| `src/components/Header/` | Клиент: имя, ссылка, PDF, проекты, выход |
-| `src/components/ShareLinkToast/` | Toast после копирования публичной ссылки |
-| `src/components/AppBootstrapSkeleton/`, `BootstrapErrorScreen/`, `Spinner/` | Состояния bootstrap |
-| `src/components/WarmFloorSection/` | Режим emitters, карточки ТП |
-| `src/components/RoomsForm/RoomAccordionItem.tsx` | Основа ТП + финишное покрытие в комнате |
-| `src/components/RecommendationsBlock/` | Отчёт: теплопотери, котёл, радиаторы, ТП, гидравлика |
-| `src/components/HydraulicsProposal/` | Блок `matching.hydraulics` |
-| `src/components/CatalogEquipmentReference/` | Справочник номенклатуры из каталога |
-| `src/components/ProjectsDialog/` | Диалог проектов на сервере |
-| `src/data/fallback*.ts` | Офлайн-fallback справочников |
-| `src/utils/migrateRoomUnderfloorHeating.ts` | Legacy `presetId` → base + finish |
-| `src/styles/` | Общие CSS-переменные и элементы форм |
-
-В заголовке каждого исходного файла — комментарий «Назначение / Описание».
-
-### Гидравлика и тёплый пол
-
-| Модуль | Где | Что делает | Статус UI |
-|--------|-----|------------|-----------|
-| **Гидравлика** | `hydraulics/public.js` | Pure Pipeline: DTO → граф → Δp → подбор труб/насосов из каталога | Шаг в анкете + блок в RecommendationsBlock |
-
-**Гидравлика — подбор труб и микроветки (выполнено):** см. [`docs/hydraulics-pipeline.md`](docs/hydraulics-pipeline.md).
-
-| # | Задача | Статус |
-|---|--------|--------|
-| H.1 | Трёхрежимный fallback `pickPipe.js` (optimal / max Ø / min Ø) | ✅ |
-| H.2 | `velocityLimitsMps.branchMin`, `radiatorBranchGrouping` в `appliances.hydraulics` (v3→v4) | ✅ |
-| H.3 | Группировка микроветок → узел `radiator_manifold` (`groupRadiatorGraphBranches.js`) | ✅ |
-| H.4 | Рекомендации `WARN_PIPE_VELOCITY_*`, `REC_RADIATOR_MICRO_BRANCH_MANIFOLD` | ✅ |
-| H.5 | `npm run verify:pick-pipe`, фикстура `apartment_mixed_ufh_micro_branches` в `verify:hydraulics-pipeline` | ✅ |
-| H.6 | `isMainLine` в графе (`e_boiler_main`, `e_boiler_separator`, `e_main_to_mixing`) | ✅ |
-| H.7 | Guard `mainTransitMinInternalDiameterMm` / `branchMinInternalDiameterMm` в `pickPipe.js` | ✅ |
-| H.8 | Рекомендации `WARN_PIPE_MAIN_TRANSIT_*`, `WARN_PIPE_CATALOG_*`, `REC_PIPE_MAIN_TRANSIT_GUARD_APPLIED` | ✅ |
-| H.9 | `verify:pipe-catalog-pool-filter`, фикстура `apartment_mixed_ufh_mixing_valve` | ✅ |
-| H.10 | `SurveySession` pipeline (`dispatch` → migrate → calc), `wiringLayoutV3`, `verify:survey-session` | ✅ |
-| H.14 | Интеграция `radiatorWiringSystemType` в граф: фабрика `buildRadiatorSubgraph.js`, dead-end / pass / manifold | ✅ |
-| H.11 | `circulationPump` Baxi ECO Home 24 F + Luna Duo-Tec E 33 (6 режимов, полезный H) | ✅ |
-| H.12 | Ф2: `below_manufacturer_qmin`, `curve_unavailable`, без catalog fallback для wall boiler | ✅ |
-| H.13 | Ф5 «Тамбур»: микронагрузка радиаторов (`resolveMicroLoadRadiatorStrategy`, тип `тамбур`) | ✅ |
-| H.15 | Подбор коллекторов из каталога: `matching/manifold.js` → `matching.manifolds`; house/apartment; каскад ТП при >12 петель (`units[]`, `splitOutletsForCascade`); verify `verify:manifold-matching`; док. [`docs/manifold-matching.md`](docs/manifold-matching.md) | ✅ |
-| H.16 | Подбор унибоксов: `matching/unibox.js` → `matching.uniboxes`; паспортные min/max; JSON `uniboxes` / Mongo `kind=unibox`; verify `verify:unibox-matching`; док. [`docs/unibox-matching.md`](docs/unibox-matching.md) | ✅ |
-| H.16b | Унибокс шаг 2: строгие неравенства; `validateUniboxLoopDemand`; smart fallback **T воздуха** (`санузел` → 24 °C, иначе `temps.insideC`); малые зоны `санузел`/`коридор`/`прихожая`/`тамбур`; гейт каскада H.15; verify + док. | ✅ |
-| H.16c | Фаза B: общий `resolveDesignRoomAirTempC` (heatloss + ТП + радиаторы + unibox); пол санузла `max(…, 24)`; поле `temps.bathroomAirTempC`; UI анкеты; verify `verify:room-design-air-temp`; док. [`docs/room-design-air-temp.md`](docs/room-design-air-temp.md) | ✅ |
-| **ТП — расчёт** | `logic/warmFloorCalc.js` | Rλ,B = база над контуром + финиш; q↑/q↓, Tповерх, `maxAllowableHeatFluxUpWm2`; warning при превышении лимита покрытия | Результат в `RecommendationsBlock` |
-| **ТП — matching** | `matching/warmFloor.js` | Подсказки в `radiatorSelectionNotes` + цифры из отчёта ТП | Шаг `warmFloor` (до `rooms`) + селекты в комнатах |
-| **ТП — heatloss** | `heatlossByRooms.js` + `floorPresetId` | Теплопотери через пол; при `bottomBoundary: heated` пол не считается | Поле «Пол (ограждение)» в комнате |
+| Вне `npm run verify` | `node scripts/verifyRoomExteriorLayoutHeatLoss.js` |
 
 ---
 
-## Тёплый пол: пресеты покрытий и разделение расчётов
+## `frontend/` — клиент
 
-**Статус:** фазы 0–8 — **выполнено**
-**Цель:** расчёт Вт/м² ТП по **композиции** «базовый конструктив + финишное покрытие» (керамика, клеевой/замковый винил, ламинат), лимит Tповерх из материала (27 °C или до 35 °C для керамики), без смешения с теплопотерями через `floorPresetId`.
+Документация: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md), [`docs/survey-draft.md`](docs/survey-draft.md), [`docs/start-state.md`](docs/start-state.md).
 
-### Проблема
-
-Две разные физические задачи нельзя решать одним `floorPresetId` или одним монолитным JSON-пирогом на каждую комбинацию покрытия:
-
-| Задача | Потребитель | Справочник |
-|--------|-------------|------------|
-| Теплопотери пола к холодной зоне снизу | `heatlossByRooms.js` | `envelopePresets.js` (`building_envelope`) |
-| Проектирование ТП: q↑/q↓, Tповерх, гидравлика | `warmFloorCalc.js` | `warmFloorAssemblyPresets.js` (базы) + `flooringFinishMaterials.js` (финиш) |
-
-Монолитные пресеты `underfloor_heating_glued_*` / `underfloor_heating_floating_*` **заменены** композицией; legacy `presetId` мигрируется на сервере и во frontend.
-
-### Согласованная архитектура
-
-| Поле | Назначение |
+| Путь | Назначение |
 |------|------------|
-| `room.floorPresetId` → `envelopeElements[kind=floor]` | Ограждение для heatloss |
-| `room.underfloorHeating.enabled` | ТП включён в комнате |
-| `room.underfloorHeating.basePresetId` | База: плита + XPS + стяжка + выравнивание |
-| `room.underfloorHeating.finishMaterialId` | Финиш: ceramic / pvc_glue / pvc_click / laminate_click |
-| `heatingSystem.waterUnderfloorHeating` | Мастер-флаг «в проекте есть водяной ТП» |
-| `room.roomExteriorLayout` | Положение помещения: `corner` / `facade` / `internal` (только frontend-черновик; в API — `envelopeElements`) |
-
-Подробнее: [`docs/room-exterior-layout.md`](docs/room-exterior-layout.md).
-
-**Формула Rλ,B (упрощённо):**
-
-```
-Rλ,B = R(слои базы над isHeatingLayer) + δ_finish / λ_finish
-T_max поверхности = finish.maxSurfaceTemperatureCelsius
-q↑ при заданном контуре = (Tср_контура − Tкомнаты) / R↑_полный
-warning, если Tповерх > T_max
-```
-
-```mermaid
-flowchart TB
-  subgraph room ["Комната"]
-    FP[floorPresetId]
-    UFH["underfloorHeating<br/>basePresetId + finishMaterialId"]
-  end
-  FP --> EP[envelopePresets.js]
-  EP --> HL[heatlossByRooms.js]
-  UFH --> BASE[warmFloorAssemblyPresets.js]
-  UFH --> FIN[flooringFinishMaterials.js]
-  BASE --> COMPOSE[computeComposedCoveringResistanceM2KW]
-  FIN --> COMPOSE
-  COMPOSE --> WC[warmFloorCalc.js]
-```
-
-### Справочники (текущее содержимое)
-
-**База** (`ufh_base_interstory_screed_65`): плита 150 мм, XPS 30 мм, стяжка ТП 65 мм (`isHeatingLayer`), самовыравнивание 5 мм.
-
-**Финиши** (`flooringFinishMaterials.js`):
-
-| id | Покрытие | Rλ,B финиша (ориентир) | T max |
-|----|----------|------------------------|-------|
-| `ceramic_tile` | Керамика / керамогранит (+ клей) | ≈0,011 | 35 °C |
-| `pvc_glue` | Клейовий кварцвініл / LVT | ≈0,015 | 27 °C |
-| `pvc_click` | Замковий SPC/LVT + підкладка | ≈0,046 | 27 °C |
-| `laminate_click` | Ламінат + підкладка ТП | ≈0,100 | 27 °C |
-
-### API пресетов (не в calc-bundle)
-
-| Метод | Путь | Ответ |
-|-------|------|-------|
-| GET | `/api/v1/presets/envelope` | `ENVELOPE_PRESETS` — только ограждения |
-| GET | `/api/v1/presets/underfloor-heating` | `{ ok, bases, finishes }` — bundle для UI |
-| GET | `/api/v1/presets/underfloor-heating/bases` | `{ ok, bases }` |
-| GET | `/api/v1/presets/flooring-finishes` | `{ ok, finishes }` |
+| `src/main.tsx` | `QueryProvider` → `App` |
+| `src/App.tsx` | `BrowserRouter`, auth/providers и `AppRouter` |
+| `src/routing/` | `AppRouter`, канонические `paths`, `SurveyAppShell`; маршруты SPA и подключение сессии |
+| `src/AppRoot.tsx` | Bootstrap `resolving / error / start / survey`, Header и проектные действия |
+| `src/AppSurveyContent.tsx` | Шаги анкеты и результаты, все изменения через `dispatch` |
+| `src/surveySession/` | `dispatch` → pipeline → calc |
+| `src/query/` | React Query: справочники, calc, проекты |
+| `src/services/` | HTTP-клиенты API |
+| `src/hooks/` | Bootstrap, persistence, проекты, оркестрация помещений и отчёта |
+| `src/pages/` | Login, SignUp, Projects, Docs, FAQ и legal-страницы |
+| `src/auth/` | Clerk/AuthProvider, guards и синхронизация `/me` |
+| `src/shell/` | Общая оболочка и действия Header/Footer |
+| `src/i18n/` | Украинские тексты UI и локализация Clerk |
+| `src/components/` | Формы, отчёты, StartScreen, SharePresentationPage и shell-компоненты |
+| `src/constants/surveySteps.ts` | SSOT всех шагов, включая `dataReference` и `financialResult` |
+| `scripts/` / `knip.json` | Verify-скрипты и проверка неиспользуемого кода |
 
 ---
 
-### Фаза 0 — Справочники ТП (backend) ✅
+## Поток calc
 
-| # | Задача | Статус |
-|---|--------|--------|
-| 0.1 | `warmFloorAssemblyPresets.js` — базы (`underfloor_heating_base`) | ✅ |
-| 0.2 | `flooringFinishMaterials.js` — 4 финиша | ✅ |
-| 0.3 | `computeComposedCoveringResistanceM2KW`, `resolveUnderfloorHeatingComposition` | ✅ |
-| 0.4 | Типы: `UnderfloorHeatingBasePreset`, `FlooringFinishMaterial` | ✅ |
-| 0.5 | GET bundle + `/bases` + `/flooring-finishes` | ✅ |
-| 0.6 | OpenAPI: `UnderfloorHeatingBasePreset.yaml`, `FlooringFinishMaterial.yaml`, `RoomUnderfloorHeating.yaml` | ✅ |
+**HTTP:** `runCalculation(body)` в `api/runCalculation.js` → `getReferenceBundle()` → `toCalcRuntimeContext()` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })`.
 
----
+**Bundle:** `catalog`, `waterNorms`, `appliances`, `recommendations`, `ufhPresets`. Invalidate: `POST /api/v1/system/invalidate-reference-cache`.
 
-## Помещения: `roomExteriorLayout` (дом и квартира) ✅
+**Пресеты UI (вне bundle):** `GET /api/v1/presets/envelope`; `GET /api/v1/presets/underfloor-heating` (+ `/bases`, `/flooring-finishes`, `/modes`).
 
-| # | Задача | Статус |
-|---|--------|--------|
-| R.1 | Тип `RoomExteriorLayout`, поле в `RoomFormValue` | ✅ |
-| R.2 | `roomExteriorLayout.ts` — infer, UI configs, payload | ✅ |
-| R.3 | Селектор в `RoomAccordionItem` + динамические поля стен | ✅ |
-| R.4 | `buildCalcRequestPayload` — internal → `construction` коридорной стены | ✅ |
-| R.5 | Миграция черновика (`externalWall2 > 0` → corner) | ✅ |
-| R.6 | Документация: `docs/room-exterior-layout.md`, OpenAPI example | ✅ |
-| R.7 | Backend: ΔT коридора, U перегородки, corner ×1.08, validate wall count | ✅ |
-| R.8 | `verifyRoomExteriorLayoutHeatLoss.js` | ✅ |
-
-**DoD:** … `internal` — 1 коридорная стена, ΔT к ~15 °C (U из objectMeta). …
-
-### Фаза 1 — Модель комнаты и контракт API (ТП) ✅
-
-| # | Задача | Статус |
-|---|--------|--------|
-| 1.1 | `RoomUnderfloorHeatingInput`: `basePresetId`, `finishMaterialId` | ✅ |
-| 1.2 | `RoomFormValue` / миграция legacy `presetId` | ✅ |
-| 1.3 | `RoomUnderfloorHeating.yaml` + `CalcInput.yaml` | ✅ |
-| 1.4 | `buildCalcRequestPayload` → `building.rooms` (не в `envelopeElements`) | ✅ |
-| 1.5 | `migrateRoomUnderfloorHeating`, `surveyCalcInputKey` | ✅ |
-| 1.6 | `assertEnvelopeFloorPresetsNotUnderfloorHeating` + блок legacy id в envelope | ✅ |
-
-### Фаза 2 — Расчётный модуль ТП (backend) ✅
-
-| # | Задача | Файл | Статус |
-|---|--------|------|--------|
-| 2.1 | R↑, R↓, q↑/q↓ Вт/м², Tповерх, лимит из финиша | `warmFloorCalc.js` | ✅ |
-| 2.2 | Паразитный поток вниз при `bottomBoundary: heated` | `warmFloorCalc.js` | ✅ |
-| 2.3 | Контур ТП 45/35 при котле >50 °C (смесительный узел) | `warmFloorCalc.js` | ✅ |
-| 2.4 | `report.calculations.underfloorHeating` | `buildReport.js` | ✅ |
-| 2.5 | `maxAllowableHeatFluxUpWm2`, warnings в `report.warnings` | `warmFloorCalc.js` | ✅ |
-| 2.6 | Подсказки matching с цифрами и именем финиша | `warmFloor.js` | ✅ |
-
-### Фаза 3 — Frontend UI ✅
-
-| # | Задача | Статус |
-|---|--------|--------|
-| 3.1 | `fetchUnderfloorHeatingPresets()`, `useUnderfloorHeatingPresetsQuery` | ✅ |
-| 3.2 | Два селекта: основа ТП + финиш в `RoomAccordionItem` | ✅ |
-| 3.3 | Блок «Тёплый пол» в `RecommendationsBlock` | ✅ |
-| 3.4 | Fallback: `fallbackUnderfloorHeatingPresets.ts`, `fallbackFlooringFinishes.ts` | ✅ |
-
-### Фаза 4 — Композиция base + finish (рефакторинг монолита) ✅
-
-| # | Задача | Статус |
-|---|--------|--------|
-| 4.1 | Убраны монолитные пироги; одна база + N финишей | ✅ |
-| 4.2 | Ламинат и керамика в справочнике финишей | ✅ |
-| 4.3 | Лимит T: 27 °C (винил/ламинат), 35 °C (керамика) | ✅ |
-| 4.4 | Миграция `underfloor_heating_glued_*` → base + `pvc_glue` | ✅ |
-| 4.5 | Миграция `underfloor_heating_floating_*` → base + `pvc_click` | ✅ |
-
-### Критерии готовности (DoD)
-
-**Разделение heatloss и ТП**
-
-- [x] Справочник ТП (базы + финиши) отдельно от `ENVELOPE_PRESETS`
-- [x] `GET /presets/envelope` не отдаёт пресеты ТП
-- [x] `heatlossByRooms` не импортирует `warmFloorAssemblyPresets` / `flooringFinishMaterials`
-- [x] `floorPresetId` (envelope) и `underfloorHeating` (комната) не перезаписывают друг друга
-- [x] `presetId` сборки ТП в `envelopeElements[kind=floor]` → 400
-
-**Композиция base + finish**
-
-- [x] Контракт: `underfloorHeating: { enabled, basePresetId, finishMaterialId }`
-- [x] Один базовый конструктив + 4 финиша без дублирования полного пирога
-- [x] Rλ,B = база над контуром + δ/λ финиша
-- [x] `maxSurfaceTemperatureCelsius` берётся из финиша, не из базы
-- [x] API: bundle, `/bases`, `/flooring-finishes`
-- [x] UI: два селекта в комнате; отчёт показывает основу и покрытие
-
-**Расчёт и предупреждения**
-
-- [x] `calculateUnderfloorHeating` в пайплайне после `calculateHeatLossForBuilding`
-- [x] q↑ Вт/м² и Tповерх в `report.calculations.underfloorHeating`
-- [x] `Tповерх = Tкомн + q↑ × Rфиниш` (Rконв только в R↑ для q↑)
-- [x] `pipeSpacingMm` в анкете (100 / 150 / 200); `R_embed` из `R_PIPE_EMBEDMENT_BY_STEP` + `rScreedHalf`
-- [x] `WARN_FLOOR_OVERHEATING_MATERIAL` / `WARN_FLOOR_OVERHEATING_COMFORT` через `recommendationResolver`
-- [x] `REC_UFH_ACTION_INCREASE_SPACING` / `REC_UFH_ACTION_CHANGE_FINISH` при перегреве
-- [x] Паразитный q↓ при `bottomBoundary: heated`
-- [x] `maxAllowableHeatFluxUpWm2` в отчёте по комнате
-
-**Вне scope (не планируется)**
-
-- **Тепловой насос** — отдельный класс оборудования; в каталоге и matching **нет** и **не планируется** (MVP: газовые/электрокотлы Baxi-класса).
-
-**Backlog (узкий scope)**
-
-- [ ] **Валидатор Tпод радиаторов** (обратный расчёт **только** как проверка достаточности подобранных секций): при фиксированных модели/числе секций и нагрузке комнаты — минимальная требуемая `supplyC`, при которой прибор закрывает `radiatorDesignWatts`; сравнение с выбранным графиком анкеты и паспортом котла (предупреждение, не пересчёт подбора). **Не** универсальный «подбор T под мощность» и **не** для ТП/насосов. Док.: [`docs/heating-schemes-thermal-regime.md`](docs/heating-schemes-thermal-regime.md) § Валидатор Tпод.
-- [x] Шаг гидравлики в UI (форма `input.hydraulics`)
-- [x] Сценарий «только ТП» с котлом на 40/30 без радиаторов (`ufhPresetId=ufh_only`, v3)
-- [x] Пресет «Тамбур» (входная зона): при остаточной нагрузке &lt; 150 Вт — минимальный прибор для `прихожая`/`коридор`/`тамбур` и фасада; для внутренних — skip + микроколлектор. Модуль: `resolveMicroLoadRadiatorStrategy.js`; verify: `npm run verify:micro-load-radiator`
+Подробнее: [`docs/calc-runtime-context.md`](docs/calc-runtime-context.md), [`docs/hydraulics-pipeline.md`](docs/hydraulics-pipeline.md).
 
 ---
 
-## Roadmap: контур ТП, смеситель, гидравлика (фазы 0–8)
+## Доменная документация
 
-**Статус:** фазы 0–8 и план v3 — **выполнено** (код + UI + verify).
-
-Детальный чеклист ручного теста: [`docs/ufh-roadmap-test-checklist.md`](docs/ufh-roadmap-test-checklist.md).
-
-### Продуктовые правила (массовый рынок)
-
-| Контур | Пресет | Когда |
-|--------|--------|-------|
-| **Радиаторы, традиционный котёл** | **75/65** °C (`traditional_dt50_75_65`) | Дом, квартира 1К — базовый |
-| **Радиаторы, конденсационный** | **55/45** °C (`condensing_dt30_55_45`) | Квартира 2К (рекомендация); primary — по выбранному графику анкеты; **lineEfficient** — 55/45; warning при condensing + 75/65 |
-| **Тёплый пол** | **45/35** или **40/30** °C | Отдельно от котла; по **финишу** комнаты |
-| **95/85** | `traditional_high_dt70_95_85` | **Устаревший** — только обратная совместимость API |
-| **Тепловой насос** | — | **Вне scope** — оборудования нет в каталоге |
-
-Оба пресета ТП имеют **Δt = 10 K** → формула расхода теплоносителя **одинакова**; различается **q↑** (ниже при 40/30) и проверка покрытия теплопотерь комнаты.
-
-### Пресеты контура ТП (`UfhCircuitPresetId`)
-
-| id | График | Финиш (`finishMaterialId`) |
-|----|--------|----------------------------|
-| `ufh_dt10_45_35` | 45/35 °C | `ceramic_tile` (плитка, керамогранит) |
-| `ufh_dt10_40_30` | 40/30 °C | `pvc_glue`, `pvc_click`, `laminate_click` |
-
-Выбор **автоматический** по финишу; ручной override — backlog.
-
-### Смесительный узел (сквозное правило)
-
-```
-isMixingNodeRequired = heatingSystem.supplyC > ufhCircuit.supplyC
-```
-
-| Сценарий | Котёл | ТП | Смеситель |
-|----------|-------|-----|-----------|
-| Традиционный + радиаторы + ТП (плитка) | 75 | 45 | **да** |
-| Конденсационный + радиаторы + ТП (ламинат) | 55 | 40 | **да** |
-| Только ТП, котёл на 40/30 | 40 | 40 | **нет** |
-
-Заменяет legacy-эвристику `supply > 50` в `warmFloorCalc.js` (фаза 3).
-
-### Схема распределения (`UfhDistributionPreset`)
-
-При `isMixingNodeRequired === true`:
-
-| Значение | Назначение |
-|----------|------------|
-| `collector_mixing_valve` | НСУ на коллекторе (квартира, малый дом) |
-| `hydraulic_separator` | Гидрострелка + зоны (крупный дом) |
-| `auto` | Сервер: пороги в `appliances.underfloor_heating` |
-
-### Формулы узла смешения (`UfhMixingNodeSpec`)
-
-- **Расход:** `Q_m³/ч = P_kW × 0.86 / (Δt × ρ)`, Δt = 10, ρ ≈ 1
-- **Напор H:** ориентир 3–4 м (малый объект) или 5–6 м (крупный)
-- **Kvs клапана:** `Kvs = Q / Δp`, Δp ≈ 0,15–0,2 бар
-
-Номенклатура насосов/клапанов из `products` **не подбирается** — только технические требования в отчёте.
-
-### Правило модульности (обязательно)
-
-**Один файл — одна зона ответственности.** Не раздувать `warmFloorCalc.js` (~190 строк) и `RoomAccordionItem.tsx`.
-
-| Модуль | Назначение |
-|--------|------------|
-| `shared/ufhCircuitPresets.js` | 45/35, 40/30, маппинг finish → preset |
-| `shared/ufhDistributionPresets.js` | enum НСУ / гидрострелка |
-| `logic/ufhCircuitResolve.js` | finish → пресет контура |
-| `logic/ufhMixingNode.js` | `isMixingNodeRequired` |
-| `logic/ufhMixingNodeHydraulics.js` | Q, H, Kvs |
-| `logic/ufhRoomHeatFlux.js` | q↑, Tповерх (вырезать из warmFloorCalc) |
-| `logic/ufhRoomCoverageCheck.js` | ТП vs теплопотери комнаты |
-| `logic/ufhDistributionResolve.js` | auto → НСУ / гидрострелка |
-| `logic/ufhHydraulicsCircuit.js` | расход ТП, Δt = 10 |
-| `logic/warmFloorCalc.js` | **только оркестратор** |
-| `components/UnderfloorHeatingReport/UfhMixingNodeSpecCard.tsx` | UI спецификации узла |
-
-### Фазы реализации
-
-| Фаза | Содержание | Статус |
-|------|------------|--------|
-| **0** | `Plan.md`, OpenAPI-черновик, чеклист тестов | ✅ выполнено |
-| **1** | UX окон: подсказки «Добавить окно» vs `count` | ✅ выполнено |
-| **2** | 75/65 / 55/45; 95/85 deprecated в UI | ✅ выполнено |
-| **3** | Пресеты ТП, смеситель, покрытие теплопотерь | ✅ выполнено |
-| **4** | UI `underfloorDistributionPreset` | ✅ выполнено |
-| **5** | `UfhMixingNodeSpec` в отчёте | ✅ выполнено |
-| **6** | Раздельная гидравлика ТП (Δt=10) | ✅ выполнено |
-| **7** | `appliances.underfloor_heating`, REC/WARN | ✅ выполнено |
-| **8** | `verify:calc-schema`, curl/UI тесты | ✅ выполнено |
-
-### План v3 (схемы котла, unlock графика, пресеты ТП Mongo) — ✅ выполнено
-
-| Блок | Содержание | Документация |
-|------|------------|--------------|
-| 5 схем ГВС/котла | incl. `singleCircuitBoilerWithBufferElectricStorage` | [`docs/heating-schemes-thermal-regime.md`](docs/heating-schemes-thermal-regime.md) |
-| UI «Водонагреватель» | `WaterHeaterForm`, `waterHeaterForm` в `SurveyDraft`, `migrateSurveyDraft`, без ручного выбора модели | [`docs/water-heater-form.md`](docs/water-heater-form.md) |
-| Unlock графика | рекомендация 75/65 vs 55/45, расчёт по выбору пользователя | там же |
-| Mongo `underfloor_heating_presets` | 3 режима, `GET …/modes`, seed, bundle | [`docs/ufh-presets-mongo.md`](docs/ufh-presets-mongo.md) |
-| `ufh_only` | skip радиаторов; котёл от `totalHeatFluxUpWatts` | там же |
-| `maxSurface` из пресета | min(preset, финиш) в `ufhRoomHeatFlux.js` | там же |
-| Verify | `npm run verify:ufh-presets` | `backend/scripts/verifyUfhPresets.js` |
-| Чеклист | ручные сценарии v3 | [`docs/heating-schemes-test-checklist.md`](docs/heating-schemes-test-checklist.md) |
-
-### План v4 — мебель на полу ТП (S_meb → S_акт)
-
-| Блок | Содержание | Документация |
-|------|------------|--------------|
-| Анкета | `furnitureOccupiedAreaM2` в `room.underfloorHeating` | [`docs/ufh-furniture-active-area.md`](docs/ufh-furniture-active-area.md) |
-| Расчёт | S_акт, q_треб, авто-шаг (вариант B), длина петли (`loopLengthM`) | там же |
-| Рекомендации | `WARN_UFH_ACTIVE_AREA_INSUFFICIENT`, `REC_UFH_PIPE_SPACING_AUTO`, … | `recommendations.json` |
-| Verify | `npm run verify:ufh-active-area` | `backend/scripts/verifyUfhActiveArea.js` |
-
----
-
-## Поток расчёта
-
-### POST /api/v1/calc
-
-**Порядок HTTP calc:** `runCalculation(body)` в `api/runCalculation.js` (внутри: `getReferenceBundle()` → `toCalcRuntimeContext(bundle)` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })`). Вызывается из `routes.js` (`POST /api/v1/calc`) и `projectsRoutes.js` (`POST /api/v1/projects/:id/calc`).
-
-**В bundle calc:** `catalog`, `waterNorms`, `appliances`, `recommendations`, `ufhPresets`. Контекст расчёта — **`CalcRuntimeContext`** (`docs/calc-runtime-context.md`); bundle при загрузке — `deepFreeze`. **On-demand invalidate:** `POST /api/v1/system/invalidate-reference-cache` (после seed / правки Mongo; `SYSTEM_INTERNAL_TOKEN`, generation guard в `configCache.js`).
-
-**Вне calc-потока (загрузка UI / справочники):**
-
-- `GET /api/v1/presets/envelope` → `envelopePresets.js`
-- `GET /api/v1/presets/underfloor-heating` → `warmFloorAssemblyPresets.js` + `flooringFinishMaterials.js`
-- `GET /api/v1/presets/underfloor-heating/bases`
-- `GET /api/v1/presets/underfloor-heating/modes` → Mongo/file `underfloor_heating_presets` (режимы v3)
-
-```mermaid
-flowchart TD
-  Client[Client UI] --> PresetsEnv["GET /presets/envelope"]
-  Client --> PresetsUfh["GET /presets/underfloor-heating"]
-  PresetsUfh --> Bases[warmFloorAssemblyPresets.js]
-  PresetsUfh --> Finishes[flooringFinishMaterials.js]
-
-  Client --> Calc["POST /api/v1/calc"]
-
-  Calc --> RunCalc["runCalculation()"]
-  RunCalc --> Bundle["getReferenceBundle()"]
-  RunCalc --> Ctx["toCalcRuntimeContext(bundle)"]
-  Ctx --> Validate["validateAndNormalizeInput(body, ctx)"]
-
-  subgraph refs ["Справочники bundle (deepFreeze)"]
-    Bundle --> Catalog[products]
-    Bundle --> Norms[water_norms]
-    Bundle --> AppRules[appliances]
-    Bundle --> Recs[recommendations]
-    Bundle --> UfhPresets[ufhPresets]
-  end
-
-  Validate -->|input| Build["buildReport({ input, ctx })"]
-  Ctx --> Build
-
-  subgraph pipeline ["buildReport — порядок этапов"]
-    Build --> Climate{"location и нет outsideC?"}
-    Climate -->|да| Geocode["getDesignOutsideTempC"]
-    Climate -->|нет| Temps[temps]
-    Geocode --> Temps
-
-    Temps --> HeatLoss["calculateHeatLossForBuilding<br/>envelopePresets"]
-    HeatLoss --> Ufh["calculateUnderfloorHeating<br/>base + finish compose"]
-    Ufh --> Dhw["calculateHotWaterDemand"]
-    Norms --> Dhw
-
-    Dhw --> Hints["buildMatchingAutomationHints"]
-    AppRules --> Hints
-    HeatLoss --> Hints
-
-    Hints --> Match["matchEquipment({ …, ctx })"]
-    HeatLoss --> Match
-    Ufh --> Match
-    Dhw --> Match
-    Ctx --> Match
-
-    Match --> HydPipe["buildHydraulicsSnapshots<br/>→ runHydraulicsPipeline"]
-    HydPipe --> HydRecs["applyHydraulicsPipeRecommendations"]
-    AppRules --> HydPipe
-
-    Match --> UfhNotes["buildWarmFloorCalcMatchingNotes"]
-    Match --> PostHints["доп. automationHints"]
-    HydRecs --> PostHints
-  end
-
-  subgraph report ["JSON Report"]
-    ReportMeta[meta]
-    ReportInput[input]
-    ReportClimate[climate]
-    ReportTemps[temps]
-    ReportCalc["calculations:<br/>heatLoss · underfloorHeating · hotWater · hydraulics"]
-    ReportMatch[matching]
-    ReportRec[recommendations]
-    ReportWarn[warnings]
-  end
-
-  Hints --> ReportMeta
-  PostHints --> ReportMeta
-  Bundle --> ReportMeta
-  Validate --> ReportInput
-  Geocode --> ReportClimate
-  Temps --> ReportTemps
-  HeatLoss --> ReportCalc
-  Ufh --> ReportCalc
-  Dhw --> ReportCalc
-  HydPipe --> ReportCalc
-  HydRecs --> ReportMatch
-  Match --> ReportMatch
-  Match --> ReportRec
-  Ufh --> ReportWarn
-  Match --> ReportWarn
-```
-
-### Внутри `calculateUnderfloorHeating` (по комнате)
-
-```mermaid
-flowchart LR
-  IN["room.underfloorHeating<br/>+ heatingSystem"] --> RESOLVE["resolveUnderfloorHeatingComposition<br/>legacy presetId → base+finish"]
-  RESOLVE --> BASE[getUnderfloorHeatingBasePresetById]
-  RESOLVE --> FIN[getFlooringFinishMaterialById]
-  BASE --> R["Rλ,B compose<br/>R↑ R↓"]
-  FIN --> R
-  R --> Q["q↑ q↓ Tповерх"]
-  Q --> WARN{"Tповерх > T_max?"}
-  WARN -->|да| W[warning + maxAllowableHeatFluxUpWm2]
-```
-
-### Внутри `matchEquipment`
-
-```mermaid
-flowchart LR
-  M0["matchEquipment({ …, ctx })"] --> M1[pickIndirectWaterHeater]
-  M1 --> M2[applyIndirectTankToHotWaterReport]
-  M2 --> M3["pickBoiler({ …, ctx })"]
-  M3 --> M4["pickRadiatorsWithProposalLines<br/>+ buildWarmFloorMatchingNotes"]
-  M4 --> M5[pickWaterHeater]
-  M5 --> M6[enrichBoilerMatchingProposals]
-```
-
-После matching в `buildReport` дополнительно мержатся `buildWarmFloorCalcMatchingNotes(underfloorHeating)` в `radiatorSelectionNotes`.
+| Документ | Тема |
+|----------|------|
+| [`docs/auth.md`](docs/auth.md) | JWT, Clerk, tier, `/me` |
+| [`docs/projects-api.md`](docs/projects-api.md) | CRUD, share, PDF |
+| [`docs/calc-input-validation.md`](docs/calc-input-validation.md) | Валидация CalcInput |
+| [`docs/calc-runtime-context.md`](docs/calc-runtime-context.md) | CalcRuntimeContext, bundle |
+| [`docs/language-policy.md`](docs/language-policy.md) | UA user-facing тексты |
+| [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md) | SurveySession, React Query, calc |
+| [`docs/survey-draft.md`](docs/survey-draft.md) | SurveyDraft v4, localStorage |
+| [`docs/start-state.md`](docs/start-state.md) | Start Screen, bootstrap |
+| [`docs/hydraulics-pipeline.md`](docs/hydraulics-pipeline.md) | Гидравлика |
+| [`docs/ufh-presets-mongo.md`](docs/ufh-presets-mongo.md) | Режимы ТП |
+| [`docs/ufh-test-checklist.md`](docs/ufh-test-checklist.md) | Ручной чеклист ТП |
+| [`docs/manifold-matching.md`](docs/manifold-matching.md) | Коллекторы |
+| [`docs/unibox-matching.md`](docs/unibox-matching.md) | Унибоксы |
+| [`docs/financial-summary.md`](docs/financial-summary.md) | `report.commercial` |
+| [`docs/room-exterior-layout.md`](docs/room-exterior-layout.md) | Положение комнаты |
 
 ---
 
 ## Тестирование
 
-См. **Test Quickstart** в [`.cursorrules`](.cursorrules) (`LOG_LEVEL=debug`, curl calc/400/404).
-
-**Гидравлика (backend verify):**
-
 ```bash
-cd backend && npm run verify:hydraulics-pipeline
-cd backend && npm run verify:pick-pipe
-cd backend && npm run verify:builtin-boiler-pump
+npm run verify                    # из корня
+cd backend && npm run verify      # backend gate
+cd frontend && npm run verify     # frontend gate
 ```
 
-**Сессия анкеты (frontend):**
-
-```bash
-cd frontend && npm run verify && npm run build
-```
-
-`npm run verify` = `lint` + `verify:survey-session` + `verify:dead-code` (knip). Из корня: `npm run verify:frontend`.
-
-**Пресеты ТП:**
-
-```bash
-curl -s http://localhost:3001/api/v1/presets/underfloor-heating | head -c 500
-curl -s http://localhost:3001/api/v1/presets/flooring-finishes
-```
-
-**Схема CalcInput:**
-
-```bash
-cd backend && npm run verify:calc-schema
-```
-
-**Ожидаемое поведение calc с ТП:** при `waterUnderfloorHeating: true`, комната с `basePresetId: ufh_base_interstory_screed_65` и `finishMaterialId: laminate_click` — в отчёте `calculations.underfloorHeating.rooms[].coveringResistanceM2KW ≈ 0.10`, warning при Tповерх > 27 °C на контуре 45/35 °C.
+Smoke calc — Test Quickstart в [`.cursorrules`](.cursorrules). Auth — [`docs/auth.md`](docs/auth.md) § Verify.

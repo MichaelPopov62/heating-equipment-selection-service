@@ -122,7 +122,7 @@ cd backend && npm run verify:ufh-active-area
 cd backend && npm run verify:calc-schema
 ```
 
-Чеклист: [`ufh-roadmap-test-checklist.md`](ufh-roadmap-test-checklist.md) — сценарий 5.
+Чеклист: [`ufh-test-checklist.md`](ufh-test-checklist.md) — сценарий 7.
 
 ## Вне scope
 

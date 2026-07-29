@@ -1,6 +1,6 @@
 # Карта структуры проекта
 
-Навигатор по папкам и ключевым entrypoints. **Не** дублирует статус MVP и подробные таблицы из [`Plan.md`](../Plan.md) — там статус задач и развёрнутые списки модулей; здесь — «куда смотреть».
+Навигатор по папкам и ключевым entrypoints. Карта verify и calc flow — [`Plan.md`](../Plan.md); здесь — «куда смотреть» и дерево `backend/`.
 
 Правила кода и бизнес-контекст: [`.cursorrules`](../.cursorrules).  
 Контракт API: [`openapi.yaml`](../openapi.yaml).  
@@ -41,7 +41,7 @@
 | `.github/workflows/verify.yml` | CI: bypass → shared → backend → frontend → build |
 | `tsconfig.strict-base.json` | Общий strict-профиль для shared / backend / frontend |
 | `package.json` (корень) | `npm run verify`, `dev:full`, prefix-скрипты |
-| `Plan.md` | Статус MVP + детальная структура + roadmap |
+| [`Plan.md`](../Plan.md) | Карта модулей backend/frontend |
 | `.cursorrules` | Политика модулей, бизнес-правила, стек |
 
 ---
@@ -66,42 +66,81 @@
 
 ## `backend/` — API и расчётное ядро
 
-Точка входа: `src/index.js`. Публичные barrels: `*/public.js` (импорты между доменами только через них).
+Точка входа: `src/index.js`. Cross-domain импорты — только через barrels `*/public.js` (`api`, `catalog`, `hydraulics`, `matching`, `models`, `reference`, `report`).
 
-### `backend/src/`
+### Корень `backend/`
 
-| Папка / файл | Назначение |
+| Путь | Назначение |
+|------|------------|
+| `README.md` | Quick start, маршруты, verify |
+| `package.json` | `npm run start`, `npm run verify`, `npm run seed` |
+| `eslint.config.js` / `tsconfig.json` | ESLint, checkJs |
+| `.env.example` | Шаблон переменных окружения |
+| `Dockerfile` / `docker-compose.pdf.yml` | API + Chromium для PDF |
+| `data/` | JSON справочников для seed (см. ниже) |
+| `scripts/` | seed, verify, migrate, fixtures, utils |
+| `test_data.json.example` / `test_data.json` | Каталог products (example в git) |
+
+### `backend/src/` — домены (18 папок)
+
+| Папка | Назначение |
+|-------|------------|
+| `api/` | HTTP-слой — см. подтаблицу ниже |
+| `auth/` | JWT, Clerk/JWKS, `requireAuth`, `requireRole`, tier — [`auth.md`](auth.md) |
+| `catalog/` | `loadCatalog`, `validateCatalog`, helpers, geometry серий |
+| `climate/` | `geocode.js`, `snipClimate.js`, Meteostat bulk |
+| `data/` | Static пресеты ТП для UI (`warmFloorAssemblyPresets.js`, `flooringFinishMaterials.js`) |
+| `dhw/` | water_norms, appliances: load + validate + `waterCalc.js` |
+| `feedback/` | `validateFeedbackBody.js` |
+| `hydraulics/` | Pure Pipeline (~25 модулей), barrel `public.js` |
+| `logic/` | Теплопотери, ограждения, ГВС, оркестратор ТП (`warmFloorCalc`, `ufh*`) |
+| `matching/` | Подбор оборудования; `internal/` — radiators core, emitter kind, indirect helpers |
+| `models/` | Mongoose: runtime `public.js`; discriminators (`Boiler.js`, …) — только seed |
+| `projects/` | CRUD, calc, share, PDF — см. подтаблицу ниже |
+| `recommendations/` | load/validate/resolver текстов `REC_*` / `WARN_*` |
+| `reference/` | `configCache`, bundle, `toCalcRuntimeContext`, `deepFreeze` |
+| `report/` | `buildReport.js`, `buildFinancialBom.js`, `automationHints.js`, `public.js` |
+| `types/` | `shared-types.d.ts`, `boiler-types.d.ts`, `auth.d.ts`, `express-augment.d.ts` |
+| `ufh/` | Mongo-пресеты режимов ТП: load + validate |
+| `utils/` | logger, Mongo, `createAppError`, boiler mounting, pump curve, matching hints |
+
+#### `backend/src/api/`
+
+| Файл | Назначение |
+|------|------------|
+| `routes.js` | Роуты presets + calc |
+| `runCalculation.js` | Composition root calc |
+| `validate.js` | AJV + нормализация CalcInput |
+| `calcInputSchemaLoader.js` | Загрузка OpenAPI-схемы для AJV |
+| `public.js` | Barrel HTTP API |
+| `projectsRoutes.js` | Projects CRUD, calc, share, PDF |
+| `publicSharesRoutes.js` | Публичный share |
+| `meRoutes.js` / `adminRoutes.js` / `feedbackRoutes.js` / `systemRoutes.js` | `/me`, admin, feedback, cache invalidate |
+| `validateAdminUserPatch.js` | Валидация PATCH admin user |
+| `middleware/rateLimiters.js` | Rate limits |
+
+#### `backend/src/matching/`
+
+| Файл / папка | Назначение |
 |--------------|------------|
-| `index.js` | Express, CORS, Helmet, requestId, error handler |
-| `api/` | Роуты `/api/v1/*`, AJV, `runCalculation`, projects/system |
-| `api/publicSharesRoutes.js` | Публичный GET `/api/v1/public/shares/{shareToken}` (+ PDF) |
-| `api/middleware/rateLimiters.js` | Rate limit для calc, projects, public shares |
-| `auth/` | JWT pipeline, `requireAuth`, конфиг Clerk/JWKS — см. [`auth.md`](auth.md) |
-| `logic/` | Теплопотери, стены, ГВС MVP, ТП (`warmFloorCalc`, `ufh*`) |
-| `hydraulics/` | Pure Pipeline: граф → трубы → насосы → proposal |
-| `matching/` | Котёл, радиаторы, ВН, БКН, manifolds, uniboxes |
-| `catalog/` | `loadCatalog` / `validateCatalog` (Mongo \| file \| auto) |
-| `dhw/` | water_norms, appliances, формулы водоснабжения |
-| `ufh/` | Загрузка/валидация Mongo-пресетов ТП modes |
-| `reference/` | TTL bundle справочников + `toCalcRuntimeContext` |
-| `recommendations/` | Тексты `REC_*` / `WARN_*` |
-| `report/` | `buildReport` — сборка JSON-отчёта |
-| `climate/` | Nominatim + Meteostat bulk |
-| `models/` | Mongoose (runtime: `public.js` → Product/Project/…) |
-| `projects/` | CRUD, calc input, summary, **share**, **PDF** (см. ниже) |
-| `data/` | Локальные пресеты ТП (base assembly, finishes) — не Mongo |
-| `utils/` | Логер, Mongo URI, монтаж котла, `createAppError`, … |
-| `types/` | `shared-types.d.ts`, `boiler-types.d.ts`, Express augment |
+| `index.js` | Оркестратор `matchEquipment` |
+| `boiler.js`, `radiators.js`, `waterHeater.js`, `indirectWaterHeater.js` | Подбор по типам |
+| `manifold.js`, `unibox.js`, `warmFloor.js`, `hydraulics.js` | Коллекторы, унибоксы, ТП, legacy hydraulics snapshot |
+| `radiatorSizingHelpers.js`, `enrichProposalBundlePrice.js` | Sizing, цены proposal |
+| `internal/` | `pickRadiatorsCore`, emitter kind, micro-load, mixed UFH, indirect catalog |
+
+#### `backend/src/models/`
+
+Runtime — `public.js` (`Product`, `Project`, `Calculation`, `User`). Discriminators для seed: `Boiler`, `Radiator`, `WaterHeater`, `Pipe`, `Pump`, `IndirectWaterHeater`, `Manifold`, `BoilerManifold`, `Unibox`; reference: `WaterNorms`, `Appliance`, `Recommendation`, `UnderfloorHeatingPreset`, `Feedback`.
 
 #### `backend/src/projects/` — подмодули
 
 | Группа | Ключевые файлы |
 |--------|----------------|
-| CRUD / calc | `resolveProjectCalcInput.js`, `extractCalculationSummary.js`, `serializeProject.js`, `documentSizeLimits.js`, `projectAccess.js` |
-| Share | `buildShareSnapshot.js`, `shareToken.js`, `serializeShare.js` |
-| PDF | `buildEstimatePdfHtml.js`, `buildTechnicalPdfHtml.js`, `renderPdfFromHtml.js`, `renderEstimatePdf.js`, `pdfFilename.js`, `pdfRenderSemaphore.js` |
-
-Детальные строки по ключевым файлам logic/matching/hydraulics — в [`Plan.md`](../Plan.md) § `backend/`.
+| CRUD / calc | `resolveProjectCalcInput.js`, `extractCalculationSummary.js`, `serializeProject.js`, `validateProjectBody.js`, `documentSizeLimits.js`, `projectAccess.js`, `projectChangeMeta.js`, `requireMongo.js` |
+| Share | `buildShareSnapshot.js`, `buildPublisherPresentation.js`, `shareToken.js`, `serializeShare.js` |
+| PDF | `buildEstimatePdfHtml.js`, `buildTechnicalPdfHtml.js`, `renderPdfFromHtml.js`, `renderEstimatePdf.js`, `pdfFilename.js`, `pdfRenderSemaphore.js`, `pdfHtmlEscape.js` |
+| Migrate | `migrateLegacyProjectOwnerId.js` |
 
 Домены в отдельных доках: [`hydraulics-pipeline.md`](hydraulics-pipeline.md), [`manifold-matching.md`](manifold-matching.md), [`unibox-matching.md`](unibox-matching.md), [`calc-runtime-context.md`](calc-runtime-context.md), [`client-share-and-layers.md`](client-share-and-layers.md), [`project-pdf.md`](project-pdf.md).
 
@@ -112,6 +151,7 @@
 | `data/water_norms.json` | Нормы ГВС (seed → Mongo `water_norms`) |
 | `data/appliances.json` | Правила техники (не номенклатура) |
 | `data/recommendations.json` | Тексты рекомендаций |
+| `data/underfloor_heating_presets.json` | Режимы ТП (seed → Mongo `underfloor_heating_presets`) |
 | `test_data.json.example` | Эталон каталога products (в git) |
 | `test_data.json` | Локальная копия каталога (gitignore; для seed / file mode) |
 
@@ -120,7 +160,9 @@
 | Группа | Назначение |
 |--------|------------|
 | `seed.js` + `seedReferenceData.js` | Запись products + reference в Mongo |
-| `verify*.js` | Domain-гейты (`npm run verify:*`); входят в `npm run verify` |
+| `migrateProjectOwnerIds.js` | Миграция legacy `projects.ownerId` |
+| `promoteUserAdmin.js` | Dev-утилита повышения роли |
+| `verify*.js` / `verifyFeedback.mjs` | Domain-гейты (`npm run verify:*`) |
 | `fuzz-calc.ts` | Ручной fuzz POST `/api/v1/calc` (`npm run test:fuzz`; нужен поднятый API) |
 | `fixtures/` | Хелперы assert/фикстур для verify-скриптов |
 | `utils/` | Пути каталога, seed-normalize, invalidate cache |
@@ -135,33 +177,42 @@
 
 ```text
 main.tsx → QueryProvider → App.tsx
-  ├─ pathname /s/{shareToken} → SharePresentationPage (read-only презентация)
-  └─ SurveyApp → SurveySessionProvider → AppRoot
-       ├─ resolving → AppBootstrapSkeleton
-       ├─ error     → BootstrapErrorScreen
-       ├─ start     → StartScreen + Header (variant=start)
-       └─ survey    → AppSurveyContent (шаги анкеты + отчёт)
+  └─ BrowserRouter → AuthProvider → AppChromeProvider → AppRouter
+       ├─ /s/:shareToken → SharePresentationPage (read-only презентация)
+       ├─ /login, /sign-up, /docs, /faq, legal → pages/*
+       ├─ /projects → SurveyAppShell → ProtectedRoute → ProjectsPage
+       └─ / → SurveyAppShell → SurveySessionProvider → AppRoot
+            ├─ resolving → AppBootstrapSkeleton
+            ├─ error     → BootstrapErrorScreen
+            ├─ start     → StartScreen + Header (variant=start)
+            └─ survey    → AppSurveyContent (шаги анкеты + отчёт)
 ```
 
 Подробнее bootstrap: [`start-state.md`](start-state.md). Клиент vs Dev: [`client-share-and-layers.md`](client-share-and-layers.md).
 
 | Путь | Назначение |
 |------|------------|
-| `src/App.tsx` | Маршрутизация share vs редактор; справочники RQ |
+| `src/App.tsx` | BrowserRouter, auth/providers и `AppRouter` |
+| `src/routing/` | `AppRouter`, `SurveyAppShell`, канонические `paths`; маршруты и справочники RQ |
 | `src/AppRoot.tsx` | Bootstrap, Header, DevPanel, ProjectsDialog, `useSurveyProject` |
 | `src/AppSurveyContent.tsx` | Шаги анкеты, формы, отчёт |
 | `src/surveySession/` | State анкеты: `dispatch` → pipeline → calc; bootstrap |
 | `src/surveySession/resolveAppBootstrap.ts` | Hash / localStorage → start \| survey |
-| `src/surveySession/createEmptySurveySessionState.ts`, `createDefaultSurveyDraft.ts` | SSOT пустого и дефолтного черновика |
+| `src/surveySession/createEmptySurveySessionState.ts`, `createDefaultSurveyDraft.ts` | SSOT пустого и дефолтного SurveyDraft |
 | `src/query/` | React Query: справочники, calc, проекты |
 | `src/services/` | HTTP-клиенты; `meApi`, `projectsApi`, `publicShareApi`, `parsePublicShare`, `surveyDraftStorage` |
 | `src/hooks/` | `useSurveyBootstrap`, `useSurveyDraftPersistence`, `useSurveyProject`, … |
+| `src/pages/` | Login, SignUp, Projects, Docs, FAQ, Privacy/Terms/Cookies |
+| `src/auth/` | Clerk/AuthProvider, `ProtectedRoute`, redirect и `/me` cache sync |
+| `src/shell/` | `AppChromeProvider`: общие действия и модальные окна Header/Footer |
+| `src/i18n/` | Украинские UI-тексты, локализация и appearance Clerk |
 | `src/components/AccountBar/` | Сессия: «Увійти», email, tier badge, logout |
 | `src/components/SubscriptionTierBadge/` | Badge подписки из `/me` |
 | `src/components/PublisherContactBlock/` | Контакт на public share (Pro/Marketplace) |
 | `src/components/StartScreen/` | Стартовый экран (cold open) |
 | `src/components/SharePresentationPage/` | Публичная страница `/s/{token}` |
 | `src/components/DevPanel/` | Панель разработчика (DEV / `VITE_DEV_TOOLS=1`) |
+| `src/components/Footer/`, `ModalHost/`, `CookieConsentBanner/`, `DevToolsDock/` | Общая оболочка SPA |
 | `src/auth/` | Clerk SDK, `AuthProvider`, `useAuthMeCacheSync`, `ProtectedRoute`, login — см. [`auth.md`](auth.md) |
 | `src/components/Header/` | Клиент: ссылка, PDF, `accountSlot`, hint pro/marketplace; Dev — отдельно |
 | `src/components/` | Формы, отчёты, `ProjectsDialog/`, … |
@@ -172,9 +223,10 @@ main.tsx → QueryProvider → App.tsx
 | `src/styles/` | CSS-переменные / общие стили |
 | `scripts/verifySurveySessionPipeline.mjs` | Verify pipeline сессии |
 | `scripts/verifyStartState.mjs` | Verify bootstrap / start screen |
+| `scripts/verifyFooterNav.mjs`, `verifyFrontendAuth.mjs`, `verifyFrontendMe.mjs` | Verify навигации и auth |
 | `knip.json` | Dead-code (`--treat-config-hints-as-errors`) |
 
-Подробные таблицы `query/`, `surveySession/`, `hooks/` — [`Plan.md`](../Plan.md) § `frontend/`, [`frontend-calc-runner.md`](frontend-calc-runner.md), [`frontend-query-inventory.md`](frontend-query-inventory.md), [`survey-draft.md`](survey-draft.md).
+Подробности `query/`, `surveySession/`, `hooks/` — [`frontend-calc-runner.md`](frontend-calc-runner.md), [`frontend-query-inventory.md`](frontend-query-inventory.md), [`survey-draft.md`](survey-draft.md).
 
 ---
 
@@ -188,8 +240,8 @@ main.tsx → QueryProvider → App.tsx
 | [`project-pdf.md`](project-pdf.md) | Серверная генерация PDF (Chromium) |
 | [`frontend-calc-runner.md`](frontend-calc-runner.md) | SurveySession + React Query + calc |
 | [`frontend-query-inventory.md`](frontend-query-inventory.md) | Инвентарь query/mutations |
-| [`survey-draft.md`](survey-draft.md) | Черновик анкеты v4, compat, verify |
-| [`auth.md`](auth.md) | JWT auth Фазы 1–3: Clerk, tier UX, `/me`, share contact, verify |
+| [`survey-draft.md`](survey-draft.md) | SurveyDraft v4, load/save, verify |
+| [`auth.md`](auth.md) | JWT, Clerk, tier, `/me`, share contact, verify |
 | [`projects-api.md`](projects-api.md) | REST проектов, share, PDF, расчётов |
 | [`calc-runtime-context.md`](calc-runtime-context.md) | DI справочников в calc |
 | [`calc-input-validation.md`](calc-input-validation.md) | Валидация CalcInput |
@@ -199,6 +251,7 @@ main.tsx → QueryProvider → App.tsx
 | [`hydraulics-pipeline.md`](hydraulics-pipeline.md) | Pipeline гидравлики |
 | [`manifold-matching.md`](manifold-matching.md) / [`unibox-matching.md`](unibox-matching.md) | Коллекторы / унибоксы |
 | [`ufh-presets-mongo.md`](ufh-presets-mongo.md) | Пресеты режимов ТП |
+| [`ufh-test-checklist.md`](ufh-test-checklist.md) | Ручной чеклист ТП |
 | [`heating-schemes-thermal-regime.md`](heating-schemes-thermal-regime.md) | Схемы котла и режимы |
 | [`water-heater-form.md`](water-heater-form.md) | Форма ГВС |
 | `boiler-survey-report.md`, `hydraulics-survey-report.md`, `radiators-survey-report.md` | UI-отчёты по доменам |

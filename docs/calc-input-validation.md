@@ -27,9 +27,9 @@
 
 | Вход | Действие |
 |------|----------|
-| Канонический enum (после trim / регистра) | без изменений |
-| Synonym / legacy (`living` → `гостиная`, `kitchen` → `кухня`, …) | замена; warning в `_normalizationWarnings` **после AJV** (поле не в схеме heatingSystem) |
-| Неизвестная строка (`офис`, `garbage`) | **400** `ROOM_TYPE_INVALID` |
+| Канонический enum (`CANONICAL_ROOM_TYPES`, после trim / регистра) | без изменений |
+| Synonym (`ROOM_TYPE_SYNONYMS`: `kitchen` → `кухня`, `гостинная` → `гостиная`, …) | замена; warning в `_normalizationWarnings` **после AJV** |
+| Legacy (`living`, `bathroom`, `tech`, `жилое`) и прочие неизвестные | **400** `ROOM_TYPE_INVALID` (нормализация при загрузке SurveyDraft — `frontend/src/utils/migrateLegacyRoomTypes.ts`) |
 
 **Не используется:** silent-подстановка «помещение» для неизвестных значений.
 
@@ -56,7 +56,7 @@
 | Режим системы (`heatingSystem.ufhPresetId`) | фаза 6, **после AJV** | `ctx.ufhPresets` (Mongo/file, `UFH_PRESETS_SOURCE`) |
 | Контур 45/35 vs 40/30 | в расчёте | `shared/ufhCircuitPresets.js` |
 
-Для `ufh_direct_tile` / `ufh_direct_laminate` финиш включённых комнат должен совпадать с контуром (см. [`ufh-presets-mongo.md`](ufh-presets-mongo.md)). Коды: `UNDERFLOOR_HEATING_*`, `UFH_PRESET_INVALID`, `UFH_MODE_FINISH_MISMATCH`.
+Допустимые `ufhPresetId` задаются `shared/ufhModePresetIds.js`; контур 45/35 или 40/30 выбирается по финишу комнаты. Коды: `UNDERFLOOR_HEATING_*`, `UFH_PRESET_INVALID`.
 
 ---
 
@@ -75,7 +75,6 @@
 | `HOT_WATER_LEGACY_FIELD` | Удалённые поля ГВС |
 | `EXTERNAL_WALLS_*` | Cross-validation фасада |
 | `HEATING_SYSTEM_INVALID` | returnC ≥ supplyC |
-| `UFH_MODE_FINISH_MISMATCH` | `ufh_direct_*` + несовместимый `finishMaterialId` в комнате с ТП |
 | `ENVELOPE_UVALUE_MISSING` | Нет `uValue` и не выведен из `presetId` / `externalWalls` |
 
 Полный список — description ответа **400** в `openapi.yaml` для `POST /api/v1/calc`.

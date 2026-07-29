@@ -1,5 +1,5 @@
 /**
- * Назначение: verify документации auth (PR-8, PR-16) — SSOT, Фаза 3, перекрёстные ссылки.
+ * Назначение: verify документации auth — SSOT, перекрёстные ссылки.
  * Запуск: npm run verify:auth-docs (из корня репозитория)
  */
 
@@ -30,19 +30,18 @@ const requiredSections = [
   '## Frontend',
   '## Переменные окружения',
   '## Настройка Clerk',
-  '## Миграция legacy',
+  '## Миграция ownerId',
   '## Коды ошибок auth',
+  '## Authorization (tier и role)',
   '## Verify и smoke-check',
-  '## Roadmap Фазы 1',
-  '## Фаза 2 — Authorization',
-  '## Roadmap Фазы 2',
-  '## Фаза 3 — Frontend tier UX',
-  '## Roadmap Фазы 3',
+  '## Frontend tier UX',
 ];
 
 for (const section of requiredSections) {
   assert.ok(authDoc.includes(section), `docs/auth.md должен содержать "${section}"`);
 }
+
+assert.doesNotMatch(authDoc, /## Roadmap Фазы/);
 
 assert.match(authDoc, /JWT\.sub → users\.providerUserId|providerUserId.*users\._id|req\.user\.id/s);
 assert.match(authDoc, /verify:projects-auth/);
@@ -62,7 +61,7 @@ assert.match(authDoc, /GET \/api\/v1\/me/);
 assert.match(authDoc, /marketplace/);
 assert.match(authDoc, /AccountBar/);
 assert.match(authDoc, /publisherPresentation/);
-assert.match(authDoc, /Smoke Phase 3/);
+assert.match(authDoc, /Smoke tier UX/);
 assert.match(authDoc, /нет 403.*subscription|без gating/i);
 
 assert.match(projectsApi, /auth\.md/, 'projects-api.md должен ссылаться на auth.md');

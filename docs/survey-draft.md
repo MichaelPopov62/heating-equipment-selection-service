@@ -1,104 +1,92 @@
-# Survey draft (черновик анкеты)
+# Состояние анкеты (SurveyDraft)
 
-## Start State vs DRAFT_LOADED
+Клиентское состояние анкеты между шагами UI, в `localStorage`, в `project.survey` и в hash-URL. На сервер calc уходит отдельный **CalcInput** через `buildCalcPayloadFromDraft()`.
 
-См. [`start-state.md`](start-state.md).
+См. также: [`start-state.md`](start-state.md), [`frontend-calc-runner.md`](frontend-calc-runner.md).
 
-- Cold open → `SESSION_RESET` → Start Screen (без persist, без calc).
-- Hash / localStorage / file / project → `DRAFT_LOADED` → режим `survey`.
-- «Начать новый расчёт» → `SURVEY_STARTED` → дефолтный draft из `createDefaultSurveyDraft.ts`.
-- Локальный ключ: `heatcalc:survey-draft:v1` (`surveyDraftStorage.ts`).
+---
+
+## Bootstrap
+
+| Событие | Режим | Действие |
+|---------|-------|----------|
+| Cold open | `start` | Start Screen, без persist и calc |
+| Hash / localStorage / file / project | `survey` | `DRAFT_LOADED` |
+| «Начать новый расчёт» | `survey` | `SURVEY_STARTED` → `createDefaultSurveyDraft.ts` |
+
+Локальный ключ: `heatcalc:survey-draft:v1` (`surveyDraftStorage.ts`, debounce 400 ms в `useSurveyDraftPersistence`).
+
+---
 
 ## SSOT
 
-- `frontend/src/types/surveyDraft.ts` — `SURVEY_DRAFT_SCHEMA_VERSION` (**4**), тип `SurveyDraft`
-- Порядок шагов UI и валидация `currentStep` — `frontend/src/constants/surveySteps.ts` (`SURVEY_STEPS`, `isSurveyStep`): `object` → `warmFloor` → `rooms` → `hotWater` → `boiler` → `radiators` → `waterHeater` → `hydraulics` → `technicalResult` → `dataReference` → `financialResult` («Тёплый пол» до «Помещения» — флаг ТП / `ufhPresetId` до анкеты комнат; legacy `summary` → `financialResult` в `migrateSurveyDraft`)
-- Производный runtime-снимок — `SurveyDraftSnapshot` в `frontend/src/surveySession/types.ts` (включает `wiringLayoutV3`)
+| Артефакт | Путь |
+|----------|------|
+| Версия схемы | `SURVEY_DRAFT_SCHEMA_VERSION = 4` — `frontend/src/types/surveyDraft.ts` |
+| Тип | `SurveyDraft` |
+| Шаги UI | `frontend/src/constants/surveySteps.ts` — `object` → `warmFloor` → `rooms` → … → `technicalResult` → `dataReference` → `financialResult` |
+| Runtime-снимок | `SurveyDraftSnapshot` — `frontend/src/surveySession/types.ts` (`wiringLayoutV3`, формы шагов) |
 
-## Поля v4 (добавлено после гидравлики и SurveySession)
+---
+
+## Поля схемы v4
 
 | Поле | Назначение |
 |------|------------|
-| `hydraulicsForm` | Шаг «Гидравлика»: `mainLineLengthM` (котёл → коллектор), `deltaTSystemK`, `pipeMaterialPreference` |
-| `wiringLayoutV3` | Схема разводки v3: `systemType` (`auto` \| `two-pipe-dead-end` \| …), `branches[]` (длина коллектор → радиатор); на calc уходит `hydraulics.radiatorWiringSystemType` + `radiatorBranchOverrides` |
-| `ufhPresetId` | Режим emitters (`ufh_only`, `ufh_mixed_radiators`, …); `null` — классика без ТП |
-| `radiatorConnection` | Подводка радиаторов: `side` \| `bottom` (дефолт `side`); UI — шаг «Радиаторы» (`RadiatorsSurveyForm`); полный расчёт — `RadiatorsReportDialog`; KPI — `RadiatorsSummaryTable`; в calc → `heatingSystem.radiatorConnection`. SSOT — `shared/radiatorConnection.js`, см. [`radiator-connection.md`](radiator-connection.md), [`radiators-survey-report.md`](radiators-survey-report.md). Старые draft без поля → `side` в `migrateSurveyDraft` |
-| `radiatorEmitterPreference` | Тип приборов на объект: `auto` \| `sectional` \| `panel` (дефолт `auto`); UI — шаг «Радиаторы» (`RadiatorsSurveyForm`); в calc → `heatingSystem.radiatorEmitterPreference`. SSOT — `shared/radiatorEmitterPreference.js`, см. [`radiator-emitter-kind.md`](radiator-emitter-kind.md), [`radiators-survey-report.md`](radiators-survey-report.md). Старые draft без поля → `auto` |
+| `hydraulicsForm` | `mainLineLengthM`, `deltaTSystemK`, `pipeMaterialPreference` |
+| `wiringLayoutV3` | `systemType`, `branches[]` → calc: `hydraulics.radiatorWiringSystemType`, `radiatorBranchOverrides` |
+| `ufhPresetId` | Режим emitters (`ufh_only`, `ufh_mixed_radiators`, …); `null` — без ТП |
+| `radiatorConnection` | `side` \| `bottom` → `heatingSystem.radiatorConnection` — [`radiator-connection.md`](radiator-connection.md) |
+| `radiatorEmitterPreference` | `auto` \| `sectional` \| `panel` → calc — [`radiator-emitter-kind.md`](radiator-emitter-kind.md) |
 
 ### ТП в комнате: `ufhTerminalControl`
 
-В `rooms[].underfloorHeating` (compat через `migrateRoomUnderfloorHeating`):
-
-| Значение | Смысл |
-|----------|--------|
-| omit / `collector` | Петля на коллекторе ТП (default) |
-| `unibox` | Локальный регулятор; только при `areaM2 ≤ 20` |
-
-Старые черновики без поля → `collector`.
+`rooms[].underfloorHeating`: `collector` (default) \| `unibox` (при `areaM2 ≤ 20`).
 
 ### UI шага «Гидравлика»
 
-Компонент `frontend/src/components/HydraulicsSection/HydraulicsSection.tsx`:
+`HydraulicsSection.tsx`:
 
-| Поле в UI | Источник в черновике | Поле в POST `/api/v1/calc` |
-|-----------|----------------------|----------------------------|
-| Тип разводки (radio-список с пояснениями) | `wiringLayoutV3.systemType` | `hydraulics.radiatorWiringSystemType` |
+| UI | SurveyDraft | POST `/api/v1/calc` |
+|----|-------------|---------------------|
+| Тип разводки | `wiringLayoutV3.systemType` | `hydraulics.radiatorWiringSystemType` |
 | Длина котёл → коллектор | `hydraulicsForm.mainLineLengthM` | `hydraulics.mainLineLengthM` |
-| Подвод коллектор → радиатор (по комнатам) | `wiringLayoutV3.branches[].pipeLengthToEquipmentM` | `hydraulics.radiatorBranchOverrides[]` |
-| Порядок радиаторов на магистрали | порядок `branches[]` (кнопки ↑↓ для dead-end / pass) | порядок `radiatorBranchOverrides[]` |
+| Подвод по комнатам | `wiringLayoutV3.branches[].pipeLengthToEquipmentM` | `hydraulics.radiatorBranchOverrides[]` |
+| Порядок радиаторов | порядок `branches[]` | порядок overrides |
 
-Кнопки: «Отчёт по гидравлике» → `HydraulicsReportDialog`; «Назад к результатам» → якорь `results-hydraulics`. Слои UI — [`hydraulics-survey-report.md`](hydraulics-survey-report.md).
+Подписи: `wiringSystemTypeLabels.ts`. Отчёты: [`hydraulics-survey-report.md`](hydraulics-survey-report.md).
 
-Подписи схем — `frontend/src/utils/wiringSystemTypeLabels.ts` (`WIRING_SYSTEM_TYPE_OPTIONS`: заголовок + `description` под каждым radio). Дефолт — `auto` (бейдж «Рекомендуется»).
+Мутации: `WIRING_SCHEME_SET`, `WIRING_BRANCH_LENGTH_SET`, `WIRING_BRANCH_REORDER`, `SET_HYDRAULICS_FORM`.
 
-| `systemType` | Смысл для пользователя |
-|--------------|------------------------|
-| `auto` | Группировка: крупные ветки отдельно, мелкие зоны в микроколлектор |
-| `two-pipe-dead-end` | Последовательная магистраль, убывающий расход и Ø |
-| `two-pipe-pass` | Проходная магистраль, постоянный расход на trunk |
-| `manifold` | Все радиаторы строго параллельно от распределительного узла |
-
-Мутации сессии: `WIRING_SCHEME_SET`, `WIRING_BRANCH_LENGTH_SET`, `WIRING_BRANCH_REORDER`, `SET_HYDRAULICS_FORM`.
-
-Миграция v3→v4: `migrateSurveyDraft.ts` — дефолты для `hydraulicsForm` и `wiringLayoutV3`.
-
-## Compat-слой (НЕ dead code)
-
-До релиза и снятия freeze (**целевая дата review: +1 месяц после внедрения телеметрии**) следующие модули **обязательны** и **не удаляются** как «мёртвый код»:
-
-| Модуль | Назначение |
-|--------|------------|
-| `utils/migrateLegacyRoomTypes.ts` | `living`/`bathroom`/`tech` → канонические типы |
-| `utils/migrateLegacyExternalWalls.ts` | `wall_pps_*`, `insul_*` в `presetId` стены |
-| `utils/migrateRoomUnderfloorHeating.ts` | монолитный `presetId` ТП → `basePresetId` + `finishMaterialId` |
-| `utils/migrateSurveyDraft.ts` | единая точка загрузки snapshot |
-| `utils/migrateLegacyWallAreaM2` в `roomEnvelopeFields.ts` | `wallAreaM2` → `externalWall1/2` |
-| `constants/compatLegacyIds.ts` | ID устаревших пресетов стен |
-| `migrateDerivedState.ts` (ветка `DRAFT_LOADED`) | bootstrap `wiringLayoutV3` при загрузке |
-
-**Живая pipeline-логика (не compat):** `migrateDerivedState.ts` — синхронизация ТП и wiring на каждой мутации; **не удалять**.
-
-**Телеметрия freeze:** `utils/compatTelemetry.ts` — `console.warn('[survey-compat] …')` только в `import.meta.env.DEV`, при фактическом срабатывании миграции. Когда за месяц QA логи = 0 → спринт на Hard Reset (удаление compat, отказ `schemaVersion < 4`).
+---
 
 ## Загрузка и сохранение
 
 | Операция | Функция |
 |----------|---------|
-| Загрузка | `migrateSurveyDraft()` — `frontend/src/utils/migrateSurveyDraft.ts` |
+| Загрузка / нормализация | `migrateSurveyDraft()` — `frontend/src/utils/migrateSurveyDraft.ts` |
 | Сохранение | `buildSurveyDraft()` — `frontend/src/utils/buildSurveyDraft.ts` |
-| Парсинг (алиас) | `parseSurveyDraft()` → `migrateSurveyDraft()` |
-| Применение в сессию | `DRAFT_LOADED` → `runSurveyMutationPipeline` |
+| Парсинг | `frontend/src/utils/parseSurveyDraft.ts` → `migrateSurveyDraft()` |
+| В сессию | `DRAFT_LOADED` → `runSurveyMutationPipeline` |
 
-Точки вызова загрузки: файл JSON, `projects.survey` на сервере (через `useProjectMutations` / `useSurveyProject`), hash-URL (`surveyShare.ts`).
+Источники: JSON-файл, `projects.survey`, hash (`frontend/src/utils/surveyShare.ts`).
 
-## Устаревшие поля в snapshot (только при чтении)
+При загрузке snapshot вызывается **`migrateSurveyDraft`**: дефолты для отсутствующих полей v4, нормализация прежних типов комнат, стен и ТП (`migrateLegacyRoomTypes.ts`, `migrateLegacyExternalWalls.ts`, `migrateRoomUnderfloorHeating.ts`, функция `migrateLegacyWallAreaM2` в `roomEnvelopeFields.ts`). Телеметрия срабатываний — `compatTelemetry.ts` (`[survey-compat]` в DEV).
 
-| Поле в snapshot | Куда попадает после `migrateSurveyDraft` |
-|-----------------|------------------------------------------|
+**Pipeline (не удалять):** `migrateDerivedState.ts` — синхронизация ТП и wiring на каждой мутации и при `DRAFT_LOADED`.
+
+---
+
+## Поля только при чтении snapshot
+
+| В snapshot | После `migrateSurveyDraft` |
+|------------|----------------------------|
 | `hotWaterBoilerPowerMatchingScheme` (корень) | `waterHeaterForm.hotWaterBoilerPowerMatchingScheme` |
 | `objectMeta.indirectDhwSpaceAvailable` | `waterHeaterForm.indirectDhwSpaceAvailable` |
 
-После нормализации UI и state **не** содержат `indirectDhwSpaceAvailable` в `objectMeta`. В POST `/api/v1/calc` флаг мержится через `objectMetaForCalcPayload()`.
+В POST `/api/v1/calc` флаг БКН мержится через `objectMetaForCalcPayload()` — см. [`water-heater-form.md`](water-heater-form.md).
+
+---
 
 ## Verify
 
@@ -107,20 +95,6 @@ cd backend && npm run verify:survey-draft-migration
 cd frontend && npm run verify
 ```
 
-`npm run verify` во frontend = `lint` + **`typecheck`** + `verify:dead-code` (knip) + **`build`** + `verify:survey-session`  
-(`verify:survey-session` читает `dist/assets/*.js` — поэтому build идёт до него).
+Frontend `verify` = lint + typecheck + knip + build + `verify:survey-session`.
 
-### Автоматизированная приёмка (frontend)
-
-Перед сдачей задачи на чистой кодовой базе:
-
-```bash
-cd frontend && npm run verify
-```
-
-- **`npm run verify`** — exit `0` обязателен; ESLint (`strictTypeChecked`), `typecheck`, knip, production `build` и `verify:survey-session` блокируют приёмку.
-- Полный gate репозитория: из корня `npm run verify` (см. [`type-safety.md`](type-safety.md)).
-
-**Knip (`knip.json`):** entry берётся из Vite-плагина; compat/pipeline-модули миграции (`migrateLegacy*`, `migrateSurveyDraft`, `migrateDerivedState`) в графе импортов — без blanket-`ignore`. Gate: `knip --treat-config-hints-as-errors` (configuration hints = fail).
-
-См. также: [`water-heater-form.md`](water-heater-form.md), [`frontend-calc-runner.md`](frontend-calc-runner.md).
+См. [`type-safety.md`](type-safety.md), [`water-heater-form.md`](water-heater-form.md).

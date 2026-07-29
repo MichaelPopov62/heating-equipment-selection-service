@@ -1,6 +1,6 @@
 # Отчёт и итог котла (UI)
 
-> **Мова UI (PR-6, 2026-07-27):** усі user-facing підписи анкети, звітів і помилок — **українською**. Enum calc payload без змін. Деталі: [`language-policy.md`](language-policy.md).
+> **Мова UI:** user-facing тексти — **українською**; [`language-policy.md`](language-policy.md).
 
 ## Разделение ответственности
 
@@ -8,13 +8,13 @@
 |------|------------|------------|
 | Ввод | `BoilerSurveyForm` | `thermalRegimePreset` |
 | Полный расчёт | `BoilerReportDialog` → `BoilerReportView` | summary (теплопотери/запас/requiredKw), warnings, `BoilerProposalCard` × economy/efficient или legacy |
-| Сайдбар «Итог» | **новая** `BoilerSummaryTable` | KPI + `SurveyStepLink` на шаг «Котёл» |
-| Блок «Рекомендация» | `BoilerProposalCard` × economy/efficient | полные варианты: котёл + ЭВН/БКН и **Итого по варианту** |
-| Блок «Рекомендация» | `RadiatorProposalLineTable` | радиаторы отдельно (не внутри карточек котла) |
+| Шаг `technicalResult` | `BoilerSummaryTable` | KPI + `SurveyStepLink` на шаг «Котёл» |
+| Шаг `technicalResult` | `BoilerProposalCard` × economy/efficient | полные варианты: котёл + ЭВН/БКН и **Итого по варианту** |
+| Шаг `technicalResult` | `RadiatorProposalLineTable` | радиаторы отдельно (не внутри карточек котла) |
 
 Существующие summary других модулей (`RadiatorsSummaryTable`, `HotWaterSummaryTable`, …) **не изменяются**.
 
-Контракт API без изменений: `matching.boiler` → `parseBoilerFromReport`.
+Контракт API: `matching.boiler` → `frontend/src/utils/parsers/parseBoilerFromReport.ts`.
 
 ## Навигация
 

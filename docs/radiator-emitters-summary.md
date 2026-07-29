@@ -30,5 +30,5 @@ cd backend && npm run verify:radiator-emitters
 
 См. также: [`radiator-connection.md`](radiator-connection.md) — подводка side/bottom;
 [`radiator-emitter-kind.md`](radiator-emitter-kind.md) — единый тип приборов на объект (Two-Pass);
-[`radiators-survey-report.md`](radiators-survey-report.md) — UI: модалка отчёта, `RadiatorsSummaryTable`, таблицы в «Рекомендации».
+[`radiators-survey-report.md`](radiators-survey-report.md) — UI: модалка отчёта, `RadiatorsSummaryTable` и таблицы на шаге `technicalResult`.
 

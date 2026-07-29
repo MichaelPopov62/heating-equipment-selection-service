@@ -10,7 +10,7 @@
 
 | Ответственность | Модуль |
 |-----------------|--------|
-| Состояние `report`, `uiPhase`, `calcInputKey`, черновик | `frontend/src/surveySession/SurveySessionProvider.tsx` |
+| Состояние `report`, `uiPhase`, `calcInputKey`, SurveyDraft | `frontend/src/surveySession/SurveySessionProvider.tsx` |
 | Контекст сессии (хук) | `frontend/src/surveySession/useSurveySession.ts` |
 | Pipeline мутаций | `runSurveyMutationPipeline.ts` → `reduceSurveyMutation` → `migrateDerivedState` → `decideCalcAction` |
 | HTTP calc (debounce, dedup, отмена гонок) | `frontend/src/query/useSurveyCalc.ts` (React Query) |
@@ -20,7 +20,7 @@
 | Ключ изменений входа | `buildCalcInputKeyFromDraft` в том же модуле |
 | Парсинг отчёта для UI | `frontend/src/hooks/useCalcReport.ts` |
 
-`main.tsx` оборачивает приложение в `QueryProvider` (`@tanstack/react-query`). `App.tsx` — справочники, `SurveySessionProvider`, bootstrap (`AppRoot`). **`calcReport` не хранится в `App.tsx`** — компоненты читают `report` из контекста сессии.
+`main.tsx` оборачивает приложение в `QueryProvider` (`@tanstack/react-query`). `App.tsx` подключает router/auth/providers; `SurveyAppShell` загружает справочники и монтирует `SurveySessionProvider`, а `AppRoot` управляет bootstrap. **`calcReport` не хранится в `App.tsx`** — компоненты читают `report` из контекста сессии.
 
 **Calc guard:** `POST /api/v1/calc` активен только при `bootstrapMode === 'survey'` (`SurveySessionProvider.calcEnabled`). В Start/resolving calc не выполняется.
 
@@ -67,7 +67,7 @@ flowchart LR
 
 ### `wiringLayoutV3`
 
-Черновик v4 хранит layout разводки (`systemType`, ветки). При `WIRING_SCHEME_SET` и `SET_ROOMS` — `migrateWiringLayoutOnSystemTypeChange` / `adaptFlatRoomsToWiringLayout`. Ручной ввод длин и порядка — `WIRING_BRANCH_LENGTH_SET`, `WIRING_BRANCH_REORDER` (UI: `HydraulicsSection`). На сервер уходит через `buildCalcPayloadFromDraft`; граф гидравлики строится в `buildGraph.js`.
+SurveyDraft v4 хранит layout разводки (`systemType`, ветки). При `WIRING_SCHEME_SET` и `SET_ROOMS` — `migrateWiringLayoutOnSystemTypeChange` / `adaptFlatRoomsToWiringLayout`. Ручной ввод длин и порядка — `WIRING_BRANCH_LENGTH_SET`, `WIRING_BRANCH_REORDER` (UI: `HydraulicsSection`). На сервер уходит через `buildCalcPayloadFromDraft`; граф гидравлики строится в `buildGraph.js`.
 
 ---
 
@@ -107,7 +107,7 @@ const {
   (`UnderfloorHeatingReportDialog`) с полным расчётом ТП, унибоксами и **зональным насосом ТП**
   (только если `isMixingNodeRequired`; иначе текст «циркуляция насосом котла»). Котловой насос
   (`boiler_primary`) в отчёте ТП не показывается.
-- **Сайдбар «Итог»:** `UnderfloorHeatingSummaryTable` — агрегаты (в т.ч. строка насоса ТП).
+- **Шаг `technicalResult`:** `UnderfloorHeatingSummaryTable` — агрегаты (в т.ч. строка насоса ТП).
   Под таблицей — inline-ссылки на шаг `warmFloor` (`SurveyStepLink` + делегирование клика
   в `RecommendationsBlock`). В полном отчёте гидравлики (`HydraulicsReportView`) насосы зон
   `ufh_*` не показываются (без дубля с отчётом ТП); то же правило — в summary.
@@ -119,8 +119,8 @@ const {
 - **Шаг `hydraulics` (`HydraulicsSection`):** ввод разводки/длин; кнопка «Отчёт по гидравлике»
   открывает `HydraulicsReportDialog` / `HydraulicsReportView` (полный расчёт с ценами и участками).
   См. [`hydraulics-survey-report.md`](hydraulics-survey-report.md).
-- **Сайдбар «Итог»:** `HydraulicsSummaryTable` — KPI (расход, напор, насос).
-- **Блок «Рекомендация»:** `HydraulicsProposalTable` — плоский подбор труб без колонок цены и без
+- **Шаг `technicalResult`:** `HydraulicsSummaryTable` — KPI (расход, напор, насос).
+- Там же `HydraulicsProposalTable` — плоский подбор труб без колонок цены и без
   детализации по контурам/участкам.
 
 ### UI блока «Горячая вода»
@@ -175,7 +175,7 @@ const {
 | `components/SurveyNavigation/SurveyReportActions.module.css` | «Отчёт» / «Назад к результатам» |
 | `constants/surveySteps.ts` → `surveyStepNavLabel()` | Подпись шага для `aria-label` |
 
-### Загрузка черновика
+### Загрузка SurveyDraft
 
 `DRAFT_LOADED` выставляет `draftInitializing` в pipeline; автопересчёт заблокирован (`enabled: false`). После `endDraftInitializationPhase` — `scheduleFreshCalc`.
 
@@ -203,13 +203,13 @@ const {
 | `useSurveyCalc` | calc API (авто query + ручная mutation) |
 | `useReferenceData` | композиция справочных query |
 | `useCalcReport` | парсинг report → DTO для UI |
-| `useSurveyStepNavigation` | переход на шаг анкеты из сайдбара + scroll к `<main>` |
+| `useSurveyStepNavigation` | переход между формой и `technicalResult` + scroll к `<main>` |
 | `useSurveyProject` | файлы, Mongo, hash-URL (поверх project mutations) |
 | `useRoomsOrchestration` | синхронизация комнат с objectMeta |
 | `useSurveyEstimates` | локальные оценки до API |
 | `constants/surveySteps.ts` | SSOT шагов: `SURVEY_STEPS`, навигация, `isSurveyStep`, `surveyStepNavLabel` |
-| `RecommendationsBlock` | сайдбар «Итог»; делегирование `data-survey-step` |
-| `HydraulicsReportView` / `HydraulicsSummaryTable` / `HydraulicsProposalTable` | гидравлика: полный отчёт / итог / трубы в «Рекомендации» — см. [`hydraulics-survey-report.md`](hydraulics-survey-report.md) |
+| `RecommendationsBlock` | содержимое шага `technicalResult`; делегирование `data-survey-step` |
+| `HydraulicsReportView` / `HydraulicsSummaryTable` / `HydraulicsProposalTable` | гидравлика: полный отчёт / итог / подбор труб — см. [`hydraulics-survey-report.md`](hydraulics-survey-report.md) |
 
 Ручной `invalidateCalcReport()` в формах **не нужен** — пересчёт централизован в сессии.
 
@@ -219,7 +219,7 @@ const {
 
 Канонический порядок `SURVEY_STEPS`:
 
-`object` → `warmFloor` → `rooms` → `hotWater` → `boiler` → `radiators` → `waterHeater` → `hydraulics` → `technicalResult` → `dataReference`
+`object` → `warmFloor` → `rooms` → `hotWater` → `boiler` → `radiators` → `waterHeater` → `hydraulics` → `technicalResult` → `dataReference` → `financialResult`
 
 Шаг «Тёплый пол» стоит сразу после «Объект» и перед «Помещения»: глобальный флаг / `ufhPresetId` задают схему излучателей до заполнения комнат.
 
@@ -227,9 +227,9 @@ const {
 
 | Шаг | Форма / поля |
 |-----|----------------|
-| `boiler` | `BoilerSurveyForm`: график + `BoilerReportDialog`; сайдбар — `BoilerSummaryTable`; в «Рекомендации» — `BoilerProposalCard` × economy/efficient. См. [`boiler-survey-report.md`](boiler-survey-report.md) |
-| `radiators` | `RadiatorsSurveyForm`: подводка/тип + `RadiatorsReportDialog` (полный расчёт); в сайдбаре — `RadiatorsSummaryTable`; в «Рекомендации» — `RadiatorProposalLineTable` отдельно от котлов. См. [`radiators-survey-report.md`](radiators-survey-report.md) |
-| `hydraulics` | `HydraulicsSection`: разводка + `HydraulicsReportDialog`; сайдбар — `HydraulicsSummaryTable`; в «Рекомендации» — `HydraulicsProposalTable` (трубы без цен). См. [`hydraulics-survey-report.md`](hydraulics-survey-report.md) |
+| `boiler` | `BoilerSurveyForm`: график + `BoilerReportDialog`; на `technicalResult` — `BoilerSummaryTable` и `BoilerProposalCard` × economy/efficient. См. [`boiler-survey-report.md`](boiler-survey-report.md) |
+| `radiators` | `RadiatorsSurveyForm`: подводка/тип + `RadiatorsReportDialog` (полный расчёт); на `technicalResult` — `RadiatorsSummaryTable` и `RadiatorProposalLineTable`. См. [`radiators-survey-report.md`](radiators-survey-report.md) |
+| `hydraulics` | `HydraulicsSection`: разводка + `HydraulicsReportDialog`; на `technicalResult` — `HydraulicsSummaryTable` и `HydraulicsProposalTable` (трубы без цен). См. [`hydraulics-survey-report.md`](hydraulics-survey-report.md) |
 | `waterHeater` | Схема ГВС / БКН / ЭВН (`WaterHeaterForm`) |
 | `warmFloor` | Режим ТП, флаг водяного ТП, схема распределения (`WarmFloorSection`) |
 
@@ -243,7 +243,7 @@ const {
 cd frontend && npm run verify
 ```
 
-- **`npm run verify`** — exit `0` обязателен (`lint` + **`typecheck`** + `verify:dead-code`/knip + **`build`** + `verify:survey-session`).
+- **`npm run verify`** — exit `0` обязателен (`lint` + **`typecheck`** + knip + footer/auth/me verify + **`build`** + survey-session/start-state verify).
 - `verify:survey-session` читает `dist/assets` (поэтому build входит в `verify`).
 - ESLint: `strictTypeChecked` + `no-unsafe-*` (см. [`type-safety.md`](type-safety.md)).
 

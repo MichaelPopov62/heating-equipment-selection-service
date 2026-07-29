@@ -66,7 +66,7 @@ cd backend && npm run verify:document-size-limits
 
 ### Миграция legacy ownerId
 
-После деплоя PR-5 (`ownerId` = ObjectId ref User) старые проекты с `ownerId = JWT sub` (string) или `dev-local` нужно мигрировать:
+Скрипт для документов `projects`, где `ownerId` ещё строка (JWT `sub`, `dev-local`) вместо ObjectId ref User:
 
 ```bash
 cd backend
@@ -130,7 +130,7 @@ Content-Type: application/json
 {}
 ```
 
-или сохранение черновика без повторной отправки анкеты:
+или сохранение SurveyDraft без повторной отправки CalcInput:
 
 ```json
 { "survey": { "currentStep": 3, ... } }
@@ -140,7 +140,7 @@ Content-Type: application/json
 
 ### Поле `survey`
 
-- Произвольный JSON черновика UI (`project.survey`).
+- Произвольный JSON состояния анкеты UI (`project.survey`, SurveyDraft).
 - **Не** конвертируется в CalcInput на backend.
 - При наличии в теле запроса обновляет проект до расчёта.
 - Лимит **512 KB** JSON — см. [Лимиты размера](#лимиты-размера-payload-и-mongodb).
@@ -207,7 +207,8 @@ cd backend && npm run verify:extract-calculation-summary
 - `components/schemas/ProjectCalcBody.yaml` — OpenAPI
 - `components/schemas/ProjectDetail.yaml` — `lastCalcInput` в ответе GET project
 - `frontend/src/hooks/useSurveyProject.ts` — UI: проекты, share, PDF, Dev JSON/hash
+- `frontend/src/pages/ProjectsPage/ProjectsPage.tsx`, `frontend/src/utils/pendingProjectNavigation.ts` — маршрут списка и передача действия в редактор
 - `frontend/src/services/projectsApi.ts`, `publicShareApi.ts`, `projectsAuthHeaders.ts`
 - `frontend/src/query/mutations/useProjectMutations.ts` — React Query: save/load проекта и расчётов
-- `frontend/src/query/queries/useProjectsListQuery.ts` — список проектов при открытии диалога
+- `frontend/src/query/queries/useProjectsListQuery.ts` — список проектов в dialog и на `/projects`
 - `frontend/src/query/queries/useProjectCalculationsQuery.ts` — список расчётов выбранного проекта

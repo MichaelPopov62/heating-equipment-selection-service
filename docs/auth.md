@@ -77,7 +77,8 @@ Startup gate (`backend/src/index.js`):
 
 | Модуль | Назначение |
 |--------|------------|
-| `App.tsx` | `<ClerkProvider>` при `VITE_CLERK_PUBLISHABLE_KEY` |
+| `App.tsx` / `ClerkProviderWithRouter.tsx` | Router и Clerk provider при `VITE_CLERK_PUBLISHABLE_KEY` |
+| `routing/AppRouter.tsx` / `ProtectedRoute.tsx` | Guard маршрута `/projects`; `/` остаётся публичным |
 | `auth/AuthProvider.tsx` | Clerk session; `getToken({ template })` — всегда JWT template (не session token) |
 | `services/meApi.ts`, `parseMeResponse.ts` | `GET /api/v1/me` — профиль и tier с backend |
 | `query/queries/useMeQuery.ts` | React Query профиля (`queryKeys.me`) |
@@ -106,7 +107,7 @@ Startup gate (`backend/src/index.js`):
 Суффикс `/*` обязателен: Clerk path-routing использует подпути (`/sign-up/verify-email-address` и т.д.).  
 **Не** задавайте `signUpUrl={paths.login}` — регистрация не откроется.
 
-### Локализация и стили Clerk UI (PR-1)
+### Локализация и стили Clerk UI
 
 | Модуль | Назначение |
 |--------|------------|
@@ -202,7 +203,7 @@ Startup gate (`backend/src/index.js`):
 
 ---
 
-## Миграция legacy `ownerId` (PR-6)
+## Миграция ownerId
 
 После перехода на `ObjectId ref User` старые проекты с `ownerId = "dev-local"` или JWT `sub` (string) мигрируются скриптом:
 
@@ -231,7 +232,7 @@ npm run migrate:project-owner-ids -- --apply
 
 ---
 
-## Фаза 2 — Authorization (tier без лимитов, приоритет точности)
+## Authorization (tier и role)
 
 **Принцип:** полный точный calc, share и PDF **доступны на всех tier**. Подписка (`subscription`) — метка аккаунта для продукта и billing; **не** ограничивает точность расчёта и **не** блокирует share/PDF.
 
@@ -244,7 +245,7 @@ npm run migrate:project-owner-ids -- --apply
 
 Источник истины — MongoDB `users`, **не** JWT claims.
 
-### Матрица доступа (MVP Фазы 2)
+### Матрица доступа
 
 | Возможность | free | pro | marketplace |
 |-------------|------|-----|-------------|
@@ -297,7 +298,7 @@ npm run verify
 Auth-специфичные скрипты:
 
 ```bash
-# Документация auth (PR-8)
+# Документация auth
 npm run verify:auth-docs
 
 # Backend
@@ -315,14 +316,14 @@ cd frontend && npm run verify:frontend-auth
 cd frontend && npm run verify:frontend-me
 ```
 
-Интеграционный smoke (ручной, Фаза 1):
+Интеграционный smoke:
 
 1. Login через Clerk → `GET /api/v1/projects` с Bearer → 200
-2. **Регистрация:** `/login` → «Зареєструватися» → `/sign-up` (форма создания аккаунта, не «аккаунт не найден») → после verify — редирект на `/`, `GET /api/v1/me` → 200
+2. **Регистрация:** `/login` → «Зареєструватися» → `/sign-up` → после verify — редирект на `/`, `GET /api/v1/me` → 200
 3. Create project → `ownerId` в Mongo = `users._id` текущего пользователя
 4. Запрос чужого `projectId` → 404
 
-### Smoke Phase 3 (ручной)
+### Smoke tier UX
 
 1. Login → `GET /api/v1/me` с Bearer → `{ role: "user", subscription: "free" }`
 2. UI: badge **Free**, без блока контакта на share
@@ -334,7 +335,7 @@ cd frontend && npm run verify:frontend-me
 
 ---
 
-## Фаза 3 — Frontend tier UX (без gating calc/share/PDF)
+## Frontend tier UX
 
 **Принцип:** tier влияет только на **отображение в UI** и embed контакта в share snapshot; **не** блокирует calc, publish share или PDF.
 
@@ -351,7 +352,7 @@ cd frontend && npm run verify:frontend-me
 
 **Нет subscription-gates:** `POST /api/v1/calc`, `POST …/share`, `GET …/pdf` не проверяют `subscription`.
 
-### Модули (PR-13…PR-15)
+### Модули tier UX
 
 | Слой | Модуль | Назначение |
 |------|--------|------------|
@@ -366,36 +367,3 @@ cd frontend && npm run verify:frontend-me
 | OpenAPI | `SharePublisherPresentation.yaml` | `{ tier, contactEmail, contactName? }` |
 
 Подробнее share/PDF: [`client-share-and-layers.md`](client-share-and-layers.md), REST: [`projects-api.md`](projects-api.md).
-
----
-
-## Roadmap Фазы 1 (выполнено)
-
-| PR | Содержание | Статус |
-|----|------------|--------|
-| PR-1 | Контракты, startup gate, OpenAPI | ✅ |
-| PR-2 | Модель `User`, индексы | ✅ |
-| PR-3 | JWT pipeline verify → map → resolve | ✅ |
-| PR-4 | `requireAuth` / `optionalAuth` | ✅ |
-| PR-5 | `projects.ownerId` → ObjectId ref User | ✅ |
-| PR-6 | Миграция legacy ownerId | ✅ |
-| PR-7 | Frontend Clerk SDK | ✅ |
-| PR-8 | `docs/auth.md`, verify | ✅ |
-
-## Roadmap Фазы 2 (PR-9…PR-12)
-
-| PR | Содержание | Статус |
-|----|------------|--------|
-| PR-9 | Enum `UserRole` / `SubscriptionTier`, `authorizationPolicy.js` | ✅ |
-| PR-10 | `requireRole`, коды authorization, `authErrors` | ✅ |
-| PR-11 | Маршруты без subscription-gates; admin PATCH | ✅ |
-| PR-12 | `GET /api/v1/me`, `promote:user-admin`, OpenAPI, verify | ✅ |
-
-## Roadmap Фазы 3 (PR-13…PR-16)
-
-| PR | Содержание | Статус |
-|----|------------|--------|
-| PR-13 | HTTP `/me` + React Query + invalidate кеша | ✅ |
-| PR-14 | `AccountBar`, badge tier, «Увійти» в Header | ✅ |
-| PR-15 | `publisherPresentation` в share/PDF (Pro/Marketplace) | ✅ |
-| PR-16 | Verify + документация Phase 3 | ✅ |

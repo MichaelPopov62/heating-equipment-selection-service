@@ -13,4 +13,4 @@ properties:
   survey:
     type: object
     description: >
-      Черновик анкеты с фронта. Лимит размера JSON — 512 KB (413 PAYLOAD_TOO_LARGE).
+      Состояние анкеты UI (SurveyDraft) с фронта. Лимит размера JSON — 512 KB (413 PAYLOAD_TOO_LARGE).

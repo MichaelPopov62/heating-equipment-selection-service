@@ -17,7 +17,7 @@
 
 - [ ] В UI доступны все 5 схем на шаге **«Водонагреватель»** (`WaterHeaterForm`; в малой квартире без БКН — без `singleCircuitBoilerWithIndirectTankHeatingPlusTankPowerKw`)
 - [ ] Галочка места под БКН видна **только** при квартире + схема «1К + БКН» (не на шаге «Объект», не для дома)
-- [ ] Смена схемы или галочки → debounce → обновление карточек БКН/ЭВН в модалке `WaterHeaterReportDialog` (`WaterHeaterMatchingPreview`); в сайдбаре — строки `HotWaterSummaryTable`
+- [ ] Смена схемы или галочки → debounce → обновление карточек БКН/ЭВН в модалке `WaterHeaterReportDialog` (`WaterHeaterMatchingPreview`); на `technicalResult` — строки `HotWaterSummaryTable`
 - [ ] `singleCircuitBoilerWithBufferElectricStorage` — подбор 1К + буферный ЭВН, `recommendedTankLiters` из `water_norms`
 - [ ] `combiBoilerWithBufferElectricStorage` — 2К + буфер, объём из `combiBufferElectricStorage`
 - [ ] Квартира + БКН-схема → нормализация на max-комби + warning в отчёте
@@ -44,34 +44,28 @@
 
 ## Пресеты режима ТП
 
-### `ufh_direct_tile`
+### `ufh_mixed_radiators`
 
-- [ ] Карточка в UI, `ufhPresetId: ufh_direct_tile`
-- [ ] Контур комнат 45/35, `circuitSource: ufh_mode_preset`
-- [ ] `isMixingNodeRequired` зависит от `supplyC` котла (75 > 45 → да)
-
-### `ufh_direct_laminate`
-
-- [ ] Контур 40/30, `maxSurface` лимит **27** °C в отчёте комнаты
-- [ ] Смеситель не требуется при котле 40/30
+- [ ] Карточка в UI, `ufhPresetId: ufh_mixed_radiators`
+- [ ] Контур комнаты выбирается по финишу: плитка 45/35, ламинат/LVT 40/30
+- [ ] `isMixingNodeRequired` зависит от `supplyC` котла и контура комнаты
 
 ### `ufh_only`
 
 - [ ] `heatingEmittersMode: ufh_only`, радиаторы не подбираются (`matching.radiators.skippedReason: ufh_only`)
-- [ ] В UI итога радиаторов нет черновых секций (эвристика 100 Вт/м²); подпись «не требуется» / skip-hint
+- [ ] В UI итога радиаторов нет локальных оценок секций (`useSurveyEstimates`, 100 Вт/м²); подпись «не требуется» / skip-hint
 - [ ] График котла 40/30 в `input.heatingSystem`
 - [ ] `matching.boiler.requiredKw` от **отдачи ТП** (`totalHeatFluxUpWatts`×запас), не от `heatLoss.totalWatts`
 - [ ] При q↑ < теплопотерь — `WARN_UFH_COVERAGE_LOW_UFH_ONLY` (шаги без «добавьте радиатор» первым)
 - [ ] `requiresCondensingBoiler` → warning, если подобран не-condensing котёл
-- [ ] При схеме «1К + БКН» и успешном БКН сайдбар не показывает фальшивый ЭБ по литрам ГВС (см. пункт схем котла выше)
+- [ ] При схеме «1К + БКН» и успешном БКН `technicalResult` не показывает фальшивый ЭБ по литрам ГВС (см. пункт схем котла выше)
 
 ---
 
 ## maxSurface из пресета
 
-- [ ] Плитка + `ufh_direct_tile`: `maxSurfaceTemperatureCelsius` = 29, warning про паспорт 35 °C
-- [ ] Ламинат + `ufh_direct_laminate`: applied max = 27
-- [ ] В UI блока «Тёплый пол» — «применённый лимит» при override пресетом
+- [ ] `maxSurfaceTemperatureCelsius` = min(лимит mode preset, паспорт финиша)
+- [ ] В UI блока «Тёплый пол» показан применённый лимит
 
 ---
 

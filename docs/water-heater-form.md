@@ -6,9 +6,7 @@
 
 ## Цель
 
-Пользователь выбирает **стратегию** ГВС (схему связки котёл / горячая вода), а не модель или литраж вручную. Объём и номенклатура подбираются бэкендом по `recommendedTankLiters` и каталогу.
-
-Шаг 8 roadmap (ручной выбор модели) **не реализован** и в форму не входит.
+Пользователь выбирает **стратегию** ГВС (схему связки котёл / горячая вода), а не модель или литраж вручную. Объём и номенклатура подбираются бэкендом по `recommendedTankLiters` и каталогу. Ручной выбор модели/литража в форму **не входит**.
 
 ---
 
@@ -16,9 +14,9 @@
 
 | Шаг | Компонент | Поля API / UI |
 |-----|-----------|---------------|
-| Горячая вода | `HotWaterForm` + `HotWaterReportDialog` | `hotWater.*` — ввод; расчёт API — в модалке; точки — ещё в сайдбаре (`HotWaterFixturesSummaryTable`) |
+| Горячая вода | `HotWaterForm` + `HotWaterReportDialog` | `hotWater.*` — ввод; расчёт API — в модалке; точки — ещё на `technicalResult` (`HotWaterFixturesSummaryTable`) |
 | **Водонагреватель** | **`WaterHeaterForm`** + **`WaterHeaterReportDialog`** | `heatingSystem.hotWaterBoilerPowerMatchingScheme`, `objectMeta.indirectDhwSpaceAvailable` (условно); matching — только в модалке «Отчёт по подбору водонагревателя» |
-| Котёл | блок в `App.tsx` | `heatingSystem.thermalRegimePreset` — только радиаторный график |
+| Котёл | `AppSurveyContent.tsx` → `BoilerSurveyForm` | `heatingSystem.thermalRegimePreset` — только радиаторный график |
 
 ---
 
@@ -57,7 +55,7 @@
 - **Малая квартира** (площадь ≤ 50 м² и < 2 санузлов/точек ванна+душ): схема «1К + БКН» **скрыта**.
 - **Крупная квартира** и **дом**: все 5 схем из `shared/heatingMatchingSchemes.js`.
 
-При недоступной схеме `App.tsx` сбрасывает выбор на `maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw`.
+При недоступной схеме `AppSurveyContent.tsx` сбрасывает выбор на `maximumBetweenHeatingLoadWithReserveAndHotWaterPowerKw`.
 
 ---
 
@@ -65,32 +63,32 @@
 
 ```mermaid
 flowchart LR
-  HWF[HotWaterForm] --> App[App waterHeaterForm state]
+  HWF[HotWaterForm] --> Session[SurveySession waterHeaterForm state]
   HWF --> Fixtures[hotWaterForm.fixtures]
   Fixtures --> SidebarFix[HotWaterFixturesSummaryTable]
   Fixtures --> HWModal[HotWaterReportDialog]
-  WHF[WaterHeaterForm] --> App
+  WHF[WaterHeaterForm] --> Session
   WHF --> WHModal[WaterHeaterReportDialog]
-  App --> BCP[buildCalcRequestPayload]
+  Session --> BCP[buildCalcRequestPayload]
   BCP --> API[POST /api/v1/calc]
   API --> Report[matching.indirectWaterHeater / waterHeater / calculations.hotWater]
   Report --> WHModal
   Report --> HWModal
   WHModal --> Preview[WaterHeaterMatchingPreview]
   Preview --> Card[WaterHeaterProposalCard]
-  Sidebar[RecommendationsBlock] --> SidebarFix
-  Sidebar --> HWSummary[HotWaterSummaryTable]
+  TechnicalResult[RecommendationsBlock] --> SidebarFix
+  TechnicalResult --> HWSummary[HotWaterSummaryTable]
 ```
 
-- **INPUT:** `HotWaterForm` (потребление) + `WaterHeaterForm` (стратегия; `onApplyScheme` в сайдбаре)
+- **INPUT:** `HotWaterForm` (потребление) + `WaterHeaterForm` (стратегия; `onApplyScheme` на `technicalResult`)
 - **OUTPUT:**
-  - сайдбар после теплопотерь — `HotWaterFixturesSummaryTable` (точки из анкеты, live);
+  - шаг `technicalResult` после теплопотерь — `HotWaterFixturesSummaryTable` (точки из анкеты, live);
   - `WaterHeaterReportDialog` → `WaterHeaterMatchingPreview` → `WaterHeaterProposalCard` (модалка шага «Водонагреватель»);
-  - сайдбар — `HotWaterSummaryTable` (ЭБ/БКН, без карточек matching)
+  - шаг `technicalResult` — `HotWaterSummaryTable` (ЭБ/БКН, без карточек matching)
 
 Паттерн UI — как у ТП и ГВ: на форме только ввод + кнопка отчёта; полный результат — в модалке.
 На шагах ТП / ГВ / Водонагреватель рядом с отчётом — **«Назад к результатам»**
-(`navigateToResultsSection` → якоря `RESULTS_SECTION_IDS` в сайдбаре).
+(`navigateToResultsSection` → якоря `RESULTS_SECTION_IDS` на `technicalResult`).
 
 ---
 
@@ -104,7 +102,7 @@ flowchart LR
   и в `migrateSurveyDraft`;
 - calc payload — снова `normalizeHotWaterForm` в `buildCalcRequestPayload`;
 - UI — `normalizeHotWaterFixtures` в таблице / `countThermalFixtures` (без `NaN`);
-- сайдбар — `HotWaterFixturesSummaryTable` (live при смене анкеты);
+- шаг `technicalResult` — `HotWaterFixturesSummaryTable` (live при смене анкеты);
 - модалка — точки из анкеты **даже без** ответа calc; пик/кВт/бак — из `calculations.hotWater`.
 
 При изменении анкеты таблица обновляется сразу; расчёт API — после debounce, если
@@ -127,13 +125,13 @@ Discriminated union в `frontend/src/types/waterHeaterMatching.ts`:
 
 - `WaterHeaterReportView` — `idPrefix="wh-report"`
 
-Сайдбар «Итог» — компактная `HotWaterSummaryTable` (строки ЭБ/БКН), без `WaterHeaterMatchingPreview`.
+На шаге `technicalResult` отображается компактная `HotWaterSummaryTable` (строки ЭБ/БКН), без `WaterHeaterMatchingPreview`.
 
-### Участие ЭБ/БКН в сайдбаре (`HotWaterSummaryTable`)
+### Участие ЭБ/БКН в `HotWaterSummaryTable`
 
 Подписи строк — `resolveHotWaterEquipmentRowLabel` (`hotWaterEquipmentParticipation.ts`):
 
-| Схема / исход matching | ЭБ в сайдбаре | БКН в сайдбаре |
+| Схема / исход matching | ЭБ на `technicalResult` | БКН на `technicalResult` |
 |------------------------|---------------|----------------|
 | «1К + БКН» + БКН выбран | «Не участвует в расчёте» | результат подбора |
 | «1К + БКН» + fallback без БКН | результат запасного ЭВН (+ warning) | skipped / нет модели |
@@ -164,13 +162,13 @@ Discriminated union в `frontend/src/types/waterHeaterMatching.ts`:
 
 ## Реактивность
 
-Изменение схемы или галочки → `calcInputKey` меняется → хук сбрасывает отчёт → debounce **700 ms** → `POST /api/v1/calc` → обновление карточек БКН и ЭВН в модалке отчёта и строк в сайдбаре.
+Изменение схемы или галочки → `calcInputKey` меняется → хук сбрасывает отчёт → debounce **700 ms** → `POST /api/v1/calc` → обновление карточек БКН и ЭВН в модалке отчёта и строк на `technicalResult`.
 
 Подробнее: [`frontend-calc-runner.md`](frontend-calc-runner.md).
 
 ---
 
-## Черновик проекта (survey draft)
+## SurveyDraft (состояние анкеты)
 
 **Единый контракт:** `SURVEY_DRAFT_SCHEMA_VERSION` и тип `SurveyDraft` в `frontend/src/types/surveyDraft.ts`.
 
@@ -180,7 +178,7 @@ Discriminated union в `frontend/src/types/waterHeaterMatching.ts`:
 
 - `waterHeaterForm` — единственное место хранения схемы ГВС и флага «место под БКН»;
 - если в snapshot блока `waterHeaterForm` нет — значения берутся из корневого `hotWaterBoilerPowerMatchingScheme` и `objectMeta.indirectDhwSpaceAvailable`, затем нормализуются;
-- `objectMeta.indirectDhwSpaceAvailable` в сохранённом черновике **не хранится** (только в calc через `objectMetaForCalcPayload()`);
+- `objectMeta.indirectDhwSpaceAvailable` в сохранённом SurveyDraft **не хранится** (только в calc через `objectMetaForCalcPayload()`);
 - отсутствующие поля заполняются дефолтами (`createDefaultWaterHeaterFormValue()` и др.).
 
 **Запись:** `buildSurveyDraft()` всегда пишет `schemaVersion: SURVEY_DRAFT_SCHEMA_VERSION` и полный `waterHeaterForm`.
@@ -230,15 +228,15 @@ Discriminated union в `frontend/src/types/waterHeaterMatching.ts`:
 | `frontend/src/components/HotWaterForm/HotWaterForm.tsx` | UI шага «Горячая вода» (ввод + кнопка отчёта) |
 | `frontend/src/components/HotWaterReport/HotWaterReportDialog.tsx` | Модалка полного расчёта ГВ |
 | `frontend/src/utils/hotWaterFormDefaults.ts` | Дефолты формы ГВ и ключи fixtures |
-| `frontend/src/utils/normalizeHotWaterForm.ts` | Нормализация формы/точек (черновик, мутации, calc) |
+| `frontend/src/utils/normalizeHotWaterForm.ts` | Нормализация формы/точек (SurveyDraft, мутации, calc) |
 | `frontend/src/utils/countThermalFixtures.ts` | Итоги точек + guard показа (без NaN) |
 | `frontend/src/components/HotWaterReport/HotWaterFixturesTable.tsx` | Таблица точек водоразбора (SSOT UI) |
-| `frontend/src/components/HotWaterReport/HotWaterFixturesSummaryTable.tsx` | Та же таблица в сайдбаре «Результаты» |
-| `frontend/src/components/HotWaterReport/HotWaterSummaryTable.tsx` | Компактный итог ЭБ/БКН в сайдбаре |
-| `frontend/src/utils/hotWaterEquipmentParticipation.ts` | Участие ЭБ/БКН по схеме и подписи строк сайдбара |
+| `frontend/src/components/HotWaterReport/HotWaterFixturesSummaryTable.tsx` | Таблица точек на `technicalResult` |
+| `frontend/src/components/HotWaterReport/HotWaterSummaryTable.tsx` | Компактный итог ЭБ/БКН на `technicalResult` |
+| `frontend/src/utils/hotWaterEquipmentParticipation.ts` | Участие ЭБ/БКН по схеме и подписи строк |
 | `frontend/src/utils/parseWaterHeaterMatchingFromReport.ts` | Парсинг `matching.waterHeater` (stub без модели → null) |
 | `frontend/src/components/WaterHeaterForm/WaterHeaterForm.tsx` | UI формы (стратегия + кнопки отчёта и «Назад к результатам») |
-| `frontend/src/constants/surveyResultsSections.ts` | Якоря секций сайдбара для «Назад к результатам» |
+| `frontend/src/constants/surveyResultsSections.ts` | Якоря секций `technicalResult` для «Назад к результатам» |
 | `frontend/src/components/SurveyNavigation/SurveyReportActions.module.css` | Общие стили кнопок отчёта / назад |
 | `frontend/src/components/WaterHeaterReport/WaterHeaterReportDialog.tsx` | Модалка полного подбора БКН/ЭВН |
 | `frontend/src/components/WaterHeaterReport/WaterHeaterReportView.tsx` | Контент модалки |
@@ -258,19 +256,3 @@ Discriminated union в `frontend/src/types/waterHeaterMatching.ts`:
 | `backend/src/matching/index.js` | Оркестрация pickIndirect / pickWaterHeater |
 
 См. также: [`heating-schemes-thermal-regime.md`](heating-schemes-thermal-regime.md), [`heating-schemes-test-checklist.md`](heating-schemes-test-checklist.md).
-
----
-
-## План реализации (выполнено)
-
-1. Типы и утилиты (`waterHeater.ts`, `waterHeaterSchemeOptions`, `validateWaterHeaterForm`, `normalizeWaterHeaterForm`)
-2. Компонент `WaterHeaterForm` + CSS
-3. Интеграция в `App.tsx`, `useSurveyCalc`, `migrateSurveyDraft`, `surveyCalcInputKey`
-4. Удаление дублирующей галочки БКН из `ObjectMetaForm`
-5. Перенос селектора схемы со шага «Котёл» на «Водонагреватель»
-6. Превью через `WaterHeaterMatchingPreview` (сначала на форме, затем в модалке)
-7. Рефакторинг: discriminated union в карточке, без дублирующих пропсов
-8. Модалка `WaterHeaterReportDialog` по паттерну ГВ/ТП — расчёт matching скрыт под «Отчёт по подбору водонагревателя»
-9. Документация (этот файл + обновление смежных docs)
-
-**Не выполнялось:** ручной выбор модели/литража (шаг 8 roadmap).

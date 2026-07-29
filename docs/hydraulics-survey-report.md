@@ -1,6 +1,6 @@
 # Отчёт и итог гидравлики (UI)
 
-> **Мова UI (PR-6, 2026-07-27):** user-facing тексти — **українською**; [`language-policy.md`](language-policy.md).
+> **Мова UI:** user-facing тексти — **українською**; [`language-policy.md`](language-policy.md).
 >
 > Fallback-підписи контурів у `frontend/src/utils/parseHydraulicsProposalFromReport.ts` — UA; SSOT API — `backend/src/hydraulics/buildHydraulicsProposal.js`.
 
@@ -10,8 +10,8 @@
 |------|------------|------------|
 | Ввод | `HydraulicsSection` | тип разводки, длины, Δt, материал труб |
 | Полный расчёт | `HydraulicsReportDialog` → `HydraulicsReportView` | график/Δt, расход/напор, насосы (без зон ТП), трубы **с** Цена/м и Сумма, детализация по участкам, warnings |
-| Сайдбар «Итог» | `HydraulicsSummaryTable` | KPI (расход, напор, Δt); длины **Магистраль** / **Коллектор** из `pipeSegments` (не число SKU); `SurveyStepLink` на шаг «Гидравлика» |
-| Блок «Рекомендация» | `HydraulicsProposalTable` | плоский подбор труб **без** цен и **без** группировки по контурам / участков |
+| Шаг `technicalResult` | `HydraulicsSummaryTable` | KPI (расход, напор, Δt); длины **Магистраль** / **Коллектор** из `pipeSegments` (не число SKU); `SurveyStepLink` на шаг «Гидравлика» |
+| Шаг `technicalResult` | `HydraulicsProposalTable` | плоский подбор труб **без** цен и **без** группировки по контурам / участков |
 
 Насосы зон `ufh_*` — только в отчёте шага «Тёплый пол» (`excludeUfhZonePumps`).
 
