@@ -5,6 +5,7 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 
+import { AdminRoute } from '../auth/AdminRoute';
 import { ProtectedRoute } from '../auth/ProtectedRoute';
 import { AppBootstrapSkeleton } from '../components/AppBootstrapSkeleton/AppBootstrapSkeleton';
 import { CookieConsentBanner } from '../components/CookieConsentBanner/CookieConsentBanner';
@@ -29,6 +30,11 @@ const LegalPage = lazy(() =>
 );
 const ProjectsPage = lazy(() =>
   import('../pages/ProjectsPage/ProjectsPage').then((m) => ({ default: m.ProjectsPage })),
+);
+const AdminFeedbackPage = lazy(() =>
+  import('../pages/AdminFeedbackPage/AdminFeedbackPage').then((m) => ({
+    default: m.AdminFeedbackPage,
+  })),
 );
 const SharePresentationPage = lazy(() =>
   import('../components/SharePresentationPage/SharePresentationPage').then((m) => ({
@@ -60,6 +66,16 @@ export function AppRouter() {
                   <ProjectsPage />
                 </ProtectedRoute>
               </SurveyAppShell>
+            }
+          />
+          <Route
+            path={paths.adminFeedback}
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <AdminFeedbackPage />
+                </AdminRoute>
+              </ProtectedRoute>
             }
           />
           <Route path={paths.home} element={<SurveyAppShell />} />

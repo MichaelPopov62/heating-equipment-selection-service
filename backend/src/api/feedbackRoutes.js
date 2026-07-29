@@ -7,9 +7,11 @@ import express from 'express';
 import { optionalAuth } from '../auth/optionalAuth.js';
 import { validateFeedbackBody } from '../feedback/validateFeedbackBody.js';
 import { feedbackRateLimiter } from './middleware/rateLimiters.js';
-import { Feedback } from '../models/Feedback.js';
+import { Feedback } from '../models/public.js';
 import { requireMongoForProjects } from '../projects/requireMongo.js';
 import { logger } from '../utils/logger.js';
+import { serializeAdminFeedback } from '../feedback/adminFeedback.js';
+import { publishFeedbackEvent } from '../feedback/feedbackEventHub.js';
 
 /**
  * @returns {import('express').Router}
@@ -54,6 +56,10 @@ export function createFeedbackRouter() {
         id,
         type: parsed.data.type,
         hasEmail: Boolean(parsed.data.email),
+      });
+      publishFeedbackEvent({
+        event: 'feedback.created',
+        feedback: serializeAdminFeedback(doc),
       });
 
       res.status(201).json({ ok: true, id });

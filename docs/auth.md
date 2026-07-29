@@ -38,6 +38,7 @@ Clerk SignIn / SignUp (frontend)
 | `GET/POST/PUT/DELETE /api/v1/projects/*` | JWT обязателен в production |
 | `GET /api/v1/me` | JWT при auth enabled; dev без auth — синтетический профиль |
 | `PATCH /api/v1/admin/users/{id}` | JWT + `role=admin` |
+| `GET/PATCH /api/v1/admin/feedback*` | JWT + `role=admin`; список, статусы и SSE |
 | `POST /api/v1/feedback` | JWT опционален (`optionalAuth`) |
 | `POST /api/v1/calc`, `GET /api/v1/catalog`, presets, `GET /health` | Нет |
 | `GET /api/v1/public/shares/*` | Нет (read-only по `shareToken`) |
@@ -82,7 +83,7 @@ Startup gate (`backend/src/index.js`):
 | `auth/AuthProvider.tsx` | Clerk session; `getToken({ template })` — всегда JWT template (не session token) |
 | `services/meApi.ts`, `parseMeResponse.ts` | `GET /api/v1/me` — профиль и tier с backend |
 | `query/queries/useMeQuery.ts` | React Query профиля (`queryKeys.me`) |
-| `components/AccountBar/` | «Увійти», email, badge tier, logout (данные из `/me`) |
+| `components/AccountBar/` | «Увійти», email, badge tier, admin-ссылка; «Вийти з акаунта» завершает сессию (данные из `/me`) |
 | `components/SubscriptionTierBadge/` | Badge `free` / `pro` / `marketplace` |
 | `components/PublisherContactBlock/` | Контакт публикатора на `/s/{token}` (Pro/Marketplace) |
 | `services/projectsAuthToken.ts` | `getToken()` → localStorage → env fallback |
@@ -266,6 +267,9 @@ npm run migrate:project-owner-ids -- --apply
 |-------|------|----------|
 | GET | `/api/v1/me` | Профиль: `id`, `email`, `role`, `subscription` |
 | PATCH | `/api/v1/admin/users/{id}` | Admin: `{ role?, subscription? }` |
+| GET | `/api/v1/admin/feedback` | Admin: список обращений с cursor pagination |
+| PATCH | `/api/v1/admin/feedback/{id}` | Admin: статус `new` / `read` / `resolved` |
+| GET | `/api/v1/admin/feedback/stream` | Admin: авторизованный SSE-поток новых обращений |
 
 Bootstrap первого admin:
 
@@ -281,7 +285,7 @@ npm run promote:user-admin -- --email user@example.com
 | Модуль | Назначение |
 |--------|------------|
 | `api/meRoutes.js` | `GET /api/v1/me` |
-| `api/adminRoutes.js` | `PATCH /api/v1/admin/users/:id` |
+| `api/adminRoutes.js` | Управление пользователями и административный feedback API |
 | `auth/authorizationPolicy.js` | Нормализация role/subscription, `hasRole`, `canAccessAdmin` |
 | `auth/requireRole.js` | Middleware admin gate |
 

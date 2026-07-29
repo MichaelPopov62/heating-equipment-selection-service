@@ -9,6 +9,13 @@ const { Schema } = mongoose;
 const feedbackSchema = new Schema(
   {
     type: { type: String, required: true, enum: ['bug', 'contact'], index: true },
+    status: {
+      type: String,
+      required: true,
+      enum: ['new', 'read', 'resolved'],
+      default: 'new',
+      index: true,
+    },
     message: { type: String, required: true, trim: true, maxlength: 4000 },
     email: { type: String, required: false, trim: true, maxlength: 200 },
     name: { type: String, required: false, trim: true, maxlength: 120 },
@@ -17,6 +24,8 @@ const feedbackSchema = new Schema(
     buildId: { type: String, required: false, trim: true, maxlength: 80 },
     ownerSub: { type: String, required: false, trim: true, index: true },
     clientIp: { type: String, required: false, trim: true, maxlength: 64 },
+    readAt: { type: Date, required: false },
+    resolvedAt: { type: Date, required: false },
   },
   {
     timestamps: true,
@@ -25,7 +34,10 @@ const feedbackSchema = new Schema(
   },
 );
 
-feedbackSchema.index({ createdAt: -1 });
+feedbackSchema.index({ createdAt: -1, _id: -1 });
+feedbackSchema.index({ status: 1, createdAt: -1, _id: -1 });
+feedbackSchema.index({ type: 1, createdAt: -1, _id: -1 });
+feedbackSchema.index({ status: 1, type: 1, createdAt: -1, _id: -1 });
 
 /** @type {import('mongoose').Model<import('../types/shared-types.js').FeedbackMongoDoc>} */
 export const Feedback =

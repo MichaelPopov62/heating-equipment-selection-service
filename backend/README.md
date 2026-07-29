@@ -28,7 +28,7 @@ npm run seed   # нужен test_data.json (см. test_data.json.example)
 |--------|----------|
 | Public | `GET /health`, `GET /api/v1/catalog`, `GET /api/v1/presets/*`, `POST /api/v1/calc`, `GET /api/v1/public/shares/{token}` (+ `/pdf`) |
 | JWT | `/api/v1/projects/*`, `GET /api/v1/me` |
-| Admin | `PATCH /api/v1/admin/users/{id}` |
+| Admin | `PATCH /api/v1/admin/users/{id}`, `GET/PATCH /api/v1/admin/feedback*`, `GET /api/v1/admin/feedback/stream` (SSE) |
 | Feedback | `POST /api/v1/feedback` (JWT опционален) |
 | System | `POST /api/v1/system/invalidate-reference-cache` |
 
@@ -48,6 +48,7 @@ npm run verify   # lint + typecheck + все verify:*
 
 - Карта модулей: [`Plan.md`](../Plan.md), [`docs/project-structure.md`](../docs/project-structure.md)
 - Auth: [`docs/auth.md`](../docs/auth.md)
+- Admin feedback: [`docs/feedback-admin.md`](../docs/feedback-admin.md)
 - Projects: [`docs/projects-api.md`](../docs/projects-api.md)
 - Гидравлика: [`docs/hydraulics-pipeline.md`](../docs/hydraulics-pipeline.md)
 - PDF: [`docs/project-pdf.md`](../docs/project-pdf.md)

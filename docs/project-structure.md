@@ -91,7 +91,7 @@
 | `climate/` | `geocode.js`, `snipClimate.js`, Meteostat bulk |
 | `data/` | Static пресеты ТП для UI (`warmFloorAssemblyPresets.js`, `flooringFinishMaterials.js`) |
 | `dhw/` | water_norms, appliances: load + validate + `waterCalc.js` |
-| `feedback/` | `validateFeedbackBody.js` |
+| `feedback/` | Валидация публичного feedback, сериализация admin DTO и SSE-hub |
 | `hydraulics/` | Pure Pipeline (~25 модулей), barrel `public.js` |
 | `logic/` | Теплопотери, ограждения, ГВС, оркестратор ТП (`warmFloorCalc`, `ufh*`) |
 | `matching/` | Подбор оборудования; `internal/` — radiators core, emitter kind, indirect helpers |
@@ -115,7 +115,8 @@
 | `public.js` | Barrel HTTP API |
 | `projectsRoutes.js` | Projects CRUD, calc, share, PDF |
 | `publicSharesRoutes.js` | Публичный share |
-| `meRoutes.js` / `adminRoutes.js` / `feedbackRoutes.js` / `systemRoutes.js` | `/me`, admin, feedback, cache invalidate |
+| `adminFeedbackRoutes.js` | Admin: список обращений, статусы и SSE `/api/v1/admin/feedback*` |
+| `meRoutes.js` / `adminRoutes.js` / `feedbackRoutes.js` / `systemRoutes.js` | `/me`, admin gate/users, публичный feedback, cache invalidate |
 | `validateAdminUserPatch.js` | Валидация PATCH admin user |
 | `middleware/rateLimiters.js` | Rate limits |
 
@@ -131,7 +132,7 @@
 
 #### `backend/src/models/`
 
-Runtime — `public.js` (`Product`, `Project`, `Calculation`, `User`). Discriminators для seed: `Boiler`, `Radiator`, `WaterHeater`, `Pipe`, `Pump`, `IndirectWaterHeater`, `Manifold`, `BoilerManifold`, `Unibox`; reference: `WaterNorms`, `Appliance`, `Recommendation`, `UnderfloorHeatingPreset`, `Feedback`.
+Runtime — `public.js` (`Product`, `Project`, `Calculation`, `User`, `Feedback`). Discriminators для seed: `Boiler`, `Radiator`, `WaterHeater`, `Pipe`, `Pump`, `IndirectWaterHeater`, `Manifold`, `BoilerManifold`, `Unibox`; reference: `WaterNorms`, `Appliance`, `Recommendation`, `UnderfloorHeatingPreset`.
 
 #### `backend/src/projects/` — подмодули
 
@@ -162,7 +163,7 @@ Runtime — `public.js` (`Product`, `Project`, `Calculation`, `User`). Discrimin
 | `seed.js` + `seedReferenceData.js` | Запись products + reference в Mongo |
 | `migrateProjectOwnerIds.js` | Миграция legacy `projects.ownerId` |
 | `promoteUserAdmin.js` | Dev-утилита повышения роли |
-| `verify*.js` / `verifyFeedback.mjs` | Domain-гейты (`npm run verify:*`) |
+| `verify*.js` / `verifyFeedback.mjs` / `verifyAdminFeedback.mjs` | Domain-гейты (`npm run verify:*`) |
 | `fuzz-calc.ts` | Ручной fuzz POST `/api/v1/calc` (`npm run test:fuzz`; нужен поднятый API) |
 | `fixtures/` | Хелперы assert/фикстур для verify-скриптов |
 | `utils/` | Пути каталога, seed-normalize, invalidate cache |
@@ -181,6 +182,7 @@ main.tsx → QueryProvider → App.tsx
        ├─ /s/:shareToken → SharePresentationPage (read-only презентация)
        ├─ /login, /sign-up, /docs, /faq, legal → pages/*
        ├─ /projects → SurveyAppShell → ProtectedRoute → ProjectsPage
+       ├─ /admin/feedback → ProtectedRoute → AdminRoute → AdminFeedbackPage
        └─ / → SurveyAppShell → SurveySessionProvider → AppRoot
             ├─ resolving → AppBootstrapSkeleton
             ├─ error     → BootstrapErrorScreen
@@ -199,14 +201,14 @@ main.tsx → QueryProvider → App.tsx
 | `src/surveySession/` | State анкеты: `dispatch` → pipeline → calc; bootstrap |
 | `src/surveySession/resolveAppBootstrap.ts` | Hash / localStorage → start \| survey |
 | `src/surveySession/createEmptySurveySessionState.ts`, `createDefaultSurveyDraft.ts` | SSOT пустого и дефолтного SurveyDraft |
-| `src/query/` | React Query: справочники, calc, проекты |
-| `src/services/` | HTTP-клиенты; `meApi`, `projectsApi`, `publicShareApi`, `parsePublicShare`, `surveyDraftStorage` |
-| `src/hooks/` | `useSurveyBootstrap`, `useSurveyDraftPersistence`, `useSurveyProject`, … |
-| `src/pages/` | Login, SignUp, Projects, Docs, FAQ, Privacy/Terms/Cookies |
-| `src/auth/` | Clerk/AuthProvider, `ProtectedRoute`, redirect и `/me` cache sync |
+| `src/query/` | React Query: справочники, calc, проекты, admin feedback list/status |
+| `src/services/` | HTTP-клиенты; `meApi`, `projectsApi`, `adminFeedbackApi`, `adminFeedbackStream`, parsers |
+| `src/hooks/` | `useSurveyBootstrap`, `useSurveyDraftPersistence`, `useSurveyProject`, `useAdminFeedbackStream`, … |
+| `src/pages/` | Login, SignUp, Projects, AdminFeedback, Docs, FAQ, Privacy/Terms/Cookies |
+| `src/auth/` | Clerk/AuthProvider, `ProtectedRoute`, `AdminRoute`, redirect и `/me` cache sync |
 | `src/shell/` | `AppChromeProvider`: общие действия и модальные окна Header/Footer |
 | `src/i18n/` | Украинские UI-тексты, локализация и appearance Clerk |
-| `src/components/AccountBar/` | Сессия: «Увійти», email, tier badge, logout |
+| `src/components/AccountBar/` | Сессия: «Увійти», email, tier badge, admin-ссылка; «Вийти з акаунта» завершает авторизацию |
 | `src/components/SubscriptionTierBadge/` | Badge подписки из `/me` |
 | `src/components/PublisherContactBlock/` | Контакт на public share (Pro/Marketplace) |
 | `src/components/StartScreen/` | Стартовый экран (cold open) |
@@ -214,7 +216,7 @@ main.tsx → QueryProvider → App.tsx
 | `src/components/DevPanel/` | Панель разработчика (DEV / `VITE_DEV_TOOLS=1`) |
 | `src/components/Footer/`, `ModalHost/`, `CookieConsentBanner/`, `DevToolsDock/` | Общая оболочка SPA |
 | `src/auth/` | Clerk SDK, `AuthProvider`, `useAuthMeCacheSync`, `ProtectedRoute`, login — см. [`auth.md`](auth.md) |
-| `src/components/Header/` | Клиент: ссылка, PDF, `accountSlot`, hint pro/marketplace; Dev — отдельно |
+| `src/components/Header/` | Клиент: ссылка, PDF, `accountSlot`, hint pro/marketplace; «Вийти з проєкту» открывает Start Screen |
 | `src/components/` | Формы, отчёты, `ProjectsDialog/`, … |
 | `src/constants/` | SSOT шагов (`SURVEY_STEPS`), типы комнат, compat-id |
 | `src/types/` | DTO/view-модели UI |
@@ -223,7 +225,7 @@ main.tsx → QueryProvider → App.tsx
 | `src/styles/` | CSS-переменные / общие стили |
 | `scripts/verifySurveySessionPipeline.mjs` | Verify pipeline сессии |
 | `scripts/verifyStartState.mjs` | Verify bootstrap / start screen |
-| `scripts/verifyFooterNav.mjs`, `verifyFrontendAuth.mjs`, `verifyFrontendMe.mjs` | Verify навигации и auth |
+| `scripts/verifyFooterNav.mjs`, `verifyFrontendAuth.mjs`, `verifyFrontendMe.mjs`, `verifyAdminFeedback.mjs` | Verify навигации, auth и admin feedback |
 | `knip.json` | Dead-code (`--treat-config-hints-as-errors`) |
 
 Подробности `query/`, `surveySession/`, `hooks/` — [`frontend-calc-runner.md`](frontend-calc-runner.md), [`frontend-query-inventory.md`](frontend-query-inventory.md), [`survey-draft.md`](survey-draft.md).
@@ -242,6 +244,7 @@ main.tsx → QueryProvider → App.tsx
 | [`frontend-query-inventory.md`](frontend-query-inventory.md) | Инвентарь query/mutations |
 | [`survey-draft.md`](survey-draft.md) | SurveyDraft v4, load/save, verify |
 | [`auth.md`](auth.md) | JWT, Clerk, tier, `/me`, share contact, verify |
+| [`feedback-admin.md`](feedback-admin.md) | Admin REST/SSE обращений, статусы и dashboard |
 | [`projects-api.md`](projects-api.md) | REST проектов, share, PDF, расчётов |
 | [`calc-runtime-context.md`](calc-runtime-context.md) | DI справочников в calc |
 | [`calc-input-validation.md`](calc-input-validation.md) | Валидация CalcInput |

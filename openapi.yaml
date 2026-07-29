@@ -967,6 +967,159 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
+  /api/v1/admin/feedback:
+    get:
+      summary: List client feedback (admin only)
+      operationId: listAdminFeedback
+      security:
+        - ProjectsBearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: cursor
+          in: query
+          description: Opaque cursor returned by the previous page.
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/FeedbackStatus"
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [bug, contact]
+      responses:
+        "200":
+          description: Feedback page ordered by newest first
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminFeedbackListResponse"
+        "400":
+          description: VALIDATION_FAILED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: PROJECTS_AUTH_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: ADMIN_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/admin/feedback/stream:
+    get:
+      summary: Stream feedback events to an open admin dashboard
+      operationId: streamAdminFeedback
+      description: |
+        Authenticated Server-Sent Events stream. The server sends heartbeat comments and
+        `feedback.created` events. Clients must reload the REST list after reconnecting;
+        MongoDB remains the source of truth.
+      security:
+        - ProjectsBearerAuth: []
+      responses:
+        "200":
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        "401":
+          description: PROJECTS_AUTH_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: ADMIN_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/v1/admin/feedback/{id}:
+    patch:
+      summary: Change client feedback status (admin only)
+      operationId: patchAdminFeedback
+      security:
+        - ProjectsBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: feedback._id (ObjectId hex)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminFeedbackPatchBody"
+      responses:
+        "200":
+          description: Updated feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminFeedbackPatchResponse"
+        "400":
+          description: VALIDATION_FAILED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: PROJECTS_AUTH_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: ADMIN_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: FEEDBACK_NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
   /api/v1/admin/users/{id}:
     patch:
       summary: Update user role or subscription (admin only)
@@ -1060,6 +1213,16 @@ components:
       $ref: ./components/schemas/AdminUserPatchBody.yaml
     AdminUserPatchResponse:
       $ref: ./components/schemas/AdminUserPatchResponse.yaml
+    FeedbackStatus:
+      $ref: ./components/schemas/FeedbackStatus.yaml
+    FeedbackListItem:
+      $ref: ./components/schemas/FeedbackListItem.yaml
+    AdminFeedbackListResponse:
+      $ref: ./components/schemas/AdminFeedbackListResponse.yaml
+    AdminFeedbackPatchBody:
+      $ref: ./components/schemas/AdminFeedbackPatchBody.yaml
+    AdminFeedbackPatchResponse:
+      $ref: ./components/schemas/AdminFeedbackPatchResponse.yaml
     CalcInput:
       $ref: ./components/schemas/CalcInput.yaml
     ErrorEnvelope:

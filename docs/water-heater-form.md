@@ -140,6 +140,17 @@ Discriminated union в `frontend/src/types/waterHeaterMatching.ts`:
 
 При успешном БКН оркестратор (`matching/index.js`) **не** пишет `recommendedTankLiters` в `matching.waterHeater.requiredTankLiters` (остаётся `0`, `selected: null`). Объём бака — только в `matching.indirectWaterHeater` и в `calculations.hotWater.recommendedTankLiters`. Парсер `parseWaterHeaterMatchingFromReport` игнорирует stub «только литры» без модели/warnings.
 
+### Приоритет подбора электрического накопителя
+
+`pickWaterHeater` выбирает вариант по следующим приоритетам:
+
+1. минимальный объём, который не меньше `requiredTankLiters`;
+2. минимальная цена среди вариантов с одинаковым выбранным объёмом.
+
+Более дешёвая модель большего объёма не вытесняет минимальный достаточный объём. Если каталог
+не покрывает расчётный минимум, выбирается максимальный доступный объём, а при равном объёме —
+вариант с минимальной ценой; в отчёт добавляется предупреждение об ограничении каталога.
+
 ### `WaterHeaterReportDialog`
 
 Модалка полного подбора (паттерн `HotWaterReportDialog` / `UnderfloorHeatingReportDialog`):

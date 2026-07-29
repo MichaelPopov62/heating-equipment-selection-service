@@ -48,6 +48,7 @@ export default defineConfig([
                 '**/models/Project.js',
                 '**/models/Calculation.js',
                 '**/models/User.js',
+                '**/models/Feedback.js',
               ],
               message:
                 'Модели runtime: import из models/public.js. Discriminators — только scripts/.',

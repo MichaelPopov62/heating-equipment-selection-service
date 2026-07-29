@@ -1,0 +1,12 @@
+type: object
+required:
+  - ok
+  - feedback
+properties:
+  ok:
+    type: boolean
+    enum:
+      - true
+  feedback:
+    $ref: ./FeedbackListItem.yaml
+additionalProperties: false

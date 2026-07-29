@@ -25,6 +25,7 @@
 }
 
 .loginButton,
+.adminLink,
 .logoutButton {
   font: 600 12px/1.2 var(--sans);
   border-radius: 10px;
@@ -37,6 +38,7 @@
 }
 
 .loginButton:hover,
+.adminLink:hover,
 .logoutButton:hover {
   border-color: var(--accent-border);
   background: var(--accent-bg);
@@ -45,6 +47,10 @@
 .loginButton {
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
   background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  color: var(--accent);
+}
+
+.adminLink {
   color: var(--accent);
 }
 
@@ -85,6 +91,7 @@
   }
 
   .loginButton,
+  .adminLink,
   .logoutButton {
     font-size: 13px;
     padding: 10px 12px;

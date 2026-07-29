@@ -10,6 +10,8 @@
 | `useCatalogEquipmentQuery` | `query/queries/useCatalogEquipmentQuery.ts` | `GET /api/v1/catalog` | по требованию UI |
 | `useProjectsListQuery` | `query/queries/useProjectsListQuery.ts` | `GET /api/v1/projects` | `projectsOpen` в dialog или `true` на `/projects` |
 | `useMeQuery` | `query/queries/useMeQuery.ts` | `GET /api/v1/me` | `!authRequired \|\| isAuthenticated` |
+| `useAdminFeedbackQuery` | `query/queries/useAdminFeedbackQuery.ts` | `GET /api/v1/admin/feedback` | только `role=admin` |
+| `useAdminFeedbackStatusMutation` | `query/mutations/useAdminFeedbackStatusMutation.ts` | `PATCH /api/v1/admin/feedback/:id` | по действию admin |
 | `useProjectCalculationsQuery` | `query/queries/useProjectCalculationsQuery.ts` | calculations list | `projectId` задан |
 | `useProjectMutations` | `query/mutations/useProjectMutations.ts` | save/load project, calc | по действию |
 | `useSurveyCalc` | `query/useSurveyCalc.ts` | `POST /api/v1/calc` | auto: `canAutoCalc`; manual: mutation |
@@ -31,6 +33,8 @@
 | `fetchMe` | `services/meApi.ts` | `GET /api/v1/me` |
 | `fetchPublicShare` | `services/publicShareApi.ts` | public share (+ `parsePublicShare.ts`) |
 | `submitFeedback` | `services/feedbackApi.ts` | `POST /api/v1/feedback` |
+| `listAdminFeedback`, `patchAdminFeedbackStatus` | `services/adminFeedbackApi.ts` | Admin feedback REST API |
+| `streamAdminFeedback` | `services/adminFeedbackStream.ts` | Авторизованный SSE через streaming fetch |
 | `getProjectsAuthHeaders` | `services/projectsAuthHeaders.ts` | заголовки Bearer |
 | `getProjectsAuthToken` | `services/projectsAuthToken.ts` | Clerk/local/env token |
 | `buildCalcRequestPayload` | `services/buildCalcRequestPayload.ts` | локальный маппинг (не HTTP) |
@@ -52,6 +56,6 @@ Fallback-данные API offline: `src/data/fallback*.ts` (не constants).
 cd frontend && npm run lint && npm run build && npm run verify
 ```
 
-`npm run verify` = `lint` + `typecheck` + `verify:dead-code` + `verify:footer-nav` + `verify:frontend-auth` + `verify:frontend-me` + `build` + `verify:survey-session` + `verify:start-state`. Exit `0` обязателен для приёмки.
+`npm run verify` = `lint` + `typecheck` + `verify:dead-code` + `verify:footer-nav` + `verify:frontend-auth` + `verify:frontend-me` + `verify:admin-feedback` + `build` + `verify:survey-session` + `verify:start-state`. Exit `0` обязателен для приёмки.
 
 **Knip:** `knip --treat-config-hints-as-errors`; compat/pipeline-миграции в графе импортов (см. `docs/survey-draft.md`).

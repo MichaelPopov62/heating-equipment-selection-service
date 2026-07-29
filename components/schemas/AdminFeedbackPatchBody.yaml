@@ -1,0 +1,7 @@
+type: object
+required:
+  - status
+properties:
+  status:
+    $ref: ./FeedbackStatus.yaml
+additionalProperties: false

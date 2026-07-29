@@ -2,6 +2,8 @@
  * Назначение: единый реестр ключей React Query.
  */
 
+import type { AdminFeedbackStatus, AdminFeedbackType } from '../types/adminFeedback';
+
 export const queryKeys = {
   me: ['me', 'profile'] as const,
   envelopePresets: ['presets', 'envelope'] as const,
@@ -14,4 +16,10 @@ export const queryKeys = {
     ['projects', 'list', params ?? {}] as const,
   projectCalculations: (projectId: string) =>
     ['projects', projectId, 'calculations'] as const,
+  adminFeedbackRoot: ['admin', 'feedback'] as const,
+  adminFeedback: (filters: {
+    status?: AdminFeedbackStatus;
+    type?: AdminFeedbackType;
+    limit: number;
+  }) => ['admin', 'feedback', 'list', filters] as const,
 };

@@ -1452,10 +1452,56 @@ export interface FeedbackOkResponse {
   id: string;
 }
 
+export type FeedbackType = 'bug' | 'contact';
+export type FeedbackStatus = 'new' | 'read' | 'resolved';
+
+/** Безопасное представление feedback для admin API и SSE. */
+export interface AdminFeedbackItem {
+  id: string;
+  type: FeedbackType;
+  status: FeedbackStatus;
+  message: string;
+  email?: string;
+  name?: string;
+  pageUrl?: string;
+  appVersion?: string;
+  buildId?: string;
+  ownerSub?: string;
+  readAt?: string;
+  resolvedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminFeedbackListResponse {
+  ok: true;
+  items: AdminFeedbackItem[];
+  nextCursor: string | null;
+  limit: number;
+}
+
+export interface AdminFeedbackPatchBody {
+  status: FeedbackStatus;
+}
+
+export interface AdminFeedbackPatchResponse {
+  ok: true;
+  feedback: AdminFeedbackItem;
+}
+
+export interface FeedbackCreatedEvent {
+  event: 'feedback.created';
+  feedback: AdminFeedbackItem;
+}
+
+export type FeedbackEventListener = (event: FeedbackCreatedEvent) => void;
+
 /** Документ MongoDB `feedback`. */
 export interface FeedbackMongoDoc {
   _id?: import('mongoose').Types.ObjectId;
-  type: 'bug' | 'contact';
+  type: FeedbackType;
+  /** Legacy-документы, созданные до admin feedback, не содержат status. */
+  status?: FeedbackStatus;
   message: string;
   email?: string;
   name?: string;
@@ -1464,6 +1510,8 @@ export interface FeedbackMongoDoc {
   buildId?: string;
   ownerSub?: string;
   clientIp?: string;
+  readAt?: Date;
+  resolvedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -12,6 +12,7 @@ import { parseObjectIdParam } from '../projects/parseObjectId.js';
 import { requireMongoForProjects } from '../projects/requireMongo.js';
 import { validateAdminUserPatchBody } from './validateAdminUserPatch.js';
 import { logger } from '../utils/logger.js';
+import { createAdminFeedbackRouter } from './adminFeedbackRoutes.js';
 
 /**
  * @param {import('express').Request} req
@@ -52,6 +53,7 @@ export function createAdminRouter() {
   const router = express.Router();
 
   router.use('/api/v1/admin', mongoMiddleware, requireAuth, requireRole('admin'));
+  router.use(createAdminFeedbackRouter());
 
   /**
    * @param {import('express').Request<{ id: string }, import('../types/auth.js').AdminUserPatchResponse, import('../types/auth.js').AdminUserPatchBody>} req

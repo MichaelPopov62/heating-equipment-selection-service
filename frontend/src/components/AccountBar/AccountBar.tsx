@@ -6,6 +6,7 @@
 import { Link, useLocation } from 'react-router-dom';
 
 import { useAuth } from '../../auth/useAuth';
+import { adminFeedbackUk } from '../../i18n/uk/adminFeedback';
 import { authUk } from '../../i18n/uk/auth';
 import { useMeQuery } from '../../query/queries/useMeQuery';
 import { MeApiError } from '../../services/meApi';
@@ -105,6 +106,11 @@ export function AccountBar({ className, compact = false }: AccountBarProps) {
         {meUser.email}
       </span>
       <SubscriptionTierBadge tier={meUser.subscription} devMode={meUser.devMode === true} />
+      {meUser.role === 'admin' ? (
+        <Link to={paths.adminFeedback} className={styles.adminLink}>
+          {adminFeedbackUk.accountLink}
+        </Link>
+      ) : null}
       {isAuthRequired || meUser.authProvider != null ? (
         <button
           type="button"

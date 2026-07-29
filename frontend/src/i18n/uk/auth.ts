@@ -16,7 +16,7 @@ export const authUk = {
   loginDevHint:
     'У production використовуйте провайдера автентифікації (Clerk/Auth0). У dev auth може бути вимкнено на backend.',
   logout: 'Вийти з облікового запису',
-  logoutButton: 'Вийти',
+  logoutButton: 'Вийти з акаунта',
   loginButton: 'Увійти',
   tierFree: 'Free',
   tierPro: 'Pro',

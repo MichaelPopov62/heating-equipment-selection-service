@@ -1,0 +1,47 @@
+type: object
+required:
+  - id
+  - type
+  - status
+  - message
+  - createdAt
+  - updatedAt
+properties:
+  id:
+    type: string
+  type:
+    type: string
+    enum:
+      - bug
+      - contact
+  status:
+    $ref: ./FeedbackStatus.yaml
+  message:
+    type: string
+  email:
+    type: string
+  name:
+    type: string
+  pageUrl:
+    type: string
+  appVersion:
+    type: string
+  buildId:
+    type: string
+  ownerSub:
+    type: string
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+  readAt:
+    type: string
+    format: date-time
+    nullable: true
+  resolvedAt:
+    type: string
+    format: date-time
+    nullable: true
+additionalProperties: false

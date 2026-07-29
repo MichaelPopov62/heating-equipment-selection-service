@@ -58,26 +58,17 @@ export function RoomsForm({
     insulationPresets,
   );
   const allIds = useMemo(() => value.map((r) => r.id), [value]);
-  // Стартуем со "все свернуты" и больше не авто-открываем комнаты.
-  const [openIds, setOpenIds] = useState<Set<string>>(() => new Set());
+  // Стартуем со «все свёрнуты» и разрешаем открыть только одну комнату.
+  const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- синхронная подрезка openIds при смене списка комнат */
-    setOpenIds((prev) => {
-      const next = new Set<string>();
-      for (const id of allIds) if (prev.has(id)) next.add(id);
-      return next;
-    });
+    /* eslint-disable react-hooks/set-state-in-effect -- сброс открытой комнаты при её удалении */
+    setOpenId((prev) => (prev !== null && !allIds.includes(prev) ? null : prev));
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [allIds]);
 
   const toggleAccordion = (id: string) => {
-    setOpenIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    setOpenId((prev) => (prev === id ? null : id));
   };
 
   const copyFirstRoomSettings = () => {
@@ -136,7 +127,7 @@ export function RoomsForm({
             key={room.id}
             room={room}
             index={index}
-            isOpen={openIds.has(room.id)}
+            isOpen={openId === room.id}
             onToggle={() => { toggleAccordion(room.id); }}
             maxFloors={maxFloors}
             objectExternalWallsSummary={objectExternalWallsSummary}

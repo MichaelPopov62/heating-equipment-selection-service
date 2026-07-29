@@ -1,0 +1,24 @@
+type: object
+required:
+  - ok
+  - items
+  - nextCursor
+  - limit
+properties:
+  ok:
+    type: boolean
+    enum:
+      - true
+  items:
+    type: array
+    items:
+      $ref: ./FeedbackListItem.yaml
+  nextCursor:
+    type: string
+    nullable: true
+    description: Opaque cursor for the next page.
+  limit:
+    type: integer
+    minimum: 1
+    maximum: 100
+additionalProperties: false

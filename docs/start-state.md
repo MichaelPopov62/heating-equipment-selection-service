@@ -59,14 +59,16 @@ SSOT дефолтов:
 | Первое открытие сайта | ✅ `resolving` → `AppBootstrapSkeleton` (~200 ms) |
 | Загрузка сохранённого проекта с сервера | Переход `/projects` → `pendingProjectNavigation` → загрузка in-place, без bootstrap skeleton |
 | Перерасчёт после изменения параметров | локальный `calcLoading` / «Расчёт…» в секциях |
-| **Выход из проекта (Exit)** | ❌ сразу Start Screen |
+| **«Вийти з проєкту» (Exit)** | ❌ сразу Start Screen |
 | **Новый проект** | ❌ сразу Start Screen |
 
 Exit и «Новый проект» **не** вызывают `retryBootstrap()` и **не** переводят в `resolving`.
 
-## Выход из проекта (Exit)
+## «Вийти з проєкту» (Exit)
 
-Клиентский Header (`variant=survey`): кнопка **«Выйти»** → `exitProject()` → `exitToStart()`.
+Клиентский Header (`variant=survey`): кнопка **«Вийти з проєкту»** → `exitProject()` → `exitToStart()`.
+Не путать с **«Вийти з акаунта»** в `AccountBar`: она завершает авторизованную сессию,
+а не закрывает текущий проект.
 
 **Очерёдность** (синхронно, без `await`, без `showOk`/`showErr` после exit):
 

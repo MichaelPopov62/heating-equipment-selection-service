@@ -1,7 +1,7 @@
 /**
  * Назначение: подбор электронакопительного водонагревателя.
- * Описание: выбор модели и варианта объёма из каталога по recommendedTankLiters; при нехватке
- * номенклатуры — максимально доступный вариант с предупреждением.
+ * Описание: выбор минимального достаточного объёма из каталога и минимальной цены при равном
+ * объёме; при нехватке номенклатуры — максимально доступный вариант с предупреждением.
  */
 import { buildMatchingSortPools } from '../catalog/matchingSortPools.js';
 import { waterHeaterMaxVolumeLiters } from '../catalog/comparators.js';
@@ -59,6 +59,10 @@ export function pickWaterHeater({ hotWater, catalog }) {
     if (
       !best
       || v.volumeLiters < best.variant.volumeLiters
+      || (
+        v.volumeLiters === best.variant.volumeLiters
+        && v.price < best.variant.price
+      )
     ) {
       best = { heater: h, variant: v };
     }
@@ -75,7 +79,14 @@ export function pickWaterHeater({ hotWater, catalog }) {
       );
       const v = vars[vars.length - 1];
       if (!v) continue;
-      if (!largest || v.volumeLiters > largest.variant.volumeLiters) {
+      if (
+        !largest
+        || v.volumeLiters > largest.variant.volumeLiters
+        || (
+          v.volumeLiters === largest.variant.volumeLiters
+          && v.price < largest.variant.price
+        )
+      ) {
         largest = { heater: h, variant: v };
       }
     }

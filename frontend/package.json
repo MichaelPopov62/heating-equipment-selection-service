@@ -15,7 +15,8 @@
     "verify:footer-nav": "node scripts/verifyFooterNav.mjs",
     "verify:frontend-auth": "node scripts/verifyFrontendAuth.mjs",
     "verify:frontend-me": "node scripts/verifyFrontendMe.mjs",
-    "verify": "npm run lint && npm run typecheck && npm run verify:dead-code && npm run verify:footer-nav && npm run verify:frontend-auth && npm run verify:frontend-me && npm run build && npm run verify:survey-session && npm run verify:start-state"
+    "verify:admin-feedback": "node scripts/verifyAdminFeedback.mjs",
+    "verify": "npm run lint && npm run typecheck && npm run verify:dead-code && npm run verify:footer-nav && npm run verify:frontend-auth && npm run verify:frontend-me && npm run verify:admin-feedback && npm run build && npm run verify:survey-session && npm run verify:start-state"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.9",
