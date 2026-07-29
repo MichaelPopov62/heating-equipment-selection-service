@@ -10,6 +10,7 @@ import { resolveUfhActiveFloorAreaM2 } from '../src/logic/ufhActiveFloorArea.js'
 import { applyUnderfloorHeatingRecommendations } from '../src/matching/warmFloor.js';
 import { assertAt, assertDefined } from './fixtures/scriptAssert.js';
 import { buildObjectMeta, buildRoom, buildUfhReport, buildUfhRoom } from './fixtures/verifyFixtures.js';
+import { exitVerifyScript } from './utils/exitVerifyScript.js';
 
 let passed = 0;
 let failed = 0;
@@ -236,4 +237,4 @@ check(
 );
 
 console.log(`\nИтого: ${passed} OK, ${failed} FAIL`);
-if (failed > 0) process.exit(1);
+await exitVerifyScript(failed > 0 ? 1 : 0);

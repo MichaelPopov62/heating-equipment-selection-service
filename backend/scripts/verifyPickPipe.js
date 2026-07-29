@@ -12,6 +12,7 @@ import { pipeInternalDiameterMm } from '../src/hydraulics/pipeHydraulics.js';
 import { hydraulicsRulesFromAppliance } from '../src/hydraulics/resolveEmittersMode.js';
 import { assertAt } from './fixtures/scriptAssert.js';
 import { buildHydraulicsGraphEdge } from './fixtures/verifyFixtures.js';
+import { exitVerifyScript } from './utils/exitVerifyScript.js';
 
 const bundle = await getReferenceBundle();
 const pipes = bundle.catalog.pipes ?? [];
@@ -236,3 +237,4 @@ console.log(
 );
 
 console.log('verify:pick-pipe — все кейсы прошли');
+await exitVerifyScript(0);

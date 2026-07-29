@@ -9,6 +9,7 @@ import {
   invalidateAndWarmReferenceCache,
   warmupReferenceCache,
 } from '../src/reference/public.js';
+import { exitVerifyScript } from './utils/exitVerifyScript.js';
 
 /** @param {boolean} ok @param {string} label */
 function logCheck(ok, label) {
@@ -54,4 +55,4 @@ tally(
 );
 
 console.log(failed === 0 ? '\nverifyReferenceCacheInvalidate: ALL OK' : `\nFAILED: ${failed}`);
-process.exitCode = failed > 0 ? 1 : 0;
+await exitVerifyScript(failed > 0 ? 1 : 0);

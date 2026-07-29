@@ -23,6 +23,7 @@ import {
   buildRoom,
 } from './fixtures/verifyFixtures.js';
 import { assertDefined } from './fixtures/scriptAssert.js';
+import { exitVerifyScript } from './utils/exitVerifyScript.js';
 
 /** @param {boolean} ok @param {string} label */
 function check(ok, label) {
@@ -388,12 +389,13 @@ async function main() {
 
   if (!ok) {
     console.error('\nverify:radiator-emitter-kind FAILED');
-    process.exit(1);
+    await exitVerifyScript(1);
   }
   console.log('\nverify:radiator-emitter-kind OK');
+  await exitVerifyScript(0);
 }
 
 main().catch((err) => {
   console.error(err);
-  process.exit(1);
+  void exitVerifyScript(1);
 });

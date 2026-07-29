@@ -12,6 +12,7 @@ import {
   validateUfhLoopHydraulics,
 } from '../src/logic/ufhLoopHydraulics.js';
 import { assertAt } from './fixtures/scriptAssert.js';
+import { exitVerifyScript } from './utils/exitVerifyScript.js';
 
 const bundle = await getReferenceBundle();
 const ctx = toCalcRuntimeContext(bundle);
@@ -143,3 +144,4 @@ console.log(
 );
 
 console.log('verify:ufh-loop-hydraulics — все проверки прошли');
+await exitVerifyScript(0);

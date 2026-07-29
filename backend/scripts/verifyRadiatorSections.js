@@ -18,6 +18,7 @@ import { buildReport } from '../src/report/buildReport.js';
 import { HEATING_THERMAL_REGIME_PRESET_ENUM } from '../src/logic/heatingThermalRegimes.js';
 import { adjustOutputWatts } from '../src/matching/radiatorSizingHelpers.js';
 import { assertAt, assertDefined } from './fixtures/scriptAssert.js';
+import { exitVerifyScript } from './utils/exitVerifyScript.js';
 
 /** @typedef {import('../src/types/shared-types.js').HeatLossReport} HeatLossReport */
 /** @typedef {import('../src/types/shared-types.js').HotWaterReport} HotWaterReport */
@@ -560,4 +561,4 @@ const allOk =
   formulaOk;
 
 console.log('\n=== Итог ===', allOk ? 'ALL OK' : 'FAILED');
-process.exit(allOk ? 0 : 1);
+await exitVerifyScript(allOk ? 0 : 1);

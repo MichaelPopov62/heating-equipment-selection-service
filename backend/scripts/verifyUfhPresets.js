@@ -20,6 +20,7 @@ import {
 } from '../../shared/ufhModePresetIds.js';
 import { assertAt, assertDefined } from './fixtures/scriptAssert.js';
 import { buildObjectMeta, buildRoom, buildUfhReport, buildUfhRoom } from './fixtures/verifyFixtures.js';
+import { exitVerifyScript } from './utils/exitVerifyScript.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_FILE = path.join(__dirname, '..', 'data', 'underfloor_heating_presets.json');
@@ -668,4 +669,4 @@ console.log('\n=== ufh_only: график котла 40/30 (не 75/65) ===');
 }
 
 console.log(failed === 0 ? '\nverifyUfhPresets: ALL OK' : `\nverifyUfhPresets: ${failed} FAIL`);
-process.exitCode = failed === 0 ? 0 : 1;
+await exitVerifyScript(failed === 0 ? 0 : 1);

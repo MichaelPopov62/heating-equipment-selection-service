@@ -13,6 +13,7 @@ import {
   buildObjectMeta,
   buildRoom,
 } from './fixtures/verifyFixtures.js';
+import { exitVerifyScript } from './utils/exitVerifyScript.js';
 
 /** @type {import('../src/dhw/types.js').RadiatorApplianceRules['microLoad']} */
 const MICRO_LOAD_RULES = {
@@ -124,3 +125,4 @@ assert.ok(
 );
 
 console.log('OK — verifyMicroLoadRadiator (Ф5 Тамбур)');
+await exitVerifyScript(0);

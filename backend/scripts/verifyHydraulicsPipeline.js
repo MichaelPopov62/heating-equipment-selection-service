@@ -21,6 +21,7 @@ import {
   buildRoom,
   DEFAULT_EXTERNAL_WALLS,
 } from './fixtures/verifyFixtures.js';
+import { exitVerifyScript } from './utils/exitVerifyScript.js';
 
 /** @param {string} label
  * @param {import('../src/types/shared-types.js').CalcRequestBody} input
@@ -707,3 +708,4 @@ await runFixture('ufh_parasitic_down_resize', {
 });
 
 console.log('verify:hydraulics-pipeline — все фикстуры прошли');
+await exitVerifyScript(0);

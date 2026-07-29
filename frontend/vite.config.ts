@@ -24,9 +24,31 @@ const buildId =
   process.env.GITHUB_SHA?.slice(0, 7) ||
   'local';
 
+/**
+ * Розбиття vendor-залежностей на окремі чанки для кешування браузера та зменшення головного бандла.
+ *
+ * @param id — абсолютний шлях модуля під час збірки Rollup
+ */
+function resolveManualChunk(id: string): string | undefined {
+  if (!id.includes('node_modules')) return undefined;
+  if (id.includes('@clerk')) return 'clerk';
+  if (id.includes('@tanstack/react-query')) return 'query';
+  if (id.includes('react-router')) return 'router';
+  if (id.includes('react-dom')) return 'react-dom';
+  if (id.includes('/react/')) return 'react';
+  return undefined;
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: resolveManualChunk,
+      },
+    },
+  },
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
     __APP_BUILD_DATE__: JSON.stringify(buildDate),

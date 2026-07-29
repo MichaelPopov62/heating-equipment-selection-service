@@ -138,26 +138,28 @@ assert.deepEqual(
 );
 
 
-const mainBundle = readFileSync(path.join(distAssets, bundles[0]), 'utf8');
+const indexBundleName = bundles.find((f) => f.startsWith('index-') && f.endsWith('.js'));
+assert.ok(indexBundleName, 'dist/assets/index-*.js должен существовать (npm run build)');
+const mainBundle = readFileSync(path.join(distAssets, indexBundleName), 'utf8');
 assert.ok(
   mainBundle.includes('two-pipe-dead-end'),
-  'bundle должен содержать коды типов разводки (HydraulicsSection)',
+  'index-бандл должен содержать коды типов разводки (HydraulicsSection)',
 );
 assert.ok(
   mainBundle.includes('Тип розводки системи опалення'),
-  'bundle должен содержать подпись поля типа разводки',
+  'index-бандл должен содержать подпись поля типа разводки',
 );
 assert.ok(
   mainBundle.includes('оптимальний підбір системи'),
-  'bundle должен содержать подпись radio auto',
+  'index-бандл должен содержать подпись radio auto',
 );
 assert.ok(
   mainBundle.includes('Колекторна променева'),
-  'bundle должен содержать подпись radio manifold',
+  'index-бандл должен содержать подпись radio manifold',
 );
 assert.ok(
   mainBundle.includes('Рекомендовано'),
-  'bundle должен содержать бейдж рекомендуемой схемы',
+  'index-бандл должен содержать бейдж рекомендуемой схемы',
 );
 
 console.log('verify:survey-session — все кейсы прошли');

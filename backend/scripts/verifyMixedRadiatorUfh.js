@@ -11,6 +11,7 @@ import {
   resolveMixedRadiatorRoomLoad,
 } from '../src/matching/internal/resolveMixedRadiatorRoomLoad.js';
 import { buildObjectMeta, buildRoom } from './fixtures/verifyFixtures.js';
+import { exitVerifyScript } from './utils/exitVerifyScript.js';
 
 await warmupReferenceCache();
 const ctx = toCalcRuntimeContext(await getReferenceBundle());
@@ -149,4 +150,4 @@ console.log(noteOk ? 'OK' : 'FAIL', '— sizingNote про отсутствие 
 
 const allOk = ufhCoversOk && skipOk && designWattsOk && modelOk && sectionsOk && noteOk;
 console.log('\n=== Итог ===', allOk ? 'ALL OK' : 'FAILED');
-process.exit(allOk ? 0 : 1);
+await exitVerifyScript(allOk ? 0 : 1);

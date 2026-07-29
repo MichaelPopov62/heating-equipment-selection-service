@@ -14,6 +14,7 @@ import { filterPanelsByConnection } from '../src/matching/radiatorSizingHelpers.
 import { warmupReferenceCache, getReferenceBundle, toCalcRuntimeContext } from '../src/reference/public.js';
 import { assertAt } from './fixtures/scriptAssert.js';
 import { buildObjectMeta } from './fixtures/verifyFixtures.js';
+import { exitVerifyScript } from './utils/exitVerifyScript.js';
 
 /** @param {boolean} ok @param {string} label */
 function check(ok, label) {
@@ -66,12 +67,13 @@ async function main() {
 
   if (!ok) {
     console.error('\nverify:radiator-connection FAILED');
-    process.exit(1);
+    await exitVerifyScript(1);
   }
   console.log('\nverify:radiator-connection OK');
+  await exitVerifyScript(0);
 }
 
 main().catch((err) => {
   console.error(err);
-  process.exit(1);
+  void exitVerifyScript(1);
 });

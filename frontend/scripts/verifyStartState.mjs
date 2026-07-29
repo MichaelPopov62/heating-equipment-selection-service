@@ -43,19 +43,21 @@ assert.equal(resolveAppBootstrap(true, true), 'survey-hash');
 assert.equal(resolveAppBootstrap(false, true), 'survey-storage');
 assert.equal(resolveAppBootstrap(false, false), 'start');
 
-const mainBundle = readFileSync(path.join(distAssets, bundles[0]), 'utf8');
-assert.ok(mainBundle.includes('Почати новий розрахунок'), 'bundle: start CTA');
-assert.ok(mainBundle.includes('Загрузка приложения') || mainBundle.includes('Завантаження'), 'bundle: bootstrap skeleton label');
-assert.ok(mainBundle.includes('SESSION_RESET'), 'bundle: SESSION_RESET');
-assert.ok(mainBundle.includes('SURVEY_STARTED'), 'bundle: SURVEY_STARTED');
-assert.ok(mainBundle.includes('heatcalc:survey-draft'), 'bundle: localStorage key');
-assert.ok(mainBundle.includes('Вийти') || mainBundle.includes('Выйти'), 'bundle: exit to start action');
-assert.ok(mainBundle.includes('exitToStart') || mainBundle.includes('exitProject'), 'bundle: exit handlers');
+const indexBundleName = bundles.find((f) => f.startsWith('index-') && f.endsWith('.js'));
+assert.ok(indexBundleName, 'dist/assets/index-*.js должен существовать (npm run build)');
+const mainBundle = readFileSync(path.join(distAssets, indexBundleName), 'utf8');
+assert.ok(mainBundle.includes('Почати новий розрахунок'), 'index-бандл: start CTA');
+assert.ok(mainBundle.includes('Загрузка приложения') || mainBundle.includes('Завантаження'), 'index-бандл: bootstrap skeleton label');
+assert.ok(mainBundle.includes('SESSION_RESET'), 'index-бандл: SESSION_RESET');
+assert.ok(mainBundle.includes('SURVEY_STARTED'), 'index-бандл: SURVEY_STARTED');
+assert.ok(mainBundle.includes('heatcalc:survey-draft'), 'index-бандл: localStorage key');
+assert.ok(mainBundle.includes('Вийти') || mainBundle.includes('Выйти'), 'index-бандл: exit to start action');
+assert.ok(mainBundle.includes('exitToStart') || mainBundle.includes('exitProject'), 'index-бандл: exit handlers');
 assert.ok(
   mainBundle.includes('Новий проєкт') || mainBundle.includes('Новый проект') || mainBundle.includes('Начать новый проект'),
-  'bundle: new project action',
+  'index-бандл: new project action',
 );
-assert.ok(mainBundle.includes('HeatCalc Pro'), 'bundle: brand');
-assert.ok(mainBundle.includes('Політика конфіденційності'), 'bundle: footer legal UA');
+assert.ok(mainBundle.includes('HeatCalc Pro'), 'index-бандл: brand');
+assert.ok(mainBundle.includes('Політика конфіденційності'), 'index-бандл: footer legal UA');
 
 console.log('verify:start-state — все кейсы прошли');
