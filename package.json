@@ -21,6 +21,8 @@
     "verify:frontend": "npm run verify --prefix frontend",
     "verify:backend": "npm run verify --prefix backend",
     "build:frontend": "npm run build --prefix frontend",
+    "build": "npm run vercel-build",
+    "vercel-build": "npm run build --prefix frontend && node scripts/vercelPrepareOutput.mjs",
     "verify": "npm run verify:type-bypass && npm run verify:auth-docs && npm run verify:backend-docs && npm run verify:language-policy && npm run verify:shared && npm run verify:backend && npm run verify:frontend",
     "seed": "npm run seed --prefix backend",
     "verify:seed-catalog": "npm run verify:seed-catalog --prefix backend"
