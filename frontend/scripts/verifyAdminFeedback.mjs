@@ -52,7 +52,7 @@ assert.match(parser, /!data\.nextCursor\.trim\(\)/);
 assert.match(listQuery, /useInfiniteQuery/);
 assert.match(listQuery, /getNextPageParam/);
 assert.match(mutation, /useMutation/);
-assert.match(stream, /fetch\('\/api\/v1\/admin\/feedback\/stream'/);
+assert.match(stream, /apiUrl\('\/api\/v1\/admin\/feedback\/stream'\)/);
 assert.match(stream, /getProjectsAuthHeaders/);
 assert.match(streamHook, /AbortController/);
 assert.match(streamHook, /invalidateQueries/);

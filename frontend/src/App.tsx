@@ -2,7 +2,7 @@
  * Назначение: Корень приложения — router + providers.
  */
 
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 
 import { AuthProvider } from './auth/AuthProvider';
 import { ClerkProviderWithRouter } from './auth/ClerkProviderWithRouter';

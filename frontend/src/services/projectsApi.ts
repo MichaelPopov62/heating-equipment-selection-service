@@ -15,6 +15,7 @@ import type {
 } from '../types/projectsApi';
 import type { SurveyDraft } from '../types/surveyDraft';
 import { parseApiErrorMessage } from '../utils/apiError';
+import { apiUrl } from '../utils/apiUrl';
 import { formatAuthApiErrorMessage } from '../utils/authApiError';
 import {
   downloadBlobFile,
@@ -50,7 +51,7 @@ export async function listProjects(params?: {
   if (params?.limit != null) q.set('limit', String(params.limit));
   if (params?.skip != null) q.set('skip', String(params.skip));
   const qs = q.toString();
-  const res = await fetch(`/api/v1/projects${qs ? `?${qs}` : ''}`, {
+  const res = await fetch(apiUrl(`/api/v1/projects${qs ? `?${qs}` : ''}`), {
     headers: await projectsFetchHeaders(),
   });
   const data = await parseJson(res);
@@ -68,7 +69,7 @@ export async function createProject(body: {
   label?: string;
   survey?: SurveyDraft;
 }): Promise<ProjectCreateResponse> {
-  const res = await fetch('/api/v1/projects', {
+  const res = await fetch(apiUrl('/api/v1/projects'), {
     method: 'POST',
     headers: await projectsFetchHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
@@ -88,7 +89,7 @@ export async function getProject(
   opts?: { includeLastCalculation?: boolean },
 ): Promise<ProjectGetResponse> {
   const q = opts?.includeLastCalculation ? '?includeLastCalculation=1' : '';
-  const res = await fetch(`/api/v1/projects/${encodeURIComponent(id)}${q}`, {
+  const res = await fetch(apiUrl(`/api/v1/projects/${encodeURIComponent(id)}${q}`), {
     headers: await projectsFetchHeaders(),
   });
   const data = await parseJson(res);
@@ -105,7 +106,7 @@ export async function updateProject(
   id: string,
   body: { clientName?: string; label?: string | null; survey?: SurveyDraft },
 ): Promise<ProjectGetResponse> {
-  const res = await fetch(`/api/v1/projects/${encodeURIComponent(id)}`, {
+  const res = await fetch(apiUrl(`/api/v1/projects/${encodeURIComponent(id)}`), {
     method: 'PUT',
     headers: await projectsFetchHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
@@ -124,7 +125,7 @@ export async function postProjectCalc(
   projectId: string,
   body: { calcInput: unknown; survey?: SurveyDraft },
 ): Promise<ProjectCalcResponse> {
-  const res = await fetch(`/api/v1/projects/${encodeURIComponent(projectId)}/calc`, {
+  const res = await fetch(apiUrl(`/api/v1/projects/${encodeURIComponent(projectId)}/calc`), {
     method: 'POST',
     headers: await projectsFetchHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
@@ -148,7 +149,7 @@ export async function listProjectCalculations(
   if (params?.skip != null) q.set('skip', String(params.skip));
   const qs = q.toString();
   const res = await fetch(
-    `/api/v1/projects/${encodeURIComponent(projectId)}/calculations${qs ? `?${qs}` : ''}`,
+    apiUrl(`/api/v1/projects/${encodeURIComponent(projectId)}/calculations${qs ? `?${qs}` : ''}`),
     { headers: await projectsFetchHeaders() },
   );
   const data = await parseJson(res);
@@ -166,7 +167,9 @@ export async function getProjectCalculation(
   calcId: string,
 ): Promise<CalculationGetResponse> {
   const res = await fetch(
-    `/api/v1/projects/${encodeURIComponent(projectId)}/calculations/${encodeURIComponent(calcId)}`,
+    apiUrl(
+      `/api/v1/projects/${encodeURIComponent(projectId)}/calculations/${encodeURIComponent(calcId)}`,
+    ),
     { headers: await projectsFetchHeaders() },
   );
   const data = await parseJson(res);
@@ -189,7 +192,7 @@ export async function publishProjectShare(
   projectId: string,
   body?: { calculationId?: string },
 ): Promise<ProjectSharePublishResponse> {
-  const res = await fetch(`/api/v1/projects/${encodeURIComponent(projectId)}/share`, {
+  const res = await fetch(apiUrl(`/api/v1/projects/${encodeURIComponent(projectId)}/share`), {
     method: 'POST',
     headers: await projectsFetchHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body ?? {}),
@@ -212,7 +215,7 @@ export async function publishProjectShare(
 export async function revokeProjectShare(
   projectId: string,
 ): Promise<ProjectShareRevokeResponse> {
-  const res = await fetch(`/api/v1/projects/${encodeURIComponent(projectId)}/share`, {
+  const res = await fetch(apiUrl(`/api/v1/projects/${encodeURIComponent(projectId)}/share`), {
     method: 'DELETE',
     headers: await projectsFetchHeaders(),
   });
@@ -240,7 +243,7 @@ export async function downloadProjectPdf(
   if (opts?.includeTechnical) q.set('includeTechnical', '1');
   const qs = q.toString();
   const res = await fetch(
-    `/api/v1/projects/${encodeURIComponent(projectId)}/pdf${qs ? `?${qs}` : ''}`,
+    apiUrl(`/api/v1/projects/${encodeURIComponent(projectId)}/pdf${qs ? `?${qs}` : ''}`),
     { headers: await projectsFetchHeaders({ Accept: 'application/pdf' }) },
   );
   if (!res.ok) {

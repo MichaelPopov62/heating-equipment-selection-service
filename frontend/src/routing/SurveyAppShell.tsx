@@ -3,7 +3,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 import { AppErrorBoundary } from '../components/AppErrorBoundary/AppErrorBoundary';
 import { AppRoot } from '../AppRoot';

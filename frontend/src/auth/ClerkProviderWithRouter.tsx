@@ -3,7 +3,7 @@
  */
 
 import { ClerkProvider } from '@clerk/clerk-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { clerkAppearance } from '../i18n/clerkAppearance';
 import { clerkUkLocalization } from '../i18n/clerkUkLocalization';

@@ -4,6 +4,7 @@
 
 import type { MeOkResponse } from '../types/meApi';
 import { parseApiErrorMessage } from '../utils/apiError';
+import { apiUrl } from '../utils/apiUrl';
 import { formatAuthApiErrorMessage } from '../utils/authApiError';
 import { getProjectsAuthHeaders } from './projectsAuthHeaders';
 import { parseMeOkResponse } from './parseMeResponse';
@@ -27,7 +28,7 @@ export class MeApiError extends Error {
  * @returns {Promise<MeOkResponse>}
  */
 export async function fetchMe(): Promise<MeOkResponse> {
-  const res = await fetch('/api/v1/me', {
+  const res = await fetch(apiUrl('/api/v1/me'), {
     headers: {
       Accept: 'application/json',
       ...(await getProjectsAuthHeaders()),

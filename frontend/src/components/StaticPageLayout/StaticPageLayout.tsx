@@ -2,7 +2,7 @@
  * Назначение: layout статичних сторінок (docs, faq, legal).
  */
 
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 import { Footer } from '../Footer/Footer';
 import { footerUk } from '../../i18n/uk/footer';

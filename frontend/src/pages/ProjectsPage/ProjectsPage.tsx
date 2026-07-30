@@ -2,7 +2,7 @@
  * Назначение: страница проектов (prod SaaS, /projects).
  */
 
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 
 import { AccountBar } from '../../components/AccountBar/AccountBar';
 import { Footer } from '../../components/Footer/Footer';

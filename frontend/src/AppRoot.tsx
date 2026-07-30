@@ -3,7 +3,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { brandUk } from './i18n/uk/brand';
 import { footerUk } from './i18n/uk/footer';

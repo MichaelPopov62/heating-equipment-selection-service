@@ -2,7 +2,7 @@
  * Назначение: група посилань футера.
  */
 
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 import type { FooterLink } from '../../constants/footerNav';
 import { getSupportEmail, getSupportPhone } from '../../constants/siteEnv';

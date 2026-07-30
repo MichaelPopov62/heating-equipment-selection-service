@@ -3,7 +3,7 @@
  */
 
 import { lazy, Suspense } from 'react';
-import { Navigate, Route, Routes, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useParams } from 'react-router';
 
 import { AdminRoute } from '../auth/AdminRoute';
 import { ProtectedRoute } from '../auth/ProtectedRoute';

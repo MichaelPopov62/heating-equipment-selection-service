@@ -3,7 +3,7 @@
  */
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 import { COOKIE_CONSENT_STORAGE_KEY } from '../../auth/authConfig';
 import { cookieConsentUk } from '../../i18n/uk/cookieConsent';

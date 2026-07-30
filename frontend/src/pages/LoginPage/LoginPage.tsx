@@ -4,7 +4,7 @@
 
 import { SignedOut, SignIn } from '@clerk/clerk-react';
 import { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router';
 
 import { AuthRedirectShell } from '../../components/AuthRedirectShell/AuthRedirectShell';
 import { Footer } from '../../components/Footer/Footer';

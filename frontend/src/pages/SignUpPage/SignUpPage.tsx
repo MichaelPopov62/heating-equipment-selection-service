@@ -3,7 +3,7 @@
  */
 
 import { SignedOut, SignUp } from '@clerk/clerk-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router';
 
 import { AuthRedirectShell } from '../../components/AuthRedirectShell/AuthRedirectShell';
 import { Footer } from '../../components/Footer/Footer';

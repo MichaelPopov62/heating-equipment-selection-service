@@ -2,7 +2,7 @@
  * Назначение: guard маршрутов, доступных только роли admin из GET /api/v1/me.
  */
 
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router';
 
 import { AppBootstrapSkeleton } from '../components/AppBootstrapSkeleton/AppBootstrapSkeleton';
 import { adminFeedbackUk } from '../i18n/uk/adminFeedback';

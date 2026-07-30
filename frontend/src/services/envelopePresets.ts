@@ -5,6 +5,7 @@
 
 import type { EnvelopePreset } from '../types/envelope';
 import { FALLBACK_ENVELOPE_PRESETS } from '../data/fallbackEnvelopePresets';
+import { apiUrl } from '../utils/apiUrl';
 import { envelopePresetKindNormalized } from '../utils/envelopePresetKind';
 /** Нормализация элементов ответа API и восстановление kind, если поле отсутствует. */
 function normalizePresetsList(arr: unknown[]): EnvelopePreset[] {
@@ -51,7 +52,7 @@ export function fetchEnvelopePresets(): Promise<EnvelopePreset[]> {
  */
 async function loadEnvelopePresetsFromApi(): Promise<EnvelopePreset[]> {
   try {
-    const res = await fetch('/api/v1/presets/envelope', {
+    const res = await fetch(apiUrl('/api/v1/presets/envelope'), {
       cache: 'no-store',
       headers: { Accept: 'application/json' },
     });

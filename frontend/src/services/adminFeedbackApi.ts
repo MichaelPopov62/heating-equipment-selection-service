@@ -9,6 +9,7 @@ import type {
   AdminFeedbackUpdateResponse,
 } from '../types/adminFeedback';
 import { parseApiErrorMessage } from '../utils/apiError';
+import { apiUrl } from '../utils/apiUrl';
 import { getProjectsAuthHeaders } from './projectsAuthHeaders';
 import {
   parseAdminFeedbackListResponse,
@@ -58,7 +59,7 @@ export async function listAdminFeedback(
   if (params.status) query.set('status', params.status);
   if (params.type) query.set('type', params.type);
 
-  const response = await fetch(`/api/v1/admin/feedback?${query.toString()}`, {
+  const response = await fetch(apiUrl(`/api/v1/admin/feedback?${query.toString()}`), {
     headers: {
       Accept: 'application/json',
       ...(await getProjectsAuthHeaders()),
@@ -77,7 +78,7 @@ export async function updateAdminFeedbackStatus(
   id: string,
   status: AdminFeedbackStatus,
 ): Promise<AdminFeedbackUpdateResponse> {
-  const response = await fetch(`/api/v1/admin/feedback/${encodeURIComponent(id)}`, {
+  const response = await fetch(apiUrl(`/api/v1/admin/feedback/${encodeURIComponent(id)}`), {
     method: 'PATCH',
     headers: {
       Accept: 'application/json',

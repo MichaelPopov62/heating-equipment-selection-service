@@ -11,6 +11,7 @@ import {
 import { parseCatalogIndirectWaterHeaters } from './parseCatalogIndirectWaterHeaters';
 import { parseCatalogUniboxes } from './parseCatalogUniboxes';
 import { parseCatalogWaterHeaters } from './parseCatalogWaterHeaters';
+import { apiUrl } from '../utils/apiUrl';
 import type {
   CatalogBoilerItem,
   CatalogBoilerManifoldItem,
@@ -88,7 +89,7 @@ export function fetchCatalogEquipment(): Promise<CatalogEquipmentSnapshot> {
 async function loadCatalogEquipmentFromApi(): Promise<CatalogEquipmentSnapshot> {
   let res: Response;
   try {
-    res = await fetch('/api/v1/catalog', {
+    res = await fetch(apiUrl('/api/v1/catalog'), {
       headers: { Accept: 'application/json' },
     });
   } catch {

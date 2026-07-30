@@ -3,7 +3,7 @@
  * Профиль tier/email — только из GET /api/v1/me (не JWT decode).
  */
 
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router';
 
 import { useAuth } from '../../auth/useAuth';
 import { adminFeedbackUk } from '../../i18n/uk/adminFeedback';

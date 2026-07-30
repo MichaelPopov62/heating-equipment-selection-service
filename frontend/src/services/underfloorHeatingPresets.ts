@@ -4,6 +4,7 @@
 
 import { FALLBACK_FLOORING_FINISH_MATERIALS } from '../data/fallbackFlooringFinishes';
 import { FALLBACK_UNDERFLOOR_HEATING_BASES } from '../data/fallbackUnderfloorHeatingPresets';
+import { apiUrl } from '../utils/apiUrl';
 import type {
   FlooringFinishMaterial,
   UnderfloorHeatingBasePreset,
@@ -79,7 +80,7 @@ export function fetchUnderfloorHeatingPresets(): Promise<UnderfloorHeatingPreset
  */
 async function loadUnderfloorHeatingPresetsFromApi(): Promise<UnderfloorHeatingPresetsBundle> {
   try {
-    const res = await fetch('/api/v1/presets/underfloor-heating', {
+    const res = await fetch(apiUrl('/api/v1/presets/underfloor-heating'), {
       cache: 'no-store',
       headers: { Accept: 'application/json' },
     });

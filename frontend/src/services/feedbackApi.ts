@@ -3,6 +3,7 @@
  */
 
 import { getProjectsAuthHeaders } from './projectsAuthHeaders';
+import { apiUrl } from '../utils/apiUrl';
 
 export type FeedbackType = 'bug' | 'contact';
 
@@ -26,7 +27,7 @@ export type FeedbackOkResponse = {
  * @returns {Promise<FeedbackOkResponse>}
  */
 export async function submitFeedback(payload: FeedbackPayload): Promise<FeedbackOkResponse> {
-  const res = await fetch('/api/v1/feedback', {
+  const res = await fetch(apiUrl('/api/v1/feedback'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

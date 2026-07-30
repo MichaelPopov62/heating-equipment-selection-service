@@ -4,6 +4,7 @@
  */
 
 import type { CalcOkPayload } from '../types/calcApi';
+import { apiUrl } from '../utils/apiUrl';
 import { isRecord } from '../utils/jsonGuards';
 
 /** Типичная подсказка при недоступном backend в dev (см. frontend/vite.config.ts). */
@@ -40,7 +41,7 @@ function parseCalcOkPayload(data: unknown): CalcOkPayload {
 export async function postCalc(payload: unknown): Promise<CalcOkPayload> {
   let res: Response;
   try {
-    res = await fetch('/api/v1/calc', {
+    res = await fetch(apiUrl('/api/v1/calc'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

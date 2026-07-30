@@ -3,6 +3,7 @@
  */
 
 import type { AdminFeedbackItem } from '../types/adminFeedback';
+import { apiUrl } from '../utils/apiUrl';
 import { getProjectsAuthHeaders } from './projectsAuthHeaders';
 import { AdminFeedbackApiError } from './adminFeedbackApi';
 import { parseAdminFeedbackItem } from './parseAdminFeedback';
@@ -44,7 +45,7 @@ function processSseBlock(block: string, onCreated: (item: AdminFeedbackItem) => 
  * @param options
  */
 export async function streamAdminFeedback(options: AdminFeedbackStreamOptions): Promise<void> {
-  const response = await fetch('/api/v1/admin/feedback/stream', {
+  const response = await fetch(apiUrl('/api/v1/admin/feedback/stream'), {
     headers: {
       Accept: 'text/event-stream',
       'Cache-Control': 'no-cache',

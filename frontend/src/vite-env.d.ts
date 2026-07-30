@@ -21,6 +21,8 @@ interface ImportMetaEnv {
   readonly VITE_PROJECTS_BEARER_TOKEN?: string;
   readonly VITE_DEV_TOOLS?: string;
   readonly VITE_BUILD_ID?: string;
+  /** Базовый URL Render API; пусто — относительные /api/... через Vite proxy. */
+  readonly VITE_API_BASE_URL?: string;
 }
 
 interface ImportMeta {

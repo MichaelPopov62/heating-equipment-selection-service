@@ -2,7 +2,7 @@
  * Назначение: guard маршрутов, требующих входа (prod SaaS).
  */
 
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router';
 
 import { useAuth } from './useAuth';
 import { paths } from '../routing/paths';

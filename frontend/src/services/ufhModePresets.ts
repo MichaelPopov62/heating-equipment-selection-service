@@ -3,11 +3,12 @@
  */
 
 import type { UfhModePresetsResponse } from '../types/ufhModePreset';
+import { apiUrl } from '../utils/apiUrl';
 /**
  * GET /api/v1/presets/underfloor-heating/modes — только presetId и ui.
  */
 export async function fetchUfhModePresets(): Promise<UfhModePresetsResponse> {
-  const res = await fetch('/api/v1/presets/underfloor-heating/modes', {
+  const res = await fetch(apiUrl('/api/v1/presets/underfloor-heating/modes'), {
     cache: 'no-store',
     headers: { Accept: 'application/json' },
   });

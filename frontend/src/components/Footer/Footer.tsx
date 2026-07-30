@@ -2,7 +2,7 @@
  * Назначение: подвал HeatCalc Pro (prod SaaS, UA).
  */
 
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 
 import {
   FOOTER_LINK_GROUPS,

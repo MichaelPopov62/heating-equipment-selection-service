@@ -4,6 +4,7 @@
 
 import type { PublicShareResponse } from '../types/projectsApi';
 import { parseApiErrorMessage } from '../utils/apiError';
+import { apiUrl } from '../utils/apiUrl';
 import {
   downloadBlobFile,
   filenameFromContentDisposition,
@@ -18,7 +19,7 @@ async function parseJson(res: Response): Promise<unknown> {
  * @param shareToken
  */
 export async function fetchPublicShare(shareToken: string): Promise<PublicShareResponse> {
-  const res = await fetch(`/api/v1/public/shares/${encodeURIComponent(shareToken)}`, {
+  const res = await fetch(apiUrl(`/api/v1/public/shares/${encodeURIComponent(shareToken)}`), {
     headers: { Accept: 'application/json' },
   });
   const data: unknown = await res.json().catch(() => null);
@@ -44,7 +45,7 @@ export async function downloadPublicSharePdf(
   if (opts?.includeTechnical) q.set('includeTechnical', '1');
   const qs = q.toString();
   const res = await fetch(
-    `/api/v1/public/shares/${encodeURIComponent(shareToken)}/pdf${qs ? `?${qs}` : ''}`,
+    apiUrl(`/api/v1/public/shares/${encodeURIComponent(shareToken)}/pdf${qs ? `?${qs}` : ''}`),
     { headers: { Accept: 'application/pdf' } },
   );
   if (!res.ok) {
