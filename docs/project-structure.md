@@ -213,7 +213,7 @@ main.tsx → QueryProvider → App.tsx
 | `src/components/PublisherContactBlock/` | Контакт на public share (Pro/Marketplace) |
 | `src/components/StartScreen/` | Стартовый экран (cold open) |
 | `src/components/SharePresentationPage/` | Публичная страница `/s/{token}` |
-| `src/components/DevPanel/` | Панель разработчика (DEV / `VITE_DEV_TOOLS=1`) |
+| `src/components/DevPanel/` | Панель разработчика; условия включения и действия — [`frontend-dev-panel.md`](frontend-dev-panel.md) |
 | `src/components/Footer/`, `ModalHost/`, `CookieConsentBanner/`, `DevToolsDock/` | Общая оболочка SPA |
 | `src/auth/` | Clerk SDK, `AuthProvider`, `useAuthMeCacheSync`, `ProtectedRoute`, login — см. [`auth.md`](auth.md) |
 | `src/components/Header/` | Клиент: ссылка, PDF, `accountSlot`, hint pro/marketplace; «Вийти з проєкту» открывает Start Screen |

@@ -51,12 +51,29 @@ React + Vite + TypeScript + **@tanstack/react-query**. Точка входа: `s
 | `StartScreen/` | Стартовый экран с действием «Почати новий розрахунок» |
 | `SharePresentationPage/` | Публичная презентация по `/s/{token}` |
 | `Header/` | Клиент: ссылка, PDF, выход (без JSON) |
-| `DevPanel/` | JSON, server save, hash — только DEV / `VITE_DEV_TOOLS=1` |
+| `DevPanel/` | Служебная панель разработчика; подробнее — [`frontend-dev-panel.md`](../docs/frontend-dev-panel.md) |
 | `ShareLinkToast/` | Toast после копирования публичной ссылки |
 
 Подробнее: [`docs/start-state.md`](../docs/start-state.md), [`docs/frontend-calc-runner.md`](../docs/frontend-calc-runner.md), публичная ссылка и PDF — [`docs/client-share-and-layers.md`](../docs/client-share-and-layers.md), [`docs/project-pdf.md`](../docs/project-pdf.md), структура в [`Plan.md`](../Plan.md), карта папок — [`docs/project-structure.md`](../docs/project-structure.md).
 
 PDF сметы скачивается с API (`downloadProjectPdf` / `downloadPublicSharePdf` → `utils/downloadBlobFile.ts`) без `window.open`.
+
+## Быстрая шпаргалка DevPanel
+
+Условия отображения панели описаны в [`docs/frontend-dev-panel.md`](../docs/frontend-dev-panel.md).
+
+1. Сохранить черновик локально → **`Зберегти JSON`**.
+2. Загрузить черновик с диска → **`Відкрити JSON`**.
+3. Сохранить проект в MongoDB без расчёта → **`На сервер`**.
+4. Сохранить проект и, если анкета готова, получить расчёт → **`На сервер + розрахунок`**.
+5. Пересчитать вручную без сохранения проекта → **`POST /api/v1/calc`**.
+6. Посмотреть запрос, сформированный для расчёта → **`CalcInput`**.
+7. Посмотреть полный результат → **`Report`**; основные блоки результата → **`Модули`**.
+8. Скачать краткую текстовую сводку → **`TXT зведення`**.
+9. Передать черновик через legacy hash-ссылку без сервера → **`Hash #survey=`**.
+10. Закрыть ранее опубликованную клиентскую ссылку → **`Відкликати share`**.
+
+Точное назначение кнопок, условия доступности и различия способов расчёта описаны в [`docs/frontend-dev-panel.md`](../docs/frontend-dev-panel.md).
 
 ## Команды
 

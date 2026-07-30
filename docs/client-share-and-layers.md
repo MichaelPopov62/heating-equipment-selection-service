@@ -18,9 +18,9 @@ SSOT по ТЗ: два слоя кнопок, **серверный PDF** (ска
 
 ## Developer (DevPanel)
 
-Включается только при `import.meta.env.DEV` или `VITE_DEV_TOOLS=1`. В чистом production-билде без флага панель не монтируется.
+DevPanel содержит служебные действия для работы с JSON, сохранением проекта, ручным расчётом и legacy hash-ссылкой.
 
-Действия: draft JSON, server save, server+calc, calcInput, full report, report по модулям, project id, ручной POST `/api/v1/calc`, legacy hash-share.
+Условия отображения панели, назначение каждой кнопки и ограничения по режимам приложения описаны в [`frontend-dev-panel.md`](frontend-dev-panel.md).
 
 ## Публичная ссылка
 
