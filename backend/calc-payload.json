@@ -1,0 +1,38 @@
+{
+  "building": {
+    "temps": { "insideC": 20, "outsideC": -5 },
+    "objectMeta": {
+      "objectType": "house",
+      "floors": 1,
+      "roomsCount": 1,
+      "externalWalls": {
+        "presetId": "wall_gas_concrete_d500",
+        "thicknessMm": 375,
+        "facadeSystem": "none"
+      }
+    },
+    "rooms": [
+      {
+        "id": "r1",
+        "name": "Комната",
+        "type": "гостиная",
+        "floor": 1,
+        "topBoundary": "heated",
+        "bottomBoundary": "unheated",
+        "areaM2": 10,
+        "heightM": 2.7
+      }
+    ],
+    "envelopeElements": [
+      {
+        "kind": "wall",
+        "roomId": "r1",
+        "name": "Стена №1",
+        "construction": "наружная стена",
+        "presetId": "wall_gas_concrete_d500",
+        "areaM2": 12,
+        "orientation": "N"
+      }
+    ]
+  }
+}
