@@ -2,7 +2,7 @@
 
 Дата проверки: 2026-07-30.
 
-Статус: этапы 1 и 2 завершены; исходное состояние зафиксировано, HTTP-клиенты переведены на `apiUrl()`.
+Статус: этапы 1 и 2 завершены; фаза C (MongoDB staging) завершена; HTTP-клиенты переведены на `apiUrl()`.
 
 ## 1. Окружение проверки
 
@@ -195,3 +195,60 @@ Frontend готов к деплою на Vercel с прямым вызовом R
 
 Следующий этап: настройка Vercel/Render проектов, CORS на backend и smoke-тесты
 по staging URL.
+
+## 9. Фаза C — MongoDB Atlas staging (2026-07-31)
+
+Статус: завершена (staging БД `heatcalc_staging`).
+
+### Инфраструктура
+
+| Параметр | Значение |
+|---|---|
+| Провайдер | MongoDB Atlas (существующий cluster) |
+| Cluster | `cluster0.ddnqw2o.mongodb.net` |
+| Staging DB | **`heatcalc_staging`** |
+| Dev DB (локальный `.env`) | `heating-selection-service` — **не изменялась** |
+| Production DB | `heatcalc_production` — **фаза F** (не выполнялась) |
+
+### Seed и verify
+
+```bash
+cd backend
+npm run seed:mongo-db -- heatcalc_staging
+npm run verify:mongo-db -- heatcalc_staging
+npm run verify:seed-catalog
+```
+
+Скрипты `seedMongoDatabase.mjs` / `verifyMongoDatabase.mjs` берут credentials из
+`backend/.env` и подменяют только имя БД в URI (секреты не передаются в CLI).
+
+### Результат seed (heatcalc_staging)
+
+| Коллекция | Документов |
+|---|---:|
+| `products` | 126 |
+| `water_norms` | 1 |
+| `appliances` | 6 |
+| `recommendations` | 38 |
+| `underfloor_heating_presets` | 2 |
+
+**products by kind:** boiler 24, radiator 13, waterHeater 5, pipe 30, pump 15,
+indirectWaterHeater 13, manifold 14, boilerManifold 3, unibox 9.
+
+Post-seed smoke `loadCatalog(mongo)` — OK (126 позиций, round-trip validateAndNormalizeCatalog).
+
+`verify:mongo-db` — `ok: true`, errors: [].
+
+### Критерии завершения фазы C (staging)
+
+- [x] Atlas cluster доступен
+- [x] БД `heatcalc_staging` создана и заполнена
+- [x] `npm run seed:mongo-db -- heatcalc_staging` — exit 0
+- [x] `verify:mongo-db` — все обязательные коллекции ≥ minCount
+- [x] `verify:seed-catalog` — OK
+- [ ] БД `heatcalc_production` — отложено до фазы F
+
+### Вывод фазы C
+
+Staging MongoDB готова для Render (`MONGODB_URI=.../heatcalc_staging`).
+Следующая фаза по плану: **D — Clerk staging** (origins + JWKS для Render env).

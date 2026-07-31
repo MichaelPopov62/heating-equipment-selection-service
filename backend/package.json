@@ -61,6 +61,8 @@
     "verify:room-design-air-temp": "node scripts/verifyRoomDesignAirTemp.js",
     "verify:financial-bom": "node scripts/verifyFinancialBom.js",
     "seed": "node scripts/seed.js",
+    "seed:mongo-db": "node scripts/seedMongoDatabase.mjs",
+    "verify:mongo-db": "node scripts/verifyMongoDatabase.mjs",
     "test:fuzz": "tsx scripts/fuzz-calc.ts"
   },
   "keywords": [],
