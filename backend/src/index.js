@@ -209,7 +209,7 @@ function handleApiError(err, req, res, _next) {
 
 app.use(handleApiError);
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   process.stdout.write(`API запущен на порту ${PORT}\n`);
   // Не через logger: при LOG_LEVEL=warn|error сообщения info не видны.
   process.stdout.write(
