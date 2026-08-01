@@ -1,0 +1,22 @@
+# Контекст: docker build -f backend/Dockerfile .  (корень монорепо)
+# В образ попадают только backend/, shared/, components/ — см. backend/Dockerfile
+
+.git
+.cursor
+.vercel
+
+**/node_modules
+**/npm-debug.log*
+**/.env
+**/.env.*
+**/*.md
+**/.DS_Store
+**/.eslintcache
+
+frontend/
+docs/
+openapi.yaml
+
+backend/test_data.json
+backend/nul
+nul

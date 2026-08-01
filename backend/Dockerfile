@@ -1,4 +1,6 @@
 # Production API image with system Chromium for server-side PDF.
+# Контекст сборки — корень монорепо (Render: Root Directory пустой, Dockerfile Path backend/Dockerfile).
+# Layout в образе зеркалит Node-деплой: /repo/backend + /repo/shared + /repo/components.
 FROM node:20-bookworm-slim
 
 RUN apt-get update \
@@ -15,12 +17,14 @@ ENV NODE_ENV=production \
     PDF_RENDER_TIMEOUT_MS=30000 \
     PDF_MAX_CONCURRENT=2
 
-WORKDIR /app
+WORKDIR /repo/backend
 
-COPY package.json package-lock.json ./
+COPY backend/package.json backend/package-lock.json ./
 RUN npm ci --omit=dev
 
-COPY . .
+COPY backend/ .
+COPY shared/ /repo/shared/
+COPY components/ /repo/components/
 
 EXPOSE 3001
 CMD ["node", "src/index.js"]

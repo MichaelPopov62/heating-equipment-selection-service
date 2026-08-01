@@ -1,9 +1,10 @@
-# Пример compose для API с PDF (Chromium в образе).
+# Локальный запуск API с PDF (Chromium в образе).
+# Из корня репо: docker compose -f backend/docker-compose.pdf.yml up --build
 services:
   api:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: backend/Dockerfile
     ports:
       - "3001:3001"
     env_file:
