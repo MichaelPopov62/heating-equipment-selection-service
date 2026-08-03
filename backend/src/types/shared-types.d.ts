@@ -1389,6 +1389,15 @@ export interface ProjectCreateBody {
   survey?: Record<string, unknown>;
 }
 
+/** Тело POST /api/v1/projects/import — ProjectExportBundle v1 или legacy SurveyDraft. */
+export type ProjectImportBody = Record<string, unknown>;
+
+export interface ProjectImportResponse {
+  ok: true;
+  project: ProjectDetail;
+  calculationsImported: number;
+}
+
 export interface ProjectUpdateBody {
   clientName?: string;
   label?: string | null;

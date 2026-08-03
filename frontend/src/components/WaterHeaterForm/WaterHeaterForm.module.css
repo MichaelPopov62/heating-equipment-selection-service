@@ -1,8 +1,6 @@
 /* Назначение: Стили шага «Водонагреватель».
    Описание: Согласовано с HotWaterForm, ObjectMetaForm и formElements. */
 
-@import '../../styles/custom-media.css';
-
 .root {
   display: flex;
   flex-direction: column;
@@ -17,7 +15,7 @@
 }
 
 .hint {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
   margin: 0;
 }
 
@@ -38,12 +36,12 @@
 }
 
 .label {
-  composes: label from '../../styles/formElements.module.css';
+  composes: label from global;
   font-size: 12px;
 }
 
 .select {
-  composes: select from '../../styles/formElements.module.css';
+  composes: select from global;
   max-width: 100%;
   border-radius: 12px;
   background: var(--surface-2);
@@ -97,7 +95,7 @@
 }
 
 .inlineCode {
-  composes: inlineCode from '../../styles/formElements.module.css';
+  composes: inlineCode from global;
 }
 
 @media (--tablet) {

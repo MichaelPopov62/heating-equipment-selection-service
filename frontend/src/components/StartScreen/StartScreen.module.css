@@ -2,8 +2,6 @@
  * Назначение: Стили стартового экрана (Start State).
  */
 
-@import '../../styles/custom-media.css';
-
 .root {
   width: 100%;
   max-width: 100%;

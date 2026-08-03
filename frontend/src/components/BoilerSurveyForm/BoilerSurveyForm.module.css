@@ -1,7 +1,7 @@
 /* Призначення: стилі кроку анкети «Котёл». */
 
 .root {
-  composes: block from '../../styles/formElements.module.css';
+  composes: block from global;
 }
 
 .fieldBlock {
@@ -11,17 +11,17 @@
 }
 
 .fieldLabel {
-  composes: label from '../../styles/formElements.module.css';
+  composes: label from global;
 }
 
 .select {
-  composes: select from '../../styles/formElements.module.css';
+  composes: select from global;
 }
 
 .hint {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
 }
 
 .inlineCode {
-  composes: inlineCode from '../../styles/formElements.module.css';
+  composes: inlineCode from global;
 }

@@ -1,0 +1,51 @@
+type: object
+description: >
+  Dev-импорт проекта между окружениями: ProjectExportBundle (exportSchemaVersion=1)
+  или legacy SurveyDraft (heatcalc-*.json).
+additionalProperties: true
+properties:
+  exportSchemaVersion:
+    type: integer
+    enum: [1]
+  exportedAt:
+    type: string
+    format: date-time
+  source:
+    type: object
+    additionalProperties: false
+    properties:
+      projectId:
+        type: string
+      calculationsTotal:
+        type: integer
+        minimum: 0
+  project:
+    type: object
+    required: [clientName]
+    properties:
+      clientName:
+        type: string
+        minLength: 1
+        maxLength: 200
+      label:
+        type: string
+        maxLength: 200
+      survey:
+        type: object
+        description: SurveyDraft без projectId; лимит JSON 512 KB.
+      lastCalcInput:
+        type: object
+        description: Последний CalcInput; лимит JSON 512 KB.
+  calculations:
+    type: array
+    items:
+      $ref: ProjectExportCalculationItem.yaml
+  schemaVersion:
+    type: integer
+    description: Legacy SurveyDraft — schemaVersion анкеты.
+  clientName:
+    type: string
+    description: Legacy SurveyDraft — имя клиента.
+  lastCalcReport:
+    type: object
+    description: Legacy SurveyDraft — последний отчёт расчёта.

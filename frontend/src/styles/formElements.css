@@ -1,5 +1,6 @@
-/* Назначение: Общие стили элементов форм.
-   Описание: Переиспользуемые классы block, label, select, hint и inlineCode анкеты. */
+/* Назначение: Общие стили элементов форм (глобальные классы для composes: … from global).
+   Описание: block, label, select, hint и inlineCode анкеты. */
+
 .block {
   display: flex;
   flex-direction: column;

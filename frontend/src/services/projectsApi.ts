@@ -8,6 +8,7 @@ import type {
   CalculationsListResponse,
   ProjectCalcResponse,
   ProjectCreateResponse,
+  ProjectImportResponse,
   ProjectGetResponse,
   ProjectSharePublishResponse,
   ProjectShareRevokeResponse,
@@ -82,6 +83,33 @@ export async function createProject(body: {
     throw new Error('Некоректна відповідь створення проєкту');
   }
   return data as ProjectCreateResponse;
+}
+
+/**
+ * Dev-импорт ProjectExportBundle или legacy SurveyDraft в текущую MongoDB.
+ *
+ * @param body
+ */
+export async function importProject(
+  body: Record<string, unknown>,
+): Promise<ProjectImportResponse> {
+  const res = await fetch(apiUrl('/api/v1/projects/import'), {
+    method: 'POST',
+    headers: await projectsFetchHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(body),
+  });
+  const data = await parseJson(res);
+  if (!res.ok) {
+    throw new Error(projectsApiError(data, `Помилка імпорту: HTTP ${res.status}`));
+  }
+  if (
+    !isRecord(data)
+    || data.ok !== true
+    || typeof data.calculationsImported !== 'number'
+  ) {
+    throw new Error('Некоректна відповідь імпорту проєкту');
+  }
+  return data as ProjectImportResponse;
 }
 
 export async function getProject(

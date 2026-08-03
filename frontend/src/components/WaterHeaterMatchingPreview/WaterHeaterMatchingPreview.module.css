@@ -21,7 +21,7 @@
 }
 
 .pending {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
   margin: 0;
   padding: 8px 10px;
   border-radius: 8px;

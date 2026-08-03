@@ -46,6 +46,8 @@ import { generateShareToken } from '../projects/shareToken.js';
 import { serializeProjectShareMeta } from '../projects/serializeShare.js';
 import { parseIncludeTechnicalQuery } from '../projects/parseIncludeTechnicalQuery.js';
 import { renderEstimatePdf } from '../projects/renderEstimatePdf.js';
+import { validateProjectImportBody } from '../projects/validateProjectImportBody.js';
+import { importProjectBundle } from '../projects/importProjectBundle.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -196,6 +198,33 @@ export function createProjectsRouter() {
       res.status(201).json({
         ok: true,
         project: serializeProjectDetail(doc.toObject(), { calculationsCount: 0 }),
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  /**
+   * @param {import('express').Request<{}, import('../types/shared-types.js').ProjectImportResponse, import('../types/shared-types.js').ProjectImportBody>} req
+   * @param {import('express').Response<import('../types/shared-types.js').ProjectImportResponse>} res
+   * @param {import('express').NextFunction} next
+   */
+  router.post('/api/v1/projects/import', projectsWriteRateLimiter, async (req, res, next) => {
+    try {
+      const ownerId = ownerIdFromRequest(req);
+      const payload = validateProjectImportBody(req.body);
+      const { project, calculationsImported } = await importProjectBundle({
+        ownerId,
+        payload,
+        requestId: req.requestId ?? null,
+      });
+
+      res.status(201).json({
+        ok: true,
+        project: serializeProjectDetail(project.toObject(), {
+          calculationsCount: calculationsImported,
+        }),
+        calculationsImported,
       });
     } catch (err) {
       next(err);

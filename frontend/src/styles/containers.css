@@ -1,7 +1,5 @@
 /* Назначение: единые токены и классы контейнеров контента (mobile-first).
    Описание: padding, gap, radius и max-width по брейкпоинтам — header, layoutBody, footer, страницы. */
-@import './custom-media.css';
-
 :root {
   /* Оболочка приложения (#root): на всю ширину viewport (317 / 768 / 1200) */
   --shell-max-width: 100%;

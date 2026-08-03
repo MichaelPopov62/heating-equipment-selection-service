@@ -1,8 +1,6 @@
 /* Призначення: стилі повного звіту котла (модалка кроку «Котёл»). */
-@import '../../styles/custom-media.css';
-
 .hint {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
 }
 
 .dl {

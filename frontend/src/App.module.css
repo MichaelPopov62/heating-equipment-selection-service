@@ -1,7 +1,5 @@
 /* Назначение: Стили layout главного приложения.
    Описание: Шаги навигации, колонки контента, кнопки расчёта и адаптивная сетка App. */
-@import './styles/custom-media.css';
-
 /* Mobile-first: 316 → --narrow → --tablet → --desktop — см. src/styles/custom-media.css */
 
 .appContainer {
@@ -153,7 +151,7 @@
 }
 
 .hint {
-  composes: hint from './styles/formElements.module.css';
+  composes: hint from global;
 }
 
 .calcApiBar {
@@ -245,17 +243,17 @@
 
 /* Шаг «Котёл»: тільки пресет графіка опалення (подача / обратка) */
 .thermalRegimeBlock {
-  composes: block from './styles/formElements.module.css';
+  composes: block from global;
 }
 
 .thermalRegimeLabel {
-  composes: label from './styles/formElements.module.css';
+  composes: label from global;
 }
 
 .thermalRegimeSelect {
-  composes: select from './styles/formElements.module.css';
+  composes: select from global;
 }
 
 .inlineCode {
-  composes: inlineCode from './styles/formElements.module.css';
+  composes: inlineCode from global;
 }

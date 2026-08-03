@@ -1,21 +1,19 @@
 /* Назначение: Стили секции тёплого пола.
    Описание: Оформление блока WarmFloorSection с переиспользованием formElements. */
-@import '../../styles/custom-media.css';
-
 .root {
-  composes: block from '../../styles/formElements.module.css';
+  composes: block from global;
 }
 
 .title {
-  composes: label from '../../styles/formElements.module.css';
+  composes: label from global;
 }
 
 .hint {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
 }
 
 .inlineCode {
-  composes: inlineCode from '../../styles/formElements.module.css';
+  composes: inlineCode from global;
 }
 
 .checkboxRow {
@@ -32,9 +30,9 @@
 }
 
 .fieldLabel {
-  composes: label from '../../styles/formElements.module.css';
+  composes: label from global;
 }
 
 .select {
-  composes: control from '../../styles/formElements.module.css';
+  composes: control from global;
 }

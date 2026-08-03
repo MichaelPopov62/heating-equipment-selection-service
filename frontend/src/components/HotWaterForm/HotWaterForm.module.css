@@ -13,7 +13,7 @@
 }
 
 .hint {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
   margin: 0;
 }
 

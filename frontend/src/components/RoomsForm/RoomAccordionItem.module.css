@@ -1,7 +1,5 @@
 /* Назначение: Стили аккордеона помещения.
    Описание: Раскрываемая карточка комнаты и поля ограждающих конструкций. */
-@import '../../styles/custom-media.css';
-
 .card {
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -172,7 +170,7 @@
 }
 
 .hint {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
 }
 
 .checkboxRow {

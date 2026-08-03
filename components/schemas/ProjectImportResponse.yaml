@@ -1,0 +1,11 @@
+type: object
+required: [ok, project, calculationsImported]
+properties:
+  ok:
+    type: boolean
+    enum: [true]
+  project:
+    $ref: ProjectDetail.yaml
+  calculationsImported:
+    type: integer
+    minimum: 0

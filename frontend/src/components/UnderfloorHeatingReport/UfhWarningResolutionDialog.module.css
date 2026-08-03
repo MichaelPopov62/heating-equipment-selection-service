@@ -37,7 +37,7 @@
 }
 
 .closeIconButton {
-  composes: button from '../../styles/formElements.module.css';
+  composes: button from global;
   flex-shrink: 0;
   padding: 4px 10px;
   min-width: 2rem;
@@ -72,7 +72,7 @@
 }
 
 .hint {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
 }
 
 .footer {
@@ -81,5 +81,5 @@
 }
 
 .closeButton {
-  composes: button from '../../styles/formElements.module.css';
+  composes: button from global;
 }

@@ -5,31 +5,17 @@
  */
 import { isPlainObject } from '../utils/isPlainObject.js';
 import { sanitizeTrimAngleBrackets } from '../utils/sanitizeString.js';
-import { MAX_SURVEY_JSON_CHARS } from './documentSizeLimits.js';
 import { throwAppError } from '../utils/createAppError.js';
+import { assertSurveyShape } from './validateProjectSurveyShape.js';
 
 const MAX_CLIENT_NAME_LEN = 200;
 const MAX_LABEL_LEN = 200;
 
 /**
- * @param {unknown} survey
- */
-function assertSurveyShape(survey) {
-  if (survey === undefined || survey === null) return;
-  if (!isPlainObject(survey)) {
-    throwAppError('Поле survey має бути обʼєктом.', 'VALIDATION_ERROR', 400);
-  }
-  const serialized = JSON.stringify(survey);
-  if (serialized.length > MAX_SURVEY_JSON_CHARS) {
-    throwAppError('Занадто великий обʼєкт survey.', 'PAYLOAD_TOO_LARGE', 413);
-  }
-}
-
-/**
  * @param {unknown} raw
  * @returns {string}
  */
-function normalizeClientName(raw) {
+export function normalizeClientNameFromImport(raw) {
   const name = sanitizeTrimAngleBrackets(raw);
   if (!name) {
     throwAppError('Вкажіть імʼя клієнта (clientName).', 'VALIDATION_ERROR', 400);
@@ -48,7 +34,7 @@ function normalizeClientName(raw) {
  * @param {unknown} raw
  * @returns {string | undefined}
  */
-function normalizeLabel(raw) {
+export function normalizeLabelFromImport(raw) {
   if (raw === undefined || raw === null || raw === '') return undefined;
   const label = sanitizeTrimAngleBrackets(raw);
   if (!label) return undefined;
@@ -70,8 +56,8 @@ export function validateProjectCreateBody(body) {
   if (!isPlainObject(body)) {
     throwAppError('Тіло запиту має бути JSON-обʼєктом.', 'VALIDATION_ERROR', 400);
   }
-  const clientName = normalizeClientName(body.clientName);
-  const label = normalizeLabel(body.label);
+  const clientName = normalizeClientNameFromImport(body.clientName);
+  const label = normalizeLabelFromImport(body.label);
   assertSurveyShape(body.survey);
 
   /** @type {{ clientName: string, label?: string, survey?: Record<string, unknown> }} */
@@ -107,13 +93,13 @@ export function validateProjectUpdateBody(body) {
   const out = {};
 
   if (hasClient) {
-    out.clientName = normalizeClientName(body.clientName);
+    out.clientName = normalizeClientNameFromImport(body.clientName);
   }
   if (hasLabel) {
     if (body.label === null) {
       out.label = null;
     } else {
-      out.label = normalizeLabel(body.label) ?? null;
+      out.label = normalizeLabelFromImport(body.label) ?? null;
     }
   }
   if (hasSurvey) {

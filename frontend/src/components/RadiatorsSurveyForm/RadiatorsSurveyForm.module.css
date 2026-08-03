@@ -2,7 +2,7 @@
    Опис: Підводка та тип приладів; перевикористовує formElements. */
 
 .root {
-  composes: block from '../../styles/formElements.module.css';
+  composes: block from global;
 }
 
 .fieldBlock {
@@ -16,11 +16,11 @@
 }
 
 .fieldLabel {
-  composes: label from '../../styles/formElements.module.css';
+  composes: label from global;
 }
 
 .select {
-  composes: select from '../../styles/formElements.module.css';
+  composes: select from global;
 }
 
 .select:disabled {
@@ -29,15 +29,15 @@
 }
 
 .hint {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
 }
 
 .inlineCode {
-  composes: inlineCode from '../../styles/formElements.module.css';
+  composes: inlineCode from global;
 }
 
 .status {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
   margin: 0;
   padding: 10px 12px;
   border-radius: 10px;

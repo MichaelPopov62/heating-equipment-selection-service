@@ -1,0 +1,16 @@
+type: object
+additionalProperties: false
+required: [calcInput, report]
+properties:
+  calcInput:
+    type: object
+    description: Нормализованный вход расчёта; лимит JSON 512 KB.
+  report:
+    type: object
+    description: Полный JSON-отчёт расчёта.
+  summary:
+    $ref: CalculationSummary.yaml
+  sourceCreatedAt:
+    type: string
+    format: date-time
+    description: ISO-метка исходного расчёта (для порядка импорта, не Mongo _id).

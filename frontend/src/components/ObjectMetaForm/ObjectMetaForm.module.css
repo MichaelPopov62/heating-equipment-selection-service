@@ -1,7 +1,5 @@
 /* Назначение: Стили формы метаданных объекта.
    Описание: Сетка полей, селекты и контролы шага «Объект». */
-@import '../../styles/custom-media.css';
-
 .formGrid {
   display: flex;
   flex-wrap: wrap;
@@ -42,7 +40,7 @@ button.control:hover {
 }
 
 .hint {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
 }
 
 .fullWidth {

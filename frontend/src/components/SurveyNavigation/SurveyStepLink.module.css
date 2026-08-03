@@ -1,7 +1,7 @@
 /* Назначение: Inline-ссылка на шаг анкеты в тексте сайдбара «Итог». */
 
 .stepLink {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
   display: inline;
   padding: 0;
   margin: 0;

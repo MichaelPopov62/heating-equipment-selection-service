@@ -1,6 +1,4 @@
 /* Назначение: Toast после копирования публичной ссылки (без URL на экране). */
-@import '../../styles/custom-media.css';
-
 .toast {
   position: absolute;
   top: calc(100% + 4px);

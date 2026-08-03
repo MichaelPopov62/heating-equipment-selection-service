@@ -1,8 +1,5 @@
 /* Назначение: Глобальные стили страницы.
    Описание: CSS-переменные темы, типографика, базовые стили body и общие утилиты. */
-@import './styles/custom-media.css';
-@import './styles/containers.css';
-@import './styles/clerkGlobal.css';
 
 *,
 *::before,

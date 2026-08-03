@@ -1,7 +1,5 @@
 /* Назначение: Стили панели рекомендаций.
    Описание: Aside с группами секций, карточками оборудования и адаптивом. */
-@import '../../styles/custom-media.css';
-
 /* ─── Контейнер aside: візуальний стиль ─── */
 .root {
   border: 1px solid var(--border);
@@ -39,7 +37,7 @@
 
 /* ─── Підказка ─── */
 .hint {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
 }
 
 /* ─── Рекомендації по схемі котел / ГВС (automation hints) ─── */

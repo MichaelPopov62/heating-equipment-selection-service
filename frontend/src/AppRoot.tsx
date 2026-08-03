@@ -149,6 +149,7 @@ export function AppRoot(props: AppRootProps) {
 
   const {
     fileInputRef,
+    importFileInputRef,
     statusMessage,
     statusError,
     projectsOpen,
@@ -165,6 +166,11 @@ export function AppRoot(props: AppRootProps) {
     dismissShareToast,
     saveProjectDraft,
     saveToFile,
+    exportProjectBundleToFile,
+    exportBusy,
+    openImportFilePicker,
+    handleImportFileSelected,
+    importBusy,
     saveToServer,
     openFilePicker,
     handleFileSelected,
@@ -269,6 +275,26 @@ export function AppRoot(props: AppRootProps) {
     />
   );
 
+  const sharedImportFileInput = (
+    <input
+      ref={importFileInputRef}
+      type="file"
+      accept="application/json,.json"
+      style={{ display: 'none' }}
+      onChange={(e) => {
+        void handleImportFileSelected(e.target.files?.[0]);
+        e.target.value = '';
+      }}
+    />
+  );
+
+  const sharedDevFileInputs = (
+    <>
+      {sharedFileInput}
+      {sharedImportFileInput}
+    </>
+  );
+
   const sharedProjectsDialog = (
     <ProjectsDialog
       open={projectsOpen}
@@ -303,6 +329,12 @@ export function AppRoot(props: AppRootProps) {
             buildCalcPayload={buildCalcPayload}
             buildDraftJson={() => buildDraft()}
             onSaveFile={saveToFile}
+            onExportProject={() => {
+              void exportProjectBundleToFile();
+            }}
+            exportBusy={exportBusy}
+            onImportProject={openImportFilePicker}
+            importBusy={importBusy}
             onSaveServer={(withCalc) => {
               void saveToServer(withCalc);
             }}
@@ -323,7 +355,7 @@ export function AppRoot(props: AppRootProps) {
   if (bootstrapMode === 'resolving') {
     return (
       <>
-        {sharedFileInput}
+        {sharedDevFileInputs}
         <AppBootstrapSkeleton />
         {sharedProjectsDialog}
         {devToolsDock}
@@ -334,7 +366,7 @@ export function AppRoot(props: AppRootProps) {
   if (bootstrapMode === 'error') {
     return (
       <>
-        {sharedFileInput}
+        {sharedDevFileInputs}
         <BootstrapErrorScreen onRetry={retryBootstrap} />
         {sharedProjectsDialog}
         {devToolsDock}
@@ -345,7 +377,7 @@ export function AppRoot(props: AppRootProps) {
   if (bootstrapMode === 'start') {
     return (
       <div className={styles.appContainer}>
-        {sharedFileInput}
+        {sharedDevFileInputs}
         <Header {...headerProps} variant="start" />
         <StartScreen onStartNew={handleNewCalculation} />
         {sharedProjectsDialog}
@@ -356,7 +388,7 @@ export function AppRoot(props: AppRootProps) {
 
   return (
     <>
-      {sharedFileInput}
+      {sharedDevFileInputs}
       <AppSurveyContent {...surveyContentProps} projectChrome={headerProps} />
       {sharedProjectsDialog}
       {devToolsDock}

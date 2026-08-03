@@ -6,6 +6,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import './styles/formElements.css';
+import './styles/containers.css';
+import './styles/clerkGlobal.css';
 import './index.css';
 import App from './App.tsx';
 import { QueryProvider } from './query/QueryProvider';

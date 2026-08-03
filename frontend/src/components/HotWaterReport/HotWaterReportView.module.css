@@ -1,7 +1,7 @@
 /* Назначение: Стили полного отчёта ГВС (модалка шага «Горячая вода»). */
 
 .hint {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
 }
 
 .dl {

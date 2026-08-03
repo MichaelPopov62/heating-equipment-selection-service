@@ -1,7 +1,5 @@
 /* Назначение: Стили шапки приложения.
    Описание: Бренд, поля ввода, выпадающее меню и адаптивное поведение header. */
-@import '../../styles/custom-media.css';
-
 /* Mobile-first: base → --narrow → --tablet → --desktop — см. src/styles/custom-media.css */
 
 /* ========== MOBILE (base) ========== */

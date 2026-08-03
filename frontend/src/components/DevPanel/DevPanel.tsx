@@ -13,6 +13,10 @@ export type DevPanelProps = {
   buildCalcPayload: () => unknown;
   buildDraftJson: () => unknown;
   onSaveFile: () => void;
+  onExportProject: () => void;
+  exportBusy?: boolean;
+  onImportProject: () => void;
+  importBusy?: boolean;
   onSaveServer: (withCalc: boolean) => void;
   onOpenFile: () => void;
   onExportText: () => void;
@@ -33,6 +37,10 @@ export function DevPanel({
   buildCalcPayload,
   buildDraftJson,
   onSaveFile,
+  onExportProject,
+  exportBusy = false,
+  onImportProject,
+  importBusy = false,
   onSaveServer,
   onOpenFile,
   onExportText,
@@ -114,6 +122,12 @@ export function DevPanel({
         </button>
         <button type="button" onClick={onSaveFile}>
           Зберегти JSON
+        </button>
+        <button type="button" disabled={exportBusy} onClick={onExportProject}>
+          {exportBusy ? 'Експорт…' : '📥 Експорт (Save JSON)'}
+        </button>
+        <button type="button" disabled={importBusy} onClick={onImportProject}>
+          {importBusy ? 'Імпорт…' : '📤 Імпорт (Load JSON)'}
         </button>
         <button
           type="button"

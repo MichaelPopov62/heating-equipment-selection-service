@@ -1,7 +1,7 @@
 /* Назначение: Стили полного отчёта ТП (модалка / шаговый отчёт). */
 
 .hint {
-  composes: hint from '../../styles/formElements.module.css';
+  composes: hint from global;
 }
 
 .roomBlock {
@@ -112,6 +112,6 @@
 }
 
 .resolveButton {
-  composes: button from '../../styles/formElements.module.css';
+  composes: button from global;
   font-size: 13px;
 }

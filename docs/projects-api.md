@@ -6,6 +6,7 @@ CRUD клиентских проектов и сохранённых расчё�
 
 | Метод | Путь | Auth |
 |-------|------|------|
+| POST | `/api/v1/projects/import` | JWT (owner) — Dev-импорт ProjectExportBundle |
 | POST | `/api/v1/projects/{id}/share` | JWT (owner) |
 | DELETE | `/api/v1/projects/{id}/share` | JWT (owner) |
 | GET | `/api/v1/projects/{id}/pdf` | JWT (owner) — скачать PDF сметы |
@@ -87,6 +88,51 @@ npm run migrate:project-owner-ids -- --apply
 | sub без User в БД | skip (orphaned), требует ручного разбора |
 
 Verify логики: `npm run verify:migrate-project-owner-ids`
+
+---
+
+## POST `/api/v1/projects/import`
+
+Dev-импорт проекта из JSON (перенос между Production / Staging). Создаёт **новый** проект и записывает `calculations[]` **без** `runCalculation`. `ownerId` — текущий JWT-пользователь; share-поля не копируются.
+
+Реализация: `validateProjectImportBody.js`, `importProjectBundle.js`, маршрут в `projectsRoutes.js`.
+
+### Тело запроса
+
+| Формат | Условие |
+|--------|---------|
+| **ProjectExportBundle v1** | `exportSchemaVersion: 1`, блок `project`, массив `calculations` |
+| **Legacy SurveyDraft** | без `exportSchemaVersion`; `schemaVersion` + `clientName` + анкета; опционально `lastCalcReport` → одна calculation |
+
+Служебные поля Mongo (`_id`, `createdAt`, `shareToken`, …) и `survey.projectId` удаляются при валидации.
+
+### Ответ `201`
+
+```json
+{
+  "ok": true,
+  "project": { "id": "…", "clientName": "…", "calculationsCount": 2 },
+  "calculationsImported": 2
+}
+```
+
+### Ошибки
+
+| Код | HTTP | Когда |
+|-----|------|--------|
+| `VALIDATION_ERROR` | 400 | Некорректный JSON / формат |
+| `UNSUPPORTED_EXPORT_VERSION` | 400 | `exportSchemaVersion` ≠ 1 |
+| `PAYLOAD_TOO_LARGE` | 413 | `survey` > 512 KB |
+| `CALC_INPUT_TOO_LARGE` | 413 | `calcInput` > 512 KB |
+| `CALCULATION_DOCUMENT_TOO_LARGE` | 413 | BSON calculation > ~14 MB |
+| `PROJECT_QUOTA_EXCEEDED` | 409 | Лимит проектов на owner |
+| `CALCULATION_QUOTA_EXCEEDED` | 409 | Лимит расчётов на проект |
+
+Verify:
+
+```bash
+cd backend && npm run verify:project-import
+```
 
 ---
 
@@ -200,7 +246,8 @@ cd backend && npm run verify:extract-calculation-summary
 - `backend/src/api/projectsRoutes.js` — CRUD, share publish/revoke, owner PDF
 - `backend/src/api/publicSharesRoutes.js` — public GET share + PDF
 - `backend/src/api/middleware/rateLimiters.js` — rate limit
-- `backend/src/projects/documentSizeLimits.js` — лимиты survey/calcInput/BSON
+- `backend/src/projects/validateProjectImportBody.js`, `importProjectBundle.js`, `stripMongoExportFields.js` — Dev POST `/import`
+- `backend/scripts/verifyProjectImport.js` — verify import/strip
 - `backend/src/projects/buildShareSnapshot.js`, `shareToken.js`, `serializeShare.js` — share snapshot
 - `backend/src/projects/renderEstimatePdf.js` — PDF (см. [`project-pdf.md`](project-pdf.md))
 - `backend/src/api/runCalculation.js` — общий calc-пайплайн с `POST /api/v1/calc`

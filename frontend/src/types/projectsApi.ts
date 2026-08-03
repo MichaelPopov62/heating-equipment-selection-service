@@ -108,6 +108,12 @@ export type ProjectCreateResponse = {
   project: ProjectDetail;
 };
 
+export type ProjectImportResponse = {
+  ok: true;
+  project: ProjectDetail;
+  calculationsImported: number;
+};
+
 export type ProjectCalcResponse = {
   ok: true;
   report: CalcReportJson;

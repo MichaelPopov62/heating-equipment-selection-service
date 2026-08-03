@@ -486,6 +486,59 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
+  /api/v1/projects/import:
+    post:
+      summary: Import project from Dev export JSON
+      description: >
+        Создаёт новый проект и сохраняет calculations из ProjectExportBundle или legacy SurveyDraft
+        без пересчёта. ownerId — текущий JWT-пользователь. Share-поля не копируются.
+      operationId: importProject
+      security:
+        - ProjectsBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectImportBody"
+      responses:
+        "201":
+          description: Imported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectImportResponse"
+        "400":
+          description: Validation error / unsupported export version
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: PROJECTS_AUTH_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: PROJECT_QUOTA_EXCEEDED / CALCULATION_QUOTA_EXCEEDED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "413":
+          description: PAYLOAD_TOO_LARGE / CALC_INPUT_TOO_LARGE / CALCULATION_DOCUMENT_TOO_LARGE
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: MongoDB недоступна
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
   /api/v1/projects/{id}:
     get:
       summary: Get project by id
@@ -1380,6 +1433,10 @@ components:
       $ref: ./components/schemas/CalculationSummary.yaml
     ProjectCreateBody:
       $ref: ./components/schemas/ProjectCreateBody.yaml
+    ProjectImportBody:
+      $ref: ./components/schemas/ProjectImportBody.yaml
+    ProjectExportCalculationItem:
+      $ref: ./components/schemas/ProjectExportCalculationItem.yaml
     ProjectUpdateBody:
       $ref: ./components/schemas/ProjectUpdateBody.yaml
     ProjectListItem:
@@ -1394,6 +1451,8 @@ components:
       $ref: ./components/schemas/ProjectsListResponse.yaml
     ProjectCreateResponse:
       $ref: ./components/schemas/ProjectCreateResponse.yaml
+    ProjectImportResponse:
+      $ref: ./components/schemas/ProjectImportResponse.yaml
     ProjectGetResponse:
       $ref: ./components/schemas/ProjectGetResponse.yaml
     ProjectDeleteResponse:

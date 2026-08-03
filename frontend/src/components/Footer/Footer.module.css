@@ -2,8 +2,6 @@
  * Назначение: стили подвала HeatCalc Pro (prod SaaS, UA).
  */
 
-@import '../../styles/custom-media.css';
-
 .footer {
   width: 100%;
   max-width: 100%;
