@@ -60,16 +60,26 @@ Production:
 
 ```env
 VITE_API_BASE_URL=https://heatcalc-api-mp62.onrender.com
+VITE_DEV_TOOLS=1
 ```
 
 Staging:
 
 ```env
 VITE_API_BASE_URL=https://heatcalc-api-staging-mp62.onrender.com
+VITE_DEV_TOOLS=1
 ```
 
+`VITE_DEV_TOOLS=1` включает DevPanel (кнопка **Dev**, экспорт/импорт проектов между
+окружениями). Переменная попадает в bundle **на этапе сборки** Vite — после добавления
+или изменения в Vercel Dashboard нужен **Redeploy**. Без неё на deployed SPA кнопки Dev
+не будет, даже если код на `main` совпадает с production. Подробнее —
+[`frontend-dev-panel.md`](frontend-dev-panel.md), runbook переноса данных —
+[`project-export-import.md`](project-export-import.md).
+
 Локальная разработка без `VITE_API_BASE_URL` сохраняет относительные `/api/...`
-и существующий Vite proxy на `http://localhost:3001`.
+и существующий Vite proxy на `http://localhost:3001`. DevPanel в `npm run dev` доступен
+без `VITE_DEV_TOOLS` (`import.meta.env.DEV`).
 
 ## 5. CORS backend
 
@@ -102,6 +112,18 @@ Output Directory: frontend/dist
 
 Корневой `vercel.json` должен содержать только конфигурацию статического Vite SPA.
 Существующая конфигурация Node backend должна быть заменена на этапе настройки Vercel.
+
+**Чеклист Environment Variables** (отдельно для каждого Vercel-проекта — staging и
+production не наследуют переменные друг от друга):
+
+| Переменная | Staging | Production |
+|---|---|---|
+| `VITE_API_BASE_URL` | Render staging API | Render production API |
+| `VITE_DEV_TOOLS` | `1` (если нужен DevPanel) | `1` (если нужен DevPanel) |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk staging | Clerk production |
+| `VITE_CLERK_JWT_TEMPLATE` | как в backend `AUTH_AUDIENCE` | то же для prod Clerk |
+
+После изменения любой `VITE_*` — **Redeploy** соответствующего проекта.
 
 ## 7. Настройка Render в монорепозитории
 
