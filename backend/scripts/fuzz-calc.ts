@@ -14,6 +14,70 @@ import type {
 const delay = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
 
+const SERVER_URL = 'http://localhost:3001/api/v1/calc';
+const FUZZ_INTER_REQUEST_MS = 120;
+const FUZZ_MAX_429_RETRIES = 8;
+
+/**
+ * Затримка перед повтором після 429 (Retry-After або RateLimit-Reset).
+ * @param headers — заголовки відповіді Express rate-limit
+ */
+function parseRetryAfterMs(headers: Record<string, unknown>): number {
+  const retryAfter = headers['retry-after'];
+  if (typeof retryAfter === 'string' || typeof retryAfter === 'number') {
+    const sec = Number(retryAfter);
+    if (Number.isFinite(sec) && sec > 0) return sec * 1000;
+  }
+
+  const reset = headers['ratelimit-reset'];
+  if (typeof reset === 'string' || typeof reset === 'number') {
+    const resetSec = Number(reset);
+    if (Number.isFinite(resetSec)) {
+      const waitMs = resetSec * 1000 - Date.now();
+      if (waitMs > 0) return Math.min(waitMs + 500, 15 * 60 * 1000);
+    }
+  }
+
+  return 5000;
+}
+
+/**
+ * POST /calc з повтором при 429 (rate limit API).
+ * @param payload — тіло calc-запиту
+ */
+async function postCalcWithRetry(
+  payload: CalcRequestBody,
+): Promise<{ data: unknown; remaining: number | null }> {
+  for (let attempt = 0; attempt <= FUZZ_MAX_429_RETRIES; attempt++) {
+    try {
+      const response = await axios.post<unknown>(SERVER_URL, payload);
+      const remaining = Number(response.headers['ratelimit-remaining']);
+      return {
+        data: response.data,
+        remaining: Number.isFinite(remaining) ? remaining : null,
+      };
+    } catch (error: unknown) {
+      if (
+        axios.isAxiosError(error) &&
+        error.response?.status === 429 &&
+        attempt < FUZZ_MAX_429_RETRIES
+      ) {
+        const waitMs = parseRetryAfterMs(
+          error.response.headers as Record<string, unknown>,
+        );
+        console.warn(
+          `⏳ Rate limit (429), пауза ${Math.ceil(waitMs / 1000)} с (спроба ${attempt + 1}/${FUZZ_MAX_429_RETRIES})…`,
+        );
+        await delay(waitMs);
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw new Error('postCalcWithRetry: unreachable');
+}
+
 const WALL_PRESET_ID = 'wall_gas_concrete_d500';
 const WINDOW_PRESET_ID = 'window_pvc_double_chamber_3_glass';
 const UFH_BASE_PRESET_ID = 'ufh_base_interstory_screed_65';
@@ -325,6 +389,7 @@ interface FuzzStats {
   successful: number;
   withWarnings: number;
   validationFailed: number;
+  rateLimited: number;
   serverCrashed: number;
 }
 
@@ -379,12 +444,11 @@ function parseCalcErrorDetails(data: unknown): CalcErrorDetail[] {
 
 /** Головний раннер фаззінг-тесту calc API. */
 async function runFuzzTests(iterations = 50): Promise<void> {
-  const SERVER_URL = 'http://localhost:3001/api/v1/calc';
-
   const stats: FuzzStats = {
     successful: 0,
     withWarnings: 0,
     validationFailed: 0,
+    rateLimited: 0,
     serverCrashed: 0,
   };
 
@@ -406,9 +470,9 @@ async function runFuzzTests(iterations = 50): Promise<void> {
     profileCounts[profile] += 1;
 
     try {
-      const response = await axios.post<unknown>(SERVER_URL, payload);
-      const ufhWarnings = readUfhWarnings(response.data);
-      const hydraulicNotes = readHydraulicNotes(response.data);
+      const { data, remaining } = await postCalcWithRetry(payload);
+      const ufhWarnings = readUfhWarnings(data);
+      const hydraulicNotes = readHydraulicNotes(data);
 
       const hasUnresolvedConflict = ufhWarnings.some(
         (w) => w.includes('низкая скорость') || w.includes('высокий риск'),
@@ -425,6 +489,10 @@ async function runFuzzTests(iterations = 50): Promise<void> {
         stats.withWarnings += 1;
       } else {
         stats.successful += 1;
+      }
+
+      if (remaining !== null && remaining <= 2) {
+        await delay(2000);
       }
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
@@ -444,6 +512,13 @@ async function runFuzzTests(iterations = 50): Promise<void> {
               );
             }
           }
+        } else if (status === 429) {
+          stats.rateLimited += 1;
+          if (stats.rateLimited <= 3) {
+            console.error(
+              `❌ Ітерація №${i} [${profile}]: HTTP 429 (rate limit після повторів)`,
+            );
+          }
         } else {
           stats.serverCrashed += 1;
           console.error(
@@ -461,7 +536,7 @@ async function runFuzzTests(iterations = 50): Promise<void> {
     }
 
     if (i < iterations) {
-      await delay(120);
+      await delay(FUZZ_INTER_REQUEST_MS);
     }
   }
 
@@ -472,6 +547,12 @@ async function runFuzzTests(iterations = 50): Promise<void> {
     deadlockCount: deadlockScenarios.length,
   });
 
+  if (stats.rateLimited > 0) {
+    console.log(
+      'Підказка: для fuzz локально у backend/.env — RATE_LIMIT_DISABLED=true (dev) або RATE_LIMIT_CALC_PER_15M=500.',
+    );
+  }
+
   const firstDeadlock = deadlockScenarios[0];
   if (firstDeadlock) {
     console.log(
@@ -480,8 +561,8 @@ async function runFuzzTests(iterations = 50): Promise<void> {
     console.log(firstDeadlock.warnings.join('\n'));
   }
 
-  // Жорсткі збої API — fail; WARN/400 залишаються інформативними для ручного огляду.
-  if (stats.serverCrashed > 0) {
+  // Жорсткі збої API — fail; 429 після повторів — теж fail; WARN/400 лишаються інформативними.
+  if (stats.serverCrashed > 0 || stats.rateLimited > 0) {
     process.exitCode = 1;
   }
 }
@@ -506,6 +587,7 @@ function printFuzzSummary(args: {
   console.log(row('ok_clean', stats.successful));
   console.log(row('ok_warnings', stats.withWarnings));
   console.log(row('http_400', stats.validationFailed));
+  console.log(row('http_429', stats.rateLimited));
   console.log(row('http_5xx_net', stats.serverCrashed));
   console.log(
     `profiles          apt=${profileCounts.apartment_mixed_ufh} house=${profileCounts.house_radiators_ufh}`,
