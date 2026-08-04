@@ -10,6 +10,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attachRequestContext } from '../src/auth/attachRequestContext.js';
 import { mapJwtPayload } from '../src/auth/mapJwtPayload.js';
+import { resetPlatformAdminAllowlistCache } from '../src/auth/platformAdminAllowlist.js';
 import { resolveUser } from '../src/auth/resolveUser.js';
 import { verifyAccessToken } from '../src/auth/verifyAccessToken.js';
 import { User } from '../src/models/public.js';
@@ -38,6 +39,7 @@ const prevProvider = process.env.AUTH_PROVIDER;
 const prevJwks = process.env.AUTH_JWKS_URI;
 const prevNodeEnv = process.env.NODE_ENV;
 const prevAuthEnabled = process.env.PROJECTS_AUTH_ENABLED;
+const prevPlatformAdminEmails = process.env.PLATFORM_ADMIN_EMAILS;
 
 process.env.NODE_ENV = 'test';
 delete process.env.PROJECTS_AUTH_ENABLED;
@@ -49,6 +51,9 @@ process.env.AUTH_PROVIDER = 'clerk';
 
 /** @type {string | null} */
 let createdUserId = null;
+
+/** @type {string | null} */
+let platformAdminCreatedUserId = null;
 
 try {
   const clerkLikePayload = {
@@ -167,11 +172,39 @@ try {
         'attachRequestContext — req.user и метаданные',
       ),
     );
+
+    process.env.PLATFORM_ADMIN_EMAILS = 'jwt@example.com';
+    resetPlatformAdminAllowlistCache();
+    const platformSynced = await resolveUser(fromVerify);
+    tally(
+      logCheck(platformSynced.role === 'admin', 'resolveUser — platform admin sync existing user'),
+    );
+
+    const platformCreateIdentity = {
+      provider: /** @type {const} */ ('clerk'),
+      providerUserId: 'user_verify_platform_admin_create',
+      email: 'platform-admin-create@example.com',
+      emailVerified: true,
+    };
+    process.env.PLATFORM_ADMIN_EMAILS = 'platform-admin-create@example.com';
+    resetPlatformAdminAllowlistCache();
+    const platformCreated = await resolveUser(platformCreateIdentity);
+    platformAdminCreatedUserId = platformCreated.id;
+    tally(
+      logCheck(platformCreated.role === 'admin', 'resolveUser — platform admin on create'),
+    );
   }
 } finally {
   if (createdUserId && (await ensureMongoReferenceConnection())) {
     await User.deleteOne({ _id: createdUserId }).catch(() => undefined);
   }
+  if (platformAdminCreatedUserId && (await ensureMongoReferenceConnection())) {
+    await User.deleteOne({ _id: platformAdminCreatedUserId }).catch(() => undefined);
+  }
+
+  resetPlatformAdminAllowlistCache();
+  if (prevPlatformAdminEmails === undefined) delete process.env.PLATFORM_ADMIN_EMAILS;
+  else process.env.PLATFORM_ADMIN_EMAILS = prevPlatformAdminEmails;
 
   if (prevNodeEnv === undefined) delete process.env.NODE_ENV;
   else process.env.NODE_ENV = prevNodeEnv;

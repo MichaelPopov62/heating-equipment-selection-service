@@ -151,8 +151,11 @@ Startup gate (`backend/src/index.js`):
 | `PROJECTS_MAX_PER_OWNER` | опционально | Safety cap проектов на владельца (default **200** в коде) |
 | `PROJECTS_MAX_CALCULATIONS_PER_PROJECT` | опционально | Safety cap расчётов на проект (default **100** в коде) |
 | `AUTH_ISSUER_PROVIDER_MAP` | опционально | JSON `{ "https://iss": "clerk" }` без `AUTH_PROVIDER` |
+| `PLATFORM_ADMIN_EMAILS` | staging / production | Comma-separated emails platform admin; **один список на все Render API**; см. [Platform admin](#platform-admin) |
 
 `AUTH_JWKS_URI` и `AUTH_JWT_SECRET` **взаимоисключающие**.
+
+`PLATFORM_ADMIN_EMAILS` — **только backend** (Render / `backend/.env`); **не** задавать на Vercel.
 
 ### Frontend (`frontend/.env`)
 
@@ -241,10 +244,17 @@ npm run migrate:project-owner-ids -- --apply
 
 | Поле Mongo / `req.user` | Значения | Назначение |
 |-------------------------|----------|------------|
-| `role` | `user` (default), `admin` | `admin` — служебный PATCH subscription/role |
+| `role` | `user` (default), `admin` | `admin` — admin API, «Звернення», DevPanel (staging) |
 | `subscription` | `free` (default), `pro`, `marketplace` | Аудитория: частные лица / профи / бренды |
 
-Источник истины — MongoDB `users`, **не** JWT claims.
+**Источник `role`:**
+
+| Тип admin | SSOT | Поведение |
+|-----------|------|-----------|
+| **Platform admin** | `PLATFORM_ADMIN_EMAILS` (backend env) | При login email из JWT ∈ списка → `role=admin` (sync в Mongo в `resolveUser`) |
+| **Delegated admin** | MongoDB `users.role` | Назначение через `PATCH /api/v1/admin/users/{id}` существующим admin |
+
+JWT claims **не** задают `role` напрямую; email в JWT используется только для сопоставления с allowlist.
 
 ### Матрица доступа
 
@@ -271,14 +281,54 @@ npm run migrate:project-owner-ids -- --apply
 | PATCH | `/api/v1/admin/feedback/{id}` | Admin: статус `new` / `read` / `resolved` |
 | GET | `/api/v1/admin/feedback/stream` | Admin: авторизованный SSE-поток новых обращений |
 
-Bootstrap первого admin:
+### Platform admin
+
+SSOT — **`PLATFORM_ADMIN_EMAILS`** на **Render** (staging и production: **одинаковый** список) и в **`backend/.env`** локально.
+
+```env
+PLATFORM_ADMIN_EMAILS=popov1ms@i.ua,romantikzizni@gmail.com
+```
+
+**Цепочка:** Clerk JWT (`email` claim) → `resolveUser` → если email ∈ allowlist → `users.role=admin` (create или sync) → `GET /api/v1/me` → UI «Звернення», admin API, DevPanel на staging.
+
+**Acceptance (обязательно после deploy или изменения списка):**
+
+1. Login на целевом frontend (staging / production) через Clerk **этого** окружения.
+2. `GET /api/v1/me` → `"role": "admin"`, email из allowlist.
+3. UI: ссылка **«Звернення»**; на staging Dev — при `VITE_DEV_TOOLS=1` + `VITE_APP_ENV=staging`.
+
+Platform admin **не синхронизируется между MongoDB автоматически** — синхронизируется **список env** на Render-сервисах. Имена БД (`heatcalc_staging`, `heatcalc_production`, dev `heating-selection-service`) на allowlist не влияют.
+
+**Ops runbook (Render deploy, acceptance):** [`deployment-architecture.md`](deployment-architecture.md) §10.
+
+Модуль: `auth/platformAdminAllowlist.js`; sync: `auth/resolveUser.js`.
+
+### Delegated admin
+
+Назначение admin **другому** пользователю (не из platform allowlist) — только существующим admin:
+
+```http
+PATCH /api/v1/admin/users/{id}
+Authorization: Bearer <JWT admin>
+Content-Type: application/json
+
+{ "role": "admin" }
+```
+
+`{id}` — `_id` из `GET /api/v1/me` назначаемого пользователя на **том же** окружении.
+
+### Legacy bootstrap (`promote:user-admin`)
+
+Dev / break-glass без platform allowlist; **не** заменяет `PLATFORM_ADMIN_EMAILS` на deploy.
 
 ```bash
 cd backend
+# Для staging/production укажите целевую БД (как seed:mongo-db):
+# npm run seed:mongo-db -- heatcalc_staging  — паттерн URI
 npm run promote:user-admin -- --email user@example.com
 ```
 
-Пользователь должен уже существовать в `users` (после login через Clerk).
+Пользователь должен уже существовать в `users` **целевой** БД (после login через Clerk). Сверьте `id` в stdout с `GET /api/v1/me`. Предпочтительный путь на deploy — **platform allowlist**, не promote.
 
 ### Модули
 
@@ -287,6 +337,8 @@ npm run promote:user-admin -- --email user@example.com
 | `api/meRoutes.js` | `GET /api/v1/me` |
 | `api/adminRoutes.js` | Управление пользователями и административный feedback API |
 | `auth/authorizationPolicy.js` | Нормализация role/subscription, `hasRole`, `canAccessAdmin` |
+| `auth/platformAdminAllowlist.js` | Парсинг `PLATFORM_ADMIN_EMAILS`, `isPlatformAdminEmail` |
+| `auth/resolveUser.js` | Materialize user; platform admin sync в Mongo |
 | `auth/requireRole.js` | Middleware admin gate |
 
 ---
@@ -309,6 +361,7 @@ npm run verify:auth-docs
 cd backend && npm run verify:projects-auth
 cd backend && npm run verify:user-model
 cd backend && npm run verify:auth-pipeline
+cd backend && npm run verify:platform-admin
 cd backend && npm run verify:auth-middleware
 cd backend && npm run verify:authorization-policy
 cd backend && npm run verify:authorization-middleware
@@ -329,9 +382,9 @@ cd frontend && npm run verify:frontend-me
 
 ### Smoke tier UX
 
-1. Login → `GET /api/v1/me` с Bearer → `{ role: "user", subscription: "free" }`
+1. Login → `GET /api/v1/me` с Bearer → `{ role: "user", subscription: "free" }` (или `role: "admin"` если email ∈ `PLATFORM_ADMIN_EMAILS`)
 2. UI: badge **Free**, без блока контакта на share
-3. `npm run promote:user-admin -- --email …` → `PATCH /api/v1/admin/users/{id}` `{ "subscription": "pro" }` → 200; UI badge **Pro**
+3. `PATCH /api/v1/admin/users/{id}` `{ "subscription": "pro" }` (JWT admin) → 200; UI badge **Pro**
 4. Publish share → `/s/{token}` показывает `PublisherContactBlock` (email)
 5. Owner PDF и public PDF — секция контакта
 6. PATCH обратно на `free` → republish → контакт исчезает

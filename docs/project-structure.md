@@ -162,7 +162,8 @@ Runtime — `public.js` (`Product`, `Project`, `Calculation`, `User`, `Feedback`
 |--------|------------|
 | `seed.js` + `seedReferenceData.js` | Запись products + reference в Mongo |
 | `migrateProjectOwnerIds.js` | Миграция legacy `projects.ownerId` |
-| `promoteUserAdmin.js` | Dev-утилита повышения роли |
+| `promoteUserAdmin.js` | Legacy bootstrap admin по email (dev / break-glass) |
+| `verifyPlatformAdminAllowlist.js` | Verify `PLATFORM_ADMIN_EMAILS` и интеграция с `resolveUser` |
 | `verify*.js` / `verifyFeedback.mjs` / `verifyAdminFeedback.mjs` | Domain-гейты (`npm run verify:*`) |
 | `fuzz-calc.ts` | Ручной fuzz POST `/api/v1/calc` (`npm run test:fuzz`; нужен поднятый API) |
 | `fixtures/` | Хелперы assert/фикстур для verify-скриптов |

@@ -3,8 +3,10 @@
  * Описание: find по (authProvider, providerUserId) или create один раз; без upsert на каждый request.
  */
 import { normalizeAuthUserAuthorization } from './authorizationPolicy.js';
+import { isPlatformAdminEmail } from './platformAdminAllowlist.js';
 import { User } from '../models/public.js';
 import { ensureMongoReferenceConnection } from '../utils/mongoReferenceConnection.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * @param {import('../types/shared-types.js').UserMongoDoc} doc
@@ -49,6 +51,7 @@ export async function resolveUser(identity) {
   });
 
   if (!user) {
+    const platformAdmin = isPlatformAdminEmail(identity.email);
     try {
       user = await User.create({
         authProvider: identity.provider,
@@ -56,6 +59,7 @@ export async function resolveUser(identity) {
         email: identity.email,
         emailVerified: identity.emailVerified,
         ...(identity.name ? { name: identity.name } : {}),
+        ...(platformAdmin ? { role: 'admin' } : {}),
       });
     } catch (createErr) {
       const code =
@@ -69,6 +73,21 @@ export async function resolveUser(identity) {
         });
       }
       if (!user) throw createErr;
+    }
+  }
+
+  if (isPlatformAdminEmail(identity.email) && user.role !== 'admin') {
+    const userId = user._id != null ? String(user._id) : '';
+    user = await User.findByIdAndUpdate(
+      user._id,
+      { $set: { role: 'admin' } },
+      { new: true, runValidators: true },
+    );
+    if (!user) {
+      throw new Error('Platform admin sync: пользователь не найден после update');
+    }
+    if (userId) {
+      logger.info('auth.platform_admin.sync', null, { userId });
     }
   }
 

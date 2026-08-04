@@ -24,6 +24,10 @@ SSE-хаб хранится в памяти процесса. Для неско�
 - `PATCH /api/v1/admin/feedback/:id`;
 - `GET /api/v1/admin/feedback/stream`.
 
+**Platform admin:** email ∈ `PLATFORM_ADMIN_EMAILS` на Render → `role=admin` после login (`resolveUser`). См. [`auth.md`](auth.md).
+
+**Delegated admin:** `PATCH /api/v1/admin/users/{id}` `{ "role": "admin" }` — редко, для пользователей вне allowlist.
+
 Frontend получает роль только из `GET /api/v1/me`. Проверка роли на клиенте скрывает интерфейс,
 но не заменяет backend-авторизацию.
 

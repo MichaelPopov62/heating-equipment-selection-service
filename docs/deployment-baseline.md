@@ -251,4 +251,5 @@ Post-seed smoke `loadCatalog(mongo)` — OK (126 позиций, round-trip vali
 ### Вывод фазы C
 
 Staging MongoDB готова для Render (`MONGODB_URI=.../heatcalc_staging`).
+Platform admin на любом окружении — через **`PLATFORM_ADMIN_EMAILS`** на Render (не per-DB promote); см. [`auth.md`](auth.md).
 Следующая фаза по плану: **D — Clerk staging** (origins + JWKS для Render env).

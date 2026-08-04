@@ -140,6 +140,23 @@ Health Check Path: /health
 Backend остаётся отдельным долгоживущим Express-процессом. Он не переносится в
 Vercel Functions.
 
+**Чеклист Environment Variables** (отдельно для каждого Render Web Service — staging и
+production не наследуют переменные друг от друга):
+
+| Переменная | Staging | Production | Local `backend/.env` |
+|---|---|---|---|
+| `MONGODB_URI` | `.../heatcalc_staging` | `.../heatcalc_production` | credentials к кластеру; dev-БД см. [`deployment-baseline.md`](deployment-baseline.md) |
+| `PLATFORM_ADMIN_EMAILS` | **один список** | **тот же список** | тот же список (comma-separated) |
+| `AUTH_JWKS_URI`, `AUTH_ISSUER`, `AUTH_AUDIENCE`, `AUTH_PROVIDER` | Clerk staging | Clerk production | dev / staging Clerk |
+| `CORS_ORIGIN` | staging Vercel URL | production Vercel URL | `http://localhost:5173` (dev) |
+
+```env
+# Пример — одинаково на staging и production Render:
+PLATFORM_ADMIN_EMAILS=popov1ms@i.ua,romantikzizni@gmail.com
+```
+
+После изменения `PLATFORM_ADMIN_EMAILS` — **Redeploy** backend (restart Render). На Vercel переменную **не** задавать. Подробнее — [`auth.md`](auth.md) (Platform admin).
+
 ## 8. Границы ответственности
 
 - Vercel отвечает за статические файлы SPA, CDN и frontend-домены.
@@ -159,3 +176,63 @@ Vercel Functions.
 
 Этап 0 завершён. Фактическое резервирование имён выполняется при создании проектов
 Vercel и Render на соответствующих этапах деплоя.
+
+## 10. Platform admin — ops runbook (после merge)
+
+Статус: внедрён `PLATFORM_ADMIN_EMAILS` + sync в `resolveUser`. Подробности — [`auth.md`](auth.md).
+
+### 10.1. Merge и deploy backend
+
+1. Merge ветки с изменениями в `master` (или deploy staging branch — по вашему CI).
+2. **Render** автоматически пересобирает backend **после push**; если env менялись до merge — см. п. 10.2.
+
+### 10.2. Environment Variables на Render
+
+Для **каждого** Web Service (staging **и** production):
+
+| Шаг | Действие |
+|-----|----------|
+| 1 | Render Dashboard → сервис API → **Environment** |
+| 2 | Add variable: `PLATFORM_ADMIN_EMAILS` |
+| 3 | Value (пример): `popov1ms@i.ua,romantikzizni@gmail.com` — **без пробелов**, lowercase не обязателен (runtime нормализует) |
+| 4 | **Один и тот же список** на staging и production |
+| 5 | **Save** → **Manual Deploy** / Redeploy (или Clear build cache + deploy, если env добавили до последнего билда) |
+
+**Не задавать** на Vercel — frontend role не читает env, только `GET /api/v1/me`.
+
+**Локально** (`backend/.env`, не коммитить):
+
+```env
+PLATFORM_ADMIN_EMAILS=popov1ms@i.ua,romantikzizni@gmail.com
+```
+
+### 10.3. Acceptance checklist (staging, затем production)
+
+Выполнить **на каждом** окружении отдельно (разные Clerk + Mongo):
+
+| # | Проверка | Ожидание |
+|---|----------|----------|
+| A1 | Login platform admin через Clerk **этого** frontend | 200 |
+| A2 | DevTools → Network → `GET /api/v1/me` | `"role": "admin"`, email ∈ allowlist |
+| A3 | UI шапка | ссылка **«Звернення»** |
+| A4 | Открыть `/admin/feedback` | 200, список (может быть пуст) |
+| A5 | Обычный user (email **не** в allowlist) → `/me` | `"role": "user"` |
+| A6 | Staging only: Dev-кнопка | при `VITE_DEV_TOOLS=1` + `VITE_APP_ENV=staging` + admin — справа внизу **Dev** |
+| A7 | Production | Dev-кнопки **нет** (by design) |
+
+После первого login platform admin Mongo `users.role` для его документа = `admin` (sync). Ручной Atlas / `promote:user-admin` **не нужен** для email из allowlist.
+
+### 10.4. Rollback
+
+- Удалить email из `PLATFORM_ADMIN_EMAILS` на Render → Redeploy.
+- v1 **не** demote автоматически: Mongo может остаться `admin` до `PATCH` `{ "role": "user" }` другим admin или ручной правки.
+
+### 10.5. Verify перед/после merge
+
+```bash
+# из корня репозитория
+npm run verify:auth-docs
+
+# backend auth + platform admin
+cd backend && npm run verify:platform-admin && npm run verify:auth-pipeline
+```

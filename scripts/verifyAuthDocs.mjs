@@ -57,6 +57,11 @@ assert.match(authDoc, /JWT без claim email/);
 
 assert.match(authDoc, /verify:authorization-policy/);
 assert.match(authDoc, /verify:me-endpoint/);
+assert.match(authDoc, /verify:platform-admin/);
+assert.match(authDoc, /PLATFORM_ADMIN_EMAILS/);
+assert.match(authDoc, /Platform admin/);
+assert.match(authDoc, /platformAdminAllowlist/);
+assert.match(authDoc, /Delegated admin/);
 assert.match(authDoc, /GET \/api\/v1\/me/);
 assert.match(authDoc, /marketplace/);
 assert.match(authDoc, /AccountBar/);
@@ -80,6 +85,16 @@ assert.match(openapi, /SharePublisherPresentation/);
 assert.match(openapi, /users\._id → projects\.ownerId/);
 
 assert.match(String(rootPkg.scripts.verify), /verify:auth-docs/, 'корневой verify должен включать verify:auth-docs');
+assert.match(String(JSON.parse(readRepo('backend/package.json')).scripts.verify),
+  /verify:platform-admin/,
+  'backend verify должен включать verify:platform-admin',
+);
+
+const deployArch = readRepo('docs/deployment-architecture.md');
+assert.match(deployArch, /PLATFORM_ADMIN_EMAILS/);
+assert.match(deployArch, /Platform admin — ops runbook/);
+assert.match(deployArch, /Acceptance checklist/);
+
 assert.match(String(frontendPkg.scripts.verify), /verify:frontend-me/, 'frontend verify должен включать verify:frontend-me');
 
 console.log('verify:auth-docs OK');
