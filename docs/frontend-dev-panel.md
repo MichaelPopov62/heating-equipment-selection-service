@@ -4,12 +4,17 @@
 
 ## Когда отображается панель
 
-Кнопка **`Dev`** открывает панель разработчика. Она отображается, если выполняется одно из условий:
+Кнопка **`Dev`** открывает панель разработчика:
 
-- приложение запущено Vite в режиме разработки (`npm run dev`, `import.meta.env.DEV`);
-- при сборке frontend задано `VITE_DEV_TOOLS=1`.
+| Среда | Условие |
+|-------|---------|
+| **`npm run dev`** (localhost) | всегда (команда разработки) |
+| **Vercel staging** | `VITE_DEV_TOOLS=1` **и** `VITE_APP_ENV=staging` **и** `GET /api/v1/me` → `role=admin` |
+| **Vercel production (master)** | **никогда** (даже при ошибочном `VITE_DEV_TOOLS`) |
 
-В production-сборке без `VITE_DEV_TOOLS=1` кнопка и панель не монтируются. Обычному пользователю DevPanel не показывается.
+Обычному пользователю и пользователю без `role=admin` на staging DevPanel не показывается.
+
+`POST /api/v1/projects/import` на backend — **только admin** (`403 ADMIN_REQUIRED` для `role=user`).
 
 Справа внизу также может отображаться отдельная кнопка **React Query Devtools**. Она открывает инспектор запросов и кэша TanStack React Query и доступна только в режиме разработки Vite. Флаг `VITE_DEV_TOOLS=1` сам по себе React Query Devtools не включает.
 

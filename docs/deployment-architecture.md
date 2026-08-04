@@ -60,7 +60,7 @@ Production:
 
 ```env
 VITE_API_BASE_URL=https://heatcalc-api-mp62.onrender.com
-VITE_DEV_TOOLS=1
+# VITE_DEV_TOOLS — не задавать (DevPanel на master отключён)
 ```
 
 Staging:
@@ -68,13 +68,14 @@ Staging:
 ```env
 VITE_API_BASE_URL=https://heatcalc-api-staging-mp62.onrender.com
 VITE_DEV_TOOLS=1
+VITE_APP_ENV=staging
 ```
 
-`VITE_DEV_TOOLS=1` включает DevPanel (кнопка **Dev**, экспорт/импорт проектов между
-окружениями). Переменная попадает в bundle **на этапе сборки** Vite — после добавления
-или изменения в Vercel Dashboard нужен **Redeploy**. Без неё на deployed SPA кнопки Dev
-не будет, даже если код на `main` совпадает с production. Подробнее —
-[`frontend-dev-panel.md`](frontend-dev-panel.md), runbook переноса данных —
+DevPanel (кнопка **Dev**, экспорт/импорт) — **только staging Vercel** при `VITE_DEV_TOOLS=1`
+и `VITE_APP_ENV=staging`, и только для пользователя с **`role=admin`** (`GET /api/v1/me`).
+На **production master** DevPanel **не монтируется**, даже если ошибочно задать `VITE_DEV_TOOLS`.
+Переменные попадают в bundle **на этапе сборки** — после изменения в Vercel Dashboard нужен
+**Redeploy**. Подробнее — [`frontend-dev-panel.md`](frontend-dev-panel.md), runbook —
 [`project-export-import.md`](project-export-import.md).
 
 Локальная разработка без `VITE_API_BASE_URL` сохраняет относительные `/api/...`
@@ -119,7 +120,8 @@ production не наследуют переменные друг от друга
 | Переменная | Staging | Production |
 |---|---|---|
 | `VITE_API_BASE_URL` | Render staging API | Render production API |
-| `VITE_DEV_TOOLS` | `1` (если нужен DevPanel) | `1` (если нужен DevPanel) |
+| `VITE_DEV_TOOLS` | `1` | **не задавать** |
+| `VITE_APP_ENV` | `staging` | **не задавать** (или `production`) |
 | `VITE_CLERK_PUBLISHABLE_KEY` | Clerk staging | Clerk production |
 | `VITE_CLERK_JWT_TEMPLATE` | как в backend `AUTH_AUDIENCE` | то же для prod Clerk |
 

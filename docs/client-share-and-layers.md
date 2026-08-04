@@ -96,7 +96,7 @@ DevPanel содержит служебные действия для работ�
 | Frontend — контакт Pro/Marketplace | `frontend/src/components/PublisherContactBlock/` |
 | Frontend — клиент (Header) | `frontend/src/components/Header/Header.tsx` |
 | Frontend — сессия / tier | `frontend/src/components/AccountBar/`, `SubscriptionTierBadge/` |
-| Frontend — Dev | `frontend/src/components/DevPanel/DevPanel.tsx`, `frontend/src/utils/isDevToolsEnabled.ts` |
+| Frontend — Dev | `frontend/src/components/DevPanel/DevPanel.tsx`, `frontend/src/utils/isDevToolsEnabled.ts`, `frontend/src/hooks/useDevPanelAccess.ts` |
 | Frontend — Dev shell | `frontend/src/components/DevToolsDock/DevToolsDock.tsx` |
 | Frontend — toast ссылки | `frontend/src/components/ShareLinkToast/ShareLinkToast.tsx` |
 | Frontend — API share/PDF | `frontend/src/services/publicShareApi.ts`, `parsePublicShare.ts`, `projectsApi.ts` |

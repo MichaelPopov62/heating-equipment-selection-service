@@ -32,7 +32,7 @@ import { surveyDraftToSessionSnapshot } from './surveySession/surveyDraftBridge'
 import { useSurveySession } from './surveySession/useSurveySession';
 import type { AppBootstrapMode } from './surveySession/types';
 import type { SurveyDraft } from './types/surveyDraft';
-import { isDevToolsEnabled } from './utils/isDevToolsEnabled';
+import { useDevPanelAccess } from './hooks/useDevPanelAccess';
 
 type AppRootProps = Omit<AppSurveyContentProps, 'projectChrome'> & {
   onBootstrapModeChange: (mode: AppBootstrapMode) => void;
@@ -188,6 +188,8 @@ export function AppRoot(props: AppRootProps) {
     buildDraft,
   } = surveyProject;
 
+  const { canShowDevPanel, showDevToolsDock } = useDevPanelAccess();
+
   useEffect(() => {
     onBootstrapModeChange(bootstrapMode);
   }, [bootstrapMode, onBootstrapModeChange]);
@@ -318,10 +320,9 @@ export function AppRoot(props: AppRootProps) {
     />
   );
 
-  const devToolsDock =
-    import.meta.env.DEV || isDevToolsEnabled() ? (
+  const devToolsDock = showDevToolsDock ? (
       <DevToolsDock>
-        {isDevToolsEnabled() ? (
+        {canShowDevPanel ? (
           <DevPanel
             projectId={projectId}
             canRunCalc={canAutoCalc}

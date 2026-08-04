@@ -260,6 +260,8 @@ export function useSurveyProject({
         const msg = e instanceof Error ? e.message : 'Не вдалося імпортувати проєкт';
         if (msg.includes('401') || msg.includes('PROJECTS_AUTH')) {
           showErr('Увійдіть у систему перед імпортом');
+        } else if (msg.includes('ADMIN_REQUIRED') || msg.includes('403')) {
+          showErr('Імпорт доступний лише адміністратору (role=admin)');
         } else if (msg.includes('503') || msg.includes('MONGODB_UNAVAILABLE')) {
           showErr('MongoDB недоступна — імпорт неможливий');
         } else if (msg.includes('413')) {

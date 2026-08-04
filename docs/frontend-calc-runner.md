@@ -98,7 +98,7 @@ const {
 - Перед POST сравнивается `JSON.stringify(payload)` с последним успешным — дубликаты не уходят
 - При dedup (`CALC_SKIP_DEDUP`) вызывается `applyCalcSkippedDedup` → `uiPhase` снова `stable`/`idle`
   (иначе баннер «Обновление расчёта…» зависал бы при неизменном payload)
-- `runApiCalc` (кнопка «POST /api/v1/calc» в **DevPanel**, только при `isDevToolsEnabled`) — `useMutation`, сброс dedup и немедленный POST; production UI без DevPanel, клиент опирается на автопересчёт
+- `runApiCalc` (кнопка «POST /api/v1/calc» в **DevPanel**, только при `useDevPanelAccess`) — `useMutation`, сброс dedup и немедленный POST; production UI без DevPanel, клиент опирается на автопересчёт
 - `abortInFlightCalc` — `queryClient.cancelQueries({ queryKey: ['calc'] })`
 
 ### UI блока «Тёплый пол»

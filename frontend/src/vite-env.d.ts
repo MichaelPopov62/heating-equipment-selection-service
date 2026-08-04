@@ -20,6 +20,8 @@ interface ImportMetaEnv {
   readonly VITE_CLERK_JWT_TEMPLATE?: string;
   readonly VITE_PROJECTS_BEARER_TOKEN?: string;
   readonly VITE_DEV_TOOLS?: string;
+  /** staging — DevPanel на deploy; production master — не задавать staging. */
+  readonly VITE_APP_ENV?: string;
   readonly VITE_BUILD_ID?: string;
   /** Базовый URL Render API; пусто — относительные /api/... через Vite proxy. */
   readonly VITE_API_BASE_URL?: string;

@@ -6,7 +6,7 @@ CRUD клиентских проектов и сохранённых расчё�
 
 | Метод | Путь | Auth |
 |-------|------|------|
-| POST | `/api/v1/projects/import` | JWT (owner) — Dev-импорт ProjectExportBundle |
+| POST | `/api/v1/projects/import` | JWT + **`role=admin`** — Dev-импорт ProjectExportBundle |
 | POST | `/api/v1/projects/{id}/share` | JWT (owner) |
 | DELETE | `/api/v1/projects/{id}/share` | JWT (owner) |
 | GET | `/api/v1/projects/{id}/pdf` | JWT (owner) — скачать PDF сметы |
@@ -93,7 +93,9 @@ Verify логики: `npm run verify:migrate-project-owner-ids`
 
 ## POST `/api/v1/projects/import`
 
-Dev-импорт проекта из JSON (перенос между Production / Staging). Создаёт **новый** проект и записывает `calculations[]` **без** `runCalculation`. `ownerId` — текущий JWT-пользователь; share-поля не копируются.
+Dev-импорт проекта из JSON (перенос между Production / Staging). Требует **`role=admin`**
+(`403 ADMIN_REQUIRED` иначе). Создаёт **новый** проект и записывает `calculations[]` **без**
+`runCalculation`. `ownerId` — текущий JWT-пользователь; share-поля не копируются.
 
 Реализация: `validateProjectImportBody.js`, `importProjectBundle.js`, маршрут в `projectsRoutes.js`.
 

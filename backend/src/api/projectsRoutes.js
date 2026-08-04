@@ -6,6 +6,7 @@
 import express from 'express';
 import { Project, Calculation } from '../models/public.js';
 import { requireAuth } from '../auth/requireAuth.js';
+import { requireRole } from '../auth/requireRole.js';
 import { resolveProjectsDevOwnerObjectId } from '../auth/projectsAuthConfig.js';
 import {
   projectCalcRateLimiter,
@@ -209,27 +210,32 @@ export function createProjectsRouter() {
    * @param {import('express').Response<import('../types/shared-types.js').ProjectImportResponse>} res
    * @param {import('express').NextFunction} next
    */
-  router.post('/api/v1/projects/import', projectsWriteRateLimiter, async (req, res, next) => {
-    try {
-      const ownerId = ownerIdFromRequest(req);
-      const payload = validateProjectImportBody(req.body);
-      const { project, calculationsImported } = await importProjectBundle({
-        ownerId,
-        payload,
-        requestId: req.requestId ?? null,
-      });
+  router.post(
+    '/api/v1/projects/import',
+    projectsWriteRateLimiter,
+    requireRole('admin'),
+    async (req, res, next) => {
+      try {
+        const ownerId = ownerIdFromRequest(req);
+        const payload = validateProjectImportBody(req.body);
+        const { project, calculationsImported } = await importProjectBundle({
+          ownerId,
+          payload,
+          requestId: req.requestId ?? null,
+        });
 
-      res.status(201).json({
-        ok: true,
-        project: serializeProjectDetail(project.toObject(), {
-          calculationsCount: calculationsImported,
-        }),
-        calculationsImported,
-      });
-    } catch (err) {
-      next(err);
-    }
-  });
+        res.status(201).json({
+          ok: true,
+          project: serializeProjectDetail(project.toObject(), {
+            calculationsCount: calculationsImported,
+          }),
+          calculationsImported,
+        });
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
 
   /**
    * @param {import('express').Request<{ id: string }>} req

@@ -38,17 +38,26 @@ SSOT для переноса проектов Production ↔ Staging через 
 
 Legacy `heatcalc-*.json` (SurveyDraft без `exportSchemaVersion`) также принимается импортом.
 
+## Runbook Staging → Production (перенос проекта)
+
+1. **Staging** (admin): Dev → **📥 Експорт** → файл на ПК.
+2. **Production**: Dev на master **нет**. Импорт:
+   - **curl** `POST /api/v1/projects/import` с JWT admin и телом JSON; или
+   - временно (не рекомендуется) включить Dev на master — лучше admin + curl.
+3. На **целевом** окружении: «Оновити список» на `/projects`.
+
 ## Runbook Production → Staging
 
-1. Production Vercel: открыть проект, Dev → **📥 Експорт**.
-2. Staging Vercel: войти в Clerk Staging, Dev → **📤 Імпорт**, выбрать файл.
+1. Экспорт через **curl** с production JWT admin (Dev на master нет) или из Mongo.
+2. **Staging** (admin): Dev → **📤 Імпорт**, выбрать файл.
 3. Проверить анкету, отчёт, список проектов.
 
 ## Окружения
 
-- Разные БД через `MONGODB_URI` (`heating-prod` / `heating-staging`).
+- Разные БД: `heatcalc_staging` / `heatcalc_production`.
 - Frontend: `VITE_API_BASE_URL` на соответствующий Render API.
-- DevPanel: `VITE_DEV_TOOLS=1` на Vercel.
+- DevPanel: только **staging Vercel** — `VITE_DEV_TOOLS=1` + `VITE_APP_ENV=staging` + admin.
+- Bootstrap admin: `cd backend && npm run promote:user-admin -- --email user@example.com`
 
 ## API
 
