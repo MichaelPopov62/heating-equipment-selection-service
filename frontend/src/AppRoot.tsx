@@ -149,7 +149,7 @@ export function AppRoot(props: AppRootProps) {
 
   const {
     fileInputRef,
-    importFileInputRef,
+    handleFileInputChange,
     statusMessage,
     statusError,
     projectsOpen,
@@ -169,11 +169,9 @@ export function AppRoot(props: AppRootProps) {
     exportProjectBundleToFile,
     exportBusy,
     openImportFilePicker,
-    handleImportFileSelected,
     importBusy,
     saveToServer,
     openFilePicker,
-    handleFileSelected,
     exportTextFile,
     exportHashLink,
     copyPublicLink,
@@ -270,32 +268,11 @@ export function AppRoot(props: AppRootProps) {
       type="file"
       accept="application/json,.json"
       style={{ display: 'none' }}
-      onChange={(e) => {
-        void handleFileSelected(e.target.files?.[0]);
-        e.target.value = '';
-      }}
+      onChange={handleFileInputChange}
     />
   );
 
-  const sharedImportFileInput = (
-    <input
-      ref={importFileInputRef}
-      type="file"
-      accept="application/json,.json"
-      style={{ display: 'none' }}
-      onChange={(e) => {
-        void handleImportFileSelected(e.target.files?.[0]);
-        e.target.value = '';
-      }}
-    />
-  );
-
-  const sharedDevFileInputs = (
-    <>
-      {sharedFileInput}
-      {sharedImportFileInput}
-    </>
-  );
+  const sharedDevFileInputs = sharedFileInput;
 
   const sharedProjectsDialog = (
     <ProjectsDialog

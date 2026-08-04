@@ -63,8 +63,38 @@
   gap: 8px;
 }
 
+.listItem {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.rowAction {
+  flex: 0 0 auto;
+  align-self: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  color: var(--text-h);
+  font: 600 12px/1.2 var(--sans);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.rowAction:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.rowAction:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 .itemButton {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   text-align: left;
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -126,4 +156,20 @@
 
 .backLink:hover {
   text-decoration: underline;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.statusOk {
+  margin: 0 0 10px;
+  font: 600 13px/1.4 var(--sans);
+  color: var(--accent);
+}
+
+.statusErr {
+  margin: 0 0 10px;
+  font: 600 13px/1.4 var(--sans);
+  color: #e57373;
 }

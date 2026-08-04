@@ -3,34 +3,25 @@
  * Описание: Клиент — публичная ссылка и PDF; Dev — JSON/сервер/hash.
  */
 
-import { useCallback, useRef, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useState } from 'react';
 
+import { useProjectBundleTransfer } from './useProjectBundleTransfer';
 import { useProjectMutations } from '../query/mutations/useProjectMutations';
-import { queryKeys } from '../query/queryKeys';
 import { useProjectCalculationsQuery } from '../query/queries/useProjectCalculationsQuery';
 import { useProjectsListQuery } from '../query/queries/useProjectsListQuery';
 import {
   publishProjectShare,
   revokeProjectShare,
   downloadProjectPdf,
-  importProject,
 } from '../services/projectsApi';
-import { fetchProjectExportBundle } from '../services/fetchProjectExportBundle';
 import { saveSurveyDraftToStorage } from '../services/surveyDraftStorage';
 import type { AppBootstrapMode } from '../surveySession/types';
 import type { CalcReportJson } from '../types/calcApi';
 import type { SurveyDraft } from '../types/surveyDraft';
-import { buildSurveyDraft } from '../utils/buildSurveyDraft';
 import { downloadJsonFile, downloadTextFile } from '../utils/fileDownload';
 import { parseCommercialBomFromReport } from '../utils/parseCommercialBomFromReport';
 import { buildPublicShareUrlFromToken } from '../utils/parseSharePath';
-import { parseSurveyDraft } from '../utils/parseSurveyDraft';
-import { parseProjectImportFile, buildSurveyDraftAfterImport } from '../utils/parseProjectImportFile';
-import {
-  buildProjectExportFilename,
-  estimateProjectExportJsonBytes,
-} from '../types/projectExport';
+import { buildSurveyDraft } from '../utils/buildSurveyDraft';
 import {
   buildSurveyTextSummary,
   copyTextToClipboard,
@@ -83,11 +74,6 @@ export function useSurveyProject({
   const [publicPath, setPublicPath] = useState<string | null>(null);
   const [shareBusy, setShareBusy] = useState(false);
   const [shareToastOpen, setShareToastOpen] = useState(false);
-  const [exportBusy, setExportBusy] = useState(false);
-  const [importBusy, setImportBusy] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const importFileInputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
 
   const {
     saveProjectMutation,
@@ -141,6 +127,42 @@ export function useSurveyProject({
     [applyDraft, enterSurveyMode, setClientName, setProjectId],
   );
 
+  const {
+    fileInputRef,
+    handleFileInputChange,
+    requestImport: openImportFilePicker,
+    requestOpenLocal: openFilePicker,
+    sendProjectBundle,
+    importBusy,
+    exportBusy,
+  } = useProjectBundleTransfer({
+    confirmBeforeImport: () => {
+      if (!needsResetConfirm()) return true;
+      return window.confirm(
+        'Поточна анкета буде замінена імпортованим проєктом. Продовжити?',
+      );
+    },
+    onImportSuccess: (result) => {
+      applyDraft(result.draft);
+      setClientName(result.draft.clientName);
+      setProjectId(result.project.id);
+      saveSurveyDraftToStorage(result.draft);
+      enterSurveyMode();
+      if (result.latestReport) {
+        setCalcReport(result.latestReport);
+      }
+      setPublicPath(null);
+      setShareToastOpen(false);
+    },
+    onOpenLocalSuccess: (draft) => {
+      applyDraftAndMeta(draft);
+    },
+    onStatus: (message, error) => {
+      if (error) showErr(error);
+      else if (message) showOk(message);
+    },
+  });
+
   const saveToFile = useCallback(() => {
     if (bootstrapMode !== 'survey') return;
     try {
@@ -158,149 +180,31 @@ export function useSurveyProject({
 
   const exportProjectBundleToFile = useCallback(async () => {
     if (bootstrapMode !== 'survey') return;
-    setExportBusy(true);
-    try {
-      const localDraft = buildDraft();
-      let localLastCalcInput: unknown;
-      if (canRunCalc) {
-        try {
-          localLastCalcInput = buildCalcPayload();
-        } catch {
-          /* calcInput опционален для экспорта */
-        }
+
+    const localDraft = buildDraft();
+    let localLastCalcInput: unknown;
+    if (canRunCalc) {
+      try {
+        localLastCalcInput = buildCalcPayload();
+      } catch {
+        /* calcInput опционален для экспорта */
       }
-
-      const bundle = await fetchProjectExportBundle({
-        projectId,
-        localDraft,
-        localLastCalcInput,
-        queryClient,
-      });
-
-      const bytes = estimateProjectExportJsonBytes(bundle);
-      if (bytes > 900_000) {
-        const ok = window.confirm(
-          `Файл експорту ~${Math.round(bytes / 1024)} KB. Продовжити завантаження?`,
-        );
-        if (!ok) return;
-      }
-
-      const filename = buildProjectExportFilename(bundle.project.clientName, bundle.exportedAt);
-      downloadJsonFile(filename, bundle);
-
-      if (projectId) {
-        showOk(
-          `Проєкт експортовано (${String(bundle.calculations.length)} розрахунків, Dev)`,
-        );
-      } else {
-        showOk('Експорт чернетки без сервера (Dev) — збережіть проєкт для повної історії');
-      }
-    } catch (e) {
-      showErr(e instanceof Error ? e.message : 'Не вдалося експортувати проєкт');
-    } finally {
-      setExportBusy(false);
     }
+
+    await sendProjectBundle({
+      projectId,
+      clientName: localDraft.clientName,
+      localDraft,
+      localLastCalcInput,
+    });
   }, [
     bootstrapMode,
     buildDraft,
     buildCalcPayload,
     canRunCalc,
     projectId,
-    queryClient,
-    showOk,
-    showErr,
+    sendProjectBundle,
   ]);
-
-  const openFilePicker = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
-
-  const openImportFilePicker = useCallback(() => {
-    importFileInputRef.current?.click();
-  }, []);
-
-  const handleImportFileSelected = useCallback(
-    async (file: File | undefined) => {
-      if (!file) return;
-      if (needsResetConfirm()) {
-        const ok = window.confirm(
-          'Поточна анкета буде замінена імпортованим проєктом. Продовжити?',
-        );
-        if (!ok) return;
-      }
-
-      setImportBusy(true);
-      try {
-        const text = await file.text();
-        const raw: unknown = JSON.parse(text);
-        const { importBody, latestReport } = parseProjectImportFile(raw);
-        const result = await importProject(importBody);
-        const draft = buildSurveyDraftAfterImport(result.project, importBody, latestReport);
-
-        applyDraft(draft);
-        setClientName(draft.clientName);
-        setProjectId(result.project.id);
-        saveSurveyDraftToStorage(draft);
-        enterSurveyMode();
-        if (latestReport) {
-          setCalcReport(latestReport);
-        }
-        setPublicPath(null);
-        setShareToastOpen(false);
-
-        await queryClient.invalidateQueries({ queryKey: ['projects'] });
-        await queryClient.invalidateQueries({
-          queryKey: queryKeys.projectCalculations(result.project.id),
-        });
-
-        showOk(
-          `Проект успішно імпортовано! (${String(result.calculationsImported)} розрахунків)`,
-        );
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : 'Не вдалося імпортувати проєкт';
-        if (msg.includes('401') || msg.includes('PROJECTS_AUTH')) {
-          showErr('Увійдіть у систему перед імпортом');
-        } else if (msg.includes('ADMIN_REQUIRED') || msg.includes('403')) {
-          showErr('Імпорт доступний лише адміністратору (role=admin)');
-        } else if (msg.includes('503') || msg.includes('MONGODB_UNAVAILABLE')) {
-          showErr('MongoDB недоступна — імпорт неможливий');
-        } else if (msg.includes('413')) {
-          showErr('Файл занадто великий для імпорту');
-        } else {
-          showErr(msg);
-        }
-      } finally {
-        setImportBusy(false);
-      }
-    },
-    [
-      applyDraft,
-      enterSurveyMode,
-      needsResetConfirm,
-      queryClient,
-      setCalcReport,
-      setClientName,
-      setProjectId,
-      showOk,
-      showErr,
-    ],
-  );
-
-  const handleFileSelected = useCallback(
-    async (file: File | undefined) => {
-      if (!file) return;
-      try {
-        const text = await file.text();
-        const raw: unknown = JSON.parse(text);
-        const draft = parseSurveyDraft(raw);
-        applyDraftAndMeta(draft);
-        showOk(`Завантажено з файлу: ${file.name}`);
-      } catch (e) {
-        showErr(e instanceof Error ? e.message : 'Не вдалося прочитати файл');
-      }
-    },
-    [applyDraftAndMeta, showOk, showErr],
-  );
 
   const saveToServer = useCallback(
     async (withCalc: boolean) => {
@@ -606,7 +510,7 @@ export function useSurveyProject({
     statusMessage,
     statusError,
     fileInputRef,
-    importFileInputRef,
+    handleFileInputChange,
     projectsOpen,
     setProjectsOpen,
     projectsLoading,
@@ -628,8 +532,6 @@ export function useSurveyProject({
     saveProjectDraft,
     openFilePicker,
     openImportFilePicker,
-    handleFileSelected,
-    handleImportFileSelected,
     exportTextFile,
     exportHashLink,
     copyPublicLink,

@@ -17,4 +17,7 @@ export const projectsUk = {
   savedCalculations: 'Збережені розрахунки проєкту',
   backHome: 'До головної',
   openSurvey: 'Відкрити анкету',
+  importProject: 'Імпорт проєкту',
+  importBusy: 'Імпорт…',
+  exportProject: 'Експорт',
 } as const;
