@@ -7,25 +7,27 @@ import { Link, useNavigate } from 'react-router';
 
 import { AccountBar } from '../../components/AccountBar/AccountBar';
 import { Footer } from '../../components/Footer/Footer';
+import { ProjectTransferDialog } from '../../components/ProjectTransferDialog/ProjectTransferDialog';
 import { useProjectBundleTransfer } from '../../hooks/useProjectBundleTransfer';
 import { projectsUk } from '../../i18n/uk/projects';
 import { useMeQuery } from '../../query/queries/useMeQuery';
 import { useProjectsListQuery } from '../../query/queries/useProjectsListQuery';
 import { paths } from '../../routing/paths';
+import { isDevToolsBuildEnabled } from '../../utils/isDevToolsEnabled';
 import {
   queuePendingNewProject,
   queuePendingProjectLoad,
 } from '../../utils/pendingProjectNavigation';
 import styles from './ProjectsPage.module.css';
 
-/** Действия страницы — одна dispatch-функция, разная логика в switch. */
+/** Действия toolbar / списка — одна dispatch-функция. */
 type ProjectsPageAction =
   | { type: 'refresh' }
   | { type: 'newProject' }
   | { type: 'openSurvey' }
-  | { type: 'import' }
-  | { type: 'openProject'; projectId: string }
-  | { type: 'export'; projectId: string; clientName: string };
+  | { type: 'openTransferDialog' }
+  | { type: 'closeTransferDialog' }
+  | { type: 'openProject'; projectId: string };
 
 /**
  * Список проектов клиентов с переходом в анкету.
@@ -34,7 +36,9 @@ export function ProjectsPage() {
   const navigate = useNavigate();
   const { user: meUser } = useMeQuery();
   const isAdmin = meUser?.role === 'admin';
+  const showExportInTransfer = isDevToolsBuildEnabled();
   const { projectList, projectsLoading, refetch } = useProjectsListQuery({ enabled: true });
+  const [transferOpen, setTransferOpen] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
 
@@ -58,6 +62,7 @@ export function ProjectsPage() {
   } = useProjectBundleTransfer({
     onImportSuccess: async () => {
       await refetch();
+      setTransferOpen(false);
     },
     onStatus: notifyStatus,
   });
@@ -75,18 +80,15 @@ export function ProjectsPage() {
         case 'openSurvey':
           void navigate(paths.home);
           break;
-        case 'import':
-          requestImport();
+        case 'openTransferDialog':
+          setTransferOpen(true);
+          break;
+        case 'closeTransferDialog':
+          setTransferOpen(false);
           break;
         case 'openProject':
           queuePendingProjectLoad(action.projectId);
           void navigate(paths.home);
-          break;
-        case 'export':
-          void sendProjectBundle({
-            projectId: action.projectId,
-            clientName: action.clientName,
-          });
           break;
         default: {
           const _exhaustive: never = action;
@@ -94,7 +96,18 @@ export function ProjectsPage() {
         }
       }
     },
-    [navigate, refetch, requestImport, sendProjectBundle],
+    [navigate, refetch],
+  );
+
+  const handleImportFromDialog = useCallback(() => {
+    requestImport();
+  }, [requestImport]);
+
+  const handleExportFromDialog = useCallback(
+    (projectId: string, clientName: string) => {
+      void sendProjectBundle({ projectId, clientName });
+    },
+    [sendProjectBundle],
   );
 
   return (
@@ -144,12 +157,11 @@ export function ProjectsPage() {
             <button
               type="button"
               className={styles.button}
-              disabled={importBusy}
               onClick={() => {
-                handlePageAction({ type: 'import' });
+                handlePageAction({ type: 'openTransferDialog' });
               }}
             >
-              {importBusy ? projectsUk.importBusy : projectsUk.importProject}
+              {projectsUk.transferProject}
             </button>
           ) : null}
         </div>
@@ -162,6 +174,21 @@ export function ProjectsPage() {
           onChange={handleFileInputChange}
         />
 
+        <ProjectTransferDialog
+          open={transferOpen}
+          loading={projectsLoading}
+          projects={projectList}
+          showExportSection={showExportInTransfer}
+          showOwnerInExportList={isAdmin}
+          importBusy={importBusy}
+          exportBusy={exportBusy}
+          onClose={() => {
+            handlePageAction({ type: 'closeTransferDialog' });
+          }}
+          onImportClick={handleImportFromDialog}
+          onExportProject={handleExportFromDialog}
+        />
+
         {projectsLoading ? (
           <p className={styles.muted}>{projectsUk.loading}</p>
         ) : projectList.length === 0 ? (
@@ -169,7 +196,7 @@ export function ProjectsPage() {
         ) : (
           <ul className={styles.list}>
             {projectList.map((p) => (
-              <li key={p.id} className={styles.listItem}>
+              <li key={p.id}>
                 <button
                   type="button"
                   className={styles.itemButton}
@@ -188,22 +215,6 @@ export function ProjectsPage() {
                     {new Date(p.updatedAt).toLocaleString('uk-UA')}
                   </span>
                 </button>
-                {isAdmin ? (
-                  <button
-                    type="button"
-                    className={styles.rowAction}
-                    disabled={exportBusy}
-                    onClick={() => {
-                      handlePageAction({
-                        type: 'export',
-                        projectId: p.id,
-                        clientName: p.clientName,
-                      });
-                    }}
-                  >
-                    {exportBusy ? '…' : projectsUk.exportProject}
-                  </button>
-                ) : null}
               </li>
             ))}
           </ul>

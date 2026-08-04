@@ -17,7 +17,14 @@ export const projectsUk = {
   savedCalculations: 'Збережені розрахунки проєкту',
   backHome: 'До головної',
   openSurvey: 'Відкрити анкету',
-  importProject: 'Імпорт проєкту',
   importBusy: 'Імпорт…',
-  exportProject: 'Експорт',
+  transferProject: 'Перенос проєкту',
+  transferDialogTitle: 'Перенос проєкту (JSON)',
+  transferImportSection: 'Імпорт',
+  transferImportHint:
+    'Завантажте ProjectExportBundle з іншого середовища. Буде створено новий проєкт.',
+  transferImportPickFile: 'Обрати JSON-файл',
+  transferExportSection: 'Експорт',
+  transferExportHint: 'Оберіть проєкт для завантаження JSON-файлу.',
+  transferClose: 'Закрити',
 } as const;

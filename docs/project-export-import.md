@@ -41,9 +41,8 @@ Legacy `heatcalc-*.json` (SurveyDraft без `exportSchemaVersion`) также �
 ## Runbook Staging → Production (перенос проекта)
 
 1. **Staging** (admin): Dev → **📥 Експорт** → файл на ПК.
-2. **Production**: Dev на master **нет**. Импорт:
-   - **curl** `POST /api/v1/projects/import` с JWT admin и телом JSON; или
-   - временно (не рекомендуется) включить Dev на master — лучше admin + curl.
+2. **Production**: admin → `/projects` → **«Перенос проєкту»** → **«Обрати JSON-файл»**; або
+   - **curl** `POST /api/v1/projects/import` з JWT admin і тілом JSON (legacy).
 3. На **целевом** окружении: «Оновити список» на `/projects`.
 
 ## Runbook Production → Staging
