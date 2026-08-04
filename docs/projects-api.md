@@ -25,7 +25,8 @@ PDF: серверный Chromium, см. [`client-share-and-layers.md`](client-sh
 
 - **JWT обязателен** при `NODE_ENV=production` на `/api/v1/projects/*`.
 - Цепочка: `JWT.sub` → `users.providerUserId` → `users._id` → `projects.ownerId` (ObjectId).
-- **IDOR:** фильтр по `req.user.id`; чужой id → `404 PROJECT_NOT_FOUND`.
+- **IDOR (role=user):** фильтр по `req.user.id`; чужой id → `404 PROJECT_NOT_FOUND`.
+- **Admin (role=admin):** доступ ко **всем** проектам (read/write/calc/share/PDF); list — все записи + `ownerEmail`; query `ownerId` / `ownerEmail` только для admin. См. [`auth.md`](auth.md).
 - **Rate limit** и **квоты:** см. `backend/.env.example`.
 
 ### Лимиты размера payload и MongoDB

@@ -86,6 +86,19 @@
   color: var(--text);
 }
 
+.itemOwner {
+  display: block;
+  margin-top: 4px;
+  font: 600 12px/1.35 var(--sans);
+  color: var(--accent);
+}
+
+.adminHint {
+  margin: 0 0 12px;
+  font: 500 13px/1.45 var(--sans);
+  color: var(--text);
+}
+
 .muted {
   font: 500 14px/1.45 var(--sans);
   color: var(--text);

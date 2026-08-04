@@ -7,3 +7,10 @@ properties:
   createdAt: { type: string, format: date-time }
   updatedAt: { type: string, format: date-time }
   calculationsCount: { type: integer, minimum: 0 }
+  ownerId:
+    type: string
+    description: Владелец проекта (Mongo users._id); в списке для role=admin
+  ownerEmail:
+    type: string
+    format: email
+    description: Email владельца; в списке для role=admin

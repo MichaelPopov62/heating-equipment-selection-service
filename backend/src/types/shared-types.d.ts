@@ -1411,6 +1411,9 @@ export interface ProjectListItem {
   createdAt: string;
   updatedAt: string;
   calculationsCount?: number;
+  /** Присутствует в ответах admin (role=admin). */
+  ownerId?: string;
+  ownerEmail?: string;
 }
 
 /** Документ MongoDB `projects` (для Mongoose Model / QueryFilter). */

@@ -46,11 +46,15 @@ export async function listProjects(params?: {
   search?: string;
   limit?: number;
   skip?: number;
+  ownerId?: string;
+  ownerEmail?: string;
 }): Promise<ProjectsListResponse> {
   const q = new URLSearchParams();
   if (params?.search?.trim()) q.set('search', params.search.trim());
   if (params?.limit != null) q.set('limit', String(params.limit));
   if (params?.skip != null) q.set('skip', String(params.skip));
+  if (params?.ownerId?.trim()) q.set('ownerId', params.ownerId.trim());
+  if (params?.ownerEmail?.trim()) q.set('ownerEmail', params.ownerEmail.trim());
   const qs = q.toString();
   const res = await fetch(apiUrl(`/api/v1/projects${qs ? `?${qs}` : ''}`), {
     headers: await projectsFetchHeaders(),

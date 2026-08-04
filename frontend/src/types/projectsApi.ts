@@ -24,6 +24,9 @@ export type ProjectListItem = {
   createdAt: string;
   updatedAt: string;
   calculationsCount?: number;
+  /** Admin list — владелец проекта. */
+  ownerId?: string;
+  ownerEmail?: string;
 };
 
 export type ProjectDetail = ProjectListItem & {

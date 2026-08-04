@@ -406,6 +406,14 @@ paths:
           in: query
           description: Поиск по clientName (регистронезависимый подстрочный)
           schema: { type: string }
+        - name: ownerId
+          in: query
+          description: Фильтр по владельцу (только role=admin)
+          schema: { type: string }
+        - name: ownerEmail
+          in: query
+          description: Фильтр по email владельца (только role=admin)
+          schema: { type: string, format: email }
       responses:
         "200":
           description: OK
@@ -426,7 +434,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "403":
-          description: PROJECTS_AUTH_FORBIDDEN — недействительный JWT
+          description: PROJECTS_AUTH_FORBIDDEN или ADMIN_REQUIRED (ownerId/ownerEmail без role=admin)
           content:
             application/json:
               schema:

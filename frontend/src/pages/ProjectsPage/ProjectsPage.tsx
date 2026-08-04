@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router';
 import { AccountBar } from '../../components/AccountBar/AccountBar';
 import { Footer } from '../../components/Footer/Footer';
 import { projectsUk } from '../../i18n/uk/projects';
+import { useMeQuery } from '../../query/queries/useMeQuery';
 import { useProjectsListQuery } from '../../query/queries/useProjectsListQuery';
 import { paths } from '../../routing/paths';
 import {
@@ -20,6 +21,8 @@ import styles from './ProjectsPage.module.css';
  */
 export function ProjectsPage() {
   const navigate = useNavigate();
+  const { user: meUser } = useMeQuery();
+  const isAdmin = meUser?.role === 'admin';
   const { projectList, projectsLoading, refetch } = useProjectsListQuery({ enabled: true });
 
   return (
@@ -32,6 +35,9 @@ export function ProjectsPage() {
         </div>
         <h1 className={styles.title}>{projectsUk.title}</h1>
         <AccountBar className={styles.accountBar} />
+        {isAdmin ? (
+          <p className={styles.adminHint}>{projectsUk.adminAllProjectsHint}</p>
+        ) : null}
         <div className={styles.toolbar}>
           <button
             type="button"
@@ -80,6 +86,11 @@ export function ProjectsPage() {
                   }}
                 >
                   {p.clientName}
+                  {isAdmin && p.ownerEmail ? (
+                    <span className={styles.itemOwner}>
+                      {projectsUk.owner}: {p.ownerEmail}
+                    </span>
+                  ) : null}
                   <span className={styles.itemMeta}>
                     {p.calculationsCount ?? 0} {projectsUk.calculations} · {projectsUk.updated}{' '}
                     {new Date(p.updatedAt).toLocaleString('uk-UA')}

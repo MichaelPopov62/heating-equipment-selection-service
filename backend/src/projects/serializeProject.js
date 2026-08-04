@@ -35,9 +35,10 @@ function formatTimestamp(value) {
 
 /**
  * @param {import('mongoose').Document | import('../types/shared-types.js').ProjectMongoDoc | Record<string, unknown>} doc
+ * @param {{ ownerEmail?: string }} [meta]
  * @returns {import('../types/shared-types.js').ProjectListItem}
  */
-export function serializeProjectListItem(doc) {
+export function serializeProjectListItem(doc, meta = {}) {
   const rec = toPlainRecord(doc);
   const id = String(rec._id ?? '');
 
@@ -55,18 +56,26 @@ export function serializeProjectListItem(doc) {
   if (typeof rec.calculationsCount === 'number') {
     item.calculationsCount = rec.calculationsCount;
   }
+  if (rec.ownerId != null && String(rec.ownerId).trim()) {
+    item.ownerId = String(rec.ownerId);
+  }
+  if (meta.ownerEmail != null && meta.ownerEmail.trim()) {
+    item.ownerEmail = meta.ownerEmail.trim();
+  }
 
   return item;
 }
 
 /**
  * @param {import('mongoose').Document | import('../types/shared-types.js').ProjectMongoDoc | Record<string, unknown>} doc
- * @param {{ calculationsCount?: number, lastCalculation?: import('../types/shared-types.js').CalculationListItem | null }} [extra]
+ * @param {{ calculationsCount?: number, lastCalculation?: import('../types/shared-types.js').CalculationListItem | null, ownerEmail?: string }} [extra]
  * @returns {import('../types/shared-types.js').ProjectDetail}
  */
 export function serializeProjectDetail(doc, extra = {}) {
   const rec = toPlainRecord(doc);
-  const base = serializeProjectListItem(rec);
+  const base = serializeProjectListItem(rec, {
+    ...(extra.ownerEmail !== undefined ? { ownerEmail: extra.ownerEmail } : {}),
+  });
 
   /** @type {import('../types/shared-types.js').ProjectDetail} */
   const detail = { ...base };

@@ -31,6 +31,7 @@
     "verify:document-size-limits": "node scripts/verifyDocumentSizeLimits.js",
     "verify:extract-calculation-summary": "node scripts/verifyExtractCalculationSummary.js",
     "verify:projects-auth": "node scripts/verifyProjectsAuth.js",
+    "verify:projects-admin-access": "node scripts/verifyProjectsAdminAccess.js",
     "verify:migrate-project-owner-ids": "node scripts/verifyMigrateProjectOwnerIds.js",
     "migrate:project-owner-ids": "node scripts/migrateProjectOwnerIds.js",
     "verify:user-model": "node scripts/verifyUserModel.js",

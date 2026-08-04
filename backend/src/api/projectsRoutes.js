@@ -24,10 +24,15 @@ import { requireMongoForProjects } from '../projects/requireMongo.js';
 import {
   assertCanCreateCalculation,
   assertCanCreateProject,
-  buildProjectOwnerFilter,
-  findOwnedProjectDoc,
-  findOwnedProjectLean,
+  buildAccessibleProjectByIdFilter,
+  findAccessibleProjectDoc,
+  findAccessibleProjectLean,
+  isProjectsAdminRequest,
+  logAdminCrossOwnerProjectAccess,
+  resolveProjectListFilter,
+  validateProjectsListQueryForRole,
 } from '../projects/projectAccess.js';
+import { loadOwnerEmailByOwnerId } from '../projects/projectOwnerMeta.js';
 import {
   serializeCalculationDetail,
   serializeCalculationListItem,
@@ -127,6 +132,19 @@ export function createProjectsRouter() {
    */
   router.get('/api/v1/projects', projectsReadRateLimiter, async (req, res, next) => {
     try {
+      const listQueryError = validateProjectsListQueryForRole(req);
+      if (listQueryError) {
+        res.status(403).json({
+          ok: false,
+          error: {
+            message: listQueryError,
+            code: 'ADMIN_REQUIRED',
+            statusCode: 403,
+          },
+        });
+        return;
+      }
+
       const ownerId = ownerIdFromRequest(req);
       const limit = parseLimit(req.query.limit, 50, 100);
       const skip = parseLimit(req.query.skip, 0, 10_000);
@@ -136,7 +154,7 @@ export function createProjectsRouter() {
           : null;
 
       /** @type {import('mongoose').QueryFilter<import('../types/shared-types.js').ProjectMongoDoc>} */
-      const filter = { ...buildProjectOwnerFilter(ownerId) };
+      const filter = { ...(await resolveProjectListFilter(req, ownerId)) };
       if (search) {
         filter.clientName = {
           $regex: search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
@@ -158,12 +176,30 @@ export function createProjectsRouter() {
       ]);
       const countByProject = new Map(counts.map((c) => [String(c._id), c.count]));
 
-      const projects = docs.map((doc) =>
-        serializeProjectListItem({
-          ...doc,
-          calculationsCount: countByProject.get(String(doc._id)) ?? 0,
-        }),
-      );
+      const ownerEmailById = isProjectsAdminRequest(req)
+        ? await loadOwnerEmailByOwnerId(docs)
+        : new Map();
+
+      const projects = docs.map((doc) => {
+        const ownerKey = doc.ownerId != null ? String(doc.ownerId) : '';
+        const ownerEmail = ownerKey ? ownerEmailById.get(ownerKey) : undefined;
+        return serializeProjectListItem(
+          {
+            ...doc,
+            calculationsCount: countByProject.get(String(doc._id)) ?? 0,
+          },
+          ownerEmail ? { ownerEmail } : {},
+        );
+      });
+
+      if (isProjectsAdminRequest(req) && total > 0) {
+        logger.info('projects.admin.list', reqLogMeta(req), {
+          total,
+          limit,
+          skip,
+          adminUserId: req.user?.id ?? '',
+        });
+      }
 
       res.status(200).json({ ok: true, projects, total, limit, skip });
     } catch (err) {
@@ -254,7 +290,7 @@ export function createProjectsRouter() {
         return;
       }
 
-      const doc = await findOwnedProjectLean(oid, ownerId);
+      const doc = await findAccessibleProjectLean(oid, ownerId, req);
       if (!doc) {
         res.status(404).json({
           ok: false,
@@ -274,10 +310,19 @@ export function createProjectsRouter() {
         if (last) lastCalculation = serializeCalculationListItem(last);
       }
 
-      /** @type {{ calculationsCount: number; lastCalculation?: import('../types/shared-types.js').CalculationListItem }} */
+      const ownerEmailMap = isProjectsAdminRequest(req)
+        ? await loadOwnerEmailByOwnerId([doc])
+        : new Map();
+      const ownerKey = doc.ownerId != null ? String(doc.ownerId) : '';
+      const ownerEmail = ownerKey ? ownerEmailMap.get(ownerKey) : undefined;
+
+      /** @type {{ calculationsCount: number; lastCalculation?: import('../types/shared-types.js').CalculationListItem; ownerEmail?: string }} */
       const detailExtra = { calculationsCount };
       if (lastCalculation !== undefined) {
         detailExtra.lastCalculation = lastCalculation;
+      }
+      if (ownerEmail) {
+        detailExtra.ownerEmail = ownerEmail;
       }
 
       res.status(200).json({
@@ -306,6 +351,15 @@ export function createProjectsRouter() {
         return;
       }
 
+      const existing = await findAccessibleProjectLean(oid, ownerId, req);
+      if (!existing) {
+        res.status(404).json({
+          ok: false,
+          error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+        });
+        return;
+      }
+
       const patch = validateProjectUpdateBody(req.body);
       const update = /** @type {Record<string, unknown>} */ ({});
       if (patch.clientName !== undefined) update.clientName = patch.clientName;
@@ -313,7 +367,7 @@ export function createProjectsRouter() {
       if (patch.survey !== undefined) update.survey = patch.survey;
 
       const doc = await Project.findOneAndUpdate(
-        { _id: oid, ...buildProjectOwnerFilter(ownerId) },
+        buildAccessibleProjectByIdFilter(oid, ownerId, req),
         { $set: update },
         { new: true },
       ).lean();
@@ -325,6 +379,8 @@ export function createProjectsRouter() {
         });
         return;
       }
+
+      logAdminCrossOwnerProjectAccess(req, existing, 'mutate');
 
       const calculationsCount = await Calculation.countDocuments({ projectId: oid });
       logger.info('project.update', reqLogMeta(req), {
@@ -360,10 +416,18 @@ export function createProjectsRouter() {
         return;
       }
 
-      const deleted = await Project.findOneAndDelete({
-        _id: oid,
-        ...buildProjectOwnerFilter(ownerId),
-      });
+      const existing = await findAccessibleProjectLean(oid, ownerId, req);
+      if (!existing) {
+        res.status(404).json({
+          ok: false,
+          error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+        });
+        return;
+      }
+
+      const deleted = await Project.findOneAndDelete(
+        buildAccessibleProjectByIdFilter(oid, ownerId, req),
+      );
 
       if (!deleted) {
         res.status(404).json({
@@ -372,6 +436,8 @@ export function createProjectsRouter() {
         });
         return;
       }
+
+      logAdminCrossOwnerProjectAccess(req, existing, 'mutate');
 
       const calcResult = await Calculation.deleteMany({ projectId: oid });
       logger.info('project.delete', reqLogMeta(req), {
@@ -417,7 +483,7 @@ export function createProjectsRouter() {
         return;
       }
 
-      const projectRaw = await findOwnedProjectDoc(oid, ownerId);
+      const projectRaw = await findAccessibleProjectDoc(oid, ownerId, req);
       if (!projectRaw) {
         res.status(404).json({
           ok: false,
@@ -490,6 +556,7 @@ export function createProjectsRouter() {
       if (!project.ownerId) {
         project.ownerId = ownerId;
       }
+      logAdminCrossOwnerProjectAccess(req, project.toObject(), 'mutate');
       project.lastCalcInput = input;
       await project.save();
 
@@ -545,7 +612,7 @@ export function createProjectsRouter() {
         return;
       }
 
-      const owned = await findOwnedProjectLean(oid, ownerId);
+      const owned = await findAccessibleProjectLean(oid, ownerId, req);
       if (!owned) {
         res.status(404).json({
           ok: false,
@@ -599,7 +666,7 @@ export function createProjectsRouter() {
           return;
         }
 
-        const owned = await findOwnedProjectLean(projectOid, ownerId);
+        const owned = await findAccessibleProjectLean(projectOid, ownerId, req);
         if (!owned) {
           res.status(404).json({
             ok: false,
@@ -649,7 +716,7 @@ export function createProjectsRouter() {
           return;
         }
 
-        const project = await findOwnedProjectLean(oid, ownerId);
+        const project = await findAccessibleProjectLean(oid, ownerId, req);
         if (!project) {
           res.status(404).json({
             ok: false,
@@ -722,7 +789,7 @@ export function createProjectsRouter() {
           return;
         }
 
-        const project = await findOwnedProjectDoc(oid, ownerId);
+        const project = await findAccessibleProjectDoc(oid, ownerId, req);
         if (!project) {
           res.status(404).json({
             ok: false,
@@ -797,8 +864,10 @@ export function createProjectsRouter() {
         const shareToken = existingToken ?? generateShareToken();
         const sharePublishedAt = new Date();
 
+        logAdminCrossOwnerProjectAccess(req, projectPlain, 'mutate');
+
         const updated = await Project.findOneAndUpdate(
-          { _id: oid, ...buildProjectOwnerFilter(ownerId) },
+          buildAccessibleProjectByIdFilter(oid, ownerId, req),
           {
             $set: {
               shareToken,
@@ -868,7 +937,7 @@ export function createProjectsRouter() {
           return;
         }
 
-        const project = await findOwnedProjectDoc(oid, ownerId);
+        const project = await findAccessibleProjectDoc(oid, ownerId, req);
         if (!project) {
           res.status(404).json({
             ok: false,
@@ -877,12 +946,15 @@ export function createProjectsRouter() {
           return;
         }
 
+        const projectPlain = project.toObject();
+        logAdminCrossOwnerProjectAccess(req, projectPlain, 'mutate');
+
         await Project.updateOne(
-          { _id: oid, ...buildProjectOwnerFilter(ownerId) },
+          buildAccessibleProjectByIdFilter(oid, ownerId, req),
           { $unset: { shareToken: 1, sharePublishedAt: 1, shareSnapshot: 1 } },
         );
 
-        const refreshed = await findOwnedProjectLean(oid, ownerId);
+        const refreshed = await findAccessibleProjectLean(oid, ownerId, req);
         const calculationsCount = await Calculation.countDocuments({ projectId: oid });
 
         logger.info('project.share.revoke', reqLogMeta(req), {

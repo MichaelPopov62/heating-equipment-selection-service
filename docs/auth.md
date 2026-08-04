@@ -27,7 +27,9 @@ Clerk SignIn / SignUp (frontend)
 | `req.user` | `id` | String(`users._id`) — для фильтров и rate limit |
 | MongoDB `projects` | `ownerId` | ObjectId ref `User` |
 
-**IDOR:** все запросы к проектам фильтруются по `req.user.id`; чужой `projectId` → `404 PROJECT_NOT_FOUND`.
+**IDOR (role=user):** запросы к проектам фильтруются по `req.user.id`; чужой `projectId` → `404 PROJECT_NOT_FOUND`.
+
+**Admin bypass (role=admin):** platform/delegated admin видит и изменяет **любой** проект (`GET/PUT/DELETE /api/v1/projects/*`, calc, PDF, share). Список `GET /api/v1/projects` без фильтра — все проекты; опционально `?ownerId=` / `?ownerEmail=`. В ответе list/detail — `ownerId`, `ownerEmail`. Cross-owner доступ логируется (`projects.admin.cross_owner`, `projects.admin.list`). Модули: `projects/projectAccess.js`, `projects/projectOwnerMeta.js`. Verify: `npm run verify:projects-admin-access`.
 
 ---
 

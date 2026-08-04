@@ -4,6 +4,9 @@
 
 export const projectsUk = {
   title: 'Проєкти клієнтів',
+  adminAllProjectsHint:
+    'Режим адміністратора: показано всі проєкти користувачів. Власник — у кожному рядку.',
+  owner: 'Власник',
   refresh: 'Оновити список',
   newProject: 'Новий проєкт',
   loading: 'Завантаження…',
