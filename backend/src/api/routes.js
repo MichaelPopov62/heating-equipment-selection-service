@@ -29,10 +29,7 @@ export async function createRoutes() {
    * @param {import('express').Request} _req
    * @param {import('express').Response<import('../types/shared-types.js').HealthOkResponse>} res
    */
-  const healthHandler = (_req, res) => res.status(200).json({ ok: true, status: 'up' });
-  router.get('/health', healthHandler);
-  /** Legacy alias для мониторинга / старых URL (канонический путь — GET /health). */
-  router.get('/api/health', healthHandler);
+  router.get('/health', (_req, res) => res.status(200).json({ ok: true, status: 'up' }));
 
   router.use(createSystemRouter());
 
@@ -125,21 +122,6 @@ export async function createRoutes() {
     } catch (err) {
       next(err);
     }
-  });
-
-  /**
-   * Legacy alias: /api/projects/* → внутренний rewrite на /api/v1/projects/*.
-   *
-   * @param {import('express').Request} req
-   * @param {import('express').Response} _res
-   * @param {import('express').NextFunction} next
-   */
-  router.use((req, _res, next) => {
-    const path = req.path ?? '';
-    if (path === '/api/projects' || path.startsWith('/api/projects/')) {
-      req.url = req.url.replace(/^\/api\/projects/, '/api/v1/projects');
-    }
-    next();
   });
 
   /**
