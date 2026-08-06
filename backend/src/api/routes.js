@@ -34,6 +34,44 @@ export async function createRoutes() {
   /** Legacy alias для мониторинга / старых URL (канонический путь — GET /health). */
   router.get('/api/health', healthHandler);
 
+  /**
+   * Корень API: открытие базового URL в браузере без 404.
+   *
+   * @param {import('express').Request} _req
+   * @param {import('express').Response<import('../types/shared-types.js').ApiRootResponse>} res
+   */
+  router.get('/', (_req, res) => {
+    res.status(200).json({
+      ok: true,
+      status: 'up',
+      service: 'heatcalc-api',
+      health: '/health',
+      api: '/api/v1',
+      endpoints: {
+        health: 'GET /health',
+        catalog: 'GET /api/v1/catalog',
+        calc: 'POST /api/v1/calc',
+        projects: 'GET /api/v1/projects',
+        me: 'GET /api/v1/me',
+      },
+    });
+  });
+
+  /**
+   * Подсказка для /api без версии (канонический префикс — /api/v1).
+   *
+   * @param {import('express').Request} _req
+   * @param {import('express').Response<import('../types/shared-types.js').ApiVersionHintResponse>} res
+   */
+  router.get('/api', (_req, res) => {
+    res.status(200).json({
+      ok: true,
+      version: 'v1',
+      base: '/api/v1',
+      hint: 'Використовуйте шляхи з префіксом /api/v1/…',
+    });
+  });
+
   router.use(createSystemRouter());
 
   /**

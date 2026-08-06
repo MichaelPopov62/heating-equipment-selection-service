@@ -54,6 +54,30 @@ export interface HealthOkResponse {
   status: 'up';
 }
 
+/** GET / — корень API для быстрой проверки в браузере и мониторинге. */
+export interface ApiRootResponse {
+  ok: true;
+  status: 'up';
+  service: 'heatcalc-api';
+  health: '/health';
+  api: '/api/v1';
+  endpoints: {
+    health: 'GET /health';
+    catalog: 'GET /api/v1/catalog';
+    calc: 'POST /api/v1/calc';
+    projects: 'GET /api/v1/projects';
+    me: 'GET /api/v1/me';
+  };
+}
+
+/** GET /api — подсказка версии API без сегмента v1. */
+export interface ApiVersionHintResponse {
+  ok: true;
+  version: 'v1';
+  base: '/api/v1';
+  hint: string;
+}
+
 /** Ответ POST /api/v1/system/invalidate-reference-cache */
 export interface InvalidateReferenceCacheOkResponse {
   ok: true;
