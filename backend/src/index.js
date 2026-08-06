@@ -12,7 +12,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { createRoutes } from './api/public.js';
 import { warmupReferenceCache } from './reference/public.js';
-import { assertAuthConfiguredForProduction, assertAuthConfiguredWhenEnabled } from './auth/projectsAuthConfig.js';
+import {
+  assertAuthConfiguredForProduction,
+  assertAuthConfiguredWhenEnabled,
+} from './auth/projectsAuthConfig.js';
 import { isMongoBsonObjectTooLargeError } from './projects/documentSizeLimits.js';
 import { logger } from './utils/logger.js';
 
@@ -48,15 +51,19 @@ const corsOrigins =
     ? process.env.CORS_ORIGIN.split(',')
         .map((s) => s.trim())
         .filter(Boolean)
-    : isProduction
-      ? []
-      : defaultCorsOrigins;
+    : defaultCorsOrigins;
 
 app.use(
   cors({
     origin: corsOrigins.length > 0 ? corsOrigins : false,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'X-System-Token'],
+    allowedHeaders: [
+      'Content-Type',
+      'Accept',
+      'Authorization',
+      'X-System-Token',
+    ],
+    credentials: true,
     maxAge: 86400,
   }),
 );
@@ -91,7 +98,11 @@ app.use((req, res, next) => {
 
   res.on('finish', () => {
     const ms = Date.now() - startedAt;
-    logger.info('api.response', { requestId }, { method, path, statusCode: res.statusCode, ms });
+    logger.info(
+      'api.response',
+      { requestId },
+      { method, path, statusCode: res.statusCode, ms },
+    );
   });
 
   next();
@@ -113,7 +124,9 @@ const blockStartupWarmup =
  * @returns {Promise<void>}
  */
 async function runReferenceCacheWarmup() {
-  logger.info('referenceCache.warmup.start', null, { blocking: blockStartupWarmup });
+  logger.info('referenceCache.warmup.start', null, {
+    blocking: blockStartupWarmup,
+  });
   try {
     const bundle = await warmupReferenceCache();
     logger.info('referenceCache.warmup.ok', null, {
@@ -156,12 +169,16 @@ function handleApiError(err, req, res, _next) {
   let statusCode = err?.statusCode ?? err?.status ?? 500;
   let code = err?.code ?? 'ERR';
   let clientMessage =
-    statusCode >= 500 ? 'Внутрішня помилка сервера' : err?.message ?? 'Помилка запиту';
+    statusCode >= 500
+      ? 'Внутрішня помилка сервера'
+      : (err?.message ?? 'Помилка запиту');
   /** @type {import('./types/shared-types.js').ErrorDetailsAjvItem[] | undefined} */
   const details =
     statusCode >= 500
       ? undefined
-      : (Array.isArray(err?.details) ? err.details : undefined);
+      : Array.isArray(err?.details)
+        ? err.details
+        : undefined;
 
   // Помилки парсингу JSON / надто великий payload від express.json()
   if (err && typeof err === 'object') {
@@ -218,11 +235,14 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 });
 
 server.on('error', (err) => {
-  const nodeErr = err && typeof err === 'object'
-    ? /** @type {NodeJS.ErrnoException} */ (err)
-    : null;
+  const nodeErr =
+    err && typeof err === 'object'
+      ? /** @type {NodeJS.ErrnoException} */ (err)
+      : null;
   if (nodeErr?.code === 'EADDRINUSE') {
-    process.stderr.write(`Порт ${PORT} уже занят. Освободите порт и перезапустите.\n`);
+    process.stderr.write(
+      `Порт ${PORT} уже занят. Освободите порт и перезапустите.\n`,
+    );
     process.exitCode = 1;
     return;
   }
