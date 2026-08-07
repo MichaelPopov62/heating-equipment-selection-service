@@ -45,6 +45,8 @@ const meApi = readSrc('services/meApi.ts');
 const useMeQuery = readSrc('query/queries/useMeQuery.ts');
 const queryKeys = readSrc('query/queryKeys.ts');
 const authProvider = readSrc('auth/AuthProvider.tsx');
+const clerkAuthProviderInner = readSrc('auth/ClerkAuthProviderInner.tsx');
+const publicAuthProvider = readSrc('auth/PublicAuthProviderInner.tsx');
 const authMeCacheSync = readSrc('auth/useAuthMeCacheSync.ts');
 const authUk = readSrc('i18n/uk/auth.ts');
 const accountBar = readSrc('components/AccountBar/AccountBar.tsx');
@@ -67,18 +69,19 @@ assert.match(meApi, /getProjectsAuthHeaders/);
 
 assert.match(useMeQuery, /export function useMeQuery/);
 assert.match(useMeQuery, /isMeQueryEnabled/);
-assert.match(authProvider, /useLayoutEffect/);
-assert.match(authProvider, /clerkSessionReady/);
-assert.match(authProvider, /isMeQueryEnabled/);
-assert.match(authProvider, /!clerkSessionReady/);
+assert.match(clerkAuthProviderInner, /useLayoutEffect/);
+assert.match(clerkAuthProviderInner, /clerkSessionReady/);
+assert.match(clerkAuthProviderInner, /isMeQueryEnabled/);
+assert.match(clerkAuthProviderInner, /!clerkSessionReady/);
+assert.match(publicAuthProvider, /isMeQueryEnabled: false/);
 assert.match(useMeQuery, /staleTime: ME_STALE_MS/);
 assert.match(useMeQuery, /statusCode === 401/);
 
 assert.match(queryKeys, /me: \['me', 'profile'\]/);
 
 assert.match(authProvider, /useAuthMeCacheSync/);
-assert.match(authProvider, /refreshMeProfile/);
-assert.match(authProvider, /clearMeProfile/);
+assert.match(clerkAuthProviderInner, /refreshMeProfile/);
+assert.match(clerkAuthProviderInner, /clearMeProfile/);
 
 assert.match(authMeCacheSync, /invalidateQueries/);
 assert.match(authMeCacheSync, /removeQueries/);
