@@ -18,7 +18,9 @@ export function JsonLd({ schemas }: JsonLdProps) {
   useEffect(() => {
     document
       .querySelectorAll('script[type="application/ld+json"]')
-      .forEach((node) => node.remove());
+      .forEach((node) => {
+        node.remove();
+      });
 
     const created: HTMLScriptElement[] = [];
     for (const schema of schemas) {
@@ -31,7 +33,9 @@ export function JsonLd({ schemas }: JsonLdProps) {
     }
 
     return () => {
-      created.forEach((node) => node.remove());
+      created.forEach((node) => {
+        node.remove();
+      });
     };
   }, [schemas]);
 

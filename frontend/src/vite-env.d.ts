@@ -25,6 +25,8 @@ interface ImportMetaEnv {
   readonly VITE_BUILD_ID?: string;
   /** Базовый URL Render API; пусто — относительные /api/... через Vite proxy. */
   readonly VITE_API_BASE_URL?: string;
+  /** Публічний origin сайту (canonical, sitemap, Schema.org). */
+  readonly VITE_SITE_URL?: string;
 }
 
 interface ImportMeta {
