@@ -13,6 +13,25 @@ const envPath = path.join(frontendRoot, '.env');
 
 const PRODUCTION_ORIGIN = 'https://heatcalc-mp62.vercel.app';
 
+/** Шляхи, закриті від індексації (приватні/auth/share). */
+const DISALLOW_PATHS = [
+  '/login',
+  '/sign-up',
+  '/projects',
+  '/admin/',
+  '/s/',
+];
+
+/** User-agent блоки: * + AI-сканери (без Allow — лише стандартний Disallow). */
+const ROBOTS_USER_AGENTS = [
+  '*',
+  'GPTBot',
+  'ChatGPT-User',
+  'Claude-Web',
+  'Google-Extended',
+  'PerplexityBot',
+];
+
 /** Публичные маршруты для sitemap (без auth и share). */
 const PUBLIC_PATHS = [
   { loc: '/', changefreq: 'weekly', priority: '1.0' },
@@ -65,30 +84,13 @@ function resolveSiteOrigin() {
  * @returns {string}
  */
 function buildRobotsTxt(origin) {
-  return `# HeatCalc Pro — ${origin}
-User-agent: *
-Allow: /
+  const blocks = ROBOTS_USER_AGENTS.map((userAgent) => {
+    const disallows = DISALLOW_PATHS.map((path) => `Disallow: ${path}`).join('\n');
+    return `User-agent: ${userAgent}\n${disallows}`;
+  });
 
-User-agent: GPTBot
-Allow: /
-
-User-agent: ChatGPT-User
-Allow: /
-
-User-agent: Claude-Web
-Allow: /
-
-User-agent: Google-Extended
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-Disallow: /login
-Disallow: /sign-up
-Disallow: /projects
-Disallow: /admin/
-Disallow: /s/
+  return `# HeatCalc Pro
+${blocks.join('\n\n')}
 
 Sitemap: ${origin}/sitemap.xml
 `;

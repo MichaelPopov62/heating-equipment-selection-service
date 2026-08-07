@@ -18,11 +18,33 @@ assert.ok(existsSync(sitemapPath), 'dist/sitemap.xml должен существ
 const robots = readFileSync(robotsPath, 'utf8');
 const sitemap = readFileSync(sitemapPath, 'utf8');
 
+assert.doesNotMatch(robots, /^Allow:/m, 'robots.txt: без нестандартных Allow');
 assert.match(robots, /^User-agent: \*$/m, 'robots.txt: User-agent *');
-assert.match(robots, /^Allow: \//m, 'robots.txt: Allow /');
-assert.match(robots, /^User-agent: GPTBot/m, 'robots.txt: GPTBot');
+assert.match(robots, /^User-agent: GPTBot$/m, 'robots.txt: GPTBot');
+assert.match(robots, /^User-agent: Google-Extended$/m, 'robots.txt: Google-Extended');
+assert.match(robots, /^Disallow: \/login$/m, 'robots.txt: Disallow /login');
+assert.match(robots, /^Disallow: \/s\/$/m, 'robots.txt: Disallow /s/');
 assert.match(robots, /^Sitemap: https:\/\//m, 'robots.txt: Sitemap URL');
 assert.doesNotMatch(robots, /^Disallow: \/$/m, 'robots.txt: не блокировать корень');
+
+/** Кожен Disallow має йти після User-agent у тому ж блоці (не сиротами в кінці файлу). */
+const lines = robots.split('\n').map((line) => line.trim()).filter(Boolean);
+let lastWasUserAgent = false;
+for (const line of lines) {
+  if (line.startsWith('#') || line.startsWith('Sitemap:')) {
+    lastWasUserAgent = false;
+    continue;
+  }
+  if (line.startsWith('User-agent:')) {
+    lastWasUserAgent = true;
+    continue;
+  }
+  if (line.startsWith('Disallow:')) {
+    assert.ok(lastWasUserAgent, `robots.txt: сиротский Disallow без User-agent: ${line}`);
+    continue;
+  }
+  assert.fail(`robots.txt: неизвестная директива: ${line}`);
+}
 
 assert.match(sitemap, /^<\?xml version="1\.0"/, 'sitemap.xml: XML declaration');
 assert.match(sitemap, /<loc>https:\/\/[^<]+\/<\/loc>/, 'sitemap.xml: главная');

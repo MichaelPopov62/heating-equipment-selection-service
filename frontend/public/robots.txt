@@ -1,22 +1,40 @@
-# HeatCalc Pro — https://heatcalc-mp62.vercel.app
+# HeatCalc Pro
 User-agent: *
-Allow: /
+Disallow: /login
+Disallow: /sign-up
+Disallow: /projects
+Disallow: /admin/
+Disallow: /s/
 
 User-agent: GPTBot
-Allow: /
+Disallow: /login
+Disallow: /sign-up
+Disallow: /projects
+Disallow: /admin/
+Disallow: /s/
 
 User-agent: ChatGPT-User
-Allow: /
+Disallow: /login
+Disallow: /sign-up
+Disallow: /projects
+Disallow: /admin/
+Disallow: /s/
 
 User-agent: Claude-Web
-Allow: /
+Disallow: /login
+Disallow: /sign-up
+Disallow: /projects
+Disallow: /admin/
+Disallow: /s/
 
 User-agent: Google-Extended
-Allow: /
+Disallow: /login
+Disallow: /sign-up
+Disallow: /projects
+Disallow: /admin/
+Disallow: /s/
 
 User-agent: PerplexityBot
-Allow: /
-
 Disallow: /login
 Disallow: /sign-up
 Disallow: /projects
