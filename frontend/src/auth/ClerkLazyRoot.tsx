@@ -2,7 +2,7 @@
  * Назначение: lazy ClerkProvider — SDK лише на auth/projects/admin маршрутах (1b-6).
  */
 
-import { Suspense, lazy, useEffect, useState, type ReactNode } from 'react';
+import { Suspense, lazy, useLayoutEffect, type ReactNode } from 'react';
 import { useLocation } from 'react-router';
 
 import { AppBootstrapSkeleton } from '../components/AppBootstrapSkeleton/AppBootstrapSkeleton';
@@ -10,9 +10,19 @@ import { getClerkPublishableKey, isClerkEnabled } from './authConfig';
 import { ClerkLoadContext, type ClerkLoadMode } from './clerkLoadContext';
 import { shouldLoadClerkForPath } from './shouldLoadClerkForPath';
 
+const CLERK_STICKY_STORAGE_KEY = 'heatcalc:clerk-sticky:v1';
+
 const ClerkProviderWithRouter = lazy(() =>
   import('./ClerkProviderWithRouter').then((m) => ({ default: m.ClerkProviderWithRouter })),
 );
+
+/**
+ * @returns {boolean}
+ */
+function readClerkStickyFromStorage(): boolean {
+  if (typeof sessionStorage === 'undefined') return false;
+  return sessionStorage.getItem(CLERK_STICKY_STORAGE_KEY) === '1';
+}
 
 export type ClerkLazyRootProps = {
   children: ReactNode;
@@ -25,12 +35,10 @@ export function ClerkLazyRoot({ children }: ClerkLazyRootProps) {
   const { pathname } = useLocation();
   const publishableKey = getClerkPublishableKey();
   const routeNeedsClerk = shouldLoadClerkForPath(pathname);
-  const [clerkSticky, setClerkSticky] = useState(routeNeedsClerk);
 
-  useEffect(() => {
-    if (routeNeedsClerk) {
-      setClerkSticky(true);
-    }
+  useLayoutEffect(() => {
+    if (!routeNeedsClerk) return;
+    sessionStorage.setItem(CLERK_STICKY_STORAGE_KEY, '1');
   }, [routeNeedsClerk]);
 
   if (!isClerkEnabled() || !publishableKey) {
@@ -40,7 +48,7 @@ export function ClerkLazyRoot({ children }: ClerkLazyRootProps) {
     );
   }
 
-  const clerkActive = routeNeedsClerk || clerkSticky;
+  const clerkActive = routeNeedsClerk || readClerkStickyFromStorage();
 
   if (!clerkActive) {
     return (
