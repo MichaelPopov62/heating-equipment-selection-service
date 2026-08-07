@@ -46,6 +46,9 @@ assert.equal(resolveAppBootstrap(false, false), 'start');
 const indexBundleName = bundles.find((f) => f.startsWith('index-') && f.endsWith('.js'));
 assert.ok(indexBundleName, 'dist/assets/index-*.js должен существовать (npm run build)');
 const mainBundle = readFileSync(path.join(distAssets, indexBundleName), 'utf8');
+const allBundles = bundles
+  .map((f) => readFileSync(path.join(distAssets, f), 'utf8'))
+  .join('\n');
 assert.ok(mainBundle.includes('Почати новий розрахунок'), 'index-бандл: start CTA');
 assert.ok(mainBundle.includes('Загрузка приложения') || mainBundle.includes('Завантаження'), 'index-бандл: bootstrap skeleton label');
 assert.ok(mainBundle.includes('SESSION_RESET'), 'index-бандл: SESSION_RESET');
@@ -54,10 +57,14 @@ assert.ok(mainBundle.includes('heatcalc:survey-draft'), 'index-бандл: local
 assert.ok(mainBundle.includes('Вийти') || mainBundle.includes('Выйти'), 'index-бандл: exit to start action');
 assert.ok(mainBundle.includes('exitToStart') || mainBundle.includes('exitProject'), 'index-бандл: exit handlers');
 assert.ok(
-  mainBundle.includes('Новий проєкт') || mainBundle.includes('Новый проект') || mainBundle.includes('Начать новый проект'),
-  'index-бандл: new project action',
+  allBundles.includes('Новий проєкт') || allBundles.includes('Новый проект') || allBundles.includes('Начать новый проект'),
+  'бандлы: new project action',
 );
 assert.ok(mainBundle.includes('HeatCalc Pro'), 'index-бандл: brand');
 assert.ok(mainBundle.includes('Політика конфіденційності'), 'index-бандл: footer legal UA');
+assert.ok(
+  bundles.some((f) => f.startsWith('AppSurveyContent-')),
+  'dist/assets: отдельный чанк AppSurveyContent',
+);
 
 console.log('verify:start-state — все кейсы прошли');

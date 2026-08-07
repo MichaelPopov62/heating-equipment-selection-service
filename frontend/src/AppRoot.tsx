@@ -2,7 +2,7 @@
  * Назначение: Корень UI после SurveySessionProvider — bootstrap и режимы start/survey.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { brandUk } from './i18n/uk/brand';
@@ -14,15 +14,12 @@ import { consumePendingProjectNavigation } from './utils/pendingProjectNavigatio
 import { AppBootstrapSkeleton } from './components/AppBootstrapSkeleton/AppBootstrapSkeleton';
 import { AccountBar } from './components/AccountBar/AccountBar';
 import { BootstrapErrorScreen } from './components/BootstrapErrorScreen/BootstrapErrorScreen';
-import { DevPanel } from './components/DevPanel/DevPanel';
 import { DevToolsDock } from './components/DevToolsDock/DevToolsDock';
 import { Header } from './components/Header/Header';
 import type { HeaderProps } from './components/Header/Header';
 import Logo from './components/Logo/Logo';
-import { ProjectsDialog } from './components/ProjectsDialog/ProjectsDialog';
 import { StartScreen } from './components/StartScreen/StartScreen';
 import styles from './App.module.css';
-import { AppSurveyContent } from './AppSurveyContent';
 import type { AppSurveyContentProps } from './AppSurveyContent';
 import { useSurveyBootstrap } from './hooks/useSurveyBootstrap';
 import { useSurveyDraftPersistence } from './hooks/useSurveyDraftPersistence';
@@ -33,6 +30,20 @@ import { useSurveySession } from './surveySession/useSurveySession';
 import type { AppBootstrapMode } from './surveySession/types';
 import type { SurveyDraft } from './types/surveyDraft';
 import { useDevPanelAccess } from './hooks/useDevPanelAccess';
+
+const AppSurveyContent = lazy(() =>
+  import('./AppSurveyContent').then((m) => ({ default: m.AppSurveyContent })),
+);
+
+const ProjectsDialog = lazy(() =>
+  import('./components/ProjectsDialog/ProjectsDialog').then((m) => ({
+    default: m.ProjectsDialog,
+  })),
+);
+
+const DevPanel = lazy(() =>
+  import('./components/DevPanel/DevPanel').then((m) => ({ default: m.DevPanel })),
+);
 
 type AppRootProps = Omit<AppSurveyContentProps, 'projectChrome'> & {
   onBootstrapModeChange: (mode: AppBootstrapMode) => void;
@@ -274,58 +285,62 @@ export function AppRoot(props: AppRootProps) {
 
   const sharedDevFileInputs = sharedFileInput;
 
-  const sharedProjectsDialog = (
-    <ProjectsDialog
-      open={projectsOpen}
-      loading={projectsLoading}
-      projects={projectList}
-      calculations={calculations}
-      activeProjectId={projectId}
-      onClose={() => {
-        setProjectsOpen(false);
-      }}
-      onRefresh={() => {
-        void refreshProjectList();
-      }}
-      onNewProject={startNewProject}
-      onSelectProject={(id) => {
-        void loadProjectById(id);
-      }}
-      onSelectCalculation={(id) => {
-        void loadCalculationById(id);
-      }}
-    />
-  );
+  const sharedProjectsDialog = projectsOpen ? (
+    <Suspense fallback={null}>
+      <ProjectsDialog
+        open={projectsOpen}
+        loading={projectsLoading}
+        projects={projectList}
+        calculations={calculations}
+        activeProjectId={projectId}
+        onClose={() => {
+          setProjectsOpen(false);
+        }}
+        onRefresh={() => {
+          void refreshProjectList();
+        }}
+        onNewProject={startNewProject}
+        onSelectProject={(id) => {
+          void loadProjectById(id);
+        }}
+        onSelectCalculation={(id) => {
+          void loadCalculationById(id);
+        }}
+      />
+    </Suspense>
+  ) : null;
 
   const devToolsDock = showDevToolsDock ? (
       <DevToolsDock>
         {canShowDevPanel ? (
-          <DevPanel
-            projectId={projectId}
-            canRunCalc={canAutoCalc}
-            calcReport={calcReport}
-            buildCalcPayload={buildCalcPayload}
-            buildDraftJson={() => buildDraft()}
-            onSaveFile={saveToFile}
-            onExportProject={() => {
-              void exportProjectBundleToFile();
-            }}
-            exportBusy={exportBusy}
-            onImportProject={openImportFilePicker}
-            importBusy={importBusy}
-            onSaveServer={(withCalc) => {
-              void saveToServer(withCalc);
-            }}
-            onOpenFile={openFilePicker}
-            onExportText={exportTextFile}
-            onExportHashLink={() => {
-              void exportHashLink();
-            }}
-            onRunManualCalc={runManualCalc}
-            onRevokeShare={() => {
-              void revokeShare();
-            }}
-          />
+          <Suspense fallback={null}>
+            <DevPanel
+              projectId={projectId}
+              canRunCalc={canAutoCalc}
+              calcReport={calcReport}
+              buildCalcPayload={buildCalcPayload}
+              buildDraftJson={() => buildDraft()}
+              onSaveFile={saveToFile}
+              onExportProject={() => {
+                void exportProjectBundleToFile();
+              }}
+              exportBusy={exportBusy}
+              onImportProject={openImportFilePicker}
+              importBusy={importBusy}
+              onSaveServer={(withCalc) => {
+                void saveToServer(withCalc);
+              }}
+              onOpenFile={openFilePicker}
+              onExportText={exportTextFile}
+              onExportHashLink={() => {
+                void exportHashLink();
+              }}
+              onRunManualCalc={runManualCalc}
+              onRevokeShare={() => {
+                void revokeShare();
+              }}
+            />
+          </Suspense>
         ) : null}
       </DevToolsDock>
     ) : null;
@@ -367,7 +382,9 @@ export function AppRoot(props: AppRootProps) {
   return (
     <>
       {sharedDevFileInputs}
-      <AppSurveyContent {...surveyContentProps} projectChrome={headerProps} />
+      <Suspense fallback={<AppBootstrapSkeleton statusLabel="Завантаження анкети…" />}>
+        <AppSurveyContent {...surveyContentProps} projectChrome={headerProps} />
+      </Suspense>
       {sharedProjectsDialog}
       {devToolsDock}
     </>
