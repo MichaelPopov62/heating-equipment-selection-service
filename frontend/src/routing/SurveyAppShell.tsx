@@ -40,7 +40,7 @@ export function SurveyAppShell({ children }: SurveyAppShellProps) {
     ufhModePresets,
     ufhModePresetsLoading,
     ufhModePresetsError,
-  } = useReferenceData();
+  } = useReferenceData({ enabled: calcEnabled });
 
   const {
     wallPresets,

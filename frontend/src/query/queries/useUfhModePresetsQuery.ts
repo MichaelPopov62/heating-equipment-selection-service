@@ -11,6 +11,11 @@ import { mergeUfhModePresetsWithFallback } from '../../utils/ufhPresetCardsForUi
 import { REFERENCE_STALE_MS } from '../queryClient';
 import { queryKeys } from '../queryKeys';
 
+export type UseUfhModePresetsQueryOptions = {
+  /** false — не запрашивать API (Start Screen на главной). */
+  enabled?: boolean;
+};
+
 export type UseUfhModePresetsQueryResult = {
   ufhModePresets: UfhModePresetCard[];
   ufhModePresetsLoading: boolean;
@@ -18,9 +23,13 @@ export type UseUfhModePresetsQueryResult = {
 };
 
 /**
+ * @param options
  * @returns {UseUfhModePresetsQueryResult}
  */
-export function useUfhModePresetsQuery(): UseUfhModePresetsQueryResult {
+export function useUfhModePresetsQuery(
+  options: UseUfhModePresetsQueryOptions = {},
+): UseUfhModePresetsQueryResult {
+  const enabled = options.enabled ?? true;
   const query = useQuery({
     queryKey: queryKeys.ufhModePresets,
     queryFn: async () => {
@@ -38,11 +47,12 @@ export function useUfhModePresetsQuery(): UseUfhModePresetsQueryResult {
       }
     },
     staleTime: REFERENCE_STALE_MS,
+    enabled,
   });
 
   return {
     ufhModePresets: query.data?.presets ?? [],
-    ufhModePresetsLoading: query.isPending,
+    ufhModePresetsLoading: enabled && query.isLoading,
     ufhModePresetsError: query.data?.warning ?? null,
   };
 }

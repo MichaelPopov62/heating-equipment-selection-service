@@ -9,6 +9,11 @@ import type { EnvelopePreset } from '../../types/envelope';
 import { REFERENCE_STALE_MS } from '../queryClient';
 import { queryKeys } from '../queryKeys';
 
+export type UseEnvelopePresetsQueryOptions = {
+  /** false — не запрашивать API (Start Screen на главной). */
+  enabled?: boolean;
+};
+
 export type UseEnvelopePresetsQueryResult = {
   envelopePresets: EnvelopePreset[];
   presetsLoading: boolean;
@@ -16,18 +21,23 @@ export type UseEnvelopePresetsQueryResult = {
 };
 
 /**
+ * @param options
  * @returns {UseEnvelopePresetsQueryResult}
  */
-export function useEnvelopePresetsQuery(): UseEnvelopePresetsQueryResult {
+export function useEnvelopePresetsQuery(
+  options: UseEnvelopePresetsQueryOptions = {},
+): UseEnvelopePresetsQueryResult {
+  const enabled = options.enabled ?? true;
   const query = useQuery({
     queryKey: queryKeys.envelopePresets,
     queryFn: fetchEnvelopePresets,
     staleTime: REFERENCE_STALE_MS,
+    enabled,
   });
 
   return {
     envelopePresets: query.data ?? [],
-    presetsLoading: query.isPending,
+    presetsLoading: enabled && query.isLoading,
     presetsError: query.error instanceof Error ? query.error.message : null,
   };
 }
