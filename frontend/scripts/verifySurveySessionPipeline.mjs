@@ -140,26 +140,33 @@ assert.deepEqual(
 
 const indexBundleName = bundles.find((f) => f.startsWith('index-') && f.endsWith('.js'));
 assert.ok(indexBundleName, 'dist/assets/index-*.js должен существовать (npm run build)');
-const mainBundle = readFileSync(path.join(distAssets, indexBundleName), 'utf8');
-assert.ok(
-  mainBundle.includes('two-pipe-dead-end'),
-  'index-бандл должен содержать коды типов разводки (HydraulicsSection)',
+const surveyContentBundleName = bundles.find(
+  (f) => f.startsWith('AppSurveyContent-') && f.endsWith('.js'),
 );
 assert.ok(
-  mainBundle.includes('Тип розводки системи опалення'),
-  'index-бандл должен содержать подпись поля типа разводки',
+  surveyContentBundleName,
+  'dist/assets/AppSurveyContent-*.js должен существовать (lazy AppSurveyContent)',
+);
+const surveyBundle = readFileSync(path.join(distAssets, surveyContentBundleName), 'utf8');
+assert.ok(
+  surveyBundle.includes('two-pipe-dead-end'),
+  'AppSurveyContent-чанк должен содержать коды типов разводки (HydraulicsSection)',
 );
 assert.ok(
-  mainBundle.includes('оптимальний підбір системи'),
-  'index-бандл должен содержать подпись radio auto',
+  surveyBundle.includes('Тип розводки системи опалення'),
+  'AppSurveyContent-чанк должен содержать подпись поля типа разводки',
 );
 assert.ok(
-  mainBundle.includes('Колекторна променева'),
-  'index-бандл должен содержать подпись radio manifold',
+  surveyBundle.includes('оптимальний підбір системи'),
+  'AppSurveyContent-чанк должен содержать подпись radio auto',
 );
 assert.ok(
-  mainBundle.includes('Рекомендовано'),
-  'index-бандл должен содержать бейдж рекомендуемой схемы',
+  surveyBundle.includes('Колекторна променева'),
+  'AppSurveyContent-чанк должен содержать подпись radio manifold',
+);
+assert.ok(
+  surveyBundle.includes('Рекомендовано'),
+  'AppSurveyContent-чанк должен содержать бейдж рекомендуемой схемы',
 );
 
 console.log('verify:survey-session — все кейсы прошли');
