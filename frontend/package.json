@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/generateSeoStatic.mjs",
     "build": "npm run typecheck && vite build",
     "postbuild": "node scripts/prepareVercelBuildOutput.mjs",
     "lint": "eslint .",
@@ -21,7 +22,8 @@
     "verify:frontend-me": "node scripts/verifyFrontendMe.mjs",
     "verify:admin-feedback": "node scripts/verifyAdminFeedback.mjs",
     "verify:dev-panel": "node scripts/verifyDevPanelAccess.mjs",
-    "verify": "npm run lint && npm run typecheck && npm run verify:dead-code && npm run verify:footer-nav && npm run verify:frontend-auth && npm run verify:frontend-me && npm run verify:admin-feedback && npm run verify:dev-panel && npm run build && npm run verify:survey-session && npm run verify:start-state"
+    "verify:seo": "node scripts/verifySeoStatic.mjs",
+    "verify": "npm run lint && npm run typecheck && npm run verify:dead-code && npm run verify:footer-nav && npm run verify:frontend-auth && npm run verify:frontend-me && npm run verify:admin-feedback && npm run verify:dev-panel && npm run build && npm run verify:seo && npm run verify:survey-session && npm run verify:start-state"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.9",

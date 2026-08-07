@@ -1,0 +1,26 @@
+# HeatCalc Pro — https://heatcalc-mp62.vercel.app
+User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Disallow: /login
+Disallow: /sign-up
+Disallow: /projects
+Disallow: /admin/
+Disallow: /s/
+
+Sitemap: https://heatcalc-mp62.vercel.app/sitemap.xml
