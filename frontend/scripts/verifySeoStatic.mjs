@@ -62,4 +62,13 @@ assert.match(
   'index.html: static h1 для LCP',
 );
 
+assert.match(
+  indexHtml,
+  /<script type="application\/ld\+json">/,
+  'index.html: Schema.org JSON-LD',
+);
+assert.match(indexHtml, /"@type":"Organization"/, 'index.html: Organization schema');
+assert.match(indexHtml, /"@type":"WebSite"/, 'index.html: WebSite schema');
+assert.match(indexHtml, /"@type":"WebApplication"/, 'index.html: WebApplication schema');
+
 console.log('verify:seo — OK');

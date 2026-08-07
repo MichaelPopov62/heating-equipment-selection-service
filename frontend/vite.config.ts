@@ -4,8 +4,80 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+
+const PRODUCTION_SITE_ORIGIN = 'https://heatcalc-mp62.vercel.app';
+
+/**
+ * @returns {string}
+ */
+function resolveSiteOriginForBuild(): string {
+  const fromEnv = process.env.VITE_SITE_URL?.trim();
+  if (fromEnv) return fromEnv.replace(/\/$/, '');
+  return PRODUCTION_SITE_ORIGIN;
+}
+
+/**
+ * JSON-LD для головної — ін'єкція в dist/index.html під час build (краулери без JS).
+ * @param origin — абсолютний origin
+ * @returns {Record<string, unknown>[]}
+ */
+function buildHomeJsonLdForHtml(origin: string): Record<string, unknown>[] {
+  const brandName = 'HeatCalc Pro';
+  const tagline = 'Сервіс розрахунку тепловтрат та підбору опалювального обладнання';
+  const lead =
+    'Заповніть анкету об\'єкта — сервіс розрахує тепловтрати, підбере котел, радіатори, ГВП та гідравліку за каталогом обладнання.';
+
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: brandName,
+      url: origin,
+      email: 'popov1ms@i.ua',
+      description: tagline,
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: brandName,
+      url: origin,
+      description: tagline,
+      inLanguage: 'uk-UA',
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: brandName,
+      url: origin,
+      applicationCategory: 'UtilitiesApplication',
+      operatingSystem: 'Web',
+      description: lead,
+      inLanguage: 'uk-UA',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'UAH' },
+    },
+  ];
+}
+
+/**
+ * @returns {Plugin}
+ */
+function seoJsonLdHtmlPlugin(): Plugin {
+  return {
+    name: 'heatcalc-seo-jsonld',
+    transformIndexHtml(html) {
+      const origin = resolveSiteOriginForBuild();
+      const scripts = buildHomeJsonLdForHtml(origin)
+        .map(
+          (schema) =>
+            `  <script type="application/ld+json">${JSON.stringify(schema)}</script>`,
+        )
+        .join('\n');
+      return html.replace('<!-- HEATCALC_JSON_LD -->', scripts);
+    },
+  };
+}
 
 function formatBuildDate(d: Date): string {
   const y = String(d.getUTCFullYear());
@@ -41,7 +113,7 @@ function resolveManualChunk(id: string): string | undefined {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), seoJsonLdHtmlPlugin()],
   build: {
     rollupOptions: {
       output: {

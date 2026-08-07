@@ -1,6 +1,21 @@
 /**
- * Назначение: env-конфиг сайта для футера и контактов.
+ * Назначение: env-конфиг сайта для футера, контактов і SEO (canonical, JSON-LD).
  */
+
+/** Production fallback — узгоджено з generateSeoStatic.mjs. */
+export const PRODUCTION_SITE_ORIGIN = 'https://heatcalc-mp62.vercel.app';
+
+/**
+ * Публічний origin сайту (без trailing slash).
+ * @returns {string}
+ */
+export function getSiteOrigin(): string {
+  const fromEnv = import.meta.env.VITE_SITE_URL;
+  if (typeof fromEnv === 'string' && fromEnv.trim()) {
+    return fromEnv.trim().replace(/\/$/, '');
+  }
+  return PRODUCTION_SITE_ORIGIN;
+}
 
 /**
  * @returns {string}

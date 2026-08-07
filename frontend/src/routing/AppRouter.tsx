@@ -5,6 +5,7 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, useParams } from 'react-router';
 
+import { JsonLdBoundary } from '../seo/JsonLdBoundary';
 import { AdminRoute } from '../auth/AdminRoute';
 import { ProtectedRoute } from '../auth/ProtectedRoute';
 import { AppBootstrapSkeleton } from '../components/AppBootstrapSkeleton/AppBootstrapSkeleton';
@@ -48,6 +49,7 @@ const SharePresentationPage = lazy(() =>
 export function AppRouter() {
   return (
     <>
+      <JsonLdBoundary />
       <Suspense fallback={<AppBootstrapSkeleton statusLabel="Завантаження сторінки…" />}>
         <Routes>
           <Route path="/s/:shareToken" element={<ShareRoute />} />
