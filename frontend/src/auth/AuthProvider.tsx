@@ -1,23 +1,25 @@
 /**
- * Назначение: провайдер сессии — Clerk SDK или dev JWT scaffold.
+ * Назначение: провайдер сессии — Clerk SDK (lazy), public guest или dev JWT scaffold.
  */
 
-import { useAuth as useClerkAuth, useUser } from '@clerk/clerk-react';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
+import { Suspense, lazy, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
-import { setProjectsAuthTokenGetter } from '../services/projectsAuthToken';
 import {
   clearStoredAuthToken,
   decodeJwtPayload,
-  getClerkJwtTemplate,
   isAuthRequiredInFrontend,
   isClerkEnabled,
   readStoredAuthToken,
-  resolveClerkJwtTemplateForApi,
   writeStoredAuthToken,
 } from './authConfig';
 import { AuthContext, type AuthUser } from './authContext';
+import { ClerkLoadContext } from './clerkLoadContext';
+import { PublicAuthProviderInner } from './PublicAuthProviderInner';
 import { useAuthMeCacheSync } from './useAuthMeCacheSync';
+
+const ClerkAuthProviderInner = lazy(() =>
+  import('./ClerkAuthProviderInner').then((m) => ({ default: m.ClerkAuthProviderInner })),
+);
 
 export type AuthProviderProps = {
   children: ReactNode;
@@ -27,113 +29,21 @@ export type AuthProviderProps = {
  * @param props
  */
 export function AuthProvider({ children }: AuthProviderProps) {
-  if (isClerkEnabled()) {
-    return <ClerkAuthProviderInner>{children}</ClerkAuthProviderInner>;
+  const clerkLoadMode = useContext(ClerkLoadContext);
+
+  if (!isClerkEnabled()) {
+    return <LegacyAuthProviderInner>{children}</LegacyAuthProviderInner>;
   }
-  return <LegacyAuthProviderInner>{children}</LegacyAuthProviderInner>;
-}
 
-/**
- * Clerk session → AuthContext + getToken() для projects API.
- *
- * @param props
- */
-function ClerkAuthProviderInner({ children }: AuthProviderProps) {
-  const { getToken, isSignedIn, signOut, isLoaded } = useClerkAuth();
-  const { user: clerkUser } = useUser();
-  const jwtTemplate = resolveClerkJwtTemplateForApi();
-  const isAuthRequired = isAuthRequiredInFrontend();
-  const { refreshMeProfile, clearMeProfile } = useAuthMeCacheSync();
-  const clerkSessionReady = isLoaded && isSignedIn;
+  if (clerkLoadMode === 'clerk') {
+    return (
+      <Suspense fallback={null}>
+        <ClerkAuthProviderInner>{children}</ClerkAuthProviderInner>
+      </Suspense>
+    );
+  }
 
-  useEffect(() => {
-    if (import.meta.env.DEV && isClerkEnabled() && !getClerkJwtTemplate()) {
-      console.warn(
-        `[auth] VITE_CLERK_JWT_TEMPLATE не задан — используется "${jwtTemplate}". ` +
-          'Создайте JWT template в Clerk с claim email и aud = AUTH_AUDIENCE.',
-      );
-    }
-  }, [jwtTemplate]);
-
-  useLayoutEffect(() => {
-    if (!clerkSessionReady) {
-      setProjectsAuthTokenGetter(null);
-      return;
-    }
-
-    setProjectsAuthTokenGetter(async () => {
-      try {
-        const token = await getToken({ template: jwtTemplate });
-        if (token && import.meta.env.DEV) {
-          const payload = decodeJwtPayload(token);
-          if (!payload?.email) {
-            console.warn(
-              `[auth] JWT template "${jwtTemplate}" без claim email. ` +
-                'Clerk Dashboard → JWT Templates → добавьте email: {{user.primary_email_address}}',
-            );
-          }
-        }
-        return token;
-      } catch {
-        return null;
-      }
-    });
-
-    return () => {
-      setProjectsAuthTokenGetter(null);
-    };
-  }, [getToken, clerkSessionReady, jwtTemplate]);
-
-  useEffect(() => {
-    if (!clerkSessionReady) return;
-    refreshMeProfile();
-  }, [clerkSessionReady, refreshMeProfile]);
-
-  const user = useMemo((): AuthUser | null => {
-    if (!isLoaded || !isSignedIn || !clerkUser) return null;
-    const emailAddress = clerkUser.primaryEmailAddress?.emailAddress;
-    const email = typeof emailAddress === 'string' ? emailAddress.trim() : undefined;
-    return email ? { sub: clerkUser.id, email } : { sub: clerkUser.id };
-  }, [clerkUser, isLoaded, isSignedIn]);
-
-  const loginWithToken = useCallback(
-    (token: string) => {
-      const trimmed = token.trim();
-      if (!trimmed) return;
-      writeStoredAuthToken(trimmed);
-      refreshMeProfile();
-    },
-    [refreshMeProfile],
-  );
-
-  const logout = useCallback(async () => {
-    clearMeProfile();
-    clearStoredAuthToken();
-    await signOut();
-  }, [clearMeProfile, signOut]);
-
-  const isMeQueryEnabled = !isAuthRequired || clerkSessionReady;
-
-  const value = useMemo(
-    () => ({
-      user,
-      isAuthenticated: !isAuthRequired || clerkSessionReady,
-      isMeQueryEnabled,
-      isAuthRequired,
-      loginWithToken,
-      logout,
-    }),
-    [
-      user,
-      isAuthRequired,
-      clerkSessionReady,
-      isMeQueryEnabled,
-      loginWithToken,
-      logout,
-    ],
-  );
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <PublicAuthProviderInner>{children}</PublicAuthProviderInner>;
 }
 
 /**

@@ -66,5 +66,15 @@ assert.ok(
   bundles.some((f) => f.startsWith('AppSurveyContent-')),
   'dist/assets: отдельный чанк AppSurveyContent',
 );
+assert.ok(
+  bundles.some(
+    (f) =>
+      f.startsWith('ClerkProviderWithRouter-')
+      || f.startsWith('ClerkAuthProviderInner-'),
+  ),
+  'dist/assets: отдельный чанк Clerk (lazy 1b-6)',
+);
+assert.doesNotMatch(mainBundle, /@clerk\/clerk-react/, 'index-бандл: без @clerk/clerk-react');
+assert.doesNotMatch(mainBundle, /clerk\.accounts\.dev/, 'index-бандл: без Clerk FAPI URL');
 
 console.log('verify:start-state — все кейсы прошли');

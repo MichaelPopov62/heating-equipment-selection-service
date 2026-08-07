@@ -5,8 +5,7 @@
 import { BrowserRouter } from 'react-router';
 
 import { AuthProvider } from './auth/AuthProvider';
-import { ClerkProviderWithRouter } from './auth/ClerkProviderWithRouter';
-import { getClerkPublishableKey } from './auth/authConfig';
+import { ClerkLazyRoot } from './auth/ClerkLazyRoot';
 import { AppErrorBoundary } from './components/AppErrorBoundary/AppErrorBoundary';
 import { AppRouter } from './routing/AppRouter';
 import { AppChromeProvider } from './shell/AppChromeProvider';
@@ -22,18 +21,12 @@ function AppProviders() {
 }
 
 function App() {
-  const clerkPublishableKey = getClerkPublishableKey();
-
   return (
     <AppErrorBoundary>
       <BrowserRouter>
-        {clerkPublishableKey ? (
-          <ClerkProviderWithRouter publishableKey={clerkPublishableKey}>
-            <AppProviders />
-          </ClerkProviderWithRouter>
-        ) : (
+        <ClerkLazyRoot>
           <AppProviders />
-        )}
+        </ClerkLazyRoot>
       </BrowserRouter>
     </AppErrorBoundary>
   );
