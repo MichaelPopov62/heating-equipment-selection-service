@@ -16,7 +16,6 @@ import { surveyDraftToSessionSnapshot } from '../surveySession/surveyDraftBridge
 import type { AppBootstrapMode, SurveyMutation } from '../surveySession/types';
 import type { SurveyDraft } from '../types/surveyDraft';
 
-const RESOLVING_MIN_MS = 200;
 const RESOLVING_TIMEOUT_MS = 3000;
 
 export type UseSurveyBootstrapParams = {
@@ -49,22 +48,21 @@ export function useSurveyBootstrap({
   }, [onDraftMetaLoaded]);
 
   const resolveOnce = useCallback(() => {
-    const startedAt = Date.now();
-
-    const finish = (mode: AppBootstrapMode) => {
-      const elapsed = Date.now() - startedAt;
-      const delay = Math.max(0, RESOLVING_MIN_MS - elapsed);
-      window.setTimeout(() => {
-        setBootstrapMode(mode);
-      }, delay);
-    };
-
     let finished = false;
     const timeoutId = window.setTimeout(() => {
       if (finished) return;
       finished = true;
       setBootstrapMode('error');
     }, RESOLVING_TIMEOUT_MS);
+
+    /**
+     * Завершить bootstrap без искусственной задержки (RESOLVING_MIN_MS убран для LCP).
+     *
+     * @param mode — целевой режим приложения
+     */
+    const finish = (mode: AppBootstrapMode) => {
+      setBootstrapMode(mode);
+    };
 
     try {
       const storageDraft = loadSurveyDraftFromStorage();
