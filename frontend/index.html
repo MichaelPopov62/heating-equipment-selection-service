@@ -77,11 +77,69 @@
       border-inline: 1px solid var(--border);
       background: var(--bg);
     }
+
+    /* Static LCP shell — замінюється React при mount #root */
+    .static-start-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      min-height: 100svh;
+      padding: 24px 12px 32px;
+    }
+
+    .static-start-screen__hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      max-width: 420px;
+    }
+
+    .static-start-screen__title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--text-h);
+    }
+
+    .static-start-screen__lead {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    @media (min-width: 768px) {
+      .static-start-screen {
+        padding-inline: 20px;
+      }
+
+      .static-start-screen__title {
+        font-size: 26px;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <main class="static-start-screen" aria-labelledby="static-start-screen-title">
+      <div class="static-start-screen__hero">
+        <h1 id="static-start-screen-title" class="static-start-screen__title">
+          Підбір опалення для дому та квартири
+        </h1>
+        <p class="static-start-screen__lead">
+          Заповніть анкету об'єкта — сервіс розрахує тепловтрати, підбере котел, радіатори, ГВП та
+          гідравліку за каталогом обладнання.
+        </p>
+      </div>
+    </main>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
