@@ -53,6 +53,8 @@ const accountBar = readSrc('components/AccountBar/AccountBar.tsx');
 const tierBadge = readSrc('components/SubscriptionTierBadge/SubscriptionTierBadge.tsx');
 const header = readSrc('components/Header/Header.tsx');
 const appRoot = readSrc('AppRoot.tsx');
+const startAppRoot = readSrc('StartAppRoot.tsx');
+const surveyAppRoot = readSrc('SurveyAppRoot.tsx');
 const projectsPage = readSrc('pages/ProjectsPage/ProjectsPage.tsx');
 const authSessionBar = readMaybe('components/AuthSessionBar/AuthSessionBar.tsx');
 const meQuerySubscriber = readMaybe('query/MeQuerySubscriber.tsx');
@@ -103,7 +105,10 @@ assert.match(tierBadge, /export function SubscriptionTierBadge/);
 assert.match(header, /accountSlot\?: ReactNode/);
 assert.match(header, /styles\.accountSlot/);
 
-assert.match(appRoot, /accountSlot: <AccountBar compact \/>/);
+assert.match(startAppRoot, /accountSlot=\{<AccountBar compact \/>}/);
+assert.match(surveyAppRoot, /accountSlot: <AccountBar compact \/>/);
+assert.match(appRoot, /StartAppRoot/);
+assert.match(appRoot, /SurveyAppRoot/);
 assert.match(projectsPage, /AccountBar/);
 assert.doesNotMatch(projectsPage, /AuthSessionBar/);
 

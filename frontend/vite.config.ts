@@ -128,7 +128,8 @@ export default defineConfig({
             !dep.includes('clerk-')
             && !dep.includes('ClerkProviderWithRouter-')
             && !dep.includes('ClerkAuthProviderInner-')
-            && !dep.includes('AppSurveyContent-'),
+            && !dep.includes('AppSurveyContent-')
+            && !dep.includes('SurveyAppRoot-'),
         ),
     },
     rollupOptions: {

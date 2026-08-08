@@ -1,48 +1,24 @@
 /**
- * Назначение: Корень UI после SurveySessionProvider — bootstrap и режимы start/survey.
+ * Назначение: оркестратор bootstrap — StartAppRoot (легкий) / lazy SurveyAppRoot.
  */
 
-import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
-
-import { brandUk } from './i18n/uk/brand';
-import { footerUk } from './i18n/uk/footer';
-import { paths } from './routing/paths';
-import { useAppChrome } from './shell/useAppChrome';
-import { consumePendingProjectNavigation } from './utils/pendingProjectNavigation';
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 
 import { AppBootstrapSkeleton } from './components/AppBootstrapSkeleton/AppBootstrapSkeleton';
-import { AccountBar } from './components/AccountBar/AccountBar';
-import { BootstrapErrorScreen } from './components/BootstrapErrorScreen/BootstrapErrorScreen';
-import { DevToolsDock } from './components/DevToolsDock/DevToolsDock';
-import { Header } from './components/Header/Header';
-import type { HeaderProps } from './components/Header/Header';
-import Logo from './components/Logo/Logo';
-import { StartScreen } from './components/StartScreen/StartScreen';
-import styles from './App.module.css';
 import type { AppSurveyContentProps } from './AppSurveyContent';
 import { useSurveyBootstrap } from './hooks/useSurveyBootstrap';
-import { useSurveyDraftPersistence } from './hooks/useSurveyDraftPersistence';
-import { useSurveyProject } from './hooks/useSurveyProject';
-import { buildCalcPayloadFromDraft } from './surveySession/buildCalcInputSnapshot';
-import { surveyDraftToSessionSnapshot } from './surveySession/surveyDraftBridge';
+import { StartAppRoot } from './StartAppRoot';
 import { useSurveySession } from './surveySession/useSurveySession';
 import type { AppBootstrapMode } from './surveySession/types';
 import type { SurveyDraft } from './types/surveyDraft';
-import { useDevPanelAccess } from './hooks/useDevPanelAccess';
+import {
+  consumePendingProjectNavigation,
+  type PendingProjectNavigation,
+} from './utils/pendingProjectNavigation';
+import type { SurveyAppRootDraftMeta } from './SurveyAppRoot';
 
-const AppSurveyContent = lazy(() =>
-  import('./AppSurveyContent').then((m) => ({ default: m.AppSurveyContent })),
-);
-
-const ProjectsDialog = lazy(() =>
-  import('./components/ProjectsDialog/ProjectsDialog').then((m) => ({
-    default: m.ProjectsDialog,
-  })),
-);
-
-const DevPanel = lazy(() =>
-  import('./components/DevPanel/DevPanel').then((m) => ({ default: m.DevPanel })),
+const SurveyAppRoot = lazy(() =>
+  import('./SurveyAppRoot').then((m) => ({ default: m.SurveyAppRoot })),
 );
 
 type AppRootProps = Omit<AppSurveyContentProps, 'projectChrome'> & {
@@ -50,48 +26,25 @@ type AppRootProps = Omit<AppSurveyContentProps, 'projectChrome'> & {
 };
 
 /**
- * @param props — справочники для AppSurveyContent
+ * @param props — справочники для SurveyAppRoot / AppSurveyContent
  */
 export function AppRoot(props: AppRootProps) {
-  const navigate = useNavigate();
-  const appChrome = useAppChrome();
-  const {
-    onBootstrapModeChange,
-    ...surveyContentProps
-  } = props;
-  const {
-    dispatch,
-    draft,
-    report: calcReport,
-    canAutoCalc,
-    setReportFromProject,
-    state: sessionState,
-  } = useSurveySession();
+  const { onBootstrapModeChange, ...surveyContentProps } = props;
+  const { dispatch } = useSurveySession();
 
-  const draftRef = useRef(draft);
-
-  useEffect(() => {
-    draftRef.current = draft;
-  }, [draft]);
-
-  const [clientName, setClientName] = useState('');
-  const [projectId, setProjectId] = useState<string | null>(null);
+  const [draftMeta, setDraftMeta] = useState<SurveyAppRootDraftMeta>({
+    clientName: '',
+    projectId: null,
+  });
+  const [pendingNavigation, setPendingNavigation] =
+    useState<PendingProjectNavigation | null>(null);
 
   const onDraftMetaLoaded = useCallback((loaded: SurveyDraft) => {
-    setClientName(loaded.clientName);
-    setProjectId(loaded.projectId ?? null);
+    setDraftMeta({
+      clientName: loaded.clientName,
+      projectId: loaded.projectId ?? null,
+    });
   }, []);
-
-  const applySurveyDraftState = useCallback(
-    (loaded: SurveyDraft) => {
-      dispatch({
-        type: 'DRAFT_LOADED',
-        draft: surveyDraftToSessionSnapshot(loaded),
-        lastCalcReport: loaded.lastCalcReport ?? null,
-      });
-    },
-    [dispatch],
-  );
 
   const {
     bootstrapMode,
@@ -104,289 +57,50 @@ export function AppRoot(props: AppRootProps) {
     onDraftMetaLoaded,
   });
 
-  const buildCalcPayload = useCallback(
-    () => buildCalcPayloadFromDraft(draftRef.current, surveyContentProps.windowPresetsList),
-    [surveyContentProps.windowPresetsList],
-  );
-
-  const getDraftParams = useCallback(
-    () => ({
-      currentStep: draftRef.current.currentStep,
-      objectMeta: draftRef.current.objectMeta,
-      rooms: draftRef.current.rooms,
-      temps: draftRef.current.temps,
-      hotWaterForm: draftRef.current.hotWaterForm,
-      waterHeaterForm: draftRef.current.waterHeaterForm,
-      waterUnderfloorHeating: draftRef.current.waterUnderfloorHeating,
-      underfloorDistributionPreset: draftRef.current.underfloorDistributionPreset,
-      thermalRegimePreset: draftRef.current.thermalRegimePreset,
-      radiatorConnection: draftRef.current.radiatorConnection,
-      radiatorEmitterPreference: draftRef.current.radiatorEmitterPreference,
-      ufhPresetId: draftRef.current.ufhPresetId,
-      hydraulicsForm: draftRef.current.hydraulicsForm,
-      wiringLayoutV3: draftRef.current.wiringLayoutV3,
-      lastCalcReport: calcReport,
-    }),
-    [calcReport],
-  );
-
-  const needsResetConfirm = useCallback(() => {
-    if (calcReport != null) return true;
-    return draftRef.current.rooms.some(
-      (r) => typeof r.areaM2 === 'number' && r.areaM2 > 0,
-    );
-  }, [calcReport]);
-
-  const runManualCalc = useCallback(() => {
-    dispatch({ type: 'RUN_CALC_MANUAL' });
-  }, [dispatch]);
-
-  const surveyProject = useSurveyProject({
-    bootstrapMode,
-    clientName,
-    setClientName,
-    projectId,
-    setProjectId,
-    getDraftParams,
-    applyDraft: applySurveyDraftState,
-    enterSurveyMode,
-    resetToStart,
-    needsResetConfirm,
-    buildCalcPayload,
-    canRunCalc: canAutoCalc,
-    setCalcReport: setReportFromProject,
-    runManualCalc,
-  });
-
-  const {
-    fileInputRef,
-    handleFileInputChange,
-    statusMessage,
-    statusError,
-    projectsOpen,
-    setProjectsOpen,
-    projectsLoading,
-    projectList,
-    calculations,
-    canPrintPdf,
-    canPublishShare,
-    canSaveProject,
-    saveProjectBusy,
-    shareBusy,
-    shareToastOpen,
-    dismissShareToast,
-    saveProjectDraft,
-    saveToFile,
-    exportProjectBundleToFile,
-    exportBusy,
-    openImportFilePicker,
-    importBusy,
-    saveToServer,
-    openFilePicker,
-    exportTextFile,
-    exportHashLink,
-    copyPublicLink,
-    revokeShare,
-    printPdf,
-    exitProject,
-    openProjectsPanel: _openProjectsPanel,
-    loadProjectById,
-    loadCalculationById,
-    startNewProject,
-    refreshProjectList,
-    buildDraft,
-  } = surveyProject;
-
-  const { canShowDevPanel, showDevToolsDock } = useDevPanelAccess();
-
   useEffect(() => {
     onBootstrapModeChange(bootstrapMode);
   }, [bootstrapMode, onBootstrapModeChange]);
 
-  useSurveyDraftPersistence({
-    bootstrapMode,
-    calcInputKey: sessionState.calcInputKey,
-    clientName,
-    projectId,
-    getDraftParams,
-  });
-
-  const handleNewCalculation = useCallback(() => {
-    if (needsResetConfirm()) {
-      const ok = window.confirm(footerUk.confirmNewCalculation);
-      if (!ok) return;
-    }
-    beginSurvey();
-  }, [needsResetConfirm, beginSurvey]);
-
-  const handleOpenProjects = useCallback(() => {
-    void navigate(paths.projects);
-  }, [navigate]);
-
   useEffect(() => {
-    appChrome.registerFooterActions({
-      onNewCalculation: handleNewCalculation,
-      onOpenProjects: handleOpenProjects,
-    });
-    return () => {
-      appChrome.unregisterFooterActions();
-    };
-  }, [appChrome, handleNewCalculation, handleOpenProjects]);
+    if (bootstrapMode === 'resolving' || bootstrapMode === 'error') return;
 
-  useEffect(() => {
-    if (bootstrapMode === 'resolving') return;
     const pending = consumePendingProjectNavigation();
     if (!pending) return;
+
     if (pending.kind === 'newProject') {
-      handleNewCalculation();
+      beginSurvey();
       return;
     }
-    if (pending.kind === 'project') {
-      void loadProjectById(pending.projectId);
-      return;
-    }
-    void loadCalculationById(pending.calculationId);
-  }, [bootstrapMode, handleNewCalculation, loadProjectById, loadCalculationById]);
 
-  const headerProps: HeaderProps = {
-    logo: <Logo />,
-    title: brandUk.name,
-    accountSlot: <AccountBar compact />,
-    clientName,
-    onClientNameChange: setClientName,
-    projectId,
-    statusMessage,
-    statusError,
-    canPrintPdf,
-    canPublishShare,
-    canSaveProject,
-    saveProjectBusy,
-    shareBusy,
-    shareToastOpen,
-    onDismissShareToast: dismissShareToast,
-    onOpenProjects: handleOpenProjects,
-    onSaveProject: saveProjectDraft,
-    onExit: exitProject,
-    onCopyPublicLink: () => {
-      void copyPublicLink();
-    },
-    onPrintPdf: printPdf,
-  };
+    queueMicrotask(() => {
+      setPendingNavigation(pending);
+      enterSurveyMode();
+    });
+  }, [bootstrapMode, beginSurvey, enterSurveyMode]);
 
-  const sharedFileInput = (
-    <input
-      ref={fileInputRef}
-      type="file"
-      accept="application/json,.json"
-      style={{ display: 'none' }}
-      onChange={handleFileInputChange}
-    />
-  );
+  const clearPendingNavigation = useCallback(() => {
+    setPendingNavigation(null);
+  }, []);
 
-  const sharedDevFileInputs = sharedFileInput;
-
-  const sharedProjectsDialog = projectsOpen ? (
-    <Suspense fallback={null}>
-      <ProjectsDialog
-        open={projectsOpen}
-        loading={projectsLoading}
-        projects={projectList}
-        calculations={calculations}
-        activeProjectId={projectId}
-        onClose={() => {
-          setProjectsOpen(false);
-        }}
-        onRefresh={() => {
-          void refreshProjectList();
-        }}
-        onNewProject={startNewProject}
-        onSelectProject={(id) => {
-          void loadProjectById(id);
-        }}
-        onSelectCalculation={(id) => {
-          void loadCalculationById(id);
-        }}
+  if (bootstrapMode === 'start' || bootstrapMode === 'resolving' || bootstrapMode === 'error') {
+    return (
+      <StartAppRoot
+        bootstrapMode={bootstrapMode}
+        onStartNew={beginSurvey}
+        onRetryBootstrap={retryBootstrap}
       />
-    </Suspense>
-  ) : null;
-
-  const devToolsDock = showDevToolsDock ? (
-      <DevToolsDock>
-        {canShowDevPanel ? (
-          <Suspense fallback={null}>
-            <DevPanel
-              projectId={projectId}
-              canRunCalc={canAutoCalc}
-              calcReport={calcReport}
-              buildCalcPayload={buildCalcPayload}
-              buildDraftJson={() => buildDraft()}
-              onSaveFile={saveToFile}
-              onExportProject={() => {
-                void exportProjectBundleToFile();
-              }}
-              exportBusy={exportBusy}
-              onImportProject={openImportFilePicker}
-              importBusy={importBusy}
-              onSaveServer={(withCalc) => {
-                void saveToServer(withCalc);
-              }}
-              onOpenFile={openFilePicker}
-              onExportText={exportTextFile}
-              onExportHashLink={() => {
-                void exportHashLink();
-              }}
-              onRunManualCalc={runManualCalc}
-              onRevokeShare={() => {
-                void revokeShare();
-              }}
-            />
-          </Suspense>
-        ) : null}
-      </DevToolsDock>
-    ) : null;
-
-  if (bootstrapMode === 'resolving') {
-    return (
-      <>
-        {sharedDevFileInputs}
-        <AppBootstrapSkeleton />
-        {sharedProjectsDialog}
-        {devToolsDock}
-      </>
-    );
-  }
-
-  if (bootstrapMode === 'error') {
-    return (
-      <>
-        {sharedDevFileInputs}
-        <BootstrapErrorScreen onRetry={retryBootstrap} />
-        {sharedProjectsDialog}
-        {devToolsDock}
-      </>
-    );
-  }
-
-  if (bootstrapMode === 'start') {
-    return (
-      <div className={styles.appContainer}>
-        {sharedDevFileInputs}
-        <Header {...headerProps} variant="start" />
-        <StartScreen onStartNew={handleNewCalculation} />
-        {sharedProjectsDialog}
-        {devToolsDock}
-      </div>
     );
   }
 
   return (
-    <>
-      {sharedDevFileInputs}
-      <Suspense fallback={<AppBootstrapSkeleton statusLabel="Завантаження анкети…" />}>
-        <AppSurveyContent {...surveyContentProps} projectChrome={headerProps} />
-      </Suspense>
-      {sharedProjectsDialog}
-      {devToolsDock}
-    </>
+    <Suspense fallback={<AppBootstrapSkeleton statusLabel="Завантаження анкети…" />}>
+      <SurveyAppRoot
+        {...surveyContentProps}
+        draftMeta={draftMeta}
+        bootstrap={{ resetToStart, enterSurveyMode, beginSurvey }}
+        pendingNavigation={pendingNavigation}
+        onPendingNavigationHandled={clearPendingNavigation}
+      />
+    </Suspense>
   );
 }

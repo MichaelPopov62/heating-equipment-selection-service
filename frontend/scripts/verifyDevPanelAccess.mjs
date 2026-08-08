@@ -18,6 +18,8 @@ function readSrc(rel) {
 const isDevTools = readSrc('utils/isDevToolsEnabled.ts');
 const useDevPanel = readSrc('hooks/useDevPanelAccess.ts');
 const appRoot = readSrc('AppRoot.tsx');
+const startAppRoot = readSrc('StartAppRoot.tsx');
+const surveyAppRoot = readSrc('SurveyAppRoot.tsx');
 const deployDoc = readFileSync(
   path.join(root, '..', '..', 'docs', 'deployment-architecture.md'),
   'utf8',
@@ -28,8 +30,10 @@ assert.match(isDevTools, /user\?\.role === 'admin'/);
 assert.match(isDevTools, /isDevToolsBuildEnabled/);
 assert.match(useDevPanel, /useDevPanelAccess/);
 assert.match(useDevPanel, /canShowDevPanelForUser/);
-assert.match(appRoot, /useDevPanelAccess/);
+assert.match(startAppRoot, /useDevPanelAccess/);
+assert.match(surveyAppRoot, /useDevPanelAccess/);
 assert.doesNotMatch(appRoot, /\bisDevToolsEnabled\b/);
+assert.doesNotMatch(surveyAppRoot, /\bisDevToolsEnabled\b/);
 
 const prodEnvBlock = deployDoc.match(/Production:\r?\n\r?\n```env\r?\n([\s\S]*?)```/);
 assert.ok(prodEnvBlock?.[1], 'deployment-architecture: блок Production env');

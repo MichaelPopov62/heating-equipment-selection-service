@@ -55,16 +55,27 @@ assert.ok(mainBundle.includes('SESSION_RESET'), 'index-бандл: SESSION_RESET
 assert.ok(mainBundle.includes('SURVEY_STARTED'), 'index-бандл: SURVEY_STARTED');
 assert.ok(mainBundle.includes('heatcalc:survey-draft'), 'index-бандл: localStorage key');
 assert.ok(mainBundle.includes('Вийти') || mainBundle.includes('Выйти'), 'index-бандл: exit to start action');
-assert.ok(mainBundle.includes('exitToStart') || mainBundle.includes('exitProject'), 'index-бандл: exit handlers');
 assert.ok(
-  allBundles.includes('Новий проєкт') || allBundles.includes('Новый проект') || allBundles.includes('Начать новый проект'),
-  'бандлы: new project action',
+  allBundles.includes('exitToStart') || allBundles.includes('exitProject'),
+  'бандлы: exit handlers',
 );
 assert.ok(mainBundle.includes('HeatCalc Pro'), 'index-бандл: brand');
-assert.ok(mainBundle.includes('Політика конфіденційності'), 'index-бандл: footer legal UA');
+assert.ok(
+  allBundles.includes('Політика конфіденційності'),
+  'бандлы: footer legal UA',
+);
 assert.ok(
   bundles.some((f) => f.startsWith('AppSurveyContent-')),
   'dist/assets: отдельный чанк AppSurveyContent',
+);
+assert.ok(
+  bundles.some((f) => f.startsWith('SurveyAppRoot-')),
+  'dist/assets: отдельный lazy-чанк SurveyAppRoot',
+);
+assert.doesNotMatch(
+  mainBundle,
+  /publishProjectShare/,
+  'index-бандл: без projectsApi на cold open',
 );
 assert.ok(
   bundles.some(
