@@ -116,13 +116,32 @@ ${urls}
 `;
 }
 
+/**
+ * @param {string} origin
+ * @returns {string}
+ */
+function buildLlmsTxt(origin) {
+  return `# HeatCalc Pro
+> Сервіс розрахунку тепловтрат та підбору опалювального обладнання для дому та квартири.
+
+- [Головна](${origin}/)
+- [Документація](${origin}/docs)
+- [FAQ](${origin}/faq)
+- [Політика конфіденційності](${origin}/privacy)
+- [Умови використання](${origin}/terms)
+`;
+}
+
 const origin = resolveSiteOrigin();
 const robotsPath = path.join(publicDir, 'robots.txt');
 const sitemapPath = path.join(publicDir, 'sitemap.xml');
+const llmsPath = path.join(publicDir, 'llms.txt');
 
 writeFileSync(robotsPath, buildRobotsTxt(origin), 'utf8');
 writeFileSync(sitemapPath, buildSitemapXml(origin), 'utf8');
+writeFileSync(llmsPath, buildLlmsTxt(origin), 'utf8');
 
 console.log(`generateSeoStatic: ${origin}`);
 console.log(`  → ${robotsPath}`);
 console.log(`  → ${sitemapPath}`);
+console.log(`  → ${llmsPath}`);

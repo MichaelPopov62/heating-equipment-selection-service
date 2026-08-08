@@ -11,9 +11,11 @@ import { fileURLToPath } from 'node:url';
 const distDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 const robotsPath = path.join(distDir, 'robots.txt');
 const sitemapPath = path.join(distDir, 'sitemap.xml');
+const llmsPath = path.join(distDir, 'llms.txt');
 
 assert.ok(existsSync(robotsPath), 'dist/robots.txt должен существовать');
 assert.ok(existsSync(sitemapPath), 'dist/sitemap.xml должен существовать');
+assert.ok(existsSync(llmsPath), 'dist/llms.txt должен существовать');
 
 const robots = readFileSync(robotsPath, 'utf8');
 const sitemap = readFileSync(sitemapPath, 'utf8');
@@ -52,14 +54,33 @@ assert.match(sitemap, /<loc>https:\/\/[^<]+\/docs<\/loc>/, 'sitemap.xml: /docs')
 assert.match(sitemap, /<loc>https:\/\/[^<]+\/faq<\/loc>/, 'sitemap.xml: /faq');
 assert.match(sitemap, /<loc>https:\/\/[^<]+\/privacy<\/loc>/, 'sitemap.xml: /privacy');
 
+const llms = readFileSync(llmsPath, 'utf8');
+assert.match(llms, /^# HeatCalc Pro$/m, 'llms.txt: заголовок');
+assert.match(llms, /^\> /m, 'llms.txt: summary');
+assert.match(llms, /\[Головна\]\(https:\/\//, 'llms.txt: ссылка на главную');
+assert.match(llms, /\/docs\)/, 'llms.txt: ссылка на /docs');
+
 const indexPath = path.join(distDir, 'index.html');
 assert.ok(existsSync(indexPath), 'dist/index.html должен существовать');
 const indexHtml = readFileSync(indexPath, 'utf8');
+assert.match(indexHtml, /id="static-app-shell"/, 'index.html: static app shell wrapper');
 assert.match(indexHtml, /class="static-start-screen"/, 'index.html: static LCP shell');
 assert.match(
   indexHtml,
   /Підбір опалення для дому та квартири/,
   'index.html: static h1 для LCP',
+);
+assert.match(
+  indexHtml,
+  /Почати новий розрахунок/,
+  'index.html: static CTA для LCP',
+);
+assert.match(indexHtml, /static-app-shell--fade-out/, 'index.html: fade-out static shell');
+assert.match(indexHtml, /<div id="root"><\/div>/, 'index.html: порожній #root для React mount');
+assert.doesNotMatch(
+  indexHtml,
+  /rel="modulepreload"[^>]+clerk-/,
+  'index.html: без modulepreload clerk на cold open',
 );
 
 assert.match(

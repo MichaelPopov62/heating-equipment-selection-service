@@ -2,7 +2,7 @@
  * Назначение: Bootstrap приложения — resolving / start / survey.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import {
   clearSurveyDraftStorage,
@@ -17,6 +17,34 @@ import type { AppBootstrapMode, SurveyMutation } from '../surveySession/types';
 import type { SurveyDraft } from '../types/surveyDraft';
 
 const RESOLVING_TIMEOUT_MS = 3000;
+
+type SurveyBootstrapResolved = Extract<
+  ReturnType<typeof resolveAppBootstrap>,
+  { mode: 'survey' }
+>;
+
+type InitialBootstrapSnapshot = {
+  mode: AppBootstrapMode;
+  surveyResolved: SurveyBootstrapResolved | null;
+};
+
+/**
+ * Синхронный cold-open resolve — без фазы resolving/skeleton (LCP/CLS).
+ *
+ * @returns {InitialBootstrapSnapshot}
+ */
+function resolveInitialBootstrapSnapshot(): InitialBootstrapSnapshot {
+  try {
+    const storageDraft = loadSurveyDraftFromStorage();
+    const resolved = resolveAppBootstrap(window.location.hash, storageDraft);
+    if (resolved.mode === 'survey') {
+      return { mode: 'survey', surveyResolved: resolved };
+    }
+    return { mode: 'start', surveyResolved: null };
+  } catch {
+    return { mode: 'error', surveyResolved: null };
+  }
+}
 
 export type UseSurveyBootstrapParams = {
   dispatch: (mutation: SurveyMutation) => void;
@@ -39,13 +67,36 @@ export function useSurveyBootstrap({
   dispatch,
   onDraftMetaLoaded,
 }: UseSurveyBootstrapParams): UseSurveyBootstrapResult {
-  const [bootstrapMode, setBootstrapMode] = useState<AppBootstrapMode>('resolving');
+  const [initialBootstrap] = useState(() => resolveInitialBootstrapSnapshot());
+  const [bootstrapMode, setBootstrapMode] = useState<AppBootstrapMode>(initialBootstrap.mode);
   const onDraftMetaLoadedRef = useRef(onDraftMetaLoaded);
-  const mountedRef = useRef(false);
+  const bootstrapDispatchAppliedRef = useRef(false);
 
   useEffect(() => {
     onDraftMetaLoadedRef.current = onDraftMetaLoaded;
   }, [onDraftMetaLoaded]);
+
+  useLayoutEffect(() => {
+    if (bootstrapDispatchAppliedRef.current) return;
+    bootstrapDispatchAppliedRef.current = true;
+
+    if (initialBootstrap.mode === 'survey' && initialBootstrap.surveyResolved) {
+      dispatch({
+        type: 'DRAFT_LOADED',
+        draft: surveyDraftToSessionSnapshot(initialBootstrap.surveyResolved.draft),
+        lastCalcReport: initialBootstrap.surveyResolved.draft.lastCalcReport ?? null,
+      });
+      onDraftMetaLoadedRef.current(initialBootstrap.surveyResolved.draft);
+      if (initialBootstrap.surveyResolved.source === 'hash') {
+        clearSurveyHashFromUrl();
+      }
+      return;
+    }
+
+    if (initialBootstrap.mode === 'start') {
+      dispatch({ type: 'SESSION_RESET' });
+    }
+  }, [dispatch, initialBootstrap]);
 
   const resolveOnce = useCallback(() => {
     let finished = false;
@@ -56,8 +107,6 @@ export function useSurveyBootstrap({
     }, RESOLVING_TIMEOUT_MS);
 
     /**
-     * Завершить bootstrap без искусственной задержки (RESOLVING_MIN_MS убран для LCP).
-     *
      * @param mode — целевой режим приложения
      */
     const finish = (mode: AppBootstrapMode) => {
@@ -95,14 +144,6 @@ export function useSurveyBootstrap({
     }
   }, [dispatch]);
 
-  useEffect(() => {
-    if (mountedRef.current) return;
-    mountedRef.current = true;
-    queueMicrotask(() => {
-      resolveOnce();
-    });
-  }, [resolveOnce]);
-
   const beginSurvey = useCallback(() => {
     dispatch({ type: 'SURVEY_STARTED' });
     setBootstrapMode('survey');
@@ -119,12 +160,8 @@ export function useSurveyBootstrap({
   }, []);
 
   const retryBootstrap = useCallback(() => {
-    mountedRef.current = false;
     setBootstrapMode('resolving');
-    queueMicrotask(() => {
-      mountedRef.current = true;
-      resolveOnce();
-    });
+    resolveOnce();
   }, [resolveOnce]);
 
   return {

@@ -110,7 +110,11 @@ export function Header({
           {logo ?? <div className={styles.logoMark} aria-hidden="true" />}
         </div>
         <div className={styles.titles}>
-          <h1 className={styles.title}>{title}</h1>
+          {variant === 'start' ? (
+            <p className={styles.title}>{title}</p>
+          ) : (
+            <h1 className={styles.title}>{title}</h1>
+          )}
           <p className={styles.subtitle}>
             {brandUk.tagline}
             {projectId ? (

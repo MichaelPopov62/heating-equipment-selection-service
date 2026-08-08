@@ -115,6 +115,22 @@ function resolveManualChunk(id: string): string | undefined {
 export default defineConfig({
   plugins: [react(), seoJsonLdHtmlPlugin()],
   build: {
+    modulePreload: {
+      /**
+       * Не preload lazy-чанки (Clerk, анкета) на cold open `/` — менше TBT.
+       *
+       * @param _filename
+       * @param deps
+       */
+      resolveDependencies: (_filename, deps) =>
+        deps.filter(
+          (dep) =>
+            !dep.includes('clerk-')
+            && !dep.includes('ClerkProviderWithRouter-')
+            && !dep.includes('ClerkAuthProviderInner-')
+            && !dep.includes('AppSurveyContent-'),
+        ),
+    },
     rollupOptions: {
       output: {
         manualChunks: resolveManualChunk,

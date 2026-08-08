@@ -5,7 +5,7 @@
 import { Suspense, lazy, useLayoutEffect, type ReactNode } from 'react';
 import { useLocation } from 'react-router';
 
-import { AppBootstrapSkeleton } from '../components/AppBootstrapSkeleton/AppBootstrapSkeleton';
+import { ClerkAuthLoadingFallback } from '../components/ClerkAuthLoadingFallback/ClerkAuthLoadingFallback';
 import { getClerkPublishableKey, isClerkEnabled } from './authConfig';
 import { ClerkLoadContext, type ClerkLoadMode } from './clerkLoadContext';
 import { shouldLoadClerkForPath } from './shouldLoadClerkForPath';
@@ -59,9 +59,7 @@ export function ClerkLazyRoot({ children }: ClerkLazyRootProps) {
   return (
     <ClerkLoadContext.Provider value="clerk">
       <Suspense
-        fallback={
-          <AppBootstrapSkeleton statusLabel="Завантаження автентифікації…" />
-        }
+        fallback={<ClerkAuthLoadingFallback />}
       >
         <ClerkProviderWithRouter publishableKey={publishableKey}>
           {children}

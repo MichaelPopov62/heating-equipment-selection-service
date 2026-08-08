@@ -5,6 +5,7 @@
 import { ClerkProvider } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router';
 
+import '../styles/clerkGlobal.css';
 import { clerkAppearance } from '../i18n/clerkAppearance';
 import { clerkUkLocalization } from '../i18n/clerkUkLocalization';
 
