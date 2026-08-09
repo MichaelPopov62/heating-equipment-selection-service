@@ -233,7 +233,7 @@ main.tsx → QueryProvider → App.tsx
 | `public/` | Статика Vite: `favicon.svg`, `robots.txt`, `sitemap.xml`, `llms.txt` |
 | `scripts/verifySurveySessionPipeline.mjs` | Verify pipeline сессии |
 | `scripts/verifyStartState.mjs` | Verify bootstrap / start screen |
-| `scripts/verifyFooterNav.mjs`, `verifyFrontendAuth.mjs`, `verifyFrontendMe.mjs`, `verifyAdminFeedback.mjs`, `verifyReportColocation.mjs` | Verify навигации, auth, admin feedback, colocation отчётов |
+| `scripts/verifyFooterNav.mjs`, `verifyFrontendAuth.mjs`, `verifyFrontendMe.mjs`, `verifyAdminFeedback.mjs`, `verifyReportColocation.mjs`, `verifyTypesPlacement.mjs` | Verify навигации, auth, admin feedback, colocation отчётов, размещение типов |
 | `knip.json` | Dead-code (`--treat-config-hints-as-errors`) |
 
 ### Соглашения размещения frontend (colocation, types, исключения)
@@ -296,6 +296,26 @@ main.tsx → QueryProvider → App.tsx
 | `shell/appChromeContext.ts` | Типы chrome-контекста рядом с `AppChromeProvider` | — |
 
 Наличие записи в таблице **снимает вопросы** на Code Review; новые исключения добавлять сюда до merge.
+
+##### Локальные типы вне `types/` (допустимо без записи в «исключения»)
+
+| Путь | Классификация |
+|------|---------------|
+| `auth/authContext.ts`, `auth/clerkLoadContext.ts` | Контекст auth рядом с provider |
+| `services/feedbackApi.ts`, `services/adminFeedbackStream.ts` | DTO HTTP-клиента рядом с fetch |
+| `utils/roomExteriorLayout.ts` | View-хелперы формы (`ExternalWallFieldConfig`, `WallEnvelopeEntry`) |
+| `utils/validateWaterHeaterForm.ts`, `utils/projectBundleTransfer.ts`, … | Локальные структуры util-модуля |
+| `*Props` в `.tsx` | Props компонента |
+
+##### Кандидаты на будущий рефакторинг (не блокер)
+
+| Путь | Замечание |
+|------|-----------|
+| `utils/parsers/parseBoilerFromReport.ts`, `parseRadiatorsMatchingFromReport.ts`, `parseWaterHeaterMatchingFromReport.ts`, `parseIndirectWaterHeaterMatchingFromReport.ts`, `parseUniboxesMatchingFromReport.ts`, `parseCommercialBomFromReport.ts`, `parseProjectImportFile.ts` | `Parsed*` и view-типы colocated с парсером; при росте — вынести в `types/reportParsing.ts` |
+| `types/recommendationsBlock.ts`, `types/waterHeaterMatching.ts` | Импорт `Parsed*` из `utils/parsers/` (cross-layer) |
+| `types/hydraulics.ts`, `types/underfloorHeating.ts`, `types/hotWaterReport.ts` | **Эталон:** `Parsed*` в `types/`, парсеры импортируют оттуда |
+
+Gate: `npm run verify:types-placement` (наличие исключений, SSOT `RoomExteriorLayout`, парсеры только в `utils/parsers/`).
 
 Подробности `query/`, `surveySession/`, `hooks/` — [`frontend-calc-runner.md`](frontend-calc-runner.md), [`frontend-query-inventory.md`](frontend-query-inventory.md), [`survey-draft.md`](survey-draft.md).
 
