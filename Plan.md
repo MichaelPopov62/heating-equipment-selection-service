@@ -108,9 +108,16 @@ SSOT — `backend/package.json` → скрипт `verify`.
 | `src/main.tsx` | `QueryProvider` → `App` |
 | `src/App.tsx` | `BrowserRouter`, auth/providers и `AppRouter` |
 | `src/routing/` | `AppRouter`, канонические `paths`, `SurveyAppShell`; маршруты SPA и подключение сессии |
-| `src/AppRoot.tsx` | Bootstrap `resolving / error / start / survey`, Header и проектные действия |
+| `src/AppRoot.tsx` | Оркестратор bootstrap: `useSurveyBootstrap` → `StartAppRoot` \| lazy `SurveyAppRoot` |
+| `src/StartAppRoot.tsx` | Лёгкий bootstrap: start / resolving / error |
+| `src/SurveyAppRoot.tsx` | Тяжёлый survey-chunk: projects, DevPanel, lazy `AppSurveyContent` |
 | `src/AppSurveyContent.tsx` | Шаги анкеты и результаты, все изменения через `dispatch` |
 | `src/surveySession/` | `dispatch` → pipeline → calc |
+| `src/seo/` | JSON-LD для SEO по маршруту |
+| `src/types/` | DTO / view-модели UI |
+| `src/data/` | Offline-fallback справочников |
+| `src/styles/` | Глобальные CSS-переменные и form styles |
+| `public/` | Статика Vite: `favicon.svg`, `robots.txt`, `sitemap.xml`, `llms.txt` |
 | `src/query/` | React Query: справочники, calc, проекты |
 | `src/services/` | HTTP-клиенты API |
 | `src/hooks/` | Bootstrap, persistence, проекты, оркестрация помещений и отчёта |

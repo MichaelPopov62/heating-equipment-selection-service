@@ -180,15 +180,18 @@ Runtime — `public.js` (`Product`, `Project`, `Calculation`, `User`, `Feedback`
 ```text
 main.tsx → QueryProvider → App.tsx
   └─ BrowserRouter → AuthProvider → AppChromeProvider → AppRouter
+       ├─ JsonLdBoundary (seo/ — Schema.org по pathname)
        ├─ /s/:shareToken → SharePresentationPage (read-only презентация)
        ├─ /login, /sign-up, /docs, /faq, legal → pages/*
        ├─ /projects → SurveyAppShell → ProtectedRoute → ProjectsPage
        ├─ /admin/feedback → ProtectedRoute → AdminRoute → AdminFeedbackPage
        └─ / → SurveyAppShell → SurveySessionProvider → AppRoot
-            ├─ resolving → AppBootstrapSkeleton
-            ├─ error     → BootstrapErrorScreen
-            ├─ start     → StartScreen + Header (variant=start)
-            └─ survey    → AppSurveyContent (шаги анкеты + отчёт)
+            ├─ useSurveyBootstrap → resolving | start | error
+            │    └─ StartAppRoot (лёгкий chunk: StartScreen, skeleton, error)
+            └─ survey
+                 └─ lazy SurveyAppRoot (тяжёлый chunk)
+                      ├─ Header, DevPanel, ProjectsDialog, useSurveyProject
+                      └─ lazy AppSurveyContent (шаги анкеты + отчёт)
 ```
 
 Подробнее bootstrap: [`start-state.md`](start-state.md). Клиент vs Dev: [`client-share-and-layers.md`](client-share-and-layers.md).
@@ -197,8 +200,11 @@ main.tsx → QueryProvider → App.tsx
 |------|------------|
 | `src/App.tsx` | BrowserRouter, auth/providers и `AppRouter` |
 | `src/routing/` | `AppRouter`, `SurveyAppShell`, канонические `paths`; маршруты и справочники RQ |
-| `src/AppRoot.tsx` | Bootstrap, Header, DevPanel, ProjectsDialog, `useSurveyProject` |
+| `src/AppRoot.tsx` | Оркестратор bootstrap: `useSurveyBootstrap` → `StartAppRoot` \| lazy `SurveyAppRoot` |
+| `src/StartAppRoot.tsx` | Cold open: `start` / `resolving` / `error` (без calc, projects, survey-chunk) |
+| `src/SurveyAppRoot.tsx` | Survey UI: Header, DevPanel, ProjectsDialog, `useSurveyProject`, lazy `AppSurveyContent` |
 | `src/AppSurveyContent.tsx` | Шаги анкеты, формы, отчёт |
+| `src/seo/` | `JsonLdBoundary`, `JsonLd`, `jsonLdSchemas.ts` — FAQPage и др. по маршруту |
 | `src/surveySession/` | State анкеты: `dispatch` → pipeline → calc; bootstrap |
 | `src/surveySession/resolveAppBootstrap.ts` | Hash / localStorage → start \| survey |
 | `src/surveySession/createEmptySurveySessionState.ts`, `createDefaultSurveyDraft.ts` | SSOT пустого и дефолтного SurveyDraft |
@@ -206,7 +212,7 @@ main.tsx → QueryProvider → App.tsx
 | `src/services/` | HTTP-клиенты; `meApi`, `projectsApi`, `adminFeedbackApi`, `adminFeedbackStream`, parsers |
 | `src/hooks/` | `useSurveyBootstrap`, `useSurveyDraftPersistence`, `useSurveyProject`, `useAdminFeedbackStream`, … |
 | `src/pages/` | Login, SignUp, Projects, AdminFeedback, Docs, FAQ, Privacy/Terms/Cookies |
-| `src/auth/` | Clerk/AuthProvider, `ProtectedRoute`, `AdminRoute`, redirect и `/me` cache sync |
+| `src/auth/` | Clerk/AuthProvider, `ProtectedRoute`, `AdminRoute`, redirect, `/me` cache sync — см. [`auth.md`](auth.md) |
 | `src/shell/` | `AppChromeProvider`: общие действия и модальные окна Header/Footer |
 | `src/i18n/` | Украинские UI-тексты, локализация и appearance Clerk |
 | `src/components/AccountBar/` | Сессия: «Увійти», email, tier badge, admin-ссылка; «Вийти з акаунта» завершает авторизацию |
@@ -216,7 +222,6 @@ main.tsx → QueryProvider → App.tsx
 | `src/components/SharePresentationPage/` | Публичная страница `/s/{token}` |
 | `src/components/DevPanel/` | Панель разработчика; условия включения и действия — [`frontend-dev-panel.md`](frontend-dev-panel.md) |
 | `src/components/Footer/`, `ModalHost/`, `CookieConsentBanner/`, `DevToolsDock/` | Общая оболочка SPA |
-| `src/auth/` | Clerk SDK, `AuthProvider`, `useAuthMeCacheSync`, `ProtectedRoute`, login — см. [`auth.md`](auth.md) |
 | `src/components/Header/` | Клиент: ссылка, PDF, `accountSlot`, hint pro/marketplace; «Вийти з проєкту» открывает Start Screen |
 | `src/components/` | Формы, отчёты, `ProjectsDialog/`, … |
 | `src/constants/` | SSOT шагов (`SURVEY_STEPS`), типы комнат, compat-id |
@@ -224,10 +229,46 @@ main.tsx → QueryProvider → App.tsx
 | `src/utils/` | Парсеры отчёта, миграции, `parseSharePath`, `downloadBlobFile`, … |
 | `src/data/fallback*.ts` | Офлайн-fallback справочников |
 | `src/styles/` | CSS-переменные / общие стили |
+| `public/` | Статика Vite: `favicon.svg`, `robots.txt`, `sitemap.xml`, `llms.txt` |
 | `scripts/verifySurveySessionPipeline.mjs` | Verify pipeline сессии |
 | `scripts/verifyStartState.mjs` | Verify bootstrap / start screen |
 | `scripts/verifyFooterNav.mjs`, `verifyFrontendAuth.mjs`, `verifyFrontendMe.mjs`, `verifyAdminFeedback.mjs` | Verify навигации, auth и admin feedback |
 | `knip.json` | Dead-code (`--treat-config-hints-as-errors`) |
+
+### Соглашения размещения frontend (colocation, types, исключения)
+
+Правила doc ↔ code для `frontend/src/`. На Code Review — SSOT: этот подраздел.
+
+#### Colocation чистых хелперов
+
+| Правило | Детали |
+|---------|--------|
+| Допустимо | Чистая функция, нужная **только** одному модулю — в **его папке** (например `components/BoilerReport/hasBoilerReportContent.ts`, `formatBoilerProposalShortLabel.ts`; паттерн `components/*Report/has*ReportContent.ts`) |
+| Запрещено | Импорт такого хелпера из **другой** фичи |
+| При нарушении | Немедленный перенос в `utils/` (или `utils/parsers/` для парсеров) |
+
+Хуки (`use*`) — **не** в `components/`; только `hooks/`, `query/`, `auth/`, `surveySession/`, `shell/` (colocation с контекстом).
+
+#### Типы
+
+| Слой | Назначение | Примеры |
+|------|------------|---------|
+| `src/types/` | Глобальные доменные модели, DTO API, view-модели UI | `surveyDraft.ts`, `rooms.ts`, `hydraulics.ts`, `projectsApi.ts` |
+| `*/types.ts`, `*Context.ts` в модуле | Локальный контекст, props, внутреннее состояние **только этого** модуля | `surveySession/types.ts`, props `*Props` в `.tsx` |
+| Типы в `utils/` | Только вспомогательные структуры, не дублирующие `types/` | `ExternalWallFieldConfig` в `roomExteriorLayout.ts` |
+
+**SSOT enum/union:** каноничное объявление — в `types/`; из `utils/` и компонентов — **импорт**, без повторного `export type` (например `RoomExteriorLayout` → `types/rooms.ts`).
+
+#### Задокументированные исключения
+
+| Путь | Почему не «стандартный» слой | Ссылка |
+|------|------------------------------|--------|
+| `components/SharePresentationPage/` | Route-level read-only презентация; lazy из `AppRouter`, не `pages/` | [`client-share-and-layers.md`](client-share-and-layers.md) |
+| `surveySession/types.ts` | Типы pipeline сессии tightly coupled к `dispatch` / `reduceSurveyMutation` | [`frontend-calc-runner.md`](frontend-calc-runner.md) |
+| `services/catalogTypes.ts` | DTO каталога рядом с `parseCatalog*` | `services/parseCatalogBoilers.ts`, … |
+| `shell/appChromeContext.ts` | Типы chrome-контекста рядом с `AppChromeProvider` | — |
+
+Наличие записи в таблице **снимает вопросы** на Code Review; новые исключения добавлять сюда до merge.
 
 Подробности `query/`, `surveySession/`, `hooks/` — [`frontend-calc-runner.md`](frontend-calc-runner.md), [`frontend-query-inventory.md`](frontend-query-inventory.md), [`survey-draft.md`](survey-draft.md).
 

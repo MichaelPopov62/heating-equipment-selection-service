@@ -112,7 +112,7 @@ cd frontend && npm run verify
 |------|------|
 | Bootstrap hook | `frontend/src/hooks/useSurveyBootstrap.ts` |
 | Resolve hash/storage | `frontend/src/surveySession/resolveAppBootstrap.ts` |
-| Режимы UI | `frontend/src/AppRoot.tsx`, тип `AppBootstrapMode` в `surveySession/types.ts` |
+| Режимы UI | `frontend/src/AppRoot.tsx` (оркестратор), `StartAppRoot.tsx` (start/resolving/error), lazy `SurveyAppRoot.tsx` (survey); тип `AppBootstrapMode` в `surveySession/types.ts` |
 | Маршруты | `frontend/src/routing/AppRouter.tsx`, `paths.ts`, `SurveyAppShell.tsx` |
 | Проекты | `frontend/src/pages/ProjectsPage/`, `frontend/src/utils/pendingProjectNavigation.ts` |
 | Общие действия | `frontend/src/shell/AppChromeProvider.tsx` |

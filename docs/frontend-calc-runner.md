@@ -20,7 +20,7 @@
 | Ключ изменений входа | `buildCalcInputKeyFromDraft` в том же модуле |
 | Парсинг отчёта для UI | `frontend/src/hooks/useCalcReport.ts` |
 
-`main.tsx` оборачивает приложение в `QueryProvider` (`@tanstack/react-query`). `App.tsx` подключает router/auth/providers; `SurveyAppShell` загружает справочники и монтирует `SurveySessionProvider`, а `AppRoot` управляет bootstrap. **`calcReport` не хранится в `App.tsx`** — компоненты читают `report` из контекста сессии.
+`main.tsx` оборачивает приложение в `QueryProvider` (`@tanstack/react-query`). `App.tsx` подключает router/auth/providers; `SurveyAppShell` загружает справочники и монтирует `SurveySessionProvider`, а `AppRoot` управляет bootstrap (`StartAppRoot` для start/resolving/error, lazy `SurveyAppRoot` для survey). **`calcReport` не хранится в `App.tsx`** — компоненты читают `report` из контекста сессии.
 
 **Calc guard:** `POST /api/v1/calc` активен только при `bootstrapMode === 'survey'` (`SurveySessionProvider.calcEnabled`). В Start/resolving calc не выполняется.
 
