@@ -4,7 +4,7 @@
  */
 
 import type { UfhModePresetId } from '../types/ufhModePreset';
-import type { ParsedRadiatorsMatching } from './parseRadiatorsMatchingFromReport';
+import type { ParsedRadiatorsMatching } from './parsers/parseRadiatorsMatchingFromReport';
 
 export const RADIATORS_SKIPPED_UFH_ONLY = 'ufh_only' as const;
 

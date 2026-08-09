@@ -2,7 +2,7 @@
 
 > **Мова UI:** user-facing тексти — **українською**; [`language-policy.md`](language-policy.md).
 >
-> Fallback-підписи контурів у `frontend/src/utils/parseHydraulicsProposalFromReport.ts` — UA; SSOT API — `backend/src/hydraulics/buildHydraulicsProposal.js`.
+> Fallback-підписи контурів у `frontend/src/utils/parsers/parseHydraulicsProposalFromReport.ts` — UA; SSOT API — `backend/src/hydraulics/buildHydraulicsProposal.js`.
 
 ## Разделение ответственности
 

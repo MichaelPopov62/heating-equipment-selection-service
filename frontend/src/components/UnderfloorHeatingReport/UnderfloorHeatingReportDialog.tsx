@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 
 import type { ParsedHydraulicsPumpProposal } from '../../types/hydraulics';
 import type { ParsedUnderfloorHeating } from '../../types/underfloorHeating';
-import type { ParsedUniboxesMatching } from '../../utils/parseUniboxesMatchingFromReport';
+import type { ParsedUniboxesMatching } from '../../utils/parsers/parseUniboxesMatchingFromReport';
 import {
   UnderfloorHeatingReportView,
 } from './UnderfloorHeatingReportView';

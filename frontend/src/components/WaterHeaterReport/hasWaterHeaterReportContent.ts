@@ -3,8 +3,8 @@
  * Описание: Используется кнопкой отчёта на шаге «Водонагреватель» (как hasHotWaterReportContent для ГВ).
  */
 
-import type { ParsedIndirectWaterHeaterMatching } from '../../utils/parseIndirectWaterHeaterMatchingFromReport';
-import type { ParsedWaterHeaterMatching } from '../../utils/parseWaterHeaterMatchingFromReport';
+import type { ParsedIndirectWaterHeaterMatching } from '../../utils/parsers/parseIndirectWaterHeaterMatchingFromReport';
+import type { ParsedWaterHeaterMatching } from '../../utils/parsers/parseWaterHeaterMatchingFromReport';
 
 /**
  * @param indirect — matching.indirectWaterHeater

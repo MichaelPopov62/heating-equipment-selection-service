@@ -5,8 +5,8 @@
 
 import { useEffect } from 'react';
 
-import type { ParsedIndirectWaterHeaterMatching } from '../../utils/parseIndirectWaterHeaterMatchingFromReport';
-import type { ParsedWaterHeaterMatching } from '../../utils/parseWaterHeaterMatchingFromReport';
+import type { ParsedIndirectWaterHeaterMatching } from '../../utils/parsers/parseIndirectWaterHeaterMatchingFromReport';
+import type { ParsedWaterHeaterMatching } from '../../utils/parsers/parseWaterHeaterMatchingFromReport';
 import { WaterHeaterReportView } from './WaterHeaterReportView';
 import { hasWaterHeaterReportContent } from './hasWaterHeaterReportContent';
 import styles from './WaterHeaterReportDialog.module.css';

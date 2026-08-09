@@ -3,8 +3,8 @@
  * Описание: Карточки БКН / ЭВН через WaterHeaterMatchingPreview.
  */
 
-import type { ParsedIndirectWaterHeaterMatching } from '../../utils/parseIndirectWaterHeaterMatchingFromReport';
-import type { ParsedWaterHeaterMatching } from '../../utils/parseWaterHeaterMatchingFromReport';
+import type { ParsedIndirectWaterHeaterMatching } from '../../utils/parsers/parseIndirectWaterHeaterMatchingFromReport';
+import type { ParsedWaterHeaterMatching } from '../../utils/parsers/parseWaterHeaterMatchingFromReport';
 import { WaterHeaterMatchingPreview } from '../WaterHeaterMatchingPreview/WaterHeaterMatchingPreview';
 
 export type WaterHeaterReportViewProps = {

@@ -15,7 +15,7 @@ import {
 } from '../../services/projectsApi';
 import type { CalcReportJson } from '../../types/calcApi';
 import type { SurveyDraft } from '../../types/surveyDraft';
-import { parseSurveyDraft } from '../../utils/parseSurveyDraft';
+import { parseSurveyDraft } from '../../utils/parsers/parseSurveyDraft';
 import { queryKeys } from '../queryKeys';
 
 export type SaveProjectParams = {

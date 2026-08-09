@@ -15,7 +15,7 @@ import {
   RADIATOR_EMITTER_PREFERENCE_SURVEY_UI_OPTIONS,
   type RadiatorEmitterPreference,
 } from '../../types/radiatorEmitterPreference';
-import type { ParsedRadiatorsMatching } from '../../utils/parseRadiatorsMatchingFromReport';
+import type { ParsedRadiatorsMatching } from '../../utils/parsers/parseRadiatorsMatchingFromReport';
 import { RadiatorsReportDialog } from '../RadiatorsReport/RadiatorsReportDialog';
 import { hasRadiatorsReportContent } from '../RadiatorsReport/hasRadiatorsReportContent';
 import reportActionsStyles from '../SurveyNavigation/SurveyReportActions.module.css';

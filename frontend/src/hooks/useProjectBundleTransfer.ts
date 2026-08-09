@@ -13,7 +13,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 
 import type { SurveyDraft } from '../types/surveyDraft';
-import { parseSurveyDraft } from '../utils/parseSurveyDraft';
+import { parseSurveyDraft } from '../utils/parsers/parseSurveyDraft';
 import {
   mapProjectImportErrorMessage,
   receiveProjectBundle,

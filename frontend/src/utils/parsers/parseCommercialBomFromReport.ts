@@ -2,7 +2,7 @@
  * Назначение: парсинг report.commercial для шага «Итог финансовый».
  */
 
-import { isRecord, readRecordField } from './jsonGuards';
+import { isRecord, readRecordField } from '../jsonGuards';
 
 export type FinancialBomLineKind = 'equipment' | 'labor' | 'consumable' | 'note';
 export type FinancialBomQtyUnit = 'pcs' | 'm' | 'section' | 'lot';

@@ -3,7 +3,7 @@
  * Описание: иерархия scope/category, суффикс единиц в колонке количества, итоговые строки.
  */
 
-import type { ParsedCommercialBom, ParsedFinancialBomLine } from '../../utils/parseCommercialBomFromReport';
+import type { ParsedCommercialBom, ParsedFinancialBomLine } from '../../utils/parsers/parseCommercialBomFromReport';
 import styles from './FinancialSummaryTable.module.css';
 
 export type FinancialSummaryTableProps = {

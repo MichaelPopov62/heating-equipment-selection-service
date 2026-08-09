@@ -7,7 +7,7 @@ import {
   isRecord,
   readRecordField,
   readStringArray,
-} from './jsonGuards';
+} from '../jsonGuards';
 
 export type RadiatorDisplayKind = 'sectional' | 'panel' | 'none';
 

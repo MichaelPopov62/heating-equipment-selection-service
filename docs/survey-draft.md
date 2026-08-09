@@ -66,7 +66,7 @@
 |----------|---------|
 | Загрузка / нормализация | `migrateSurveyDraft()` — `frontend/src/utils/migrateSurveyDraft.ts` |
 | Сохранение | `buildSurveyDraft()` — `frontend/src/utils/buildSurveyDraft.ts` |
-| Парсинг | `frontend/src/utils/parseSurveyDraft.ts` → `migrateSurveyDraft()` |
+| Парсинг | `frontend/src/utils/parsers/parseSurveyDraft.ts` → `migrateSurveyDraft()` |
 | В сессию | `DRAFT_LOADED` → `runSurveyMutationPipeline` |
 
 Источники: JSON-файл, `projects.survey`, hash (`frontend/src/utils/surveyShare.ts`).

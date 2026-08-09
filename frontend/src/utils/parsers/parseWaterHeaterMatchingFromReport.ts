@@ -7,7 +7,7 @@ import {
   isRecord,
   readRecordField,
   readStringArray,
-} from './jsonGuards';
+} from '../jsonGuards';
 
 /** Данные подбора электрического накопительного водонагревателя из report.matching.waterHeater */
 

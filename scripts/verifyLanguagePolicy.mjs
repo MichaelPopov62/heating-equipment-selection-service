@@ -126,7 +126,7 @@ async function scanTree(absPath, exts) {
 }
 
 // Явные проверки критичных файлов (post-close fix)
-const parseHydraulics = await readRepo('frontend/src/utils/parseHydraulicsProposalFromReport.ts');
+const parseHydraulics = await readRepo('frontend/src/utils/parsers/parseHydraulicsProposalFromReport.ts');
 assert.ok(
   parseHydraulics.includes('Контур опалення (радіатори)'),
   'parseHydraulicsProposalFromReport.ts: очікується UA fallback опалення',

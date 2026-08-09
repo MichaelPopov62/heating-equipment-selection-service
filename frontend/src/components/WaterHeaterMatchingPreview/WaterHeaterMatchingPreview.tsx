@@ -4,8 +4,8 @@
  */
 
 import type { WaterHeaterMatchingPreviewIdPrefix } from '../../types/waterHeaterMatching';
-import type { ParsedIndirectWaterHeaterMatching } from '../../utils/parseIndirectWaterHeaterMatchingFromReport';
-import type { ParsedWaterHeaterMatching } from '../../utils/parseWaterHeaterMatchingFromReport';
+import type { ParsedIndirectWaterHeaterMatching } from '../../utils/parsers/parseIndirectWaterHeaterMatchingFromReport';
+import type { ParsedWaterHeaterMatching } from '../../utils/parsers/parseWaterHeaterMatchingFromReport';
 import { WaterHeaterProposalCard } from '../WaterHeaterProposalCard/WaterHeaterProposalCard';
 import styles from './WaterHeaterMatchingPreview.module.css';
 

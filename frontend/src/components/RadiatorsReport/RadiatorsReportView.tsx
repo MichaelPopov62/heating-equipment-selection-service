@@ -6,7 +6,7 @@
 import {
   formatRadiatorsEmittersSummaryLabel,
   type ParsedRadiatorsMatching,
-} from '../../utils/parseRadiatorsMatchingFromReport';
+} from '../../utils/parsers/parseRadiatorsMatchingFromReport';
 import { RadiatorProposalLineTable } from '../RadiatorProposalLineTable/RadiatorProposalLineTable';
 import styles from './RadiatorsReportView.module.css';
 

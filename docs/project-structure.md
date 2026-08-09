@@ -226,7 +226,8 @@ main.tsx → QueryProvider → App.tsx
 | `src/components/` | Формы, отчёты, `ProjectsDialog/`, … |
 | `src/constants/` | SSOT шагов (`SURVEY_STEPS`), типы комнат, compat-id |
 | `src/types/` | DTO/view-модели UI |
-| `src/utils/` | Парсеры отчёта, миграции, `parseSharePath`, `downloadBlobFile`, … |
+| `src/utils/` | Миграции, форматирование, `downloadBlobFile`, … |
+| `src/utils/parsers/` | Парсеры отчёта calc, SurveyDraft, share URL, import bundle |
 | `src/data/fallback*.ts` | Офлайн-fallback справочников |
 | `src/styles/` | CSS-переменные / общие стили |
 | `public/` | Статика Vite: `favicon.svg`, `robots.txt`, `sitemap.xml`, `llms.txt` |
@@ -244,8 +245,9 @@ main.tsx → QueryProvider → App.tsx
 | Правило | Детали |
 |---------|--------|
 | Допустимо | Чистая функция, нужная **только** одному модулю — в **его папке** (например `components/BoilerReport/hasBoilerReportContent.ts`, `formatBoilerProposalShortLabel.ts`; паттерн `components/*Report/has*ReportContent.ts`) |
-| Запрещено | Импорт такого хелпера из **другой** фичи |
-| При нарушении | Немедленный перенос в `utils/` (или `utils/parsers/` для парсеров) |
+| Парсеры | Только **`src/utils/parsers/`** (отчёт calc, SurveyDraft, share URL, import) |
+| Запрещено | Импорт colocated-хелпера из **другой** фичи; `parse*.ts` в корне `utils/` |
+| При нарушении | Немедленный перенос в `utils/parsers/` (парсеры) или `utils/` (прочие хелперы) |
 
 Хуки (`use*`) — **не** в `components/`; только `hooks/`, `query/`, `auth/`, `surveySession/`, `shell/` (colocation с контекстом).
 

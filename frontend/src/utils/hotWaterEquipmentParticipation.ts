@@ -11,8 +11,8 @@ import {
   SCHEME_BOILER_SINGLE_BUFFER_ELECTRIC,
   SCHEME_BOILER_SINGLE_INDIRECT_SUM,
 } from '../types/heatingMatching';
-import type { ParsedIndirectWaterHeaterMatching } from './parseIndirectWaterHeaterMatchingFromReport';
-import type { ParsedWaterHeaterMatching } from './parseWaterHeaterMatchingFromReport';
+import type { ParsedIndirectWaterHeaterMatching } from './parsers/parseIndirectWaterHeaterMatchingFromReport';
+import type { ParsedWaterHeaterMatching } from './parsers/parseWaterHeaterMatchingFromReport';
 import { formatKw, formatLiters } from './format';
 
 export type HotWaterEquipmentKind = 'electric' | 'indirect';

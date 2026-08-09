@@ -6,7 +6,7 @@
 import {
   formatRadiatorsEmittersSummaryLabel,
   type ParsedRadiatorsMatching,
-} from '../../utils/parseRadiatorsMatchingFromReport';
+} from '../../utils/parsers/parseRadiatorsMatchingFromReport';
 import { isRadiatorsMatchingSkipped } from '../../utils/radiatorsSkip';
 import { RESULTS_SECTION_IDS } from '../../constants/surveyResultsSections';
 import { SurveyStepLink } from '../SurveyNavigation/SurveyStepLink';

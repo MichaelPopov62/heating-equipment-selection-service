@@ -7,8 +7,8 @@ import type {
   ParsedHydraulicsCalculations,
   ParsedHydraulicsFlowContext,
   ParsedHydraulicsView,
-} from '../types/hydraulics';
-import { isRecord, readRecordField, readStringArray } from './jsonGuards';
+} from '../../types/hydraulics';
+import { isRecord, readRecordField, readStringArray } from '../jsonGuards';
 import { parseHydraulicsProposalFromReport } from './parseHydraulicsProposalFromReport';
 
 function num(v: unknown): number | null {

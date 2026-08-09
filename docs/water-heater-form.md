@@ -245,7 +245,7 @@ Discriminated union в `frontend/src/types/waterHeaterMatching.ts`:
 | `frontend/src/components/HotWaterReport/HotWaterFixturesSummaryTable.tsx` | Таблица точек на `technicalResult` |
 | `frontend/src/components/HotWaterReport/HotWaterSummaryTable.tsx` | Компактный итог ЭБ/БКН на `technicalResult` |
 | `frontend/src/utils/hotWaterEquipmentParticipation.ts` | Участие ЭБ/БКН по схеме и подписи строк |
-| `frontend/src/utils/parseWaterHeaterMatchingFromReport.ts` | Парсинг `matching.waterHeater` (stub без модели → null) |
+| `frontend/src/utils/parsers/parseWaterHeaterMatchingFromReport.ts` | Парсинг `matching.waterHeater` (stub без модели → null) |
 | `frontend/src/components/WaterHeaterForm/WaterHeaterForm.tsx` | UI формы (стратегия + кнопки отчёта и «Назад к результатам») |
 | `frontend/src/constants/surveyResultsSections.ts` | Якоря секций `technicalResult` для «Назад к результатам» |
 | `frontend/src/components/SurveyNavigation/SurveyReportActions.module.css` | Общие стили кнопок отчёта / назад |

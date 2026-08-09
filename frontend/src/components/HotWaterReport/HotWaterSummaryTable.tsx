@@ -5,8 +5,8 @@
 
 import type { HotWaterBoilerPowerMatchingScheme } from '../../types/heatingMatching';
 import type { ParsedHotWaterReport } from '../../types/hotWaterReport';
-import type { ParsedIndirectWaterHeaterMatching } from '../../utils/parseIndirectWaterHeaterMatchingFromReport';
-import type { ParsedWaterHeaterMatching } from '../../utils/parseWaterHeaterMatchingFromReport';
+import type { ParsedIndirectWaterHeaterMatching } from '../../utils/parsers/parseIndirectWaterHeaterMatchingFromReport';
+import type { ParsedWaterHeaterMatching } from '../../utils/parsers/parseWaterHeaterMatchingFromReport';
 import {
   hasHotWaterEquipmentWarnings,
   isHotWaterEquipmentSchemeParticipant,

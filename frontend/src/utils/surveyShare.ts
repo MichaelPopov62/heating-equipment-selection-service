@@ -8,7 +8,7 @@ import type { SurveyDraft } from '../types/surveyDraft';
 import { wattsToKilowatts } from './calculators/heatLoss';
 import { formatKw } from './format';
 import { isRecord } from './jsonGuards';
-import { parseSurveyDraft } from './parseSurveyDraft';
+import { parseSurveyDraft } from './parsers/parseSurveyDraft';
 
 const URL_HASH_PREFIX = '#survey=';
 /** Макс. размер JSON в hash (~50 KB). */

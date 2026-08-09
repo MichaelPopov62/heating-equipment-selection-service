@@ -13,7 +13,7 @@ import { brandUk } from '../../i18n/uk/brand';
 import { downloadPublicSharePdf, fetchPublicShare } from '../../services/publicShareApi';
 import type { PublicSharePayload } from '../../types/projectsApi';
 import { isRecord } from '../../utils/jsonGuards';
-import { parseCommercialBomFromReport } from '../../utils/parseCommercialBomFromReport';
+import { parseCommercialBomFromReport } from '../../utils/parsers/parseCommercialBomFromReport';
 import {
   buildTechnicalPrintHtml,
   reportLikeFromPublicShare,

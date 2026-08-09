@@ -3,8 +3,8 @@
  * Описание: Полный блок ГВС для карты «Горячая вода» и сайдбара.
  */
 
-import type { ParsedHotWaterReport } from '../types/hotWaterReport';
-import { isRecord, readRecordField } from './jsonGuards';
+import type { ParsedHotWaterReport } from '../../types/hotWaterReport';
+import { isRecord, readRecordField } from '../jsonGuards';
 
 /**
  * @param value

@@ -5,7 +5,7 @@
 
 import type { ParsedUnderfloorHeating } from '../../types/underfloorHeating';
 import type { ParsedHydraulicsPumpProposal } from '../../types/hydraulics';
-import type { ParsedUniboxesMatching } from '../../utils/parseUniboxesMatchingFromReport';
+import type { ParsedUniboxesMatching } from '../../utils/parsers/parseUniboxesMatchingFromReport';
 import { formatKw } from '../../utils/format';
 import {
   selectUfhZonePumps,

@@ -2,7 +2,7 @@
  * Назначение: Парсинг расчёта тёплого пола из отчёта API.
  */
 
-import type { CalcReportJson } from '../types/calcApi';
+import type { CalcReportJson } from '../../types/calcApi';
 import type {
   ParsedUnderfloorHeating,
   ParsedUnderfloorHeatingRoom,
@@ -10,10 +10,10 @@ import type {
   ParsedUfhLoopHydraulics,
   ParsedUfhMixingNodeSpec,
   ParsedUfhResolvedRecommendation,
-} from '../types/underfloorHeating';
-import type { UfhDistributionPreset } from '../types/ufhDistribution';
-import { isUfhDistributionPreset } from '../types/ufhDistribution';
-import { isRecord, readRecordField, readStringArray } from './jsonGuards';
+} from '../../types/underfloorHeating';
+import type { UfhDistributionPreset } from '../../types/ufhDistribution';
+import { isUfhDistributionPreset } from '../../types/ufhDistribution';
+import { isRecord, readRecordField, readStringArray } from '../jsonGuards';
 
 function readFiniteNumber(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;

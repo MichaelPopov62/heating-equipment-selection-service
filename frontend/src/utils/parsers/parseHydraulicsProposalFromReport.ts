@@ -8,7 +8,7 @@ import type {
   ParsedHydraulicsPipeSegment,
   ParsedHydraulicsProposal,
   ParsedHydraulicsPumpProposal,
-} from '../types/hydraulics';
+} from '../../types/hydraulics';
 
 /** Fallback-підписи контурів (SSOT API — buildHydraulicsProposal.js). */
 const HYDRAULICS_HEATING_CIRCUIT_LABEL = 'Контур опалення (радіатори)';

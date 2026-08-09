@@ -19,8 +19,8 @@ import type { AppBootstrapMode } from '../surveySession/types';
 import type { CalcReportJson } from '../types/calcApi';
 import type { SurveyDraft } from '../types/surveyDraft';
 import { downloadJsonFile, downloadTextFile } from '../utils/fileDownload';
-import { parseCommercialBomFromReport } from '../utils/parseCommercialBomFromReport';
-import { buildPublicShareUrlFromToken } from '../utils/parseSharePath';
+import { parseCommercialBomFromReport } from '../utils/parsers/parseCommercialBomFromReport';
+import { buildPublicShareUrlFromToken } from '../utils/parsers/parseSharePath';
 import { buildSurveyDraft } from '../utils/buildSurveyDraft';
 import {
   buildSurveyTextSummary,

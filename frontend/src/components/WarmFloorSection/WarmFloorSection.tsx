@@ -12,7 +12,7 @@ import type { ParsedUnderfloorHeating } from '../../types/underfloorHeating';
 import type { ParsedHydraulicsPumpProposal } from '../../types/hydraulics';
 import type { UfhDistributionPreset } from '../../types/ufhDistribution';
 import type { UfhModePresetCard, UfhModePresetId } from '../../types/ufhModePreset';
-import type { ParsedUniboxesMatching } from '../../utils/parseUniboxesMatchingFromReport';
+import type { ParsedUniboxesMatching } from '../../utils/parsers/parseUniboxesMatchingFromReport';
 import reportActionsStyles from '../SurveyNavigation/SurveyReportActions.module.css';
 import styles from './WarmFloorSection.module.css';
 import { UfhDistributionSelect } from './UfhDistributionSelect';

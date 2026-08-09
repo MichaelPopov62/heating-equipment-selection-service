@@ -5,7 +5,7 @@
 
 import { useEffect } from 'react';
 
-import type { ParsedRadiatorsMatching } from '../../utils/parseRadiatorsMatchingFromReport';
+import type { ParsedRadiatorsMatching } from '../../utils/parsers/parseRadiatorsMatchingFromReport';
 import { RadiatorsReportView } from './RadiatorsReportView';
 import { hasRadiatorsReportContent } from './hasRadiatorsReportContent';
 import styles from './RadiatorsReportDialog.module.css';

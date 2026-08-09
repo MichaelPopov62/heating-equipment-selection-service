@@ -3,7 +3,7 @@
  * Описание: Строки по петлям ТП — модель, лимиты, цена; warnings блока.
  */
 
-import type { ParsedUniboxesMatching } from '../../utils/parseUniboxesMatchingFromReport';
+import type { ParsedUniboxesMatching } from '../../utils/parsers/parseUniboxesMatchingFromReport';
 import styles from '../CatalogEquipmentReference/CatalogEquipmentReference.module.css';
 
 type Props = {

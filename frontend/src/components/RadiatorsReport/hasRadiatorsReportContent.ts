@@ -3,7 +3,7 @@
  * Опис: Кнопка звіту на кроці «Радіатори» та summary в сайдбарі.
  */
 
-import type { ParsedRadiatorsMatching } from '../../utils/parseRadiatorsMatchingFromReport';
+import type { ParsedRadiatorsMatching } from '../../utils/parsers/parseRadiatorsMatchingFromReport';
 import { isRadiatorsMatchingSkipped } from '../../utils/radiatorsSkip';
 
 /**

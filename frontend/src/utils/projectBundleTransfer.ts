@@ -18,8 +18,8 @@ import {
 import type { SurveyDraft } from '../types/surveyDraft';
 import { SURVEY_DRAFT_SCHEMA_VERSION } from '../types/surveyDraft';
 import { downloadJsonFile } from './fileDownload';
-import { parseSurveyDraft } from './parseSurveyDraft';
-import { buildSurveyDraftAfterImport, parseProjectImportFile } from './parseProjectImportFile';
+import { parseSurveyDraft } from './parsers/parseSurveyDraft';
+import { buildSurveyDraftAfterImport, parseProjectImportFile } from './parsers/parseProjectImportFile';
 
 export type ProjectBundleImportResult = {
   project: ProjectDetail;

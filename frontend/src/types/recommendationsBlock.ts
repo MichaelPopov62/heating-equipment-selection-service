@@ -4,14 +4,14 @@
  */
 
 import type { ParsedBoilerMatching } from '../utils/parsers/parseBoilerFromReport';
-import type { ParsedRadiatorsMatching } from '../utils/parseRadiatorsMatchingFromReport';
-import type { ParsedIndirectWaterHeaterMatching } from '../utils/parseIndirectWaterHeaterMatchingFromReport';
-import type { ParsedWaterHeaterMatching } from '../utils/parseWaterHeaterMatchingFromReport';
+import type { ParsedRadiatorsMatching } from '../utils/parsers/parseRadiatorsMatchingFromReport';
+import type { ParsedIndirectWaterHeaterMatching } from '../utils/parsers/parseIndirectWaterHeaterMatchingFromReport';
+import type { ParsedWaterHeaterMatching } from '../utils/parsers/parseWaterHeaterMatchingFromReport';
 import type { HotWaterBoilerPowerMatchingScheme } from './heatingMatching';
 import type { ObjectType } from './envelope';
 import type { ParsedUnderfloorHeating } from './underfloorHeating';
 import type { ParsedHydraulicsView } from './hydraulics';
-import type { ParsedUniboxesMatching } from '../utils/parseUniboxesMatchingFromReport';
+import type { ParsedUniboxesMatching } from '../utils/parsers/parseUniboxesMatchingFromReport';
 import type { SurveyUiPhase } from '../surveySession/types';
 import type { HotWaterFormFixtures } from './hotWater';
 import type { ParsedHotWaterReport } from './hotWaterReport';

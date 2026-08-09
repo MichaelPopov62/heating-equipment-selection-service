@@ -22,6 +22,7 @@ React + Vite + TypeScript + **@tanstack/react-query**. Точка входа: `s
 | Оболочка и тексты | `src/shell/`, `src/i18n/` | Header/Footer actions и украинская локализация |
 | SEO | `src/seo/` | JSON-LD (`JsonLdBoundary` в `AppRouter`) |
 | Типы / fallback / стили | `src/types/`, `src/data/`, `src/styles/` | DTO UI, offline-fallback справочников, глобальные CSS |
+| Парсеры | `src/utils/parsers/` | Отчёт calc, SurveyDraft, share URL, import bundle |
 | Статика Vite | `public/` | `favicon.svg`, `robots.txt`, `sitemap.xml`, `llms.txt` |
 
 ### Маршрутизация (`src/routing/AppRouter.tsx`)

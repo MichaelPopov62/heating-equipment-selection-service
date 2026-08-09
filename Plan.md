@@ -127,6 +127,7 @@ SSOT — `backend/package.json` → скрипт `verify`.
 | `src/i18n/` | Украинские тексты UI и локализация Clerk |
 | `src/components/` | Формы, отчёты, StartScreen, SharePresentationPage и shell-компоненты |
 | `src/constants/surveySteps.ts` | SSOT всех шагов, включая `dataReference` и `financialResult` |
+| `src/utils/parsers/` | Парсеры отчёта calc, SurveyDraft, share URL, import bundle |
 | `scripts/` / `knip.json` | Verify-скрипты и проверка неиспользуемого кода |
 
 ---

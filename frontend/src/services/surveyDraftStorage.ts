@@ -4,7 +4,7 @@
  */
 
 import type { SurveyDraft } from '../types/surveyDraft';
-import { parseSurveyDraft } from '../utils/parseSurveyDraft';
+import { parseSurveyDraft } from '../utils/parsers/parseSurveyDraft';
 
 export const SURVEY_DRAFT_STORAGE_KEY = 'heatcalc:survey-draft:v1';
 

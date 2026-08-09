@@ -3,7 +3,7 @@
  * Описание: Строки byLoop с selected / warnings и параметрами demand.
  */
 
-import { isRecord, readRecordField } from './jsonGuards';
+import { isRecord, readRecordField } from '../jsonGuards';
 
 export type ParsedUniboxConnection = {
   thread: string;

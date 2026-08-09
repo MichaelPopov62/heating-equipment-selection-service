@@ -8,7 +8,7 @@ import {
   formatRadiatorRoomQuantityLabel,
   formatRadiatorsEmittersSummaryLabel,
   type RadiatorsProposalLineView,
-} from '../../utils/parseRadiatorsMatchingFromReport';
+} from '../../utils/parsers/parseRadiatorsMatchingFromReport';
 
 type RadiatorProposalLineTableProps = {
   line: RadiatorsProposalLineView | null;

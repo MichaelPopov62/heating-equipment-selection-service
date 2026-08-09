@@ -11,15 +11,15 @@ import { heatLossReserveKw, heatLossTotalKw, wattsToKilowatts } from './calculat
 import { formatKw } from './format';
 import { isRecord, readRecordField } from './jsonGuards';
 import { parseBoilerFromReport } from './parsers/parseBoilerFromReport';
-import { parseHotWaterFromReport } from './parseHotWaterFromReport';
+import { parseHotWaterFromReport } from './parsers/parseHotWaterFromReport';
 import {
   formatRadiatorsEmittersSummaryLabel,
   parseRadiatorsMatchingFromReport,
-} from './parseRadiatorsMatchingFromReport';
-import { parseIndirectWaterHeaterMatchingFromReport } from './parseIndirectWaterHeaterMatchingFromReport';
-import { parseWaterHeaterMatchingFromReport } from './parseWaterHeaterMatchingFromReport';
-import { parseUnderfloorHeatingFromReport } from './parseUnderfloorHeatingFromReport';
-import { parseHydraulicsFromReport } from './parseHydraulicsFromReport';
+} from './parsers/parseRadiatorsMatchingFromReport';
+import { parseIndirectWaterHeaterMatchingFromReport } from './parsers/parseIndirectWaterHeaterMatchingFromReport';
+import { parseWaterHeaterMatchingFromReport } from './parsers/parseWaterHeaterMatchingFromReport';
+import { parseUnderfloorHeatingFromReport } from './parsers/parseUnderfloorHeatingFromReport';
+import { parseHydraulicsFromReport } from './parsers/parseHydraulicsFromReport';
 import { isRadiatorsMatchingSkipped } from './radiatorsSkip';
 
 const SCHEME_SET = new Set<string>(HOT_WATER_BOILER_MATCHING_SCHEME_ENUM);

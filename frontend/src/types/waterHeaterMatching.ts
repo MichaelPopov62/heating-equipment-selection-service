@@ -3,8 +3,8 @@
  * Описание: Discriminated union для карточки БКН / электробойлера без дублирующих пропсов.
  */
 
-import type { ParsedIndirectWaterHeaterMatching } from '../utils/parseIndirectWaterHeaterMatchingFromReport';
-import type { ParsedWaterHeaterMatching } from '../utils/parseWaterHeaterMatchingFromReport';
+import type { ParsedIndirectWaterHeaterMatching } from '../utils/parsers/parseIndirectWaterHeaterMatchingFromReport';
+import type { ParsedWaterHeaterMatching } from '../utils/parsers/parseWaterHeaterMatchingFromReport';
 
 export type WaterHeaterProposalCardProps =
   | {

@@ -7,7 +7,7 @@ import {
   isRecord,
   readRecordField,
   readStringArray,
-} from './jsonGuards';
+} from '../jsonGuards';
 
 /** Данные подбора БКН из report.matching.indirectWaterHeater */
 

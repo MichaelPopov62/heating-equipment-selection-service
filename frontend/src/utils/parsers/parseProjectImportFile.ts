@@ -3,11 +3,11 @@
  * Описание: ProjectExportBundle v1 или legacy SurveyDraft → тело POST /projects/import.
  */
 
-import type { CalcReportJson } from '../types/calcApi';
-import type { ProjectDetail } from '../types/projectsApi';
-import { PROJECT_EXPORT_SCHEMA_VERSION } from '../types/projectExport';
-import type { SurveyDraft } from '../types/surveyDraft';
-import { isRecord } from './jsonGuards';
+import type { CalcReportJson } from '../../types/calcApi';
+import type { ProjectDetail } from '../../types/projectsApi';
+import { PROJECT_EXPORT_SCHEMA_VERSION } from '../../types/projectExport';
+import type { SurveyDraft } from '../../types/surveyDraft';
+import { isRecord } from '../jsonGuards';
 import { parseSurveyDraft } from './parseSurveyDraft';
 
 export type ParsedProjectImportFile = {

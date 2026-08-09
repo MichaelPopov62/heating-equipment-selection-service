@@ -8,17 +8,17 @@ import type { CalcReportJson } from '../types/calcApi';
 import type { HotWaterBoilerPowerMatchingScheme } from '../types/heatingMatching';
 import type { ApiHotWater } from '../types/recommendationsBlock';
 import type { UfhModePresetId } from '../types/ufhModePreset';
-import { parseHotWaterFromReport } from '../utils/parseHotWaterFromReport';
+import { parseHotWaterFromReport } from '../utils/parsers/parseHotWaterFromReport';
 import { heatLossReserveKw, heatLossTotalKw, wattsToKilowatts } from '../utils/calculators/heatLoss';
 import { isRecord, readRecordField } from '../utils/jsonGuards';
 import { parseBoilerFromReport } from '../utils/parsers/parseBoilerFromReport';
-import { parseIndirectWaterHeaterMatchingFromReport } from '../utils/parseIndirectWaterHeaterMatchingFromReport';
-import { parseRadiatorsMatchingFromReport, formatRadiatorsEmittersSummaryLabel } from '../utils/parseRadiatorsMatchingFromReport';
-import { parseWaterHeaterMatchingFromReport } from '../utils/parseWaterHeaterMatchingFromReport';
-import { parseUnderfloorHeatingFromReport } from '../utils/parseUnderfloorHeatingFromReport';
-import { parseHydraulicsFromReport } from '../utils/parseHydraulicsFromReport';
-import { parseUniboxesMatchingFromReport } from '../utils/parseUniboxesMatchingFromReport';
-import { parseCommercialBomFromReport } from '../utils/parseCommercialBomFromReport';
+import { parseIndirectWaterHeaterMatchingFromReport } from '../utils/parsers/parseIndirectWaterHeaterMatchingFromReport';
+import { parseRadiatorsMatchingFromReport, formatRadiatorsEmittersSummaryLabel } from '../utils/parsers/parseRadiatorsMatchingFromReport';
+import { parseWaterHeaterMatchingFromReport } from '../utils/parsers/parseWaterHeaterMatchingFromReport';
+import { parseUnderfloorHeatingFromReport } from '../utils/parsers/parseUnderfloorHeatingFromReport';
+import { parseHydraulicsFromReport } from '../utils/parsers/parseHydraulicsFromReport';
+import { parseUniboxesMatchingFromReport } from '../utils/parsers/parseUniboxesMatchingFromReport';
+import { parseCommercialBomFromReport } from '../utils/parsers/parseCommercialBomFromReport';
 import {
   isRadiatorsMatchingSkipped,
   isUfhOnlySurveyMode,
