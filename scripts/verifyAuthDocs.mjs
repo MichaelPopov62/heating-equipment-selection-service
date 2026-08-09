@@ -90,10 +90,11 @@ assert.match(String(JSON.parse(readRepo('backend/package.json')).scripts.verify)
   'backend verify должен включать verify:platform-admin',
 );
 
-const deployArch = readRepo('docs/deployment-architecture.md');
-assert.match(deployArch, /PLATFORM_ADMIN_EMAILS/);
-assert.match(deployArch, /Platform admin — ops runbook/);
-assert.match(deployArch, /Acceptance checklist/);
+const deploySmoke = readRepo('docs/deploy/smoke-tests.md');
+const deployRender = readRepo('docs/deploy/render.md');
+assert.match(deployRender, /PLATFORM_ADMIN_EMAILS/);
+assert.match(deploySmoke, /Platform admin — ops runbook/);
+assert.match(deploySmoke, /Acceptance checklist \(A1–A7\)/);
 
 assert.match(String(frontendPkg.scripts.verify), /verify:frontend-me/, 'frontend verify должен включать verify:frontend-me');
 

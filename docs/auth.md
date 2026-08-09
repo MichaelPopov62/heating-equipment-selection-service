@@ -153,11 +153,11 @@ Startup gate (`backend/src/index.js`):
 | `PROJECTS_MAX_PER_OWNER` | опционально | Safety cap проектов на владельца (default **200** в коде) |
 | `PROJECTS_MAX_CALCULATIONS_PER_PROJECT` | опционально | Safety cap расчётов на проект (default **100** в коде) |
 | `AUTH_ISSUER_PROVIDER_MAP` | опционально | JSON `{ "https://iss": "clerk" }` без `AUTH_PROVIDER` |
-| `PLATFORM_ADMIN_EMAILS` | staging / production | Comma-separated emails platform admin; **один список на все Render API**; см. [Platform admin](#platform-admin) |
+| `PLATFORM_ADMIN_EMAILS` | deploy / local | Comma-separated emails platform admin; см. [Platform admin](#platform-admin) и [`deploy/render.md`](deploy/render.md) |
 
 `AUTH_JWKS_URI` и `AUTH_JWT_SECRET` **взаимоисключающие**.
 
-`PLATFORM_ADMIN_EMAILS` — **только backend** (Render / `backend/.env`); **не** задавать на Vercel.
+`PLATFORM_ADMIN_EMAILS` — **только backend** (`backend/.env`); на frontend не задавать.
 
 ### Frontend (`frontend/.env`)
 
@@ -285,23 +285,13 @@ JWT claims **не** задают `role` напрямую; email в JWT испо�
 
 ### Platform admin
 
-SSOT — **`PLATFORM_ADMIN_EMAILS`** на **Render** (staging и production: **одинаковый** список) и в **`backend/.env`** локально.
+SSOT переменной — **`PLATFORM_ADMIN_EMAILS`** в backend env (локально — `backend/.env`). Значение и синхронизация между окружениями: [`deploy/render.md`](deploy/render.md).
 
-```env
-PLATFORM_ADMIN_EMAILS=popov1ms@i.ua,romantikzizni@gmail.com
-```
+**Цепочка:** Clerk JWT (`email` claim) → `resolveUser` → если email ∈ allowlist → `users.role=admin` (create или sync) → `GET /api/v1/me` → UI «Звернення», admin API; DevPanel на hosted staging — см. [`frontend-dev-panel.md`](frontend-dev-panel.md).
 
-**Цепочка:** Clerk JWT (`email` claim) → `resolveUser` → если email ∈ allowlist → `users.role=admin` (create или sync) → `GET /api/v1/me` → UI «Звернення», admin API, DevPanel на staging.
+Allowlist **не** хранится в MongoDB как отдельная коллекция; `role=admin` выставляется при login по email из JWT.
 
-**Acceptance (обязательно после deploy или изменения списка):**
-
-1. Login на целевом frontend (staging / production) через Clerk **этого** окружения.
-2. `GET /api/v1/me` → `"role": "admin"`, email из allowlist.
-3. UI: ссылка **«Звернення»**; на staging Dev — при `VITE_DEV_TOOLS=1` + `VITE_APP_ENV=staging`.
-
-Platform admin **не синхронизируется между MongoDB автоматически** — синхронизируется **список env** на Render-сервисах. Имена БД (`heatcalc_staging`, `heatcalc_production`, dev `heating-selection-service`) на allowlist не влияют.
-
-**Ops runbook (Render deploy, acceptance):** [`deployment-architecture.md`](deployment-architecture.md) §10.
+**Acceptance после изменения списка:** [`deploy/smoke-tests.md`](deploy/smoke-tests.md) (A5–A7).
 
 Модуль: `auth/platformAdminAllowlist.js`; sync: `auth/resolveUser.js`.
 
@@ -321,16 +311,14 @@ Content-Type: application/json
 
 ### Legacy bootstrap (`promote:user-admin`)
 
-Dev / break-glass без platform allowlist; **не** заменяет `PLATFORM_ADMIN_EMAILS` на deploy.
+Dev / break-glass без platform allowlist; **не** заменяет `PLATFORM_ADMIN_EMAILS` на hosted окружениях.
 
 ```bash
 cd backend
-# Для staging/production укажите целевую БД (как seed:mongo-db):
-# npm run seed:mongo-db -- heatcalc_staging  — паттерн URI
 npm run promote:user-admin -- --email user@example.com
 ```
 
-Пользователь должен уже существовать в `users` **целевой** БД (после login через Clerk). Сверьте `id` в stdout с `GET /api/v1/me`. Предпочтительный путь на deploy — **platform allowlist**, не promote.
+Пользователь должен уже существовать в `users` **целевой** БД (после login через Clerk). Сверьте `id` в stdout с `GET /api/v1/me`. На deploy предпочтительен **platform allowlist** — см. [`deploy/render.md`](deploy/render.md).
 
 ### Модули
 

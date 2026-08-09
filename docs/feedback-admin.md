@@ -24,7 +24,7 @@ SSE-хаб хранится в памяти процесса. Для неско�
 - `PATCH /api/v1/admin/feedback/:id`;
 - `GET /api/v1/admin/feedback/stream`.
 
-**Platform admin:** email ∈ `PLATFORM_ADMIN_EMAILS` на Render → `role=admin` после login (`resolveUser`). См. [`auth.md`](auth.md).
+**Platform admin:** email ∈ `PLATFORM_ADMIN_EMAILS` → `role=admin` после login. Настройка env: [`deploy/render.md`](deploy/render.md); поведение: [`auth.md`](auth.md).
 
 **Delegated admin:** `PATCH /api/v1/admin/users/{id}` `{ "role": "admin" }` — редко, для пользователей вне allowlist.
 

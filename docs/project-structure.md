@@ -7,7 +7,7 @@
 Типобезопасность / verify gate: [`type-safety.md`](type-safety.md).  
 **Мова UI (user-facing):** [`language-policy.md`](language-policy.md) — українська; whitelist enum/calc payload.
 
-В заголовке большинства исходников есть блок «Назначение / Описание».
+В заголовке большинства исходников есть блок «Назначение / Описание»; в `docs/deploy/*.md` — HTML-комментарий `<!-- Назначение: … -->` (проверка: `npm run verify:deploy-docs`).
 
 ---
 
@@ -20,6 +20,7 @@
 ├── backend/                             # Express API + calc (+ Dockerfile PDF)
 ├── frontend/                            # React + Vite UI
 ├── docs/                                # документация доменов
+│   └── deploy/                          # деплой Vercel + Render (hub: deploy/README.md)
 ├── scripts/                             # root verify helpers
 ├── .github/workflows/                   # CI
 ├── tsconfig.strict-base.json            # общий strict TS
@@ -37,6 +38,7 @@
 | `backend/docker-compose.pdf.yml` | Пример запуска API с PDF-рендером |
 | `frontend/` | React + TS + React Query: анкета, start screen, публичная ссылка |
 | `docs/` | Тематические гайды (не код) |
+| `docs/deploy/` | Деплой Vercel + Render — hub [`deploy/README.md`](deploy/README.md) |
 | `scripts/verifyNoTypeBypass.mjs` | Gate: запрет `any` / `@ts-ignore` / unsafe eslint-disable |
 | `.github/workflows/verify.yml` | CI: bypass → shared → backend → frontend → build |
 | `tsconfig.strict-base.json` | Общий strict-профиль для shared / backend / frontend |

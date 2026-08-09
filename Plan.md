@@ -144,6 +144,24 @@ SSOT — `backend/package.json` → скрипт `verify`.
 
 ---
 
+## Деплой
+
+| Документ | Тема |
+|----------|------|
+| [`docs/deploy/README.md`](docs/deploy/README.md) | **Hub:** Vercel + Render, навигация |
+| [`docs/deploy/architecture.md`](docs/deploy/architecture.md) | Схема, границы платформ |
+| [`docs/deploy/environments.md`](docs/deploy/environments.md) | URL, Mongo, Clerk, CORS, env |
+| [`docs/deploy/vercel.md`](docs/deploy/vercel.md) | Vercel build, `vercel.json`, `VITE_*` |
+| [`docs/deploy/render.md`](docs/deploy/render.md) | Render Web Service, backend env |
+| [`docs/deploy/first-deploy.md`](docs/deploy/first-deploy.md) | Runbook «с нуля» |
+| [`docs/deploy/smoke-tests.md`](docs/deploy/smoke-tests.md) | Acceptance A1–A7 после деплоя |
+| [`docs/deploy/baseline.md`](docs/deploy/baseline.md) | История готовности к деплою |
+| [`docs/deploy/phase0-audit.md`](docs/deploy/phase0-audit.md) | Аудит docs ↔ код |
+
+Verify: `npm run verify:deploy-docs`.
+
+---
+
 ## Доменная документация
 
 | Документ | Тема |

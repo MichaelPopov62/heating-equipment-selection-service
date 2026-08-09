@@ -9,8 +9,8 @@
 | Среда | Условие |
 |-------|---------|
 | **`npm run dev`** (localhost) | всегда (команда разработки) |
-| **Vercel staging** | `VITE_DEV_TOOLS=1` **и** `VITE_APP_ENV=staging` **и** `GET /api/v1/me` → `role=admin` |
-| **Vercel production (master)** | **никогда** (даже при ошибочном `VITE_DEV_TOOLS`) |
+| **Hosted staging** | admin (`GET /api/v1/me` → `role=admin`) и флаги окружения — см. [`deploy/environments.md`](deploy/environments.md) |
+| **Hosted production** | **никогда** |
 
 Обычному пользователю и пользователю без `role=admin` на staging DevPanel не показывается.
 
@@ -100,7 +100,7 @@ Dev-экспорт для переноса между Production / Staging:
 
 ### `📤 Імпорт (Load JSON)`
 
-Dev-импорт в **текущую** MongoDB (`VITE_API_BASE_URL`):
+Dev-импорт в **текущую** MongoDB backend (к какому API привязан frontend):
 
 1. Выбор `.json` — `ProjectExportBundle` или legacy SurveyDraft.
 2. `POST /api/v1/projects/import` (JWT обязателен).
@@ -260,3 +260,4 @@ DELETE /api/v1/projects/{projectId}/share
 - [`start-state.md`](start-state.md) — bootstrap приложения из файла, hash и localStorage.
 - [`projects-api.md`](projects-api.md) — Projects API, расчёты и авторизация.
 - [`client-share-and-layers.md`](client-share-and-layers.md) — граница клиентского и Dev-слоя, публичная ссылка и PDF.
+- [`deploy/environments.md`](deploy/environments.md) — hosted env и флаги DevPanel.

@@ -21,7 +21,7 @@ const appRoot = readSrc('AppRoot.tsx');
 const startAppRoot = readSrc('StartAppRoot.tsx');
 const surveyAppRoot = readSrc('SurveyAppRoot.tsx');
 const deployDoc = readFileSync(
-  path.join(root, '..', '..', 'docs', 'deployment-architecture.md'),
+  path.join(root, '..', '..', 'docs', 'deploy', 'environments.md'),
   'utf8',
 );
 
@@ -35,8 +35,8 @@ assert.match(surveyAppRoot, /useDevPanelAccess/);
 assert.doesNotMatch(appRoot, /\bisDevToolsEnabled\b/);
 assert.doesNotMatch(surveyAppRoot, /\bisDevToolsEnabled\b/);
 
-const prodEnvBlock = deployDoc.match(/Production:\r?\n\r?\n```env\r?\n([\s\S]*?)```/);
-assert.ok(prodEnvBlock?.[1], 'deployment-architecture: блок Production env');
+const prodEnvBlock = deployDoc.match(/### Production\r?\n\r?\n```env\r?\n([\s\S]*?)```/);
+assert.ok(prodEnvBlock?.[1], 'deploy/environments.md: блок Production env');
 assert.doesNotMatch(
   prodEnvBlock[1],
   /^VITE_DEV_TOOLS=1/m,

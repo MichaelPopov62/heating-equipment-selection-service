@@ -2,23 +2,49 @@
 
 REST API и фронтенд для подбора теплового оборудования (дом/квартира).
 
-| Документ                                                       | Назначение                                                          |
-| -------------------------------------------------------------- | ------------------------------------------------------------------- |
-| [`openapi.yaml`](openapi.yaml)                                 | Контракт REST API                                                   |
-| [`.cursorrules`](.cursorrules)                                 | Правила backend/frontend, бизнес-логика, env, модули                |
-| [`Plan.md`](Plan.md)                                           | Карта модулей backend/frontend                                      |
-| [`backend/README.md`](backend/README.md)                       | Backend: quick start, verify, маршруты                              |
-| [`docs/project-structure.md`](docs/project-structure.md)       | Карта папок и entrypoints (навигатор по репозиторию)               |
-| [`docs/type-safety.md`](docs/type-safety.md)                   | Строгая типобезопасность: tsc/checkJs, ESLint, CI gate              |
-| [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md) | Frontend: SurveySession, React Query, calc, справочники             |
-| [`docs/survey-draft.md`](docs/survey-draft.md)                 | Состояние анкеты (SurveyDraft v4), localStorage, project.survey   |
-| [`docs/start-state.md`](docs/start-state.md)                   | Start Screen, bootstrap, восстановление сессии                      |
-| [`docs/language-policy.md`](docs/language-policy.md)           | Политика UA для user-facing текстов                                 |
-| [`docs/projects-api.md`](docs/projects-api.md)                 | REST API проектов, share, PDF и сохранённых расчётов                |
-| [`docs/client-share-and-layers.md`](docs/client-share-and-layers.md) | Клиент vs Dev, публичная ссылка, PDF                          |
-| [`docs/project-pdf.md`](docs/project-pdf.md)                   | Серверная генерация PDF (Chromium)                                  |
-| [`docs/calc-runtime-context.md`](docs/calc-runtime-context.md) | CalcRuntimeContext: DI справочников в calc-пайплайне                |
-| [`docs/room-exterior-layout.md`](docs/room-exterior-layout.md) | Положение помещения: угловое / фасад / внутреннее (стена в коридор) |
+Правила и карта модулей — [`Plan.md`](Plan.md), [`.cursorrules`](.cursorrules).  
+Контракт API — [`openapi.yaml`](openapi.yaml).
+
+---
+
+## Документация
+
+| Документ | Назначение |
+|----------|------------|
+| [`Plan.md`](Plan.md) | Карта модулей backend/frontend |
+| [`docs/project-structure.md`](docs/project-structure.md) | Навигатор по папкам и entrypoints |
+| [`docs/type-safety.md`](docs/type-safety.md) | Строгая типобезопасность, CI gate |
+| [`backend/README.md`](backend/README.md) | Backend: quick start, verify, маршруты |
+
+---
+
+## Доменные гайды
+
+| Документ | Назначение |
+|----------|------------|
+| [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md) | SurveySession, React Query, calc |
+| [`docs/survey-draft.md`](docs/survey-draft.md) | SurveyDraft v4, localStorage |
+| [`docs/start-state.md`](docs/start-state.md) | Start Screen, bootstrap |
+| [`docs/language-policy.md`](docs/language-policy.md) | UA user-facing тексты |
+| [`docs/projects-api.md`](docs/projects-api.md) | REST проектов, share, PDF |
+| [`docs/auth.md`](docs/auth.md) | JWT, Clerk, `/me` |
+| [`docs/client-share-and-layers.md`](docs/client-share-and-layers.md) | Клиент vs Dev, share, PDF |
+| [`docs/project-pdf.md`](docs/project-pdf.md) | Серверный PDF (Chromium) |
+| [`docs/calc-runtime-context.md`](docs/calc-runtime-context.md) | CalcRuntimeContext, bundle |
+| [`docs/calc-input-validation.md`](docs/calc-input-validation.md) | Валидация CalcInput |
+| [`docs/room-exterior-layout.md`](docs/room-exterior-layout.md) | Положение комнаты (угловое / фасад / internal) |
+
+Полный список — [`Plan.md`](Plan.md) § «Доменная документация».
+
+---
+
+## Деплой
+
+| Документ | Назначение |
+|----------|------------|
+| [`docs/deploy/README.md`](docs/deploy/README.md) | Hub: Vercel + Render, smoke |
+
+---
 
 ## Backend — быстрый старт
 
@@ -36,21 +62,21 @@ npm run start          # http://localhost:3001
 
 Calc-пайплайн HTTP: `runCalculation(body)` (`api/runCalculation.js`); внутри — `getReferenceBundle()` → `toCalcRuntimeContext()` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })`. On-demand сброс кэша: `POST /api/v1/system/invalidate-reference-cache`.
 
-Подробнее: [`backend/README.md`](backend/README.md). Эндпоинты и auth — `openapi.yaml`, [`docs/auth.md`](docs/auth.md), [`docs/projects-api.md`](docs/projects-api.md). Валидация calc — [`docs/calc-input-validation.md`](docs/calc-input-validation.md).
+Подробнее: [`backend/README.md`](backend/README.md). Эндпоинты и auth — `openapi.yaml`, [`docs/auth.md`](docs/auth.md), [`docs/projects-api.md`](docs/projects-api.md).
+
+---
 
 ## Frontend
 
-React + Vite + TypeScript + **React Query** (`@tanstack/react-query`, слой `frontend/src/query/`). Запуск: `cd frontend && npm install && npm run dev`.
+React + Vite + TypeScript + **React Query** (`frontend/src/query/`). Запуск: `cd frontend && npm install && npm run dev`.
 
-Документация клиента: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md), [`docs/start-state.md`](docs/start-state.md). Карта папок: [`docs/project-structure.md`](docs/project-structure.md), [`Plan.md`](Plan.md).
+Документация: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md), [`docs/start-state.md`](docs/start-state.md). Карта: [`docs/project-structure.md`](docs/project-structure.md), [`Plan.md`](Plan.md).
 
-Точка входа SPA: `App.tsx` подключает providers и `AppRouter`; `/` открывает анкету через `SurveyAppShell`, `/projects` — список проектов, `/s/:shareToken` — read-only презентацию. Bootstrap start/survey — [`docs/start-state.md`](docs/start-state.md).
+Точка входа SPA: `App.tsx` → `AppRouter`; `/` — анкета, `/projects` — проекты, `/s/:shareToken` — read-only презентация.
 
-В анкете для каждого помещения задаётся **положение относительно наружного контура** (`roomExteriorLayout`: угловое, на фасаде, внутреннее со стеной в коридор) — см. [`docs/room-exterior-layout.md`](docs/room-exterior-layout.md).
+---
 
 ## Приёмка (production gate)
-
-Полная проверка из корня репозитория:
 
 ```bash
 npm run verify
@@ -59,18 +85,10 @@ npm run verify
 Эквивалент по шагам:
 
 ```bash
-node scripts/verifyNoTypeBypass.mjs   # запрет any / @ts-ignore / unsafe eslint-disable
+node scripts/verifyNoTypeBypass.mjs
 cd shared && npm run typecheck
-cd backend && npm run verify          # lint + typecheck (checkJs) + domain verify:*
-cd frontend && npm run verify         # lint + typecheck + knip + nav/auth/me + build + session/start
-```
-
-Отдельно:
-
-```bash
-cd frontend && npm run lint       # явный any + no-unsafe-* + type-aware правила
-cd frontend && npm run typecheck  # неявный any: strict + noImplicitAny + EOPT + NUI
-cd backend && npm run typecheck   # checkJs на src/ и scripts/
+cd backend && npm run verify
+cd frontend && npm run verify
 ```
 
 Подробности: [`docs/type-safety.md`](docs/type-safety.md). CI: `.github/workflows/verify.yml`.

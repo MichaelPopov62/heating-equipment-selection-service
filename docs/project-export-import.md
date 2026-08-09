@@ -53,11 +53,9 @@ Legacy `heatcalc-*.json` (SurveyDraft без `exportSchemaVersion`) также �
 
 ## Окружения
 
-- Разные БД: `heatcalc_staging` / `heatcalc_production`.
-- Frontend: `VITE_API_BASE_URL` на соответствующий Render API.
-- DevPanel: только **staging Vercel** — `VITE_DEV_TOOLS=1` + `VITE_APP_ENV=staging` + admin.
-- Bootstrap admin (legacy): `cd backend && npm run promote:user-admin -- --email user@example.com`
-- **Platform admin (deploy):** `PLATFORM_ADMIN_EMAILS` на Render — см. [`auth.md`](auth.md)
+Деплой, URL и env-матрица: [`deploy/README.md`](deploy/README.md).
+
+Admin для экспорта/импорта: [`auth.md`](auth.md) (platform admin). Подробнее runbook выше.
 
 ## API
 
