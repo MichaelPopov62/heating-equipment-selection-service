@@ -53,7 +53,7 @@
   flex: 1 1 auto;
 }
 
-.stepList > li {
+.stepList>li {
   display: flex;
   flex: 0 0 calc((100% - 6px) / 2);
   max-width: calc((100% - 6px) / 2);
@@ -215,6 +215,7 @@
 @media (--desktop) {
   .navigationSteps {
     flex: 0 0 240px;
+    width: auto;
     flex-direction: column;
     flex-wrap: nowrap;
     min-width: 200px;
@@ -225,14 +226,20 @@
     flex-wrap: nowrap;
   }
 
-  .stepList > li {
+  .stepList>li {
     flex: none;
     width: 100%;
+    min-width: 0;
+    max-width: none;
+
   }
 
   .stepButton {
     flex: none;
     width: 100%;
+    min-width: 0;
+    white-space: nowrap;
+
   }
 
   .mainColumn {
