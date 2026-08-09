@@ -30,7 +30,7 @@ import {
   UFH_WARN_MIXING_NODE_CODE,
   UFH_WARN_PARASITIC_DOWN_CODE,
 } from '../../utils/ufhWarningDisplay';
-import { HydraulicsPumpCard } from '../HydraulicsProposal/HydraulicsPumpCard';
+import { HydraulicsPumpCard } from '../Hydraulics/HydraulicsPumpCard';
 import { UfhMixingNodeSpecCard } from './UfhMixingNodeSpecCard';
 import { UfhLoopHydraulicsTable } from './UfhLoopHydraulicsTable';
 import { UniboxMatchingSection } from './UniboxMatchingSection';

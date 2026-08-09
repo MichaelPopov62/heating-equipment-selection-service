@@ -16,7 +16,7 @@ import {
   formatPriceUah,
 } from '../../utils/format';
 import { excludeUfhZonePumps } from '../../utils/ufhHydraulicsPumps';
-import { HydraulicsPumpCard } from '../HydraulicsProposal/HydraulicsPumpCard';
+import { HydraulicsPumpCard } from '../Hydraulics/HydraulicsPumpCard';
 import styles from './HydraulicsReportView.module.css';
 
 export type HydraulicsReportViewProps = {

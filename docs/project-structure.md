@@ -251,6 +251,14 @@ main.tsx → QueryProvider → App.tsx
 
 Хуки (`use*`) — **не** в `components/`; только `hooks/`, `query/`, `auth/`, `surveySession/`, `shell/` (colocation с контекстом).
 
+#### Shared UI между фичами
+
+| Правило | Детали |
+|---------|--------|
+| Когда | Один и тот же компонент используется в **двух и более** доменных папках `components/*` |
+| Куда | Нейтральная папка домена, например `components/Hydraulics/HydraulicsPumpCard` (используется в `HydraulicsReport/` и `UnderfloorHeatingReport/`) |
+| Запрещено | Держать shared-комponent в папке одной из фич (`HydraulicsProposal/` и т.п.) |
+
 #### Типы
 
 | Слой | Назначение | Примеры |
