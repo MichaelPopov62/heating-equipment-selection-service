@@ -276,7 +276,7 @@ export function UnderfloorHeatingReportView({
           </div>
 
           {underfloorHeating.underfloorHydraulics != null && (
-            <dl className={styles.dl} style={{ marginTop: 10 }}>
+            <dl className={`${styles.dl} ${styles.dlMt10}`}>
               <dt>Гідравліка контуру ТП</dt>
               <dd>
                 Δt = {underfloorHeating.underfloorHydraulics.deltaTK} K, витрата{' '}
@@ -284,7 +284,7 @@ export function UnderfloorHeatingReportView({
               </dd>
             </dl>
           )}
-          <dl className={styles.dl} style={{ marginTop: 10 }}>
+          <dl className={`${styles.dl} ${styles.dlMt10}`}>
             <dt>Сумарна віддача вгору</dt>
             <dd>
               {formatKw(underfloorHeating.totalHeatFluxUpWatts / 1000, 2)}{' '}

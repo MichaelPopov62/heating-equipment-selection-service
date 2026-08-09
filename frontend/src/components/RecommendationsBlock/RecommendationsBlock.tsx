@@ -83,7 +83,7 @@ export function RecommendationsBlock({
         <h2 id="calculation-results-title">Результати розрахунку</h2>
 
         {apiCatalogSource != null && (
-          <p className={styles.hint} style={{ marginTop: 8, marginBottom: 0 }}>
+          <p className={`${styles.hint} ${styles.hintMt8Mb0}`}>
             {apiCatalogSource === 'mongo'
               ? 'Підбір обладнання виконано за каталогом із бази даних (MongoDB).'
               : 'Підбір за файловим каталогом. Для використання БД: CATALOG_SOURCE=auto (або mongo), змінні MONGODB_* і колекція Product після seed.'}

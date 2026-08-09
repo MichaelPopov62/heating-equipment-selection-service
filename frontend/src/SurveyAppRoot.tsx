@@ -24,6 +24,7 @@ import { surveyDraftToSessionSnapshot } from './surveySession/surveyDraftBridge'
 import { useSurveySession } from './surveySession/useSurveySession';
 import type { UseSurveyBootstrapResult } from './hooks/useSurveyBootstrap';
 import type { SurveyDraft } from './types/surveyDraft';
+import styles from './App.module.css';
 
 const AppSurveyContent = lazy(() =>
   import('./AppSurveyContent').then((m) => ({ default: m.AppSurveyContent })),
@@ -273,7 +274,7 @@ export function SurveyAppRoot({
       ref={fileInputRef}
       type="file"
       accept="application/json,.json"
-      style={{ display: 'none' }}
+      className={styles.hiddenInput}
       onChange={handleFileInputChange}
     />
   );

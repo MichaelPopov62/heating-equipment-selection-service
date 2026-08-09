@@ -32,6 +32,10 @@
   composes: hint from global;
 }
 
+.hintMt8 {
+  margin-top: 8px;
+}
+
 .inlineCode {
   composes: inlineCode from global;
 }

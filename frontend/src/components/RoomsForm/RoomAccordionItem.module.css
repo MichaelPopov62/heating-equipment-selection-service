@@ -173,6 +173,14 @@
   composes: hint from global;
 }
 
+.hintMt12 {
+  margin-top: 12px;
+}
+
+.formGridMt8 {
+  margin-top: 8px;
+}
+
 .checkboxRow {
   display: flex;
   gap: 10px;

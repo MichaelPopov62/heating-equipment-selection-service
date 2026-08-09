@@ -40,6 +40,11 @@
   composes: hint from global;
 }
 
+.hintMt8Mb0 {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
 /* ─── Рекомендації по схемі котел / ГВС (automation hints) ─── */
 .automationHintsList {
   margin: 6px 0 0;

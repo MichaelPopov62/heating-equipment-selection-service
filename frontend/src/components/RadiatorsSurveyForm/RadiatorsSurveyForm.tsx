@@ -152,12 +152,12 @@ export function RadiatorsSurveyForm({
           )}
         </div>
         {calcLoading && (
-          <p className={styles.hint} style={{ marginTop: 8 }} role="status">
+          <p className={`${styles.hint} ${styles.hintMt8}`} role="status">
             Оновлення розрахунку…
           </p>
         )}
         {!canOpenReport && !calcLoading && (
-          <p className={styles.hint} style={{ marginTop: 8 }}>
+          <p className={`${styles.hint} ${styles.hintMt8}`}>
             Звіт з&apos;явиться після авторозрахунку. Заповніть приміщення та огородження;
             у режимі «лише тепла підлога» підбір радіаторів пропускається — у
             звіті буде пояснення після відповіді сервера.

@@ -181,12 +181,12 @@ export function WaterHeaterForm({
           )}
         </div>
         {calcLoading && (
-          <p className={styles.hint} style={{ marginTop: 8 }} role="status">
+          <p className={`${styles.hint} ${styles.hintMt8}`} role="status">
             Оновлення підбору…
           </p>
         )}
         {!canOpenReport && !calcLoading && (
-          <p className={styles.hint} style={{ marginTop: 8 }}>
+          <p className={`${styles.hint} ${styles.hintMt8}`}>
             Звіт з&apos;явиться після авторозрахунку з обраною схемою ГВП.
           </p>
         )}

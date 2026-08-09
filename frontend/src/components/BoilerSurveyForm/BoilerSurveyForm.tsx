@@ -124,12 +124,12 @@ export function BoilerSurveyForm({
           )}
         </div>
         {calcLoading && (
-          <p className={styles.hint} style={{ marginTop: 8 }} role="status">
+          <p className={`${styles.hint} ${styles.hintMt8}`} role="status">
             Оновлення розрахунку…
           </p>
         )}
         {!canOpenReport && !calcLoading && (
-          <p className={styles.hint} style={{ marginTop: 8 }}>
+          <p className={`${styles.hint} ${styles.hintMt8}`}>
             Звіт з&apos;явиться після авторозрахунку. Заповніть приміщення та огородження,
             оберіть сценарій ГВП на кроці «Водонагрівач».
           </p>

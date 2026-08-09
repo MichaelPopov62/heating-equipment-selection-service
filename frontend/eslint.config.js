@@ -10,6 +10,12 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
+/** Заборона inline style у JSX (аналог react/forbid-dom-props без eslint-plugin-react). */
+const forbidInlineStyleRule = {
+  selector: 'JSXAttribute[name.name="style"]',
+  message: 'Inline style заборонено. Використовуйте CSS Modules або override для динамічних значень.',
+}
+
 export default defineConfig([
   globalIgnores(['dist']),
   {
@@ -28,6 +34,7 @@ export default defineConfig([
       },
     },
     rules: {
+      'no-restricted-syntax': ['error', forbidInlineStyleRule],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unsafe-assignment': 'error',
       '@typescript-eslint/no-unsafe-member-access': 'error',
@@ -61,6 +68,12 @@ export default defineConfig([
         'error',
         { allowNumber: true, allowBoolean: true },
       ],
+    },
+  },
+  {
+    files: ['src/components/Spinner/Spinner.tsx'],
+    rules: {
+      'no-restricted-syntax': 'off',
     },
   },
   {

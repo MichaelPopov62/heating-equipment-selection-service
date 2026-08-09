@@ -19,6 +19,10 @@
   margin: 0;
 }
 
+.hintMt8 {
+  margin-top: 8px;
+}
+
 .section {
   display: flex;
   flex-direction: column;

@@ -17,6 +17,10 @@
   margin: 0;
 }
 
+.hintMt8 {
+  margin-top: 8px;
+}
+
 .row {
   display: flex;
   flex-wrap: wrap;

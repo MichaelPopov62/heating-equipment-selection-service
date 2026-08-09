@@ -63,7 +63,7 @@ export function WarmFloorSection({
   return (
     <div className={styles.root}>
       <h3 className={styles.title}>Тепла підлога</h3>
-      <p className={styles.hint} style={{ marginTop: 0 }}>
+      <p className={`${styles.hint} ${styles.hintMt0}`}>
         Оберіть режим опалення. Для комбінації «тепла підлога в частині кімнат + радіатори» —
         картка <strong>«Тепла підлога + радіатори»</strong>; ТП вмикається по кімнатах на кроці
         «Приміщення». Радіаторний графік котла (75/65 або 55/45) — на кроці «Котел».
@@ -77,7 +77,7 @@ export function WarmFloorSection({
         error={ufhModePresetsError}
       />
 
-      <label className={`${styles.hint} ${styles.checkboxRow}`} style={{ marginTop: 16 }}>
+      <label className={`${styles.hint} ${styles.checkboxRow} ${styles.hintMt16}`}>
         <input
           type="checkbox"
           checked={waterUnderfloorHeating}
@@ -113,14 +113,14 @@ export function WarmFloorSection({
           )}
         </div>
         {!canOpenReport && (
-          <p className={styles.hint} style={{ marginTop: 8 }}>
+          <p className={`${styles.hint} ${styles.hintMt8}`}>
             Звіт з&apos;явиться після авторозрахунку з увімкненим ТП у приміщеннях.
           </p>
         )}
       </div>
 
       {import.meta.env.DEV && (
-        <p className={styles.hint} style={{ marginTop: 10 }}>
+        <p className={`${styles.hint} ${styles.hintMt10}`}>
           Поля API:{' '}
           <code className={styles.inlineCode}>heatingSystem.ufhPresetId</code>,{' '}
           <code className={styles.inlineCode}>heatingSystem.waterUnderfloorHeating</code>,{' '}

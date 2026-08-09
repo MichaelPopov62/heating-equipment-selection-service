@@ -12,6 +12,22 @@
   composes: hint from global;
 }
 
+.hintMt0 {
+  margin-top: 0;
+}
+
+.hintMt8 {
+  margin-top: 8px;
+}
+
+.hintMt10 {
+  margin-top: 10px;
+}
+
+.hintMt16 {
+  margin-top: 16px;
+}
+
 .inlineCode {
   composes: inlineCode from global;
 }

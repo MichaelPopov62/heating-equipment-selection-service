@@ -22,7 +22,7 @@ export function UniboxMatchingSection({ matching }: Props) {
   if (byLoop.length === 0 && warnings.length === 0) return null;
 
   return (
-    <div className={styles.wrap} style={{ marginTop: 12 }}>
+    <div className={styles.wrap}>
       <h3 className={styles.title}>Унибокси (підбір за петлями ТП)</h3>
       <p className={styles.meta}>
         Локальний регулятор петлі: фільтр за паспортними лімітами (площа, довжина, T, P, Kv, eurocone).
@@ -30,7 +30,7 @@ export function UniboxMatchingSection({ matching }: Props) {
       </p>
 
       {warnings.length > 0 && (
-        <ul className={styles.meta} style={{ color: 'var(--danger, #b00020)' }}>
+        <ul className={`${styles.meta} ${styles.metaDanger}`}>
           {warnings.map((w, i) => (
             <li key={`unibox-warn-${i}`}>{w}</li>
           ))}

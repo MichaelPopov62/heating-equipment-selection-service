@@ -853,19 +853,19 @@ export function RoomAccordionItem({
         </div>
 
         {/* Окна */}
-        <div className={styles.hint} style={{ marginTop: 12 }}>
+        <div className={`${styles.hint} ${styles.hintMt12}`}>
           Вікна задаються окремими рядками: ширина прорізу потрібна для правила «радіатор ≥ 70% ширини вікна».
           Для <strong>різних типів або розмірів</strong> натисніть «Додати вікно», а не збільшуйте поле
           «К-сть» — воно лише для однакових копій одного вікна.
         </div>
-        <div className={styles.formGrid} style={{ marginTop: 8 }}>
-          <div className={styles.field} style={{ gridColumn: '1 / -1' }}>
+        <div className={`${styles.formGrid} ${styles.formGridMt8}`}>
+          <div className={`${styles.field} ${styles.fullWidth}`}>
             <button type="button" className={styles.control} onClick={addWindow}>
               Додати вікно
             </button>
           </div>
           {room.windows.length === 0 ? (
-            <div className={styles.hint} style={{ gridColumn: '1 / -1' }}>
+            <div className={`${styles.hint} ${styles.fullWidth}`}>
               Вікна не додано.
             </div>
           ) : (
@@ -878,8 +878,7 @@ export function RoomAccordionItem({
               return (
               <div
                 key={`${room.id}-win-row-${wi}`}
-                className={styles.windowCard}
-                style={{ gridColumn: '1 / -1' }}
+                className={`${styles.windowCard} ${styles.fullWidth}`}
               >
                 <h4 className={styles.windowCardTitle}>
                   Вікно {wi + 1}

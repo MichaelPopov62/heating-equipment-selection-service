@@ -30,6 +30,10 @@
   font-size: 13px;
 }
 
+.dlMt10 {
+  margin-top: 10px;
+}
+
 .dl dt {
   margin: 0;
   color: var(--text);

@@ -445,7 +445,7 @@ export function AppSurveyContent({
               )}
 
               {currentStep === 'hotWater' && (
-                <p className={styles.hint} style={{ marginTop: 8 }}>
+                <p className={`${styles.hint} ${styles.hintMt8}`}>
                   Тип об&apos;єкта:{' '}
                   <strong>
                     {objectMeta.objectType === 'apartment' ? 'Квартира' : 'Будинок'}
@@ -458,7 +458,7 @@ export function AppSurveyContent({
               )}
 
               {currentStep === 'boiler' && (
-                <p className={styles.hint} style={{ marginTop: 8 }}>
+                <p className={`${styles.hint} ${styles.hintMt8}`}>
                   Задайте графік подачі/звороту радіаторного контуру (пресет під
                   тип котла). Підводка та тип приладів — на кроці «Радіатори».
                   Сценарій ГВП і підбір БКН/електробойлера — на кроці
@@ -467,7 +467,7 @@ export function AppSurveyContent({
               )}
 
               {currentStep === 'radiators' && (
-                <p className={styles.hint} style={{ marginTop: 8 }}>
+                <p className={`${styles.hint} ${styles.hintMt8}`}>
                   Підводка (бокова / нижня) фільтрує панельний пул; тип
                   приладів задається один на весь об&apos;єкт. Графік 75/65 або 55/45 —
                   на кроці «Котел».
@@ -475,7 +475,7 @@ export function AppSurveyContent({
               )}
 
               {currentStep === 'waterHeater' && (
-                <p className={styles.hint} style={{ marginTop: 8 }}>
+                <p className={`${styles.hint} ${styles.hintMt8}`}>
                   Оберіть стратегію ГВП: від цього залежать підбір бойлера
                   непрямого нагріву або електронакопичувача та формула потужності
                   котла. Зміни перераховуються автоматично.
@@ -538,7 +538,7 @@ export function AppSurveyContent({
                 </div>
               )}
               {currentStep === 'object' && (
-                <p className={styles.hint} style={{ marginTop: 8 }}>
+                <p className={`${styles.hint} ${styles.hintMt8}`}>
                   «Повітря в санвузлі» — розрахункова температура повітря (не теплоносій), не
                   нижче 24 °C. Порожньо = max(всередині, 24). Можна задати вище (наприклад 26–28).
                 </p>

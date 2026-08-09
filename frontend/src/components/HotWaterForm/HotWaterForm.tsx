@@ -317,12 +317,12 @@ export function HotWaterForm({
           )}
         </div>
         {calcLoading && (
-          <p className={styles.hint} style={{ marginTop: 8 }} role="status">
+          <p className={`${styles.hint} ${styles.hintMt8}`} role="status">
             Оновлення розрахунку…
           </p>
         )}
         {!canOpenReport && !calcLoading && (
-          <p className={styles.hint} style={{ marginTop: 8 }}>
+          <p className={`${styles.hint} ${styles.hintMt8}`}>
             Вкажіть точки водорозбору — звіт і таблиця в «Результатах» з&apos;являться
             одразу; розрахунок потужності — після авторозрахунку.
           </p>

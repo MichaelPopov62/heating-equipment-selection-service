@@ -18,6 +18,10 @@
   margin-bottom: 10px;
 }
 
+.metaDanger {
+  color: var(--danger, #b00020);
+}
+
 .counts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
