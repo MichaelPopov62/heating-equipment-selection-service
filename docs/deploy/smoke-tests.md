@@ -7,6 +7,19 @@ Hub: [`README.md`](README.md). Env: [`environments.md`](environments.md).
 
 ---
 
+## Preflight Vercel (вариант A)
+
+Перед smoke, если deploy упал на install:
+
+| Проверка | Ожидание |
+|----------|----------|
+| Root Directory | **корень репо** (не `frontend/`) — [`vercel.md`](vercel.md) |
+| Node.js | 22.x |
+| Output Directory | `build` |
+| Лог install | `npm ci --prefix frontend` без `EUSAGE` |
+
+---
+
 ## Быстрые HTTP-проверки
 
 ```bash

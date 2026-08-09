@@ -39,6 +39,27 @@ SSOT в репозитории — корневой [`vercel.json`](../../vercel
 
 ---
 
+## Vercel Dashboard (вариант A, обязательно)
+
+Для **каждого** проекта (`heatcalc-staging-mp62`, `heatcalc-mp62`) — **Settings → General**:
+
+| Параметр | Значение |
+|----------|----------|
+| **Root Directory** | **корень репозитория** (поле пустое или `.`) — **не** `frontend/` |
+| **Node.js Version** | **22.x** (≥ 22.22) |
+
+**Settings → Build & Development:** Override **выключить** (берётся [`vercel.json`](../../vercel.json)) **или** вручную те же три команды, что в SSOT выше.
+
+После смены Root Directory — **Redeploy** (лучше без build cache).
+
+### Troubleshooting: `npm ci --prefix frontend` → `EUSAGE` / нет `package-lock.json`
+
+Причина: Root Directory = `frontend/`, а install-команда рассчитана на **корень** монорепо (`frontend/package-lock.json` относительно root).
+
+Fix: Root Directory → **корень репо** → Redeploy. Не менять install на `npm ci` в Dashboard, пока Root = `frontend/` — это другой сценарий (не вариант A).
+
+---
+
 ## Environment Variables
 
 Отдельно для **каждого** Vercel-проекта (staging и production **не наследуют** переменные):

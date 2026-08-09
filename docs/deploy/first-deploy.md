@@ -82,11 +82,12 @@ GEOCODE_USER_AGENT=heatcalc/1.0 (your@email.com)
 ## Шаг 4. Vercel (staging frontend)
 
 1. **New Project** → тот же GitHub repo.
-2. **Root Directory:** корень репозитория (не `frontend/`)
+2. **Root Directory:** **корень репозитория** (поле **пустое** / `.`) — **не** `frontend/`.  
+   Иначе install `npm ci --prefix frontend` падает с `EUSAGE` (см. [`vercel.md`](vercel.md) § Troubleshooting).
 3. **Production Branch:** `staging`
-4. **Node.js:** 22.x
+4. **Node.js:** 22.x (≥ 22.22)
 
-**Build settings** (SSOT — [`vercel.md`](vercel.md)):
+**Build settings** — Override **off** (из [`vercel.json`](../../vercel.json)) или вручную (SSOT — [`vercel.md`](vercel.md)):
 
 ```text
 Install Command:    npm ci --prefix frontend

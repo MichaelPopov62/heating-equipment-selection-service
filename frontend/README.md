@@ -69,6 +69,11 @@ React + Vite + TypeScript + **@tanstack/react-query**. Точка входа: `s
 
 PDF сметы скачивается с API (`downloadProjectPdf` / `downloadPublicSharePdf` → `utils/downloadBlobFile.ts`) без `window.open`.
 
+## Vercel (вариант A)
+
+Сборка **не** из каталога `frontend/` — Root Directory в Vercel Dashboard = **корень монорепо**.  
+Install/build/output: [`docs/deploy/vercel.md`](../docs/deploy/vercel.md). Локально: `npm run vercel-build` из корня репозитория.
+
 ## Быстрая шпаргалка DevPanel
 
 Условия отображения панели описаны в [`docs/frontend-dev-panel.md`](../docs/frontend-dev-panel.md).

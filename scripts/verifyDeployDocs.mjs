@@ -57,6 +57,8 @@ assert.match(smoke, /PLATFORM_ADMIN_EMAILS/);
 const vercelDoc = readRepo('docs/deploy/vercel.md');
 assert.match(vercelDoc, /vercel-build/);
 assert.match(vercelDoc, /Output Directory:\s+build/);
+assert.match(vercelDoc, /Root Directory.*корень/);
+assert.match(vercelDoc, /EUSAGE/);
 
 /** @type {{ installCommand?: string; buildCommand?: string; outputDirectory?: string }} */
 const vercelJson = JSON.parse(readRepo('vercel.json'));
