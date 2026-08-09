@@ -5,10 +5,7 @@
 
 import type { ObjectType } from '../types/envelope';
 import { createDefaultExternalWall } from './roomEnvelopeFields';
-import type { ExternalWallFormValue, RoomFormValue, RoomType } from '../types/rooms';
-
-/** Расположение помещения относительно наружного контура (дом и квартира). */
-export type RoomExteriorLayout = 'corner' | 'facade' | 'internal';
+import type { ExternalWallFormValue, RoomExteriorLayout, RoomFormValue, RoomType } from '../types/rooms';
 
 /** Строка construction для стены в неотапливаемый коридор в API calc. */
 export const INTERNAL_CORRIDOR_WALL_CONSTRUCTION = 'стена в неотапливаемый коридор';
