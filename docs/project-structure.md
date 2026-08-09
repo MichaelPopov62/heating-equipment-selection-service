@@ -233,7 +233,7 @@ main.tsx → QueryProvider → App.tsx
 | `public/` | Статика Vite: `favicon.svg`, `robots.txt`, `sitemap.xml`, `llms.txt` |
 | `scripts/verifySurveySessionPipeline.mjs` | Verify pipeline сессии |
 | `scripts/verifyStartState.mjs` | Verify bootstrap / start screen |
-| `scripts/verifyFooterNav.mjs`, `verifyFrontendAuth.mjs`, `verifyFrontendMe.mjs`, `verifyAdminFeedback.mjs` | Verify навигации, auth и admin feedback |
+| `scripts/verifyFooterNav.mjs`, `verifyFrontendAuth.mjs`, `verifyFrontendMe.mjs`, `verifyAdminFeedback.mjs`, `verifyReportColocation.mjs` | Verify навигации, auth, admin feedback, colocation отчётов |
 | `knip.json` | Dead-code (`--treat-config-hints-as-errors`) |
 
 ### Соглашения размещения frontend (colocation, types, исключения)
@@ -250,6 +250,23 @@ main.tsx → QueryProvider → App.tsx
 | При нарушении | Немедленный перенос в `utils/parsers/` (парсеры) или `utils/` (прочие хелперы) |
 
 Хуки (`use*`) — **не** в `components/`; только `hooks/`, `query/`, `auth/`, `surveySession/`, `shell/` (colocation с контекстом).
+
+##### Whitelist colocated-хелперов отчётов
+
+Паттерн `components/*Report/has*ReportContent.ts` — чистая проверка «есть ли данные для UI отчёта». Дополнительно: `BoilerReport/formatBoilerProposalShortLabel.ts` (только `BoilerSummaryTable`).
+
+| Файл | Допустимые импортёры (кроме своей `*Report/`) |
+|------|-----------------------------------------------|
+| `BoilerReport/hasBoilerReportContent.ts` | `BoilerSurveyForm`, `RecommendationsBlock` |
+| `BoilerReport/formatBoilerProposalShortLabel.ts` | — (только `BoilerReport/`) |
+| `HydraulicsReport/hasHydraulicsReportContent.ts` | `HydraulicsSection`, `RecommendationsBlock` |
+| `HotWaterReport/hasHotWaterReportContent.ts` | `HotWaterForm` |
+| `HotWaterReport/hasHotWaterSummaryContent.ts` | `RecommendationsBlock` |
+| `RadiatorsReport/hasRadiatorsReportContent.ts` | `RadiatorsSurveyForm`, `RecommendationsBlock` |
+| `WaterHeaterReport/hasWaterHeaterReportContent.ts` | `WaterHeaterForm` |
+| `UnderfloorHeatingReport/hasUnderfloorHeatingReportContent.ts` | `WarmFloorSection` |
+
+Новый импортёр вне таблицы → расширить whitelist в docs **и** `frontend/scripts/verifyReportColocation.mjs`. Gate: `npm run verify:report-colocation`.
 
 #### Shared UI между фичами
 

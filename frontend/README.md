@@ -101,5 +101,6 @@ npm run verify:frontend-auth
 npm run verify:frontend-me
 npm run verify:survey-session
 npm run verify:start-state
+npm run verify:report-colocation
 npm run verify           # полный gate
 ```
