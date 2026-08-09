@@ -89,7 +89,7 @@ Confirm: если `projectId` уже есть (проект на сервере)
 
 `startNewProject` → confirm (если report / заполненные rooms) → **`exitToStart()`** (та же очистка, без skeleton).
 
-Header в режиме `start`: **Проекты** и AccountBar. В режиме `survey`: **Проекты**, **Ссылка** (публичная `/s/{shareToken}` + toast), **PDF / Скачать**, **Выйти**. JSON и server-save — только **DevPanel** (`useDevPanelAccess`, staging + admin).
+Header в режиме `start`: **Проекты** и AccountBar. В режиме `survey`: **Проекты**, **Ссылка** (публичная `/s/{shareToken}` + toast), **PDF / Скачать**, **Выйти**. JSON, server-save и ручной calc — только **DevPanel** в режиме **`survey`** (`SurveyAppRoot`; `useDevPanelAccess`, staging + admin). На стартовом экране (`StartAppRoot`) кнопка **Dev** не показывается.
 
 Публичная страница: маршрут `/s/:shareToken` в `frontend/src/routing/AppRouter.tsx` → `SharePresentationPage` (без анкеты). См. [`client-share-and-layers.md`](client-share-and-layers.md).
 

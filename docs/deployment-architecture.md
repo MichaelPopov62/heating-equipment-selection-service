@@ -80,7 +80,7 @@ DevPanel (кнопка **Dev**, экспорт/импорт) — **только 
 
 Локальная разработка без `VITE_API_BASE_URL` сохраняет относительные `/api/...`
 и существующий Vite proxy на `http://localhost:3001`. DevPanel в `npm run dev` доступен
-без `VITE_DEV_TOOLS` (`import.meta.env.DEV`).
+без `VITE_DEV_TOOLS` (`import.meta.env.DEV`), но только после входа в режим анкеты (не на стартовом экране).
 
 ## 5. CORS backend
 
@@ -217,7 +217,7 @@ PLATFORM_ADMIN_EMAILS=popov1ms@i.ua,romantikzizni@gmail.com
 | A3 | UI шапка | ссылка **«Звернення»** |
 | A4 | Открыть `/admin/feedback` | 200, список (может быть пуст) |
 | A5 | Обычный user (email **не** в allowlist) → `/me` | `"role": "user"` |
-| A6 | Staging only: Dev-кнопка | при `VITE_DEV_TOOLS=1` + `VITE_APP_ENV=staging` + admin — справа внизу **Dev** |
+| A6 | Staging only: Dev-кнопка | при `VITE_DEV_TOOLS=1` + `VITE_APP_ENV=staging` + admin — справа внизу **Dev** в режиме анкеты (после «Почати…» или открытия проекта) |
 | A7 | Production | Dev-кнопки **нет** (by design) |
 
 После первого login platform admin Mongo `users.role` для его документа = `admin` (sync). Ручной Atlas / `promote:user-admin` **не нужен** для email из allowlist.

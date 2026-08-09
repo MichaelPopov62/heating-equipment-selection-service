@@ -201,7 +201,7 @@ main.tsx → QueryProvider → App.tsx
 | `src/App.tsx` | BrowserRouter, auth/providers и `AppRouter` |
 | `src/routing/` | `AppRouter`, `SurveyAppShell`, канонические `paths`; маршруты и справочники RQ |
 | `src/AppRoot.tsx` | Оркестратор bootstrap: `useSurveyBootstrap` → `StartAppRoot` \| lazy `SurveyAppRoot` |
-| `src/StartAppRoot.tsx` | Cold open: `start` / `resolving` / `error` (без calc, projects, survey-chunk) |
+| `src/StartAppRoot.tsx` | Cold open: `start` / `resolving` / `error` (без calc, projects, DevPanel; на localhost — только React Query Devtools) |
 | `src/SurveyAppRoot.tsx` | Survey UI: Header, DevPanel, ProjectsDialog, `useSurveyProject`, lazy `AppSurveyContent` |
 | `src/AppSurveyContent.tsx` | Шаги анкеты, формы, отчёт |
 | `src/seo/` | `JsonLdBoundary`, `JsonLd`, `jsonLdSchemas.ts` — FAQPage и др. по маршруту |
