@@ -9,6 +9,9 @@ React + Vite + TypeScript + **@tanstack/react-query**. Точка входа: `s
 | Точка входа | `main.tsx`, `App.tsx` | QueryProvider, BrowserRouter, auth и общие providers |
 | Маршрутизация | `src/routing/` | `AppRouter`, `SurveyAppShell`, канонические пути SPA |
 | Bootstrap | `hooks/useSurveyBootstrap.ts`, `surveySession/resolveAppBootstrap.ts` | Cold open → Start Screen или восстановление SurveyDraft |
+| Bootstrap-оркестратор | `AppRoot.tsx` | Выбор `StartAppRoot` vs lazy `SurveyAppRoot` по `bootstrapMode` |
+| Bootstrap UI (лёгкий) | `StartAppRoot.tsx` | Start / resolving / error без survey-chunk |
+| Bootstrap UI (тяжёлый) | `SurveyAppRoot.tsx` | Projects, DevPanel, persistence, lazy `AppSurveyContent` |
 | Persistence | `services/surveyDraftStorage.ts`, `hooks/useSurveyDraftPersistence.ts` | localStorage SurveyDraft (debounce 400 ms) |
 | Сессия анкеты | `src/surveySession/` | `SurveySessionProvider`, `dispatch` → pipeline; `report` / `uiPhase` |
 | Серверные данные | `src/query/` | React Query: справочники, calc, проекты |
@@ -17,6 +20,9 @@ React + Vite + TypeScript + **@tanstack/react-query**. Точка входа: `s
 | UI | `src/components/` | Формы, отчёты, `StartScreen`, `SharePresentationPage`, `DevPanel` |
 | Страницы | `src/pages/` | Login, SignUp, Projects, Docs, FAQ и legal |
 | Оболочка и тексты | `src/shell/`, `src/i18n/` | Header/Footer actions и украинская локализация |
+| SEO | `src/seo/` | JSON-LD (`JsonLdBoundary` в `AppRouter`) |
+| Типы / fallback / стили | `src/types/`, `src/data/`, `src/styles/` | DTO UI, offline-fallback справочников, глобальные CSS |
+| Статика Vite | `public/` | `favicon.svg`, `robots.txt`, `sitemap.xml`, `llms.txt` |
 
 ### Маршрутизация (`src/routing/AppRouter.tsx`)
 
@@ -26,11 +32,15 @@ React + Vite + TypeScript + **@tanstack/react-query**. Точка входа: `s
 /docs, /faq, /privacy, /terms, ... → static pages
 /projects                          → SurveyAppShell → ProtectedRoute → ProjectsPage
 /                                  → SurveyAppShell → SurveySessionProvider → AppRoot
-                                       ├─ start     → StartScreen
-                                       ├─ resolving → AppBootstrapSkeleton
-                                       ├─ error     → BootstrapErrorScreen
-                                       └─ survey    → AppSurveyContent
+                                       ├─ start | resolving | error → StartAppRoot
+                                       └─ survey → lazy SurveyAppRoot → AppSurveyContent
 ```
+
+### Code-split bootstrap
+
+- `StartAppRoot` — в main bundle (cold open без calc и projects).
+- `SurveyAppRoot` и `AppSurveyContent` — отдельные lazy-чанки.
+- Контракт проверяется: `npm run verify:start-state`, `npm run verify:frontend-me`.
 
 ### `src/query/`
 
