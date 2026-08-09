@@ -319,6 +319,81 @@ Gate: `npm run verify:types-placement` (наличие исключений, SSO
 
 Подробности `query/`, `surveySession/`, `hooks/` — [`frontend-calc-runner.md`](frontend-calc-runner.md), [`frontend-query-inventory.md`](frontend-query-inventory.md), [`survey-draft.md`](survey-draft.md).
 
+### Соглашения именования и распределение ответственности
+
+SSOT для Code Review: этот подраздел + § «Соглашения размещения frontend» выше.  
+Calc-pipeline: [`frontend-calc-runner.md`](frontend-calc-runner.md). Язык UI vs payload enum: [`language-policy.md`](language-policy.md).
+
+#### Распределение ответственности (frontend)
+
+| Слой | Что делает | Что запрещено |
+|------|------------|---------------|
+| `components/` | UI, локальный state формы, colocated pure helpers | `fetch` / React Query; pipeline calc |
+| `hooks/` | Композиция UI, парсинг отчёта для экрана | Прямой HTTP (→ `services/` или `query/`) |
+| `query/` | React Query: cache, mutations, `useSurveyCalc` | DOM, JSX |
+| `services/` | HTTP + parse ответа API (catalog, projects, calc, feedback) | React hooks, JSX |
+| `surveySession/` | SurveyDraft, `dispatch`, pipeline, calc key | HTTP (→ `query/useSurveyCalc`) |
+| `utils/` | Pure helpers, миграции, форматирование | React, HTTP |
+| `utils/parsers/` | Parse calc report / SurveyDraft / import bundle | JSX |
+| `types/` | Глобальные DTO и view-модели | Логика мутаций |
+| `pages/` | Route-level страницы | Тяжёлая доменная логика (→ `components/` / `hooks/`) |
+| `routing/` | Router, `paths`, `SurveyAppShell` | Бизнес-логика анкеты |
+
+Корень `src/`: только entry/orchestrators — `main.tsx`, `App.tsx`, `AppRoot.tsx`, `StartAppRoot.tsx`, `SurveyAppRoot.tsx`, `AppSurveyContent.tsx`.
+
+**Parse DTO каталога:** `services/parseCatalog*` и `services/catalogTypes.ts` — рядом с `GET /api/v1/catalog` (не `utils/parsers/`). Парсеры **отчёта calc** — только `utils/parsers/`.
+
+#### Распределение ответственности (backend)
+
+| Слой | Что делает | Cross-import |
+|------|------------|--------------|
+| `api/` | HTTP, AJV, rate limits | → domain barrels `*/public.js` |
+| `logic/` | Расчётные формулы (теплопотери, ГВС, ТП) | через `ctx`, без global cache |
+| `matching/` | Подбор оборудования | `public.js` |
+| `report/` | Сборка JSON-отчёта, смета | `public.js` |
+| `hydraulics/` | Pure Pipeline гидравлики | `public.js` |
+| `reference/` | TTL bundle + `toCalcRuntimeContext` | `public.js` |
+| `catalog/`, `dhw/`, `ufh/` | Load/validate справочников | `catalog/public.js` и internal |
+| `models/` | Mongoose runtime | `public.js`; discriminators — только seed |
+| `projects/` | CRUD, share, PDF | через `api/projectsRoutes.js` |
+| `scripts/` | seed, verify, migrate | internal import напрямую |
+
+#### Таблица именования
+
+| Объект | Стиль | Пример | Примечание |
+|--------|-------|--------|------------|
+| Папка React-компонента | **PascalCase** | `BoilerReport/` | один UI-модуль = одна папка |
+| Route page | **PascalCase** + суффикс `Page` | `ProjectsPage/ProjectsPage.tsx` | только `pages/` |
+| Папка слоя frontend | **lowercase** | `hooks/`, `surveySession/`, `utils/parsers/` | |
+| Hook | **camelCase**, префикс `use` | `useSurveyBootstrap.ts` | `hooks/`, `query/`, `auth/`, `surveySession/`, `shell/` |
+| RQ query / mutation | `use` + Domain + `Query` / `Mutation` | `useMeQuery.ts`, `useProjectMutations.ts` | `query/queries/`, `query/mutations/` |
+| Util / service module | **camelCase** | `roomExteriorLayout.ts`, `projectsApi.ts` | |
+| Entry orchestrator (корень `src/`) | **PascalCase** `.tsx` | `SurveyAppRoot.tsx` | исключение: `main.tsx` |
+| TypeScript type / interface | **PascalCase** | `RoomFormValue`, `CalcReportJson` | SSOT enum/union → `types/` |
+| Константа (immutable config) | **SCREAMING_SNAKE** | `SURVEY_STEPS`, `RESULTS_SECTION_IDS` | `constants/` |
+| CSS Module | **PascalCase** + `.module.css` | `BoilerReportView.module.css` | рядом с `.tsx` |
+| Global CSS | **kebab-case** | `custom-media.css` | `styles/` |
+| Backend domain folder | **lowercase** | `matching/`, `hydraulics/` | |
+| Backend module file | **camelCase** | `buildReport.js`, `runCalculation.js` | |
+| Mongoose model file | **PascalCase** | `IndirectWaterHeater.js`, `WaterNorms.js` | |
+| Backend `.d.ts` bundle | **kebab-case** | `shared-types.d.ts`, `boiler-types.d.ts` | `backend/src/types/` |
+| OpenAPI path segment | **kebab-case** | `/presets/underfloor-heating/modes` | `openapi.yaml` |
+| OpenAPI schema file | **PascalCase** | `CalcInput.yaml`, `BoilerMatchingReport.yaml` | `components/schemas/` |
+| Doc file | **kebab-case** | `room-exterior-layout.md` | `docs/` |
+| Verify script | **camelCase** `verify*` | `verifyTypesPlacement.mjs` | `frontend/scripts/`, `backend/scripts/` |
+| SPA path key (`paths.ts`) | **camelCase** | `signUp: '/sign-up'` | URL-сегменты — kebab-case |
+| `shared/` module | **camelCase** | `roomTypeNormalization.js` | парные `.js` + `.d.ts` |
+| JSON / API enum **value** | **контракт** | `corner`, `гостиная`, `wall_pps_50` | не переименовывать под UI; см. [`language-policy.md`](language-policy.md) |
+
+##### Известный drift имён (не блокер)
+
+| Область | Замечание |
+|---------|-----------|
+| ТП в UI | `WarmFloorSection`, `UnderfloorHeatingReport`, `UfhPresetCards` — разные аббревиации одного домена; новые модули — предпочитать `UnderfloorHeating*` или согласованный `Ufh*` |
+| Формы шагов | `BoilerSurveyForm` vs `HotWaterForm` — исторический суффикс `SurveyForm` vs `Form`; новые формы — `*SurveyForm` если это шаг анкеты |
+
+Gate colocation/types: `npm run verify:report-colocation`, `npm run verify:types-placement` (из `frontend/`).
+
 ---
 
 ## `docs/` — тематическая документация
