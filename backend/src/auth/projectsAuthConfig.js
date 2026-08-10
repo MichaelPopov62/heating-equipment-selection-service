@@ -165,14 +165,6 @@ export function assertAuthConfiguredWhenEnabled() {
   process.exitCode = 1;
 }
 
-/**
- * @deprecated Используйте assertAuthConfiguredForProduction().
- * @returns {void}
- */
-export function assertProjectsAuthConfiguredForProduction() {
-  assertAuthConfiguredForProduction();
-}
-
 /** Фиксированный ObjectId dev-владельца, если PROJECTS_DEV_OWNER_ID не задан или невалиден. */
 export const DEFAULT_DEV_OWNER_OBJECT_ID_HEX = '000000000000000000000001';
 

@@ -1,6 +1,6 @@
 type: object
 description: >
-  Коммерческая смета расчёта (report.commercial): оборудование из matching/hydraulics,
+  Коммерческая смета расчёта (report.commercial): оборудование из matching и hydraulics,
   плюс строки монтажа (40%) и расходников (15%) от суммы оборудования.
   Линии proposalEconomy / proposalEfficient / lineEconomy / lineEfficient не учитываются.
 additionalProperties: false

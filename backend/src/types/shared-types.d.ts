@@ -1375,7 +1375,7 @@ export interface CalcReport {
   matching: MatchingReport;
   /**
    * Коммерческая смета: оборудование (основная линия) + монтаж 40% + расходники 15%.
-   * Собирается в buildReport после matching/hydraulics.
+   * Собирается в buildReport после matching и hydraulics pipeline.
    * Опционально для совместимости со старыми сохранёнными расчётами.
    */
   commercial?: CommercialBomReport;

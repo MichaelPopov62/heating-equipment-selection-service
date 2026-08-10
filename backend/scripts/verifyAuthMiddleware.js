@@ -3,9 +3,7 @@
  * Запуск: cd backend && npm run verify:auth-middleware
  */
 import { optionalAuth } from '../src/auth/optionalAuth.js';
-import { optionalProjectsAuth } from '../src/auth/optionalProjectsAuth.js';
 import { requireAuth } from '../src/auth/requireAuth.js';
-import { requireProjectsAuth } from '../src/auth/requireProjectsAuth.js';
 import { resolveRateLimitKey } from '../src/api/middleware/rateLimiters.js';
 
 /** @param {boolean} ok @param {string} label */
@@ -21,8 +19,8 @@ function tally(ok) {
   if (!ok) failed += 1;
 }
 
-tally(logCheck(requireAuth === requireProjectsAuth, 'requireProjectsAuth — deprecated alias requireAuth'));
-tally(logCheck(optionalAuth === optionalProjectsAuth, 'optionalProjectsAuth — deprecated alias optionalAuth'));
+tally(logCheck(typeof requireAuth === 'function', 'requireAuth — middleware function'));
+tally(logCheck(typeof optionalAuth === 'function', 'optionalAuth — middleware function'));
 tally(
   logCheck(
     resolveRateLimitKey(

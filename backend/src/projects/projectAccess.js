@@ -186,26 +186,6 @@ export async function findAccessibleProjectDoc(projectId, requesterOwnerId, req)
 
 
 /**
- * @param {import('mongoose').Types.ObjectId} projectId
- * @param {import('mongoose').Types.ObjectId} ownerId
- * @returns {Promise<import('../types/shared-types.js').ProjectMongoDoc | null>}
- * @deprecated Внутренний alias — используйте findAccessibleProjectLean с req.
- */
-export async function findOwnedProjectLean(projectId, ownerId) {
-  return Project.findOne({ _id: projectId, ...buildProjectOwnerFilter(ownerId) }).lean();
-}
-
-/**
- * @param {import('mongoose').Types.ObjectId} projectId
- * @param {import('mongoose').Types.ObjectId} ownerId
- * @returns {Promise<import('mongoose').HydratedDocument<import('../types/shared-types.js').ProjectMongoDoc> | null>}
- * @deprecated Внутренний alias — используйте findAccessibleProjectDoc с req.
- */
-export async function findOwnedProjectDoc(projectId, ownerId) {
-  return Project.findOne({ _id: projectId, ...buildProjectOwnerFilter(ownerId) });
-}
-
-/**
  * @param {import('mongoose').Types.ObjectId} ownerId
  * @returns {Promise<void>}
  */

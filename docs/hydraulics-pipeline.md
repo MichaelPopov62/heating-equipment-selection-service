@@ -61,7 +61,7 @@ SurveyDraft: `SURVEY_DRAFT_SCHEMA_VERSION=4`, поля `hydraulicsForm`, `wiring
 
 | Условие | Действие |
 |---------|----------|
-| `qRad < порога` и (тип входной зоны **или** `roomExteriorLayout` = `facade`/`corner`) | Минимальный прибор (`pickMinimumViableRadiatorSizing`), `radiatorDesignWatts ≥ порога` для гидравлики |
+| `qRad < порога` и (тип входной зоны **или** `roomExteriorLayout` = `facade`/`corner`) | Минимальный прибор (`pickMinimumViableForcedKind`), `radiatorDesignWatts ≥ порога` для гидравлики |
 | `qRad < порога` и внутреннее помещение | `radiatorDesignWatts = 0` — в микроколлектор / переток |
 | `qRad ≥ порога` | Обычный подбор |
 

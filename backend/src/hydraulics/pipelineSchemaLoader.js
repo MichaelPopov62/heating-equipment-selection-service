@@ -26,10 +26,3 @@ export async function loadHydraulicsPipelineSchemaForAjv() {
   );
   return cachedSchema;
 }
-
-/**
- * @param {import('ajv').SchemaObject | null} [schema]
- */
-export function resetHydraulicsPipelineSchemaCacheForTests(schema = null) {
-  cachedSchema = schema;
-}
