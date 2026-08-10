@@ -5,7 +5,9 @@
 import { isProjectsAuthRequired } from './projectsAuthConfig.js';
 import { attachRequestContext } from './attachRequestContext.js';
 import { extractBearerToken } from './extractBearerToken.js';
+import { mapAuthErrorToResponse } from './authErrors.js';
 import { runAuthPipeline } from './runAuthPipeline.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * @param {import('express').Request} req
@@ -28,7 +30,16 @@ export async function optionalAuth(req, _res, next) {
     const user = await runAuthPipeline(token);
     attachRequestContext(req, user);
     next();
-  } catch {
+  } catch (err) {
+    // Трасування без зміни семантики: невалідний/збійний токен → гість
+    const mapped = mapAuthErrorToResponse(err);
+    /** @type {{ requestId?: string } | null} */
+    const logMeta = req.requestId ? { requestId: req.requestId } : null;
+    logger.warn('auth.optional.ignored', logMeta, {
+      statusCode: mapped.statusCode,
+      code: mapped.code,
+      message: err instanceof Error ? err.message : String(err),
+    });
     next();
   }
 }

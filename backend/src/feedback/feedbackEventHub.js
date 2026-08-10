@@ -2,6 +2,8 @@
  * Назначение: in-memory fan-out событий feedback для одного процесса API.
  */
 
+import { logger } from '../utils/logger.js';
+
 /** @type {Set<import('../types/shared-types.js').FeedbackEventListener>} */
 const listeners = new Set();
 
@@ -24,8 +26,16 @@ export function publishFeedbackEvent(event) {
   for (const listener of [...listeners]) {
     try {
       listener(event);
-    } catch {
+    } catch (err) {
       // Ошибка одного SSE-клиента не должна мешать доставке остальным.
+      logger.warn(
+        'feedbackEventHub.sse.listener_error',
+        null,
+        {
+          message: err instanceof Error ? err.message : String(err),
+        },
+        err,
+      );
     }
   }
 }
