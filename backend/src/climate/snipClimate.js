@@ -84,12 +84,25 @@ function haversineKm(lat1, lon1, lat2, lon2) {
 }
 
 /**
+ * Таймаут HTTP до bulk Meteostat: METEOSTAT_BULK_TIMEOUT_MS або fallback.
+ * Якщо env задано — одне значення для fetch і HEAD; інакше — історичні дефолти.
+ *
+ * @param {number} fallbackMs
+ * @returns {number}
+ */
+function resolveMeteostatBulkTimeoutMs(fallbackMs) {
+  const n = Number(process.env.METEOSTAT_BULK_TIMEOUT_MS);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallbackMs;
+}
+
+/**
  * @param {string} url
  * @returns {Promise<Buffer>}
  */
 async function fetchBuffer(url) {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 15000);
+  const timeoutMs = resolveMeteostatBulkTimeoutMs(15_000);
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
   let resp;
   try {
     resp = await fetch(url, { headers: { accept: '*/*' }, signal: ctrl.signal });
@@ -113,7 +126,8 @@ async function fetchBuffer(url) {
  */
 async function headOk(url) {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 8000);
+  const timeoutMs = resolveMeteostatBulkTimeoutMs(8_000);
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     const resp = await fetch(url, { method: 'HEAD', headers: { accept: '*/*' }, signal: ctrl.signal });
     return resp.ok;

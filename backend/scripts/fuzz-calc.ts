@@ -1,4 +1,3 @@
-import axios from 'axios';
 import {
   SCHEME_BOILER_ELECTRIC_SEPARATE,
   SCHEME_BOILER_MAX_COMBI,
@@ -19,18 +18,40 @@ const FUZZ_INTER_REQUEST_MS = 120;
 const FUZZ_MAX_429_RETRIES = 8;
 
 /**
+ * HTTP-помилка відповіді calc (fetch).
+ */
+class CalcHttpError extends Error {
+  readonly status: number;
+  readonly data: unknown;
+  readonly headers: Headers;
+
+  /**
+   * @param status — HTTP status
+   * @param data — тіло JSON або text
+   * @param headers — заголовки відповіді
+   */
+  constructor(status: number, data: unknown, headers: Headers) {
+    super(`HTTP ${status}`);
+    this.name = 'CalcHttpError';
+    this.status = status;
+    this.data = data;
+    this.headers = headers;
+  }
+}
+
+/**
  * Затримка перед повтором після 429 (Retry-After або RateLimit-Reset).
  * @param headers — заголовки відповіді Express rate-limit
  */
-function parseRetryAfterMs(headers: Record<string, unknown>): number {
-  const retryAfter = headers['retry-after'];
-  if (typeof retryAfter === 'string' || typeof retryAfter === 'number') {
+function parseRetryAfterMs(headers: Headers): number {
+  const retryAfter = headers.get('retry-after');
+  if (retryAfter != null) {
     const sec = Number(retryAfter);
     if (Number.isFinite(sec) && sec > 0) return sec * 1000;
   }
 
-  const reset = headers['ratelimit-reset'];
-  if (typeof reset === 'string' || typeof reset === 'number') {
+  const reset = headers.get('ratelimit-reset');
+  if (reset != null) {
     const resetSec = Number(reset);
     if (Number.isFinite(resetSec)) {
       const waitMs = resetSec * 1000 - Date.now();
@@ -42,6 +63,20 @@ function parseRetryAfterMs(headers: Record<string, unknown>): number {
 }
 
 /**
+ * Читає тіло відповіді як JSON, інакше текст.
+ * @param response — fetch Response
+ */
+async function readResponseBody(response: Response): Promise<unknown> {
+  const text = await response.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return text;
+  }
+}
+
+/**
  * POST /calc з повтором при 429 (rate limit API).
  * @param payload — тіло calc-запиту
  */
@@ -49,30 +84,37 @@ async function postCalcWithRetry(
   payload: CalcRequestBody,
 ): Promise<{ data: unknown; remaining: number | null }> {
   for (let attempt = 0; attempt <= FUZZ_MAX_429_RETRIES; attempt++) {
+    let response: Response;
     try {
-      const response = await axios.post<unknown>(SERVER_URL, payload);
-      const remaining = Number(response.headers['ratelimit-remaining']);
-      return {
-        data: response.data,
-        remaining: Number.isFinite(remaining) ? remaining : null,
-      };
+      response = await fetch(SERVER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(payload),
+      });
     } catch (error: unknown) {
-      if (
-        axios.isAxiosError(error) &&
-        error.response?.status === 429 &&
-        attempt < FUZZ_MAX_429_RETRIES
-      ) {
-        const waitMs = parseRetryAfterMs(
-          error.response.headers as Record<string, unknown>,
-        );
-        console.warn(
-          `⏳ Rate limit (429), пауза ${Math.ceil(waitMs / 1000)} с (спроба ${attempt + 1}/${FUZZ_MAX_429_RETRIES})…`,
-        );
-        await delay(waitMs);
-        continue;
-      }
       throw error;
     }
+
+    const data = await readResponseBody(response);
+    if (response.ok) {
+      const remainingRaw = response.headers.get('ratelimit-remaining');
+      const remaining = remainingRaw != null ? Number(remainingRaw) : NaN;
+      return {
+        data,
+        remaining: Number.isFinite(remaining) ? remaining : null,
+      };
+    }
+
+    if (response.status === 429 && attempt < FUZZ_MAX_429_RETRIES) {
+      const waitMs = parseRetryAfterMs(response.headers);
+      console.warn(
+        `⏳ Rate limit (429), пауза ${Math.ceil(waitMs / 1000)} с (спроба ${attempt + 1}/${FUZZ_MAX_429_RETRIES})…`,
+      );
+      await delay(waitMs);
+      continue;
+    }
+
+    throw new CalcHttpError(response.status, data, response.headers);
   }
 
   throw new Error('postCalcWithRetry: unreachable');
@@ -495,9 +537,9 @@ async function runFuzzTests(iterations = 50): Promise<void> {
         await delay(2000);
       }
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-        const details = parseCalcErrorDetails(error.response?.data);
+      if (error instanceof CalcHttpError) {
+        const status = error.status;
+        const details = parseCalcErrorDetails(error.data);
 
         if (status === 400) {
           stats.validationFailed += 1;
@@ -522,7 +564,7 @@ async function runFuzzTests(iterations = 50): Promise<void> {
         } else {
           stats.serverCrashed += 1;
           console.error(
-            `❌ Ітерація №${i} [${profile}]: HTTP ${status ?? 'немає відповіді'}`,
+            `❌ Ітерація №${i} [${profile}]: HTTP ${String(status)}`,
           );
           if (details.length > 0) {
             console.error(JSON.stringify(details.slice(0, 2), null, 2));

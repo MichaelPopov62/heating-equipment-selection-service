@@ -56,6 +56,7 @@ PLATFORM_ADMIN_EMAILS=popov1ms@i.ua,romantikzizni@gmail.com
 | `WATER_NORMS_SOURCE`, `APPLIANCES_SOURCE`, … | `mongo` / `auto` |
 | `GEOCODE_USER_AGENT` | Nominatim (contact email) |
 | `METEOSTAT_YEARS` | глубина истории климата (default 10) |
+| `METEOSTAT_BULK_TIMEOUT_MS` | таймаут HTTP bulk Meteostat (мс); без env — 15000 fetch / 8000 HEAD |
 | `LOG_LEVEL` | `info` / `debug` |
 | `PDF_BROWSER_EXECUTABLE` | путь к Chromium на Render — [`../project-pdf.md`](../project-pdf.md) |
 | `TRUST_PROXY` | `1` за reverse proxy Render |
@@ -76,6 +77,7 @@ npm run verify:seed-catalog
 ```
 
 Credentials берутся из `backend/.env`; CLI подменяет только имя БД в URI.
+Альтернатива аргументу CLI: `SEED_MONGODB_DB=heatcalc_staging` в `.env` (см. [`../../backend/.env.example`](../../backend/.env.example)).
 
 Ожидаемый результат после seed staging: `products` 126, справочники заполнены — см. [`baseline.md`](baseline.md) §9.
 
