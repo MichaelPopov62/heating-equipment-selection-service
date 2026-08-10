@@ -97,8 +97,13 @@ export async function renderPdfFromHtml(html) {
     return Buffer.from(pdf);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
+    const knownCode =
+      e && typeof e === 'object'
+        ? /** @type {{ code?: string }} */ (e).code
+        : undefined;
     if (
-      /** @type {{ code?: string }} */ (e).code === 'PDF_BROWSER_MISSING'
+      knownCode === 'PDF_BROWSER_MISSING' ||
+      knownCode === 'PDF_QUEUE_TIMEOUT'
     ) {
       throw e;
     }

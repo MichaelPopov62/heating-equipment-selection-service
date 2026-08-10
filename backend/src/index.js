@@ -29,6 +29,14 @@ if (process.exitCode === 1) {
   process.exit(1);
 }
 
+// Захисна сітка: фонові rejection поза Express (без process.exit)
+process.on('unhandledRejection', (reason) => {
+  logger.error('process.unhandledRejection', null, {
+    message: reason instanceof Error ? reason.message : String(reason),
+    stack: reason instanceof Error ? reason.stack : undefined,
+  });
+});
+
 const PORT = Number(process.env.PORT || 3001);
 const isProduction = process.env.NODE_ENV === 'production';
 

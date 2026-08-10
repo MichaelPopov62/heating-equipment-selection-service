@@ -382,6 +382,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+        "502":
+          description: >
+            Upstream climate / geocode failure (ErrorEnvelope).
+            Codes: GEOCODE_FAILED, GEOCODE_TIMEOUT (Nominatim);
+            METEOSTAT_* (напр. METEOSTAT_BULK_HTTP_ERROR) при збої bulk Meteostat.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
         "500":
           description: Internal error
           content:
@@ -713,6 +722,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+        "502":
+          description: >
+            Upstream climate / geocode failure (ErrorEnvelope).
+            Codes: GEOCODE_FAILED, GEOCODE_TIMEOUT; METEOSTAT_* при збої bulk Meteostat.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
         "503":
           description: MongoDB недоступна
           content:
@@ -796,7 +813,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "503":
-          description: PDF_BROWSER_MISSING / PDF_RENDER_TIMEOUT / MongoDB
+          description: >
+            PDF_BROWSER_MISSING / PDF_RENDER_TIMEOUT / PDF_RENDER_FAILED /
+            PDF_QUEUE_TIMEOUT / MongoDB
           content:
             application/json:
               schema:
@@ -957,7 +976,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "503":
-          description: PDF_BROWSER_MISSING / PDF_RENDER_TIMEOUT / MongoDB
+          description: >
+            PDF_BROWSER_MISSING / PDF_RENDER_TIMEOUT / PDF_RENDER_FAILED /
+            PDF_QUEUE_TIMEOUT / MongoDB
           content:
             application/json:
               schema:
