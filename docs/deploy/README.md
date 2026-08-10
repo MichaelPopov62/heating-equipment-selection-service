@@ -35,6 +35,8 @@ Frontend обращается к API **напрямую** через `VITE_API_B
 | [`first-deploy.md`](first-deploy.md) | Runbook «с нуля» |
 | [`smoke-tests.md`](smoke-tests.md) | Acceptance A1–A7 |
 
+В разделе только актуальные операционные гайды (без истории этапов плана реализации).
+
 ### Связанные domain-доки
 
 | Документ | Назначение |

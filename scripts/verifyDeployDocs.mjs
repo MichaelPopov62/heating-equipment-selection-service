@@ -88,6 +88,10 @@ for (const name of required) {
   assert.doesNotMatch(content, /phase0-audit/, `docs/deploy/${name}: no phase0-audit refs`);
   assert.doesNotMatch(content, /baseline\.md/, `docs/deploy/${name}: no baseline.md refs`);
   assert.doesNotMatch(content, /^## Этап \d/m, `docs/deploy/${name}: no ## Этап N sections`);
+  assert.doesNotMatch(content, /Фаза 0/, `docs/deploy/${name}: no Фаза 0`);
+  assert.doesNotMatch(content, /Фаза [CDEF]\b/, `docs/deploy/${name}: no plan-phase letters`);
+  assert.doesNotMatch(content, /Pre-deploy baseline/, `docs/deploy/${name}: no Pre-deploy baseline`);
+  assert.doesNotMatch(content, /История готовности к деплою/, `docs/deploy/${name}: no readiness history`);
 }
 
 const rootPkg = JSON.parse(readRepo('package.json'));
@@ -98,6 +102,8 @@ assert.match(plan, /docs\/deploy\/README\.md/);
 assert.doesNotMatch(plan, /deployment-architecture/);
 assert.doesNotMatch(plan, /phase0-audit/);
 assert.doesNotMatch(plan, /baseline\.md/);
+assert.doesNotMatch(plan, /Фаза 0/);
+assert.doesNotMatch(plan, /Pre-deploy baseline/);
 
 const auth = readRepo('docs/auth.md');
 assert.match(auth, /deploy\/smoke-tests\.md/);
