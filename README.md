@@ -52,19 +52,12 @@ REST API и фронтенд для подбора теплового обору
 
 ```bash
 cd backend && npm install
-cp .env.example .env   # заполнить MONGODB_* при необходимости
-npm run start          # http://localhost:3001
+cp .env.example .env
+npm run start   # http://localhost:3001
 ```
 
-- Seed MongoDB / справки: `cd backend && npm run seed` (нужен `test_data.json` — см. `test_data.json.example`). Чтобы API сразу подхватил новые данные без рестарта: задайте **`SYSTEM_INTERNAL_TOKEN`**, включите **`AUTO_INVALIDATE_CACHE=true`** (или `NODE_ENV=production`) — см. [`docs/calc-runtime-context.md`](docs/calc-runtime-context.md).
-- Проверка схемы calc: `cd backend && npm run verify:calc-schema`
-- Типы (checkJs): `cd backend && npm run typecheck`
-- Линт: `cd backend && npm run lint`
-- Полный backend gate: `cd backend && npm run verify` (lint + **typecheck** + все `verify:*`)
-
-Calc-пайплайн HTTP: `runCalculation(body)` (`api/runCalculation.js`); внутри — `getReferenceBundle()` → `toCalcRuntimeContext()` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })`. On-demand сброс кэша: `POST /api/v1/system/invalidate-reference-cache`.
-
-Подробнее: [`backend/README.md`](backend/README.md), структура — [`docs/project-structure.md`](docs/project-structure.md). Эндпоинты и auth — `openapi.yaml`, [`docs/auth.md`](docs/auth.md), [`docs/projects-api.md`](docs/projects-api.md).
+Seed / verify / маршруты / calc — только в [`backend/README.md`](backend/README.md).  
+Структура папок — [`docs/project-structure.md`](docs/project-structure.md). Контракт и auth — `openapi.yaml`, [`docs/auth.md`](docs/auth.md).
 
 ---
 

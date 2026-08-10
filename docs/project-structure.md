@@ -447,7 +447,7 @@ sanitizeString.js
 setNoStoreCacheHeaders.js
 ```
 
-Гидравлика после matching — только `backend/src/hydraulics/` (файла `matching/hydraulics.js` нет).
+Гидравлика после matching — только `backend/src/hydraulics/`.
 
 ##### Runtime barrels `*/public.js`
 

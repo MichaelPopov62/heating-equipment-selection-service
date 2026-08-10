@@ -127,6 +127,11 @@ assert.doesNotMatch(
   /legacy hydraulics snapshot/,
   'устаревший matching hydraulics snapshot не должен быть в docs',
 );
+assert.doesNotMatch(
+  projectStructure,
+  /matching\/hydraulics\.js/,
+  'project-structure.md не должен упоминать matching/hydraulics.js',
+);
 assert.ok(
   !existsSync(path.join(root, 'backend', 'src', 'matching', 'hydraulics.js')),
   'backend/src/matching/hydraulics.js не должен существовать',
