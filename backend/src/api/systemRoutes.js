@@ -5,6 +5,7 @@
 
 import express from 'express';
 import { invalidateAndWarmReferenceCache } from '../reference/public.js';
+import { sendErrorEnvelope } from './sendErrorEnvelope.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -29,15 +30,7 @@ export function createSystemRouter() {
     try {
       const configured = process.env.SYSTEM_INTERNAL_TOKEN?.trim();
       if (!configured) {
-        res.status(503).json({
-          ok: false,
-          error: {
-            message:
-              'SYSTEM_INTERNAL_TOKEN не задано на сервері — інвалідація кешу недоступна.',
-            code: 'SYSTEM_TOKEN_NOT_CONFIGURED',
-            statusCode: 503,
-          },
-        });
+        sendErrorEnvelope(res, { statusCode: 503, message: 'SYSTEM_INTERNAL_TOKEN не задано на сервері — інвалідація кешу недоступна.', code: 'SYSTEM_TOKEN_NOT_CONFIGURED' });
         return;
       }
 
@@ -45,14 +38,7 @@ export function createSystemRouter() {
       const token = typeof headerToken === 'string' ? headerToken.trim() : '';
       if (token !== configured) {
         logger.warn('referenceCache.invalidate.forbidden', logMeta);
-        res.status(403).json({
-          ok: false,
-          error: {
-            message: 'Невірний або відсутній X-System-Token.',
-            code: 'SYSTEM_TOKEN_FORBIDDEN',
-            statusCode: 403,
-          },
-        });
+        sendErrorEnvelope(res, { statusCode: 403, message: 'Невірний або відсутній X-System-Token.', code: 'SYSTEM_TOKEN_FORBIDDEN' });
         return;
       }
 

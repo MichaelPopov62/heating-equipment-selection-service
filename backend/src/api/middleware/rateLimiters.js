@@ -5,6 +5,7 @@
 
 import { rateLimit, ipKeyGenerator } from 'express-rate-limit';
 import { isRateLimitDisabled } from '../../auth/projectsAuthConfig.js';
+import { sendErrorEnvelope } from '../sendErrorEnvelope.js';
 
 /**
  * @param {import('express').Request} req
@@ -41,13 +42,10 @@ function createLimiter(opts) {
     legacyHeaders: false,
     keyGenerator: resolveRateLimitKey,
     handler: (_req, res) => {
-      res.status(429).json({
-        ok: false,
-        error: {
-          message: 'Забагато запитів',
-          code,
-          statusCode: 429,
-        },
+      sendErrorEnvelope(res, {
+        statusCode: 429,
+        message: 'Забагато запитів',
+        code,
       });
     },
   });

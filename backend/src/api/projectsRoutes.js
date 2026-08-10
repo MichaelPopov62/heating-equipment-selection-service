@@ -14,6 +14,7 @@ import {
   projectsWriteRateLimiter,
 } from './middleware/rateLimiters.js';
 import { ERROR_CODES } from './errorCodes.js';
+import { sendErrorEnvelope } from './sendErrorEnvelope.js';
 import { runCalculation } from './runCalculation.js';
 import { extractCalculationSummary } from '../projects/extractCalculationSummary.js';
 import {
@@ -135,14 +136,7 @@ export function createProjectsRouter() {
     try {
       const listQueryError = validateProjectsListQueryForRole(req);
       if (listQueryError) {
-        res.status(403).json({
-          ok: false,
-          error: {
-            message: listQueryError,
-            code: 'ADMIN_REQUIRED',
-            statusCode: 403,
-          },
-        });
+        sendErrorEnvelope(res, { statusCode: 403, message: listQueryError, code: 'ADMIN_REQUIRED' });
         return;
       }
 
@@ -284,19 +278,13 @@ export function createProjectsRouter() {
       const ownerId = ownerIdFromRequest(req);
       const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
-        res.status(400).json({
-          ok: false,
-          error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
-        });
+        sendErrorEnvelope(res, { statusCode: 400, message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR });
         return;
       }
 
       const doc = await findAccessibleProjectLean(oid, ownerId, req);
       if (!doc) {
-        res.status(404).json({
-          ok: false,
-          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
-        });
+        sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });
         return;
       }
 
@@ -345,19 +333,13 @@ export function createProjectsRouter() {
       const ownerId = ownerIdFromRequest(req);
       const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
-        res.status(400).json({
-          ok: false,
-          error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
-        });
+        sendErrorEnvelope(res, { statusCode: 400, message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR });
         return;
       }
 
       const existing = await findAccessibleProjectLean(oid, ownerId, req);
       if (!existing) {
-        res.status(404).json({
-          ok: false,
-          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
-        });
+        sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });
         return;
       }
 
@@ -374,10 +356,7 @@ export function createProjectsRouter() {
       ).lean();
 
       if (!doc) {
-        res.status(404).json({
-          ok: false,
-          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
-        });
+        sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });
         return;
       }
 
@@ -410,19 +389,13 @@ export function createProjectsRouter() {
       const ownerId = ownerIdFromRequest(req);
       const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
-        res.status(400).json({
-          ok: false,
-          error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
-        });
+        sendErrorEnvelope(res, { statusCode: 400, message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR });
         return;
       }
 
       const existing = await findAccessibleProjectLean(oid, ownerId, req);
       if (!existing) {
-        res.status(404).json({
-          ok: false,
-          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
-        });
+        sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });
         return;
       }
 
@@ -431,10 +404,7 @@ export function createProjectsRouter() {
       );
 
       if (!deleted) {
-        res.status(404).json({
-          ok: false,
-          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
-        });
+        sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });
         return;
       }
 
@@ -477,19 +447,13 @@ export function createProjectsRouter() {
       ownerIdForLog = String(ownerId);
       const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
-        res.status(400).json({
-          ok: false,
-          error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
-        });
+        sendErrorEnvelope(res, { statusCode: 400, message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR });
         return;
       }
 
       const projectRaw = await findAccessibleProjectDoc(oid, ownerId, req);
       if (!projectRaw) {
-        res.status(404).json({
-          ok: false,
-          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
-        });
+        sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });
         return;
       }
 
@@ -606,19 +570,13 @@ export function createProjectsRouter() {
       const ownerId = ownerIdFromRequest(req);
       const oid = parseObjectIdParam(asRouteParam(req.params.id));
       if (!oid) {
-        res.status(400).json({
-          ok: false,
-          error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
-        });
+        sendErrorEnvelope(res, { statusCode: 400, message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR });
         return;
       }
 
       const owned = await findAccessibleProjectLean(oid, ownerId, req);
       if (!owned) {
-        res.status(404).json({
-          ok: false,
-          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
-        });
+        sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });
         return;
       }
 
@@ -660,28 +618,19 @@ export function createProjectsRouter() {
         const projectOid = parseObjectIdParam(asRouteParam(req.params.projectId));
         const calcOid = parseObjectIdParam(asRouteParam(req.params.calcId));
         if (!projectOid || !calcOid) {
-          res.status(400).json({
-            ok: false,
-            error: { message: 'Некоректний id', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
-          });
+          sendErrorEnvelope(res, { statusCode: 400, message: 'Некоректний id', code: ERROR_CODES.VALIDATION_ERROR });
           return;
         }
 
         const owned = await findAccessibleProjectLean(projectOid, ownerId, req);
         if (!owned) {
-          res.status(404).json({
-            ok: false,
-            error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
-          });
+          sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });
           return;
         }
 
         const doc = await Calculation.findOne({ _id: calcOid, projectId: projectOid }).lean();
         if (!doc) {
-          res.status(404).json({
-            ok: false,
-            error: { message: 'Розрахунок не знайдено', code: ERROR_CODES.CALCULATION_NOT_FOUND, statusCode: 404 },
-          });
+          sendErrorEnvelope(res, { statusCode: 404, message: 'Розрахунок не знайдено', code: ERROR_CODES.CALCULATION_NOT_FOUND });
           return;
         }
 
@@ -710,32 +659,19 @@ export function createProjectsRouter() {
         const ownerId = ownerIdFromRequest(req);
         const oid = parseObjectIdParam(asRouteParam(req.params.id));
         if (!oid) {
-          res.status(400).json({
-            ok: false,
-            error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
-          });
+          sendErrorEnvelope(res, { statusCode: 400, message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR });
           return;
         }
 
         const project = await findAccessibleProjectLean(oid, ownerId, req);
         if (!project) {
-          res.status(404).json({
-            ok: false,
-            error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
-          });
+          sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });
           return;
         }
 
         const calcDoc = await Calculation.findOne({ projectId: oid }).sort({ createdAt: -1 }).lean();
         if (!calcDoc || !/** @type {{ report?: unknown }} */ (calcDoc).report) {
-          res.status(400).json({
-            ok: false,
-            error: {
-              message: 'Немає збереженого розрахунку для PDF',
-              code: 'PDF_REPORT_REQUIRED',
-              statusCode: 400,
-            },
-          });
+          sendErrorEnvelope(res, { statusCode: 400, message: 'Немає збереженого розрахунку для PDF', code: 'PDF_REPORT_REQUIRED' });
           return;
         }
 
@@ -783,19 +719,13 @@ export function createProjectsRouter() {
         const ownerId = ownerIdFromRequest(req);
         const oid = parseObjectIdParam(asRouteParam(req.params.id));
         if (!oid) {
-          res.status(400).json({
-            ok: false,
-            error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
-          });
+          sendErrorEnvelope(res, { statusCode: 400, message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR });
           return;
         }
 
         const project = await findAccessibleProjectDoc(oid, ownerId, req);
         if (!project) {
-          res.status(404).json({
-            ok: false,
-            error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
-          });
+          sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });
           return;
         }
 
@@ -810,26 +740,12 @@ export function createProjectsRouter() {
         if (calcIdRaw) {
           const calcOid = parseObjectIdParam(calcIdRaw);
           if (!calcOid) {
-            res.status(400).json({
-              ok: false,
-              error: {
-                message: 'Некоректний calculationId',
-                code: ERROR_CODES.VALIDATION_ERROR,
-                statusCode: 400,
-              },
-            });
+            sendErrorEnvelope(res, { statusCode: 400, message: 'Некоректний calculationId', code: ERROR_CODES.VALIDATION_ERROR });
             return;
           }
           calcDoc = await Calculation.findOne({ _id: calcOid, projectId: oid }).lean();
           if (!calcDoc) {
-            res.status(404).json({
-              ok: false,
-              error: {
-                message: 'Розрахунок не знайдено',
-                code: ERROR_CODES.CALCULATION_NOT_FOUND,
-                statusCode: 404,
-              },
-            });
+            sendErrorEnvelope(res, { statusCode: 404, message: 'Розрахунок не знайдено', code: ERROR_CODES.CALCULATION_NOT_FOUND });
             return;
           }
         } else {
@@ -837,14 +753,7 @@ export function createProjectsRouter() {
         }
 
         if (!calcDoc || !/** @type {{ report?: unknown }} */ (calcDoc).report) {
-          res.status(400).json({
-            ok: false,
-            error: {
-              message: 'Немає збереженого розрахунку для публікації посилання',
-              code: 'SHARE_REPORT_REQUIRED',
-              statusCode: 400,
-            },
-          });
+          sendErrorEnvelope(res, { statusCode: 400, message: 'Немає збереженого розрахунку для публікації посилання', code: 'SHARE_REPORT_REQUIRED' });
           return;
         }
 
@@ -880,10 +789,7 @@ export function createProjectsRouter() {
         ).lean();
 
         if (!updated) {
-          res.status(404).json({
-            ok: false,
-            error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
-          });
+          sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });
           return;
         }
 
@@ -931,19 +837,13 @@ export function createProjectsRouter() {
         const ownerId = ownerIdFromRequest(req);
         const oid = parseObjectIdParam(asRouteParam(req.params.id));
         if (!oid) {
-          res.status(400).json({
-            ok: false,
-            error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
-          });
+          sendErrorEnvelope(res, { statusCode: 400, message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR });
           return;
         }
 
         const project = await findAccessibleProjectDoc(oid, ownerId, req);
         if (!project) {
-          res.status(404).json({
-            ok: false,
-            error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
-          });
+          sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });
           return;
         }
 

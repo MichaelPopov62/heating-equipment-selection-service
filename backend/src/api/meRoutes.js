@@ -6,6 +6,7 @@ import express from 'express';
 import { optionalAuth } from '../auth/optionalAuth.js';
 import { isProjectsAuthRequired } from '../auth/projectsAuthConfig.js';
 import { buildDevMeUser, serializeMeUser } from '../auth/serializeMeUser.js';
+import { sendErrorEnvelope } from './sendErrorEnvelope.js';
 
 /**
  * @returns {import('express').Router}
@@ -36,14 +37,7 @@ export function createMeRouter() {
         return;
       }
 
-      res.status(401).json({
-        ok: false,
-        error: {
-          message: 'Потрібен Authorization: Bearer <JWT>',
-          code: 'PROJECTS_AUTH_REQUIRED',
-          statusCode: 401,
-        },
-      });
+      sendErrorEnvelope(res, { statusCode: 401, message: 'Потрібен Authorization: Bearer <JWT>', code: 'PROJECTS_AUTH_REQUIRED' });
     } catch (err) {
       next(err);
     }

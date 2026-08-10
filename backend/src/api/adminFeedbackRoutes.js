@@ -16,6 +16,7 @@ import { Feedback } from '../models/public.js';
 import { parseObjectIdParam } from '../projects/parseObjectId.js';
 import { logger } from '../utils/logger.js';
 import { ERROR_CODES } from './errorCodes.js';
+import { sendErrorEnvelope } from './sendErrorEnvelope.js';
 
 const SSE_HEARTBEAT_INTERVAL_MS = 25_000;
 
@@ -43,9 +44,10 @@ function asRouteParam(value) {
  * @returns {void}
  */
 function respondValidationError(res, message) {
-  res.status(400).json({
-    ok: false,
-    error: { message, code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
+  sendErrorEnvelope(res, {
+    statusCode: 400,
+    message,
+    code: ERROR_CODES.VALIDATION_ERROR,
   });
 }
 
@@ -186,14 +188,7 @@ export function createAdminFeedbackRouter() {
 
       const current = await Feedback.findById(id).lean().exec();
       if (!current) {
-        res.status(404).json({
-          ok: false,
-          error: {
-            message: 'Feedback не найден',
-            code: ERROR_CODES.FEEDBACK_NOT_FOUND,
-            statusCode: 404,
-          },
-        });
+        sendErrorEnvelope(res, { statusCode: 404, message: 'Feedback не найден', code: ERROR_CODES.FEEDBACK_NOT_FOUND });
         return;
       }
 
@@ -205,14 +200,7 @@ export function createAdminFeedbackRouter() {
         .lean()
         .exec();
       if (!updated) {
-        res.status(404).json({
-          ok: false,
-          error: {
-            message: 'Feedback не найден',
-            code: ERROR_CODES.FEEDBACK_NOT_FOUND,
-            statusCode: 404,
-          },
-        });
+        sendErrorEnvelope(res, { statusCode: 404, message: 'Feedback не найден', code: ERROR_CODES.FEEDBACK_NOT_FOUND });
         return;
       }
 

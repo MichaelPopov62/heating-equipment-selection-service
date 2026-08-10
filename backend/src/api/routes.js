@@ -18,6 +18,7 @@ import { createFeedbackRouter } from './feedbackRoutes.js';
 import { createMeRouter } from './meRoutes.js';
 import { createAdminRouter } from './adminRoutes.js';
 import { calcRateLimiter } from './middleware/rateLimiters.js';
+import { sendErrorEnvelope } from './sendErrorEnvelope.js';
 
 /**
  * @returns {Promise<import('express').Router>}
@@ -210,7 +211,11 @@ export async function createRoutes() {
    * @param {import('express').Response<import('../types/shared-types.js').ErrorEnvelope>} res
    */
   router.use((_req, res) =>
-    res.status(404).json({ ok: false, error: { message: 'Не знайдено', code: 'NOT_FOUND', statusCode: 404 } }),
+    sendErrorEnvelope(res, {
+      statusCode: 404,
+      message: 'Не знайдено',
+      code: 'NOT_FOUND',
+    }),
   );
 
   return router;

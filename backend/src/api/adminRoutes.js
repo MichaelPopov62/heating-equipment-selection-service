@@ -12,6 +12,7 @@ import { parseObjectIdParam } from '../projects/parseObjectId.js';
 import { requireMongoForProjects } from '../projects/requireMongo.js';
 import { validateAdminUserPatchBody } from './validateAdminUserPatch.js';
 import { ERROR_CODES } from './errorCodes.js';
+import { sendErrorEnvelope } from './sendErrorEnvelope.js';
 import { logger } from '../utils/logger.js';
 import { createAdminFeedbackRouter } from './adminFeedbackRoutes.js';
 
@@ -65,14 +66,7 @@ export function createAdminRouter() {
     try {
       const userId = parseObjectIdParam(asRouteParam(req.params.id));
       if (!userId) {
-        res.status(400).json({
-          ok: false,
-          error: {
-            message: 'Некоректний id користувача',
-            code: ERROR_CODES.VALIDATION_ERROR,
-            statusCode: 400,
-          },
-        });
+        sendErrorEnvelope(res, { statusCode: 400, message: 'Некоректний id користувача', code: ERROR_CODES.VALIDATION_ERROR });
         return;
       }
 
@@ -88,14 +82,7 @@ export function createAdminRouter() {
       });
 
       if (!updated) {
-        res.status(404).json({
-          ok: false,
-          error: {
-            message: 'Користувача не знайдено',
-            code: ERROR_CODES.USER_NOT_FOUND,
-            statusCode: 404,
-          },
-        });
+        sendErrorEnvelope(res, { statusCode: 404, message: 'Користувача не знайдено', code: ERROR_CODES.USER_NOT_FOUND });
         return;
       }
 

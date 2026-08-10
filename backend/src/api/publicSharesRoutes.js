@@ -6,6 +6,7 @@
 import express from 'express';
 import { Project } from '../models/public.js';
 import { publicShareReadRateLimiter } from './middleware/rateLimiters.js';
+import { sendErrorEnvelope } from './sendErrorEnvelope.js';
 import { requireMongoForProjects } from '../projects/requireMongo.js';
 import { normalizeShareTokenParam } from '../projects/shareToken.js';
 import { serializePublicShare } from '../projects/serializeShare.js';
@@ -65,10 +66,7 @@ export function createPublicSharesRouter() {
       try {
         const token = normalizeShareTokenParam(asRouteParam(req.params.shareToken));
         if (!token) {
-          res.status(404).json({
-            ok: false,
-            error: { message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND', statusCode: 404 },
-          });
+          sendErrorEnvelope(res, { statusCode: 404, message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND' });
           return;
         }
 
@@ -82,10 +80,7 @@ export function createPublicSharesRouter() {
 
         const snapshot = doc && isPlainObject(doc.shareSnapshot) ? doc.shareSnapshot : null;
         if (!doc || !snapshot || typeof snapshot.clientName !== 'string') {
-          res.status(404).json({
-            ok: false,
-            error: { message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND', statusCode: 404 },
-          });
+          sendErrorEnvelope(res, { statusCode: 404, message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND' });
           return;
         }
 
@@ -122,10 +117,7 @@ export function createPublicSharesRouter() {
       try {
         const token = normalizeShareTokenParam(asRouteParam(req.params.shareToken));
         if (!token) {
-          res.status(404).json({
-            ok: false,
-            error: { message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND', statusCode: 404 },
-          });
+          sendErrorEnvelope(res, { statusCode: 404, message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND' });
           return;
         }
 
@@ -139,22 +131,12 @@ export function createPublicSharesRouter() {
 
         const snapshot = doc && isPlainObject(doc.shareSnapshot) ? doc.shareSnapshot : null;
         if (!doc || !snapshot || typeof snapshot.clientName !== 'string') {
-          res.status(404).json({
-            ok: false,
-            error: { message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND', statusCode: 404 },
-          });
+          sendErrorEnvelope(res, { statusCode: 404, message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND' });
           return;
         }
 
         if (!isPlainObject(snapshot.commercial)) {
-          res.status(400).json({
-            ok: false,
-            error: {
-              message: 'У знімку немає фінансової смети',
-              code: 'PDF_COMMERCIAL_REQUIRED',
-              statusCode: 400,
-            },
-          });
+          sendErrorEnvelope(res, { statusCode: 400, message: 'У знімку немає фінансової смети', code: 'PDF_COMMERCIAL_REQUIRED' });
           return;
         }
 

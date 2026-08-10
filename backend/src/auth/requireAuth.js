@@ -8,6 +8,7 @@ import { attachRequestContext } from './attachRequestContext.js';
 import { extractBearerToken } from './extractBearerToken.js';
 import { respondAuthError } from './authErrors.js';
 import { runAuthPipeline } from './runAuthPipeline.js';
+import { sendErrorEnvelope } from '../api/sendErrorEnvelope.js';
 
 /**
  * @param {import('express').Request} req
@@ -22,14 +23,7 @@ export async function requireAuth(req, res, next) {
 
   const token = extractBearerToken(req);
   if (!token) {
-    res.status(401).json({
-      ok: false,
-      error: {
-        message: 'Потрібен Authorization: Bearer <JWT>',
-        code: 'PROJECTS_AUTH_REQUIRED',
-        statusCode: 401,
-      },
-    });
+    sendErrorEnvelope(res, { statusCode: 401, message: 'Потрібен Authorization: Bearer <JWT>', code: 'PROJECTS_AUTH_REQUIRED' });
     return;
   }
 

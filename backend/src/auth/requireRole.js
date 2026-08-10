@@ -5,6 +5,7 @@
 import { hasRole } from './authorizationPolicy.js';
 import { isProjectsAuthRequired } from './projectsAuthConfig.js';
 import { respondAuthorizationError } from './authErrors.js';
+import { sendErrorEnvelope } from '../api/sendErrorEnvelope.js';
 
 /**
  * @param {...import('../types/auth.js').UserRole} allowedRoles
@@ -27,14 +28,7 @@ export function requireRole(...allowedRoles) {
     }
 
     if (!req.user) {
-      res.status(401).json({
-        ok: false,
-        error: {
-          message: 'Потрібен Authorization: Bearer <JWT>',
-          code: 'PROJECTS_AUTH_REQUIRED',
-          statusCode: 401,
-        },
-      });
+      sendErrorEnvelope(res, { statusCode: 401, message: 'Потрібен Authorization: Bearer <JWT>', code: 'PROJECTS_AUTH_REQUIRED' });
       return;
     }
 

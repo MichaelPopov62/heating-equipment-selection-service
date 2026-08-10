@@ -7,6 +7,7 @@ import express from 'express';
 import { optionalAuth } from '../auth/optionalAuth.js';
 import { validateFeedbackBody } from '../feedback/validateFeedbackBody.js';
 import { feedbackRateLimiter } from './middleware/rateLimiters.js';
+import { sendErrorEnvelope } from './sendErrorEnvelope.js';
 import { Feedback } from '../models/public.js';
 import { requireMongoForProjects } from '../projects/requireMongo.js';
 import { logger } from '../utils/logger.js';
@@ -29,14 +30,7 @@ export function createFeedbackRouter() {
     try {
       const parsed = validateFeedbackBody(req.body);
       if (!parsed.ok) {
-        res.status(400).json({
-          ok: false,
-          error: {
-            message: parsed.message,
-            code: parsed.code,
-            statusCode: 400,
-          },
-        });
+        sendErrorEnvelope(res, { statusCode: 400, message: parsed.message, code: parsed.code });
         return;
       }
 

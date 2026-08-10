@@ -2,6 +2,7 @@
  * Назначение: общая обработка ошибок auth middleware.
  */
 
+import { sendErrorEnvelope } from '../api/sendErrorEnvelope.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -68,14 +69,7 @@ export function respondAuthorizationError(req, res, err) {
     message,
   });
 
-  res.status(statusCode).json({
-    ok: false,
-    error: {
-      message,
-      code,
-      statusCode,
-    },
-  });
+  sendErrorEnvelope(res, { statusCode, message, code });
 }
 
 /**
@@ -96,12 +90,5 @@ export function respondAuthError(req, res, err) {
     message: err instanceof Error ? err.message : String(err),
   });
 
-  res.status(statusCode).json({
-    ok: false,
-    error: {
-      message,
-      code,
-      statusCode,
-    },
-  });
+  sendErrorEnvelope(res, { statusCode, message, code });
 }
