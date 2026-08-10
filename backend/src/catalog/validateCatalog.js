@@ -21,6 +21,17 @@ import {
 import { assertKnownBoilerManifoldSeriesGeometry } from './boilerManifoldSeriesGeometry.js';
 
 /**
+ * Верхні межі outputWatts (Вт) при валідації каталогу радіаторів.
+ * Панель — сумарна потужність приладу; секція — потужність однієї секції.
+ */
+const RADIATOR_OUTPUT_WATTS_LIMITS = Object.freeze({
+  panelDeltaT50Max: 10_000,
+  panelDeltaT70Max: 15_000,
+  sectionalDeltaT50Max: 2_000,
+  sectionalDeltaT70Max: 3_000,
+});
+
+/**
  * @param {unknown} x
  * @param {{ field?: string, min?: number, max?: number }} [opts]
  * @returns {number}
@@ -346,8 +357,12 @@ function validateRadiator(item, idx) {
   normalizeRadiatorFromExtendedFormats(item);
 
   const looksPanel = radiatorLooksLikePanelRecord(item);
-  const outputDt50Max = looksPanel ? 10_000 : 2000;
-  const outputDt70Max = looksPanel ? 15_000 : 3000;
+  const outputDt50Max = looksPanel
+    ? RADIATOR_OUTPUT_WATTS_LIMITS.panelDeltaT50Max
+    : RADIATOR_OUTPUT_WATTS_LIMITS.sectionalDeltaT50Max;
+  const outputDt70Max = looksPanel
+    ? RADIATOR_OUTPUT_WATTS_LIMITS.panelDeltaT70Max
+    : RADIATOR_OUTPUT_WATTS_LIMITS.sectionalDeltaT70Max;
 
   if (!isPlainObject(item.outputWatts)) throw new Error(`Каталог: outputWatts обязателен (radiators[${idx}]).`);
   item.outputWatts.deltaT50 = toFiniteNumber(item.outputWatts.deltaT50, {

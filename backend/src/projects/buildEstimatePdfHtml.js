@@ -3,6 +3,7 @@
  * Описание: таблица commercial + карточки proposalEconomy / proposalEfficient; не подменяет grandTotal.
  */
 
+import { isPublisherSubscriptionTier } from '../auth/authorizationPolicy.js';
 import { isPlainObject } from '../utils/isPlainObject.js';
 import { escapeHtml } from './pdfHtmlEscape.js';
 import { buildTechnicalPdfHtml } from './buildTechnicalPdfHtml.js';
@@ -199,7 +200,7 @@ function publisherPresentationHtml(presentation) {
   if (!node) return '';
 
   const tier = node.tier;
-  if (tier !== 'pro' && tier !== 'marketplace') return '';
+  if (!isPublisherSubscriptionTier(tier)) return '';
 
   const contactEmail = typeof node.contactEmail === 'string' ? node.contactEmail.trim() : '';
   if (!contactEmail) return '';

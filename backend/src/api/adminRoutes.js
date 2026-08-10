@@ -11,6 +11,7 @@ import { User } from '../models/public.js';
 import { parseObjectIdParam } from '../projects/parseObjectId.js';
 import { requireMongoForProjects } from '../projects/requireMongo.js';
 import { validateAdminUserPatchBody } from './validateAdminUserPatch.js';
+import { ERROR_CODES } from './errorCodes.js';
 import { logger } from '../utils/logger.js';
 import { createAdminFeedbackRouter } from './adminFeedbackRoutes.js';
 
@@ -68,7 +69,7 @@ export function createAdminRouter() {
           ok: false,
           error: {
             message: 'Некоректний id користувача',
-            code: 'VALIDATION_FAILED',
+            code: ERROR_CODES.VALIDATION_ERROR,
             statusCode: 400,
           },
         });
@@ -91,7 +92,7 @@ export function createAdminRouter() {
           ok: false,
           error: {
             message: 'Користувача не знайдено',
-            code: 'USER_NOT_FOUND',
+            code: ERROR_CODES.USER_NOT_FOUND,
             statusCode: 404,
           },
         });

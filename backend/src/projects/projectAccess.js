@@ -11,6 +11,7 @@ import {
 import { logger } from '../utils/logger.js';
 import { Project, Calculation } from '../models/public.js';
 import { parseObjectIdParam } from './parseObjectId.js';
+import { ERROR_CODES } from '../api/errorCodes.js';
 import { resolveOwnerObjectIdByEmail } from './projectOwnerMeta.js';
 import {
   resolveMaxCalculationsPerProject,
@@ -97,7 +98,7 @@ export async function resolveProjectListFilter(req, requesterOwnerId) {
       const err = new Error('Некоректний query ownerId');
       /** @type {import('../types/shared-types.js').AppErrorLike} */
       const appErr = err;
-      appErr.code = 'VALIDATION_ERROR';
+      appErr.code = ERROR_CODES.VALIDATION_ERROR;
       appErr.statusCode = 400;
       throw err;
     }

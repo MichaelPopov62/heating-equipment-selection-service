@@ -13,6 +13,7 @@ import {
   projectsReadRateLimiter,
   projectsWriteRateLimiter,
 } from './middleware/rateLimiters.js';
+import { ERROR_CODES } from './errorCodes.js';
 import { runCalculation } from './runCalculation.js';
 import { extractCalculationSummary } from '../projects/extractCalculationSummary.js';
 import {
@@ -285,7 +286,7 @@ export function createProjectsRouter() {
       if (!oid) {
         res.status(400).json({
           ok: false,
-          error: { message: 'Некоректний id проєкту', code: 'VALIDATION_ERROR', statusCode: 400 },
+          error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
         });
         return;
       }
@@ -294,7 +295,7 @@ export function createProjectsRouter() {
       if (!doc) {
         res.status(404).json({
           ok: false,
-          error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
         });
         return;
       }
@@ -346,7 +347,7 @@ export function createProjectsRouter() {
       if (!oid) {
         res.status(400).json({
           ok: false,
-          error: { message: 'Некоректний id проєкту', code: 'VALIDATION_ERROR', statusCode: 400 },
+          error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
         });
         return;
       }
@@ -355,7 +356,7 @@ export function createProjectsRouter() {
       if (!existing) {
         res.status(404).json({
           ok: false,
-          error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
         });
         return;
       }
@@ -375,7 +376,7 @@ export function createProjectsRouter() {
       if (!doc) {
         res.status(404).json({
           ok: false,
-          error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
         });
         return;
       }
@@ -411,7 +412,7 @@ export function createProjectsRouter() {
       if (!oid) {
         res.status(400).json({
           ok: false,
-          error: { message: 'Некоректний id проєкту', code: 'VALIDATION_ERROR', statusCode: 400 },
+          error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
         });
         return;
       }
@@ -420,7 +421,7 @@ export function createProjectsRouter() {
       if (!existing) {
         res.status(404).json({
           ok: false,
-          error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
         });
         return;
       }
@@ -432,7 +433,7 @@ export function createProjectsRouter() {
       if (!deleted) {
         res.status(404).json({
           ok: false,
-          error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
         });
         return;
       }
@@ -478,7 +479,7 @@ export function createProjectsRouter() {
       if (!oid) {
         res.status(400).json({
           ok: false,
-          error: { message: 'Некоректний id проєкту', code: 'VALIDATION_ERROR', statusCode: 400 },
+          error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
         });
         return;
       }
@@ -487,7 +488,7 @@ export function createProjectsRouter() {
       if (!projectRaw) {
         res.status(404).json({
           ok: false,
-          error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
         });
         return;
       }
@@ -607,7 +608,7 @@ export function createProjectsRouter() {
       if (!oid) {
         res.status(400).json({
           ok: false,
-          error: { message: 'Некоректний id проєкту', code: 'VALIDATION_ERROR', statusCode: 400 },
+          error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
         });
         return;
       }
@@ -616,7 +617,7 @@ export function createProjectsRouter() {
       if (!owned) {
         res.status(404).json({
           ok: false,
-          error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+          error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
         });
         return;
       }
@@ -661,7 +662,7 @@ export function createProjectsRouter() {
         if (!projectOid || !calcOid) {
           res.status(400).json({
             ok: false,
-            error: { message: 'Некоректний id', code: 'VALIDATION_ERROR', statusCode: 400 },
+            error: { message: 'Некоректний id', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
           });
           return;
         }
@@ -670,7 +671,7 @@ export function createProjectsRouter() {
         if (!owned) {
           res.status(404).json({
             ok: false,
-            error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+            error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
           });
           return;
         }
@@ -679,7 +680,7 @@ export function createProjectsRouter() {
         if (!doc) {
           res.status(404).json({
             ok: false,
-            error: { message: 'Розрахунок не знайдено', code: 'CALCULATION_NOT_FOUND', statusCode: 404 },
+            error: { message: 'Розрахунок не знайдено', code: ERROR_CODES.CALCULATION_NOT_FOUND, statusCode: 404 },
           });
           return;
         }
@@ -711,7 +712,7 @@ export function createProjectsRouter() {
         if (!oid) {
           res.status(400).json({
             ok: false,
-            error: { message: 'Некоректний id проєкту', code: 'VALIDATION_ERROR', statusCode: 400 },
+            error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
           });
           return;
         }
@@ -720,7 +721,7 @@ export function createProjectsRouter() {
         if (!project) {
           res.status(404).json({
             ok: false,
-            error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+            error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
           });
           return;
         }
@@ -784,7 +785,7 @@ export function createProjectsRouter() {
         if (!oid) {
           res.status(400).json({
             ok: false,
-            error: { message: 'Некоректний id проєкту', code: 'VALIDATION_ERROR', statusCode: 400 },
+            error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
           });
           return;
         }
@@ -793,7 +794,7 @@ export function createProjectsRouter() {
         if (!project) {
           res.status(404).json({
             ok: false,
-            error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+            error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
           });
           return;
         }
@@ -813,7 +814,7 @@ export function createProjectsRouter() {
               ok: false,
               error: {
                 message: 'Некоректний calculationId',
-                code: 'VALIDATION_ERROR',
+                code: ERROR_CODES.VALIDATION_ERROR,
                 statusCode: 400,
               },
             });
@@ -825,7 +826,7 @@ export function createProjectsRouter() {
               ok: false,
               error: {
                 message: 'Розрахунок не знайдено',
-                code: 'CALCULATION_NOT_FOUND',
+                code: ERROR_CODES.CALCULATION_NOT_FOUND,
                 statusCode: 404,
               },
             });
@@ -881,7 +882,7 @@ export function createProjectsRouter() {
         if (!updated) {
           res.status(404).json({
             ok: false,
-            error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+            error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
           });
           return;
         }
@@ -932,7 +933,7 @@ export function createProjectsRouter() {
         if (!oid) {
           res.status(400).json({
             ok: false,
-            error: { message: 'Некоректний id проєкту', code: 'VALIDATION_ERROR', statusCode: 400 },
+            error: { message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
           });
           return;
         }
@@ -941,7 +942,7 @@ export function createProjectsRouter() {
         if (!project) {
           res.status(404).json({
             ok: false,
-            error: { message: 'Проєкт не знайдено', code: 'PROJECT_NOT_FOUND', statusCode: 404 },
+            error: { message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND, statusCode: 404 },
           });
           return;
         }

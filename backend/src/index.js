@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import cors from 'cors';
 import helmet from 'helmet';
 import { createRoutes } from './api/public.js';
+import { ERROR_CODES } from './api/errorCodes.js';
 import { warmupReferenceCache } from './reference/public.js';
 import {
   assertAuthConfiguredForProduction,
@@ -168,6 +169,10 @@ function handleApiError(err, req, res, _next) {
 
   let statusCode = err?.statusCode ?? err?.status ?? 500;
   let code = err?.code ?? 'ERR';
+  // Legacy alias admin endpoints → канон VALIDATION_ERROR
+  if (code === 'VALIDATION_FAILED') {
+    code = ERROR_CODES.VALIDATION_ERROR;
+  }
   let clientMessage =
     statusCode >= 500
       ? 'Внутрішня помилка сервера'

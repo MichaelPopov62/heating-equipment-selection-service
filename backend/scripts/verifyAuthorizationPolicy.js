@@ -5,9 +5,11 @@
 import {
   canAccessAdmin,
   hasRole,
+  isPublisherSubscriptionTier,
   normalizeAuthUserAuthorization,
   normalizeSubscriptionTier,
   normalizeUserRole,
+  PUBLISHER_SUBSCRIPTION_TIERS,
   SUBSCRIPTION_TIERS,
   USER_ROLES,
 } from '../src/auth/authorizationPolicy.js';
@@ -27,6 +29,21 @@ function tally(ok) {
 
 tally(logCheck(USER_ROLES.length === 2, 'USER_ROLES — user | admin'));
 tally(logCheck(SUBSCRIPTION_TIERS.length === 3, 'SUBSCRIPTION_TIERS — free | pro | marketplace'));
+tally(
+  logCheck(
+    PUBLISHER_SUBSCRIPTION_TIERS.length === 2 &&
+      PUBLISHER_SUBSCRIPTION_TIERS.includes('pro') &&
+      PUBLISHER_SUBSCRIPTION_TIERS.includes('marketplace') &&
+      !PUBLISHER_SUBSCRIPTION_TIERS.includes('free'),
+    'PUBLISHER_SUBSCRIPTION_TIERS — pro | marketplace (без free)',
+  ),
+);
+tally(logCheck(isPublisherSubscriptionTier('pro') === true, 'isPublisherSubscriptionTier pro'));
+tally(
+  logCheck(isPublisherSubscriptionTier('marketplace') === true, 'isPublisherSubscriptionTier marketplace'),
+);
+tally(logCheck(isPublisherSubscriptionTier('free') === false, 'isPublisherSubscriptionTier free → false'));
+tally(logCheck(isPublisherSubscriptionTier(null) === false, 'isPublisherSubscriptionTier null → false'));
 tally(logCheck(normalizeUserRole('user') === 'user', 'normalizeUserRole user'));
 tally(logCheck(normalizeUserRole('admin') === 'admin', 'normalizeUserRole admin'));
 tally(logCheck(normalizeSubscriptionTier('free') === 'free', 'normalizeSubscriptionTier free'));

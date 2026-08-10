@@ -1,19 +1,15 @@
 /**
  * Назначение: Mongoose-модель пользователя системы (auth Фаза 1).
  * Описание: Материализация JWT identity — JWT.sub → providerUserId, users._id → projects.ownerId.
+ * role/subscription enum — SSOT из auth/authorizationPolicy.js (не дублировать литералы).
  */
 import mongoose from 'mongoose';
+import { SUBSCRIPTION_TIERS, USER_ROLES } from '../auth/authorizationPolicy.js';
 
 const { Schema } = mongoose;
 
 /** @type {readonly ['clerk', 'auth0']} */
 const AUTH_PROVIDER_VALUES = ['clerk', 'auth0'];
-
-/** @type {readonly ['user', 'admin']} */
-const USER_ROLE_VALUES = ['user', 'admin'];
-
-/** @type {readonly ['free', 'pro', 'marketplace']} */
-const SUBSCRIPTION_TIER_VALUES = ['free', 'pro', 'marketplace'];
 
 const userSchema = new Schema(
   {
@@ -33,7 +29,7 @@ const userSchema = new Schema(
     role: {
       type: String,
       required: true,
-      enum: USER_ROLE_VALUES,
+      enum: [...USER_ROLES],
       trim: true,
       default: 'user',
       maxlength: 64,
@@ -42,7 +38,7 @@ const userSchema = new Schema(
     subscription: {
       type: String,
       required: true,
-      enum: SUBSCRIPTION_TIER_VALUES,
+      enum: [...SUBSCRIPTION_TIERS],
       trim: true,
       default: 'free',
       maxlength: 64,

@@ -43,6 +43,7 @@ import {
   isLargeApartmentByInput,
 } from '../utils/apartmentMatching.js';
 import { assertExternalWalls } from '../logic/externalWallsValidate.js';
+import { ERROR_CODES } from './errorCodes.js';
 import { normalizeVentilationReserveMode } from '../logic/ventilationReserve.js';
 import {
   normalizeApartmentStackPosition,
@@ -275,10 +276,10 @@ export function validateAndNormalizeInput(input, ctx) {
       keyword: e.keyword,
     }));
     logger.warn('validation.failed', null, {
-      code: 'VALIDATION_ERROR',
+      code: ERROR_CODES.VALIDATION_ERROR,
       errors: short,
     });
-    throwAppError('Некоректні вхідні дані', 'VALIDATION_ERROR', details);
+    throwAppError('Некоректні вхідні дані', ERROR_CODES.VALIDATION_ERROR, details);
   }
 
   /** @type {import('../types/shared-types.js').CalcRequestBody} */

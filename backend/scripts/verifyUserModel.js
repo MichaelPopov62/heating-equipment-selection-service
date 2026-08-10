@@ -2,6 +2,7 @@
  * Назначение: проверка схемы Mongoose-модели User (auth Фаза 1).
  * Запуск: cd backend && npm run verify:user-model
  */
+import { SUBSCRIPTION_TIERS, USER_ROLES } from '../src/auth/authorizationPolicy.js';
 import { User } from '../src/models/User.js';
 import { User as UserFromPublic } from '../src/models/public.js';
 
@@ -45,6 +46,14 @@ tally(
     'role enum user | admin',
   ),
 );
+tally(
+  logCheck(
+    Array.isArray(paths.role?.enumValues) &&
+      paths.role.enumValues.length === USER_ROLES.length &&
+      USER_ROLES.every((r) => paths.role.enumValues.includes(r)),
+    'role enum === authorizationPolicy.USER_ROLES (SSOT)',
+  ),
+);
 tally(logCheck(paths.subscription?.defaultValue === 'free', "subscription default 'free'"));
 tally(
   logCheck(
@@ -53,6 +62,14 @@ tally(
       paths.subscription.enumValues.includes('pro') &&
       paths.subscription.enumValues.includes('marketplace'),
     'subscription enum free | pro | marketplace',
+  ),
+);
+tally(
+  logCheck(
+    Array.isArray(paths.subscription?.enumValues) &&
+      paths.subscription.enumValues.length === SUBSCRIPTION_TIERS.length &&
+      SUBSCRIPTION_TIERS.every((t) => paths.subscription.enumValues.includes(t)),
+    'subscription enum === authorizationPolicy.SUBSCRIPTION_TIERS (SSOT)',
   ),
 );
 

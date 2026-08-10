@@ -2,6 +2,8 @@
  * Назначение: контакт публикатора для share snapshot (Pro/Marketplace, без gating).
  */
 
+import { isPublisherSubscriptionTier } from '../auth/authorizationPolicy.js';
+
 /**
  * @param {import('../types/auth.js').AuthUser | undefined | null} user
  * @returns {import('../types/shared-types.js').SharePublisherPresentation | undefined}
@@ -10,7 +12,7 @@ export function buildPublisherPresentationFromUser(user) {
   if (!user) return undefined;
 
   const tier = user.subscription;
-  if (tier !== 'pro' && tier !== 'marketplace') {
+  if (!isPublisherSubscriptionTier(tier)) {
     return undefined;
   }
 

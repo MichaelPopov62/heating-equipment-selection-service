@@ -6,6 +6,7 @@ import {
   normalizeSubscriptionTier,
   normalizeUserRole,
 } from '../auth/authorizationPolicy.js';
+import { ERROR_CODES } from './errorCodes.js';
 
 /**
  * @param {unknown} body
@@ -16,7 +17,7 @@ export function validateAdminUserPatchBody(body) {
     const err = new Error('Тіло запиту має бути JSON-обʼєктом');
     /** @type {import('../types/shared-types.js').AppErrorLike} */
     const appErr = err;
-    appErr.code = 'VALIDATION_FAILED';
+    appErr.code = ERROR_CODES.VALIDATION_ERROR;
     appErr.statusCode = 400;
     throw err;
   }
@@ -36,7 +37,7 @@ export function validateAdminUserPatchBody(body) {
     const err = new Error('Вкажіть role та/або subscription');
     /** @type {import('../types/shared-types.js').AppErrorLike} */
     const appErr = err;
-    appErr.code = 'VALIDATION_FAILED';
+    appErr.code = ERROR_CODES.VALIDATION_ERROR;
     appErr.statusCode = 400;
     throw err;
   }

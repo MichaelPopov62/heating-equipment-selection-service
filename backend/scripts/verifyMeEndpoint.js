@@ -4,6 +4,7 @@
  */
 import { DEFAULT_DEV_OWNER_OBJECT_ID_HEX } from '../src/auth/projectsAuthConfig.js';
 import { buildDevMeUser, serializeMeUser } from '../src/auth/serializeMeUser.js';
+import { ERROR_CODES } from '../src/api/errorCodes.js';
 import { validateAdminUserPatchBody } from '../src/api/validateAdminUserPatch.js';
 
 /** @param {boolean} ok @param {string} label */
@@ -68,8 +69,8 @@ tally(
   logCheck(
     patchErr instanceof Error &&
       /** @type {import('../src/types/shared-types.js').AppErrorLike} */ (patchErr).code ===
-        'VALIDATION_FAILED',
-    'validateAdminUserPatchBody empty → VALIDATION_FAILED',
+        ERROR_CODES.VALIDATION_ERROR,
+    'validateAdminUserPatchBody empty → VALIDATION_ERROR',
   ),
 );
 

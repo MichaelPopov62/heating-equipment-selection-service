@@ -10,6 +10,29 @@ export const USER_ROLES = ['user', 'admin'];
 export const SUBSCRIPTION_TIERS = ['free', 'pro', 'marketplace'];
 
 /**
+ * Tier для контакту публікатора в share/PDF (усі subscription крім free).
+ * @type {readonly import('../types/auth.js').SubscriptionTier[]}
+ */
+export const PUBLISHER_SUBSCRIPTION_TIERS = Object.freeze(
+  SUBSCRIPTION_TIERS.filter((t) => t !== 'free'),
+);
+
+/**
+ * Чи показувати контакт публікатора (pro / marketplace).
+ *
+ * @param {unknown} tier
+ * @returns {tier is 'pro' | 'marketplace'}
+ */
+export function isPublisherSubscriptionTier(tier) {
+  return (
+    typeof tier === 'string' &&
+    PUBLISHER_SUBSCRIPTION_TIERS.includes(
+      /** @type {import('../types/auth.js').SubscriptionTier} */ (tier),
+    )
+  );
+}
+
+/**
  * @param {unknown} raw
  * @returns {import('../types/auth.js').UserRole}
  */

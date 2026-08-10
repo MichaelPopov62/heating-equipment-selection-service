@@ -5,6 +5,7 @@
 
 import { isPlainObject } from '../utils/isPlainObject.js';
 import { throwAppError } from '../utils/createAppError.js';
+import { ERROR_CODES } from '../api/errorCodes.js';
 import {
   normalizeClientNameFromImport,
   normalizeLabelFromImport,
@@ -29,7 +30,7 @@ import {
  */
 function assertPlainObject(raw, message) {
   if (!isPlainObject(raw)) {
-    throwAppError(message, 'VALIDATION_ERROR', 400);
+    throwAppError(message, ERROR_CODES.VALIDATION_ERROR, 400);
   }
 }
 
@@ -40,7 +41,7 @@ function assertPlainObject(raw, message) {
  */
 function assertCalcObject(value, label) {
   if (!isPlainObject(value)) {
-    throwAppError(`Поле ${label} має бути обʼєктом.`, 'VALIDATION_ERROR', 400);
+    throwAppError(`Поле ${label} має бути обʼєктом.`, ERROR_CODES.VALIDATION_ERROR, 400);
   }
 }
 
@@ -56,7 +57,7 @@ function assertCalcObject(value, label) {
 function normalizeCalculationsImport(calculationsRaw) {
   if (calculationsRaw === undefined) return [];
   if (!Array.isArray(calculationsRaw)) {
-    throwAppError('Поле calculations має бути масивом.', 'VALIDATION_ERROR', 400);
+    throwAppError('Поле calculations має бути масивом.', ERROR_CODES.VALIDATION_ERROR, 400);
   }
 
   /** @type {Array<{ calcInput: unknown, report: unknown, summary?: unknown, sourceCreatedAt?: string }>} */
@@ -67,7 +68,7 @@ function normalizeCalculationsImport(calculationsRaw) {
       stripMongoExportFields(calculationsRaw[i]),
     );
     if (!isPlainObject(itemRaw)) {
-      throwAppError(`calculations[${i}] має бути обʼєктом.`, 'VALIDATION_ERROR', 400);
+      throwAppError(`calculations[${i}] має бути обʼєктом.`, ERROR_CODES.VALIDATION_ERROR, 400);
     }
 
     assertCalcObject(itemRaw.calcInput, `calculations[${i}].calcInput`);
@@ -208,7 +209,7 @@ export function validateProjectImportBody(body) {
 
   throwAppError(
     'Очікується ProjectExportBundle (exportSchemaVersion) або legacy SurveyDraft.',
-    'VALIDATION_ERROR',
+    ERROR_CODES.VALIDATION_ERROR,
     400,
   );
 }

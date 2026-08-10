@@ -15,6 +15,7 @@ import { subscribeFeedbackEvents } from '../feedback/feedbackEventHub.js';
 import { Feedback } from '../models/public.js';
 import { parseObjectIdParam } from '../projects/parseObjectId.js';
 import { logger } from '../utils/logger.js';
+import { ERROR_CODES } from './errorCodes.js';
 
 const SSE_HEARTBEAT_INTERVAL_MS = 25_000;
 
@@ -44,7 +45,7 @@ function asRouteParam(value) {
 function respondValidationError(res, message) {
   res.status(400).json({
     ok: false,
-    error: { message, code: 'VALIDATION_FAILED', statusCode: 400 },
+    error: { message, code: ERROR_CODES.VALIDATION_ERROR, statusCode: 400 },
   });
 }
 
@@ -189,7 +190,7 @@ export function createAdminFeedbackRouter() {
           ok: false,
           error: {
             message: 'Feedback не найден',
-            code: 'FEEDBACK_NOT_FOUND',
+            code: ERROR_CODES.FEEDBACK_NOT_FOUND,
             statusCode: 404,
           },
         });
@@ -208,7 +209,7 @@ export function createAdminFeedbackRouter() {
           ok: false,
           error: {
             message: 'Feedback не найден',
-            code: 'FEEDBACK_NOT_FOUND',
+            code: ERROR_CODES.FEEDBACK_NOT_FOUND,
             statusCode: 404,
           },
         });

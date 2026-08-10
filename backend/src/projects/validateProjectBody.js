@@ -6,6 +6,7 @@
 import { isPlainObject } from '../utils/isPlainObject.js';
 import { sanitizeTrimAngleBrackets } from '../utils/sanitizeString.js';
 import { throwAppError } from '../utils/createAppError.js';
+import { ERROR_CODES } from '../api/errorCodes.js';
 import { assertSurveyShape } from './validateProjectSurveyShape.js';
 
 const MAX_CLIENT_NAME_LEN = 200;
@@ -18,12 +19,12 @@ const MAX_LABEL_LEN = 200;
 export function normalizeClientNameFromImport(raw) {
   const name = sanitizeTrimAngleBrackets(raw);
   if (!name) {
-    throwAppError('Вкажіть імʼя клієнта (clientName).', 'VALIDATION_ERROR', 400);
+    throwAppError('Вкажіть імʼя клієнта (clientName).', ERROR_CODES.VALIDATION_ERROR, 400);
   }
   if (name.length > MAX_CLIENT_NAME_LEN) {
     throwAppError(
       `Імʼя клієнта не довше ${MAX_CLIENT_NAME_LEN} символів.`,
-      'VALIDATION_ERROR',
+      ERROR_CODES.VALIDATION_ERROR,
       400,
     );
   }
@@ -41,7 +42,7 @@ export function normalizeLabelFromImport(raw) {
   if (label.length > MAX_LABEL_LEN) {
     throwAppError(
       `Підпис обʼєкта не довше ${MAX_LABEL_LEN} символів.`,
-      'VALIDATION_ERROR',
+      ERROR_CODES.VALIDATION_ERROR,
       400,
     );
   }
@@ -54,7 +55,7 @@ export function normalizeLabelFromImport(raw) {
  */
 export function validateProjectCreateBody(body) {
   if (!isPlainObject(body)) {
-    throwAppError('Тіло запиту має бути JSON-обʼєктом.', 'VALIDATION_ERROR', 400);
+    throwAppError('Тіло запиту має бути JSON-обʼєктом.', ERROR_CODES.VALIDATION_ERROR, 400);
   }
   const clientName = normalizeClientNameFromImport(body.clientName);
   const label = normalizeLabelFromImport(body.label);
@@ -75,7 +76,7 @@ export function validateProjectCreateBody(body) {
  */
 export function validateProjectUpdateBody(body) {
   if (!isPlainObject(body)) {
-    throwAppError('Тіло запиту має бути JSON-обʼєктом.', 'VALIDATION_ERROR', 400);
+    throwAppError('Тіло запиту має бути JSON-обʼєктом.', ERROR_CODES.VALIDATION_ERROR, 400);
   }
   const hasClient = Object.prototype.hasOwnProperty.call(body, 'clientName');
   const hasLabel = Object.prototype.hasOwnProperty.call(body, 'label');
@@ -84,7 +85,7 @@ export function validateProjectUpdateBody(body) {
   if (!hasClient && !hasLabel && !hasSurvey) {
     throwAppError(
       'Вкажіть хоча б одне поле: clientName, label або survey.',
-      'VALIDATION_ERROR',
+      ERROR_CODES.VALIDATION_ERROR,
       400,
     );
   }
