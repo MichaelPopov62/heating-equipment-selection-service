@@ -174,6 +174,7 @@ function handleApiError(err, req, res, _next) {
   const requestId = req.requestId;
   const method = String(req.method ?? 'GET').toUpperCase();
   const path = req.path ?? '/';
+  const isProduction = process.env.NODE_ENV === 'production';
 
   let statusCode = err?.statusCode ?? err?.status ?? 500;
   let code = err?.code ?? 'ERR';
@@ -182,16 +183,11 @@ function handleApiError(err, req, res, _next) {
     code = ERROR_CODES.VALIDATION_ERROR;
   }
   let clientMessage =
-    statusCode >= 500
-      ? 'Внутрішня помилка сервера'
-      : (err?.message ?? 'Помилка запиту');
+    typeof err?.message === 'string' && err.message.trim()
+      ? err.message
+      : 'Помилка запиту';
   /** @type {import('./types/shared-types.js').ErrorDetailsAjvItem[] | undefined} */
-  const details =
-    statusCode >= 500
-      ? undefined
-      : Array.isArray(err?.details)
-        ? err.details
-        : undefined;
+  let details = Array.isArray(err?.details) ? err.details : undefined;
 
   // Помилки парсингу JSON / надто великий payload від express.json()
   if (err && typeof err === 'object') {
@@ -199,20 +195,25 @@ function handleApiError(err, req, res, _next) {
       statusCode = 413;
       code = 'PAYLOAD_TOO_LARGE';
       clientMessage = 'Занадто великий запит';
+      details = undefined;
     } else if (err instanceof SyntaxError && 'body' in err) {
       statusCode = 400;
       code = 'BAD_JSON';
       clientMessage = 'Некоректний JSON';
+      details = undefined;
     } else if (isMongoBsonObjectTooLargeError(err)) {
       statusCode = 413;
       code = 'CALCULATION_DOCUMENT_TOO_LARGE';
       clientMessage = 'Документ розрахунку занадто великий для збереження';
+      details = undefined;
     }
   }
 
+  const logCode = code;
   /** @type {Record<string, unknown>} */
-  const errorLog = { method, path, statusCode, code, clientMessage };
+  const errorLog = { method, path, statusCode, code: logCode };
   if (statusCode >= 500 && err instanceof Error) {
+    // Приватний лог: повний текст і stack лише на сервері
     errorLog.internalMessage = err.message;
     errorLog.stack = err.stack;
   } else {
@@ -223,6 +224,20 @@ function handleApiError(err, req, res, _next) {
     logger.error('api.error', { requestId }, errorLog);
   } else {
     logger.error('api.error', undefined, errorLog);
+  }
+
+  // Клієнтський ErrorEnvelope: 500 без витоку err.message / внутрішніх кодів у production
+  if (statusCode === 500) {
+    clientMessage = 'Внутрішня помилка сервера';
+    details = undefined;
+    if (isProduction) {
+      code = ERROR_CODES.INTERNAL_ERROR;
+    } else if (!code || code === 'ERR' || typeof code !== 'string') {
+      code = ERROR_CODES.INTERNAL_ERROR;
+    }
+  } else if (statusCode > 500) {
+    // 502/503 AppError: зберігаємо code і message для клієнта
+    details = undefined;
   }
 
   /** @type {import('./types/shared-types.js').ErrorEnvelope['error']} */

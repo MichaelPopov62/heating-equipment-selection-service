@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Heating equipment selection service
-  version: "1.0.0"
+  version: '1.0.0'
   license:
     name: ISC
     url: https://opensource.org/license/isc-license-txt/
@@ -17,18 +17,18 @@ paths:
       summary: Health check
       operationId: healthCheck
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HealthOkResponse"
-        "400":
+                $ref: '#/components/schemas/HealthOkResponse'
+        '400':
           description: Client error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/system/invalidate-reference-cache:
     post:
@@ -45,31 +45,31 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Cache invalidated and reloaded
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InvalidateReferenceCacheOkResponse"
-        "403":
+                $ref: '#/components/schemas/InvalidateReferenceCacheOkResponse'
+        '403':
           description: Invalid or missing token
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: SYSTEM_INTERNAL_TOKEN not configured on server
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/catalog:
     get:
       summary: Get equipment catalog
       operationId: getCatalog
       responses:
-        "200":
+        '200':
           description: >
             Каталог из согласованного reference bundle (`configCache`, TTL `REFERENCE_CACHE_TTL_MS`):
             тот же снимок, что для `POST /api/v1/calc`. Источник номенклатуры — `file` или MongoDB
@@ -86,20 +86,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CatalogGetResponse"
-        "400":
+                $ref: '#/components/schemas/CatalogGetResponse'
+        '400':
           description: Client error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/presets/envelope:
     get:
       summary: Get envelope presets
       operationId: getEnvelopePresets
       responses:
-        "200":
+        '200':
           description: Presets
           x-notes: >
             Справочник: kind=wall (несущий слой без утеплителя), kind=insulation (отдельно:
@@ -112,20 +112,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PresetsEnvelopeOkResponse"
-        "400":
+                $ref: '#/components/schemas/PresetsEnvelopeOkResponse'
+        '400':
           description: Client error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/presets/underfloor-heating:
     get:
       summary: Get underfloor heating bases and flooring finishes (bundle)
       operationId: getUnderfloorHeatingPresetsBundle
       responses:
-        "200":
+        '200':
           description: Базы ТП + финишные покрытия для композиции room.underfloorHeating
           x-notes: >
             bases (usage=underfloor_heating_base) — плита, XPS, стяжка; finishes — керамика, винил,
@@ -133,20 +133,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PresetsUnderfloorHeatingOkResponse"
-        "400":
+                $ref: '#/components/schemas/PresetsUnderfloorHeatingOkResponse'
+        '400':
           description: Client error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/presets/underfloor-heating/modes:
     get:
       summary: Get underfloor heating mode presets (human-readable UI cards)
       operationId: getUnderfloorHeatingModePresets
       responses:
-        "200":
+        '200':
           description: Режимы ТП из underfloor_heating_presets (presetId + ui)
           content:
             application/json:
@@ -182,54 +182,54 @@ paths:
                             title: { type: string }
                             badge: { type: string }
                             description: { type: string }
-        "400":
+        '400':
           description: Client error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "500":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
           description: Server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/presets/underfloor-heating/bases:
     get:
       summary: Get underfloor heating base constructions only
       operationId: getUnderfloorHeatingBases
       responses:
-        "200":
+        '200':
           description: Базовые конструкции ТП без финишного покрытия
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PresetsUnderfloorHeatingBasesOkResponse"
-        "400":
+                $ref: '#/components/schemas/PresetsUnderfloorHeatingBasesOkResponse'
+        '400':
           description: Client error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/presets/flooring-finishes:
     get:
       summary: Get flooring finish materials for UFH
       operationId: getFlooringFinishes
       responses:
-        "200":
+        '200':
           description: Финишные покрытия (керамика, винил, ламинат) с Rλ,B и лимитом Tповерх
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PresetsFlooringFinishesOkResponse"
-        "400":
+                $ref: '#/components/schemas/PresetsFlooringFinishesOkResponse'
+        '400':
           description: Client error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/feedback:
     post:
@@ -240,32 +240,32 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/FeedbackRequestBody"
+              $ref: '#/components/schemas/FeedbackRequestBody'
       responses:
-        "201":
+        '201':
           description: Feedback stored
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/FeedbackOkResponse"
-        "400":
+                $ref: '#/components/schemas/FeedbackOkResponse'
+        '400':
           description: Validation error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "429":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
           description: Rate limit
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB unavailable
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/calc:
     post:
@@ -276,7 +276,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CalcInput"
+              $ref: '#/components/schemas/CalcInput'
             examples:
               minimal:
                 summary: Голая стена без утеплителя
@@ -292,9 +292,26 @@ paths:
                         thicknessMm: 375
                         facadeSystem: none
                     rooms:
-                      - { id: "r1", name: "Гостиная", type: "гостиная", floor: 1, topBoundary: "heated", bottomBoundary: "unheated", areaM2: 10, heightM: 2.7 }
+                      - {
+                          id: 'r1',
+                          name: 'Гостиная',
+                          type: 'гостиная',
+                          floor: 1,
+                          topBoundary: 'heated',
+                          bottomBoundary: 'unheated',
+                          areaM2: 10,
+                          heightM: 2.7,
+                        }
                     envelopeElements:
-                      - { kind: wall, roomId: "r1", name: "Стена №1", construction: "наружная стена", presetId: wall_gas_concrete_d500, areaM2: 12, orientation: N }
+                      - {
+                          kind: wall,
+                          roomId: 'r1',
+                          name: 'Стена №1',
+                          construction: 'наружная стена',
+                          presetId: wall_gas_concrete_d500,
+                          areaM2: 12,
+                          orientation: N,
+                        }
               houseSftkWall:
                 summary: Газобетон + СФТК (ППС 16Ф 100 мм), угловая комната — две стены
                 description: >
@@ -314,11 +331,47 @@ paths:
                         insulationPresetId: insul_sftk_pps16f
                         insulationThicknessMm: 100
                     rooms:
-                      - { id: "r1", name: "Гостиная", type: "гостиная", floor: 1, topBoundary: "heated", bottomBoundary: "unheated", areaM2: 18, heightM: 2.7 }
+                      - {
+                          id: 'r1',
+                          name: 'Гостиная',
+                          type: 'гостиная',
+                          floor: 1,
+                          topBoundary: 'heated',
+                          bottomBoundary: 'unheated',
+                          areaM2: 18,
+                          heightM: 2.7,
+                        }
                     envelopeElements:
-                      - { kind: wall, roomId: "r1", name: "Стена №1", construction: "наружная стена", presetId: wall_gas_concrete_d500, areaM2: 14, orientation: N }
-                      - { kind: wall, roomId: "r1", name: "Стена №2", construction: "наружная стена", presetId: wall_gas_concrete_d500, areaM2: 10, orientation: W }
-                      - { kind: window, roomId: "r1", name: "Окно 1", construction: "окно", presetId: window_pvc_double_chamber_3_glass, areaM2: 2.1, orientation: N, openingWidthMm: 1500, openingHeightMm: 1400, count: 1 }
+                      - {
+                          kind: wall,
+                          roomId: 'r1',
+                          name: 'Стена №1',
+                          construction: 'наружная стена',
+                          presetId: wall_gas_concrete_d500,
+                          areaM2: 14,
+                          orientation: N,
+                        }
+                      - {
+                          kind: wall,
+                          roomId: 'r1',
+                          name: 'Стена №2',
+                          construction: 'наружная стена',
+                          presetId: wall_gas_concrete_d500,
+                          areaM2: 10,
+                          orientation: W,
+                        }
+                      - {
+                          kind: window,
+                          roomId: 'r1',
+                          name: 'Окно 1',
+                          construction: 'окно',
+                          presetId: window_pvc_double_chamber_3_glass,
+                          areaM2: 2.1,
+                          orientation: N,
+                          openingWidthMm: 1500,
+                          openingHeightMm: 1400,
+                          count: 1,
+                        }
               internalCorridorWall:
                 summary: Внутреннее помещение — стена в неотапливаемый коридор (дом или квартира)
                 description: >
@@ -336,12 +389,37 @@ paths:
                         thicknessMm: 375
                         facadeSystem: none
                     rooms:
-                      - { id: "r1", name: "Прихожая", type: "прихожая", floor: 1, topBoundary: "heated", bottomBoundary: "heated", areaM2: 8, heightM: 2.7, roomExteriorLayout: internal }
+                      - {
+                          id: 'r1',
+                          name: 'Прихожая',
+                          type: 'прихожая',
+                          floor: 1,
+                          topBoundary: 'heated',
+                          bottomBoundary: 'heated',
+                          areaM2: 8,
+                          heightM: 2.7,
+                          roomExteriorLayout: internal,
+                        }
                     envelopeElements:
-                      - { kind: wall, roomId: "r1", name: "Стена в коридор", construction: "стена в неотапливаемый коридор", presetId: wall_gas_concrete_d500, areaM2: 9, orientation: N }
-                      - { kind: floor, roomId: "r1", name: "Пол", construction: "пол", presetId: floor_slab_rough_screed_eps_finish_screed_porcelain, areaM2: 8 }
+                      - {
+                          kind: wall,
+                          roomId: 'r1',
+                          name: 'Стена в коридор',
+                          construction: 'стена в неотапливаемый коридор',
+                          presetId: wall_gas_concrete_d500,
+                          areaM2: 9,
+                          orientation: N,
+                        }
+                      - {
+                          kind: floor,
+                          roomId: 'r1',
+                          name: 'Пол',
+                          construction: 'пол',
+                          presetId: floor_slab_rough_screed_eps_finish_screed_porcelain,
+                          areaM2: 8,
+                        }
       responses:
-        "200":
+        '200':
           description: >
             Отчёт расчёта и подбора (CalcOkResponse). Справочники catalog, water_norms, appliances и
             recommendations — согласованный bundle (configCache, TTL REFERENCE_CACHE_TTL_MS, см. ReferenceDataSources).
@@ -362,8 +440,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CalcOkResponse"
-        "400":
+                $ref: '#/components/schemas/CalcOkResponse'
+        '400':
           description: >
             Validation / input error. Причина — поле error.message; для интеграции — error.code.
 
@@ -381,8 +459,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "502":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '502':
           description: >
             Upstream climate / geocode failure (ErrorEnvelope).
             Codes: GEOCODE_FAILED, GEOCODE_TIMEOUT (Nominatim);
@@ -390,13 +468,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "500":
-          description: Internal error
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: >
+            Internal error (ErrorEnvelope). У production клієнту — code INTERNAL_ERROR
+            і узагальнене message; stack / internalMessage лише в серверних логах.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/projects:
     get:
@@ -424,36 +504,36 @@ paths:
           description: Фильтр по email владельца (только role=admin)
           schema: { type: string, format: email }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProjectsListResponse"
-        "400":
+                $ref: '#/components/schemas/ProjectsListResponse'
+        '400':
           description: Некорректные query-параметры
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "401":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
           description: PROJECTS_AUTH_REQUIRED — отсутствует Bearer JWT
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "403":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
           description: PROJECTS_AUTH_FORBIDDEN или ADMIN_REQUIRED (ownerId/ownerEmail без role=admin)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB недоступна (MONGODB_UNAVAILABLE)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
     post:
       summary: Create project
       operationId: createProject
@@ -464,44 +544,44 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProjectCreateBody"
+              $ref: '#/components/schemas/ProjectCreateBody'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProjectCreateResponse"
-        "400":
+                $ref: '#/components/schemas/ProjectCreateResponse'
+        '400':
           description: Validation error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "401":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
           description: PROJECTS_AUTH_REQUIRED — отсутствует Bearer JWT
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "403":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
           description: PROJECTS_AUTH_FORBIDDEN — недействительный JWT
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "413":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '413':
           description: PAYLOAD_TOO_LARGE — survey превышает 512 KB JSON
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB недоступна
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/projects/import:
     post:
@@ -517,44 +597,44 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProjectImportBody"
+              $ref: '#/components/schemas/ProjectImportBody'
       responses:
-        "201":
+        '201':
           description: Imported
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProjectImportResponse"
-        "400":
+                $ref: '#/components/schemas/ProjectImportResponse'
+        '400':
           description: Validation error / unsupported export version
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "401":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
           description: PROJECTS_AUTH_REQUIRED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "409":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
           description: PROJECT_QUOTA_EXCEEDED / CALCULATION_QUOTA_EXCEEDED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "413":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '413':
           description: PAYLOAD_TOO_LARGE / CALC_INPUT_TOO_LARGE / CALCULATION_DOCUMENT_TOO_LARGE
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB недоступна
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/projects/{id}:
     get:
@@ -569,26 +649,26 @@ paths:
           schema: { type: string }
         - name: includeLastCalculation
           in: query
-          schema: { type: string, enum: ["1", "true"] }
+          schema: { type: string, enum: ['1', 'true'] }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProjectGetResponse"
-        "404":
+                $ref: '#/components/schemas/ProjectGetResponse'
+        '404':
           description: PROJECT_NOT_FOUND
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB недоступна
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
     put:
       summary: Update project (clientName, label, survey)
       operationId: updateProject
@@ -604,38 +684,38 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProjectUpdateBody"
+              $ref: '#/components/schemas/ProjectUpdateBody'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProjectGetResponse"
-        "400":
+                $ref: '#/components/schemas/ProjectGetResponse'
+        '400':
           description: Validation error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "404":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
           description: PROJECT_NOT_FOUND
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "413":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '413':
           description: PAYLOAD_TOO_LARGE — survey превышает 512 KB JSON
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB недоступна
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
     delete:
       summary: Delete project and its calculations
       operationId: deleteProject
@@ -647,30 +727,30 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProjectDeleteResponse"
-        "400":
+                $ref: '#/components/schemas/ProjectDeleteResponse'
+        '400':
           description: Некорректный id проекта
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "404":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
           description: PROJECT_NOT_FOUND
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB недоступна
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/projects/{id}/calc:
     post:
@@ -694,48 +774,48 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProjectCalcBody"
+              $ref: '#/components/schemas/ProjectCalcBody'
       responses:
-        "200":
+        '200':
           description: Report + saved calculation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProjectCalcResponse"
-        "400":
+                $ref: '#/components/schemas/ProjectCalcResponse'
+        '400':
           description: Validation error, CALC_INPUT_REQUIRED или ошибка calc input
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "404":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
           description: PROJECT_NOT_FOUND
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "413":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '413':
           description: >
             PAYLOAD_TOO_LARGE (survey или HTTP body), CALC_INPUT_TOO_LARGE или
             CALCULATION_DOCUMENT_TOO_LARGE
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "502":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '502':
           description: >
             Upstream climate / geocode failure (ErrorEnvelope).
             Codes: GEOCODE_FAILED, GEOCODE_TIMEOUT; METEOSTAT_* при збої bulk Meteostat.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB недоступна
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/projects/{id}/calculations:
     get:
@@ -755,24 +835,24 @@ paths:
           in: query
           schema: { type: integer, minimum: 0, default: 0 }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CalculationsListResponse"
-        "404":
+                $ref: '#/components/schemas/CalculationsListResponse'
+        '404':
           description: PROJECT_NOT_FOUND
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB недоступна
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/projects/{id}/pdf:
     get:
@@ -791,35 +871,35 @@ paths:
         - name: includeTechnical
           in: query
           required: false
-          schema: { type: string, enum: ["0", "1", "true", "false"] }
+          schema: { type: string, enum: ['0', '1', 'true', 'false'] }
       responses:
-        "200":
+        '200':
           description: PDF file
           content:
             application/pdf:
               schema:
                 type: string
                 format: binary
-        "400":
+        '400':
           description: PDF_REPORT_REQUIRED / PDF_COMMERCIAL_REQUIRED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "404":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
           description: PROJECT_NOT_FOUND
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: >
             PDF_BROWSER_MISSING / PDF_RENDER_TIMEOUT / PDF_RENDER_FAILED /
             PDF_QUEUE_TIMEOUT / MongoDB
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/projects/{id}/share:
     post:
@@ -840,32 +920,32 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProjectSharePublishBody"
+              $ref: '#/components/schemas/ProjectSharePublishBody'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProjectSharePublishResponse"
-        "400":
+                $ref: '#/components/schemas/ProjectSharePublishResponse'
+        '400':
           description: SHARE_REPORT_REQUIRED / SHARE_COMMERCIAL_REQUIRED / VALIDATION_ERROR
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "404":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
           description: PROJECT_NOT_FOUND / CALCULATION_NOT_FOUND
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB недоступна
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
     delete:
       summary: Revoke public share link
       operationId: revokeProjectShare
@@ -877,24 +957,24 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProjectShareRevokeResponse"
-        "404":
+                $ref: '#/components/schemas/ProjectShareRevokeResponse'
+        '404':
           description: PROJECT_NOT_FOUND
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB недоступна
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/public/shares/{shareToken}:
     get:
@@ -909,30 +989,30 @@ paths:
           required: true
           schema: { type: string, minLength: 16, maxLength: 128 }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PublicShareResponse"
-        "404":
+                $ref: '#/components/schemas/PublicShareResponse'
+        '404':
           description: SHARE_NOT_FOUND
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "429":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
           description: PUBLIC_SHARE_RATE_LIMIT_EXCEEDED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB недоступна
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/public/shares/{shareToken}/pdf:
     get:
@@ -948,41 +1028,41 @@ paths:
         - name: includeTechnical
           in: query
           required: false
-          schema: { type: string, enum: ["0", "1", "true", "false"] }
+          schema: { type: string, enum: ['0', '1', 'true', 'false'] }
       responses:
-        "200":
+        '200':
           description: PDF file
           content:
             application/pdf:
               schema:
                 type: string
                 format: binary
-        "400":
+        '400':
           description: PDF_COMMERCIAL_REQUIRED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "404":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
           description: SHARE_NOT_FOUND
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "429":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
           description: PUBLIC_SHARE_RATE_LIMIT_EXCEEDED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: >
             PDF_BROWSER_MISSING / PDF_RENDER_TIMEOUT / PDF_RENDER_FAILED /
             PDF_QUEUE_TIMEOUT / MongoDB
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/projects/{projectId}/calculations/{calcId}:
     get:
@@ -1000,24 +1080,24 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CalculationGetResponse"
-        "404":
+                $ref: '#/components/schemas/CalculationGetResponse'
+        '404':
           description: CALCULATION_NOT_FOUND
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB недоступна
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/me:
     get:
@@ -1030,24 +1110,24 @@ paths:
       security:
         - ProjectsBearerAuth: []
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MeOkResponse"
-        "401":
+                $ref: '#/components/schemas/MeOkResponse'
+        '401':
           description: PROJECTS_AUTH_REQUIRED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "403":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
           description: INVALID_USER_ROLE / INVALID_SUBSCRIPTION_TIER
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/admin/feedback:
     get:
@@ -1071,43 +1151,43 @@ paths:
         - name: status
           in: query
           schema:
-            $ref: "#/components/schemas/FeedbackStatus"
+            $ref: '#/components/schemas/FeedbackStatus'
         - name: type
           in: query
           schema:
             type: string
             enum: [bug, contact]
       responses:
-        "200":
+        '200':
           description: Feedback page ordered by newest first
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AdminFeedbackListResponse"
-        "400":
+                $ref: '#/components/schemas/AdminFeedbackListResponse'
+        '400':
           description: VALIDATION_ERROR
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "401":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
           description: PROJECTS_AUTH_REQUIRED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "403":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
           description: ADMIN_REQUIRED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB unavailable
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/admin/feedback/stream:
     get:
@@ -1120,30 +1200,30 @@ paths:
       security:
         - ProjectsBearerAuth: []
       responses:
-        "200":
+        '200':
           description: SSE stream
           content:
             text/event-stream:
               schema:
                 type: string
-        "401":
+        '401':
           description: PROJECTS_AUTH_REQUIRED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "403":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
           description: ADMIN_REQUIRED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB unavailable
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/admin/feedback/{id}:
     patch:
@@ -1163,44 +1243,44 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AdminFeedbackPatchBody"
+              $ref: '#/components/schemas/AdminFeedbackPatchBody'
       responses:
-        "200":
+        '200':
           description: Updated feedback
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AdminFeedbackPatchResponse"
-        "400":
+                $ref: '#/components/schemas/AdminFeedbackPatchResponse'
+        '400':
           description: VALIDATION_ERROR
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "401":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
           description: PROJECTS_AUTH_REQUIRED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "403":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
           description: ADMIN_REQUIRED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "404":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
           description: FEEDBACK_NOT_FOUND
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB unavailable
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /api/v1/admin/users/{id}:
     patch:
@@ -1220,44 +1300,44 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AdminUserPatchBody"
+              $ref: '#/components/schemas/AdminUserPatchBody'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AdminUserPatchResponse"
-        "400":
+                $ref: '#/components/schemas/AdminUserPatchResponse'
+        '400':
           description: VALIDATION_ERROR
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "401":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
           description: PROJECTS_AUTH_REQUIRED
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "403":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
           description: ADMIN_REQUIRED / INVALID_USER_ROLE / INVALID_SUBSCRIPTION_TIER
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "404":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
           description: USER_NOT_FOUND
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "503":
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
           description: MongoDB недоступна
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+                $ref: '#/components/schemas/ErrorEnvelope'
 
 components:
   securitySchemes:
