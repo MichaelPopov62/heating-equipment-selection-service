@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-/** Домены верхнего уровня backend/src (SSOT — сверка с Plan.md / project-structure.md). */
+/** Домены верхнего уровня backend/src (SSOT — сверка с docs/project-structure.md). */
 const BACKEND_SRC_TOP_DIRS = [
   'api',
   'auth',
@@ -41,6 +41,18 @@ const BACKEND_PUBLIC_BARRELS = [
   'models/public.js',
   'reference/public.js',
   'report/public.js',
+];
+
+/** Ключевые файлы api/, которые должны быть отражены в project-structure.md. */
+const BACKEND_API_DOC_MARKERS = [
+  'routes.js',
+  'runCalculation.js',
+  'validate.js',
+  'errorCodes.js',
+  'sendErrorEnvelope.js',
+  'adminFeedbackRoutes.js',
+  'projectsRoutes.js',
+  'publicSharesRoutes.js',
 ];
 
 /** @param {string} rel */
@@ -85,12 +97,18 @@ const calcValidation = readRepo('docs/calc-input-validation.md');
 assert.match(calcValidation, /ROOM_TYPE_INVALID.*living/s);
 
 const plan = readRepo('Plan.md');
-assert.match(plan, /catalog-language/);
-assert.match(plan, /auth-pipeline/);
+assert.match(plan, /project-structure\.md/);
 assert.match(plan, /survey-draft\.md/);
 assert.match(plan, /ufh-test-checklist\.md/);
 assert.doesNotMatch(plan, /✅/);
 assert.doesNotMatch(plan, /Roadmap/i);
+assert.doesNotMatch(plan, /phase0-audit/);
+assert.doesNotMatch(plan, /baseline\.md/);
+assert.doesNotMatch(
+  plan,
+  /## `backend\/` — REST API/,
+  'Plan.md не должен дублировать детальную таблицу backend/ (SSOT — project-structure.md)',
+);
 
 const projectStructure = readRepo('docs/project-structure.md');
 for (const dir of BACKEND_SRC_TOP_DIRS) {
@@ -101,7 +119,26 @@ for (const dir of BACKEND_SRC_TOP_DIRS) {
   );
 }
 assert.match(projectStructure, /feedback\//);
+assert.match(projectStructure, /catalog-language/);
+assert.match(projectStructure, /auth-pipeline/);
 assert.doesNotMatch(projectStructure, /Фазы 1–3/);
+assert.doesNotMatch(
+  projectStructure,
+  /legacy hydraulics snapshot/,
+  'устаревший matching hydraulics snapshot не должен быть в docs',
+);
+assert.ok(
+  !existsSync(path.join(root, 'backend', 'src', 'matching', 'hydraulics.js')),
+  'backend/src/matching/hydraulics.js не должен существовать',
+);
+
+for (const marker of BACKEND_API_DOC_MARKERS) {
+  assert.match(
+    projectStructure,
+    new RegExp(marker.replace(/\./g, '\\.')),
+    `project-structure.md должен упоминать api/${marker}`,
+  );
+}
 
 const backendSrc = path.join(root, 'backend', 'src');
 const actualDirs = readdirSync(backendSrc)
@@ -120,14 +157,6 @@ for (const rel of BACKEND_PUBLIC_BARRELS) {
   );
 }
 assert.ok(existsSync(path.join(backendSrc, 'index.js')), 'backend/src/index.js обязателен');
-
-for (const dir of BACKEND_SRC_TOP_DIRS) {
-  assert.match(
-    plan,
-    new RegExp(`\`${dir}/\``),
-    `Plan.md должен описывать backend/src/${dir}/`,
-  );
-}
 
 const surveyDraft = readRepo('docs/survey-draft.md');
 assert.match(surveyDraft, /SurveyDraft/);
@@ -152,6 +181,13 @@ assert.equal(
 );
 
 assert.ok(existsSync(path.join(root, 'backend/README.md')), 'backend/README.md должен существовать');
+const backendReadme = readRepo('backend/README.md');
+assert.match(backendReadme, /project-structure\.md/);
+assert.doesNotMatch(
+  backendReadme,
+  /Карта модулей:.*Plan\.md.*project-structure/,
+  'backend/README не должен дублировать две карты структуры',
+);
 
 const rootPkg = JSON.parse(readRepo('package.json'));
 assert.match(String(rootPkg.scripts.verify), /verify:backend-docs/);

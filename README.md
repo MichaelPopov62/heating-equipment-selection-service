@@ -2,7 +2,9 @@
 
 REST API и фронтенд для подбора теплового оборудования (дом/квартира).
 
-Правила и карта модулей — [`Plan.md`](Plan.md), [`.cursorrules`](.cursorrules).  
+Правила — [`.cursorrules`](.cursorrules).  
+Дерево папок (SSOT) — [`docs/project-structure.md`](docs/project-structure.md).  
+Индекс модулей и доменных ссылок — [`Plan.md`](Plan.md).  
 Контракт API — [`openapi.yaml`](openapi.yaml).
 
 ---
@@ -11,8 +13,8 @@ REST API и фронтенд для подбора теплового обору
 
 | Документ | Назначение |
 |----------|------------|
-| [`Plan.md`](Plan.md) | Карта модулей backend/frontend |
-| [`docs/project-structure.md`](docs/project-structure.md) | Навигатор по папкам и entrypoints |
+| [`docs/project-structure.md`](docs/project-structure.md) | SSOT: папки, entrypoints, слои |
+| [`Plan.md`](Plan.md) | Краткий индекс модулей и ссылок |
 | [`docs/type-safety.md`](docs/type-safety.md) | Строгая типобезопасность, CI gate |
 | [`backend/README.md`](backend/README.md) | Backend: quick start, verify, маршруты |
 
@@ -62,7 +64,7 @@ npm run start          # http://localhost:3001
 
 Calc-пайплайн HTTP: `runCalculation(body)` (`api/runCalculation.js`); внутри — `getReferenceBundle()` → `toCalcRuntimeContext()` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })`. On-demand сброс кэша: `POST /api/v1/system/invalidate-reference-cache`.
 
-Подробнее: [`backend/README.md`](backend/README.md). Эндпоинты и auth — `openapi.yaml`, [`docs/auth.md`](docs/auth.md), [`docs/projects-api.md`](docs/projects-api.md).
+Подробнее: [`backend/README.md`](backend/README.md), структура — [`docs/project-structure.md`](docs/project-structure.md). Эндпоинты и auth — `openapi.yaml`, [`docs/auth.md`](docs/auth.md), [`docs/projects-api.md`](docs/projects-api.md).
 
 ---
 
@@ -70,7 +72,7 @@ Calc-пайплайн HTTP: `runCalculation(body)` (`api/runCalculation.js`); в
 
 React + Vite + TypeScript + **React Query** (`frontend/src/query/`). Запуск: `cd frontend && npm install && npm run dev`.
 
-Документация: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md), [`docs/start-state.md`](docs/start-state.md). Карта: [`docs/project-structure.md`](docs/project-structure.md), [`Plan.md`](Plan.md).
+Документация: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md), [`docs/start-state.md`](docs/start-state.md). Карта папок: [`docs/project-structure.md`](docs/project-structure.md).
 
 Точка входа SPA: `App.tsx` → `AppRouter`; `/` — анкета, `/projects` — проекты, `/s/:shareToken` — read-only презентация.
 

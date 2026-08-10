@@ -24,7 +24,7 @@ SSOT матрицы URL, пар CORS и переменных окружения.
 | `staging` | Staging (Vercel + Render) |
 | `main` | Production (Vercel + Render) |
 
-> Подтвердить Production Branch / Auto-Deploy в Vercel и Render Dashboard — [`phase0-audit.md`](phase0-audit.md) §0.1.
+> Подтвердить Production Branch / Auto-Deploy в Vercel и Render Dashboard.
 
 ---
 
@@ -32,11 +32,11 @@ SSOT матрицы URL, пар CORS и переменных окружения.
 
 | Окружение | Имя БД | Seed |
 |-----------|--------|------|
-| Local dev | `heating-selection-service` (или из `MONGODB_DB`) | [`baseline.md`](baseline.md) |
-| Staging | **`heatcalc_staging`** | выполнен — [`render.md`](render.md) § Seed |
+| Local dev | `heating-selection-service` (или из `MONGODB_DB`) | `npm run seed` в `backend/` |
+| Staging | **`heatcalc_staging`** | [`render.md`](render.md) § Seed |
 | Production | **`heatcalc_production`** | [`first-deploy.md`](first-deploy.md) § Production |
 
-Cluster (baseline): `cluster0.ddnqw2o.mongodb.net`. Seed: [`render.md`](render.md) § Seed.
+Seed: [`render.md`](render.md) § Seed.
 
 ---
 

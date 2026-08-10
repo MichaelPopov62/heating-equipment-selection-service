@@ -65,7 +65,7 @@ React + Vite + TypeScript + **@tanstack/react-query**. Точка входа: `s
 | `DevPanel/` | Служебная панель разработчика; подробнее — [`frontend-dev-panel.md`](../docs/frontend-dev-panel.md) |
 | `ShareLinkToast/` | Toast после копирования публичной ссылки |
 
-Подробнее: [`docs/start-state.md`](../docs/start-state.md), [`docs/frontend-calc-runner.md`](../docs/frontend-calc-runner.md), публичная ссылка и PDF — [`docs/client-share-and-layers.md`](../docs/client-share-and-layers.md), [`docs/project-pdf.md`](../docs/project-pdf.md), **деплой Vercel/Render** — [`docs/deploy/README.md`](../docs/deploy/README.md), структура в [`Plan.md`](../Plan.md), карта папок и **соглашения именования/слоёв** — [`docs/project-structure.md`](../docs/project-structure.md) § «Соглашения именования и распределение ответственности».
+Подробнее: [`docs/start-state.md`](../docs/start-state.md), [`docs/frontend-calc-runner.md`](../docs/frontend-calc-runner.md), публичная ссылка и PDF — [`docs/client-share-and-layers.md`](../docs/client-share-and-layers.md), [`docs/project-pdf.md`](../docs/project-pdf.md), **деплой Vercel/Render** — [`docs/deploy/README.md`](../docs/deploy/README.md), карта папок и **соглашения именования/слоёв** — [`docs/project-structure.md`](../docs/project-structure.md) § «Соглашения именования и распределение ответственности».
 
 PDF сметы скачивается с API (`downloadProjectPdf` / `downloadPublicSharePdf` → `utils/downloadBlobFile.ts`) без `window.open`.
 

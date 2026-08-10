@@ -2,6 +2,8 @@
 
 Node.js + Express: расчёт теплопотерь, подбор оборудования, гидравлика, проекты, share, PDF.
 
+**Структура папок и файлов** — только в [`docs/project-structure.md`](../docs/project-structure.md) § `backend/` (SSOT).
+
 ## Быстрый старт
 
 ```bash
@@ -44,9 +46,12 @@ npm run seed   # нужен test_data.json (см. test_data.json.example)
 npm run verify   # lint + typecheck + все verify:*
 ```
 
+Группы скриптов — [`docs/project-structure.md`](../docs/project-structure.md) § Verify.
+
 ## Документация
 
-- Карта модулей: [`Plan.md`](../Plan.md), [`docs/project-structure.md`](../docs/project-structure.md)
+- Структура: [`docs/project-structure.md`](../docs/project-structure.md)
+- Индекс ссылок: [`Plan.md`](../Plan.md)
 - Auth: [`docs/auth.md`](../docs/auth.md)
 - Admin feedback: [`docs/feedback-admin.md`](../docs/feedback-admin.md)
 - Projects: [`docs/projects-api.md`](../docs/projects-api.md)

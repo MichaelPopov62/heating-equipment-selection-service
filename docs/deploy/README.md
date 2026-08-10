@@ -34,8 +34,6 @@ Frontend обращается к API **напрямую** через `VITE_API_B
 | [`render.md`](render.md) | Web Service, backend env, seed |
 | [`first-deploy.md`](first-deploy.md) | Runbook «с нуля» |
 | [`smoke-tests.md`](smoke-tests.md) | Acceptance A1–A7 |
-| [`baseline.md`](baseline.md) | История готовности к деплою |
-| [`phase0-audit.md`](phase0-audit.md) | Аудит docs ↔ код |
 
 ### Связанные domain-доки
 

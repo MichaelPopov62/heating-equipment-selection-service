@@ -2,7 +2,7 @@ type: object
 additionalProperties: true
 description: >
   Расчёт водяного тёплого пола; null, если waterUnderfloorHeating выключен.
-  Поля ufhCircuitPresetId, mixingNode, roomHeatLossWatts — план roadmap (фазы 1–8), см. Plan.md.
+  Включает circuit*, mixingNode, distributionPreset, rooms[], underfloorHydraulics.
 properties:
   enabled:
     type: boolean

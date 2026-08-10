@@ -139,4 +139,4 @@ cd backend && npm run verify:reference-cache-invalidate
 - `backend/src/api/runCalculation.js` — composition root HTTP calc (POST /api/v1/calc, POST /api/v1/projects/:id/calc)
 - `backend/src/reference/configCache.js` — TTL bundle + `deepFreeze`
 - `backend/src/reference/public.js` — barrel: `getReferenceBundle`, `toCalcRuntimeContext`, `assertCalcRuntimeContext`
-- `Plan.md` § «Поток calc» — краткая схема пайплайна
+- `Plan.md` § «Поток calc» и [`project-structure.md`](project-structure.md) § `backend/` — схема пайплайна и карта модулей

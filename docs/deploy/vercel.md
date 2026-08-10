@@ -3,7 +3,7 @@
 # Vercel (frontend)
 
 Развёртывание React + Vite SPA из монорепозитория.  
-Матрица env: [`environments.md`](environments.md). SSOT сборки — [`phase0-audit.md`](phase0-audit.md) §0.3.
+Матрица env: [`environments.md`](environments.md).
 
 ---
 

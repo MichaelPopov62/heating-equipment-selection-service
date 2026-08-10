@@ -1,6 +1,7 @@
 # Карта структуры проекта
 
-Навигатор по папкам и ключевым entrypoints. Карта verify и calc flow — [`Plan.md`](../Plan.md); здесь — «куда смотреть» и дерево `backend/`.
+**SSOT** дерева папок и entrypoints репозитория (в т.ч. полный навигатор `backend/`).  
+Краткий индекс модулей и доменных ссылок — [`Plan.md`](../Plan.md). Quick start API — [`backend/README.md`](../backend/README.md).
 
 Правила кода и бизнес-контекст: [`.cursorrules`](../.cursorrules).  
 Контракт API: [`openapi.yaml`](../openapi.yaml).  
@@ -43,7 +44,7 @@
 | `.github/workflows/verify.yml` | CI: bypass → shared → backend → frontend → build |
 | `tsconfig.strict-base.json` | Общий strict-профиль для shared / backend / frontend |
 | `package.json` (корень) | `npm run verify`, `dev:full`, prefix-скрипты |
-| [`Plan.md`](../Plan.md) | Карта модулей backend/frontend |
+| [`Plan.md`](../Plan.md) | Краткий индекс модулей и ссылок на доменные доки |
 | `.cursorrules` | Политика модулей, бизнес-правила, стек |
 
 ---
@@ -68,110 +69,503 @@
 
 ## `backend/` — API и расчётное ядро
 
-Точка входа: `src/index.js`. Cross-domain импорты — только через barrels `*/public.js` (`api`, `catalog`, `hydraulics`, `matching`, `models`, `reference`, `report`).
+Точка входа: `src/index.js`. Cross-domain импорты в runtime — только через barrels `*/public.js` (`api`, `catalog`, `hydraulics`, `matching`, `models`, `reference`, `report`). `scripts/` импортирует internal напрямую.
+
+Calc HTTP: `runCalculation(body)` → `getReferenceBundle()` → `toCalcRuntimeContext()` → `validateAndNormalizeInput(body, ctx)` → `buildReport({ input, ctx })` → matching + hydraulics. Invalidate bundle: `POST /api/v1/system/invalidate-reference-cache`.
+
+Полные деревья ниже — **SSOT** файлов `backend/` (сверка с диском). Локальный мусор (`node`, пустые артефакты npm) в дерево не входит.
 
 ### Корень `backend/`
 
+```text
+backend/
+  README.md
+  package.json
+  package-lock.json
+  eslint.config.js
+  tsconfig.json
+  .env.example
+  Dockerfile
+  docker-compose.pdf.yml
+  test_data.json.example
+  test_data.json          # gitignore; локальная копия каталога
+  data/                  # JSON справочников для seed
+  scripts/               # seed, verify, migrate, fixtures, utils
+  src/
+    index.js             # Express entry
+    <18 domain folders>
+```
+
 | Путь | Назначение |
 |------|------------|
+| `src/index.js` | Express app: CORS, Helmet, requestId, warmup reference bundle |
 | `README.md` | Quick start, маршруты, verify |
 | `package.json` | `npm run start`, `npm run verify`, `npm run seed` |
-| `eslint.config.js` / `tsconfig.json` | ESLint, checkJs |
-| `.env.example` | Шаблон переменных окружения |
+| `eslint.config.js` / `tsconfig.json` | ESLint, checkJs / typecheck |
+| `.env.example` | Шаблон env (Mongo, CORS, auth, cache, PDF) |
 | `Dockerfile` / `docker-compose.pdf.yml` | API + Chromium для PDF |
-| `data/` | JSON справочников для seed (см. ниже) |
+| `data/` | JSON-эталоны справочников для seed |
 | `scripts/` | seed, verify, migrate, fixtures, utils |
-| `test_data.json.example` / `test_data.json` | Каталог products (example в git) |
+| `test_data.json.example` | Эталон каталога `products` (в git) |
+| `test_data.json` | Локальная копия каталога (gitignore; seed / `CATALOG_SOURCE=file`) |
 
-### `backend/src/` — домены (18 папок)
+### `backend/src/` — домены (18 папок + `index.js`)
 
 | Папка | Назначение |
 |-------|------------|
-| `api/` | HTTP-слой — см. подтаблицу ниже |
-| `auth/` | JWT, Clerk/JWKS, `requireAuth`, `requireRole`, tier — [`auth.md`](auth.md) |
-| `catalog/` | `loadCatalog`, `validateCatalog`, helpers, geometry серий |
-| `climate/` | `geocode.js`, `snipClimate.js`, Meteostat bulk |
-| `data/` | Static пресеты ТП для UI (`warmFloorAssemblyPresets.js`, `flooringFinishMaterials.js`) |
-| `dhw/` | water_norms, appliances: load + validate + `waterCalc.js` |
-| `feedback/` | Валидация публичного feedback, сериализация admin DTO и SSE-hub |
-| `hydraulics/` | Pure Pipeline (~25 модулей), barrel `public.js` |
-| `logic/` | Теплопотери, ограждения, ГВС, оркестратор ТП (`warmFloorCalc`, `ufh*`) |
-| `matching/` | Подбор оборудования; `internal/` — radiators core, emitter kind, indirect helpers |
-| `models/` | Mongoose: runtime `public.js`; discriminators (`Boiler.js`, …) — только seed |
-| `projects/` | CRUD, calc, share, PDF — см. подтаблицу ниже |
-| `recommendations/` | load/validate/resolver текстов `REC_*` / `WARN_*` |
-| `reference/` | `configCache`, bundle, `toCalcRuntimeContext`, `deepFreeze` |
-| `report/` | `buildReport.js`, `buildFinancialBom.js`, `automationHints.js`, `public.js` |
-| `types/` | `shared-types.d.ts`, `boiler-types.d.ts`, `auth.d.ts`, `express-augment.d.ts` |
-| `ufh/` | Mongo-пресеты режимов ТП: load + validate |
-| `utils/` | logger, Mongo, `createAppError`, boiler mounting, pump curve, matching hints |
+| `api/` | HTTP `/api/v1/*`, AJV, `runCalculation`, rate limiters |
+| `auth/` | JWT pipeline, Clerk/JWKS, `requireAuth`, `requireRole`, tier — см. [`auth.md`](auth.md) |
+| `catalog/` | `loadCatalog` / `validateCatalog` (mongo | file | auto), helpers, geometry серий |
+| `climate/` | Nominatim geocode + Meteostat bulk |
+| `data/` | Static пресеты ТП для UI (не Mongo) |
+| `dhw/` | water_norms / appliances: load + validate + `waterCalc` |
+| `feedback/` | Публичный feedback + admin DTO + SSE hub |
+| `hydraulics/` | Pure Pipeline гидравлики, barrel `public.js` |
+| `logic/` | Теплопотери, стены, ГВС, оркестратор ТП (`warmFloorCalc`, `ufh*`) |
+| `matching/` | Подбор оборудования; `internal/` — radiators / emitter / indirect helpers |
+| `models/` | Mongoose: runtime `public.js`; discriminators — только seed |
+| `projects/` | CRUD, calc, share, PDF, import/export |
+| `recommendations/` | load / validate / resolver текстов `REC_*` / `WARN_*` |
+| `reference/` | TTL bundle + `toCalcRuntimeContext` |
+| `report/` | `buildReport`, `buildFinancialBom` → `commercial`, `automationHints` |
+| `types/` | JSDoc/`*.d.ts` для HTTP и доменных DTO |
+| `ufh/` | load + validate Mongo `underfloor_heating_presets` |
+| `utils/` | logger, Mongo, errors, boiler mounting, pump curve, apartment matching |
 
-#### `backend/src/api/`
+#### Полные деревья `backend/src/<domain>/`
 
-| Файл | Назначение |
-|------|------------|
-| `routes.js` | Роуты presets + calc |
-| `runCalculation.js` | Composition root calc |
-| `validate.js` | AJV + нормализация CalcInput |
-| `calcInputSchemaLoader.js` | Загрузка OpenAPI-схемы для AJV |
-| `public.js` | Barrel HTTP API |
-| `projectsRoutes.js` | Projects CRUD, calc, share, PDF |
-| `publicSharesRoutes.js` | Публичный share |
-| `adminFeedbackRoutes.js` | Admin: список обращений, статусы и SSE `/api/v1/admin/feedback*` |
-| `meRoutes.js` / `adminRoutes.js` / `feedbackRoutes.js` / `systemRoutes.js` | `/me`, admin gate/users, публичный feedback, cache invalidate |
-| `validateAdminUserPatch.js` | Валидация PATCH admin user |
-| `middleware/rateLimiters.js` | Rate limits |
+##### `api/` (16 файлов)
 
-#### `backend/src/matching/`
+```text
+middleware/
+  rateLimiters.js
+adminFeedbackRoutes.js
+adminRoutes.js
+calcInputSchemaLoader.js
+errorCodes.js
+feedbackRoutes.js
+meRoutes.js
+projectsRoutes.js
+public.js
+publicSharesRoutes.js
+routes.js
+runCalculation.js
+sendErrorEnvelope.js
+systemRoutes.js
+validate.js
+validateAdminUserPatch.js
+```
 
-| Файл / папка | Назначение |
-|--------------|------------|
-| `index.js` | Оркестратор `matchEquipment` |
-| `boiler.js`, `radiators.js`, `waterHeater.js`, `indirectWaterHeater.js` | Подбор по типам |
-| `manifold.js`, `unibox.js`, `warmFloor.js`, `hydraulics.js` | Коллекторы, унибоксы, ТП, legacy hydraulics snapshot |
-| `radiatorSizingHelpers.js`, `enrichProposalBundlePrice.js` | Sizing, цены proposal |
-| `internal/` | `pickRadiatorsCore`, emitter kind, micro-load, mixed UFH, indirect catalog |
+##### `auth/` (14 файлов)
 
-#### `backend/src/models/`
+```text
+attachRequestContext.js
+authErrors.js
+authorizationPolicy.js
+extractBearerToken.js
+mapJwtPayload.js
+optionalAuth.js
+platformAdminAllowlist.js
+projectsAuthConfig.js
+requireAuth.js
+requireRole.js
+resolveUser.js
+runAuthPipeline.js
+serializeMeUser.js
+verifyAccessToken.js
+```
 
-Runtime — `public.js` (`Product`, `Project`, `Calculation`, `User`, `Feedback`). Discriminators для seed: `Boiler`, `Radiator`, `WaterHeater`, `Pipe`, `Pump`, `IndirectWaterHeater`, `Manifold`, `BoilerManifold`, `Unibox`; reference: `WaterNorms`, `Appliance`, `Recommendation`, `UnderfloorHeatingPreset`.
+##### `catalog/` (12 файлов)
 
-#### `backend/src/projects/` — подмодули
+```text
+boilerCatalogHelpers.js
+boilerManifoldSeriesGeometry.js
+comparators.js
+loadCatalog.js
+manifoldSeriesGeometry.js
+matchingSortPools.js
+pipeCatalogHelpers.js
+public.js
+pumpCatalogHelpers.js
+types.d.ts
+uniboxCatalogHelpers.js
+validateCatalog.js
+```
 
-| Группа | Ключевые файлы |
-|--------|----------------|
-| CRUD / calc | `resolveProjectCalcInput.js`, `extractCalculationSummary.js`, `serializeProject.js`, `validateProjectBody.js`, `documentSizeLimits.js`, `projectAccess.js`, `projectChangeMeta.js`, `requireMongo.js` |
-| Share | `buildShareSnapshot.js`, `buildPublisherPresentation.js`, `shareToken.js`, `serializeShare.js` |
-| PDF | `buildEstimatePdfHtml.js`, `buildTechnicalPdfHtml.js`, `renderPdfFromHtml.js`, `renderEstimatePdf.js`, `pdfFilename.js`, `pdfRenderSemaphore.js`, `pdfHtmlEscape.js` |
-| Migrate | `migrateLegacyProjectOwnerId.js` |
+##### `climate/` (3 файлов)
 
-Домены в отдельных доках: [`hydraulics-pipeline.md`](hydraulics-pipeline.md), [`manifold-matching.md`](manifold-matching.md), [`unibox-matching.md`](unibox-matching.md), [`calc-runtime-context.md`](calc-runtime-context.md), [`client-share-and-layers.md`](client-share-and-layers.md), [`project-pdf.md`](project-pdf.md).
+```text
+geocode.js
+index.js
+snipClimate.js
+```
+
+##### `data/` (2 файлов)
+
+```text
+flooringFinishMaterials.js
+warmFloorAssemblyPresets.js
+```
+
+##### `dhw/` (7 файлов)
+
+```text
+loadAppliances.js
+loadWaterNorms.js
+types.d.ts
+validateAppliances.js
+validateReferenceHelpers.js
+validateWaterNorms.js
+waterCalc.js
+```
+
+##### `feedback/` (3 файлов)
+
+```text
+adminFeedback.js
+feedbackEventHub.js
+validateFeedbackBody.js
+```
+
+##### `hydraulics/` (26 файлов)
+
+```text
+buildGraph.js
+buildHydraulicsProposal.js
+buildRadiatorSubgraph.js
+buildSnapshots.js
+circulationLoops.js
+crossValidatePipelineInput.js
+groupRadiatorGraphBranches.js
+parseConnectionDiameter.js
+pickPipe.js
+pickPump.js
+pickTrunkChain.js
+pipeCatalogPoolFilter.js
+pipeHydraulics.js
+pipelineSchemaLoader.js
+pressureDrop.js
+public.js
+radiatorGraphHelpers.js
+resolveCirculationFlows.js
+resolveEmittersMode.js
+resolveFlowDeltaTK.js
+resolveSystemPumps.js
+resolveZoneHead.js
+runHydraulicsPipeline.js
+thermalLoadToFlow.js
+types.d.ts
+validatePipelineInput.js
+```
+
+##### `logic/` (30 файлов)
+
+```text
+apartmentStackBoundaries.js
+envelopeHeatLoss.js
+envelopePresets.js
+externalWallsValidate.js
+heatingThermalRegimes.js
+heatlossByRooms.js
+hotWater.js
+normalizeHeatingUfhPreset.js
+normalizeUnderfloorDistribution.js
+orientationHeatLoss.js
+roomExteriorLayoutHeatLoss.js
+topBoundaryEnvelope.js
+ufhActiveFloorArea.js
+ufhCircuitResolve.js
+ufhDistributionResolve.js
+ufhHydraulicsCircuit.js
+ufhLoopGeometry.js
+ufhLoopHydraulics.js
+ufhLoopHydraulics.types.d.ts
+ufhLoopLength.js
+ufhMixingNode.js
+ufhMixingNodeHydraulics.js
+ufhPipeEmbedment.js
+ufhPipeSpacingResolve.js
+ufhRequiredHeatFlux.js
+ufhRoomCoverageCheck.js
+ufhRoomHeatFlux.js
+ventilationReserve.js
+wallAssembly.js
+warmFloorCalc.js
+```
+
+##### `matching/` (23 файлов)
+
+```text
+internal/
+  decideObjectEmitterKind.js
+  exploreRoomEmitterKind.js
+  indirectCatalogHelpers.js
+  mixedRadiatorsUfhMode.js
+  pickRadiatorsCore.js
+  radiatorConnectionNotes.js
+  resolveMicroLoadRadiatorStrategy.js
+  resolveMixedRadiatorRoomLoad.js
+  sizeForcedRoomEmitter.js
+  summarizeRadiatorEmitters.js
+  uniboxRoomAirPresets.js
+boiler.js
+enrichProposalBundlePrice.js
+index.js
+indirectPriorityRoomHint.js
+indirectWaterHeater.js
+manifold.js
+public.js
+radiators.js
+radiatorSizingHelpers.js
+unibox.js
+warmFloor.js
+waterHeater.js
+```
+
+##### `models/` (20 файлов)
+
+```text
+Appliance.js
+Boiler.js
+BoilerManifold.js
+Calculation.js
+Feedback.js
+IndirectWaterHeater.js
+Manifold.js
+Pipe.js
+Product.js
+productSchemas.js
+Project.js
+public.js
+Pump.js
+Radiator.js
+Recommendation.js
+UnderfloorHeatingPreset.js
+Unibox.js
+User.js
+WaterHeater.js
+WaterNorms.js
+```
+
+##### `projects/` (30 файлов)
+
+```text
+buildEstimatePdfHtml.js
+buildPublisherPresentation.js
+buildShareSnapshot.js
+buildTechnicalPdfHtml.js
+documentSizeLimits.js
+extractCalculationSummary.js
+importProjectBundle.js
+migrateLegacyProjectOwnerId.js
+normalizeLegacySurveyImport.js
+parseIncludeTechnicalQuery.js
+parseObjectId.js
+pdfFilename.js
+pdfHtmlEscape.js
+pdfRenderSemaphore.js
+projectAccess.js
+projectChangeMeta.js
+projectExportConstants.js
+projectOwnerMeta.js
+renderEstimatePdf.js
+renderPdfFromHtml.js
+requireMongo.js
+resolveProjectCalcInput.js
+serializeProject.js
+serializeShare.js
+shareToken.js
+sortCalculationsForImport.js
+stripMongoExportFields.js
+validateProjectBody.js
+validateProjectImportBody.js
+validateProjectSurveyShape.js
+```
+
+##### `recommendations/` (4 файлов)
+
+```text
+loadRecommendations.js
+recommendationResolver.js
+types.d.ts
+validateRecommendations.js
+```
+
+##### `reference/` (6 файлов)
+
+```text
+assertCalcRuntimeContext.js
+configCache.js
+deepFreeze.js
+loadReferenceCollection.js
+public.js
+toCalcRuntimeContext.js
+```
+
+##### `report/` (4 файлов)
+
+```text
+automationHints.js
+buildFinancialBom.js
+buildReport.js
+public.js
+```
+
+##### `types/` (4 файлов)
+
+```text
+auth.d.ts
+boiler-types.d.ts
+express-augment.d.ts
+shared-types.d.ts
+```
+
+##### `ufh/` (3 файлов)
+
+```text
+loadUnderfloorHeatingPresets.js
+types.d.ts
+validateUnderfloorHeatingPresets.js
+```
+
+##### `utils/` (14 файлов)
+
+```text
+apartmentCombiSerialBufferHint.js
+apartmentMatching.js
+boilerMatchingByType.js
+boilerMountingConstraints.js
+createAppError.js
+isPlainObject.js
+logger.js
+math.js
+mongoConnectionConfig.js
+mongoDnsPreferPublic.js
+mongoReferenceConnection.js
+pumpCurveMath.js
+sanitizeString.js
+setNoStoreCacheHeaders.js
+```
+
+Гидравлика после matching — только `backend/src/hydraulics/` (файла `matching/hydraulics.js` нет).
+
+##### Runtime barrels `*/public.js`
+
+`api/public.js`, `catalog/public.js`, `hydraulics/public.js`, `matching/public.js`, `models/public.js`, `reference/public.js`, `report/public.js`.
 
 ### `backend/data/` и каталог
+
+```text
+appliances.json
+recommendations.json
+underfloor_heating_presets.json
+water_norms.json
+```
 
 | Путь | Назначение |
 |------|------------|
 | `data/water_norms.json` | Нормы ГВС (seed → Mongo `water_norms`) |
 | `data/appliances.json` | Правила техники (не номенклатура) |
 | `data/recommendations.json` | Тексты рекомендаций |
-| `data/underfloor_heating_presets.json` | Режимы ТП (seed → Mongo `underfloor_heating_presets`) |
+| `data/underfloor_heating_presets.json` | Режимы ТП |
 | `test_data.json.example` | Эталон каталога products (в git) |
-| `test_data.json` | Локальная копия каталога (gitignore; для seed / file mode) |
+| `test_data.json` | Локальная копия каталога (gitignore) |
 
 ### `backend/scripts/`
 
-| Группа | Назначение |
-|--------|------------|
-| `seed.js` + `seedReferenceData.js` | Запись products + reference в Mongo |
-| `migrateProjectOwnerIds.js` | Миграция legacy `projects.ownerId` |
-| `promoteUserAdmin.js` | Legacy bootstrap admin по email (dev / break-glass) |
-| `verifyPlatformAdminAllowlist.js` | Verify `PLATFORM_ADMIN_EMAILS` и интеграция с `resolveUser` |
-| `verify*.js` / `verifyFeedback.mjs` / `verifyAdminFeedback.mjs` | Domain-гейты (`npm run verify:*`) |
-| `fuzz-calc.ts` | Ручной fuzz POST `/api/v1/calc` (`npm run test:fuzz`; нужен поднятый API) |
-| `fixtures/` | Хелперы assert/фикстур для verify-скриптов |
-| `utils/` | Пути каталога, seed-normalize, invalidate cache |
+```text
+fixtures/
+  calcRuntimeContextFromFiles.js
+  scriptAssert.js
+  verifyFixtures.js
+utils/
+  catalogNormalize.js
+  catalogPaths.js
+  catalogSeedBuild.js
+  exitVerifyScript.js
+  invalidateReferenceCacheRemote.js
+  radiatorHelpers.js
+fuzz-calc.ts
+migrateProjectOwnerIds.js
+promoteUserAdmin.js
+seed.js
+seedMongoDatabase.mjs
+seedReferenceData.js
+testApartmentScheme2Payload.json
+verifyAdminFeedback.mjs
+verifyAuthMiddleware.js
+verifyAuthorizationMiddleware.js
+verifyAuthorizationPolicy.js
+verifyAuthPipeline.js
+verifyBuiltinBoilerPump.js
+verifyCalcInputSchema.js
+verifyCalcInputValidation.js
+verifyCalcRuntimeContext.js
+verifyCatalogLanguage.js
+verifyCirculationFlows.js
+verifyDocumentSizeLimits.js
+verifyExtractCalculationSummary.js
+verifyFeedback.mjs
+verifyFinancialBom.js
+verifyFitPumpCurve.js
+verifyFlowDeltaTK.js
+verifyHydraulicsPipeline.js
+verifyManifoldMatching.js
+verifyMeEndpoint.js
+verifyMicroLoadRadiator.js
+verifyMigrateProjectOwnerIds.js
+verifyMixedRadiatorUfh.js
+verifyMongoDatabase.mjs
+verifyPickPipe.js
+verifyPipeCatalogPoolFilter.js
+verifyPipeCatalogValidation.js
+verifyPlatformAdminAllowlist.js
+verifyProjectCalcInput.js
+verifyProjectImport.js
+verifyProjectPdf.js
+verifyProjectsAdminAccess.js
+verifyProjectsAuth.js
+verifyProjectShare.js
+verifyProjectsImportAdmin.js
+verifyPumpDuty.js
+verifyRadiatorConnection.js
+verifyRadiatorEmitterKind.js
+verifyRadiatorEmittersSummary.js
+verifyRadiatorSections.js
+verifyRadiatorWiringGraph.js
+verifyReferenceCacheInvalidate.js
+verifyRoomDesignAirTemp.js
+verifyRoomExteriorLayoutHeatLoss.js
+verifySeedCatalog.js
+verifySurveyDraftMigration.js
+verifyUfhActiveArea.js
+verifyUfhLoopHydraulics.js
+verifyUfhPresets.js
+verifyUniboxMatching.js
+verifyUserModel.js
+verifyWaterHeaterFormUtils.js
+verifyWaterHeaterMatching.js
+```
 
-Полный список `verify:*` — в `backend/package.json` (сгруппирован в [`Plan.md`](../Plan.md) § verify).
+### Verify (`cd backend && npm run verify`)
+
+SSOT списка скриптов — `backend/package.json` → `verify`. Группы:
+
+| Группа | `npm run verify:…` |
+|--------|---------------------|
+| Calc / schema | `calc-schema`, `calc-input-validation`, `calc-runtime-context`, `reference-cache-invalidate` |
+| Auth / identity | `user-model`, `auth-pipeline`, `auth-middleware`, `authorization-policy`, `authorization-middleware`, `me-endpoint`, `platform-admin`, `feedback`, `admin-feedback`, `projects-auth`, `projects-admin-access`, `migrate-project-owner-ids` |
+| Projects / share / PDF | `project-calc-input`, `project-import`, `projects-import-admin`, `document-size-limits`, `extract-calculation-summary`, `project-share`, `project-pdf` |
+| Catalog / seed / language | `seed-catalog`, `catalog-language`, `pipe-catalog`, `pipe-catalog-pool-filter`, `financial-bom` |
+| Hydraulics / pumps | `hydraulics-pipeline`, `pick-pipe`, `circulation-flows`, `flow-delta-tk`, `builtin-boiler-pump`, `fit-pump-curve`, `pump-duty` |
+| Radiators | `radiator-sections`, `radiator-emitters`, `radiator-connection`, `radiator-emitter-kind`, `mixed-radiator-ufh`, `micro-load-radiator`, `radiator-wiring-graph` |
+| UFH | `ufh-presets`, `ufh-loop-hydraulics`, `ufh-active-area` |
+| Matching extras | `manifold-matching`, `unibox-matching`, `room-design-air-temp`, `water-heater-matching` |
+| Frontend-adjacent | `survey-draft-migration`, `water-heater-form` |
+
+Вне `npm run verify`: `node scripts/verifyRoomExteriorLayoutHeatLoss.js`.
+
+Доменные гайды: [`hydraulics-pipeline.md`](hydraulics-pipeline.md), [`manifold-matching.md`](manifold-matching.md), [`unibox-matching.md`](unibox-matching.md), [`calc-runtime-context.md`](calc-runtime-context.md), [`client-share-and-layers.md`](client-share-and-layers.md), [`project-pdf.md`](project-pdf.md), [`projects-api.md`](projects-api.md), [`feedback-admin.md`](feedback-admin.md).
 
 ---
 
@@ -434,6 +828,6 @@ Gate colocation/types: `npm run verify:report-colocation`, `npm run verify:types
 2. UI мутация → `surveySession/runSurveyMutationPipeline` → `useSurveyCalc` → `services/calc.ts`.
 3. Контракт полей → `openapi.yaml` + `backend/src/types/shared-types.d.ts`.
 4. Публичная ссылка → `SharePresentationPage` → `publicShareApi` → `api/publicSharesRoutes.js`.
-5. PDF → `projectsApi.downloadProjectPdf` / `downloadPublicSharePdf` → `backend/projects/renderEstimatePdf.js`.
+5. PDF → `projectsApi.downloadProjectPdf` / `downloadPublicSharePdf` → `backend/src/projects/renderEstimatePdf.js`.
 6. Auth / tier UX → [`auth.md`](auth.md) · `/me` → `AccountBar` · Pro share contact → `buildPublisherPresentation.js`.
 7. Перед merge → из корня `npm run verify` (см. [`type-safety.md`](type-safety.md)).

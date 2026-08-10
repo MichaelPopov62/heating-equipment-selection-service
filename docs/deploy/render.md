@@ -30,7 +30,7 @@ Auto-deploy после push — настройка Render Dashboard (ветка 
 
 | Переменная | Staging | Production | Local `backend/.env` |
 |------------|---------|------------|----------------------|
-| `MONGODB_URI` | `…/heatcalc_staging` | `…/heatcalc_production` | dev cluster; см. [`baseline.md`](baseline.md) |
+| `MONGODB_URI` | `…/heatcalc_staging` | `…/heatcalc_production` | local: `MONGODB_*` / `.env` |
 | `CORS_ORIGIN` | `https://heatcalc-staging-mp62.vercel.app` | `https://heatcalc-mp62.vercel.app` | `http://localhost:5173` |
 | `AUTH_JWKS_URI` | Clerk staging JWKS | Clerk production JWKS | dev Clerk |
 | `AUTH_ISSUER` | Clerk staging issuer | Clerk production issuer | dev Clerk |
@@ -79,7 +79,7 @@ npm run verify:seed-catalog
 Credentials берутся из `backend/.env`; CLI подменяет только имя БД в URI.
 Альтернатива аргументу CLI: `SEED_MONGODB_DB=heatcalc_staging` в `.env` (см. [`../../backend/.env.example`](../../backend/.env.example)).
 
-Ожидаемый результат после seed staging: `products` 126, справочники заполнены — см. [`baseline.md`](baseline.md) §9.
+Ожидаемый результат после seed (ориентир по `test_data.json.example` + `backend/data/`): заполнены `products`, `water_norms`, `appliances`, `recommendations`, `underfloor_heating_presets`. Точные счётчики — `npm run verify:mongo-db -- <dbName>` / `npm run verify:seed-catalog`.
 
 ### Production (`heatcalc_production`)
 

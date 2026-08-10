@@ -14,7 +14,7 @@ Hub: [`README.md`](README.md). Матрица env: [`environments.md`](environme
 - [ ] MongoDB Atlas cluster доступен
 - [ ] Clerk Application для staging (отдельно от production)
 - [ ] Аккаунты Vercel и Render
-- [ ] Локально: `npm run verify` проходит (см. [`baseline.md`](baseline.md))
+- [ ] Локально: `npm run verify` проходит
 
 ---
 
@@ -33,7 +33,7 @@ npm run verify:mongo-db -- heatcalc_staging
 npm run verify:seed-catalog
 ```
 
-Детали: [`render.md`](render.md) § Seed, [`baseline.md`](baseline.md) §9.
+Детали: [`render.md`](render.md) § Seed.
 
 ---
 
@@ -109,7 +109,7 @@ VITE_SITE_URL=https://heatcalc-staging-mp62.vercel.app
 
 6. Deploy → открыть staging frontend URL.
 
-> Если Dashboard не даёт задать build settings — см. [`vercel.md`](vercel.md) и [`phase0-audit.md`](phase0-audit.md) §0.2.
+> Если Dashboard не даёт задать build settings — см. [`vercel.md`](vercel.md).
 
 ---
 
