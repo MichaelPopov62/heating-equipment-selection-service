@@ -86,6 +86,11 @@ for (const name of readdirSync(authSrcDir).filter((n) => n.endsWith('.js'))) {
 assert.match(authDoc, /auth\/ProtectedRoute\.tsx/);
 assert.doesNotMatch(authDoc, /routing\/ProtectedRoute\.tsx/);
 assert.match(authDoc, /auth\/ClerkProviderWithRouter\.tsx/);
+assert.match(authDoc, /auth\/ClerkLazyRoot\.tsx|ClerkLazyRoot/);
+assert.match(authDoc, /shouldLoadClerkForPath/);
+assert.match(authDoc, /clerk-sticky/);
+assert.match(authDoc, /ClerkAuthLoadingFallback/);
+assert.match(authDoc, /start-state\.md/);
 assert.match(authDoc, /extractBearerToken\.js/);
 assert.match(authDoc, /adminFeedbackRoutes\.js/);
 assert.equal(

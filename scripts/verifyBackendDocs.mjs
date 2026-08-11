@@ -366,11 +366,19 @@ assert.doesNotMatch(
   /Первые ~200 ms после mount/,
 );
 assert.match(startStateDoc, /verify:start-state/);
+assert.match(startStateDoc, /verify:seo/);
+assert.match(startStateDoc, /Static LCP shell|#static-app-shell/i);
+assert.match(startStateDoc, /static-start-screen/);
+assert.match(startStateDoc, /staticAppShellTransition/);
+assert.match(startStateDoc, /фейкового header|static-app-shell__header/i);
 assert.match(startStateDoc, /frontend\/src\/AppRoot\.tsx/);
 assert.match(startStateDoc, /frontend\/src\/hooks\/useSurveyBootstrap\.ts/);
 
 assert.doesNotMatch(projectStructure, /useSurveyBootstrap → resolving \| start \| error/);
 assert.match(projectStructure, /cold open: sync resolve/i);
+assert.match(projectStructure, /ClerkLazyRoot/);
+assert.match(projectStructure, /#static-app-shell|static-app-shell/);
+assert.match(projectStructure, /verifySeoStatic\.mjs/);
 
 for (const rel of [
   'frontend/src/AppRoot.tsx',

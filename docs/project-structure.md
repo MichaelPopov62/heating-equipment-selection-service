@@ -574,8 +574,9 @@ SSOT списка скриптов — `backend/package.json` → `verify`. Гр
 Точка входа:
 
 ```text
-main.tsx → QueryProvider → App.tsx
-  └─ BrowserRouter → AuthProvider → AppChromeProvider → AppRouter
+index.html (#static-app-shell: только hero + CTA; без фейкового header)
+  → main.tsx (fadeOutStaticShell) → QueryProvider → App.tsx
+       BrowserRouter → ClerkLazyRoot → AuthProvider → AppChromeProvider → AppRouter
        ├─ JsonLdBoundary (seo/ — Schema.org по pathname)
        ├─ /s/:shareToken → SharePresentationPage (read-only презентация)
        ├─ /login, /sign-up, /docs, /faq, legal → pages/*
@@ -584,7 +585,7 @@ main.tsx → QueryProvider → App.tsx
        └─ / → SurveyAppShell → SurveySessionProvider → AppRoot
             ├─ useSurveyBootstrap → start | survey | error
             │    └─ StartAppRoot (лёгкий chunk: StartScreen; resolving/error — skeleton / BootstrapErrorScreen)
-            │         · cold open: sync resolve (без ~200 ms resolving)
+            │         · cold open: sync resolve (без фазы resolving)
             │         · resolving только при retryBootstrap()
             └─ survey
                  └─ lazy SurveyAppRoot (тяжёлый chunk)
@@ -592,11 +593,14 @@ main.tsx → QueryProvider → App.tsx
                       └─ lazy AppSurveyContent (шаги анкеты + отчёт)
 ```
 
-Подробнее bootstrap: [`start-state.md`](start-state.md). Клиент vs Dev: [`client-share-and-layers.md`](client-share-and-layers.md).
+Подробнее bootstrap и static LCP shell: [`start-state.md`](start-state.md). Клиент vs Dev: [`client-share-and-layers.md`](client-share-and-layers.md).
 
 | Путь | Назначение |
 |------|------------|
-| `src/App.tsx` | BrowserRouter, auth/providers и `AppRouter` |
+| `index.html` | Static LCP shell (`#static-app-shell`: только hero + CTA) + `#root`; SEO meta / JSON-LD placeholder |
+| `src/main.tsx` | Mount React; `fadeOutStaticShell` / `dismissStaticAppShellImmediately` |
+| `src/utils/staticAppShellTransition.ts` | Fade/remove overlay `#static-app-shell` |
+| `src/App.tsx` | BrowserRouter, `ClerkLazyRoot`, auth/providers и `AppRouter` |
 | `src/routing/` | `AppRouter`, `SurveyAppShell`, канонические `paths`; маршруты и справочники RQ |
 | `src/AppRoot.tsx` | Оркестратор bootstrap: `useSurveyBootstrap` → `StartAppRoot` \| lazy `SurveyAppRoot` |
 | `src/StartAppRoot.tsx` | Cold open: `start` / `resolving` (retry) / `error` (без calc, projects, DevPanel; на localhost — только React Query Devtools) |
@@ -631,6 +635,7 @@ main.tsx → QueryProvider → App.tsx
 | `public/` | Статика Vite: `favicon.svg`, `robots.txt`, `sitemap.xml`, `llms.txt` |
 | `scripts/verifySurveySessionPipeline.mjs` | Verify pipeline сессии |
 | `scripts/verifyStartState.mjs` | Verify bootstrap / start screen |
+| `scripts/verifySeoStatic.mjs` | Verify SEO артефактов и контракта static LCP shell (hero + CTA, без фейкового header) |
 | `scripts/verifyFooterNav.mjs`, `verifyFrontendAuth.mjs`, `verifyFrontendMe.mjs`, `verifyAdminFeedback.mjs`, `verifyReportColocation.mjs`, `verifyTypesPlacement.mjs` | Verify навигации, auth, admin feedback, colocation отчётов, размещение типов |
 | `knip.json` | Dead-code (`--treat-config-hints-as-errors`) |
 
@@ -799,7 +804,7 @@ Gate colocation/types: `npm run verify:report-colocation`, `npm run verify:types
 | Документ | Тема |
 |----------|------|
 | [`type-safety.md`](type-safety.md) | Strict TS / checkJs / ESLint / CI |
-| [`start-state.md`](start-state.md) | Start Screen, bootstrap, exit, localStorage |
+| [`start-state.md`](start-state.md) | Start Screen, static LCP shell, bootstrap, exit, localStorage |
 | [`client-share-and-layers.md`](client-share-and-layers.md) | Клиент vs Dev, публичная ссылка, PDF |
 | [`project-pdf.md`](project-pdf.md) | Серверная генерация PDF (Chromium) |
 | [`frontend-calc-runner.md`](frontend-calc-runner.md) | SurveySession + React Query + calc |
