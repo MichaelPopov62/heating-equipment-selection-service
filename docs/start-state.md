@@ -54,11 +54,46 @@ SSOT дефолтов:
 
 `POST /api/v1/calc` только при `bootstrapMode === 'survey'` (`SurveySessionProvider.calcEnabled`).
 
+## Static LCP shell (до mount React)
+
+До загрузки JS-бандла в `frontend/index.html` поверх пустого `#root` показывается overlay `#static-app-shell` (критический CSS в `<head>`). Назначение: FCP/LCP главной без ожидания React. После mount React shell скрывается через `fadeOutStaticShell` (`STATIC_SHELL_FADE_MS` = 220 ms; при `prefers-reduced-motion` — сразу remove).
+
+### Контракт содержимого
+
+| Разрешено в `#static-app-shell` | Запрещено |
+|----------------------------------|-----------|
+| `main.static-start-screen`: SVG-логотип, один `h1`, lead, disabled CTA | Фейковый header (классы `.static-app-shell__header*`) |
+| Текст hero/CTA, согласованный с `StartScreen` / `startScreenUk` | Chip-плейсхолдеры кнопок (`.static-app-shell__chip`) |
+| Fade-out → remove (`frontend/src/utils/staticAppShellTransition.ts`) | Дублировать «Увійти» / «Проєкти» без реального UI Header/AccountBar |
+
+Настоящий `Header` (`variant=start`) и `AccountBar` появляются только после mount React в `StartAppRoot`. Пустой logo-box и chip-кнопки в static shell не использовать: они воспринимаются как дефект UI, а не как скелетон.
+
+### Последовательность cold open `/`
+
+1. HTML: `#static-app-shell` — только hero + CTA.
+2. `main.tsx`: mount React + `fadeOutStaticShell`.
+3. React: sync `useSurveyBootstrap` → `start` \| `survey` (без bootstrap skeleton / `resolving`).
+4. Опционально: при `sessionStorage` ключе `heatcalc:clerk-sticky:v1` — `ClerkLazyRoot` Suspense → `ClerkAuthLoadingFallback` («Завантаження автентифікації…»), затем UI. Это не часть static shell; см. [`auth.md`](auth.md) § Frontend (lazy Clerk).
+
+### SEO при правках shell
+
+Не удалять и не ослаблять:
+
+- `<title>`, `meta name="description"`, `meta name="robots"`;
+- static `h1` («Підбір опалення для дому та квартири») и CTA («Почати новий розрахунок»);
+- `#static-app-shell`, `.static-start-screen`, класс fade-out;
+- JSON-LD (`Organization` / `WebSite` / `WebApplication`) — инъекция на build;
+- отсутствие `modulepreload` Clerk на cold open.
+
+Gate: `cd frontend && npm run verify:seo` (входит в `npm run verify`).
+
 ## Skeleton и индикаторы загрузки
 
 | Событие | Skeleton / «Загрузка…» |
 |---------|------------------------|
-| Первое открытие сайта | ❌ сразу `start` или `survey` (sync resolve, без bootstrap skeleton) |
+| Первое открытие сайта (HTML) | Static LCP shell: только hero + CTA (без фейкового header) |
+| Первое открытие сайта (React) | ❌ сразу `start` или `survey` (sync resolve, без bootstrap skeleton) |
+| Lazy Clerk при sticky / auth-маршруте | Suspense → `ClerkAuthLoadingFallback` |
 | Lazy-load survey-chunk / route | Suspense → `AppBootstrapSkeleton` |
 | `retryBootstrap()` после error | `resolving` → `AppBootstrapSkeleton`; при зависании > **3 s** → `error` |
 | Загрузка сохранённого проекта с сервера | Переход `/projects` → `pendingProjectNavigation` → загрузка in-place, без bootstrap skeleton |
@@ -101,6 +136,7 @@ Header в режиме `start`: **Проекты** и AccountBar. В режим�
 
 ```bash
 cd frontend && npm run verify:start-state
+cd frontend && npm run verify:seo
 cd frontend && npm run verify
 ```
 
@@ -108,12 +144,15 @@ cd frontend && npm run verify
 
 - [`survey-draft.md`](survey-draft.md)
 - [`frontend-calc-runner.md`](frontend-calc-runner.md)
+- [`auth.md`](auth.md) § Frontend (lazy Clerk)
 - [`project-structure.md`](project-structure.md) § `frontend/`
 
 ## Файлы в репозитории
 
 | Слой | Путь |
 |------|------|
+| Static LCP shell | `frontend/index.html` (`#static-app-shell`, только hero + CTA) |
+| Fade shell → React | `frontend/src/utils/staticAppShellTransition.ts`, `frontend/src/main.tsx` |
 | Bootstrap hook | `frontend/src/hooks/useSurveyBootstrap.ts` |
 | Resolve hash/storage | `frontend/src/surveySession/resolveAppBootstrap.ts` |
 | Режимы UI | `frontend/src/AppRoot.tsx` (оркестратор), `StartAppRoot.tsx` (start/resolving/error), lazy `SurveyAppRoot.tsx` (survey); тип `AppBootstrapMode` в `surveySession/types.ts` |
@@ -123,4 +162,5 @@ cd frontend && npm run verify
 | Start / skeleton / error | `frontend/src/components/StartScreen/`, `AppBootstrapSkeleton/`, `BootstrapErrorScreen/` |
 | localStorage | `frontend/src/services/surveyDraftStorage.ts`, `frontend/src/hooks/useSurveyDraftPersistence.ts` |
 | Пустой / дефолтный draft | `frontend/src/surveySession/createEmptySurveySessionState.ts`, `createDefaultSurveyDraft.ts` |
-| Verify | `frontend/scripts/verifyStartState.mjs` |
+| Verify bootstrap | `frontend/scripts/verifyStartState.mjs` |
+| Verify SEO / static shell | `frontend/scripts/verifySeoStatic.mjs` |

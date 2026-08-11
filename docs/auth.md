@@ -83,19 +83,34 @@ Startup gate (`backend/src/index.js`):
 
 | Модуль | Назначение |
 |--------|------------|
-| `App.tsx` / `auth/ClerkProviderWithRouter.tsx` | Router и Clerk provider при `VITE_CLERK_PUBLISHABLE_KEY` |
+| `App.tsx` / `auth/ClerkLazyRoot.tsx` | Router; lazy Clerk только на auth/projects/admin или при sticky session |
+| `auth/ClerkProviderWithRouter.tsx` | Clerk provider + React Router adapters при активном Clerk |
 | `routing/AppRouter.tsx` / `auth/ProtectedRoute.tsx` | Guard маршрута `/projects`; `/` остаётся публичным |
-| `auth/AuthProvider.tsx` | Clerk session; `getToken({ template })` — всегда JWT template (не session token) |
+| `auth/AuthProvider.tsx` | Clerk session / public guest / legacy JWT; `getToken({ template })` — всегда JWT template (не session token) |
+| `auth/shouldLoadClerkForPath.ts` | Какие pathname требуют SDK Clerk (`/login`, `/sign-up`, `/projects`, `/admin/*`) |
 | `services/meApi.ts`, `parseMeResponse.ts` | `GET /api/v1/me` — профиль и tier с backend |
 | `query/queries/useMeQuery.ts` | React Query профиля (`queryKeys.me`) |
 | `components/AccountBar/` | «Увійти», email, badge tier, admin-ссылка; «Вийти з акаунта» завершает сессию (данные из `/me`) |
 | `components/SubscriptionTierBadge/` | Badge `free` / `pro` / `marketplace` |
 | `components/PublisherContactBlock/` | Контакт публикатора на `/s/{token}` (Pro/Marketplace) |
+| `components/ClerkAuthLoadingFallback/` | Suspense fallback при lazy-загрузке Clerk SDK |
 | `services/projectsAuthToken.ts` | `getToken()` → localStorage → env fallback |
 | `services/projectsAuthHeaders.ts` | async `Authorization: Bearer` |
 | `pages/LoginPage/` | `<SignIn />` (`/login/*`) или dev textarea JWT |
 | `pages/SignUpPage/` | `<SignUp />` (`/sign-up/*`); `signUpUrl` / `signInUrl` — см. ниже |
 | `components/Header/` | `accountSlot`, hint под «Посилання» для pro/marketplace |
+
+### Lazy Clerk (cold open `/`)
+
+Назначение: не тащить Clerk SDK на первый paint публичной главной.
+
+| Правило | Детали |
+|---------|--------|
+| Когда SDK **не** грузится | `pathname` не в `shouldLoadClerkForPath` и нет sticky → `PublicAuthProviderInner` (гость, «Увійти» → `/login`) |
+| Когда SDK грузится | auth/projects/admin маршруты **или** `sessionStorage` ключ `heatcalc:clerk-sticky:v1` |
+| Sticky | Ставится в `useLayoutEffect` при первом заходе на маршрут, требующий Clerk; сохраняется на вкладку |
+| Suspense UI | `ClerkAuthLoadingFallback` («Завантаження автентифікації…») — **не** путать со static LCP shell в `index.html` |
+| Static shell | Только hero + CTA до mount React; без фейкового header — [`start-state.md`](start-state.md) § Static LCP shell |
 
 Приоритет Bearer token:
 
