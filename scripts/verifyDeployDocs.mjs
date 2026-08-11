@@ -70,6 +70,8 @@ assert.match(vercelDoc, /Output Directory:\s+build/);
 assert.match(vercelDoc, /Root Directory.*корень/);
 assert.match(vercelDoc, /EUSAGE/);
 assert.doesNotMatch(vercelDoc, /phase0-audit/);
+assert.doesNotMatch(vercelDoc, /baseline\.md/);
+assert.match(vercelDoc, /Node\.js Version:\s+22/, 'vercel.md должен фиксировать Node 22 SSOT');
 
 /** @type {{ installCommand?: string; buildCommand?: string; outputDirectory?: string }} */
 const vercelJson = JSON.parse(readRepo('vercel.json'));
@@ -104,6 +106,17 @@ assert.doesNotMatch(plan, /phase0-audit/);
 assert.doesNotMatch(plan, /baseline\.md/);
 assert.doesNotMatch(plan, /Фаза 0/);
 assert.doesNotMatch(plan, /Pre-deploy baseline/);
+
+const renderDoc = readRepo('docs/deploy/render.md');
+assert.match(renderDoc, /heatcalc_staging/, 'render.md должен содержать seed staging DB');
+assert.match(renderDoc, /heatcalc_production/, 'render.md должен содержать production DB');
+assert.match(renderDoc, /seed:mongo-db/, 'render.md должен содержать команду seed:mongo-db');
+
+const environmentsDoc = readRepo('docs/deploy/environments.md');
+assert.match(environmentsDoc, /heatcalc_staging/);
+assert.match(environmentsDoc, /heatcalc_production/);
+assert.doesNotMatch(environmentsDoc, /phase0-audit/);
+assert.doesNotMatch(environmentsDoc, /baseline\.md/);
 
 const auth = readRepo('docs/auth.md');
 assert.match(auth, /deploy\/smoke-tests\.md/);

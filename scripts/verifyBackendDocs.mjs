@@ -163,6 +163,66 @@ for (const rel of BACKEND_PUBLIC_BARRELS) {
 }
 assert.ok(existsSync(path.join(backendSrc, 'index.js')), 'backend/src/index.js обязателен');
 
+/**
+ * Считает файлы в каталоге рекурсивно (без скрытых).
+ * @param {string} dir
+ * @returns {number}
+ */
+function countFilesRecursive(dir) {
+  let n = 0;
+  for (const name of readdirSync(dir)) {
+    if (name.startsWith('.')) continue;
+    const abs = path.join(dir, name);
+    if (statSync(abs).isDirectory()) n += countFilesRecursive(abs);
+    else n += 1;
+  }
+  return n;
+}
+
+for (const dir of BACKEND_SRC_TOP_DIRS) {
+  const actual = countFilesRecursive(path.join(backendSrc, dir));
+  const m = projectStructure.match(new RegExp(`##### \`${dir}/\` \\((\\d+) файлов\\)`));
+  assert.ok(m, `project-structure.md должен иметь заголовок дерева для ${dir}/`);
+  assert.equal(
+    Number(m[1]),
+    actual,
+    `project-structure.md: ${dir}/ заявлено ${m[1]} файлов, на диске ${actual}`,
+  );
+}
+
+const renderEstimatePdf = path.join(backendSrc, 'projects', 'renderEstimatePdf.js');
+assert.ok(existsSync(renderEstimatePdf), 'backend/src/projects/renderEstimatePdf.js обязателен');
+assert.match(
+  projectStructure,
+  /backend\/src\/projects\/renderEstimatePdf\.js/,
+  'project-structure.md должен указывать актуальный путь PDF-оркестратора',
+);
+assert.doesNotMatch(
+  projectStructure,
+  /backend\/projects\/renderEstimatePdf/,
+  'project-structure.md: запрещён устаревший путь без src/',
+);
+
+const ufhReportSchema = readRepo('components/schemas/UnderfloorHeatingReport.yaml');
+assert.doesNotMatch(
+  ufhReportSchema,
+  /roadmap/i,
+  'UnderfloorHeatingReport.yaml не должен содержать roadmap',
+);
+assert.doesNotMatch(
+  ufhReportSchema,
+  /фазы\s*1/i,
+  'UnderfloorHeatingReport.yaml не должен ссылаться на фазы плана',
+);
+
+const rootReadme = readRepo('README.md');
+assert.match(rootReadme, /project-structure\.md/, 'корневой README должен ссылаться на SSOT структуры');
+assert.doesNotMatch(
+  rootReadme,
+  /Карта модулей — \[`Plan\.md`\].*\[`docs\/project-structure/,
+  'корневой README не должен ставить Plan.md как карту структуры впереди SSOT',
+);
+
 const surveyDraft = readRepo('docs/survey-draft.md');
 assert.match(surveyDraft, /SurveyDraft/);
 assert.doesNotMatch(surveyDraft, /Hard Reset/i);
@@ -206,6 +266,8 @@ const docHistoryBans = [
   { pattern: /до релиза/i, label: 'до релиза' },
   { pattern: /снятия freeze/i, label: 'снятия freeze' },
   { pattern: /ufh-roadmap-test-checklist/, label: 'ufh-roadmap-test-checklist' },
+  { pattern: /matching\/hydraulics\.js/, label: 'matching/hydraulics.js' },
+  { pattern: /backend\/projects\/renderEstimatePdf/, label: 'PDF path без src/' },
 ];
 
 const docPaths = [
