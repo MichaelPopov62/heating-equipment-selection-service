@@ -5,7 +5,9 @@ enum:
   - marketplace
 description: |
   Уровень подписки (MongoDB users.subscription, req.user.subscription).
-  Фаза 2: метка аккаунта; не ограничивает точность calc, share или PDF.
+  Фаза 2: метка аудитории аккаунта (не биллинг-поток); назначение вручную
+  админом через PATCH /api/v1/admin/users/{id}; self-serve / оплата не реализованы;
+  не ограничивает точность calc, share или PDF (UX: badge, hint, контакт в share/PDF).
   - free — частные лица (default).
   - pro — мастера и проектанты.
   - marketplace — бренды и дистрибьюторы.

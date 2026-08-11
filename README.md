@@ -9,34 +9,28 @@ REST API и фронтенд для подбора теплового обору
 
 ---
 
+## Части монорепо
+
+| Часть | README |
+|-------|--------|
+| Frontend | [`frontend/README.md`](frontend/README.md) — архитектура, команды, DevPanel, Vercel |
+| Backend | [`backend/README.md`](backend/README.md) — quick start, seed, маршруты, verify |
+
+Корневой README не дублирует quick start и доменные детали частей: только ссылки.
+
+---
+
 ## Документация
 
 | Документ | Назначение |
 |----------|------------|
 | [`docs/project-structure.md`](docs/project-structure.md) | SSOT: папки, entrypoints, слои |
-| [`Plan.md`](Plan.md) | Краткий индекс модулей и ссылок |
+| [`Plan.md`](Plan.md) | Краткий индекс модулей и доменных гайдов |
 | [`docs/type-safety.md`](docs/type-safety.md) | Строгая типобезопасность, CI gate |
+| [`frontend/README.md`](frontend/README.md) | Frontend: запуск, слои, verify |
 | [`backend/README.md`](backend/README.md) | Backend: quick start, verify, маршруты |
 
----
-
-## Доменные гайды
-
-| Документ | Назначение |
-|----------|------------|
-| [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md) | SurveySession, React Query, calc |
-| [`docs/survey-draft.md`](docs/survey-draft.md) | SurveyDraft v4, localStorage |
-| [`docs/start-state.md`](docs/start-state.md) | Start Screen, bootstrap |
-| [`docs/language-policy.md`](docs/language-policy.md) | UA user-facing тексты |
-| [`docs/projects-api.md`](docs/projects-api.md) | REST проектов, share, PDF |
-| [`docs/auth.md`](docs/auth.md) | JWT, Clerk, `/me` |
-| [`docs/client-share-and-layers.md`](docs/client-share-and-layers.md) | Клиент vs Dev, share, PDF |
-| [`docs/project-pdf.md`](docs/project-pdf.md) | Серверный PDF (Chromium) |
-| [`docs/calc-runtime-context.md`](docs/calc-runtime-context.md) | CalcRuntimeContext, bundle |
-| [`docs/calc-input-validation.md`](docs/calc-input-validation.md) | Валидация CalcInput |
-| [`docs/room-exterior-layout.md`](docs/room-exterior-layout.md) | Положение комнаты (угловое / фасад / internal) |
-
-Полный список — [`Plan.md`](Plan.md) § «Доменная документация».
+Полный список доменных гайдов — [`Plan.md`](Plan.md) § «Доменная документация».
 
 ---
 
@@ -45,29 +39,6 @@ REST API и фронтенд для подбора теплового обору
 | Документ | Назначение |
 |----------|------------|
 | [`docs/deploy/README.md`](docs/deploy/README.md) | Hub: Vercel + Render, smoke |
-
----
-
-## Backend — быстрый старт
-
-```bash
-cd backend && npm install
-cp .env.example .env
-npm run start   # http://localhost:3001
-```
-
-Seed / verify / маршруты / calc — только в [`backend/README.md`](backend/README.md).  
-Структура папок — [`docs/project-structure.md`](docs/project-structure.md). Контракт и auth — `openapi.yaml`, [`docs/auth.md`](docs/auth.md).
-
----
-
-## Frontend
-
-React + Vite + TypeScript + **React Query** (`frontend/src/query/`). Запуск: `cd frontend && npm install && npm run dev`.
-
-Документация: [`docs/frontend-calc-runner.md`](docs/frontend-calc-runner.md), [`docs/start-state.md`](docs/start-state.md). Карта папок: [`docs/project-structure.md`](docs/project-structure.md).
-
-Точка входа SPA: `App.tsx` → `AppRouter`; `/` — анкета, `/projects` — проекты, `/s/:shareToken` — read-only презентация.
 
 ---
 
