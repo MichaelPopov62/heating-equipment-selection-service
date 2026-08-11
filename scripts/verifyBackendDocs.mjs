@@ -438,6 +438,16 @@ assert.equal(
 assert.ok(existsSync(path.join(root, 'backend/README.md')), 'backend/README.md должен существовать');
 const backendReadme = readRepo('backend/README.md');
 assert.match(backendReadme, /project-structure\.md/);
+assert.match(
+  backendReadme,
+  /\| Метод \| Эндпоинт \| Описание \| Доступ \|/,
+  'backend/README должен содержать таблицу HTTP-маршрутов (Метод|Эндпоинт|Описание|Доступ)',
+);
+assert.doesNotMatch(
+  backendReadme,
+  /\| Группа \| Маршруты \|/,
+  'backend/README не должен дублировать старую сводку Группа|Маршруты',
+);
 assert.doesNotMatch(
   backendReadme,
   /Карта модулей:.*Plan\.md.*project-structure/,
