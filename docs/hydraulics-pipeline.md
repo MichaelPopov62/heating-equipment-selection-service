@@ -123,28 +123,39 @@ SurveyDraft: `SURVEY_DRAFT_SCHEMA_VERSION=4`, поля `hydraulicsForm`, `wiring
 
 ## Модули
 
+Все `*.js` в `backend/src/hydraulics/` (плюс связанные утилиты каталога). Таблица = диск.
+
 | Путь | Назначение |
 |------|------------|
-| `hydraulics/public.js` | Barrel API |
+| `hydraulics/public.js` | Barrel API (`buildHydraulicsSnapshots`, `validateHydraulicsPipelineInput`, `runHydraulicsPipeline`, …) |
+| `hydraulics/runHydraulicsPipeline.js` | Оркестратор: граф → трубы → Δp → насосы → отчёт |
+| `hydraulics/buildSnapshots.js` | Сборка `HydraulicsPipelineInput` из matching / ТП / ГВС |
+| `hydraulics/validatePipelineInput.js` | AJV по схеме + вызов cross-validation |
+| `hydraulics/pipelineSchemaLoader.js` | Загрузка `HydraulicsPipelineInput.yaml` для AJV |
+| `hydraulics/crossValidatePipelineInput.js` | Cross-validation DTO после AJV |
 | `hydraulics/thermalLoadToFlow.js` | SSOT Q/(c·Δt) |
 | `hydraulics/resolveFlowDeltaTK.js` | SSOT ΔT расхода (анкета → fallback график) |
+| `hydraulics/resolveEmittersMode.js` | `resolvePipelineEmittersMode`, `hydraulicsRulesFromAppliance`, длины веток |
 | `hydraulics/resolveCirculationFlows.js` | Зоны циркуляции, Q, топология |
-| `hydraulics/resolveZoneHead.js` | Напор H по зоне |
+| `hydraulics/resolveZoneHead.js` | `resolveHeadForZone` — напор H по зоне |
 | `hydraulics/resolveSystemPumps.js` | Подбор насосов (встроенный котла → каталог) |
 | `hydraulics/pickPump.js` | `evaluatePumpModeAtDuty`, `pickPumpForSystem`, `evaluatePumpCurveAtDuty` |
-| `hydraulics/buildSnapshots.js` | Сборка DTO |
-| `hydraulics/validatePipelineInput.js` | AJV + cross-validation |
+| `hydraulics/buildGraph.js` | Граф (котёл / смеситель / коллекторы ТП + радиаторный подграф) |
+| `hydraulics/buildRadiatorSubgraph.js` | Топологии радиаторов: auto / dead-end / pass / manifold |
+| `hydraulics/radiatorGraphHelpers.js` | Порядок consumers, длины trunk/веток, id узлов |
 | `hydraulics/groupRadiatorGraphBranches.js` | Группировка микроветок радиаторов в графе |
-| `hydraulics/buildGraph.js` | Граф (радиаторы до смесителя ТП) |
 | `hydraulics/pickPipe.js` | Подбор труб (guard Dвн + скорость) |
 | `hydraulics/pickTrunkChain.js` | Каскадный подбор trunk dead-end/pass (монотонное заужение Ø) |
 | `hydraulics/pipeCatalogPoolFilter.js` | Guard мин. внутреннего Ø |
-| `hydraulics/buildHydraulicsProposal.js` | Предложение клиенту |
-| `hydraulics/pressureDrop.js` | Δp, критическое кольцо |
-| `hydraulics/circulationLoops.js` | Сумма Δp по веткам |
-| `hydraulics/runHydraulicsPipeline.js` | Оркестратор |
+| `hydraulics/pipeHydraulics.js` | Dвн, скорость, Darcy-Weisbach участка |
+| `hydraulics/parseConnectionDiameter.js` | Парсинг номинала подключения котла («3/4», DN20 → мм) |
+| `hydraulics/pressureDrop.js` | Δp, критическое кольцо, consumer summaries |
+| `hydraulics/circulationLoops.js` | Сумма Δp по веткам / балансировка |
+| `hydraulics/buildHydraulicsProposal.js` | Клиентское предложение (трубы, насосы, цены) |
+| `hydraulics/types.d.ts` | Типы DTO / rules pipeline |
 | `utils/pumpCurveMath.js` | H(Q), нормализация qMax, геометрия кривой (каталог) |
 | `catalog/validateCatalog.js` | Валидация `pumps[]` и `boiler.circulationPump` |
+| `logic/ufhLoopHydraulics.js` | Петли ТП (Ø / число петель / Δp) — вне `hydraulics/`, вызывается upstream |
 
 ## Топологии и расход Q
 

@@ -79,7 +79,7 @@ TTL (`REFERENCE_CACHE_TTL_MS`) остаётся fallback, если invalidate н
 |--------|-----------|
 | `validateAndNormalizeInput(body, ctx)` | validate |
 | `buildReport({ input, ctx })` | report |
-| `matchEquipment({ heatLoss, hotWater, heatingSystem, building, underfloorHeating, ctx })` | matching |
+| `matchEquipment({ heatLoss, hotWater, heatingSystem, building, underfloorHeating?, hydraulics?, ctx })` | matching |
 | `pickBoiler({ …расчётные поля…, ctx })` | matching/boiler |
 | `attachIndirectBoilerCoupling(indirect, boiler, hotWater, ctx)` | matching |
 
@@ -108,7 +108,14 @@ ESLint (`backend/eslint.config.js`): `logic/`, `api/validate.js`, `utils/**`, `m
 
 ## Единственный глобальный кэш
 
-`backend/src/reference/configCache.js` — TTL bundle, `deepFreeze`, stale-while-revalidate, **`invalidateReferenceCache()`** / **`invalidateAndWarmReferenceCache()`** с **generation guard**. HTTP: **`POST /api/v1/system/invalidate-reference-cache`** (`X-System-Token`). Barrel: `reference/public.js`.
+`backend/src/reference/configCache.js` — TTL bundle, `deepFreeze`, **`invalidateReferenceCache()`** / **`invalidateAndWarmReferenceCache()`** с **generation guard**. HTTP: **`POST /api/v1/system/invalidate-reference-cache`** (`X-System-Token`, реализация — `api/systemRoutes.js`). Barrel: `reference/public.js`.
+
+Поведение кэша (не классический SWR «отдать stale и обновить в фоне»):
+
+1. Пока `now − loadedAt < REFERENCE_CACHE_TTL_MS` — возвращается текущий `cachedBundle`.
+2. После TTL — `await refreshReferenceCache()` (один общий `refreshInFlight`).
+3. Если refresh упал, но старый bundle ещё есть — возвращается **stale fallback** (лог `referenceCache.refresh.failed`, `stale: true`).
+4. После `invalidate*` orphan refresh с другим `cacheGeneration` **не** перезаписывает кэш (`referenceCache.refresh.discarded_stale`).
 
 ### Старт API (`index.js`)
 
@@ -116,6 +123,28 @@ ESLint (`backend/eslint.config.js`): `logic/`, `api/validate.js`, `utils/**`, `m
 - **`getReferenceBundle()`** на первом calc/catalog и warmup **делят один `refreshInFlight`** — параллельной двойной загрузки bundle нет.
 - **`REFERENCE_WARMUP_BLOCK_STARTUP=true`** — `await warmupReferenceCache()` до bind порта; при ошибке процесс завершается (readiness для prod/k8s).
 - Логи: `referenceCache.warmup.start` → `referenceCache.warmup.ok` | `referenceCache.warmup.failed`; успешная загрузка также пишет `referenceCache.loaded`.
+
+## Модули `reference/`
+
+Все файлы `backend/src/reference/` (таблица = диск):
+
+| Путь | Назначение |
+|------|------------|
+| `reference/public.js` | Barrel: `getReferenceBundle`, `warmupReferenceCache`, `invalidateReferenceCache`, `invalidateAndWarmReferenceCache`, `toCalcRuntimeContext`, `assertCalcRuntimeContext` |
+| `reference/configCache.js` | TTL-кэш `ReferenceBundle`, generation guard, warmup / get / invalidate |
+| `reference/toCalcRuntimeContext.js` | Фабрика immutable `CalcRuntimeContext` из bundle |
+| `reference/assertCalcRuntimeContext.js` | Guard: `ctx` обязателен (fail-fast без второго аргумента validate) |
+| `reference/deepFreeze.js` | Рекурсивный `Object.freeze` bundle при загрузке |
+| `reference/loadReferenceCollection.js` | Общий шаблон file \| mongo \| auto для справочных коллекций |
+
+Смежные точки входа (вне `reference/`):
+
+| Путь | Назначение |
+|------|------------|
+| `api/runCalculation.js` | Composition root HTTP calc |
+| `api/systemRoutes.js` | `POST /api/v1/system/invalidate-reference-cache` |
+| `api/validate.js` | `validateAndNormalizeInput(body, ctx)` |
+| `scripts/fixtures/calcRuntimeContextFromFiles.js` | File-fixture `ctx` без Mongo для verify |
 
 ## Скрипты verify
 
@@ -128,15 +157,13 @@ matchEquipment({ heatLoss, hotWater, heatingSystem, building, ctx });
 
 Фикстуры без Mongo: `backend/scripts/fixtures/calcRuntimeContextFromFiles.js`.
 
-In-process проверка invalidate + generation guard:
-
 ```bash
-cd backend && npm run verify:reference-cache-invalidate
+cd backend && npm run verify:calc-runtime-context          # контракт ctx, file-fixture, fail без ctx
+cd backend && npm run verify:reference-cache-invalidate    # invalidate + generation guard
 ```
 
-## Связанные модули
+## Связанные документы
 
-- `backend/src/api/runCalculation.js` — composition root HTTP calc (POST /api/v1/calc, POST /api/v1/projects/:id/calc)
-- `backend/src/reference/configCache.js` — TTL bundle + `deepFreeze`
-- `backend/src/reference/public.js` — barrel: `getReferenceBundle`, `toCalcRuntimeContext`, `assertCalcRuntimeContext`
-- `Plan.md` § «Поток calc» и [`project-structure.md`](project-structure.md) § `backend/` — схема пайплайна и карта модулей
+- `Plan.md` § «Поток calc» — краткая схема пайплайна
+- [`project-structure.md`](project-structure.md) § `backend/` — карта модулей
+- [`hydraulics-pipeline.md`](hydraulics-pipeline.md) — downstream после matching (rules из `ctx.appliances`)

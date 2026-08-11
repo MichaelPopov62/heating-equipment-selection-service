@@ -12,17 +12,17 @@
 |-----------------|--------|
 | Состояние `report`, `uiPhase`, `calcInputKey`, SurveyDraft | `frontend/src/surveySession/SurveySessionProvider.tsx` |
 | Контекст сессии (хук) | `frontend/src/surveySession/useSurveySession.ts` |
-| Pipeline мутаций | `runSurveyMutationPipeline.ts` → `reduceSurveyMutation` → `migrateDerivedState` → `decideCalcAction` |
+| Pipeline мутаций | `runSurveyMutationPipeline.ts` → `reduceSurveyMutation` → `migrateDerivedState` → `decideCalcAction` (все в `surveySession/`) |
 | HTTP calc (debounce, dedup, отмена гонок) | `frontend/src/query/useSurveyCalc.ts` (React Query) |
-| Справочники (GET) | `frontend/src/query/queries/*`, композиция — `useReferenceData.ts` |
+| Справочники (GET) | `frontend/src/query/queries/*`, композиция — `frontend/src/query/useReferenceData.ts` |
 | Проекты (CRUD) | `frontend/src/query/mutations/useProjectMutations.ts`, `useProjectsListQuery`, `useProjectCalculationsQuery` |
-| Сборка тела запроса | `buildCalcPayloadFromDraft` в `buildCalcInputSnapshot.ts` |
+| Сборка тела запроса | `buildCalcPayloadFromDraft` в `frontend/src/surveySession/buildCalcInputSnapshot.ts` |
 | Ключ изменений входа | `buildCalcInputKeyFromDraft` в том же модуле |
 | Парсинг отчёта для UI | `frontend/src/hooks/useCalcReport.ts` |
 
-`main.tsx` оборачивает приложение в `QueryProvider` (`@tanstack/react-query`). `App.tsx` подключает router/auth/providers; `SurveyAppShell` загружает справочники и монтирует `SurveySessionProvider`, а `AppRoot` управляет bootstrap (`StartAppRoot` для start/resolving/error, lazy `SurveyAppRoot` для survey). **`calcReport` не хранится в `App.tsx`** — компоненты читают `report` из контекста сессии.
+`main.tsx` оборачивает приложение в `QueryProvider` (`frontend/src/query/QueryProvider.tsx`). `App.tsx` подключает router/auth/providers; `SurveyAppShell` загружает справочники и монтирует `SurveySessionProvider`, а `AppRoot` управляет bootstrap (`StartAppRoot` для start/resolving/error, lazy `SurveyAppRoot` для survey). **`calcReport` не хранится в `App.tsx`** — компоненты читают `report` из контекста сессии.
 
-**Calc guard:** `POST /api/v1/calc` активен только при `bootstrapMode === 'survey'` (`SurveySessionProvider.calcEnabled`). В Start/resolving calc не выполняется.
+**Calc guard:** `POST /api/v1/calc` активен только при `bootstrapMode === 'survey'` (`SurveySessionProvider.calcEnabled`). В Start/resolving calc не выполняется. Cold open сразу даёт `start`\|`survey` (см. [`start-state.md`](start-state.md)).
 
 ---
 
@@ -201,7 +201,7 @@ const {
 | `QueryProvider` | `QueryClientProvider` + devtools |
 | `SurveySessionProvider` | контекст, `dispatch`, `report`, `uiPhase` |
 | `useSurveyCalc` | calc API (авто query + ручная mutation) |
-| `useReferenceData` | композиция справочных query |
+| `useReferenceData` | композиция справочных query (`query/useReferenceData.ts`) |
 | `useCalcReport` | парсинг report → DTO для UI |
 | `useSurveyStepNavigation` | переход между формой и `technicalResult` + scroll к `<main>` |
 | `useSurveyProject` | файлы, Mongo, hash-URL (поверх project mutations) |
@@ -243,12 +243,18 @@ const {
 cd frontend && npm run verify
 ```
 
-- **`npm run verify`** — exit `0` обязателен (`lint` + **`typecheck`** + knip + footer/auth/me verify + **`build`** + survey-session/start-state verify).
+- **`npm run verify`** — exit `0` обязателен (`lint` + **`typecheck`** + knip + footer/auth/me verify + **`build`** + `verify:survey-session` + `verify:start-state`).
 - `verify:survey-session` читает `dist/assets` (поэтому build входит в `verify`).
 - ESLint: `strictTypeChecked` + `no-unsafe-*` (см. [`type-safety.md`](type-safety.md)).
 
 Из корня репозитория: `npm run verify:frontend`, `npm run lint:frontend`, `npm run verify` (полный gate).
 
+Точечно:
+
+```bash
+cd frontend && npm run verify:survey-session
+cd frontend && npm run verify:start-state
+```
 Связанные backend-проверки:
 
 ```bash

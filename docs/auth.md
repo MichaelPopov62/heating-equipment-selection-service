@@ -55,14 +55,17 @@ Frontend: guard только для `/projects` (`ProtectedRoute` + `VITE_AUTH_R
 
 | Модуль | Назначение |
 |--------|------------|
+| `runAuthPipeline.js` | Оркестратор identity: token → verify → map → resolveUser → attach |
+| `extractBearerToken.js` | Парсинг `Authorization: Bearer` (используют `requireAuth` / `optionalAuth`) |
 | `verifyAccessToken.js` | JOSE + JWKS (Clerk/Auth0 RS256/ES256) или HS256 (unit-тесты) |
 | `mapJwtPayload.js` | Verified payload → `AuthIdentity` (`sub`, `email` обязательны) |
-| `resolveUser.js` | find/create `users` по `(authProvider, providerUserId)` |
+| `resolveUser.js` | find/create `users` по `(authProvider, providerUserId)`; sync platform admin |
 | `attachRequestContext.js` | `req.user`, ip, userAgent |
 | `requireAuth.js` | Обязательный JWT для projects router |
 | `optionalAuth.js` | Опциональный JWT для feedback и `/me` |
 | `requireRole.js` | Authorization gate по `req.user.role` (admin API) |
 | `authorizationPolicy.js` | SSOT: `UserRole`, `SubscriptionTier`, нормализация |
+| `platformAdminAllowlist.js` | Парсинг `PLATFORM_ADMIN_EMAILS`, `isPlatformAdminEmail` |
 | `serializeMeUser.js` | Сериализация `GET /api/v1/me` |
 | `projectsAuthConfig.js` | Env, startup gate, dev owner ObjectId, safety caps |
 | `authErrors.js` | Единые ответы 401/403/503 |
@@ -80,8 +83,8 @@ Startup gate (`backend/src/index.js`):
 
 | Модуль | Назначение |
 |--------|------------|
-| `App.tsx` / `ClerkProviderWithRouter.tsx` | Router и Clerk provider при `VITE_CLERK_PUBLISHABLE_KEY` |
-| `routing/AppRouter.tsx` / `ProtectedRoute.tsx` | Guard маршрута `/projects`; `/` остаётся публичным |
+| `App.tsx` / `auth/ClerkProviderWithRouter.tsx` | Router и Clerk provider при `VITE_CLERK_PUBLISHABLE_KEY` |
+| `routing/AppRouter.tsx` / `auth/ProtectedRoute.tsx` | Guard маршрута `/projects`; `/` остаётся публичным |
 | `auth/AuthProvider.tsx` | Clerk session; `getToken({ template })` — всегда JWT template (не session token) |
 | `services/meApi.ts`, `parseMeResponse.ts` | `GET /api/v1/me` — профиль и tier с backend |
 | `query/queries/useMeQuery.ts` | React Query профиля (`queryKeys.me`) |
@@ -325,7 +328,9 @@ npm run promote:user-admin -- --email user@example.com
 | Модуль | Назначение |
 |--------|------------|
 | `api/meRoutes.js` | `GET /api/v1/me` |
-| `api/adminRoutes.js` | Управление пользователями и административный feedback API |
+| `api/adminRoutes.js` | `PATCH /api/v1/admin/users/{id}`; монтирует admin feedback router |
+| `api/adminFeedbackRoutes.js` | `GET/PATCH /api/v1/admin/feedback*`, SSE stream |
+| `api/feedbackRoutes.js` | `POST /api/v1/feedback` (`optionalAuth`) |
 | `auth/authorizationPolicy.js` | Нормализация role/subscription, `hasRole`, `canAccessAdmin` |
 | `auth/platformAdminAllowlist.js` | Парсинг `PLATFORM_ADMIN_EMAILS`, `isPlatformAdminEmail` |
 | `auth/resolveUser.js` | Materialize user; platform admin sync в Mongo |
@@ -349,6 +354,7 @@ npm run verify:auth-docs
 
 # Backend
 cd backend && npm run verify:projects-auth
+cd backend && npm run verify:projects-admin-access
 cd backend && npm run verify:user-model
 cd backend && npm run verify:auth-pipeline
 cd backend && npm run verify:platform-admin
@@ -356,6 +362,8 @@ cd backend && npm run verify:auth-middleware
 cd backend && npm run verify:authorization-policy
 cd backend && npm run verify:authorization-middleware
 cd backend && npm run verify:me-endpoint
+cd backend && npm run verify:feedback
+cd backend && npm run verify:admin-feedback
 cd backend && npm run verify:migrate-project-owner-ids
 
 # Frontend

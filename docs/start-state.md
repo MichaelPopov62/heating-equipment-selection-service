@@ -8,10 +8,12 @@
 
 | Режим | Когда | UI |
 |-------|-------|-----|
-| `resolving` | Первые ~200 ms после mount | `AppBootstrapSkeleton` + `Spinner` |
-| `start` | Cold open | `StartScreen` + Header (`variant=start`) |
-| `survey` | SurveyDraft / «Начать» / import / project | `AppSurveyContent` |
-| `error` | Timeout bootstrap 3 s | `BootstrapErrorScreen` |
+| `start` | Cold open без валидного draft | `StartScreen` + Header (`variant=start`) |
+| `survey` | Draft / «Начать» / import / project | lazy `SurveyAppRoot` → `AppSurveyContent` |
+| `resolving` | Только **`retryBootstrap()`** после `error` | `AppBootstrapSkeleton` (+ timeout **3 s** → `error`) |
+| `error` | Сбой resolve / timeout retry | `BootstrapErrorScreen` |
+
+**Cold open:** `useSurveyBootstrap` резолвит hash/storage **синхронно** в инициализаторе `useState` → сразу `start` или `survey` (без фазы `resolving` / skeleton на первом paint — LCP/CLS). Режим `resolving` **не** используется при обычном входе.
 
 ## Критерий Start State
 
@@ -56,7 +58,9 @@ SSOT дефолтов:
 
 | Событие | Skeleton / «Загрузка…» |
 |---------|------------------------|
-| Первое открытие сайта | ✅ `resolving` → `AppBootstrapSkeleton` (~200 ms) |
+| Первое открытие сайта | ❌ сразу `start` или `survey` (sync resolve, без bootstrap skeleton) |
+| Lazy-load survey-chunk / route | Suspense → `AppBootstrapSkeleton` |
+| `retryBootstrap()` после error | `resolving` → `AppBootstrapSkeleton`; при зависании > **3 s** → `error` |
 | Загрузка сохранённого проекта с сервера | Переход `/projects` → `pendingProjectNavigation` → загрузка in-place, без bootstrap skeleton |
 | Перерасчёт после изменения параметров | локальный `calcLoading` / «Расчёт…» в секциях |
 | **«Вийти з проєкту» (Exit)** | ❌ сразу Start Screen |

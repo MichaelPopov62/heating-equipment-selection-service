@@ -582,8 +582,10 @@ main.tsx → QueryProvider → App.tsx
        ├─ /projects → SurveyAppShell → ProtectedRoute → ProjectsPage
        ├─ /admin/feedback → ProtectedRoute → AdminRoute → AdminFeedbackPage
        └─ / → SurveyAppShell → SurveySessionProvider → AppRoot
-            ├─ useSurveyBootstrap → resolving | start | error
-            │    └─ StartAppRoot (лёгкий chunk: StartScreen, skeleton, error)
+            ├─ useSurveyBootstrap → start | survey | error
+            │    └─ StartAppRoot (лёгкий chunk: StartScreen; resolving/error — skeleton / BootstrapErrorScreen)
+            │         · cold open: sync resolve (без ~200 ms resolving)
+            │         · resolving только при retryBootstrap()
             └─ survey
                  └─ lazy SurveyAppRoot (тяжёлый chunk)
                       ├─ Header, DevPanel, ProjectsDialog, useSurveyProject
@@ -597,7 +599,7 @@ main.tsx → QueryProvider → App.tsx
 | `src/App.tsx` | BrowserRouter, auth/providers и `AppRouter` |
 | `src/routing/` | `AppRouter`, `SurveyAppShell`, канонические `paths`; маршруты и справочники RQ |
 | `src/AppRoot.tsx` | Оркестратор bootstrap: `useSurveyBootstrap` → `StartAppRoot` \| lazy `SurveyAppRoot` |
-| `src/StartAppRoot.tsx` | Cold open: `start` / `resolving` / `error` (без calc, projects, DevPanel; на localhost — только React Query Devtools) |
+| `src/StartAppRoot.tsx` | Cold open: `start` / `resolving` (retry) / `error` (без calc, projects, DevPanel; на localhost — только React Query Devtools) |
 | `src/SurveyAppRoot.tsx` | Survey UI: Header, DevPanel, ProjectsDialog, `useSurveyProject`, lazy `AppSurveyContent` |
 | `src/AppSurveyContent.tsx` | Шаги анкеты, формы, отчёт |
 | `src/seo/` | `JsonLdBoundary`, `JsonLd`, `jsonLdSchemas.ts` — FAQPage и др. по маршруту |

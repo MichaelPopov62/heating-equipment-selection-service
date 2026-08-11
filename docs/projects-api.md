@@ -6,12 +6,22 @@ CRUD клиентских проектов и сохранённых расчё�
 
 | Метод | Путь | Auth |
 |-------|------|------|
+| GET | `/api/v1/projects` | JWT — список (user: свои; admin: все, опционально `?ownerId=` / `?ownerEmail=`) |
+| POST | `/api/v1/projects` | JWT — создать проект |
+| GET | `/api/v1/projects/{id}` | JWT (owner / admin) |
+| PUT | `/api/v1/projects/{id}` | JWT (owner / admin) |
+| DELETE | `/api/v1/projects/{id}` | JWT (owner / admin) |
+| POST | `/api/v1/projects/{id}/calc` | JWT (owner / admin) — расчёт + запись `calculations` |
+| GET | `/api/v1/projects/{id}/calculations` | JWT (owner / admin) — список расчётов |
+| GET | `/api/v1/projects/{projectId}/calculations/{calcId}` | JWT (owner / admin) — один расчёт |
 | POST | `/api/v1/projects/import` | JWT + **`role=admin`** — Dev-импорт ProjectExportBundle |
-| POST | `/api/v1/projects/{id}/share` | JWT (owner) |
-| DELETE | `/api/v1/projects/{id}/share` | JWT (owner) |
-| GET | `/api/v1/projects/{id}/pdf` | JWT (owner) — скачать PDF сметы |
+| POST | `/api/v1/projects/{id}/share` | JWT (owner / admin) |
+| DELETE | `/api/v1/projects/{id}/share` | JWT (owner / admin) |
+| GET | `/api/v1/projects/{id}/pdf` | JWT (owner / admin) — скачать PDF сметы |
 | GET | `/api/v1/public/shares/{shareToken}` | нет (read-only whitelist) |
 | GET | `/api/v1/public/shares/{shareToken}/pdf` | нет — скачать PDF |
+
+Контракт OpenAPI: пути выше + `ProjectsBearerAuth`. Реализация CRUD/share/PDF — `projectsRoutes.js`; public shares — `publicSharesRoutes.js`.
 
 Поля `Project`: `shareToken`, `sharePublishedAt`, `shareSnapshot`. При publish для `subscription` **pro** или **marketplace** в snapshot добавляется `publisherPresentation` (контакт публикатора: email, optional name) — см. [`client-share-and-layers.md`](client-share-and-layers.md). Verify: `npm run verify:project-share`, `npm run verify:project-pdf`.
 
@@ -135,6 +145,7 @@ Verify:
 
 ```bash
 cd backend && npm run verify:project-import
+cd backend && npm run verify:projects-import-admin
 ```
 
 ---

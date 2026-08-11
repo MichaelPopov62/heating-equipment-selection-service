@@ -69,6 +69,7 @@ function listMdInDir(relDir) {
 }
 
 const appliances = JSON.parse(readRepo('backend/data/appliances.json'));
+const backendPkg = JSON.parse(readRepo('backend/package.json'));
 const hydraulics = appliances.find(
   (/** @type {{ applianceKind?: string }} */ x) => x.applianceKind === 'hydraulics',
 );
@@ -78,6 +79,115 @@ const hydraulicsDoc = readRepo('docs/hydraulics-pipeline.md');
 assert.match(hydraulicsDoc, /schemaVersion: 5/);
 assert.doesNotMatch(hydraulicsDoc, /schemaVersion: 4/);
 assert.doesNotMatch(hydraulicsDoc, /schemaVersion 2/);
+
+/** Каждый runtime-модуль hydraulics/ должен быть назван в docs/hydraulics-pipeline.md. */
+const hydraulicsSrcDir = path.join(root, 'backend', 'src', 'hydraulics');
+const hydraulicsRuntimeFiles = readdirSync(hydraulicsSrcDir).filter((name) =>
+  name.endsWith('.js') || name.endsWith('.d.ts'),
+);
+for (const name of hydraulicsRuntimeFiles) {
+  assert.match(
+    hydraulicsDoc,
+    new RegExp(`hydraulics/${name.replace(/\./g, '\\.')}`),
+    `docs/hydraulics-pipeline.md должен упоминать hydraulics/${name}`,
+  );
+}
+
+/** CalcRuntimeContext: doc ↔ reference/* + composition root. */
+const calcRuntimeDoc = readRepo('docs/calc-runtime-context.md');
+assert.match(calcRuntimeDoc, /getReferenceBundle/);
+assert.match(calcRuntimeDoc, /toCalcRuntimeContext/);
+assert.match(calcRuntimeDoc, /assertCalcRuntimeContext/);
+assert.match(calcRuntimeDoc, /runCalculation/);
+assert.match(calcRuntimeDoc, /\/api\/v1\/system\/invalidate-reference-cache/);
+assert.match(calcRuntimeDoc, /verify:calc-runtime-context/);
+assert.match(calcRuntimeDoc, /verify:reference-cache-invalidate/);
+assert.doesNotMatch(calcRuntimeDoc, /stale-while-revalidate/i);
+// Удалённые sync-кэши в доке допустимы только как запрет; на диске файлов быть не должно.
+assert.equal(
+  existsSync(path.join(root, 'backend', 'src', 'dhw', 'referenceCache.js')),
+  false,
+  'backend/src/dhw/referenceCache.js не должен существовать',
+);
+assert.equal(
+  existsSync(path.join(root, 'backend', 'src', 'ufh', 'ufhPresetsCache.js')),
+  false,
+  'backend/src/ufh/ufhPresetsCache.js не должен существовать',
+);
+
+const referenceSrcDir = path.join(root, 'backend', 'src', 'reference');
+const referenceRuntimeFiles = readdirSync(referenceSrcDir).filter((name) =>
+  name.endsWith('.js'),
+);
+for (const name of referenceRuntimeFiles) {
+  assert.match(
+    calcRuntimeDoc,
+    new RegExp(`reference/${name.replace(/\./g, '\\.')}`),
+    `docs/calc-runtime-context.md должен упоминать reference/${name}`,
+  );
+}
+assert.match(calcRuntimeDoc, /api\/systemRoutes\.js/);
+assert.match(calcRuntimeDoc, /api\/runCalculation\.js/);
+
+for (const field of ['catalog', 'waterNorms', 'appliances', 'recommendations', 'ufhPresets', 'sources']) {
+  assert.match(
+    calcRuntimeDoc,
+    new RegExp(`\`${field}\``),
+    `docs/calc-runtime-context.md должен описывать поле ctx.${field}`,
+  );
+}
+
+/** 8d: manifold / unibox matching docs ↔ code + OpenAPI + verify. */
+const manifoldDoc = readRepo('docs/manifold-matching.md');
+const uniboxDoc = readRepo('docs/unibox-matching.md');
+assert.match(manifoldDoc, /pickManifolds/);
+assert.match(manifoldDoc, /UFH_MANIFOLD_MAX_OUTLETS_PER_NODE/);
+assert.match(manifoldDoc, /verify:manifold-matching/);
+assert.match(manifoldDoc, /ManifoldsMatchingReport/);
+assert.match(manifoldDoc, /Перевищено ліміт петель/);
+assert.doesNotMatch(manifoldDoc, /H\.15/);
+assert.doesNotMatch(manifoldDoc, /унибоксы skip по сигналу каскада/i);
+assert.match(manifoldDoc, /не\*\* блокируются каскадом|не блокируются каскадом/i);
+
+assert.match(uniboxDoc, /pickUniboxes/);
+assert.match(uniboxDoc, /UNIBOX_MAX_LOOPS_FOR_MATCHING/);
+assert.match(uniboxDoc, /verify:unibox-matching/);
+assert.match(uniboxDoc, /UniboxesMatchingReport/);
+assert.match(uniboxDoc, /hasUnderfloorManifoldCascade/);
+assert.doesNotMatch(uniboxDoc, /H\.15/);
+assert.match(uniboxDoc, /не\*\* блокируется каскадом|не блокируется каскадом/i);
+
+assert.ok(existsSync(path.join(root, 'backend', 'src', 'matching', 'manifold.js')));
+assert.ok(existsSync(path.join(root, 'backend', 'src', 'matching', 'unibox.js')));
+assert.ok(
+  existsSync(path.join(root, 'backend', 'src', 'matching', 'internal', 'uniboxRoomAirPresets.js')),
+);
+assert.ok(existsSync(path.join(root, 'components', 'schemas', 'ManifoldsMatchingReport.yaml')));
+assert.ok(existsSync(path.join(root, 'components', 'schemas', 'UniboxesMatchingReport.yaml')));
+assert.ok(existsSync(path.join(root, 'components', 'schemas', 'ManifoldCatalogItem.yaml')));
+assert.ok(existsSync(path.join(root, 'components', 'schemas', 'UniboxCatalogItem.yaml')));
+assert.ok(backendPkg.scripts['verify:manifold-matching']);
+assert.ok(backendPkg.scripts['verify:unibox-matching']);
+assert.match(String(backendPkg.scripts.verify), /verify:manifold-matching/);
+assert.match(String(backendPkg.scripts.verify), /verify:unibox-matching/);
+
+const matchingPublic = readRepo('backend/src/matching/public.js');
+assert.match(matchingPublic, /pickManifolds/);
+assert.match(matchingPublic, /pickUniboxes/);
+assert.match(matchingPublic, /buildEmptyManifoldsFailure/);
+assert.match(matchingPublic, /buildOkManifoldsReport/);
+
+for (const rel of [
+  'docs/manifold-matching.md',
+  'docs/unibox-matching.md',
+  'docs/hydraulics-pipeline.md',
+]) {
+  assert.match(
+    readRepo(rel),
+    /pickManifolds[\s\S]{0,200}?→[\s\S]{0,40}?pickUniboxes/,
+    `${rel}: порядок pickManifolds → pickUniboxes должен совпадать`,
+  );
+}
 
 const envExample = readRepo('backend/.env.example');
 assert.match(envExample, /schemaVersion 5/);
@@ -225,8 +335,64 @@ assert.doesNotMatch(
 
 const surveyDraft = readRepo('docs/survey-draft.md');
 assert.match(surveyDraft, /SurveyDraft/);
+assert.match(surveyDraft, /SURVEY_DRAFT_SCHEMA_VERSION = 4/);
+assert.match(surveyDraft, /frontend\/src\/types\/surveyDraft\.ts/);
+assert.match(surveyDraft, /frontend\/src\/surveySession\/migrateDerivedState\.ts/);
+assert.match(surveyDraft, /verify:survey-session/);
+assert.match(surveyDraft, /verify:start-state/);
 assert.doesNotMatch(surveyDraft, /Hard Reset/i);
 assert.doesNotMatch(surveyDraft, /до релиза/i);
+
+/** 8e: frontend domain docs ↔ entry/orchestrators / layers (без правок frontend/src). */
+const frontendCalcRunner = readRepo('docs/frontend-calc-runner.md');
+const startStateDoc = readRepo('docs/start-state.md');
+assert.match(frontendCalcRunner, /frontend\/src\/query\/useReferenceData\.ts/);
+assert.match(frontendCalcRunner, /frontend\/src\/surveySession\/buildCalcInputSnapshot\.ts/);
+assert.match(frontendCalcRunner, /frontend\/src\/query\/useSurveyCalc\.ts/);
+assert.match(frontendCalcRunner, /SurveySessionProvider/);
+assert.match(frontendCalcRunner, /verify:survey-session/);
+assert.match(frontendCalcRunner, /verify:start-state/);
+assert.doesNotMatch(
+  frontendCalcRunner,
+  /query\/queries\/\*`, композиция — `useReferenceData\.ts`/,
+);
+
+assert.match(startStateDoc, /sync resolve|синхронно/i);
+assert.match(startStateDoc, /retryBootstrap/);
+assert.match(startStateDoc, /RESOLVING_TIMEOUT_MS|3 s|3\s*s/);
+assert.doesNotMatch(startStateDoc, /~200\s*ms/);
+assert.doesNotMatch(
+  startStateDoc,
+  /Первые ~200 ms после mount/,
+);
+assert.match(startStateDoc, /verify:start-state/);
+assert.match(startStateDoc, /frontend\/src\/AppRoot\.tsx/);
+assert.match(startStateDoc, /frontend\/src\/hooks\/useSurveyBootstrap\.ts/);
+
+assert.doesNotMatch(projectStructure, /useSurveyBootstrap → resolving \| start \| error/);
+assert.match(projectStructure, /cold open: sync resolve/i);
+
+for (const rel of [
+  'frontend/src/AppRoot.tsx',
+  'frontend/src/StartAppRoot.tsx',
+  'frontend/src/SurveyAppRoot.tsx',
+  'frontend/src/AppSurveyContent.tsx',
+  'frontend/src/surveySession/SurveySessionProvider.tsx',
+  'frontend/src/query/useSurveyCalc.ts',
+  'frontend/src/query/useReferenceData.ts',
+  'frontend/src/surveySession/buildCalcInputSnapshot.ts',
+  'frontend/src/hooks/useSurveyBootstrap.ts',
+  'frontend/src/types/surveyDraft.ts',
+  'frontend/src/constants/surveySteps.ts',
+]) {
+  assert.ok(existsSync(path.join(root, rel)), `${rel} должен существовать`);
+}
+
+const frontendPkg = JSON.parse(readRepo('frontend/package.json'));
+assert.ok(frontendPkg.scripts['verify:survey-session']);
+assert.ok(frontendPkg.scripts['verify:start-state']);
+assert.match(String(frontendPkg.scripts.verify), /verify:survey-session/);
+assert.match(String(frontendPkg.scripts.verify), /verify:start-state/);
 
 const languagePolicy = readRepo('docs/language-policy.md');
 assert.doesNotMatch(languagePolicy, /PR-[0-9]/);
@@ -238,7 +404,6 @@ assert.ok(
 );
 assert.ok(existsSync(path.join(root, 'docs/ufh-test-checklist.md')), 'docs/ufh-test-checklist.md должен существовать');
 
-const backendPkg = JSON.parse(readRepo('backend/package.json'));
 assert.equal(
   backendPkg.scripts['verify:hydraulics-pipeline-input'],
   undefined,

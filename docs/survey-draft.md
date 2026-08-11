@@ -45,7 +45,7 @@
 
 ### UI шага «Гидравлика»
 
-`HydraulicsSection.tsx`:
+`frontend/src/components/HydraulicsSection/HydraulicsSection.tsx`:
 
 | UI | SurveyDraft | POST `/api/v1/calc` |
 |----|-------------|---------------------|
@@ -54,7 +54,7 @@
 | Подвод по комнатам | `wiringLayoutV3.branches[].pipeLengthToEquipmentM` | `hydraulics.radiatorBranchOverrides[]` |
 | Порядок радиаторов | порядок `branches[]` | порядок overrides |
 
-Подписи: `wiringSystemTypeLabels.ts`. Отчёты: [`hydraulics-survey-report.md`](hydraulics-survey-report.md).
+Подписи: `frontend/src/utils/wiringSystemTypeLabels.ts`. Отчёты: [`hydraulics-survey-report.md`](hydraulics-survey-report.md).
 
 Мутации: `WIRING_SCHEME_SET`, `WIRING_BRANCH_LENGTH_SET`, `WIRING_BRANCH_REORDER`, `SET_HYDRAULICS_FORM`.
 
@@ -73,7 +73,7 @@
 
 При загрузке snapshot вызывается **`migrateSurveyDraft`**: дефолты для отсутствующих полей v4, нормализация прежних типов комнат, стен и ТП (`migrateLegacyRoomTypes.ts`, `migrateLegacyExternalWalls.ts`, `migrateRoomUnderfloorHeating.ts`, функция `migrateLegacyWallAreaM2` в `roomEnvelopeFields.ts`). Телеметрия срабатываний — `compatTelemetry.ts` (`[survey-compat]` в DEV).
 
-**Pipeline (не удалять):** `migrateDerivedState.ts` — синхронизация ТП и wiring на каждой мутации и при `DRAFT_LOADED`.
+**Pipeline (не удалять):** `frontend/src/surveySession/migrateDerivedState.ts` — синхронизация ТП и wiring на каждой мутации и при `DRAFT_LOADED`.
 
 ---
 
@@ -92,9 +92,11 @@
 
 ```bash
 cd backend && npm run verify:survey-draft-migration
+cd frontend && npm run verify:survey-session
+cd frontend && npm run verify:start-state
 cd frontend && npm run verify
 ```
 
-Frontend `verify` = lint + typecheck + knip + build + `verify:survey-session`.
+Frontend `verify` = lint + typecheck + knip + build + `verify:survey-session` + `verify:start-state`.
 
-См. [`type-safety.md`](type-safety.md), [`water-heater-form.md`](water-heater-form.md).
+См. [`type-safety.md`](type-safety.md), [`water-heater-form.md`](water-heater-form.md), [`start-state.md`](start-state.md).

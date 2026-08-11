@@ -48,7 +48,7 @@ matchEquipment → (резолв distributionPreset ТП) → pickManifolds → 
 | `warnings` | штатные (дефицит SKU, каскад) | текст soft-fail (+ причина) |
 
 - **Дефицит каталога** (`selected: null`) — это **`ok: true`**, не soft-fail.
-- **Каскад H.15** (`units.length > 1`) — **`ok: true`** + warning; унибоксы skip по сигналу каскада.
+- **Каскад ТП** (`units.length > 1`) — **`ok: true`** + warning; сигнал каскада читает `hasUnderfloorManifoldCascade` в `unibox.js`. Явные зоны `ufhTerminalControl=unibox` **не** блокируются каскадом (см. [`unibox-matching.md`](unibox-matching.md)).
 - При `ok: false` оркестратор всё равно вызывает `pickUniboxes` и гидравлику; пустой `underfloor` **не** означает каскад.
 - Страховка в `buildReport`: try/catch + проверка `typeof report.ok === 'boolean'`.
 
@@ -59,20 +59,21 @@ Verify soft-fail: `buildEmptyManifoldsFailure`, `pickManifoldsWithCore(() => { t
 ### ТП (`underfloor[]`)
 
 1. По комнатам `underfloorHeating.rooms` взять `loopsCount` (fallback — `loops.length`).
-2. Сгруппировать по этажу комнаты (`building.rooms[].floor`).
-3. На каждый этаж: `parts = splitOutletsForCascade(total)`:
+2. **Пропуск** комнат с `ufhTerminalControl=unibox` (их outlets не входят в коллектор).
+3. Сгруппировать по этажу комнаты (`building.rooms[].floor`).
+4. На каждый этаж: `parts = splitOutletsForCascade(total)`:
    - `total ≤ 12` → `[total]` — один коллектор;
    - `total > 12` → равномерный split (`14 → [7,7]`, `25 → [9,8,8]`).
-4. Для каждой части — `pickDistributionManifold({ application: 'underfloor' })` → элемент `units[]`.
-5. При `parts.length > 1` — warning:  
-   `Превышен лимит петель на один узел (max 12). Система автоматически разделена на N коллектора (…+…).`
-6. Среди кандидатов с `outletsCount ≥ need` части: приоритет `hasFlowMeters`, затем мин. `outletsCount`, затем мин. `price`.
-7. Если подходящих нет **для одной части** — максимальный в пуле + warning дефицита (отдельно от каскада).
+5. Для каждой части — `pickDistributionManifold({ application: 'underfloor' })` → элемент `units[]`.
+6. При `parts.length > 1` — warning (UA, из кода):  
+   `Перевищено ліміт петель на один вузол (max 12). Систему автоматично розділено на N колектори (…+…).`
+7. Среди кандидатов с `outletsCount ≥ need` части: приоритет `hasFlowMeters`, затем мин. `outletsCount`, затем мин. `price`.
+8. Если подходящих нет **для одной части** — максимальный в пуле + warning дефицита (отдельно от каскада).
 
 Контракт этажа:
 
 ```text
-underfloor[].requiredOutlets  — сумма петель этажа
+underfloor[].requiredOutlets  — сумма петель этажа (без unibox-зон)
 underfloor[].units[]          — 1…N устройств сметы (index, requiredOutlets, selected)
 ```
 
@@ -90,9 +91,10 @@ underfloor[].units[]          — 1…N устройств сметы (index, re
 | objectType | Условие подбора |
 |------------|-----------------|
 | `apartment` | **не** подбирается (`null`) |
-| `house` | `distributionPreset === 'hydraulic_separator'` **или** есть зона радиаторов **и** зона ТП |
+| `house` | `distributionPreset === 'hydraulic_separator'` **или** есть зона радиаторов **и** зона ТП на коллекторе |
 
-- `requiredCircuits` = (1 если есть радиаторы) + (1 если есть ТП), минимум 1
+- «Зона ТП на коллекторе» = `outletsByFloor.size > 0` (этажи после исключения `ufhTerminalControl=unibox`)
+- `requiredCircuits` = (1 если есть радиаторы) + (1 если есть коллекторная ТП), минимум 1
 - `requiredPowerKw` = `matching.boiler.requiredKw`
 - Фильтр: `circuitsCount ≥ need` и `maxPowerKw ≥ requiredKw`; иначе max в каталоге + warning
 
@@ -104,7 +106,14 @@ cd backend && npm run verify:manifold-matching
 
 Кейсы: 5→1 unit; 12→1 без cascade-warning; 14→2 units (7+7) + warning; 25→3 (9+8+8); пустой каталог → `ok: true` + `selected: null`; soft-fail throw → `ok: false`, `underfloor: []`.
 
+Входит в общий `cd backend && npm run verify`.
+
 ## UI
 
-Справочник номенклатуры: шаг анкеты «Справочник данных» → `CatalogEquipmentReference` (`catalog.manifolds` / `catalog.boilerManifolds` и др.).  
+Справочник номенклатуры: шаг анкеты «Справочник данных» → `CatalogEquipmentReference` (`frontend/src/components/CatalogEquipmentReference/`, `catalog.manifolds` / `catalog.boilerManifolds` и др.).  
 Карточки сметы по `matching.manifolds.underfloor[].units` — отдельный шаг UI.
+
+## Контракт OpenAPI
+
+- `ManifoldCatalogItem`, `BoilerManifoldCatalogItem`
+- `ManifoldsMatchingReport` (`ok`, `failureCode?`, `underfloor[]`, `radiator`, `boilerManifold`, `warnings`)

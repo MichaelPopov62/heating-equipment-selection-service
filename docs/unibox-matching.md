@@ -2,7 +2,7 @@
 
 SKU унибоксов из каталога для сметы — локальный регулятор **одной петли** ТП / зоны.  
 Топология гидравлики и коллекторы (`matching.manifolds`) **не** заменяются этим модулем целиком — см. [`manifold-matching.md`](manifold-matching.md), [`hydraulics-pipeline.md`](hydraulics-pipeline.md).  
-Каскад ТП-коллекторов уже реализован в H.15 (`splitOutletsForCascade`, `units[]`); унибокс только **читает** сигнал и не блокируется каскадом при **явном** выборе в анкете.
+Каскад ТП-коллекторов (`splitOutletsForCascade`, `units[]`) уже в `manifold.js`; унибокс только **читает** сигнал (`hasUnderfloorManifoldCascade`) и **не** блокируется каскадом при **явном** выборе в анкете.
 
 ## Каталог (номенклатура)
 
@@ -84,8 +84,9 @@ Hard-filter каталога по `roomType` нет. Пол T воздуха —
 
 ## Модуль
 
-- `backend/src/matching/unibox.js` — `uniboxFitsDemand`, `validateUniboxLoopDemand`, `pickUniboxForDemand`, `collectUniboxLoopDemands`, `pickUniboxes`, `minKvM3hForFlowLph`, `resolveUniboxRoomAirTempC`
-- `backend/src/matching/internal/uniboxRoomAirPresets.js` — пресеты T воздуха
+- `backend/src/matching/unibox.js` — `uniboxFitsDemand`, `validateUniboxLoopDemand`, `pickUniboxForDemand`, `collectUniboxLoopDemands`, `pickUniboxes`, `minKvM3hForFlowLph`, `hasUnderfloorManifoldCascade`
+- Константы: `UNIBOX_DESIGN_PRESSURE_BAR = 3`, `UNIBOX_VALVE_MAX_DP_BAR = 0.25`, `UNIBOX_MAX_LOOPS_FOR_MATCHING = 4`, `UNIBOX_REQUIRED_FIT = 'eurocone'`
+- `backend/src/matching/internal/uniboxRoomAirPresets.js` — `resolveUniboxRoomAirTempC` (реэкспорт из `unibox.js`)
 - Public API: `matching/public.js` → `pickUniboxes`
 - Вызов в `buildReport` **после** `pickManifolds`, **до** `runHydraulicsPipeline` (передаётся `building.rooms` для `room.type`)
 - Отчёт: `report.matching.uniboxes` (`UniboxesMatchingReport`)
@@ -114,4 +115,9 @@ cd backend && npm run verify:unibox-matching
 
 Кейсы: границы паспорта; санузел → T воздуха 24; коридор/прихожая/тамбур → анкета; `ufhTerminalControl=collector` → нет demands; mixed (только санузел unibox) → один byLoop; 3 явных unibox → без soft warning; ≥4 → soft warning, подбор идёт; каскад коллекторов не блокирует; `manifolds.ok=false` → informational warning в `matching.uniboxes.warnings` (не в `byLoop`); пул через `validateAndNormalizeCatalog`; Δp=0 в `minKvM3hForFlowLph` → finite; flow=0 → `selected: null`; invalid ΔT → null.
 
-Входит в общий `npm run verify`.
+Входит в общий `cd backend && npm run verify`.
+
+## Контракт OpenAPI
+
+- `UniboxCatalogItem` (identity `id`)
+- `UniboxesMatchingReport` (`byLoop[]`, `warnings`)
