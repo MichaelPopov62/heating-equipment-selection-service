@@ -26,15 +26,42 @@ npm run seed   # нужен test_data.json (см. test_data.json.example)
 
 ## HTTP-маршруты
 
-| Группа | Маршруты |
-|--------|----------|
-| Public | `GET /health`, `GET /api/v1/catalog`, `GET /api/v1/presets/*`, `POST /api/v1/calc`, `GET /api/v1/public/shares/{token}` (+ `/pdf`) |
-| JWT | `/api/v1/projects/*`, `GET /api/v1/me` |
-| Admin | `PATCH /api/v1/admin/users/{id}`, `GET/PATCH /api/v1/admin/feedback*`, `GET /api/v1/admin/feedback/stream` (SSE) |
-| Feedback | `POST /api/v1/feedback` (JWT опционален) |
-| System | `POST /api/v1/system/invalidate-reference-cache` |
+Каталог путей (код: `src/api/`). Схемы тел/ответов — [`openapi.yaml`](../openapi.yaml). Политика auth и нюансы JWT в dev — [`docs/auth.md`](../docs/auth.md). Projects — [`docs/projects-api.md`](../docs/projects-api.md).
 
-Полный контракт — [`openapi.yaml`](../openapi.yaml).
+| Метод | Эндпоинт | Описание | Доступ |
+|-------|----------|----------|--------|
+| GET | `/health` | Health-check | Публичный |
+| GET | `/api/health` | Legacy alias health | Публичный |
+| GET | `/` | Корень API (service info) | Публичный |
+| GET | `/api` | Корень `/api` (version info) | Публичный |
+| GET | `/api/v1/catalog` | Каталог оборудования | Публичный |
+| GET | `/api/v1/presets/envelope` | Пресеты ограждений | Публичный |
+| GET | `/api/v1/presets/underfloor-heating` | Пресеты ТП (bases + finishes) | Публичный |
+| GET | `/api/v1/presets/underfloor-heating/bases` | Базы сборки ТП | Публичный |
+| GET | `/api/v1/presets/underfloor-heating/modes` | Режимы ТП | Публичный |
+| GET | `/api/v1/presets/flooring-finishes` | Финиши пола | Публичный |
+| POST | `/api/v1/calc` | Полный расчёт (теплопотери, ГВС, matching, гидравлика) | Публичный |
+| GET | `/api/v1/public/shares/{shareToken}` | Публичная презентация сметы | Публичный |
+| GET | `/api/v1/public/shares/{shareToken}/pdf` | PDF публичной сметы | Публичный |
+| POST | `/api/v1/feedback` | Обращение пользователя | JWT опционален |
+| GET | `/api/v1/me` | Профиль (`role`, `subscription`) | JWT |
+| GET | `/api/v1/projects` | Список проектов | JWT |
+| POST | `/api/v1/projects` | Создать проект | JWT |
+| POST | `/api/v1/projects/import` | Импорт ProjectExportBundle | JWT + admin |
+| GET | `/api/v1/projects/{id}` | Получить проект | JWT |
+| PUT | `/api/v1/projects/{id}` | Обновить проект | JWT |
+| DELETE | `/api/v1/projects/{id}` | Удалить проект | JWT |
+| POST | `/api/v1/projects/{id}/calc` | Расчёт + запись в `calculations` | JWT |
+| GET | `/api/v1/projects/{id}/calculations` | Список расчётов проекта | JWT |
+| GET | `/api/v1/projects/{projectId}/calculations/{calcId}` | Один расчёт | JWT |
+| GET | `/api/v1/projects/{id}/pdf` | PDF сметы владельца | JWT |
+| POST | `/api/v1/projects/{id}/share` | Опубликовать share | JWT |
+| DELETE | `/api/v1/projects/{id}/share` | Отозвать share | JWT |
+| PATCH | `/api/v1/admin/users/{id}` | Смена `role` / `subscription` | JWT + admin |
+| GET | `/api/v1/admin/feedback` | Список обращений | JWT + admin |
+| GET | `/api/v1/admin/feedback/stream` | SSE новых обращений | JWT + admin |
+| PATCH | `/api/v1/admin/feedback/{id}` | Статус обращения | JWT + admin |
+| POST | `/api/v1/system/invalidate-reference-cache` | Сброс reference-cache | System token (`X-System-Token`) |
 
 ## Переменные окружения
 
