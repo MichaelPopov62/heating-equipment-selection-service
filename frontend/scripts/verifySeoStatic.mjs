@@ -75,6 +75,16 @@ assert.match(
   /Почати новий розрахунок/,
   'index.html: static CTA для LCP',
 );
+assert.doesNotMatch(
+  indexHtml,
+  /static-app-shell__header/,
+  'index.html: без фейкового static header (лише hero+CTA)',
+);
+assert.doesNotMatch(
+  indexHtml,
+  /static-app-shell__chip/,
+  'index.html: без chip-плейсхолдерів кнопок у static shell',
+);
 assert.match(indexHtml, /static-app-shell--fade-out/, 'index.html: fade-out static shell');
 assert.match(indexHtml, /<div id="root"><\/div>/, 'index.html: порожній #root для React mount');
 assert.doesNotMatch(

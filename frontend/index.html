@@ -82,7 +82,7 @@
       background: var(--bg);
     }
 
-    /* Static LCP shell — overlay до mount React у #root */
+    /* Static LCP shell — лише hero+CTA (без фейкового header) до mount React у #root */
     .static-app-shell {
       position: fixed;
       inset: 0;
@@ -112,66 +112,6 @@
       .static-app-shell {
         transition: none;
       }
-    }
-
-    .static-app-shell__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-    }
-
-    .static-app-shell__header-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .static-app-shell__header-logo {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      background: color-mix(in srgb, var(--accent) 18%, transparent);
-      flex-shrink: 0;
-    }
-
-    .static-app-shell__header-text {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      min-width: 0;
-    }
-
-    .static-app-shell__header-name {
-      font: 600 14px/1.2 var(--heading);
-      color: var(--text-h);
-    }
-
-    .static-app-shell__header-tagline {
-      font: 400 11px/1.3 var(--sans);
-      color: var(--text);
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .static-app-shell__header-actions {
-      display: flex;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .static-app-shell__chip {
-      width: 72px;
-      height: 32px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: color-mix(in srgb, var(--text) 6%, transparent);
     }
 
     .static-start-screen {
@@ -230,10 +170,6 @@
     }
 
     @media (min-width: 768px) {
-      .static-app-shell__header {
-        padding-inline: 20px;
-      }
-
       .static-start-screen {
         padding-inline: 20px;
       }
@@ -247,22 +183,6 @@
 
 <body>
   <div id="static-app-shell" class="static-app-shell">
-    <header class="static-app-shell__header" aria-hidden="true">
-      <div class="static-app-shell__header-brand">
-        <div class="static-app-shell__header-logo"></div>
-        <div class="static-app-shell__header-text">
-          <span class="static-app-shell__header-name">HeatCalc Pro</span>
-          <span class="static-app-shell__header-tagline">
-            Сервіс розрахунку тепловтрат та підбору опалювального обладнання
-          </span>
-        </div>
-      </div>
-      <div class="static-app-shell__header-actions">
-        <span class="static-app-shell__chip"></span>
-        <span class="static-app-shell__chip"></span>
-      </div>
-    </header>
-
     <main class="static-start-screen" aria-labelledby="static-start-screen-title">
       <div class="static-start-screen__hero">
         <svg class="static-start-screen__logo" xmlns="http://www.w3.org/2000/svg" width="44" height="44"
