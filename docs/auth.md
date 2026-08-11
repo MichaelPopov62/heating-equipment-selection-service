@@ -258,6 +258,8 @@ npm run migrate:project-owner-ids -- --apply
 
 ## Authorization (tier и role)
 
+**Состояние Phase 2 (кратко):** `subscription` (`free` | `pro` | `marketplace`) — метка аудитории аккаунта, не биллинг-поток. Назначение tier — вручную админом через `PATCH /api/v1/admin/users/{id}` (self-serve / оплата не реализованы). Функции calc, share и PDF **не** гейтятся по subscription; tier влияет на UX (badge, hint, контакт публикатора в share/PDF).
+
 **Принцип:** полный точный calc, share и PDF **доступны на всех tier**. Подписка (`subscription`) — метка аккаунта для продукта и billing; **не** ограничивает точность расчёта и **не** блокирует share/PDF.
 
 ### Tier и role

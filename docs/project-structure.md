@@ -1,7 +1,7 @@
 # Карта структуры проекта
 
 **SSOT** дерева папок и entrypoints репозитория (в т.ч. полный навигатор `backend/`).  
-Краткий индекс модулей и доменных ссылок — [`Plan.md`](../Plan.md). Quick start API — [`backend/README.md`](../backend/README.md).
+Краткий индекс модулей и доменных ссылок — [`Plan.md`](../Plan.md). Frontend — [`frontend/README.md`](../frontend/README.md). Quick start API — [`backend/README.md`](../backend/README.md).
 
 Правила кода и бизнес-контекст: [`.cursorrules`](../.cursorrules).  
 Контракт API: [`openapi.yaml`](../openapi.yaml).  

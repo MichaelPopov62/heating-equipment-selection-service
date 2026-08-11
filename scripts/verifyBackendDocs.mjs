@@ -327,10 +327,27 @@ assert.doesNotMatch(
 
 const rootReadme = readRepo('README.md');
 assert.match(rootReadme, /project-structure\.md/, 'корневой README должен ссылаться на SSOT структуры');
+assert.match(rootReadme, /frontend\/README\.md/, 'корневой README должен ссылаться на frontend/README.md');
+assert.match(rootReadme, /backend\/README\.md/, 'корневой README должен ссылаться на backend/README.md');
 assert.doesNotMatch(
   rootReadme,
   /Карта модулей — \[`Plan\.md`\].*\[`docs\/project-structure/,
   'корневой README не должен ставить Plan.md как карту структуры впереди SSOT',
+);
+assert.doesNotMatch(
+  rootReadme,
+  /cd backend && npm install/,
+  'корневой README не должен дублировать backend quick start (см. backend/README.md)',
+);
+assert.doesNotMatch(
+  rootReadme,
+  /cd frontend && npm install/,
+  'корневой README не должен дублировать frontend quick start (см. frontend/README.md)',
+);
+assert.doesNotMatch(
+  rootReadme,
+  /docs\/frontend-calc-runner\.md/,
+  'корневой README не должен дублировать таблицу доменных гайдов (см. Plan.md)',
 );
 
 const surveyDraft = readRepo('docs/survey-draft.md');

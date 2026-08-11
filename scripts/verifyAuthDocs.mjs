@@ -72,6 +72,16 @@ assert.match(authDoc, /AccountBar/);
 assert.match(authDoc, /publisherPresentation/);
 assert.match(authDoc, /Smoke tier UX/);
 assert.match(authDoc, /нет 403.*subscription|без gating/i);
+assert.match(
+  authDoc,
+  /Состояние Phase 2 \(кратко\):[\s\S]*метка аудитории[\s\S]*вручную админом[\s\S]*не\*\* гейтятся|не гейтятся/i,
+);
+
+const subscriptionTierSchema = readRepo('components/schemas/SubscriptionTier.yaml');
+assert.match(
+  subscriptionTierSchema,
+  /метка аудитории[\s\S]*назначение вручную[\s\S]*self-serve/i,
+);
 
 /** Каждый runtime-модуль auth/ должен быть назван в docs/auth.md. */
 const authSrcDir = path.join(root, 'backend', 'src', 'auth');
