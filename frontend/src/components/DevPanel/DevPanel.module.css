@@ -25,7 +25,7 @@
 .panel {
   position: fixed;
   right: 12px;
-  bottom: 56px;
+  bottom: calc(56px + env(safe-area-inset-bottom));
   z-index: 50;
   width: min(480px, calc(100svw - 24px));
   max-height: min(70vh, 560px);
