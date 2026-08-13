@@ -6,7 +6,9 @@
 
   position: fixed;
   right: var(--container-padding-inline);
-  bottom: calc(56px + env(safe-area-inset-bottom));
+  top: 28px;
+  rigt: 72px;
+  bottom: auto;
   z-index: 99999;
   display: flex;
   flex-direction: row;
