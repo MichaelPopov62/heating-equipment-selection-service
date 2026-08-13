@@ -24,9 +24,12 @@
 
 .panel {
   position: fixed;
-  right: 12px;
-  bottom: calc(56px + env(safe-area-inset-bottom));
-  z-index: 50;
+
+  top: calc(var(--dev-dock-top) + var(--dev-dock-btn) + var(--dev-dock-gap));
+
+  right: var(--dev-dock-right);
+  bottom: auto;
+  z-index: 99999;
   width: min(480px, calc(100svw - 24px));
   max-height: min(70vh, 560px);
   overflow: auto;
