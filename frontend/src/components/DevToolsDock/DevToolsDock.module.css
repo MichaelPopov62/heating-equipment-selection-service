@@ -6,7 +6,7 @@
 
   position: fixed;
   right: var(--container-padding-inline);
-  bottom: 12px;
+  bottom: 72px;
   z-index: 99999;
   display: flex;
   flex-direction: row;
@@ -48,7 +48,7 @@
 }
 
 /* Размытый декоративный слой TanStack */
-.reactQuerySlot :global(.tsqd-open-btn-container) > div[aria-hidden='true'] {
+.reactQuerySlot :global(.tsqd-open-btn-container)>div[aria-hidden='true'] {
   display: none;
 }
 
