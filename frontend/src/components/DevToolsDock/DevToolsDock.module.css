@@ -1,7 +1,7 @@
 /* Назначение: dock dev-кнопок — справа внизу, ряд: Dev | React Query, без glow-наложения. */
 
 .dock {
-  --dev-dock-top: 14px;
+  --dev-dock-top: 164px;
   --dev-dock-right: 34px;
   --dev-tools-btn-size: 40px;
   --dev-tools-gap: 8px;
