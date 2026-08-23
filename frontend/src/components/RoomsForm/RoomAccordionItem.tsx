@@ -267,10 +267,15 @@ export function RoomAccordionItem({
   };
 
   return (
-    <article className={styles.card} aria-label={`Приміщення ${index + 1}`}>
+    <article
+      className={styles.card}
+      aria-label={`Приміщення ${index + 1}`}
+      data-testid={`room-card-${room.id}`}
+    >
       <button
         id={btnId}
         type="button"
+        data-testid={`room-toggle-${room.id}`}
         className={styles.accHeader}
         aria-expanded={isOpen}
         aria-controls={panelId}
@@ -308,6 +313,7 @@ export function RoomAccordionItem({
             </label>
             <input
               id={`name-${room.id}`}
+              data-testid={`room-name-${room.id}`}
               className={styles.control}
               value={room.name}
               onChange={(e) => { updateRoom({ name: e.target.value }); }}
@@ -322,6 +328,7 @@ export function RoomAccordionItem({
             </label>
             <select
               id={`type-${room.id}`}
+              data-testid={`room-type-${room.id}`}
               className={styles.control}
               value={isCanonicalRoomType(room.type) ? room.type : 'помещение'}
               onChange={(e) => {
@@ -423,6 +430,7 @@ export function RoomAccordionItem({
             </label>
             <input
               id={`area-${room.id}`}
+              data-testid={`room-area-${room.id}`}
               className={styles.control}
               type="number"
               min={0.1}
@@ -441,6 +449,7 @@ export function RoomAccordionItem({
             </label>
             <input
               id={`height-${room.id}`}
+              data-testid={`room-height-${room.id}`}
               className={styles.control}
               type="number"
               min={1.8}
@@ -459,6 +468,7 @@ export function RoomAccordionItem({
             </label>
             <select
               id={`room-layout-${room.id}`}
+              data-testid={`room-layout-${room.id}`}
               className={styles.control}
               value={roomLayout}
               onChange={(e) => {
@@ -814,6 +824,11 @@ export function RoomAccordionItem({
                   </label>
                   <input
                     id={`${slot}-area-${room.id}`}
+                    data-testid={
+                      slot === 'externalWall1'
+                        ? `room-wall1-area-${room.id}`
+                        : `room-wall2-area-${room.id}`
+                    }
                     className={styles.control}
                     type="number"
                     min={0}

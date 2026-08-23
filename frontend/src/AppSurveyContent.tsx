@@ -390,7 +390,7 @@ export function AppSurveyContent({
       <div className={styles.calcStatus}>
         {calcLoading ? <div className={styles.hint}>Розрахунок…</div> : null}
         {calcError ? (
-          <div className={styles.calcError} role="alert">
+          <div className={styles.calcError} role="alert" data-testid="calc-error">
             {calcError}
           </div>
         ) : null}
@@ -412,6 +412,7 @@ export function AppSurveyContent({
                     type="button"
                     onClick={() => { setCurrentStep(step); }}
                     aria-current={currentStep === step ? 'step' : undefined}
+                    data-testid={`step-nav-${step}`}
                     className={styles.stepButton}
                   >
                     {label}
@@ -488,6 +489,7 @@ export function AppSurveyContent({
                     Всередині, °C
                     <input
                       type="number"
+                      data-testid="field-inside-temp"
                       value={temps.insideC}
                       onChange={(e) =>
                         { setTemps((prev) => ({
@@ -501,6 +503,7 @@ export function AppSurveyContent({
                     Зовні, °C
                     <input
                       type="number"
+                      data-testid="field-outside-temp"
                       value={temps.outsideC}
                       onChange={(e) =>
                         { setTemps((prev) => ({
@@ -514,6 +517,7 @@ export function AppSurveyContent({
                     Повітря в санвузлі, °C
                     <input
                       type="number"
+                      data-testid="field-bathroom-temp"
                       min={24}
                       max={35}
                       placeholder="≥24"

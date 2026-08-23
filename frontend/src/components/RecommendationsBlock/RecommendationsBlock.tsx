@@ -74,8 +74,23 @@ export function RecommendationsBlock({
   onNavigateToSurveyStep,
 }: RecommendationsBlockProps) {
   const showRecalculating = calcLoading || reportIsStale || uiPhase === 'recalculating';
+  // Машиночитаемые маркеры для автотестов: значения берутся из уже существующего
+  // состояния (apiHeatLoss — тот же признак, что формирует подпись «Джерело: …»;
+  // uiPhase / showRecalculating — фаза отчёта из surveySession).
+  const calcPhase = showRecalculating
+    ? 'pending'
+    : uiPhase === 'error'
+      ? 'error'
+      : uiPhase === 'stable'
+        ? 'ok'
+        : 'idle';
   return (
-    <div className={[styles.root, className].filter(Boolean).join(' ')}>
+    <div
+      className={[styles.root, className].filter(Boolean).join(' ')}
+      data-testid="result-panel"
+      data-source={apiHeatLoss != null ? 'api' : 'quick'}
+      data-calc-phase={calcPhase}
+    >
       <section
         aria-labelledby="calculation-results-title"
         onClick={(e) => { handleSummaryNavigateClick(e, onNavigateToSurveyStep); }}
