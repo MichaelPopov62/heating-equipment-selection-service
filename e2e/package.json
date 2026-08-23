@@ -1,0 +1,19 @@
+{
+  "name": "heatcalc-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Регрессионный набор персон и дефектов, найденных при ручном аудите 2026-08-23.",
+  "type": "module",
+  "scripts": {
+    "install:browsers": "playwright install chromium",
+    "personas": "playwright test specs/personas.spec.ts",
+    "personas:prod": "TARGET=prod playwright test specs/personas.spec.ts",
+    "regressions": "playwright test specs/regressions.spec.ts",
+    "test": "playwright test",
+    "report": "playwright show-report",
+    "scoreboard": "node support/scoreboard.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}
