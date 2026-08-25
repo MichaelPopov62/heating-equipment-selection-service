@@ -1,0 +1,914 @@
+{
+  "../../shared/heatingMatchingSchemes.js": [],
+  "../../shared/heatingThermalRegimePresets.js": [
+    "../../shared/heatingThermalRegimeRecommendations.js"
+  ],
+  "../../shared/heatingThermalRegimeRecommendations.js": [
+    "../../shared/heatingMatchingSchemes.js"
+  ],
+  "../../shared/radiatorConnection.js": [],
+  "../../shared/radiatorEmitterPreference.js": [],
+  "../../shared/roomDesignAirTemp.js": [],
+  "../../shared/roomTypeNormalization.js": [],
+  "../../shared/ufhCircuitPresets.js": [],
+  "../../shared/ufhDistributionPresets.js": [],
+  "../../shared/ufhModePresetIds.js": [],
+  "../../shared/ufhTerminalControl.js": [],
+  "../scripts/utils/catalogPaths.js": [],
+  "api/adminFeedbackRoutes.js": [
+    "api/errorCodes.js",
+    "api/sendErrorEnvelope.js",
+    "feedback/adminFeedback.js",
+    "feedback/feedbackEventHub.js",
+    "models/public.js",
+    "projects/parseObjectId.js",
+    "utils/logger.js"
+  ],
+  "api/adminRoutes.js": [
+    "api/adminFeedbackRoutes.js",
+    "api/errorCodes.js",
+    "api/sendErrorEnvelope.js",
+    "api/validateAdminUserPatch.js",
+    "auth/requireAuth.js",
+    "auth/requireRole.js",
+    "auth/resolveUser.js",
+    "auth/serializeMeUser.js",
+    "models/public.js",
+    "projects/parseObjectId.js",
+    "projects/requireMongo.js",
+    "utils/logger.js"
+  ],
+  "api/calcInputSchemaLoader.js": [
+    "../../shared/heatingMatchingSchemes.js",
+    "../../shared/roomTypeNormalization.js",
+    "../../shared/ufhModePresetIds.js",
+    "logic/heatingThermalRegimes.js"
+  ],
+  "api/errorCodes.js": [],
+  "api/feedbackRoutes.js": [
+    "api/middleware/rateLimiters.js",
+    "api/sendErrorEnvelope.js",
+    "auth/optionalAuth.js",
+    "feedback/adminFeedback.js",
+    "feedback/feedbackEventHub.js",
+    "feedback/validateFeedbackBody.js",
+    "models/public.js",
+    "projects/requireMongo.js",
+    "utils/logger.js"
+  ],
+  "api/meRoutes.js": [
+    "api/sendErrorEnvelope.js",
+    "auth/optionalAuth.js",
+    "auth/projectsAuthConfig.js",
+    "auth/serializeMeUser.js"
+  ],
+  "api/middleware/rateLimiters.js": [
+    "api/sendErrorEnvelope.js",
+    "auth/projectsAuthConfig.js"
+  ],
+  "api/projectsRoutes.js": [
+    "api/errorCodes.js",
+    "api/middleware/rateLimiters.js",
+    "api/runCalculation.js",
+    "api/sendErrorEnvelope.js",
+    "auth/projectsAuthConfig.js",
+    "auth/requireAuth.js",
+    "auth/requireRole.js",
+    "models/public.js",
+    "projects/buildPublisherPresentation.js",
+    "projects/buildShareSnapshot.js",
+    "projects/documentSizeLimits.js",
+    "projects/extractCalculationSummary.js",
+    "projects/importProjectBundle.js",
+    "projects/parseIncludeTechnicalQuery.js",
+    "projects/parseObjectId.js",
+    "projects/projectAccess.js",
+    "projects/projectChangeMeta.js",
+    "projects/projectOwnerMeta.js",
+    "projects/renderEstimatePdf.js",
+    "projects/requireMongo.js",
+    "projects/resolveProjectCalcInput.js",
+    "projects/serializeProject.js",
+    "projects/serializeShare.js",
+    "projects/shareToken.js",
+    "projects/validateProjectBody.js",
+    "projects/validateProjectImportBody.js",
+    "utils/logger.js"
+  ],
+  "api/public.js": [
+    "api/projectsRoutes.js",
+    "api/routes.js",
+    "api/validate.js"
+  ],
+  "api/publicSharesRoutes.js": [
+    "api/middleware/rateLimiters.js",
+    "api/sendErrorEnvelope.js",
+    "models/public.js",
+    "projects/parseIncludeTechnicalQuery.js",
+    "projects/renderEstimatePdf.js",
+    "projects/requireMongo.js",
+    "projects/serializeShare.js",
+    "projects/shareToken.js",
+    "utils/isPlainObject.js",
+    "utils/logger.js"
+  ],
+  "api/routes.js": [
+    "api/adminRoutes.js",
+    "api/feedbackRoutes.js",
+    "api/meRoutes.js",
+    "api/middleware/rateLimiters.js",
+    "api/projectsRoutes.js",
+    "api/publicSharesRoutes.js",
+    "api/runCalculation.js",
+    "api/sendErrorEnvelope.js",
+    "api/systemRoutes.js",
+    "data/flooringFinishMaterials.js",
+    "data/warmFloorAssemblyPresets.js",
+    "logic/envelopePresets.js",
+    "reference/public.js",
+    "utils/logger.js",
+    "utils/setNoStoreCacheHeaders.js"
+  ],
+  "api/runCalculation.js": [
+    "api/validate.js",
+    "reference/public.js",
+    "report/public.js"
+  ],
+  "api/sendErrorEnvelope.js": [],
+  "api/systemRoutes.js": [
+    "api/sendErrorEnvelope.js",
+    "reference/public.js",
+    "utils/logger.js"
+  ],
+  "api/validate.js": [
+    "../../shared/heatingMatchingSchemes.js",
+    "../../shared/roomTypeNormalization.js",
+    "../../shared/ufhTerminalControl.js",
+    "api/calcInputSchemaLoader.js",
+    "api/errorCodes.js",
+    "data/flooringFinishMaterials.js",
+    "data/warmFloorAssemblyPresets.js",
+    "logic/apartmentStackBoundaries.js",
+    "logic/externalWallsValidate.js",
+    "logic/heatingThermalRegimes.js",
+    "logic/normalizeHeatingUfhPreset.js",
+    "logic/normalizeUnderfloorDistribution.js",
+    "logic/roomExteriorLayoutHeatLoss.js",
+    "logic/ventilationReserve.js",
+    "reference/assertCalcRuntimeContext.js",
+    "utils/apartmentMatching.js",
+    "utils/boilerMountingConstraints.js",
+    "utils/isPlainObject.js",
+    "utils/logger.js",
+    "utils/sanitizeString.js"
+  ],
+  "api/validateAdminUserPatch.js": [
+    "api/errorCodes.js",
+    "auth/authorizationPolicy.js"
+  ],
+  "auth/attachRequestContext.js": [],
+  "auth/authErrors.js": [
+    "api/sendErrorEnvelope.js",
+    "utils/logger.js"
+  ],
+  "auth/authorizationPolicy.js": [],
+  "auth/extractBearerToken.js": [],
+  "auth/mapJwtPayload.js": [
+    "auth/projectsAuthConfig.js"
+  ],
+  "auth/optionalAuth.js": [
+    "auth/attachRequestContext.js",
+    "auth/authErrors.js",
+    "auth/extractBearerToken.js",
+    "auth/projectsAuthConfig.js",
+    "auth/runAuthPipeline.js",
+    "utils/logger.js"
+  ],
+  "auth/platformAdminAllowlist.js": [],
+  "auth/projectsAuthConfig.js": [],
+  "auth/requireAuth.js": [
+    "api/sendErrorEnvelope.js",
+    "auth/attachRequestContext.js",
+    "auth/authErrors.js",
+    "auth/extractBearerToken.js",
+    "auth/projectsAuthConfig.js",
+    "auth/runAuthPipeline.js"
+  ],
+  "auth/requireRole.js": [
+    "api/sendErrorEnvelope.js",
+    "auth/authErrors.js",
+    "auth/authorizationPolicy.js",
+    "auth/projectsAuthConfig.js"
+  ],
+  "auth/resolveUser.js": [
+    "auth/authorizationPolicy.js",
+    "auth/platformAdminAllowlist.js",
+    "models/public.js",
+    "utils/logger.js",
+    "utils/mongoReferenceConnection.js"
+  ],
+  "auth/runAuthPipeline.js": [
+    "auth/mapJwtPayload.js",
+    "auth/resolveUser.js",
+    "auth/verifyAccessToken.js"
+  ],
+  "auth/serializeMeUser.js": [
+    "auth/projectsAuthConfig.js"
+  ],
+  "auth/verifyAccessToken.js": [
+    "auth/projectsAuthConfig.js"
+  ],
+  "catalog/boilerCatalogHelpers.js": [
+    "utils/sanitizeString.js"
+  ],
+  "catalog/boilerManifoldSeriesGeometry.js": [],
+  "catalog/comparators.js": [],
+  "catalog/loadCatalog.js": [
+    "../scripts/utils/catalogPaths.js",
+    "catalog/pipeCatalogHelpers.js",
+    "catalog/pumpCatalogHelpers.js",
+    "catalog/uniboxCatalogHelpers.js",
+    "catalog/validateCatalog.js",
+    "models/public.js",
+    "utils/logger.js",
+    "utils/mongoReferenceConnection.js"
+  ],
+  "catalog/manifoldSeriesGeometry.js": [],
+  "catalog/matchingSortPools.js": [
+    "catalog/comparators.js"
+  ],
+  "catalog/pipeCatalogHelpers.js": [],
+  "catalog/public.js": [
+    "catalog/loadCatalog.js"
+  ],
+  "catalog/pumpCatalogHelpers.js": [],
+  "catalog/types.d.ts": [
+    "types/boiler-types.d.ts"
+  ],
+  "catalog/uniboxCatalogHelpers.js": [],
+  "catalog/validateCatalog.js": [
+    "catalog/boilerCatalogHelpers.js",
+    "catalog/boilerManifoldSeriesGeometry.js",
+    "catalog/manifoldSeriesGeometry.js",
+    "catalog/pipeCatalogHelpers.js",
+    "catalog/pumpCatalogHelpers.js",
+    "utils/isPlainObject.js",
+    "utils/pumpCurveMath.js",
+    "utils/sanitizeString.js"
+  ],
+  "climate/geocode.js": [
+    "utils/createAppError.js",
+    "utils/logger.js"
+  ],
+  "climate/index.js": [
+    "climate/geocode.js",
+    "climate/snipClimate.js"
+  ],
+  "climate/snipClimate.js": [
+    "utils/createAppError.js",
+    "utils/logger.js"
+  ],
+  "data/flooringFinishMaterials.js": [],
+  "data/warmFloorAssemblyPresets.js": [
+    "data/flooringFinishMaterials.js"
+  ],
+  "dhw/loadAppliances.js": [
+    "dhw/validateAppliances.js",
+    "models/Appliance.js",
+    "reference/loadReferenceCollection.js",
+    "utils/mongoReferenceConnection.js"
+  ],
+  "dhw/loadWaterNorms.js": [
+    "dhw/validateWaterNorms.js",
+    "models/WaterNorms.js",
+    "reference/loadReferenceCollection.js",
+    "utils/logger.js",
+    "utils/mongoConnectionConfig.js",
+    "utils/mongoReferenceConnection.js"
+  ],
+  "dhw/types.d.ts": [],
+  "dhw/validateAppliances.js": [
+    "dhw/validateReferenceHelpers.js"
+  ],
+  "dhw/validateReferenceHelpers.js": [],
+  "dhw/validateWaterNorms.js": [
+    "dhw/validateReferenceHelpers.js"
+  ],
+  "dhw/waterCalc.js": [],
+  "feedback/adminFeedback.js": [],
+  "feedback/feedbackEventHub.js": [
+    "utils/logger.js"
+  ],
+  "feedback/validateFeedbackBody.js": [],
+  "hydraulics/buildGraph.js": [
+    "hydraulics/buildRadiatorSubgraph.js",
+    "hydraulics/resolveCirculationFlows.js",
+    "hydraulics/thermalLoadToFlow.js",
+    "utils/math.js"
+  ],
+  "hydraulics/buildHydraulicsProposal.js": [
+    "utils/math.js"
+  ],
+  "hydraulics/buildRadiatorSubgraph.js": [
+    "hydraulics/groupRadiatorGraphBranches.js",
+    "hydraulics/radiatorGraphHelpers.js"
+  ],
+  "hydraulics/buildSnapshots.js": [
+    "../../shared/heatingMatchingSchemes.js",
+    "hydraulics/parseConnectionDiameter.js",
+    "hydraulics/resolveEmittersMode.js",
+    "hydraulics/resolveFlowDeltaTK.js",
+    "utils/math.js"
+  ],
+  "hydraulics/circulationLoops.js": [
+    "utils/math.js"
+  ],
+  "hydraulics/crossValidatePipelineInput.js": [
+    "hydraulics/thermalLoadToFlow.js",
+    "utils/math.js"
+  ],
+  "hydraulics/groupRadiatorGraphBranches.js": [
+    "utils/math.js"
+  ],
+  "hydraulics/parseConnectionDiameter.js": [],
+  "hydraulics/pickPipe.js": [
+    "hydraulics/groupRadiatorGraphBranches.js",
+    "hydraulics/pickTrunkChain.js",
+    "hydraulics/pipeCatalogPoolFilter.js",
+    "hydraulics/pipeHydraulics.js",
+    "hydraulics/radiatorGraphHelpers.js"
+  ],
+  "hydraulics/pickPump.js": [
+    "utils/math.js",
+    "utils/pumpCurveMath.js"
+  ],
+  "hydraulics/pickTrunkChain.js": [
+    "hydraulics/pipeHydraulics.js"
+  ],
+  "hydraulics/pipeCatalogPoolFilter.js": [
+    "hydraulics/pipeHydraulics.js"
+  ],
+  "hydraulics/pipeHydraulics.js": [
+    "utils/math.js"
+  ],
+  "hydraulics/pipelineSchemaLoader.js": [],
+  "hydraulics/pressureDrop.js": [
+    "hydraulics/circulationLoops.js",
+    "hydraulics/resolveCirculationFlows.js",
+    "utils/math.js"
+  ],
+  "hydraulics/public.js": [
+    "hydraulics/buildSnapshots.js",
+    "hydraulics/resolveCirculationFlows.js",
+    "hydraulics/resolveFlowDeltaTK.js",
+    "hydraulics/resolveSystemPumps.js",
+    "hydraulics/runHydraulicsPipeline.js",
+    "hydraulics/thermalLoadToFlow.js",
+    "hydraulics/validatePipelineInput.js"
+  ],
+  "hydraulics/radiatorGraphHelpers.js": [
+    "utils/math.js"
+  ],
+  "hydraulics/resolveCirculationFlows.js": [
+    "hydraulics/thermalLoadToFlow.js",
+    "utils/math.js"
+  ],
+  "hydraulics/resolveEmittersMode.js": [],
+  "hydraulics/resolveFlowDeltaTK.js": [],
+  "hydraulics/resolveSystemPumps.js": [
+    "hydraulics/pickPump.js",
+    "hydraulics/resolveCirculationFlows.js",
+    "hydraulics/resolveZoneHead.js",
+    "utils/math.js"
+  ],
+  "hydraulics/resolveZoneHead.js": [
+    "utils/math.js"
+  ],
+  "hydraulics/runHydraulicsPipeline.js": [
+    "hydraulics/buildGraph.js",
+    "hydraulics/buildHydraulicsProposal.js",
+    "hydraulics/pickPipe.js",
+    "hydraulics/pressureDrop.js",
+    "hydraulics/resolveSystemPumps.js",
+    "hydraulics/thermalLoadToFlow.js"
+  ],
+  "hydraulics/thermalLoadToFlow.js": [
+    "utils/math.js"
+  ],
+  "hydraulics/types.d.ts": [
+    "recommendations/types.d.ts",
+    "types/boiler-types.d.ts",
+    "types/shared-types.d.ts"
+  ],
+  "hydraulics/validatePipelineInput.js": [
+    "hydraulics/crossValidatePipelineInput.js",
+    "hydraulics/pipelineSchemaLoader.js"
+  ],
+  "index.js": [
+    "api/errorCodes.js",
+    "api/public.js",
+    "auth/projectsAuthConfig.js",
+    "projects/documentSizeLimits.js",
+    "reference/public.js",
+    "utils/logger.js"
+  ],
+  "logic/apartmentStackBoundaries.js": [],
+  "logic/envelopeHeatLoss.js": [],
+  "logic/envelopePresets.js": [],
+  "logic/externalWallsValidate.js": [
+    "logic/envelopePresets.js",
+    "logic/wallAssembly.js"
+  ],
+  "logic/heatingThermalRegimes.js": [
+    "../../shared/heatingThermalRegimePresets.js",
+    "../../shared/radiatorConnection.js",
+    "../../shared/radiatorEmitterPreference.js",
+    "utils/boilerMatchingByType.js"
+  ],
+  "logic/heatlossByRooms.js": [
+    "../../shared/roomDesignAirTemp.js",
+    "logic/envelopeHeatLoss.js",
+    "logic/envelopePresets.js",
+    "logic/roomExteriorLayoutHeatLoss.js",
+    "logic/topBoundaryEnvelope.js",
+    "logic/ventilationReserve.js",
+    "logic/wallAssembly.js",
+    "utils/logger.js"
+  ],
+  "logic/hotWater.js": [
+    "dhw/waterCalc.js"
+  ],
+  "logic/normalizeHeatingUfhPreset.js": [
+    "../../shared/heatingThermalRegimeRecommendations.js",
+    "../../shared/ufhModePresetIds.js"
+  ],
+  "logic/normalizeUnderfloorDistribution.js": [
+    "../../shared/ufhDistributionPresets.js"
+  ],
+  "logic/orientationHeatLoss.js": [],
+  "logic/roomExteriorLayoutHeatLoss.js": [
+    "logic/orientationHeatLoss.js"
+  ],
+  "logic/topBoundaryEnvelope.js": [],
+  "logic/ufhActiveFloorArea.js": [
+    "utils/math.js"
+  ],
+  "logic/ufhCircuitResolve.js": [
+    "../../shared/ufhCircuitPresets.js"
+  ],
+  "logic/ufhDistributionResolve.js": [
+    "../../shared/ufhDistributionPresets.js"
+  ],
+  "logic/ufhHydraulicsCircuit.js": [
+    "hydraulics/thermalLoadToFlow.js"
+  ],
+  "logic/ufhLoopGeometry.js": [
+    "hydraulics/thermalLoadToFlow.js",
+    "logic/ufhLoopLength.js",
+    "utils/math.js"
+  ],
+  "logic/ufhLoopHydraulics.js": [
+    "hydraulics/pickPipe.js",
+    "hydraulics/pipeHydraulics.js",
+    "hydraulics/thermalLoadToFlow.js",
+    "logic/ufhLoopLength.js",
+    "recommendations/recommendationResolver.js",
+    "utils/math.js"
+  ],
+  "logic/ufhLoopHydraulics.types.d.ts": [
+    "catalog/types.d.ts",
+    "hydraulics/types.d.ts"
+  ],
+  "logic/ufhLoopLength.js": [],
+  "logic/ufhMixingNode.js": [],
+  "logic/ufhMixingNodeHydraulics.js": [
+    "utils/math.js"
+  ],
+  "logic/ufhPipeEmbedment.js": [],
+  "logic/ufhPipeSpacingResolve.js": [
+    "logic/ufhPipeEmbedment.js",
+    "logic/ufhRoomHeatFlux.js"
+  ],
+  "logic/ufhRequiredHeatFlux.js": [
+    "utils/math.js"
+  ],
+  "logic/ufhRoomCoverageCheck.js": [
+    "utils/math.js"
+  ],
+  "logic/ufhRoomHeatFlux.js": [
+    "data/flooringFinishMaterials.js",
+    "data/warmFloorAssemblyPresets.js",
+    "logic/ufhPipeEmbedment.js",
+    "utils/math.js"
+  ],
+  "logic/ventilationReserve.js": [],
+  "logic/wallAssembly.js": [
+    "logic/envelopePresets.js"
+  ],
+  "logic/warmFloorCalc.js": [
+    "../../shared/roomDesignAirTemp.js",
+    "../../shared/ufhDistributionPresets.js",
+    "../../shared/ufhModePresetIds.js",
+    "data/warmFloorAssemblyPresets.js",
+    "logic/ufhActiveFloorArea.js",
+    "logic/ufhCircuitResolve.js",
+    "logic/ufhHydraulicsCircuit.js",
+    "logic/ufhLoopGeometry.js",
+    "logic/ufhMixingNode.js",
+    "logic/ufhMixingNodeHydraulics.js",
+    "logic/ufhPipeEmbedment.js",
+    "logic/ufhPipeSpacingResolve.js",
+    "logic/ufhRequiredHeatFlux.js",
+    "logic/ufhRoomCoverageCheck.js",
+    "logic/ufhRoomHeatFlux.js",
+    "utils/math.js"
+  ],
+  "matching/boiler.js": [
+    "../../shared/heatingMatchingSchemes.js",
+    "catalog/matchingSortPools.js",
+    "logic/heatingThermalRegimes.js",
+    "matching/internal/indirectCatalogHelpers.js",
+    "recommendations/recommendationResolver.js",
+    "reference/assertCalcRuntimeContext.js",
+    "utils/apartmentCombiSerialBufferHint.js",
+    "utils/apartmentMatching.js",
+    "utils/boilerMatchingByType.js",
+    "utils/boilerMountingConstraints.js",
+    "utils/logger.js"
+  ],
+  "matching/enrichProposalBundlePrice.js": [
+    "../../shared/heatingMatchingSchemes.js"
+  ],
+  "matching/index.js": [
+    "../../shared/heatingMatchingSchemes.js",
+    "logic/heatingThermalRegimes.js",
+    "matching/boiler.js",
+    "matching/enrichProposalBundlePrice.js",
+    "matching/indirectPriorityRoomHint.js",
+    "matching/indirectWaterHeater.js",
+    "matching/radiators.js",
+    "matching/waterHeater.js",
+    "reference/assertCalcRuntimeContext.js",
+    "utils/boilerMatchingByType.js",
+    "utils/logger.js"
+  ],
+  "matching/indirectPriorityRoomHint.js": [],
+  "matching/indirectWaterHeater.js": [
+    "dhw/waterCalc.js",
+    "matching/internal/indirectCatalogHelpers.js",
+    "recommendations/recommendationResolver.js",
+    "utils/logger.js"
+  ],
+  "matching/internal/decideObjectEmitterKind.js": [],
+  "matching/internal/exploreRoomEmitterKind.js": [
+    "matching/radiatorSizingHelpers.js"
+  ],
+  "matching/internal/indirectCatalogHelpers.js": [],
+  "matching/internal/mixedRadiatorsUfhMode.js": [
+    "../../shared/ufhModePresetIds.js"
+  ],
+  "matching/internal/pickRadiatorsCore.js": [
+    "../../shared/radiatorEmitterPreference.js",
+    "../../shared/roomDesignAirTemp.js",
+    "hydraulics/resolveFlowDeltaTK.js",
+    "hydraulics/thermalLoadToFlow.js",
+    "logic/ventilationReserve.js",
+    "matching/internal/decideObjectEmitterKind.js",
+    "matching/internal/exploreRoomEmitterKind.js",
+    "matching/internal/mixedRadiatorsUfhMode.js",
+    "matching/internal/radiatorConnectionNotes.js",
+    "matching/internal/resolveMicroLoadRadiatorStrategy.js",
+    "matching/internal/resolveMixedRadiatorRoomLoad.js",
+    "matching/internal/sizeForcedRoomEmitter.js",
+    "matching/internal/summarizeRadiatorEmitters.js",
+    "matching/radiatorSizingHelpers.js",
+    "matching/warmFloor.js",
+    "recommendations/recommendationResolver.js",
+    "utils/logger.js",
+    "utils/math.js"
+  ],
+  "matching/internal/radiatorConnectionNotes.js": [
+    "../../shared/radiatorConnection.js"
+  ],
+  "matching/internal/resolveMicroLoadRadiatorStrategy.js": [
+    "logic/roomExteriorLayoutHeatLoss.js"
+  ],
+  "matching/internal/resolveMixedRadiatorRoomLoad.js": [],
+  "matching/internal/sizeForcedRoomEmitter.js": [
+    "matching/internal/exploreRoomEmitterKind.js",
+    "matching/radiatorSizingHelpers.js"
+  ],
+  "matching/internal/summarizeRadiatorEmitters.js": [],
+  "matching/internal/uniboxRoomAirPresets.js": [
+    "../../shared/roomDesignAirTemp.js"
+  ],
+  "matching/manifold.js": [
+    "utils/logger.js"
+  ],
+  "matching/public.js": [
+    "matching/index.js",
+    "matching/manifold.js",
+    "matching/unibox.js"
+  ],
+  "matching/radiatorSizingHelpers.js": [],
+  "matching/radiators.js": [
+    "logic/heatingThermalRegimes.js",
+    "matching/internal/pickRadiatorsCore.js",
+    "matching/internal/summarizeRadiatorEmitters.js"
+  ],
+  "matching/unibox.js": [
+    "matching/internal/uniboxRoomAirPresets.js",
+    "utils/logger.js"
+  ],
+  "matching/warmFloor.js": [
+    "recommendations/recommendationResolver.js"
+  ],
+  "matching/waterHeater.js": [
+    "catalog/comparators.js",
+    "catalog/matchingSortPools.js",
+    "utils/logger.js"
+  ],
+  "models/Appliance.js": [],
+  "models/Boiler.js": [
+    "models/Product.js",
+    "models/productSchemas.js"
+  ],
+  "models/BoilerManifold.js": [
+    "models/Product.js",
+    "models/productSchemas.js"
+  ],
+  "models/Calculation.js": [],
+  "models/Feedback.js": [],
+  "models/IndirectWaterHeater.js": [
+    "models/Product.js",
+    "models/productSchemas.js"
+  ],
+  "models/Manifold.js": [
+    "models/Product.js",
+    "models/productSchemas.js"
+  ],
+  "models/Pipe.js": [
+    "models/Product.js",
+    "models/productSchemas.js"
+  ],
+  "models/Product.js": [
+    "models/productSchemas.js"
+  ],
+  "models/Project.js": [],
+  "models/Pump.js": [
+    "models/Product.js",
+    "models/productSchemas.js"
+  ],
+  "models/Radiator.js": [
+    "models/Product.js",
+    "models/productSchemas.js"
+  ],
+  "models/Recommendation.js": [],
+  "models/UnderfloorHeatingPreset.js": [],
+  "models/Unibox.js": [
+    "models/Product.js",
+    "models/productSchemas.js"
+  ],
+  "models/User.js": [
+    "auth/authorizationPolicy.js"
+  ],
+  "models/WaterHeater.js": [
+    "models/Product.js",
+    "models/productSchemas.js"
+  ],
+  "models/WaterNorms.js": [],
+  "models/productSchemas.js": [],
+  "models/public.js": [
+    "models/Calculation.js",
+    "models/Feedback.js",
+    "models/Product.js",
+    "models/Project.js",
+    "models/User.js"
+  ],
+  "projects/buildEstimatePdfHtml.js": [
+    "auth/authorizationPolicy.js",
+    "projects/buildTechnicalPdfHtml.js",
+    "projects/pdfHtmlEscape.js",
+    "utils/isPlainObject.js"
+  ],
+  "projects/buildPublisherPresentation.js": [
+    "auth/authorizationPolicy.js"
+  ],
+  "projects/buildShareSnapshot.js": [
+    "utils/isPlainObject.js"
+  ],
+  "projects/buildTechnicalPdfHtml.js": [
+    "projects/pdfHtmlEscape.js",
+    "utils/isPlainObject.js"
+  ],
+  "projects/documentSizeLimits.js": [],
+  "projects/extractCalculationSummary.js": [
+    "utils/boilerMountingConstraints.js",
+    "utils/isPlainObject.js"
+  ],
+  "projects/importProjectBundle.js": [
+    "models/public.js",
+    "projects/documentSizeLimits.js",
+    "projects/extractCalculationSummary.js",
+    "projects/projectAccess.js",
+    "projects/sortCalculationsForImport.js",
+    "utils/logger.js"
+  ],
+  "projects/migrateLegacyProjectOwnerId.js": [],
+  "projects/normalizeLegacySurveyImport.js": [
+    "projects/stripMongoExportFields.js",
+    "utils/isPlainObject.js",
+    "utils/sanitizeString.js"
+  ],
+  "projects/parseIncludeTechnicalQuery.js": [],
+  "projects/parseObjectId.js": [],
+  "projects/pdfFilename.js": [],
+  "projects/pdfHtmlEscape.js": [],
+  "projects/pdfRenderSemaphore.js": [
+    "utils/createAppError.js"
+  ],
+  "projects/projectAccess.js": [
+    "api/errorCodes.js",
+    "auth/authorizationPolicy.js",
+    "auth/projectsAuthConfig.js",
+    "models/public.js",
+    "projects/parseObjectId.js",
+    "projects/projectOwnerMeta.js",
+    "utils/logger.js"
+  ],
+  "projects/projectChangeMeta.js": [
+    "utils/isPlainObject.js"
+  ],
+  "projects/projectExportConstants.js": [],
+  "projects/projectOwnerMeta.js": [
+    "models/public.js",
+    "projects/parseObjectId.js"
+  ],
+  "projects/renderEstimatePdf.js": [
+    "projects/buildEstimatePdfHtml.js",
+    "projects/pdfFilename.js",
+    "projects/renderPdfFromHtml.js"
+  ],
+  "projects/renderPdfFromHtml.js": [
+    "projects/pdfRenderSemaphore.js"
+  ],
+  "projects/requireMongo.js": [
+    "utils/createAppError.js",
+    "utils/mongoReferenceConnection.js"
+  ],
+  "projects/resolveProjectCalcInput.js": [
+    "projects/documentSizeLimits.js",
+    "utils/createAppError.js",
+    "utils/isPlainObject.js"
+  ],
+  "projects/serializeProject.js": [
+    "projects/extractCalculationSummary.js",
+    "projects/serializeShare.js",
+    "utils/isPlainObject.js"
+  ],
+  "projects/serializeShare.js": [
+    "utils/isPlainObject.js"
+  ],
+  "projects/shareToken.js": [],
+  "projects/sortCalculationsForImport.js": [],
+  "projects/stripMongoExportFields.js": [
+    "utils/isPlainObject.js"
+  ],
+  "projects/validateProjectBody.js": [
+    "api/errorCodes.js",
+    "projects/validateProjectSurveyShape.js",
+    "utils/createAppError.js",
+    "utils/isPlainObject.js",
+    "utils/sanitizeString.js"
+  ],
+  "projects/validateProjectImportBody.js": [
+    "api/errorCodes.js",
+    "projects/documentSizeLimits.js",
+    "projects/normalizeLegacySurveyImport.js",
+    "projects/projectExportConstants.js",
+    "projects/stripMongoExportFields.js",
+    "projects/validateProjectBody.js",
+    "projects/validateProjectSurveyShape.js",
+    "utils/createAppError.js",
+    "utils/isPlainObject.js"
+  ],
+  "projects/validateProjectSurveyShape.js": [
+    "api/errorCodes.js",
+    "projects/documentSizeLimits.js",
+    "utils/createAppError.js",
+    "utils/isPlainObject.js"
+  ],
+  "recommendations/loadRecommendations.js": [
+    "models/Recommendation.js",
+    "recommendations/validateRecommendations.js",
+    "reference/loadReferenceCollection.js",
+    "utils/mongoReferenceConnection.js"
+  ],
+  "recommendations/recommendationResolver.js": [],
+  "recommendations/types.d.ts": [],
+  "recommendations/validateRecommendations.js": [],
+  "reference/assertCalcRuntimeContext.js": [],
+  "reference/configCache.js": [
+    "catalog/public.js",
+    "dhw/loadAppliances.js",
+    "dhw/loadWaterNorms.js",
+    "recommendations/loadRecommendations.js",
+    "reference/deepFreeze.js",
+    "ufh/loadUnderfloorHeatingPresets.js",
+    "utils/logger.js"
+  ],
+  "reference/deepFreeze.js": [],
+  "reference/loadReferenceCollection.js": [
+    "utils/logger.js",
+    "utils/mongoConnectionConfig.js"
+  ],
+  "reference/public.js": [
+    "reference/assertCalcRuntimeContext.js",
+    "reference/configCache.js",
+    "reference/toCalcRuntimeContext.js"
+  ],
+  "reference/toCalcRuntimeContext.js": [],
+  "report/automationHints.js": [
+    "../../shared/heatingMatchingSchemes.js",
+    "utils/apartmentMatching.js"
+  ],
+  "report/buildFinancialBom.js": [],
+  "report/buildReport.js": [
+    "../../shared/heatingMatchingSchemes.js",
+    "climate/index.js",
+    "hydraulics/public.js",
+    "logic/heatlossByRooms.js",
+    "logic/hotWater.js",
+    "logic/ufhDistributionResolve.js",
+    "logic/ufhLoopHydraulics.js",
+    "logic/ufhMixingNodeHydraulics.js",
+    "logic/warmFloorCalc.js",
+    "matching/public.js",
+    "matching/warmFloor.js",
+    "recommendations/recommendationResolver.js",
+    "reference/assertCalcRuntimeContext.js",
+    "report/automationHints.js",
+    "report/buildFinancialBom.js",
+    "utils/apartmentCombiSerialBufferHint.js",
+    "utils/apartmentMatching.js",
+    "utils/createAppError.js",
+    "utils/isPlainObject.js",
+    "utils/logger.js"
+  ],
+  "report/public.js": [
+    "report/buildReport.js"
+  ],
+  "types/auth.d.ts": [],
+  "types/boiler-types.d.ts": [
+    "catalog/types.d.ts",
+    "recommendations/types.d.ts"
+  ],
+  "types/express-augment.d.ts": [
+    "types/auth.d.ts"
+  ],
+  "types/shared-types.d.ts": [
+    "catalog/types.d.ts",
+    "dhw/types.d.ts",
+    "hydraulics/types.d.ts",
+    "recommendations/types.d.ts",
+    "types/auth.d.ts",
+    "types/boiler-types.d.ts",
+    "ufh/types.d.ts"
+  ],
+  "ufh/loadUnderfloorHeatingPresets.js": [
+    "models/UnderfloorHeatingPreset.js",
+    "reference/loadReferenceCollection.js",
+    "ufh/validateUnderfloorHeatingPresets.js",
+    "utils/logger.js",
+    "utils/mongoConnectionConfig.js",
+    "utils/mongoReferenceConnection.js"
+  ],
+  "ufh/types.d.ts": [],
+  "ufh/validateUnderfloorHeatingPresets.js": [
+    "../../shared/ufhModePresetIds.js"
+  ],
+  "utils/apartmentCombiSerialBufferHint.js": [
+    "../../shared/heatingMatchingSchemes.js",
+    "recommendations/recommendationResolver.js"
+  ],
+  "utils/apartmentMatching.js": [
+    "utils/boilerMountingConstraints.js"
+  ],
+  "utils/boilerMatchingByType.js": [
+    "../../shared/heatingMatchingSchemes.js"
+  ],
+  "utils/boilerMountingConstraints.js": [],
+  "utils/createAppError.js": [],
+  "utils/isPlainObject.js": [],
+  "utils/logger.js": [],
+  "utils/math.js": [],
+  "utils/mongoConnectionConfig.js": [],
+  "utils/mongoDnsPreferPublic.js": [],
+  "utils/mongoReferenceConnection.js": [
+    "utils/mongoConnectionConfig.js",
+    "utils/mongoDnsPreferPublic.js"
+  ],
+  "utils/pumpCurveMath.js": [],
+  "utils/sanitizeString.js": [],
+  "utils/setNoStoreCacheHeaders.js": []
+}

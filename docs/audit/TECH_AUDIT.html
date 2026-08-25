@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Техаудит HeatCalc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root {
+  --ground:#eef1f4; --surface:#fff; --surface-2:#f6f8fa;
+  --line:#d3dae1; --line-soft:#e3e9ee;
+  --ink:#16202b; --ink-2:#46586a; --ink-3:#6b7e90;
+  --return:#23648f; --return-soft:#e2edf5;
+  --supply:#b23a2f; --supply-soft:#fae7e4;
+  --amber:#99631a; --amber-soft:#f9ecd7;
+  --steel:#4a6b80; --steel-soft:#e5edf1;
+  --moss:#4a6b52; --moss-soft:#e6eee8;
+  --shadow:0 1px 2px rgba(22,32,43,.06),0 8px 24px -16px rgba(22,32,43,.28);
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:#0e1419; --surface:#151d25; --surface-2:#1b242d;
+    --line:#2c3944; --line-soft:#232f39;
+    --ink:#e2e9ef; --ink-2:#a3b4c2; --ink-3:#7b8c9b;
+    --return:#6aa8d4; --return-soft:#16303f;
+    --supply:#e08074; --supply-soft:#3a1f1c;
+    --amber:#d5a45c; --amber-soft:#33280f;
+    --steel:#8fadc0; --steel-soft:#1e2b34;
+    --moss:#8fb59a; --moss-soft:#1a2620;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"] {
+  --ground:#0e1419; --surface:#151d25; --surface-2:#1b242d;
+  --line:#2c3944; --line-soft:#232f39;
+  --ink:#e2e9ef; --ink-2:#a3b4c2; --ink-3:#7b8c9b;
+  --return:#6aa8d4; --return-soft:#16303f;
+  --supply:#e08074; --supply-soft:#3a1f1c;
+  --amber:#d5a45c; --amber-soft:#33280f;
+  --steel:#8fadc0; --steel-soft:#1e2b34;
+  --moss:#8fb59a; --moss-soft:#1a2620;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -18px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--f-body);
+  font-size:15.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+
+.shell{max-width:1140px;margin:0 auto;padding:0 20px 80px;
+  display:grid;grid-template-columns:190px minmax(0,1fr);gap:40px;align-items:start}
+@media(max-width:900px){.shell{grid-template-columns:minmax(0,1fr);gap:0}.rail{display:none}}
+
+.rail{position:sticky;top:24px;padding-top:38px;font-family:var(--f-display)}
+.rail-title{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:11px;font-weight:700}
+.rail a{display:block;padding:5px 0 5px 12px;border-left:2px solid var(--line);
+  color:var(--ink-2);text-decoration:none;font-size:14px;line-height:1.3;font-weight:600}
+.rail a:hover{color:var(--return);border-left-color:var(--return)}
+.rail a:focus-visible{outline:2px solid var(--return);outline-offset:2px}
+
+header{padding:48px 0 6px}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--return);font-weight:500;margin-bottom:12px}
+h1{font-family:var(--f-display);font-size:clamp(34px,5.5vw,54px);line-height:1.02;
+  font-weight:700;letter-spacing:-.015em;margin:0 0 16px;text-wrap:balance}
+.lede{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:62ch;margin:0 0 22px}
+.lede strong{color:var(--ink);font-weight:600}
+.meta{display:flex;flex-wrap:wrap;gap:6px 20px;font-family:var(--f-mono);
+  font-size:12px;color:var(--ink-3);padding:12px 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.meta b{color:var(--ink-2);font-weight:500}
+
+section{padding-top:48px;scroll-margin-top:20px}
+h2{font-family:var(--f-display);font-size:26px;font-weight:700;letter-spacing:-.01em;
+  margin:0 0 5px;text-wrap:balance}
+.sub{color:var(--ink-3);font-size:14.5px;margin:0 0 20px;max-width:66ch}
+h3{font-family:var(--f-display);font-size:18px;font-weight:600;margin:28px 0 8px}
+p{max-width:70ch;margin:0 0 12px}
+a{color:var(--return)}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+code{background:var(--surface-2);border:1px solid var(--line-soft);border-radius:3px;
+  padding:.06em .32em;color:var(--ink-2);word-break:break-word}
+
+.tw{overflow-x:auto;margin:18px 0;border:1px solid var(--line);
+  border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+th{text-align:left;font-family:var(--f-display);font-weight:600;font-size:11.5px;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);padding:10px 13px;
+  border-bottom:1px solid var(--line);background:var(--surface-2);white-space:nowrap}
+td{padding:10px 13px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.id{font-family:var(--f-mono);font-weight:600;white-space:nowrap;color:var(--return)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:6px;
+  overflow:hidden;margin:22px 0}
+.stat{background:var(--surface);padding:15px 15px 13px}
+.stat .n{font-family:var(--f-display);font-size:29px;font-weight:700;line-height:1;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat .l{font-size:12px;color:var(--ink-3);margin-top:5px;line-height:1.3}
+.stat.hot .n{color:var(--supply)}
+.stat.cool .n{color:var(--return)}
+
+.chip{display:inline-block;font-family:var(--f-mono);font-size:10px;letter-spacing:.06em;
+  font-weight:600;padding:2px 6px;border-radius:3px;white-space:nowrap;text-transform:uppercase}
+.chip.a{background:var(--supply-soft);color:var(--supply)}
+.chip.b{background:var(--amber-soft);color:var(--amber)}
+.chip.d{background:var(--steel-soft);color:var(--steel)}
+.chip.nt{background:var(--moss-soft);color:var(--moss)}
+
+/* finding card */
+.find{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--supply);
+  border-radius:5px;padding:16px 18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.find.b{border-left-color:var(--amber)}
+.find .top{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;margin-bottom:8px}
+.find .fid{font-family:var(--f-mono);font-size:12px;font-weight:600;color:var(--supply)}
+.find.b .fid{color:var(--amber)}
+.find h3{margin:0;font-size:17.5px;flex:1 1 260px}
+.find .cost{font-family:var(--f-mono);font-size:12px;color:var(--ink-3);white-space:nowrap}
+.find .anchor{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);
+  margin-bottom:10px;word-break:break-all}
+.find dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 12px;
+  font-size:14.5px}
+.find dt{font-family:var(--f-display);font-weight:600;font-size:12.5px;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);padding-top:2px;
+  white-space:nowrap}
+.find dd{margin:0;color:var(--ink-2)}
+.find dd strong{color:var(--ink)}
+@media(max-width:620px){.find dl{grid-template-columns:minmax(0,1fr);gap:2px 0}
+  .find dd{margin-bottom:8px}}
+.warn{margin-top:10px;font-size:13.5px;color:var(--amber);background:var(--amber-soft);
+  border-radius:4px;padding:8px 11px}
+.warn.stop{color:var(--supply);background:var(--supply-soft)}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:16px 0}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:13px 15px}
+.tile .h{font-family:var(--f-display);font-weight:600;font-size:15.5px;margin-bottom:4px}
+.tile .p{font-size:13.5px;color:var(--ink-2)}
+
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
+  font-size:13px;color:var(--ink-3)}
+footer p{max-width:none}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<nav class="rail" aria-label="Разделы">
+  <div class="rail-title">Разделы</div>
+  <a href="#verdict">Вердикт</a>
+  <a href="#decisions">Решения</a>
+  <a href="#p1">Приоритет 1</a>
+  <a href="#p2">Приоритет 2</a>
+  <a href="#arch">Архитектура</a>
+  <a href="#tools">Инструментарий</a>
+  <a href="#skip">Что не делать</a>
+  <a href="#plan">План и оценка</a>
+  <a href="#limits">Границы оценки</a>
+</nav>
+
+<main>
+
+<header>
+  <div class="eyebrow">Технический аудит · 24 августа 2026</div>
+  <h1>HeatCalc</h1>
+  <p class="lede">
+    <strong>Код здоровый. Инфраструктура вокруг него — нет.</strong>
+    Продукт нельзя эксплуатировать (нет бэкапов и мониторинга), нельзя монетизировать
+    (нет точки списания денег) и нельзя доверять смете (неполный расчёт публикуется как полный).
+  </p>
+  <div class="meta">
+    <span><b>63 000</b> строк · 890 файлов</span>
+    <span><b>21–31 ч</b> до пилота</span>
+    <span><b>+45–80 ч</b> до первых денег</span>
+    <span><b>4–7 мес</b> полный путь</span>
+  </div>
+</header>
+
+<section id="verdict">
+  <h2>Вердикт</h2>
+  <p>
+    Искали типичные признаки быстрой разработки: отключённую типизацию, копипасту,
+    кладбище <code>TODO</code>, секреты в репозитории. Не нашли <strong>ничего</strong>
+    из этого списка. Расчётное ядро изолировано от базы и веба корректно — лучшее
+    архитектурное решение в проекте.
+  </p>
+
+  <div class="stats">
+    <div class="stat cool"><div class="n">0</div><div class="l">обходов типизации на 538 файлов</div></div>
+    <div class="stat cool"><div class="n">0,9 %</div><div class="l">дублирования кода</div></div>
+    <div class="stat cool"><div class="n">99,3 %</div><div class="l">типовое покрытие фронтенда</div></div>
+    <div class="stat hot"><div class="n">0</div><div class="l">бэкапов и мониторинга</div></div>
+    <div class="stat hot"><div class="n">4/8</div><div class="l">шагов гейта качества работают</div></div>
+    <div class="stat hot"><div class="n">27/30</div><div class="l">труб каталога считаются стальными</div></div>
+  </div>
+
+  <p><strong>Три вещи, которые реально мешают:</strong></p>
+  <div class="tiles">
+    <div class="tile">
+      <div class="h">Нельзя эксплуатировать</div>
+      <div class="p">Нет бэкапов, нет мониторинга, гейт качества падает у всех.
+      Любая авария будет обнаружена клиентом, а не вами.</div>
+    </div>
+    <div class="tile">
+      <div class="h">Нельзя монетизировать</div>
+      <div class="p">Расчёт и смета отдаются публично без авторизации.
+      Точки, где списать деньги, физически не существует.</div>
+    </div>
+    <div class="tile">
+      <div class="h">Метраж труб вдвое меньше нужного</div>
+      <div class="p">Гидравлика считает длину в одну сторону и удваивает, смета берёт её один раз.
+      Монтажник заказывает половину трубы и узнаёт об этом на объекте.</div>
+    </div>
+    <div class="tile">
+      <div class="h">Смета может врать</div>
+      <div class="p">Неполный расчёт публикуется как полный. Плюс две ошибки в физике:
+      предел температуры пола и шероховатость труб.</div>
+    </div>
+  </div>
+
+  <div class="find">
+    <div class="top">
+      <h3>Гейт качества закрепляет дефекты как правильное поведение</h3>
+    </div>
+    <dl>
+      <dt>Факт</dt><dd><strong>Два проверочных скрипта утверждают известные дефекты как контракт.</strong>
+      Проверка тёплого пола фиксирует физически неверную температуру поверхности (21 °C вместо ≈32),
+      проверка авторизации фиксирует выдачу прав администратора без подтверждения почты. Обе зелёные —
+      прогнано.</dd>
+      <dt>Следствие</dt><dd>Починка кода <strong>сделает гейт красным</strong>. Без знания об этом
+      откат правильной правки почти неизбежен — дефект вернётся, а гейт снова позеленеет.</dd>
+      <dt>Правило</dt><dd><strong>Сначала переписать проверку, потом чинить код.</strong>
+      Это меняет порядок работ, а не только их состав.</dd>
+    </dl>
+  </div>
+</section>
+
+<section id="decisions">
+  <h2>Решения, которые нужно принять</h2>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Решение</th><th>Срок</th><th>Цена</th><th>Если не принять</th></tr></thead>
+      <tbody>
+        <tr><td>Проверить настройки Clerk и Atlas в панелях</td><td class="num">сегодня</td><td class="num">20 мин</td><td>Не знаете, теоретические у вас риски или боевые</td></tr>
+        <tr><td>Включить снапшоты базы</td><td class="num">эта неделя</td><td class="num">1 ч + $9/мес</td><td>Потеря базы = потеря продукта, необратимо</td></tr>
+        <tr><td>Сменить тариф хостинга</td><td class="num">до вебхуков</td><td class="num">$7–20/мес</td><td>Вебхуки платежей не дойдут, PDF падает по памяти</td></tr>
+        <tr><td>Первые деньги: платёжная ссылка + ручная выдача тарифа</td><td class="num">волна 2</td><td class="num">6–10 ч</td><td>Альтернатива — свой биллинг за 45–75 ч, не нужен</td></tr>
+        <tr><td><strong>Мультивендорность каталога</strong></td><td class="num">не начинать</td><td class="num">8–14 нед</td><td>Ничего. Первому способу заработка не нужна</td></tr>
+        <tr><td>Наём разработчика</td><td class="num">по готовности</td><td class="num">8 дней вход</td><td>Сейчас вход дорогой: гейт сломан, тестов нет</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="p1">
+  <h2>Приоритет 1 — до пилота</h2>
+  <p class="sub">21–31 час. Цель: продукт выдержит живых людей.</p>
+
+  <div class="find">
+    <div class="top">
+      <span class="fid">P1-1</span>
+      <h3>Один анонимный запрос кладёт прод</h3>
+      <span class="cost">1–2 ч · риск нет</span>
+    </div>
+    <div class="anchor">components/schemas/CalcInput.yaml:49-51</div>
+    <dl>
+      <dt>Проблема</dt><dd>У массива комнат нет верхней границы. 1600 комнат проходят валидацию.</dd>
+      <dt>Последствие</dt><dd>Расчёт синхронный: минуты CPU на хостинге, процесс не отвечает ни на что, включая health-check. Хостинг перезапускает сервис — счётчик лимита обнуляется, атака идёт по кругу. Цена атаки: bash-скрипт, 15 минут, один IP. <strong>Ограничитель частоты не спасает</strong> — он считает запросы, а стоимость запроса различается в 50 000 раз.</dd>
+      <dt>Решение</dt><dd><code>maxItems: 60</code> одной строкой. Легальный максимум 50 — ни один текущий запрос не отклонится.</dd>
+    </dl>
+    <div class="warn">Не вешать общий лимит размера тела: импорт проекта законно весит до 512 КБ, урезание сломает его молча.</div>
+  </div>
+
+  <div class="find">
+    <div class="top">
+      <span class="fid">P1-2</span>
+      <h3>Права админа висят на настройке чужого сервиса</h3>
+      <span class="cost">1.5–3 ч · риск нет</span>
+    </div>
+    <div class="anchor">backend/src/auth/resolveUser.js:54,79-85</div>
+    <dl>
+      <dt>Проблема</dt><dd>Роль admin выдаётся по совпадению строки email из токена. Поле «email подтверждён» вычисляется, пишется в базу, отдаётся наружу — и <strong>не проверяется нигде</strong>. Список админских email лежит в трёх файлах публичного репозитория.</dd>
+      <dt>Последствие</dt><dd>Сегодня атака не проходит — её останавливает Clerk. Но эта защита вне вашего кода и не покрыта ни одной из 52 автопроверок. Clerk меняет дефолт — вы узнаёте по факту компрометации.</dd>
+      <dt>Решение</dt><dd>Определять админа по неизменяемому идентификатору, а не по email.</dd>
+      <dt>Дешевле</dt><dd>Добавить проверку подтверждения email — полчаса. Закрывает половину: список всё ещё виден в публичном репозитории.</dd>
+    </dl>
+  </div>
+
+  <div class="find">
+    <div class="top">
+      <span class="fid">P1-3</span>
+      <h3>Анкета молча теряет введённое</h3>
+      <span class="cost">4 ч · риск средний</span>
+    </div>
+    <div class="anchor">frontend/src/hooks/useSurveyDraftPersistence.ts:58-60</div>
+    <dl>
+      <dt>Проблема</dt><dd>Состояние живёт в трёх местах — черновик в браузере, сессия, сервер. Ни одно не назначено главным, кода сверки нет.</dd>
+      <dt>Последствие</dt><dd>Три клика: правка комнаты → уход со страницы через 100 мс → таймер гасится без записи → возврат → черновик <strong>полностью заменяет</strong> актуальное состояние. Правка исчезла без сообщения. Отдельно: откат версии приложения <strong>удаляет черновик навсегда</strong>. Это причина семи дефектов и трёх инцидентов из тестирования — чинить по отдельности значит семь раз оплатить одну работу.</dd>
+      <dt>Решение</dt><dd>Писать черновик при уходе со страницы и закрытии вкладки. Сравнивать счётчик мутаций, не метку времени — часы устройства бывают сбиты.</dd>
+    </dl>
+    <div class="warn stop">Порядок обязателен. Сначала 10 минут: при ошибке разбора черновика возвращать пустое значение, а не удалять ключ. Иначе первый же откат версии сотрёт незаконченные анкеты у всех.</div>
+  </div>
+
+  <div class="find">
+    <div class="top">
+      <span class="fid">P1-4</span>
+      <h3>Неполная смета публикуется как полная</h3>
+      <span class="cost">2–4 ч · риск средний</span>
+    </div>
+    <div class="anchor">backend/src/report/buildReport.js:622-681 · hydraulics/pickPipe.js:96</div>
+    <dl>
+      <dt>Проблема</dt><dd>Механизм устойчивости к отказу модуля сделан правильно, трогать его не надо. Не хватает признака неполноты в ответе и запрета публиковать неполный документ.</dd>
+      <dt>Последствие</dt><dd>Пустой пул труб → исключение → перехват → в смете пустой список и нулевая сумма → HTTP 200. Монтажник отдаёт клиенту смету без раздела труб и узнаёт о недостаче на объекте.</dd>
+      <dt>Решение</dt><dd>Флаг неполноты в трёх местах перехвата. Запрет публикации — тем же механизмом, которым уже запрещена публикация отсутствующей сметы, код написан.</dd>
+    </dl>
+    <div class="warn">Сначала посчитайте на реальных проектах, сколько из них неполные. Если много — это открытие, которое нужно увидеть до релиза, а не после.</div>
+  </div>
+
+  <div class="find">
+    <div class="top">
+      <span class="fid">P1-5</span>
+      <h3>Коэффициент запаса расходится внутри одного документа</h3>
+      <span class="cost">2–3 ч · риск нет</span>
+    </div>
+    <div class="anchor">frontend/src/utils/calculators/heatLoss.ts:6 · buildTechnicalPrintHtml.ts:127-128 vs :189</div>
+    <dl>
+      <dt>Проблема</dt><dd>Коэффициент лежит в справочнике сервера, чтобы менять без релиза. Клиент держит копию литералом в трёх местах.</dd>
+      <dt>Последствие</dt><dd>В одном печатном документе: раздел теплопотерь печатает «Запас (15%)», раздел котла двумя таблицами ниже — «×1.05» с сервера. Монтажник верит первой цифре, «поправляет» подбор вверх, продаёт лишний котёл — при том, что продукт в другом месте прямо предупреждает о вреде избыточной мощности.</dd>
+      <dt>Решение</dt><dd>Значение уже приходит в ответе API и уже разбирается на клиенте. Убрать литерал, взять из ответа.</dd>
+    </dl>
+  </div>
+
+  <div class="find">
+    <div class="top">
+      <span class="fid">P1-6</span>
+      <h3>Резервного копирования нет в документации</h3>
+      <span class="cost">1–2 ч + $9/мес</span>
+    </div>
+    <div class="anchor">docs/deploy/ — ни одного упоминания backup, restore, mongodump</div>
+    <dl>
+      <dt>Проблема</dt><dd>Наличие бэкапов по репозиторию установить нельзя. Тип кластера не указан нигде — исходим из худшего: бесплатный тариф, где автобэкапов не бывает.</dd>
+      <dt>Последствие</dt><dd>Ошибочная команда, компрометация строки подключения, истёкший кластер — проекты, расчёты и опубликованные ссылки исчезают. <strong>Единственная позиция аудита, где ущерб необратим.</strong></dd>
+      <dt>Решение</dt><dd>Проверить панель (5 мин). Нет снапшотов — включить и <strong>один раз восстановить в пустую базу</strong>. Бэкап без проверенного восстановления — не бэкап.</dd>
+    </dl>
+    <div class="warn stop">Не делать дамп в артефакт GitHub Actions. Репозиторий публичный, дамп содержит email, адреса объектов и телефоны — это публикация базы персональных данных, а не резервная копия.</div>
+  </div>
+
+  <div class="find">
+    <div class="top">
+      <span class="fid">P1-7</span>
+      <h3>Мониторинга нет</h3>
+      <span class="cost">20 мин · $0</span>
+    </div>
+    <div class="anchor">grep sentry|uptimerobot|prom-client → 0 совпадений</div>
+    <dl>
+      <dt>Проблема</dt><dd>Health-check написан и не опрашивается ничем. Плюс он может врать: при повреждённом справочнике сервис стартует и отвечает «ок» без проверки, что данные загрузились.</dd>
+      <dt>Последствие</dt><dd>Сервис упал по памяти или завис — вы узнаёте, когда напишет клиент. Более вероятно: клиент молча уходит.</dd>
+      <dt>Решение</dt><dd>Внешний аптайм-монитор, интервал 5 минут, уведомление в мессенджер. Побочный эффект: пинг не даёт бесплатному инстансу заснуть — снимает 30-секундную задержку первого ответа без смены тарифа.</dd>
+    </dl>
+  </div>
+
+  <div class="find">
+    <div class="top">
+      <span class="fid">P1-8</span>
+      <h3>Русские строки в украинском интерфейсе</h3>
+      <span class="cost">1–2 ч · риск нет</span>
+    </div>
+    <div class="anchor">scripts/verifyLanguagePolicy.mjs:105-111</div>
+    <dl>
+      <dt>Проблема</dt><dd>~24 пользовательские строки на русском доходят до клиента. Автопроверка языка их не видит: она пропускает всё внутри текста ошибки — ровно тот механизм, которым сообщения попадают на экран.</dd>
+      <dt>Последствие</dt><dd>Продукт для украинских монтажников. Это не технический долг, а отказ рынка: покупатель делает вывод о продукте раньше, чем о конкретной строке.</dd>
+      <dt>Решение</dt><dd>Перевести руками. Переписывать саму проверку (6–12 ч) — потом, это не блокер.</dd>
+    </dl>
+  </div>
+
+  <div class="find">
+    <div class="top">
+      <span class="fid">P1-9</span>
+      <h3>Ограничение температуры тёплого пола не срабатывает</h3>
+      <span class="cost">1–2 ч · риск ВЫСОКИЙ</span>
+    </div>
+    <div class="anchor">backend/src/logic/ufhRoomHeatFlux.js:158 vs :172,179</div>
+    <dl>
+      <dt>Проблема</dt><dd>Строка 158 корректно собирает полное тепловое сопротивление вверх. Строки 172 и 179 — единственные места, где считаются предельный поток и температура поверхности — берут вместо него сопротивление только финишного покрытия.</dd>
+      <dt>Последствие</dt><dd>Для плитки предел завышается кратно, температура поверхности занижается на 6–8 °C. <strong>Ограничение температуры пола для плитки не срабатывает никогда.</strong> Единственная находка, где цена ошибки — ожог, а не деньги.</dd>
+      <dt>Решение</dt><dd>Правильная величина объявлена в том же файле 14 строками выше. Дефект проводки в одну строку.</dd>
+    </dl>
+    <div class="warn stop">Правка меняет числа в каждом расчёте с тёплым полом, а числовых тестов у ядра нет. Делать только после появления эталонных снапшотов расчётов (4–8 ч, работа тестирования) — иначе исправление неотличимо от новой ошибки. Пока снапшотов нет — временное предупреждение в интерфейсе.</div>
+  </div>
+
+  <h3>Найдено при доборе непрочитанных зон</h3>
+  <p>Формы и HTTP-слой изначально были списаны как низкорисковые. Это была ошибка: через них
+  проходит весь пользовательский ввод и весь трафик продукта.</p>
+
+  <div class="find">
+    <div class="top">
+      <span class="fid">P1-15</span>
+      <h3>Backspace в поле «количество комнат» уничтожает заполненные комнаты</h3>
+      <span class="cost">2–3 ч · риск нет</span>
+    </div>
+    <div class="anchor">ObjectMetaForm.tsx:221-226 · useRoomsOrchestration.ts:133</div>
+    <dl>
+      <dt>Проблема</dt><dd>Ограничение диапазона применяется <strong>на каждое нажатие клавиши</strong>, а эффект немедленно режет массив комнат.</dd>
+      <dt>Последствие</dt><dd>Заполнено 50 комнат. Курсор в поле, Backspace — значение «5», <strong>45 комнат со всеми стенами, окнами и площадями уничтожены мгновенно</strong>. Ни подтверждения, ни отмены; через 400 мс черновик перезаписан. Отягчающее: <strong>кнопки удаления комнаты в интерфейсе нет вообще</strong> — это единственный способ, и он же уничтожает данные.</dd>
+      <dt>Решение</dt><dd>Ограничивать при потере фокуса, а не при вводе. Уменьшение при непустых данных — через подтверждение. Добавить кнопку удаления комнаты.</dd>
+    </dl>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>ID</th><th>Проблема</th><th>Цена</th><th>Замечание</th></tr></thead>
+      <tbody>
+        <tr><td class="id">P1-10</td><td><strong>Проверка ТП утверждает дефект P1-9 как правильное поведение</strong></td><td class="num">1–2 ч</td><td><strong>Делать до P1-9</strong>, иначе гейт покраснеет и правку откатят</td></tr>
+        <tr><td class="id">P1-11</td><td>Токен обхода авторизации может лежать в публичном бандле</td><td class="num">45 мин</td><td>5 минут в панели Vercel решают, боевая находка или теоретическая</td></tr>
+        <tr><td class="id">P1-12</td><td>Клиент монтажника не видит пометку неполной сметы</td><td class="num">1–2 ч</td><td>Фронтовая половина P1-4; бэкенд не трогается</td></tr>
+        <tr><td class="id">P1-13</td><td>Health-check отвечает «ок» на мёртвом сервисе</td><td class="num">1.5 ч</td><td>Делать вместе с P1-7, иначе монитор будет успокаивать</td></tr>
+        <tr><td class="id">P1-14</td><td>В проде пользователю показывается команда запуска сервера</td><td class="num">30 мин</td><td>Монтажник видит <code>cd backend &amp;&amp; npm run start</code></td></tr>
+        <tr><td class="id">P1-16</td><td>После ошибки расчёта остаётся старая смета без пометки</td><td class="num">2–3 ч</td><td>Признак принимают 2 представления из 8. Первая правка — одна строка</td></tr>
+        <tr><td class="id">P1-17</td><td><strong>Клиентской валидации нет, а серверную клиент выбрасывает</strong></td><td class="num">7–11 ч</td><td>Одна строка «Некоректні вхідні дані» на 700 полей. Запятая вместо точки обнуляет площадь молча</td></tr>
+        <tr><td class="id">P1-18</td><td>Имя хоста базы уезжает анонимному клиенту</td><td class="num">30 мин</td><td>Подтверждено запросом без авторизации</td></tr>
+        <tr><td class="id">P1-19</td><td><code>?limit=0</code> снимает пагинацию</td><td class="num">15 мин</td><td>В Mongo <code>limit(0)</code> = без ограничения</td></tr>
+        <tr><td class="id">P1-20</td><td>Один клик по истории расчётов читает до 280 МБ</td><td class="num">20 мин</td><td>Полные отчёты вместо одного поля сводки</td></tr>
+        <tr><td class="id">P1-21</td><td>Публичный PDF делит лимит с лёгкими запросами</td><td class="num">30 мин</td><td>Предел памяти достижим двумя анонимными запросами</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="p2">
+  <h2>Приоритет 2 — до первых денег</h2>
+  <p class="sub">
+    45–80 часов. Не входит: свой биллинг, полный контракт сметы, мультивендорность —
+    для первых платежей они не нужны.
+  </p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>ID</th><th>Проблема</th><th>Цена</th><th>Комментарий</th></tr></thead>
+      <tbody>
+        <tr><td class="id">P2-1</td><td><strong>27 труб из 30 считаются стальными</strong></td><td class="num">1–2 ч</td><td>Шероховатость завышена в 21 раз → завышен насос по всему каталогу</td></tr>
+        <tr><td class="id">P2-2</td><td><strong>31 битая ссылка на тип: денежный код не типизирован</strong></td><td class="num">4–6 ч</td><td>Вскрывает 5 живых дефектов; попутно исчезает половина формальной сложности</td></tr>
+        <tr><td class="id">P2-3</td><td>Расчёт публичен, субъекта права нет</td><td class="num">1–2 ч</td><td>Предусловие любого платного гейта</td></tr>
+        <tr><td class="id">P2-4</td><td>Смета вычитывает данные из чужих структур</td><td class="num">4–8 ч</td><td>Первый шаг, не полный контракт</td></tr>
+        <tr><td class="id">P2-5</td><td>Три места по-своему разбирают смету, экран теряет строки</td><td class="num">4–6 ч</td><td>Сумма и список строк могут не совпадать</td></tr>
+        <tr><td class="id">P2-6</td><td><strong>Юридический минимум документа</strong></td><td class="num">14–25 ч</td><td>+ юрист. Недели ожидания — <strong>начинать первым</strong></td></tr>
+        <tr><td class="id">P2-7</td><td>Дата актуальности цен не доходит до сметы</td><td class="num">6–10 ч</td><td>Юридический риск при платном документе</td></tr>
+        <tr><td class="id">P2-8</td><td>Инцидент по анонимному расчёту не разобрать</td><td class="num">8–12 ч</td><td>Ни входа, ни отчёта, ни идентификатора запроса</td></tr>
+        <tr><td class="id">P2-9</td><td><strong>Два PDF не помещаются в память сервера</strong></td><td class="num">5 мин</td><td>Замерено под 512 МБ: 512/512, зависание вместо отказа</td></tr>
+        <tr><td class="id">P2-10</td><td>Тариф — метка без баланса и срока</td><td class="num">3–5 ч</td><td>Ручная выдача через уже готовую админку</td></tr>
+        <tr><td class="id">P2-11</td><td>Нет защитных заголовков на фронтенде</td><td class="num">20–40 мин</td><td>Встраивание в чужой сайт, утечка адреса</td></tr>
+        <tr><td class="id">P2-12</td><td>Нет срока хранения и удаления персональных данных</td><td class="num">4–6 ч</td><td>Обязательно при платном продукте</td></tr>
+        <tr><td class="id">P2-13</td><td>Нет лицензии в публичном репозитории</td><td class="num">1–2 ч</td><td>Решить: приватный репозиторий или лицензия</td></tr>
+        <tr><td class="id">P2-14</td><td>Устаревший справочник используется бессрочно</td><td class="num">2–3 ч</td><td>Нет отметки срока годности</td></tr>
+        <tr><td class="id">P2-15</td><td>Пробуждение сервера 22–32 с ломает вебхуки</td><td class="num">тариф</td><td>Не в пути первых денег</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="find b">
+    <div class="top">
+      <span class="fid">P2-1</span>
+      <h3>Каталог считает пластиковые трубы стальными</h3>
+      <span class="cost">1–2 ч</span>
+    </div>
+    <div class="anchor">backend/src/hydraulics/pipeHydraulics.js:80-88</div>
+    <dl>
+      <dt>Проблема</dt><dd>При незнакомом материале функция молча подставляет сталь. Справочник знает три ключа: <code>pex</code>, <code>metal_plastic</code>, <code>steel</code>. Материалы <code>PP-R</code>, <code>PP-ALUX</code>, <code>PE-XA EVOH</code> и кириллическое «Металопластик» не содержат ни одного из них.</dd>
+      <dt>Последствие</dt><dd><strong>27 труб из 30 идут как стальные.</strong> Шероховатость завышена в 21 раз, следом сопротивление и подобранный насос. Это не краевой случай — типовой путь.</dd>
+      <dt>Решение</dt><dd>Нормализовать материал при загрузке; незнакомое значение — <strong>ошибка загрузки, а не подстановка по умолчанию</strong>. Тогда новая позиция с неучтённым материалом даст громкий отказ, а не тихое искажение сметы.</dd>
+    </dl>
+  </div>
+
+  <div class="find b">
+    <div class="top">
+      <span class="fid">P2-2</span>
+      <h3>Денежный код не типизирован, хотя выглядит типизированным</h3>
+      <span class="cost">4–6 ч</span>
+    </div>
+    <div class="anchor">backend/src/types/shared-types.d.ts и ещё 3 файла</div>
+    <dl>
+      <dt>Проблема</dt><dd>31 ссылка на тип записана без расширения, которого требует режим разрешения модулей. Компилятор молча подставляет «любой тип» и ошибку не показывает — для файлов деклараций проверка ослаблена настройкой.</dd>
+      <dt>Последствие</dt><dd>~1000 выражений в сборке коммерческого предложения и сметы формально типизированы, фактически нет. Проверено экспериментом: добавление расширений вскрывает 14 ошибок компилятора, <strong>5 из них — живые дефекты</strong>, включая бренд электробойлера, который никогда не попадает в КП.</dd>
+      <dt>Бонус</dt><dd>Пугающая формальная сложность главной сборочной функции — следствие именно этого: там 19 ветвлений и ноль циклов, остальное 126 защитных проверок от «вдруг undefined». <strong>Почините типы — половина сложности исчезнет сама, без единого разреза.</strong></dd>
+    </dl>
+  </div>
+</section>
+
+<section id="arch">
+  <h2>Состояние архитектуры</h2>
+
+  <h3>Ядро изолировано от инфраструктуры — это главный актив</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Папка</th><th>Переменные окружения</th><th>База данных</th><th>Веб-запрос</th></tr></thead>
+      <tbody>
+        <tr><td>теплопотери</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>подбор оборудования</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>гидравлика</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>сборка отчёта</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    Следствие: вынести расчёт в очередь обработки — часы работы, а не недели. Именно поэтому
+    52 проверочных скрипта работают без поднятой базы.
+  </p>
+
+  <h3>Крупные файлы — вердикт по каждому</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Файл</th><th>Строк</th><th>Что внутри</th><th>Вердикт</th></tr></thead>
+      <tbody>
+        <tr><td>проверка каталога</td><td class="num">1568</td><td>29 плоских функций по типу товара</td><td><span class="chip nt">не резать</span></td></tr>
+        <tr><td>сборка сметы</td><td class="num">725</td><td>19 маленьких функций</td><td><span class="chip nt">не резать</span></td></tr>
+        <tr><td>гидравлика тёплого пола</td><td class="num">1002</td><td>20 функций, макс. 135 строк</td><td><span class="chip nt">не резать</span></td></tr>
+        <tr><td>карточка комнаты</td><td class="num">1029</td><td>907 строк в одной функции, 12 секций</td><td><span class="chip b">резать, 6–10 ч</span></td></tr>
+        <tr><td>маршруты проектов</td><td class="num">880</td><td>5 ответственностей, 13 обработчиков</td><td><span class="chip d">гейт вставляется middleware</span></td></tr>
+        <tr><td>сборка отчёта</td><td class="num">771</td><td>линейный пайплайн, 8 стадий</td><td><span class="chip d">сначала типы (P2-2)</span></td></tr>
+        <tr><td>контент шага анкеты</td><td class="num">762</td><td><strong>13</strong> ответственностей</td><td><span class="chip b">разрез, 10–16 ч</span></td></tr>
+        <tr><td>подбор радиаторов</td><td class="num">949</td><td>641 строка в одной функции</td><td><span class="chip b">разрез, 8–12 ч</span></td></tr>
+        <tr><td>подбор котла</td><td class="num">1164</td><td>657 строк в одной функции</td><td><span class="chip b">разрез, 8–12 ч</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    Разрез подбора радиаторов и котла — не косметика: это сердце будущей сметы, и при текущем
+    ветвлении невозможно удержать в голове все ветки при правке. Делать при следующей
+    содержательной правке подбора, не срочно.
+  </p>
+
+  <h3>При 10 000 проектов ломается только список администратора</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Что</th><th>Когда ломается</th><th>Цена починки</th></tr></thead>
+      <tbody>
+        <tr><td>Тянет полные документы вместо 5 полей</td><td>уже на ~100 крупных проектах</td><td class="num">30 мин</td></tr>
+        <tr><td>Точный подсчёт читает всю базу</td><td>~520 МБ на запрос при 10 000</td><td class="num">2–3 ч</td></tr>
+        <tr><td>Поиск по имени не использует индекс</td><td>при росте базы</td><td class="num">2–4 ч</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Обычного пользователя рост базы не затрагивает: квота 200 на владельца плюс индекс дают постоянную скорость.</p>
+</section>
+
+<section id="tools">
+  <h2>Инструментарий</h2>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Что</th><th>Состояние</th></tr></thead>
+      <tbody>
+        <tr><td>Гейт качества</td><td>4 шага из 8 работают; корневая цепочка падает на отсутствующем файле</td></tr>
+        <tr><td>Типизация</td><td>Строже рынка: полный строгий профиль на все три пакета</td></tr>
+        <tr><td>Правила сложности</td><td><strong>Нет ни одного</strong> ни в одном конфиге</td></tr>
+        <tr><td>Поиск мёртвого кода</td><td>Только фронтенд; у бэкенда гейта нет</td></tr>
+        <tr><td>Уязвимости</td><td><code>npm audit</code> не запускается нигде; из 11 находок важна одна</td></tr>
+        <tr><td>Отслеживание ошибок</td><td><strong>Нет</strong></td></tr>
+        <tr><td>Мониторинг</td><td><strong>Нет</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Отслеживание ошибок: что выбрать</h3>
+  <p>
+    Аптайм-монитор закрывает «сервис не отвечает». Он не заметит «сервис отвечает неправильно» —
+    а именно это происходит при неполной смете (P1-4).
+  </p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Вариант</th><th>Плюс</th><th>Минус</th><th>Вердикт</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Sentry</strong>, бесплатный тариф</td><td>Лучшая поддержка Node/React, настройка за час</td><td>Данные уходят наружу — фильтр персональных данных настроить <em>до</em> включения</td><td><span class="chip nt">брать</span></td></tr>
+        <tr><td>GlitchTip, свой сервер</td><td>Данные не покидают инфраструктуру, тот же SDK</td><td>Ещё один процесс и база — на 512 МБ тесно уже сейчас</td><td><span class="chip d">не сейчас</span></td></tr>
+        <tr><td>Только логи</td><td>Ничего не подключать</td><td>Нет группировки и алертов — читать вручную</td><td><span class="chip a">недостаточно</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    <strong>2–3 часа, $0 на старте.</strong> Полный стек метрик (Prometheus, OpenTelemetry,
+    трассировка) не окупается для одного процесса на одном сервере.
+  </p>
+
+  <h3>Тестирование</h3>
+  <p>
+    Числовых тестов у расчётного ядра нет. 52 проверочных скрипта — интеграционные проверки
+    инвариантов, не unit-тесты по веткам. Это не мусор: они реально исполняют продуктовый код.
+    <strong>Рекомендация:</strong> новые проверки писать в обычном фреймворке тестов, старый
+    харнесс заморозить как есть — без единовременной миграции и риска потерять покрытие.
+  </p>
+  <p>
+    <strong>Стоимость входа нового разработчика — 8 рабочих дней</strong> до первого осмысленного
+    изменения в ядре. Из них 1.5 дня уходит на сломанный гейт (решит, что криво поставил
+    окружение) и 2.5 дня — на «доказать себе, что не сломал». После починки гейта, типов
+    и появления эталонных снапшотов — около 4 дней.
+  </p>
+</section>
+
+<section id="skip">
+  <h2>Что не делать</h2>
+  <p class="sub">Экономия — 78–125 часов работы, которая не окупится.</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Не делать</th><th>Почему</th></tr></thead>
+      <tbody>
+        <tr><td>Переходить на TypeScript</td><td>Не решает P2-2: битые ссылки сломались бы так же</td></tr>
+        <tr><td>Резать большие файлы</td><td>6 из 9 — плоские наборы мелких функций, разрез ничего не даёт</td></tr>
+        <tr><td>Заводить очереди и воркеры</td><td>Ёмкость ~100 одновременных пользователей, проблемы нет</td></tr>
+        <tr><td>Строить свой биллинг до первых денег</td><td>45–75 ч; админка уже умеет выдавать тариф вручную</td></tr>
+        <tr><td>Переписывать контракт сметы сейчас</td><td>Тот же шов нужен мультивендорности — переписывать дважды</td></tr>
+        <tr><td><strong>Мультивендорность каталога</strong></td><td><strong>8–14 недель. Первому способу заработка не нужна вообще</strong></td></tr>
+        <tr><td>Автообновление зависимостей ботом</td><td>Поток pull request'ов, которые некому смотреть</td></tr>
+        <tr><td>Prometheus, Grafana, трассировку</td><td>Расходы без выгоды на этом масштабе</td></tr>
+        <tr><td>Проверку сообщений коммитов, авторелизы</td><td>Накладные расходы для одного автора</td></tr>
+        <tr><td>CONTRIBUTING, CODEOWNERS, шаблоны PR</td><td>Избыточно для проекта из одного человека</td></tr>
+        <tr><td>Приводить к одному языку комментарии</td><td>Недели работы, нулевая выгода, риск задеть типы</td></tr>
+        <tr><td>Автоформатирование по всему дереву</td><td>Перепишет непокрытое тестами ядро, сломает историю</td></tr>
+        <tr><td>Переписывать историю git</td><td>Живых секретов нет; сломает ссылки из документов тестирования</td></tr>
+        <tr><td>Чистить каталог от копипасты</td><td>Блоки согласованы. Только после эталонных снапшотов</td></tr>
+        <tr><td>Обновлять мажор библиотеки PDF</td><td>Вектор атаки невыполним, PDF — самая хрупкая часть</td></tr>
+        <tr><td>Пул браузеров для PDF</td><td>Держал бы память занятой всегда, усугубил бы P2-9</td></tr>
+        <tr><td>Закрывать публичный каталог цен</td><td>Гейт ставится на выгрузку документа, не на цены</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="plan">
+  <h2>План и оценка</h2>
+
+  <h3>Волна 1 — эксплуатационный минимум</h3>
+  <p>
+    <strong>29–47 часов ≈ 4–6 дней по 8 ч, или 2–3 недели при реальной занятости.</strong>
+    Открывает контролируемый пилот на 3–5 монтажниках с ручным разбором каждого результата.
+    Это <strong>не</strong> публичный выпуск — для него нужны ещё 56–112 часов правок физики
+    и 130–246 часов работы над проходимостью анкеты.
+  </p>
+  <p>
+    <strong>Закрыта, когда:</strong> гейт зелёный до конца цепочки; оба набора e2e-тестов
+    зелёные; четыре сценария потери ввода пройдены руками; расчёт на 61 комнате отклоняется,
+    сохранение проекта на 50 комнат проходит; неполная смета помечена на экране, в PDF
+    и в публичной ссылке; монитор прислал уведомление на тестовой остановке; бэкап
+    восстановлен в пустую базу; русских строк в интерфейсе нет.
+  </p>
+
+  <h3>Волна 2 — до первых денег</h3>
+  <p>
+    <strong>45–80 часов ≈ 6–10 дней по 8 ч, или 3–5 недель при реальной занятости.</strong>
+    Критический путь: юрист (P2-6) идёт <strong>первым</strong>, параллельно коду — это недели
+    ожидания. Дальше: типы (P2-2) → целостность сметы (P2-4, P2-5) → платёжная ссылка
+    и гейт на выгрузку.
+  </p>
+  <p>
+    Перед изменением коммерческого контракта — выгрузить обезличенную выборку уже сохранённых
+    проектов и публичных ссылок разных поколений и убедиться, что они открываются и PDF
+    по ним строится. Иначе правки сломают то, что уже разошлось по людям.
+  </p>
+
+  <h3>Волна 3 — технический долг</h3>
+  <p>
+    <strong>~100–145 часов.</strong> Без критерия закрытия: долг не закрывается,
+    он обслуживается по мере того, как начинает мешать. Первыми брать то, что уже мешает:
+    проекции в списках (30 мин), правило сложности в линтере (1–2 ч), перерисовка карточек
+    комнат (2–4 ч).
+  </p>
+
+  <h3>Календарь</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th></th><th>8 ч/день</th><th>15–20 ч/неделю</th></tr></thead>
+      <tbody>
+        <tr><td>Волна 1</td><td class="num">4–6 дней</td><td class="num">2–3 недели</td></tr>
+        <tr><td>Волна 2</td><td class="num">6–10 дней</td><td class="num">3–5 недель</td></tr>
+        <tr><td><strong>До платного продукта, с работами по тестированию</strong></td><td class="num">—</td><td class="num"><strong>300–420 ч ≈ 4–7 месяцев</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Прогноз при бездействии</h3>
+  <div class="tiles">
+    <div class="tile">
+      <div class="h">6 месяцев</div>
+      <div class="p">Отказы при одновременной работе двух человек регулярны, узнаёте о них
+      от клиентов. Продукт бесплатный.</div>
+    </div>
+    <div class="tile">
+      <div class="h">12 месяцев</div>
+      <div class="p">Накоплен корпус выданных смет с неизвестной долей неполных — определить
+      её задним числом невозможно. Любая случайность с базой стирает всё безвозвратно.</div>
+    </div>
+  </div>
+</section>
+
+<section id="limits">
+  <h2>Границы оценки</h2>
+  <div class="tiles">
+    <div class="tile">
+      <div class="h">Требует доступа к панелям</div>
+      <div class="p">Настройки Clerk (15 мин — определяет, боевой у вас риск P1-2
+      или теоретический); тип кластера базы и наличие снапшотов (5 мин); переменные окружения
+      на хостинге; настройки репозитория.</div>
+    </div>
+    <div class="tile">
+      <div class="h">Не измеряли</div>
+      <div class="p">Стоимость нажатия клавиши в анкете на 50 комнатах; планы выполнения
+      запросов на боевой базе; формат чисел в PDF на сервере.</div>
+    </div>
+    <div class="tile">
+      <div class="h">Покрытие аудита — 87 %</div>
+      <div class="p">Закрыты: расчётное ядро, авторизация обеих сторон, <strong>все формы анкеты
+      и представления отчётов</strong>, <strong>весь HTTP-слой</strong>, проверочные скрипты,
+      схемы API, справочные данные, публичная страница, админка, инфраструктура. Остаток 13 % —
+      утилиты форматирования и стили: пользовательский ввод не принимают, наружу не отдают.</div>
+    </div>
+    <div class="tile">
+      <div class="h">Оценки трудозатрат</div>
+      <div class="p">Даны для автора, знающего кодовую базу. Для нанятого человека
+      добавьте стоимость входа — 8 дней.</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      <code>CHECKLIST.md</code> — 16 пунктов в порядке исполнения, с командами ·
+      <code>REMEDIATION_PLAN.md</code> — пакеты работ и правила безопасности правок ·
+      <code>raw/</code> — детальные отчёты с цитатами кода ·
+      <code>artifacts/</code> — вывод инструментов, графы, скрипты замеров.
+    </p>
+  </footer>
+</section>
+
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,145 @@
+### knip 6.32.2
+### CMD (cwd=backend): npx -y knip --config knip.audit3.json --no-exit-code --production
+### Смысл: недостижимое из ЕДИНСТВЕННОЙ продуктовой точки входа src/index.js (backend/scripts/* НЕ считаются entry)
+Unused files (10)
+src/models/Boiler.js                       
+src/models/BoilerManifold.js               
+src/models/IndirectWaterHeater.js          
+src/models/Manifold.js                     
+src/models/Pipe.js                         
+src/models/Pump.js                         
+src/models/Radiator.js                     
+src/models/Unibox.js                       
+src/models/WaterHeater.js                  
+src/projects/migrateLegacyProjectOwnerId.js
+Unlisted dependencies (2)
+express-serve-static-core  src/types/express-augment.d.ts:6:8      
+mongodb                    src/utils/mongoConnectionConfig.js:20:29
+Unused exports (127)
+resolveRateLimitKey                          function  src/api/middleware/rateLimiters.js:14:17              
+createProjectsRouter                                   src/api/public.js:6:10                                
+validateAndNormalizeInput                              src/api/public.js:7:10                                
+PUBLISHER_SUBSCRIPTION_TIERS                           src/auth/authorizationPolicy.js:16:14                 
+normalizePlatformAdminEmail                  function  src/auth/platformAdminAllowlist.js:18:17              
+parsePlatformAdminEmails                     function  src/auth/platformAdminAllowlist.js:30:17              
+getPlatformAdminEmailAllowlist               function  src/auth/platformAdminAllowlist.js:46:17              
+resetPlatformAdminAllowlistCache             function  src/auth/platformAdminAllowlist.js:62:17              
+isAuthEnforcedByConfig                       function  src/auth/projectsAuthConfig.js:23:17                  
+hasConflictingJwtConfig                      function  src/auth/projectsAuthConfig.js:37:17                  
+validateAuthConfiguration                    function  src/auth/projectsAuthConfig.js:78:17                  
+DEFAULT_DEV_OWNER_OBJECT_ID_HEX                        src/auth/projectsAuthConfig.js:169:14                 
+resolveProjectsDevOwnerId                    function  src/auth/projectsAuthConfig.js:190:17                 
+parseBoilerMountingTypeToken                 function  src/catalog/boilerCatalogHelpers.js:18:17             
+inferBoilerMountingTypeFromTags              function  src/catalog/boilerCatalogHelpers.js:30:17             
+BOILER_MANIFOLD_GEOMETRY_TOLERANCE_MM                  src/catalog/boilerManifoldSeriesGeometry.js:9:14      
+BOILER_MANIFOLD_SERIES_GEOMETRY                        src/catalog/boilerManifoldSeriesGeometry.js:25:14     
+normalizeBoilerManifoldInchLabel             function  src/catalog/boilerManifoldSeriesGeometry.js:49:17     
+resolveBoilerManifoldSeriesId                function  src/catalog/boilerManifoldSeriesGeometry.js:61:17     
+expectedBoilerManifoldWidthMm                function  src/catalog/boilerManifoldSeriesGeometry.js:78:17     
+MANIFOLD_GEOMETRY_TOLERANCE_MM                         src/catalog/manifoldSeriesGeometry.js:9:14            
+MANIFOLD_SERIES_GEOMETRY                               src/catalog/manifoldSeriesGeometry.js:24:14           
+expectedManifoldWidthMm                      function  src/catalog/manifoldSeriesGeometry.js:68:17           
+resolveManifoldSeriesId                      function  src/catalog/manifoldSeriesGeometry.js:78:17           
+DEFAULT_UFH_BASE_PRESET_ID                             src/data/warmFloorAssemblyPresets.js:61:14            
+decodeFeedbackCursor                         function  src/feedback/adminFeedback.js:83:17                   
+feedbackEventSubscriberCount                 function  src/feedback/feedbackEventHub.js:62:17                
+parseConnectionDiameterMm                    function  src/hydraulics/parseConnectionDiameter.js:20:17       
+pickPipeForEdgeByCatalogId                   function  src/hydraulics/pickPipe.js:139:17                     
+pumpHeadM                                              src/hydraulics/pickPump.js:9:10                       
+resolveHeatingCircuitMinFlowM3h              function  src/hydraulics/pickPump.js:36:17                      
+evaluatePumpModeAtDuty                       function  src/hydraulics/pickPump.js:65:17                      
+pickTrunkEdgeWithTaper                       function  src/hydraulics/pickTrunkChain.js:69:17                
+flowVelocityMps                              function  src/hydraulics/pipeHydraulics.js:26:17                
+thermalLoadToFlow                                      src/hydraulics/public.js:9:10                         
+resolveFlowDeltaTK                                     src/hydraulics/public.js:10:10                        
+resolveCirculationFlows                                src/hydraulics/public.js:11:10                        
+resolveDesignPumpFlowM3h                               src/hydraulics/public.js:11:35                        
+resolveSystemPumps                                     src/hydraulics/public.js:12:10                        
+mixingNodePrimaryBleedM3h                    function  src/hydraulics/resolveCirculationFlows.js:53:17       
+resetHydraulicsPipelineValidatorForTests     function  src/hydraulics/validatePipelineInput.js:51:17         
+HEATING_THERMAL_REGIME_PRESETS                         src/logic/heatingThermalRegimes.js:18:3               
+defaultThermalRegimePresetForObjectType                src/logic/heatingThermalRegimes.js:20:3               
+defaultThermalRegimePresetForMatchingScheme            src/logic/heatingThermalRegimes.js:21:3               
+isLowTemperatureThermalRegimePreset                    src/logic/heatingThermalRegimes.js:22:3               
+isHeatingThermalRegimePresetId               function  src/logic/heatingThermalRegimes.js:30:17              
+ORIENTATION_BETA                                       src/logic/orientationHeatLoss.js:7:14                 
+INTERNAL_CORRIDOR_WALL_CONSTRUCTION                    src/logic/roomExteriorLayoutHeatLoss.js:9:14          
+CORNER_ROOM_HEAT_LOSS_FACTOR                           src/logic/roomExteriorLayoutHeatLoss.js:12:14         
+ROOM_EXTERIOR_LAYOUTS                                  src/logic/roomExteriorLayoutHeatLoss.js:18:14         
+resolveUfhCircuitPresetForFinishMaterialId             src/logic/ufhCircuitResolve.js:11:10                  
+UFH_CIRCUIT_PRESETS                                    src/logic/ufhCircuitResolve.js:11:54                  
+ufhDistributionAutoRulesFromAppliances       function  src/logic/ufhDistributionResolve.js:12:17             
+estimateUfhLoopElbowCount                    function  src/logic/ufhLoopHydraulics.js:29:17                  
+ufhLoopHydraulicsThresholds                  function  src/logic/ufhLoopHydraulics.js:42:17                  
+shouldTriggerUfhPipeResize                   function  src/logic/ufhLoopHydraulics.js:69:17                  
+validateUfhLoopHydraulics                    function  src/logic/ufhLoopHydraulics.js:422:17                 
+resolveUfhRoomLoopsHydraulics                function  src/logic/ufhLoopHydraulics.js:686:17                 
+isMixingNodeRequired                         function  src/logic/ufhMixingNode.js:11:17                      
+R_PIPE_EMBEDMENT_BY_STEP_MM                            src/logic/ufhPipeEmbedment.js:7:14                    
+isAllowedPipeSpacingMm                       function  src/logic/ufhPipeEmbedment.js:22:17                   
+R_CONV_UP_M2KW                                         src/logic/ufhRoomHeatFlux.js:16:14                    
+R_CONV_DOWN_HEATED_M2KW                                src/logic/ufhRoomHeatFlux.js:18:14                    
+R_CONV_DOWN_UNHEATED_M2KW                              src/logic/ufhRoomHeatFlux.js:20:14                    
+K_VENT_NATURAL                                         src/logic/ventilationReserve.js:9:14                  
+K_VENT_RECUPERATION                                    src/logic/ventilationReserve.js:12:14                 
+WALL_SURFACE_R                                         src/logic/wallAssembly.js:17:14                       
+sizeSectionalThermal                         function  src/matching/internal/exploreRoomEmitterKind.js:147:17
+parsePanelHeightMm                                     src/matching/internal/exploreRoomEmitterKind.js:268:10
+UNIBOX_SMALL_ZONE_ROOM_TYPES                           src/matching/internal/uniboxRoomAirPresets.js:14:14   
+UNIBOX_ROOM_AIR_TEMP_PRESETS_C                         src/matching/internal/uniboxRoomAirPresets.js:21:14   
+isUniboxSmallZoneRoomType                              src/matching/internal/uniboxRoomAirPresets.js:82:33   
+UFH_MANIFOLD_MAX_OUTLETS_PER_NODE                      src/matching/manifold.js:10:14                        
+MANIFOLD_FAILURE_CODE_INTERNAL                         src/matching/manifold.js:13:14                        
+MANIFOLD_FAILURE_CODE_INPUT                            src/matching/manifold.js:16:14                        
+buildOkManifoldsReport                       function  src/matching/manifold.js:62:17                        
+pickManifoldsWithCore                        function  src/matching/manifold.js:86:17                        
+splitOutletsForCascade                       function  src/matching/manifold.js:125:17                       
+pickDistributionManifold                     function  src/matching/manifold.js:172:17                       
+pickBoilerManifold                           function  src/matching/manifold.js:234:17                       
+pickManifoldsCore                            function  src/matching/manifold.js:417:17                       
+buildOkManifoldsReport                                 src/matching/public.js:9:3                            
+parsePanelLengthMm                           function  src/matching/radiatorSizingHelpers.js:29:17           
+inferPanelConnection                         function  src/matching/radiatorSizingHelpers.js:54:17           
+UNIBOX_DESIGN_PRESSURE_BAR                             src/matching/unibox.js:20:14                          
+UNIBOX_VALVE_MAX_DP_BAR                                src/matching/unibox.js:23:14                          
+UNIBOX_MAX_LOOPS_FOR_MATCHING                          src/matching/unibox.js:26:14                          
+UNIBOX_REQUIRED_FIT                                    src/matching/unibox.js:29:14                          
+minKvM3hForFlowLph                           function  src/matching/unibox.js:38:17                          
+uniboxFitsDemand                             function  src/matching/unibox.js:73:17                          
+validateUniboxLoopDemand                     function  src/matching/unibox.js:132:17                         
+pickUniboxForDemand                          function  src/matching/unibox.js:204:17                         
+collectUniboxLoopDemands                     function  src/matching/unibox.js:252:17                         
+hasUnderfloorManifoldCascade                 function  src/matching/unibox.js:325:17                         
+resolveUniboxRoomAirTempC                              src/matching/unibox.js:503:3                          
+UNIBOX_ROOM_AIR_TEMP_PRESETS_C                         src/matching/unibox.js:504:3                          
+UNIBOX_SMALL_ZONE_ROOM_TYPES                           src/matching/unibox.js:505:3                          
+isUniboxSmallZoneRoomType                              src/matching/unibox.js:506:3                          
+boilerSchema                                           src/models/productSchemas.js:35:14                    
+radiatorSchema                                         src/models/productSchemas.js:50:14                    
+waterHeaterVariantSchema                               src/models/productSchemas.js:74:14                    
+waterHeaterSchema                                      src/models/productSchemas.js:85:14                    
+indirectWaterHeaterSchema                              src/models/productSchemas.js:95:14                    
+pipeSchema                                             src/models/productSchemas.js:106:14                   
+pumpSchema                                             src/models/productSchemas.js:117:14                   
+manifoldSchema                                         src/models/productSchemas.js:128:14                   
+boilerManifoldSchema                                   src/models/productSchemas.js:152:14                   
+uniboxSchema                                           src/models/productSchemas.js:173:14                   
+MAX_CALC_INPUT_JSON_CHARS                              src/projects/documentSizeLimits.js:12:14              
+MAX_CALCULATION_DOC_BSON_BYTES                         src/projects/documentSizeLimits.js:15:14              
+estimateCalculationDocBsonBytes              function  src/projects/documentSizeLimits.js:54:17              
+buildProjectOwnerFilter                      function  src/projects/projectAccess.js:33:17                   
+invalidateReferenceCache                     function  src/reference/configCache.js:103:17                   
+invalidateReferenceCache                               src/reference/public.js:5:52                          
+assertCalcRuntimeContext                               src/reference/public.js:7:10                          
+FINANCIAL_BOM_SCHEMA_VERSION                           src/report/buildFinancialBom.js:12:14                 
+FINANCIAL_LABOR_PERCENT                                src/report/buildFinancialBom.js:13:14                 
+FINANCIAL_CONSUMABLES_PERCENT                          src/report/buildFinancialBom.js:14:14                 
+MIXING_NODE_SELF_ASSEMBLY_NOTE                         src/report/buildFinancialBom.js:15:14                 
+collapseFinancialBomLines                    function  src/report/buildFinancialBom.js:117:17                
+sumRoomsAreaM2                               function  src/utils/apartmentMatching.js:23:17                  
+countApartmentBathrooms                      function  src/utils/apartmentMatching.js:34:17                  
+checkMountingConstraints                     function  src/utils/boilerMountingConstraints.js:100:17         
+normalizeMongoUri                            function  src/utils/mongoConnectionConfig.js:35:17              
+getMongoConnectionConfigs                    function  src/utils/mongoConnectionConfig.js:68:17              
+applyMongoFriendlyDnsIfSrvInCandidates       function  src/utils/mongoDnsPreferPublic.js:43:17               
+fitPumpCurveFromThreePoints                  function  src/utils/pumpCurveMath.js:109:17                     

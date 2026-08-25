@@ -1,0 +1,75 @@
+=== Размер рабочего дерева и git ===
+612M	.
+ 15M	.git
+
+--- по каталогам верхнего уровня (без node_modules) ---
+backend/	120M
+components/	524K
+docs/	 23M
+e2e/	 63M
+frontend/	365M
+scripts/	 52K
+shared/	 26M
+
+--- node_modules ---
+backend/node_modules	117M
+frontend/node_modules	356M
+shared/node_modules	 26M
+e2e/node_modules	 18M
+
+=== git count-objects -vH ===
+count: 146
+size: 11.43 MiB
+in-pack: 4326
+packs: 1
+size-pack: 2.86 MiB
+prune-packable: 0
+garbage: 0
+size-garbage: 0 bytes
+
+=== ТОП-20 самых больших файлов в git-индексе ===
+2137052	docs/qa/heatcalc-audit.html
+825443	docs/qa/research/ux-screens/u4/u4-mobile-room-detail.jpg
+644810	docs/qa/research/ux-screens/u4/u4-mobile-step1-object.jpg
+542265	frontend/lighthouse-mobile.json
+540598	frontend/lighthouse-after-mobile.json
+536219	frontend/lighthouse-after-desktop.json
+535443	frontend/lighthouse-final2.json
+530801	frontend/lighthouse-desktop.json
+529401	frontend/lighthouse-baseline-mobile.json
+525909	frontend/lighthouse-final.json
+510447	frontend/lighthouse-mobile2.json
+489457	docs/qa/research/ux-screens/u1/u1-step09-tech-result.jpg
+483404	docs/qa/research/ux-screens/u2/u2-step09-tech-result.jpg
+445862	frontend/lighthouse-report.json
+437737	docs/qa/research/ux-screens/u3/u3-MAIN-repro-unblocked-after-3-walls.jpg
+430859	docs/qa/TEST_PLAN.md
+406595	docs/qa/research/ux-screens/u3/u3-exp4-result-area-zero-3rooms.jpg
+405378	docs/qa/research/ux-screens/u1/u1-step09-after-apply-scheme.jpg
+392771	docs/qa/research/ux-screens/u3/u3-exp5-result-stale-with-400.jpg
+377083	docs/qa/research/ux-screens/u3/u3-exp2-result-min-2fields.jpg
+
+=== проверка заявленного мусора ===
+backend/heating-equipment-selection-service@1.0.0
+backend/node
+.rw-r--r-- 0 dmytropopov 23 Aug 11:45 backend/heating-equipment-selection-service@1.0.0
+.rw-r--r-- 0 dmytropopov 23 Aug 11:45 backend/node
+--- lighthouse ---
+frontend/lighthouse-after-desktop.json
+frontend/lighthouse-after-mobile.json
+frontend/lighthouse-baseline-mobile.json
+frontend/lighthouse-desktop.json
+frontend/lighthouse-final.json
+frontend/lighthouse-final2.json
+frontend/lighthouse-mobile.json
+frontend/lighthouse-mobile2.json
+frontend/lighthouse-report.json
+--- ux-screens ---
+файлов:       76, размер:  12M
+--- .cursorrules ---
+".cursorrules": No such file or directory (os error 2)
+README.md:9:Правила — [`.cursorrules`](.cursorrules).  
+.gitignore:9:.cursorrules
+docs/project-structure.md:6:Правила кода и бизнес-контекст: [`.cursorrules`](../.cursorrules).  
+docs/project-structure.md:29:└── Plan.md / .cursorrules / README.md
+docs/project-structure.md:48:| `.cursorrules` | Политика модулей, бизнес-правила, стек |

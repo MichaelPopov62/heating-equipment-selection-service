@@ -136,7 +136,7 @@ export function FinancialSummaryTable({
             Триває перерахунок…
           </p>
         ) : null}
-        <p className={styles.empty} role="status">
+        <p className={styles.empty} role="status" data-testid="estimate-empty">
           Немає актуальної кошторису. Заповніть анкету та дочекайтеся розрахунку.
         </p>
       </div>
@@ -227,7 +227,7 @@ export function FinancialSummaryTable({
                 {formatMoney(totals.consumablesTotalUah)}
               </td>
             </tr>
-            <tr className={styles.grandRow}>
+            <tr className={styles.grandRow} data-testid="estimate-total">
               <td colSpan={5}>Загальна вартість об&apos;єкта</td>
               <td className={styles.num}>{formatMoney(totals.grandTotalUah)}</td>
             </tr>

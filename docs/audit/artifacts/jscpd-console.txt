@@ -1,0 +1,174 @@
+### jscpd version:
+cpd 5.0.16
+
+### CMD: npx -y jscpd backend/src frontend/src shared --min-lines 15 --reporters console,json --output docs/audit/artifacts/jscpd
+[1mClone found (javascript)[22m
+ - [1m[32mapi/adminFeedbackRoutes.js[39m[22m [21:41 - 39:2] (19 lines, 66 tokens)
+   api/adminRoutes.js [17:69 - 35:2]
+[1mClone found (javascript)[22m
+ - [1m[32mapi/adminFeedbackRoutes.js[39m[22m [27:1 - 46:9] (20 lines, 66 tokens)
+   api/projectsRoutes.js [95:1 - 116:9]
+[1mClone found (javascript)[22m
+ - [1m[32mapi/projectsRoutes.js[39m[22m [87:1 - 109:2] (23 lines, 66 tokens)
+   api/publicSharesRoutes.js [30:1 - 48:2]
+[1mClone found (javascript)[22m
+ - [1m[32mapi/projectsRoutes.js[39m[22m [331:13 - 346:12] (16 lines, 114 tokens)
+   api/projectsRoutes.js [387:16 - 402:12]
+[1mClone found (javascript)[22m
+ - [1m[32mapi/projectsRoutes.js[39m[22m [690:32 - 705:5] (16 lines, 89 tokens)
+   api/publicSharesRoutes.js [151:40 - 166:5]
+[1mClone found (javascript)[22m
+ - [1m[32mapi/projectsRoutes.js[39m[22m [714:14 - 732:14] (19 lines, 114 tokens)
+   api/projectsRoutes.js [832:16 - 850:14]
+[1mClone found (javascript)[22m
+ - [1m[32mapi/publicSharesRoutes.js[39m[22m [62:40 - 85:10] (24 lines, 153 tokens)
+   api/publicSharesRoutes.js [113:44 - 136:10]
+[1mClone found (javascript)[22m
+ - [1m[32mcatalog/validateCatalog.js[39m[22m [986:14 - 1004:9] (19 lines, 62 tokens)
+   catalog/validateCatalog.js [1102:14 - 1120:9]
+[1mClone found (javascript)[22m
+ - [1m[32mcatalog/validateCatalog.js[39m[22m [1007:49 - 1034:8] (28 lines, 132 tokens)
+   catalog/validateCatalog.js [1123:55 - 1150:8]
+[1mClone found (typescript)[22m
+ - [1m[32mdhw/types.d.ts[39m[22m [90:4 - 122:7] (33 lines, 113 tokens)
+   hydraulics/types.d.ts [65:45 - 96:7]
+[1mClone found (javascript)[22m
+ - [1m[32mhydraulics/buildGraph.js[39m[22m [209:32 - 225:10] (17 lines, 61 tokens)
+   hydraulics/buildGraph.js [235:32 - 250:4]
+[1mClone found (javascript)[22m
+ - [1m[32mhydraulics/buildHydraulicsProposal.js[39m[22m [60:1 - 76:9] (17 lines, 82 tokens)
+   hydraulics/resolveSystemPumps.js [20:1 - 36:9]
+[1mClone found (javascript)[22m
+ - [1m[32mhydraulics/buildSnapshots.js[39m[22m [35:3 - 55:9] (21 lines, 60 tokens)
+   matching/manifold.js [299:41 - 320:9]
+[1mClone found (javascript)[22m
+ - [1m[32mhydraulics/pickPipe.js[39m[22m [48:24 - 65:68] (18 lines, 144 tokens)
+   logic/ufhLoopHydraulics.js [107:70 - 123:76]
+[1mClone found (javascript)[22m
+ - [1m[32mhydraulics/pickPipe.js[39m[22m [219:44 - 234:9] (16 lines, 80 tokens)
+   hydraulics/pickTrunkChain.js [128:24 - 143:9]
+[1mClone found (typescript)[22m
+ - [1m[32mhydraulics/types.d.ts[39m[22m [501:83 - 520:2] (20 lines, 84 tokens)
+   types/hydraulics.ts [43:83 - 62:2]
+[1mClone found (typescript)[22m
+ - [1m[32mhydraulics/types.d.ts[39m[22m [526:35 - 542:7] (17 lines, 63 tokens)
+   types/hydraulics.ts [68:43 - 82:3]
+[1mClone found (typescript)[22m
+ - [1m[32mlogic/ufhLoopHydraulics.types.d.ts[39m[22m [32:42 - 48:20] (17 lines, 69 tokens)
+   types/shared-types.d.ts [678:18 - 693:24]
+[1mClone found (javascript)[22m
+ - [1m[32mprojects/serializeProject.js[39m[22m [14:23 - 32:9] (19 lines, 68 tokens)
+   projects/serializeShare.js [11:28 - 29:7]
+[1mClone found (typescript)[22m
+ - [1m[32mtypes/shared-types.d.ts[39m[22m [1296:33 - 1312:7] (17 lines, 58 tokens)
+   utils/parsers/parseCommercialBomFromReport.ts [19:36 - 32:3]
+[1mClone found (typescript)[22m
+ - [1m[32mtypes/shared-types.d.ts[39m[22m [1614:37 - 1629:2] (16 lines, 81 tokens)
+   types/projectsApi.ts [62:34 - 77:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/AppErrorBoundary/AppErrorBoundary.module.css[39m[22m [1:1 - 25:2] (25 lines, 121 tokens)
+   components/BootstrapErrorScreen/BootstrapErrorScreen.module.css [1:1 - 25:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/BoilerReport/BoilerReportDialog.module.css[39m[22m [1:79 - 75:2] (75 lines, 433 tokens)
+   components/HydraulicsReport/HydraulicsReportDialog.module.css [1:74 - 75:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/BoilerReport/BoilerReportDialog.module.css[39m[22m [1:79 - 27:15] (27 lines, 148 tokens)
+   components/ProjectsDialog/ProjectsDialog.module.css [2:102 - 27:7]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/BoilerReport/BoilerReportDialog.module.css[39m[22m [1:79 - 75:2] (75 lines, 433 tokens)
+   components/RadiatorsReport/RadiatorsReportDialog.module.css [1:89 - 75:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/BoilerReport/BoilerReportDialog.module.css[39m[22m [15:17 - 75:2] (61 lines, 366 tokens)
+   components/HotWaterReport/HotWaterReportDialog.module.css [15:17 - 75:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/BoilerReport/BoilerReportDialog.module.css[39m[22m [16:28 - 39:19] (24 lines, 119 tokens)
+   components/UnderfloorHeatingReport/UfhWarningResolutionDialog.module.css [16:28 - 39:19]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/BoilerReport/BoilerSummaryTable.module.css[39m[22m [1:86 - 16:2] (16 lines, 90 tokens)
+   components/HotWaterReport/HotWaterSummaryTable.module.css [1:82 - 16:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/BoilerReport/BoilerSummaryTable.module.css[39m[22m [1:72 - 52:2] (52 lines, 274 tokens)
+   components/RadiatorsReport/RadiatorsSummaryTable.module.css [1:82 - 52:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/BoilerReport/BoilerSummaryTable.module.css[39m[22m [27:21 - 51:20] (25 lines, 106 tokens)
+   components/FinancialSummary/FinancialSummaryTable.module.css [16:23 - 40:20]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/BoilerReport/BoilerSummaryTable.module.css[39m[22m [27:21 - 52:2] (26 lines, 107 tokens)
+   components/HeatLossReport/HeatLossSummaryTable.module.css [16:19 - 41:2]
+[1mClone found (tsx)[22m
+ - [1m[32mcomponents/BoilerSurveyForm/BoilerSurveyForm.tsx[39m[22m [115:11 - 132:61] (18 lines, 97 tokens)
+   components/HotWaterForm/HotWaterForm.tsx [309:11 - 326:61]
+[1mClone found (tsx)[22m
+ - [1m[32mcomponents/BoilerSurveyForm/BoilerSurveyForm.tsx[39m[22m [115:11 - 132:61] (18 lines, 97 tokens)
+   components/HydraulicsSection/HydraulicsSection.tsx [257:11 - 274:61]
+[1mClone found (tsx)[22m
+ - [1m[32mcomponents/BoilerSurveyForm/BoilerSurveyForm.tsx[39m[22m [115:11 - 132:61] (18 lines, 97 tokens)
+   components/RadiatorsSurveyForm/RadiatorsSurveyForm.tsx [143:11 - 160:61]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/HotWaterForm/HotWaterForm.module.css[39m[22m [6:12 - 24:2] (19 lines, 61 tokens)
+   components/WaterHeaterForm/WaterHeaterForm.module.css [8:46 - 26:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/HotWaterForm/HotWaterForm.module.css[39m[22m [71:18 - 86:2] (16 lines, 95 tokens)
+   components/ObjectMetaForm/ObjectMetaForm.module.css [15:15 - 30:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/HotWaterReport/HotWaterReportView.module.css[39m[22m [1:122 - 32:2] (32 lines, 131 tokens)
+   components/RadiatorsReport/RadiatorsReportView.module.css [1:133 - 31:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/HotWaterReport/HotWaterSummaryTable.module.css[39m[22m [1:68 - 52:2] (52 lines, 274 tokens)
+   components/UnderfloorHeatingReport/UnderfloorHeatingSummaryTable.module.css [1:66 - 52:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/Hydraulics/HydraulicsPumpCard.module.css[39m[22m [36:12 - 52:2] (17 lines, 67 tokens)
+   components/HydraulicsReport/HydraulicsReportView.module.css [102:23 - 118:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/HydraulicsReport/HydraulicsProposalTable.module.css[39m[22m [19:14 - 36:2] (18 lines, 106 tokens)
+   components/RadiatorProposalLineTable/RadiatorProposalLineTable.module.css [23:22 - 40:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/HydraulicsReport/HydraulicsProposalTable.module.css[39m[22m [21:13 - 38:2] (18 lines, 95 tokens)
+   components/RadiatorProposalLineTable/RadiatorProposalLineTable.module.css [25:13 - 42:3]
+[1mClone found (tsx)[22m
+ - [1m[32mcomponents/ModalDialog/ModalDialog.tsx[39m[22m [41:15 - 58:22] (18 lines, 84 tokens)
+   components/UnderfloorHeatingReport/UfhWarningResolutionDialog.tsx [33:13 - 51:25]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/ProjectTransferDialog/ProjectTransferDialog.module.css[39m[22m [2:105 - 83:30] (82 lines, 434 tokens)
+   components/WaterHeaterReport/WaterHeaterReportDialog.module.css [1:116 - 75:2]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/ProjectTransferDialog/ProjectTransferDialog.module.css[39m[22m [65:15 - 89:18] (25 lines, 110 tokens)
+   components/ProjectsDialog/ProjectsDialog.module.css [34:18 - 58:18]
+[1mClone found (tsx)[22m
+ - [1m[32mcomponents/ProjectTransferDialog/ProjectTransferDialog.tsx[39m[22m [38:30 - 53:25] (16 lines, 67 tokens)
+   components/ProjectsDialog/ProjectsDialog.tsx [33:23 - 48:25]
+[1mClone found (css)[22m
+ - [1m[32mcomponents/RadiatorsReport/RadiatorsReportDialog.module.css[39m[22m [1:87 - 75:2] (75 lines, 434 tokens)
+   components/UnderfloorHeatingReport/UnderfloorHeatingReportDialog.module.css [2:97 - 76:2]
+[1mClone found (typescript)[22m
+ - [1m[32msurveySession/createDefaultSurveyDraft.ts[39m[22m [51:7 - 69:11] (19 lines, 59 tokens)
+   surveySession/createEmptySurveySessionState.ts [24:12 - 42:11]
+[1mClone found (typescript)[22m
+ - [1m[32mtypes/surveyDraft.ts[39m[22m [28:21 - 56:2] (29 lines, 85 tokens)
+   utils/buildSurveyDraft.ts [27:28 - 43:2]
+[1mClone found (typescript)[22m
+ - [1m[32mutils/parsers/parseCommercialBomFromReport.ts[39m[22m [59:3 - 75:35] (17 lines, 53 tokens)
+   utils/parsers/parseHydraulicsProposalFromReport.ts [15:80 - 23:35]
+[90m┌────────────┬────────────────┬─────────────┬──────────────┬──────────────┬──────────────────┬───────────────────┐[39m
+[90m│[39m[31m Format     [39m[90m│[39m[31m Files analyzed [39m[90m│[39m[31m Total lines [39m[90m│[39m[31m Total tokens [39m[90m│[39m[31m Clones found [39m[90m│[39m[31m Duplicated lines [39m[90m│[39m[31m Duplicated tokens [39m[90m│[39m
+[90m├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤[39m
+[90m│[39m css        [90m│[39m 72             [90m│[39m 6525        [90m│[39m 40880        [90m│[39m 20           [90m│[39m 740 (11.34%)     [90m│[39m 4004 (9.79%)      [90m│[39m
+[90m├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤[39m
+[90m│[39m javascript [90m│[39m 199            [90m│[39m 31430       [90m│[39m 133716       [90m│[39m 15           [90m│[39m 277 (0.88%)      [90m│[39m 1357 (1.01%)      [90m│[39m
+[90m├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤[39m
+[90m│[39m json       [90m│[39m 2              [90m│[39m 60          [90m│[39m 198          [90m│[39m 0            [90m│[39m 0 (0.00%)        [90m│[39m 0 (0.00%)         [90m│[39m
+[90m├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤[39m
+[90m│[39m tsx        [90m│[39m 99             [90m│[39m 13748       [90m│[39m 74579        [90m│[39m 5            [90m│[39m 83 (0.60%)       [90m│[39m 442 (0.59%)       [90m│[39m
+[90m├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤[39m
+[90m│[39m typescript [90m│[39m 190            [90m│[39m 18463       [90m│[39m 81137        [90m│[39m 9            [90m│[39m 176 (0.95%)      [90m│[39m 665 (0.82%)       [90m│[39m
+[90m├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤[39m
+[90m│[39m [1mTotal:[22m     [90m│[39m 562            [90m│[39m 70226       [90m│[39m 330510       [90m│[39m 49           [90m│[39m 1276 (1.82%)     [90m│[39m 6468 (1.96%)      [90m│[39m
+[90m└────────────┴────────────────┴─────────────┴──────────────┴──────────────┴──────────────────┴───────────────────┘[39m
+[90mFound 49 clones.[39m
+[32mJSON report saved to docs/audit/artifacts/jscpd/jscpd-report.json[39m
+[90mtime: 31.706ms[39m
+
+[90m💡 Auto-refactor with AI: [1m[39mnpx skills add https://github.com/kucherenko/jscpd --skill dry-refactoring[90m[22m
+[90m🎩 New: Gangsta Agents — discipline your AI coding → gangsta.page[39m
+[90m💖 Support jscpd project → https://opencollective.com/jscpd[39m
+EXIT=0

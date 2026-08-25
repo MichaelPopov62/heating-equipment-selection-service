@@ -1,0 +1,5 @@
+cold1 #1 http=200 dns=0.032487 connect=0.040996 tls=0.052436 ttfb=21.666750 total=21.666837
+cold1 #2 http=200 dns=0.002899 connect=0.009349 tls=0.021870 ttfb=0.629820 total=0.629909
+cold1 #3 http=200 dns=0.002484 connect=0.008073 tls=0.018580 ttfb=0.662798 total=0.662890
+cold1 #4 http=200 dns=0.002544 connect=0.015140 tls=0.026276 ttfb=0.249623 total=0.249718
+cold1 #5 http=200 dns=0.002851 connect=0.008366 tls=0.019617 ttfb=0.246068 total=0.246144

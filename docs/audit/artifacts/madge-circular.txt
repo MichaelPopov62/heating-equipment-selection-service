@@ -1,0 +1,31 @@
+### madge --version
+8.0.0
+
+### CMD: npx -y madge --circular --extensions js,ts,tsx backend/src
+- Finding files
+Processed 234 files (349ms) 
+
+✖ Found 2 circular dependencies!
+
+1) catalog/types.d.ts > types/boiler-types.d.ts
+2) hydraulics/types.d.ts > types/shared-types.d.ts
+
+EXIT=1
+
+### CMD: npx -y madge --circular --extensions ts,tsx frontend/src
+- Finding files
+Processed 372 files (477ms) (1 warning)
+
+✖ Found 1 circular dependency!
+
+1) utils/roomEnvelopeFields.ts > utils/roomExteriorLayout.ts
+
+EXIT=1
+
+### CMD: npx -y madge --circular --extensions js,ts shared
+- Finding files
+Processed 25 files (184ms) 
+
+✔ No circular dependency found!
+
+EXIT=0

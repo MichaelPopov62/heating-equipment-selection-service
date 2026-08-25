@@ -1,0 +1,37 @@
+{
+  "heatingMatchingSchemes.d.ts": [],
+  "heatingMatchingSchemes.js": [],
+  "heatingThermalRegimePresets.d.ts": [],
+  "heatingThermalRegimePresets.js": [
+    "heatingThermalRegimeRecommendations.js"
+  ],
+  "heatingThermalRegimeRecommendations.d.ts": [
+    "heatingThermalRegimePresets.d.ts"
+  ],
+  "heatingThermalRegimeRecommendations.js": [
+    "heatingMatchingSchemes.js"
+  ],
+  "radiatorConnection.d.ts": [],
+  "radiatorConnection.js": [],
+  "radiatorEmitterPreference.d.ts": [],
+  "radiatorEmitterPreference.js": [],
+  "roomDesignAirTemp.d.ts": [],
+  "roomDesignAirTemp.js": [],
+  "roomTypeNormalization.d.ts": [],
+  "roomTypeNormalization.js": [],
+  "surveyMutationKinds.ts": [],
+  "ufhCircuitPresets.d.ts": [],
+  "ufhCircuitPresets.js": [],
+  "ufhDistributionPresets.d.ts": [],
+  "ufhDistributionPresets.js": [],
+  "ufhModePresetIds.d.ts": [],
+  "ufhModePresetIds.js": [],
+  "ufhTerminalControl.d.ts": [],
+  "ufhTerminalControl.js": [],
+  "waterHeaterFormContract.d.ts": [
+    "heatingMatchingSchemes.d.ts"
+  ],
+  "waterHeaterFormContract.js": [
+    "heatingMatchingSchemes.js"
+  ]
+}

@@ -211,6 +211,7 @@ export function ObjectMetaForm({
         </label>
         <input
           id="roomsCount"
+          data-testid="field-rooms-count"
           className={styles.control}
           type="number"
           min={ROOMS_COUNT_MIN}
@@ -375,6 +376,7 @@ export function ObjectMetaForm({
         </label>
         <input
           id="wallThicknessMm"
+          data-testid="field-wall-thickness"
           className={styles.control}
           type="number"
           inputMode="numeric"

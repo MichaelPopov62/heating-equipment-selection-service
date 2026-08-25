@@ -1,0 +1,2 @@
+### CMD (cwd=frontend): npx knip --treat-config-hints-as-errors  (= npm run verify:dead-code)
+EXIT=0

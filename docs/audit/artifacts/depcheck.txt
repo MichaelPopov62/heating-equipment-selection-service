@@ -1,0 +1,22 @@
+### depcheck version:
+1.4.7
+
+### CMD: npx -y depcheck backend
+Unused devDependencies
+* @types/cors
+* @types/express
+Missing dependencies
+* express-serve-static-core: ./src/types/express-augment.d.ts
+EXIT=255
+
+### CMD: npx -y depcheck frontend
+No depcheck issue
+EXIT=0
+
+### CMD: npx -y depcheck shared
+No depcheck issue
+EXIT=0
+
+### CMD: npx -y depcheck e2e
+No depcheck issue
+EXIT=0

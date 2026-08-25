@@ -91,6 +91,7 @@ export function HotWaterForm({
           </label>
           <input
             id="hw-residents"
+            data-testid="field-residents"
             className={styles.control}
             type="number"
             min={0}

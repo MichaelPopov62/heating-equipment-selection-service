@@ -1,0 +1,46 @@
+### CMD: npm outdated --prefix backend
+Package                              Current   Wanted   Latest  Location                                          Depended by
+@apidevtools/json-schema-ref-parser   15.3.5   15.5.2   16.0.0  node_modules/@apidevtools/json-schema-ref-parser  backend
+@types/node                           25.6.0   25.9.5   26.2.0  node_modules/@types/node                          backend
+ajv                                   8.18.0   8.20.0   8.20.0  node_modules/ajv                                  backend
+bson                                   7.3.1    7.3.2    7.3.2  node_modules/bson                                 backend
+eslint                                10.2.1   10.9.0   10.9.0  node_modules/eslint                               backend
+express-rate-limit                     8.5.2    8.6.2    8.6.2  node_modules/express-rate-limit                   backend
+globals                               17.5.0  17.11.0  17.11.0  node_modules/globals                              backend
+helmet                                 8.2.0    8.3.0    8.3.0  node_modules/helmet                               backend
+jose                                   6.2.3   6.2.10   6.2.10  node_modules/jose                                 backend
+mongoose                               9.5.0    9.9.3    9.9.3  node_modules/mongoose                             backend
+puppeteer                            24.22.0  24.43.1   25.8.0  node_modules/puppeteer                            backend
+puppeteer-core                       24.22.0  24.43.1   25.8.0  node_modules/puppeteer-core                       backend
+tsx                                   4.23.5  4.23.12  4.23.12  node_modules/tsx                                  backend
+typescript                             6.0.3    6.0.3    7.0.2  node_modules/typescript                           backend
+EXIT=1
+
+### CMD: npm outdated --prefix frontend
+Package                         Current   Wanted   Latest  Location                                     Depended by
+@clerk/localizations             4.13.7   4.15.5   4.15.5  node_modules/@clerk/localizations            frontend
+@tabler/icons-react              3.41.1   3.46.0   3.46.0  node_modules/@tabler/icons-react             frontend
+@tanstack/react-query           5.101.2  5.102.2  5.102.2  node_modules/@tanstack/react-query           frontend
+@tanstack/react-query-devtools  5.101.2  5.102.2  5.102.2  node_modules/@tanstack/react-query-devtools  frontend
+@types/node                     24.12.2  24.13.3   26.2.0  node_modules/@types/node                     frontend
+@types/react                    19.2.14  19.2.18  19.2.18  node_modules/@types/react                    frontend
+@types/react-dom                 19.2.3   19.2.4   19.2.4  node_modules/@types/react-dom                frontend
+@vitejs/plugin-react              6.0.1    6.1.0    6.1.0  node_modules/@vitejs/plugin-react            frontend
+eslint                           10.2.1   10.9.0   10.9.0  node_modules/eslint                          frontend
+eslint-plugin-react-refresh       0.5.2    0.5.4    0.5.4  node_modules/eslint-plugin-react-refresh     frontend
+globals                          17.5.0  17.11.0  17.11.0  node_modules/globals                         frontend
+knip                             5.88.1   5.88.1   6.32.2  node_modules/knip                            frontend
+typescript                        6.0.3    6.0.3    7.0.2  node_modules/typescript                      frontend
+typescript-eslint                8.59.0   8.67.0   8.67.0  node_modules/typescript-eslint               frontend
+vite                              8.2.0    8.2.2    8.2.2  node_modules/vite                            frontend
+EXIT=1
+
+### CMD: npm outdated --prefix shared
+Package      Current  Wanted  Latest  Location                  Depended by
+@types/node   25.9.5  25.9.5  26.2.0  node_modules/@types/node  shared
+typescript     6.0.3   6.0.3   7.0.2  node_modules/typescript   shared
+EXIT=1
+
+### CMD: npm outdated --prefix e2e
+EXIT=0
+

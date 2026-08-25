@@ -141,6 +141,7 @@ export function Header({
         {variant === 'survey' ? (
           <input
             type="text"
+            data-testid="field-client-name"
             className={styles.clientInput}
             value={clientName}
             onChange={(e) => {
@@ -158,6 +159,7 @@ export function Header({
         <button
           type="button"
           className={`${styles.secondaryButton} ${styles.projectsButton}`}
+          data-testid="header-projects"
           onClick={() => {
             closeMenus();
             onOpenProjects();
@@ -171,6 +173,7 @@ export function Header({
             <button
               type="button"
               className={styles.secondaryButton}
+              data-testid="header-save"
               disabled={!canSaveProject || saveProjectBusy}
               aria-busy={saveProjectBusy}
               title={
@@ -192,6 +195,7 @@ export function Header({
               <button
                 type="button"
                 className={styles.secondaryButton}
+                data-testid="header-share"
                 disabled={!canPublishShare || shareBusy}
                 aria-busy={shareBusy}
                 title={
@@ -224,6 +228,7 @@ export function Header({
                     ? `${styles.primaryButton} ${styles.menuTriggerActivePrimary}`
                     : styles.primaryButton
                 }
+                data-testid="header-pdf"
                 disabled={!canPrintPdf}
                 aria-expanded={pdfMenuOpen}
                 aria-haspopup="menu"
@@ -238,6 +243,7 @@ export function Header({
                   <button
                     type="button"
                     role="menuitem"
+                    data-testid="pdf-financial"
                     onClick={() => {
                       onPrintPdf(false);
                       closeMenus();
@@ -248,6 +254,7 @@ export function Header({
                   <button
                     type="button"
                     role="menuitem"
+                    data-testid="pdf-financial-technical"
                     onClick={() => {
                       onPrintPdf(true);
                       closeMenus();

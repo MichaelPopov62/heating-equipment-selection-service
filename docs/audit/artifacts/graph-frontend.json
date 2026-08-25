@@ -1,0 +1,1694 @@
+{
+  "../../shared/heatingMatchingSchemes.d.ts": [],
+  "../../shared/heatingThermalRegimePresets.d.ts": [],
+  "../../shared/heatingThermalRegimeRecommendations.d.ts": [
+    "../../shared/heatingThermalRegimePresets.d.ts"
+  ],
+  "../../shared/radiatorConnection.d.ts": [],
+  "../../shared/radiatorEmitterPreference.d.ts": [],
+  "../../shared/roomTypeNormalization.d.ts": [],
+  "../../shared/ufhDistributionPresets.d.ts": [],
+  "../../shared/waterHeaterFormContract.d.ts": [
+    "../../shared/heatingMatchingSchemes.d.ts"
+  ],
+  "App.module.css": [],
+  "App.tsx": [
+    "auth/AuthProvider.tsx",
+    "auth/ClerkLazyRoot.tsx",
+    "components/AppErrorBoundary/AppErrorBoundary.tsx",
+    "routing/AppRouter.tsx",
+    "shell/AppChromeProvider.tsx"
+  ],
+  "AppRoot.tsx": [
+    "AppSurveyContent.tsx",
+    "StartAppRoot.tsx",
+    "SurveyAppRoot.tsx",
+    "components/AppBootstrapSkeleton/AppBootstrapSkeleton.tsx",
+    "hooks/useSurveyBootstrap.ts",
+    "surveySession/types.ts",
+    "surveySession/useSurveySession.ts",
+    "types/surveyDraft.ts",
+    "utils/pendingProjectNavigation.ts"
+  ],
+  "AppSurveyContent.tsx": [
+    "App.module.css",
+    "components/BoilerSurveyForm/BoilerSurveyForm.tsx",
+    "components/CatalogEquipmentReference/CatalogEquipmentReference.tsx",
+    "components/FinancialSummary/FinancialSummaryTable.tsx",
+    "components/Footer/Footer.tsx",
+    "components/Header/Header.tsx",
+    "components/HotWaterForm/HotWaterForm.tsx",
+    "components/HydraulicsSection/HydraulicsSection.tsx",
+    "components/ObjectMetaForm/ObjectMetaForm.tsx",
+    "components/RadiatorsSurveyForm/RadiatorsSurveyForm.tsx",
+    "components/RecommendationsBlock/RecommendationsBlock.tsx",
+    "components/RoomsForm/RoomsForm.tsx",
+    "components/WarmFloorSection/WarmFloorSection.tsx",
+    "components/WaterHeaterForm/WaterHeaterForm.tsx",
+    "constants/surveyResultsSections.ts",
+    "constants/surveySteps.ts",
+    "hooks/useCalcReport.ts",
+    "hooks/useRoomsOrchestration.ts",
+    "hooks/useSurveyEstimates.ts",
+    "hooks/useSurveyStepNavigation.ts",
+    "query/queries/useCatalogEquipmentQuery.ts",
+    "surveySession/useSurveySession.ts",
+    "surveySession/wiringLayoutV3.ts",
+    "types/envelope.ts",
+    "types/heatingMatching.ts",
+    "types/heatingThermalRegime.ts",
+    "types/hotWater.ts",
+    "types/hydraulics.ts",
+    "types/rooms.ts",
+    "types/surveyStep.ts",
+    "types/ufhModePreset.ts",
+    "types/underfloorHeating.ts",
+    "types/waterHeater.ts",
+    "utils/waterHeaterSchemeOptions.ts"
+  ],
+  "StartAppRoot.tsx": [
+    "App.module.css",
+    "components/AccountBar/AccountBar.tsx",
+    "components/AppBootstrapSkeleton/AppBootstrapSkeleton.tsx",
+    "components/BootstrapErrorScreen/BootstrapErrorScreen.tsx",
+    "components/DevToolsDock/DevToolsDock.tsx",
+    "components/Header/Header.tsx",
+    "components/Logo/Logo.tsx",
+    "components/StartScreen/StartScreen.tsx",
+    "hooks/useDevPanelAccess.ts",
+    "i18n/uk/brand.ts",
+    "routing/paths.ts",
+    "shell/useAppChrome.ts",
+    "surveySession/types.ts"
+  ],
+  "SurveyAppRoot.tsx": [
+    "App.module.css",
+    "AppSurveyContent.tsx",
+    "components/AccountBar/AccountBar.tsx",
+    "components/AppBootstrapSkeleton/AppBootstrapSkeleton.tsx",
+    "components/DevPanel/DevPanel.tsx",
+    "components/DevToolsDock/DevToolsDock.tsx",
+    "components/Header/Header.tsx",
+    "components/Logo/Logo.tsx",
+    "components/ProjectsDialog/ProjectsDialog.tsx",
+    "hooks/useDevPanelAccess.ts",
+    "hooks/useSurveyBootstrap.ts",
+    "hooks/useSurveyDraftPersistence.ts",
+    "hooks/useSurveyProject.ts",
+    "i18n/uk/brand.ts",
+    "i18n/uk/footer.ts",
+    "routing/paths.ts",
+    "shell/useAppChrome.ts",
+    "surveySession/buildCalcInputSnapshot.ts",
+    "surveySession/surveyDraftBridge.ts",
+    "surveySession/useSurveySession.ts",
+    "types/surveyDraft.ts",
+    "utils/pendingProjectNavigation.ts"
+  ],
+  "auth/AdminRoute.tsx": [
+    "components/AppBootstrapSkeleton/AppBootstrapSkeleton.tsx",
+    "i18n/uk/adminFeedback.ts",
+    "query/queries/useMeQuery.ts",
+    "routing/paths.ts"
+  ],
+  "auth/AuthProvider.tsx": [
+    "auth/ClerkAuthProviderInner.tsx",
+    "auth/PublicAuthProviderInner.tsx",
+    "auth/authConfig.ts",
+    "auth/authContext.ts",
+    "auth/clerkLoadContext.ts",
+    "auth/useAuthMeCacheSync.ts"
+  ],
+  "auth/ClerkAuthProviderInner.tsx": [
+    "auth/authConfig.ts",
+    "auth/authContext.ts",
+    "auth/useAuthMeCacheSync.ts",
+    "services/projectsAuthToken.ts"
+  ],
+  "auth/ClerkLazyRoot.tsx": [
+    "auth/ClerkProviderWithRouter.tsx",
+    "auth/authConfig.ts",
+    "auth/clerkLoadContext.ts",
+    "auth/shouldLoadClerkForPath.ts",
+    "components/ClerkAuthLoadingFallback/ClerkAuthLoadingFallback.tsx"
+  ],
+  "auth/ClerkProviderWithRouter.tsx": [
+    "i18n/clerkAppearance.ts",
+    "i18n/clerkUkLocalization.ts",
+    "styles/clerkGlobal.css"
+  ],
+  "auth/ProtectedRoute.tsx": [
+    "auth/useAuth.ts",
+    "routing/paths.ts"
+  ],
+  "auth/PublicAuthProviderInner.tsx": [
+    "auth/authConfig.ts",
+    "auth/authContext.ts"
+  ],
+  "auth/authConfig.ts": [],
+  "auth/authContext.ts": [],
+  "auth/clerkLoadContext.ts": [],
+  "auth/shouldLoadClerkForPath.ts": [
+    "routing/paths.ts"
+  ],
+  "auth/useAuth.ts": [
+    "auth/authContext.ts"
+  ],
+  "auth/useAuthMeCacheSync.ts": [
+    "query/queryKeys.ts"
+  ],
+  "auth/useAuthRedirectAfterClerk.ts": [
+    "auth/useAuth.ts"
+  ],
+  "components/AccountBar/AccountBar.module.css": [],
+  "components/AccountBar/AccountBar.tsx": [
+    "auth/useAuth.ts",
+    "components/AccountBar/AccountBar.module.css",
+    "components/SubscriptionTierBadge/SubscriptionTierBadge.tsx",
+    "i18n/uk/adminFeedback.ts",
+    "i18n/uk/auth.ts",
+    "query/queries/useMeQuery.ts",
+    "routing/paths.ts",
+    "services/meApi.ts"
+  ],
+  "components/AppBootstrapSkeleton/AppBootstrapSkeleton.module.css": [],
+  "components/AppBootstrapSkeleton/AppBootstrapSkeleton.tsx": [
+    "components/AppBootstrapSkeleton/AppBootstrapSkeleton.module.css",
+    "components/Footer/Footer.tsx",
+    "components/Logo/Logo.tsx",
+    "components/Spinner/Spinner.tsx"
+  ],
+  "components/AppErrorBoundary/AppErrorBoundary.module.css": [],
+  "components/AppErrorBoundary/AppErrorBoundary.tsx": [
+    "components/AppErrorBoundary/AppErrorBoundary.module.css"
+  ],
+  "components/AuthRedirectShell/AuthRedirectShell.tsx": [
+    "components/Footer/Footer.tsx",
+    "i18n/uk/auth.ts",
+    "pages/LoginPage/LoginPage.module.css"
+  ],
+  "components/BoilerProposalCard/BoilerProposalCard.module.css": [],
+  "components/BoilerProposalCard/BoilerProposalCard.tsx": [
+    "components/BoilerProposalCard/BoilerProposalCard.module.css",
+    "utils/format.ts"
+  ],
+  "components/BoilerReport/BoilerReportDialog.module.css": [],
+  "components/BoilerReport/BoilerReportDialog.tsx": [
+    "components/BoilerReport/BoilerReportDialog.module.css",
+    "components/BoilerReport/BoilerReportView.tsx",
+    "components/BoilerReport/hasBoilerReportContent.ts",
+    "types/envelope.ts",
+    "utils/parsers/parseBoilerFromReport.ts"
+  ],
+  "components/BoilerReport/BoilerReportView.module.css": [],
+  "components/BoilerReport/BoilerReportView.tsx": [
+    "components/BoilerProposalCard/BoilerProposalCard.tsx",
+    "components/BoilerReport/BoilerReportView.module.css",
+    "types/envelope.ts",
+    "utils/boilerUiLabels.ts",
+    "utils/format.ts",
+    "utils/parsers/parseBoilerFromReport.ts"
+  ],
+  "components/BoilerReport/BoilerSummaryTable.module.css": [],
+  "components/BoilerReport/BoilerSummaryTable.tsx": [
+    "components/BoilerReport/BoilerSummaryTable.module.css",
+    "components/BoilerReport/formatBoilerProposalShortLabel.ts",
+    "components/BoilerReport/hasBoilerReportContent.ts",
+    "components/SurveyNavigation/SurveyStepLink.tsx",
+    "constants/surveyResultsSections.ts",
+    "types/envelope.ts",
+    "utils/boilerUiLabels.ts",
+    "utils/format.ts",
+    "utils/parsers/parseBoilerFromReport.ts"
+  ],
+  "components/BoilerReport/formatBoilerProposalShortLabel.ts": [
+    "components/BoilerProposalCard/BoilerProposalCard.tsx",
+    "utils/format.ts"
+  ],
+  "components/BoilerReport/hasBoilerReportContent.ts": [
+    "utils/parsers/parseBoilerFromReport.ts"
+  ],
+  "components/BoilerSurveyForm/BoilerSurveyForm.module.css": [],
+  "components/BoilerSurveyForm/BoilerSurveyForm.tsx": [
+    "components/BoilerReport/BoilerReportDialog.tsx",
+    "components/BoilerReport/hasBoilerReportContent.ts",
+    "components/BoilerSurveyForm/BoilerSurveyForm.module.css",
+    "components/SurveyNavigation/SurveyReportActions.module.css",
+    "types/envelope.ts",
+    "types/heatingThermalRegime.ts",
+    "utils/parsers/parseBoilerFromReport.ts"
+  ],
+  "components/BootstrapErrorScreen/BootstrapErrorScreen.module.css": [],
+  "components/BootstrapErrorScreen/BootstrapErrorScreen.tsx": [
+    "components/BootstrapErrorScreen/BootstrapErrorScreen.module.css"
+  ],
+  "components/CatalogEquipmentReference/CatalogEquipmentReference.module.css": [],
+  "components/CatalogEquipmentReference/CatalogEquipmentReference.tsx": [
+    "components/CatalogEquipmentReference/CatalogEquipmentReference.module.css",
+    "services/catalog.ts",
+    "utils/formatCatalogDimensions.ts",
+    "utils/manifoldApplicationLabel.ts"
+  ],
+  "components/ClerkAuthLoadingFallback/ClerkAuthLoadingFallback.module.css": [],
+  "components/ClerkAuthLoadingFallback/ClerkAuthLoadingFallback.tsx": [
+    "components/ClerkAuthLoadingFallback/ClerkAuthLoadingFallback.module.css",
+    "components/Spinner/Spinner.tsx"
+  ],
+  "components/ClerkAuthWidget/ClerkAuthWidget.module.css": [],
+  "components/ClerkAuthWidget/ClerkAuthWidget.tsx": [
+    "components/ClerkAuthWidget/ClerkAuthWidget.module.css"
+  ],
+  "components/ContactModal/ContactModal.tsx": [
+    "components/ModalDialog/ModalDialog.module.css",
+    "components/ModalDialog/ModalDialog.tsx",
+    "i18n/uk/modals.ts",
+    "services/feedbackApi.ts"
+  ],
+  "components/CookieConsentBanner/CookieConsentBanner.module.css": [],
+  "components/CookieConsentBanner/CookieConsentBanner.tsx": [
+    "auth/authConfig.ts",
+    "components/CookieConsentBanner/CookieConsentBanner.module.css",
+    "i18n/uk/cookieConsent.ts",
+    "routing/paths.ts"
+  ],
+  "components/DevPanel/DevPanel.module.css": [],
+  "components/DevPanel/DevPanel.tsx": [
+    "components/DevPanel/DevPanel.module.css"
+  ],
+  "components/DevToolsDock/DevToolsDock.module.css": [],
+  "components/DevToolsDock/DevToolsDock.tsx": [
+    "components/DevToolsDock/DevToolsDock.module.css"
+  ],
+  "components/FinancialSummary/FinancialSummaryTable.module.css": [],
+  "components/FinancialSummary/FinancialSummaryTable.tsx": [
+    "components/FinancialSummary/FinancialSummaryTable.module.css",
+    "utils/parsers/parseCommercialBomFromReport.ts"
+  ],
+  "components/Footer/Footer.module.css": [],
+  "components/Footer/Footer.tsx": [
+    "components/Footer/Footer.module.css",
+    "components/Footer/FooterLinkGroup.tsx",
+    "components/Logo/Logo.tsx",
+    "constants/footerNav.ts",
+    "constants/siteEnv.ts",
+    "i18n/uk/brand.ts",
+    "i18n/uk/footer.ts",
+    "routing/paths.ts",
+    "shell/appChromeContext.ts",
+    "shell/useAppChrome.ts"
+  ],
+  "components/Footer/FooterLinkGroup.tsx": [
+    "components/Footer/Footer.module.css",
+    "constants/footerNav.ts",
+    "constants/siteEnv.ts",
+    "i18n/uk/footer.ts",
+    "routing/paths.ts",
+    "shell/useAppChrome.ts"
+  ],
+  "components/Header/Header.module.css": [],
+  "components/Header/Header.tsx": [
+    "components/Header/Header.module.css",
+    "components/ShareLinkToast/ShareLinkToast.tsx",
+    "i18n/uk/brand.ts",
+    "i18n/uk/header.ts",
+    "query/queries/useMeQuery.ts"
+  ],
+  "components/HeatLossReport/HeatLossSummaryTable.module.css": [],
+  "components/HeatLossReport/HeatLossSummaryTable.tsx": [
+    "components/HeatLossReport/HeatLossSummaryTable.module.css",
+    "constants/surveyResultsSections.ts",
+    "types/recommendationsBlock.ts",
+    "utils/format.ts"
+  ],
+  "components/HotWaterForm/HotWaterForm.module.css": [],
+  "components/HotWaterForm/HotWaterForm.tsx": [
+    "components/HotWaterForm/HotWaterForm.module.css",
+    "components/HotWaterReport/HotWaterReportDialog.tsx",
+    "components/HotWaterReport/hasHotWaterReportContent.ts",
+    "components/SurveyNavigation/SurveyReportActions.module.css",
+    "types/hotWater.ts",
+    "types/hotWaterReport.ts",
+    "utils/countThermalFixtures.ts"
+  ],
+  "components/HotWaterReport/HotWaterFixturesSummaryTable.module.css": [],
+  "components/HotWaterReport/HotWaterFixturesSummaryTable.tsx": [
+    "components/HotWaterReport/HotWaterFixturesSummaryTable.module.css",
+    "components/HotWaterReport/HotWaterFixturesTable.tsx",
+    "components/SurveyNavigation/SurveyStepLink.tsx",
+    "constants/surveyResultsSections.ts",
+    "types/hotWater.ts",
+    "utils/countThermalFixtures.ts"
+  ],
+  "components/HotWaterReport/HotWaterFixturesTable.module.css": [],
+  "components/HotWaterReport/HotWaterFixturesTable.tsx": [
+    "components/HotWaterReport/HotWaterFixturesTable.module.css",
+    "types/hotWater.ts",
+    "utils/countThermalFixtures.ts",
+    "utils/normalizeHotWaterForm.ts"
+  ],
+  "components/HotWaterReport/HotWaterReportDialog.module.css": [],
+  "components/HotWaterReport/HotWaterReportDialog.tsx": [
+    "components/HotWaterReport/HotWaterReportDialog.module.css",
+    "components/HotWaterReport/HotWaterReportView.tsx",
+    "components/HotWaterReport/hasHotWaterReportContent.ts",
+    "types/hotWater.ts",
+    "types/hotWaterReport.ts",
+    "utils/countThermalFixtures.ts",
+    "utils/normalizeHotWaterForm.ts"
+  ],
+  "components/HotWaterReport/HotWaterReportView.module.css": [],
+  "components/HotWaterReport/HotWaterReportView.tsx": [
+    "components/HotWaterReport/HotWaterFixturesTable.tsx",
+    "components/HotWaterReport/HotWaterReportView.module.css",
+    "types/hotWater.ts",
+    "types/hotWaterReport.ts",
+    "utils/countThermalFixtures.ts",
+    "utils/format.ts",
+    "utils/normalizeHotWaterForm.ts"
+  ],
+  "components/HotWaterReport/HotWaterSummaryTable.module.css": [],
+  "components/HotWaterReport/HotWaterSummaryTable.tsx": [
+    "components/HotWaterReport/HotWaterSummaryTable.module.css",
+    "components/HotWaterReport/hasHotWaterSummaryContent.ts",
+    "components/SurveyNavigation/SurveyStepLink.tsx",
+    "constants/surveyResultsSections.ts",
+    "types/heatingMatching.ts",
+    "types/hotWaterReport.ts",
+    "utils/hotWaterEquipmentParticipation.ts",
+    "utils/parsers/parseIndirectWaterHeaterMatchingFromReport.ts",
+    "utils/parsers/parseWaterHeaterMatchingFromReport.ts"
+  ],
+  "components/HotWaterReport/hasHotWaterReportContent.ts": [
+    "types/hotWaterReport.ts"
+  ],
+  "components/HotWaterReport/hasHotWaterSummaryContent.ts": [
+    "types/hotWaterReport.ts",
+    "utils/parsers/parseIndirectWaterHeaterMatchingFromReport.ts",
+    "utils/parsers/parseWaterHeaterMatchingFromReport.ts"
+  ],
+  "components/Hydraulics/HydraulicsPumpCard.module.css": [],
+  "components/Hydraulics/HydraulicsPumpCard.tsx": [
+    "components/Hydraulics/HydraulicsPumpCard.module.css",
+    "types/hydraulics.ts",
+    "utils/format.ts"
+  ],
+  "components/HydraulicsReport/HydraulicsProposalTable.module.css": [],
+  "components/HydraulicsReport/HydraulicsProposalTable.tsx": [
+    "components/HydraulicsReport/HydraulicsProposalTable.module.css",
+    "components/HydraulicsReport/hasHydraulicsReportContent.ts",
+    "types/hydraulics.ts",
+    "utils/format.ts"
+  ],
+  "components/HydraulicsReport/HydraulicsReportDialog.module.css": [],
+  "components/HydraulicsReport/HydraulicsReportDialog.tsx": [
+    "components/HydraulicsReport/HydraulicsReportDialog.module.css",
+    "components/HydraulicsReport/HydraulicsReportView.tsx",
+    "components/HydraulicsReport/hasHydraulicsReportContent.ts",
+    "types/hydraulics.ts"
+  ],
+  "components/HydraulicsReport/HydraulicsReportView.module.css": [],
+  "components/HydraulicsReport/HydraulicsReportView.tsx": [
+    "components/Hydraulics/HydraulicsPumpCard.tsx",
+    "components/HydraulicsReport/HydraulicsReportView.module.css",
+    "types/hydraulics.ts",
+    "utils/format.ts",
+    "utils/ufhHydraulicsPumps.ts"
+  ],
+  "components/HydraulicsReport/HydraulicsSummaryTable.module.css": [],
+  "components/HydraulicsReport/HydraulicsSummaryTable.tsx": [
+    "components/HydraulicsReport/HydraulicsSummaryTable.module.css",
+    "components/HydraulicsReport/hasHydraulicsReportContent.ts",
+    "components/SurveyNavigation/SurveyStepLink.tsx",
+    "constants/surveyResultsSections.ts",
+    "types/hydraulics.ts",
+    "utils/format.ts",
+    "utils/sumHydraulicsPipeLengthsByRole.ts",
+    "utils/ufhHydraulicsPumps.ts"
+  ],
+  "components/HydraulicsReport/hasHydraulicsReportContent.ts": [
+    "types/hydraulics.ts"
+  ],
+  "components/HydraulicsSection/HydraulicsSection.module.css": [],
+  "components/HydraulicsSection/HydraulicsSection.tsx": [
+    "components/HydraulicsReport/HydraulicsReportDialog.tsx",
+    "components/HydraulicsReport/hasHydraulicsReportContent.ts",
+    "components/HydraulicsSection/HydraulicsSection.module.css",
+    "components/SurveyNavigation/SurveyReportActions.module.css",
+    "surveySession/wiringLayoutV3.ts",
+    "types/hydraulics.ts",
+    "types/rooms.ts",
+    "utils/wiringSystemTypeLabels.ts"
+  ],
+  "components/Logo/Logo.module.css": [],
+  "components/Logo/Logo.tsx": [
+    "components/Logo/Logo.module.css"
+  ],
+  "components/ModalDialog/ModalDialog.module.css": [],
+  "components/ModalDialog/ModalDialog.tsx": [
+    "components/ModalDialog/ModalDialog.module.css"
+  ],
+  "components/ModalHost/ModalHost.tsx": [
+    "components/ContactModal/ContactModal.tsx",
+    "components/ReportBugModal/ReportBugModal.tsx",
+    "shell/useAppChrome.ts"
+  ],
+  "components/ObjectMetaForm/ObjectMetaForm.module.css": [],
+  "components/ObjectMetaForm/ObjectMetaForm.tsx": [
+    "components/ObjectMetaForm/ObjectMetaForm.module.css",
+    "data/fallbackEnvelopePresets.ts",
+    "types/envelope.ts",
+    "utils/presetLabel.ts"
+  ],
+  "components/ProjectTransferDialog/ProjectTransferDialog.module.css": [],
+  "components/ProjectTransferDialog/ProjectTransferDialog.tsx": [
+    "components/ProjectTransferDialog/ProjectTransferDialog.module.css",
+    "i18n/uk/projects.ts",
+    "types/projectsApi.ts"
+  ],
+  "components/ProjectsDialog/ProjectsDialog.module.css": [],
+  "components/ProjectsDialog/ProjectsDialog.tsx": [
+    "components/ProjectsDialog/ProjectsDialog.module.css",
+    "types/projectsApi.ts"
+  ],
+  "components/PublisherContactBlock/PublisherContactBlock.module.css": [],
+  "components/PublisherContactBlock/PublisherContactBlock.tsx": [
+    "components/PublisherContactBlock/PublisherContactBlock.module.css",
+    "i18n/uk/header.ts",
+    "types/projectsApi.ts"
+  ],
+  "components/RadiatorProposalLineTable/RadiatorProposalLineTable.module.css": [],
+  "components/RadiatorProposalLineTable/RadiatorProposalLineTable.tsx": [
+    "components/RadiatorProposalLineTable/RadiatorProposalLineTable.module.css",
+    "utils/parsers/parseRadiatorsMatchingFromReport.ts"
+  ],
+  "components/RadiatorsReport/RadiatorsReportDialog.module.css": [],
+  "components/RadiatorsReport/RadiatorsReportDialog.tsx": [
+    "components/RadiatorsReport/RadiatorsReportDialog.module.css",
+    "components/RadiatorsReport/RadiatorsReportView.tsx",
+    "components/RadiatorsReport/hasRadiatorsReportContent.ts",
+    "utils/parsers/parseRadiatorsMatchingFromReport.ts"
+  ],
+  "components/RadiatorsReport/RadiatorsReportView.module.css": [],
+  "components/RadiatorsReport/RadiatorsReportView.tsx": [
+    "components/RadiatorProposalLineTable/RadiatorProposalLineTable.tsx",
+    "components/RadiatorsReport/RadiatorsReportView.module.css",
+    "utils/parsers/parseRadiatorsMatchingFromReport.ts"
+  ],
+  "components/RadiatorsReport/RadiatorsSummaryTable.module.css": [],
+  "components/RadiatorsReport/RadiatorsSummaryTable.tsx": [
+    "components/RadiatorsReport/RadiatorsSummaryTable.module.css",
+    "components/RadiatorsReport/hasRadiatorsReportContent.ts",
+    "components/SurveyNavigation/SurveyStepLink.tsx",
+    "constants/surveyResultsSections.ts",
+    "utils/parsers/parseRadiatorsMatchingFromReport.ts",
+    "utils/radiatorsSkip.ts"
+  ],
+  "components/RadiatorsReport/hasRadiatorsReportContent.ts": [
+    "utils/parsers/parseRadiatorsMatchingFromReport.ts",
+    "utils/radiatorsSkip.ts"
+  ],
+  "components/RadiatorsSurveyForm/RadiatorsSurveyForm.module.css": [],
+  "components/RadiatorsSurveyForm/RadiatorsSurveyForm.tsx": [
+    "components/RadiatorsReport/RadiatorsReportDialog.tsx",
+    "components/RadiatorsReport/hasRadiatorsReportContent.ts",
+    "components/RadiatorsSurveyForm/RadiatorsSurveyForm.module.css",
+    "components/SurveyNavigation/SurveyReportActions.module.css",
+    "types/radiatorConnection.ts",
+    "types/radiatorEmitterPreference.ts",
+    "utils/parsers/parseRadiatorsMatchingFromReport.ts"
+  ],
+  "components/RecommendationsBlock/RecommendationsBlock.module.css": [],
+  "components/RecommendationsBlock/RecommendationsBlock.tsx": [
+    "components/BoilerProposalCard/BoilerProposalCard.tsx",
+    "components/BoilerReport/BoilerSummaryTable.tsx",
+    "components/BoilerReport/hasBoilerReportContent.ts",
+    "components/HeatLossReport/HeatLossSummaryTable.tsx",
+    "components/HotWaterReport/HotWaterFixturesSummaryTable.tsx",
+    "components/HotWaterReport/HotWaterSummaryTable.tsx",
+    "components/HotWaterReport/hasHotWaterSummaryContent.ts",
+    "components/HydraulicsReport/HydraulicsProposalTable.tsx",
+    "components/HydraulicsReport/HydraulicsSummaryTable.tsx",
+    "components/HydraulicsReport/hasHydraulicsReportContent.ts",
+    "components/RadiatorProposalLineTable/RadiatorProposalLineTable.tsx",
+    "components/RadiatorsReport/RadiatorsSummaryTable.tsx",
+    "components/RadiatorsReport/hasRadiatorsReportContent.ts",
+    "components/RecommendationsBlock/RecommendationsBlock.module.css",
+    "components/UnderfloorHeatingReport/UnderfloorHeatingSummaryTable.tsx",
+    "constants/surveySteps.ts",
+    "types/heatingMatching.ts",
+    "types/recommendationsBlock.ts",
+    "utils/boilerUiLabels.ts",
+    "utils/countThermalFixtures.ts",
+    "utils/radiatorsSkip.ts"
+  ],
+  "components/ReportBugModal/ReportBugModal.tsx": [
+    "components/ModalDialog/ModalDialog.module.css",
+    "components/ModalDialog/ModalDialog.tsx",
+    "i18n/uk/modals.ts",
+    "services/feedbackApi.ts"
+  ],
+  "components/RoomsForm/RoomAccordionItem.module.css": [],
+  "components/RoomsForm/RoomAccordionItem.tsx": [
+    "components/RoomsForm/RoomAccordionItem.module.css",
+    "constants/roomTypes.ts",
+    "data/fallbackEnvelopePresets.ts",
+    "data/fallbackFlooringFinishes.ts",
+    "data/fallbackUnderfloorHeatingPresets.ts",
+    "types/envelope.ts",
+    "types/rooms.ts",
+    "types/underfloorHeating.ts",
+    "utils/presetLabel.ts",
+    "utils/roomEnvelopeFields.ts",
+    "utils/roomExteriorLayout.ts",
+    "utils/roomWindowDefaults.ts",
+    "utils/underfloorPresetLabel.ts"
+  ],
+  "components/RoomsForm/RoomsForm.module.css": [],
+  "components/RoomsForm/RoomsForm.tsx": [
+    "components/RoomsForm/RoomAccordionItem.tsx",
+    "components/RoomsForm/RoomsForm.module.css",
+    "types/envelope.ts",
+    "types/rooms.ts",
+    "types/underfloorHeating.ts",
+    "utils/externalWallsSummary.ts"
+  ],
+  "components/ShareLinkToast/ShareLinkToast.module.css": [],
+  "components/ShareLinkToast/ShareLinkToast.tsx": [
+    "components/ShareLinkToast/ShareLinkToast.module.css"
+  ],
+  "components/SharePresentationPage/SharePresentationPage.module.css": [],
+  "components/SharePresentationPage/SharePresentationPage.tsx": [
+    "components/FinancialSummary/FinancialSummaryTable.tsx",
+    "components/Footer/Footer.tsx",
+    "components/Logo/Logo.tsx",
+    "components/PublisherContactBlock/PublisherContactBlock.tsx",
+    "components/SharePresentationPage/SharePresentationPage.module.css",
+    "i18n/uk/brand.ts",
+    "services/publicShareApi.ts",
+    "types/projectsApi.ts",
+    "utils/buildTechnicalPrintHtml.ts",
+    "utils/format.ts",
+    "utils/jsonGuards.ts",
+    "utils/parsers/parseCommercialBomFromReport.ts"
+  ],
+  "components/Spinner/Spinner.module.css": [],
+  "components/Spinner/Spinner.tsx": [
+    "components/Spinner/Spinner.module.css"
+  ],
+  "components/StartScreen/StartScreen.module.css": [],
+  "components/StartScreen/StartScreen.tsx": [
+    "components/Footer/Footer.tsx",
+    "components/Logo/Logo.tsx",
+    "components/StartScreen/StartScreen.module.css",
+    "i18n/uk/startScreen.ts"
+  ],
+  "components/StaticPageLayout/StaticPageLayout.module.css": [],
+  "components/StaticPageLayout/StaticPageLayout.tsx": [
+    "components/Footer/Footer.tsx",
+    "components/StaticPageLayout/StaticPageLayout.module.css",
+    "i18n/uk/footer.ts",
+    "routing/paths.ts",
+    "shell/appChromeContext.ts"
+  ],
+  "components/SubscriptionTierBadge/SubscriptionTierBadge.module.css": [],
+  "components/SubscriptionTierBadge/SubscriptionTierBadge.tsx": [
+    "components/SubscriptionTierBadge/SubscriptionTierBadge.module.css",
+    "i18n/uk/auth.ts",
+    "types/meApi.ts"
+  ],
+  "components/SurveyNavigation/SurveyReportActions.module.css": [],
+  "components/SurveyNavigation/SurveyStepLink.module.css": [],
+  "components/SurveyNavigation/SurveyStepLink.tsx": [
+    "components/SurveyNavigation/SurveyStepLink.module.css",
+    "constants/surveySteps.ts",
+    "types/surveyStep.ts"
+  ],
+  "components/UfhPresetCards/UfhPresetCards.module.css": [],
+  "components/UfhPresetCards/UfhPresetCards.tsx": [
+    "components/UfhPresetCards/UfhPresetCards.module.css",
+    "types/ufhModePreset.ts",
+    "utils/ufhPresetCardsForUi.ts"
+  ],
+  "components/UnderfloorHeatingReport/UfhLoopHydraulicsTable.module.css": [],
+  "components/UnderfloorHeatingReport/UfhLoopHydraulicsTable.tsx": [
+    "components/UnderfloorHeatingReport/UfhLoopHydraulicsTable.module.css",
+    "types/underfloorHeating.ts",
+    "utils/ufhWarningDisplay.ts"
+  ],
+  "components/UnderfloorHeatingReport/UfhMixingNodeSpecCard.module.css": [],
+  "components/UnderfloorHeatingReport/UfhMixingNodeSpecCard.tsx": [
+    "components/UnderfloorHeatingReport/UfhMixingNodeSpecCard.module.css",
+    "types/ufhDistribution.ts",
+    "types/underfloorHeating.ts"
+  ],
+  "components/UnderfloorHeatingReport/UfhWarningResolutionDialog.module.css": [],
+  "components/UnderfloorHeatingReport/UfhWarningResolutionDialog.tsx": [
+    "components/UnderfloorHeatingReport/UfhWarningResolutionDialog.module.css",
+    "types/underfloorHeating.ts"
+  ],
+  "components/UnderfloorHeatingReport/UnderfloorHeatingReportDialog.module.css": [],
+  "components/UnderfloorHeatingReport/UnderfloorHeatingReportDialog.tsx": [
+    "components/UnderfloorHeatingReport/UnderfloorHeatingReportDialog.module.css",
+    "components/UnderfloorHeatingReport/UnderfloorHeatingReportView.tsx",
+    "components/UnderfloorHeatingReport/UniboxMatchingSection.tsx",
+    "components/UnderfloorHeatingReport/hasUnderfloorHeatingReportContent.ts",
+    "types/hydraulics.ts",
+    "types/underfloorHeating.ts",
+    "utils/parsers/parseUniboxesMatchingFromReport.ts"
+  ],
+  "components/UnderfloorHeatingReport/UnderfloorHeatingReportView.module.css": [],
+  "components/UnderfloorHeatingReport/UnderfloorHeatingReportView.tsx": [
+    "components/Hydraulics/HydraulicsPumpCard.tsx",
+    "components/UnderfloorHeatingReport/UfhLoopHydraulicsTable.tsx",
+    "components/UnderfloorHeatingReport/UfhMixingNodeSpecCard.tsx",
+    "components/UnderfloorHeatingReport/UfhWarningResolutionDialog.tsx",
+    "components/UnderfloorHeatingReport/UnderfloorHeatingReportView.module.css",
+    "components/UnderfloorHeatingReport/UniboxMatchingSection.tsx",
+    "types/hydraulics.ts",
+    "types/underfloorHeating.ts",
+    "utils/format.ts",
+    "utils/parsers/parseUniboxesMatchingFromReport.ts",
+    "utils/ufhHydraulicsPumps.ts",
+    "utils/ufhWarningDisplay.ts"
+  ],
+  "components/UnderfloorHeatingReport/UnderfloorHeatingSummaryTable.module.css": [],
+  "components/UnderfloorHeatingReport/UnderfloorHeatingSummaryTable.tsx": [
+    "components/SurveyNavigation/SurveyStepLink.tsx",
+    "components/UnderfloorHeatingReport/UnderfloorHeatingSummaryTable.module.css",
+    "components/UnderfloorHeatingReport/hasUnderfloorHeatingReportContent.ts",
+    "constants/surveyResultsSections.ts",
+    "types/hydraulics.ts",
+    "types/underfloorHeating.ts",
+    "utils/format.ts",
+    "utils/parsers/parseUniboxesMatchingFromReport.ts",
+    "utils/ufhHydraulicsPumps.ts"
+  ],
+  "components/UnderfloorHeatingReport/UniboxMatchingSection.tsx": [
+    "components/CatalogEquipmentReference/CatalogEquipmentReference.module.css",
+    "utils/parsers/parseUniboxesMatchingFromReport.ts"
+  ],
+  "components/UnderfloorHeatingReport/hasUnderfloorHeatingReportContent.ts": [
+    "types/underfloorHeating.ts"
+  ],
+  "components/WarmFloorSection/UfhDistributionSelect.tsx": [
+    "../../shared/ufhDistributionPresets.d.ts",
+    "components/WarmFloorSection/WarmFloorSection.module.css",
+    "types/ufhDistribution.ts"
+  ],
+  "components/WarmFloorSection/WarmFloorSection.module.css": [],
+  "components/WarmFloorSection/WarmFloorSection.tsx": [
+    "components/SurveyNavigation/SurveyReportActions.module.css",
+    "components/UfhPresetCards/UfhPresetCards.tsx",
+    "components/UnderfloorHeatingReport/UnderfloorHeatingReportDialog.tsx",
+    "components/UnderfloorHeatingReport/hasUnderfloorHeatingReportContent.ts",
+    "components/WarmFloorSection/UfhDistributionSelect.tsx",
+    "components/WarmFloorSection/WarmFloorSection.module.css",
+    "types/hydraulics.ts",
+    "types/ufhDistribution.ts",
+    "types/ufhModePreset.ts",
+    "types/underfloorHeating.ts",
+    "utils/parsers/parseUniboxesMatchingFromReport.ts"
+  ],
+  "components/WaterHeaterForm/WaterHeaterForm.module.css": [],
+  "components/WaterHeaterForm/WaterHeaterForm.tsx": [
+    "../../shared/waterHeaterFormContract.d.ts",
+    "components/SurveyNavigation/SurveyReportActions.module.css",
+    "components/WaterHeaterForm/WaterHeaterForm.module.css",
+    "components/WaterHeaterReport/WaterHeaterReportDialog.tsx",
+    "components/WaterHeaterReport/hasWaterHeaterReportContent.ts",
+    "types/envelope.ts",
+    "types/heatingMatching.ts",
+    "types/hotWater.ts",
+    "types/waterHeater.ts",
+    "utils/parsers/parseIndirectWaterHeaterMatchingFromReport.ts",
+    "utils/parsers/parseWaterHeaterMatchingFromReport.ts",
+    "utils/validateWaterHeaterForm.ts",
+    "utils/waterHeaterSchemeOptions.ts"
+  ],
+  "components/WaterHeaterMatchingPreview/WaterHeaterMatchingPreview.module.css": [],
+  "components/WaterHeaterMatchingPreview/WaterHeaterMatchingPreview.tsx": [
+    "components/WaterHeaterMatchingPreview/WaterHeaterMatchingPreview.module.css",
+    "components/WaterHeaterProposalCard/WaterHeaterProposalCard.tsx",
+    "types/waterHeaterMatching.ts",
+    "utils/parsers/parseIndirectWaterHeaterMatchingFromReport.ts",
+    "utils/parsers/parseWaterHeaterMatchingFromReport.ts"
+  ],
+  "components/WaterHeaterProposalCard/WaterHeaterProposalCard.module.css": [],
+  "components/WaterHeaterProposalCard/WaterHeaterProposalCard.tsx": [
+    "components/WaterHeaterProposalCard/WaterHeaterProposalCard.module.css",
+    "types/waterHeaterMatching.ts",
+    "utils/format.ts"
+  ],
+  "components/WaterHeaterReport/WaterHeaterReportDialog.module.css": [],
+  "components/WaterHeaterReport/WaterHeaterReportDialog.tsx": [
+    "components/WaterHeaterReport/WaterHeaterReportDialog.module.css",
+    "components/WaterHeaterReport/WaterHeaterReportView.tsx",
+    "components/WaterHeaterReport/hasWaterHeaterReportContent.ts",
+    "utils/parsers/parseIndirectWaterHeaterMatchingFromReport.ts",
+    "utils/parsers/parseWaterHeaterMatchingFromReport.ts"
+  ],
+  "components/WaterHeaterReport/WaterHeaterReportView.tsx": [
+    "components/WaterHeaterMatchingPreview/WaterHeaterMatchingPreview.tsx",
+    "utils/parsers/parseIndirectWaterHeaterMatchingFromReport.ts",
+    "utils/parsers/parseWaterHeaterMatchingFromReport.ts"
+  ],
+  "components/WaterHeaterReport/hasWaterHeaterReportContent.ts": [
+    "utils/parsers/parseIndirectWaterHeaterMatchingFromReport.ts",
+    "utils/parsers/parseWaterHeaterMatchingFromReport.ts"
+  ],
+  "constants/compatLegacyIds.ts": [],
+  "constants/footerNav.ts": [
+    "i18n/uk/footer.ts",
+    "routing/paths.ts"
+  ],
+  "constants/roomTypes.ts": [
+    "../../shared/roomTypeNormalization.d.ts",
+    "types/rooms.ts"
+  ],
+  "constants/siteEnv.ts": [],
+  "constants/surveyResultsSections.ts": [],
+  "constants/surveySteps.ts": [
+    "types/surveyStep.ts"
+  ],
+  "data/fallbackEnvelopePresets.ts": [
+    "constants/compatLegacyIds.ts",
+    "types/envelope.ts"
+  ],
+  "data/fallbackFlooringFinishes.ts": [
+    "types/underfloorHeating.ts"
+  ],
+  "data/fallbackUfhModePresets.ts": [
+    "types/ufhModePreset.ts"
+  ],
+  "data/fallbackUnderfloorHeatingPresets.ts": [
+    "types/underfloorHeating.ts"
+  ],
+  "hooks/useAdminFeedbackStream.ts": [
+    "i18n/uk/adminFeedback.ts",
+    "query/queryKeys.ts",
+    "services/adminFeedbackApi.ts",
+    "services/adminFeedbackStream.ts"
+  ],
+  "hooks/useCalcReport.ts": [
+    "types/calcApi.ts",
+    "types/heatingMatching.ts",
+    "types/recommendationsBlock.ts",
+    "types/ufhModePreset.ts",
+    "utils/calculators/heatLoss.ts",
+    "utils/jsonGuards.ts",
+    "utils/parsers/parseBoilerFromReport.ts",
+    "utils/parsers/parseCommercialBomFromReport.ts",
+    "utils/parsers/parseHotWaterFromReport.ts",
+    "utils/parsers/parseHydraulicsFromReport.ts",
+    "utils/parsers/parseIndirectWaterHeaterMatchingFromReport.ts",
+    "utils/parsers/parseRadiatorsMatchingFromReport.ts",
+    "utils/parsers/parseUnderfloorHeatingFromReport.ts",
+    "utils/parsers/parseUniboxesMatchingFromReport.ts",
+    "utils/parsers/parseWaterHeaterMatchingFromReport.ts",
+    "utils/radiatorsSkip.ts"
+  ],
+  "hooks/useDevPanelAccess.ts": [
+    "auth/useAuth.ts",
+    "query/queries/useMeQuery.ts",
+    "utils/isDevToolsEnabled.ts"
+  ],
+  "hooks/usePresetLists.ts": [
+    "data/fallbackEnvelopePresets.ts",
+    "types/envelope.ts",
+    "utils/envelopePresetKind.ts"
+  ],
+  "hooks/useProjectBundleTransfer.ts": [
+    "types/surveyDraft.ts",
+    "utils/parsers/parseSurveyDraft.ts",
+    "utils/projectBundleTransfer.ts"
+  ],
+  "hooks/useRoomsOrchestration.ts": [
+    "data/fallbackEnvelopePresets.ts",
+    "types/envelope.ts",
+    "types/rooms.ts",
+    "utils/apartmentStackBoundaries.ts",
+    "utils/migrateLegacyExternalWalls.ts",
+    "utils/roomEnvelopeFields.ts",
+    "utils/roomExteriorLayout.ts",
+    "utils/roomWindowDefaults.ts"
+  ],
+  "hooks/useSurveyBootstrap.ts": [
+    "services/surveyDraftStorage.ts",
+    "surveySession/resolveAppBootstrap.ts",
+    "surveySession/surveyDraftBridge.ts",
+    "surveySession/types.ts",
+    "types/surveyDraft.ts"
+  ],
+  "hooks/useSurveyDraftPersistence.ts": [
+    "services/surveyDraftStorage.ts",
+    "surveySession/types.ts",
+    "utils/buildSurveyDraft.ts"
+  ],
+  "hooks/useSurveyEstimates.ts": [
+    "types/rooms.ts",
+    "utils/calculators/heatLoss.ts"
+  ],
+  "hooks/useSurveyProject.ts": [
+    "hooks/useProjectBundleTransfer.ts",
+    "query/mutations/useProjectMutations.ts",
+    "query/queries/useProjectCalculationsQuery.ts",
+    "query/queries/useProjectsListQuery.ts",
+    "services/projectsApi.ts",
+    "services/surveyDraftStorage.ts",
+    "surveySession/types.ts",
+    "types/calcApi.ts",
+    "types/surveyDraft.ts",
+    "utils/buildSurveyDraft.ts",
+    "utils/fileDownload.ts",
+    "utils/parsers/parseCommercialBomFromReport.ts",
+    "utils/parsers/parseSharePath.ts",
+    "utils/surveyShare.ts"
+  ],
+  "hooks/useSurveyStepNavigation.ts": [
+    "constants/surveyResultsSections.ts",
+    "types/surveyStep.ts"
+  ],
+  "i18n/clerkAppearance.ts": [],
+  "i18n/clerkUkLocalization.ts": [],
+  "i18n/uk/adminFeedback.ts": [],
+  "i18n/uk/auth.ts": [],
+  "i18n/uk/brand.ts": [],
+  "i18n/uk/cookieConsent.ts": [],
+  "i18n/uk/footer.ts": [],
+  "i18n/uk/header.ts": [],
+  "i18n/uk/modals.ts": [],
+  "i18n/uk/projects.ts": [],
+  "i18n/uk/startScreen.ts": [],
+  "i18n/uk/staticPages.ts": [],
+  "index.css": [],
+  "main.tsx": [
+    "App.tsx",
+    "index.css",
+    "query/QueryProvider.tsx",
+    "styles/containers.css",
+    "styles/formElements.css",
+    "utils/staticAppShellTransition.ts"
+  ],
+  "pages/AdminFeedbackPage/AdminFeedbackPage.module.css": [],
+  "pages/AdminFeedbackPage/AdminFeedbackPage.tsx": [
+    "components/AccountBar/AccountBar.tsx",
+    "components/Footer/Footer.tsx",
+    "hooks/useAdminFeedbackStream.ts",
+    "i18n/uk/adminFeedback.ts",
+    "pages/AdminFeedbackPage/AdminFeedbackPage.module.css",
+    "query/mutations/useAdminFeedbackStatusMutation.ts",
+    "query/queries/useAdminFeedbackQuery.ts",
+    "routing/paths.ts",
+    "services/parseAdminFeedback.ts",
+    "types/adminFeedback.ts"
+  ],
+  "pages/DocsPage/DocsPage.tsx": [
+    "components/StaticPageLayout/StaticPageLayout.module.css",
+    "components/StaticPageLayout/StaticPageLayout.tsx",
+    "i18n/uk/staticPages.ts"
+  ],
+  "pages/FaqPage/FaqPage.tsx": [
+    "components/StaticPageLayout/StaticPageLayout.module.css",
+    "components/StaticPageLayout/StaticPageLayout.tsx",
+    "i18n/uk/staticPages.ts"
+  ],
+  "pages/LegalPage/LegalPage.tsx": [
+    "components/StaticPageLayout/StaticPageLayout.module.css",
+    "components/StaticPageLayout/StaticPageLayout.tsx",
+    "i18n/uk/staticPages.ts"
+  ],
+  "pages/LoginPage/LoginPage.module.css": [],
+  "pages/LoginPage/LoginPage.tsx": [
+    "auth/authConfig.ts",
+    "auth/useAuth.ts",
+    "auth/useAuthRedirectAfterClerk.ts",
+    "components/AuthRedirectShell/AuthRedirectShell.tsx",
+    "components/ClerkAuthWidget/ClerkAuthWidget.tsx",
+    "components/Footer/Footer.tsx",
+    "i18n/uk/auth.ts",
+    "i18n/uk/footer.ts",
+    "pages/LoginPage/LoginPage.module.css",
+    "routing/paths.ts"
+  ],
+  "pages/ProjectsPage/ProjectsPage.module.css": [],
+  "pages/ProjectsPage/ProjectsPage.tsx": [
+    "components/AccountBar/AccountBar.tsx",
+    "components/Footer/Footer.tsx",
+    "components/ProjectTransferDialog/ProjectTransferDialog.tsx",
+    "hooks/useProjectBundleTransfer.ts",
+    "i18n/uk/projects.ts",
+    "pages/ProjectsPage/ProjectsPage.module.css",
+    "query/queries/useMeQuery.ts",
+    "query/queries/useProjectsListQuery.ts",
+    "routing/paths.ts",
+    "utils/isDevToolsEnabled.ts",
+    "utils/pendingProjectNavigation.ts"
+  ],
+  "pages/SignUpPage/SignUpPage.tsx": [
+    "auth/useAuthRedirectAfterClerk.ts",
+    "components/AuthRedirectShell/AuthRedirectShell.tsx",
+    "components/ClerkAuthWidget/ClerkAuthWidget.tsx",
+    "components/Footer/Footer.tsx",
+    "i18n/uk/auth.ts",
+    "i18n/uk/footer.ts",
+    "pages/LoginPage/LoginPage.module.css",
+    "routing/paths.ts"
+  ],
+  "query/QueryProvider.tsx": [
+    "query/queryClient.ts"
+  ],
+  "query/mutations/useAdminFeedbackStatusMutation.ts": [
+    "query/queryKeys.ts",
+    "services/adminFeedbackApi.ts",
+    "types/adminFeedback.ts"
+  ],
+  "query/mutations/useProjectMutations.ts": [
+    "query/queryKeys.ts",
+    "services/projectsApi.ts",
+    "types/calcApi.ts",
+    "types/surveyDraft.ts",
+    "utils/parsers/parseSurveyDraft.ts"
+  ],
+  "query/queries/useAdminFeedbackQuery.ts": [
+    "query/queryKeys.ts",
+    "services/adminFeedbackApi.ts",
+    "types/adminFeedback.ts"
+  ],
+  "query/queries/useCatalogEquipmentQuery.ts": [
+    "query/queryKeys.ts",
+    "services/catalog.ts"
+  ],
+  "query/queries/useEnvelopePresetsQuery.ts": [
+    "query/queryClient.ts",
+    "query/queryKeys.ts",
+    "services/envelopePresets.ts",
+    "types/envelope.ts"
+  ],
+  "query/queries/useMeQuery.ts": [
+    "auth/useAuth.ts",
+    "query/queryKeys.ts",
+    "services/meApi.ts",
+    "types/meApi.ts"
+  ],
+  "query/queries/useProjectCalculationsQuery.ts": [
+    "query/queryKeys.ts",
+    "services/projectsApi.ts",
+    "types/projectsApi.ts"
+  ],
+  "query/queries/useProjectsListQuery.ts": [
+    "query/queryKeys.ts",
+    "services/projectsApi.ts",
+    "types/projectsApi.ts"
+  ],
+  "query/queries/useUfhModePresetsQuery.ts": [
+    "data/fallbackUfhModePresets.ts",
+    "query/queryClient.ts",
+    "query/queryKeys.ts",
+    "services/ufhModePresets.ts",
+    "types/ufhModePreset.ts",
+    "utils/ufhPresetCardsForUi.ts"
+  ],
+  "query/queries/useUnderfloorHeatingPresetsQuery.ts": [
+    "query/queryClient.ts",
+    "query/queryKeys.ts",
+    "services/underfloorHeatingPresets.ts",
+    "types/underfloorHeating.ts"
+  ],
+  "query/queryClient.ts": [],
+  "query/queryKeys.ts": [
+    "types/adminFeedback.ts"
+  ],
+  "query/useDebouncedValue.ts": [],
+  "query/useReferenceData.ts": [
+    "query/queries/useEnvelopePresetsQuery.ts",
+    "query/queries/useUfhModePresetsQuery.ts",
+    "query/queries/useUnderfloorHeatingPresetsQuery.ts"
+  ],
+  "query/useSurveyCalc.ts": [
+    "query/queryKeys.ts",
+    "query/useDebouncedValue.ts",
+    "services/calc.ts",
+    "types/calcApi.ts"
+  ],
+  "routing/AppRouter.tsx": [
+    "auth/AdminRoute.tsx",
+    "auth/ProtectedRoute.tsx",
+    "components/AppBootstrapSkeleton/AppBootstrapSkeleton.tsx",
+    "components/CookieConsentBanner/CookieConsentBanner.tsx",
+    "components/ModalHost/ModalHost.tsx",
+    "components/SharePresentationPage/SharePresentationPage.tsx",
+    "pages/AdminFeedbackPage/AdminFeedbackPage.tsx",
+    "pages/DocsPage/DocsPage.tsx",
+    "pages/FaqPage/FaqPage.tsx",
+    "pages/LegalPage/LegalPage.tsx",
+    "pages/LoginPage/LoginPage.tsx",
+    "pages/ProjectsPage/ProjectsPage.tsx",
+    "pages/SignUpPage/SignUpPage.tsx",
+    "routing/SurveyAppShell.tsx",
+    "routing/paths.ts",
+    "seo/JsonLdBoundary.tsx"
+  ],
+  "routing/SurveyAppShell.tsx": [
+    "AppRoot.tsx",
+    "components/AppErrorBoundary/AppErrorBoundary.tsx",
+    "hooks/usePresetLists.ts",
+    "query/useReferenceData.ts",
+    "routing/paths.ts",
+    "surveySession/SurveySessionProvider.tsx",
+    "surveySession/createEmptySurveySessionState.ts",
+    "surveySession/types.ts"
+  ],
+  "routing/paths.ts": [],
+  "seo/JsonLd.tsx": [],
+  "seo/JsonLdBoundary.tsx": [
+    "seo/JsonLd.tsx",
+    "seo/jsonLdSchemas.ts"
+  ],
+  "seo/jsonLdSchemas.ts": [
+    "constants/siteEnv.ts",
+    "i18n/uk/brand.ts",
+    "i18n/uk/startScreen.ts",
+    "i18n/uk/staticPages.ts"
+  ],
+  "services/adminFeedbackApi.ts": [
+    "services/parseAdminFeedback.ts",
+    "services/projectsAuthHeaders.ts",
+    "types/adminFeedback.ts",
+    "utils/apiError.ts",
+    "utils/apiUrl.ts"
+  ],
+  "services/adminFeedbackStream.ts": [
+    "services/adminFeedbackApi.ts",
+    "services/parseAdminFeedback.ts",
+    "services/projectsAuthHeaders.ts",
+    "types/adminFeedback.ts",
+    "utils/apiUrl.ts"
+  ],
+  "services/buildCalcRequestPayload.ts": [
+    "data/fallbackEnvelopePresets.ts",
+    "surveySession/wiringLayoutV3.ts",
+    "types/envelope.ts",
+    "types/heatingThermalRegime.ts",
+    "types/hotWater.ts",
+    "types/hydraulics.ts",
+    "types/radiatorConnection.ts",
+    "types/radiatorEmitterPreference.ts",
+    "types/rooms.ts",
+    "types/ufhDistribution.ts",
+    "types/ufhModePreset.ts",
+    "types/waterHeater.ts",
+    "utils/normalizeHotWaterForm.ts",
+    "utils/objectMetaForCalcPayload.ts",
+    "utils/roomExteriorLayout.ts"
+  ],
+  "services/calc.ts": [
+    "types/calcApi.ts",
+    "utils/apiUrl.ts",
+    "utils/jsonGuards.ts"
+  ],
+  "services/catalog.ts": [
+    "services/catalogTypes.ts",
+    "services/parseCatalogBoilers.ts",
+    "services/parseCatalogIndirectWaterHeaters.ts",
+    "services/parseCatalogManifolds.ts",
+    "services/parseCatalogUniboxes.ts",
+    "services/parseCatalogWaterHeaters.ts",
+    "utils/apiUrl.ts"
+  ],
+  "services/catalogTypes.ts": [],
+  "services/envelopePresets.ts": [
+    "data/fallbackEnvelopePresets.ts",
+    "types/envelope.ts",
+    "utils/apiUrl.ts",
+    "utils/envelopePresetKind.ts"
+  ],
+  "services/feedbackApi.ts": [
+    "services/projectsAuthHeaders.ts",
+    "utils/apiUrl.ts"
+  ],
+  "services/fetchProjectExportBundle.ts": [
+    "query/queryKeys.ts",
+    "services/projectsApi.ts",
+    "types/projectExport.ts",
+    "types/projectsApi.ts",
+    "types/surveyDraft.ts",
+    "utils/buildProjectExportBundle.ts"
+  ],
+  "services/meApi.ts": [
+    "services/parseMeResponse.ts",
+    "services/projectsAuthHeaders.ts",
+    "types/meApi.ts",
+    "utils/apiError.ts",
+    "utils/apiUrl.ts",
+    "utils/authApiError.ts"
+  ],
+  "services/parseAdminFeedback.ts": [
+    "types/adminFeedback.ts",
+    "utils/jsonGuards.ts"
+  ],
+  "services/parseCatalogBoilers.ts": [
+    "services/catalogTypes.ts"
+  ],
+  "services/parseCatalogIndirectWaterHeaters.ts": [
+    "services/catalogTypes.ts"
+  ],
+  "services/parseCatalogManifolds.ts": [
+    "services/catalogTypes.ts"
+  ],
+  "services/parseCatalogUniboxes.ts": [
+    "services/catalogTypes.ts"
+  ],
+  "services/parseCatalogWaterHeaters.ts": [
+    "services/catalogTypes.ts"
+  ],
+  "services/parseMeResponse.ts": [
+    "types/meApi.ts",
+    "utils/jsonGuards.ts"
+  ],
+  "services/parsePublicShare.ts": [
+    "types/projectsApi.ts",
+    "utils/jsonGuards.ts"
+  ],
+  "services/projectsApi.ts": [
+    "services/projectsAuthHeaders.ts",
+    "types/projectsApi.ts",
+    "types/surveyDraft.ts",
+    "utils/apiError.ts",
+    "utils/apiUrl.ts",
+    "utils/authApiError.ts",
+    "utils/downloadBlobFile.ts",
+    "utils/jsonGuards.ts"
+  ],
+  "services/projectsAuthHeaders.ts": [
+    "services/projectsAuthToken.ts"
+  ],
+  "services/projectsAuthToken.ts": [
+    "auth/authConfig.ts"
+  ],
+  "services/publicShareApi.ts": [
+    "services/parsePublicShare.ts",
+    "types/projectsApi.ts",
+    "utils/apiError.ts",
+    "utils/apiUrl.ts",
+    "utils/downloadBlobFile.ts"
+  ],
+  "services/surveyDraftStorage.ts": [
+    "types/surveyDraft.ts",
+    "utils/parsers/parseSurveyDraft.ts"
+  ],
+  "services/ufhModePresets.ts": [
+    "types/ufhModePreset.ts",
+    "utils/apiUrl.ts"
+  ],
+  "services/underfloorHeatingPresets.ts": [
+    "data/fallbackFlooringFinishes.ts",
+    "data/fallbackUnderfloorHeatingPresets.ts",
+    "types/underfloorHeating.ts",
+    "utils/apiUrl.ts"
+  ],
+  "shell/AppChromeProvider.tsx": [
+    "routing/paths.ts",
+    "shell/appChromeContext.ts"
+  ],
+  "shell/appChromeContext.ts": [
+    "routing/paths.ts"
+  ],
+  "shell/useAppChrome.ts": [
+    "shell/appChromeContext.ts"
+  ],
+  "styles/clerkGlobal.css": [],
+  "styles/containers.css": [],
+  "styles/formElements.css": [],
+  "surveySession/SurveySessionProvider.tsx": [
+    "query/useSurveyCalc.ts",
+    "surveySession/buildCalcInputSnapshot.ts",
+    "surveySession/runSurveyMutationPipeline.ts",
+    "surveySession/surveySessionContext.ts",
+    "surveySession/types.ts",
+    "types/calcApi.ts",
+    "types/envelope.ts"
+  ],
+  "surveySession/buildCalcInputSnapshot.ts": [
+    "services/buildCalcRequestPayload.ts",
+    "surveySession/types.ts",
+    "types/envelope.ts",
+    "utils/roomEnvelopeFields.ts",
+    "utils/surveyCalcInputKey.ts"
+  ],
+  "surveySession/createDefaultSurveyDraft.ts": [
+    "surveySession/migrateDerivedState.ts",
+    "surveySession/types.ts",
+    "surveySession/wiringLayoutV3.ts",
+    "types/heatingThermalRegime.ts",
+    "types/hydraulics.ts",
+    "types/radiatorConnection.ts",
+    "types/radiatorEmitterPreference.ts",
+    "utils/hotWaterFormDefaults.ts",
+    "utils/migrateLegacyRoomTypes.ts",
+    "utils/roomEnvelopeFields.ts",
+    "utils/roomWindowDefaults.ts",
+    "utils/waterHeaterFormDefaults.ts"
+  ],
+  "surveySession/createEmptySurveySessionState.ts": [
+    "surveySession/buildCalcInputSnapshot.ts",
+    "surveySession/migrateDerivedState.ts",
+    "surveySession/types.ts",
+    "types/heatingThermalRegime.ts",
+    "types/hydraulics.ts",
+    "types/radiatorConnection.ts",
+    "types/radiatorEmitterPreference.ts",
+    "utils/hotWaterFormDefaults.ts",
+    "utils/waterHeaterFormDefaults.ts"
+  ],
+  "surveySession/decideCalcAction.ts": [
+    "surveySession/buildCalcInputSnapshot.ts",
+    "surveySession/types.ts"
+  ],
+  "surveySession/migrateDerivedState.ts": [
+    "surveySession/types.ts",
+    "surveySession/wiringLayoutV3.ts",
+    "types/radiatorConnection.ts",
+    "types/radiatorEmitterPreference.ts",
+    "types/rooms.ts"
+  ],
+  "surveySession/reduceSurveyMutation.ts": [
+    "surveySession/createDefaultSurveyDraft.ts",
+    "surveySession/createEmptySurveySessionState.ts",
+    "surveySession/types.ts",
+    "utils/normalizeHotWaterForm.ts",
+    "utils/normalizeWaterHeaterForm.ts"
+  ],
+  "surveySession/resolveAppBootstrap.ts": [
+    "types/surveyDraft.ts",
+    "utils/surveyShare.ts"
+  ],
+  "surveySession/runSurveyMutationPipeline.ts": [
+    "surveySession/buildCalcInputSnapshot.ts",
+    "surveySession/decideCalcAction.ts",
+    "surveySession/migrateDerivedState.ts",
+    "surveySession/reduceSurveyMutation.ts",
+    "surveySession/types.ts",
+    "types/calcApi.ts"
+  ],
+  "surveySession/surveyDraftBridge.ts": [
+    "surveySession/types.ts",
+    "surveySession/wiringLayoutV3.ts",
+    "types/hydraulics.ts",
+    "types/radiatorConnection.ts",
+    "types/radiatorEmitterPreference.ts",
+    "types/surveyDraft.ts"
+  ],
+  "surveySession/surveySessionContext.ts": [
+    "surveySession/types.ts",
+    "types/calcApi.ts"
+  ],
+  "surveySession/types.ts": [
+    "surveySession/wiringLayoutV3.ts",
+    "types/calcApi.ts",
+    "types/envelope.ts",
+    "types/heatingThermalRegime.ts",
+    "types/hotWater.ts",
+    "types/hydraulics.ts",
+    "types/radiatorConnection.ts",
+    "types/radiatorEmitterPreference.ts",
+    "types/rooms.ts",
+    "types/surveyStep.ts",
+    "types/ufhDistribution.ts",
+    "types/ufhModePreset.ts",
+    "types/waterHeater.ts"
+  ],
+  "surveySession/useSurveySession.ts": [
+    "surveySession/surveySessionContext.ts"
+  ],
+  "surveySession/wiringLayoutV3.ts": [
+    "types/rooms.ts"
+  ],
+  "types/adminFeedback.ts": [],
+  "types/calcApi.ts": [],
+  "types/envelope.ts": [],
+  "types/heatingMatching.ts": [
+    "../../shared/heatingMatchingSchemes.d.ts"
+  ],
+  "types/heatingThermalRegime.ts": [
+    "../../shared/heatingThermalRegimePresets.d.ts",
+    "../../shared/heatingThermalRegimeRecommendations.d.ts"
+  ],
+  "types/hotWater.ts": [],
+  "types/hotWaterReport.ts": [],
+  "types/hydraulics.ts": [],
+  "types/meApi.ts": [],
+  "types/projectExport.ts": [
+    "types/calcApi.ts",
+    "types/projectsApi.ts",
+    "types/surveyDraft.ts"
+  ],
+  "types/projectsApi.ts": [
+    "types/calcApi.ts"
+  ],
+  "types/radiatorConnection.ts": [
+    "../../shared/radiatorConnection.d.ts"
+  ],
+  "types/radiatorEmitterPreference.ts": [
+    "../../shared/radiatorEmitterPreference.d.ts"
+  ],
+  "types/recommendationsBlock.ts": [
+    "surveySession/types.ts",
+    "types/envelope.ts",
+    "types/heatingMatching.ts",
+    "types/hotWater.ts",
+    "types/hotWaterReport.ts",
+    "types/hydraulics.ts",
+    "types/surveyStep.ts",
+    "types/underfloorHeating.ts",
+    "utils/parsers/parseBoilerFromReport.ts",
+    "utils/parsers/parseIndirectWaterHeaterMatchingFromReport.ts",
+    "utils/parsers/parseRadiatorsMatchingFromReport.ts",
+    "utils/parsers/parseUniboxesMatchingFromReport.ts",
+    "utils/parsers/parseWaterHeaterMatchingFromReport.ts"
+  ],
+  "types/rooms.ts": [],
+  "types/surveyDraft.ts": [
+    "surveySession/wiringLayoutV3.ts",
+    "types/calcApi.ts",
+    "types/envelope.ts",
+    "types/heatingThermalRegime.ts",
+    "types/hotWater.ts",
+    "types/hydraulics.ts",
+    "types/radiatorConnection.ts",
+    "types/radiatorEmitterPreference.ts",
+    "types/rooms.ts",
+    "types/surveyStep.ts",
+    "types/ufhDistribution.ts",
+    "types/ufhModePreset.ts",
+    "types/waterHeater.ts"
+  ],
+  "types/surveyDraftCompat.ts": [],
+  "types/surveyStep.ts": [],
+  "types/ufhDistribution.ts": [
+    "../../shared/ufhDistributionPresets.d.ts"
+  ],
+  "types/ufhModePreset.ts": [],
+  "types/underfloorHeating.ts": [
+    "types/ufhDistribution.ts"
+  ],
+  "types/waterHeater.ts": [
+    "types/heatingMatching.ts"
+  ],
+  "types/waterHeaterMatching.ts": [
+    "utils/parsers/parseIndirectWaterHeaterMatchingFromReport.ts",
+    "utils/parsers/parseWaterHeaterMatchingFromReport.ts"
+  ],
+  "utils/apartmentStackBoundaries.ts": [
+    "types/envelope.ts",
+    "types/rooms.ts"
+  ],
+  "utils/apiError.ts": [
+    "utils/jsonGuards.ts"
+  ],
+  "utils/apiUrl.ts": [],
+  "utils/authApiError.ts": [],
+  "utils/boilerProposalParse.ts": [
+    "components/BoilerProposalCard/BoilerProposalCard.tsx",
+    "utils/jsonGuards.ts"
+  ],
+  "utils/boilerUiLabels.ts": [
+    "types/envelope.ts",
+    "types/heatingMatching.ts"
+  ],
+  "utils/buildProjectExportBundle.ts": [
+    "types/projectExport.ts",
+    "types/projectsApi.ts",
+    "types/surveyDraft.ts",
+    "utils/jsonGuards.ts",
+    "utils/stripMongoExportFields.ts"
+  ],
+  "utils/buildSurveyDraft.ts": [
+    "surveySession/wiringLayoutV3.ts",
+    "types/calcApi.ts",
+    "types/envelope.ts",
+    "types/heatingThermalRegime.ts",
+    "types/hotWater.ts",
+    "types/hydraulics.ts",
+    "types/radiatorConnection.ts",
+    "types/radiatorEmitterPreference.ts",
+    "types/rooms.ts",
+    "types/surveyDraft.ts",
+    "types/surveyStep.ts",
+    "types/ufhDistribution.ts",
+    "types/ufhModePreset.ts",
+    "types/waterHeater.ts"
+  ],
+  "utils/buildTechnicalPrintHtml.ts": [
+    "types/calcApi.ts",
+    "types/heatingMatching.ts",
+    "types/projectsApi.ts",
+    "utils/calculators/heatLoss.ts",
+    "utils/format.ts",
+    "utils/jsonGuards.ts",
+    "utils/parsers/parseBoilerFromReport.ts",
+    "utils/parsers/parseHotWaterFromReport.ts",
+    "utils/parsers/parseHydraulicsFromReport.ts",
+    "utils/parsers/parseIndirectWaterHeaterMatchingFromReport.ts",
+    "utils/parsers/parseRadiatorsMatchingFromReport.ts",
+    "utils/parsers/parseUnderfloorHeatingFromReport.ts",
+    "utils/parsers/parseWaterHeaterMatchingFromReport.ts",
+    "utils/radiatorsSkip.ts"
+  ],
+  "utils/calculators/heatLoss.ts": [],
+  "utils/compatTelemetry.ts": [],
+  "utils/countThermalFixtures.ts": [
+    "types/hotWater.ts",
+    "utils/hotWaterFormDefaults.ts",
+    "utils/normalizeHotWaterForm.ts"
+  ],
+  "utils/downloadBlobFile.ts": [],
+  "utils/envelopePresetKind.ts": [
+    "types/envelope.ts"
+  ],
+  "utils/externalWallsSummary.ts": [
+    "types/envelope.ts",
+    "utils/presetLabel.ts"
+  ],
+  "utils/fileDownload.ts": [],
+  "utils/format.ts": [],
+  "utils/formatCatalogDimensions.ts": [],
+  "utils/hotWaterEquipmentParticipation.ts": [
+    "types/heatingMatching.ts",
+    "utils/format.ts",
+    "utils/parsers/parseIndirectWaterHeaterMatchingFromReport.ts",
+    "utils/parsers/parseWaterHeaterMatchingFromReport.ts"
+  ],
+  "utils/hotWaterFormDefaults.ts": [
+    "types/hotWater.ts"
+  ],
+  "utils/isDevToolsEnabled.ts": [
+    "types/meApi.ts"
+  ],
+  "utils/jsonGuards.ts": [],
+  "utils/manifoldApplicationLabel.ts": [
+    "services/catalogTypes.ts"
+  ],
+  "utils/migrateLegacyExternalWalls.ts": [
+    "constants/compatLegacyIds.ts",
+    "data/fallbackEnvelopePresets.ts",
+    "types/envelope.ts",
+    "utils/compatTelemetry.ts"
+  ],
+  "utils/migrateLegacyRoomTypes.ts": [
+    "../../shared/roomTypeNormalization.d.ts",
+    "types/rooms.ts",
+    "utils/compatTelemetry.ts"
+  ],
+  "utils/migrateRoomUnderfloorHeating.ts": [
+    "data/fallbackFlooringFinishes.ts",
+    "data/fallbackUnderfloorHeatingPresets.ts",
+    "types/rooms.ts",
+    "types/underfloorHeating.ts",
+    "utils/compatTelemetry.ts",
+    "utils/jsonGuards.ts"
+  ],
+  "utils/migrateSurveyDraft.ts": [
+    "constants/surveySteps.ts",
+    "surveySession/wiringLayoutV3.ts",
+    "types/envelope.ts",
+    "types/heatingThermalRegime.ts",
+    "types/hydraulics.ts",
+    "types/radiatorConnection.ts",
+    "types/radiatorEmitterPreference.ts",
+    "types/rooms.ts",
+    "types/surveyDraft.ts",
+    "types/surveyDraftCompat.ts",
+    "types/ufhDistribution.ts",
+    "utils/compatTelemetry.ts",
+    "utils/jsonGuards.ts",
+    "utils/migrateLegacyExternalWalls.ts",
+    "utils/migrateLegacyRoomTypes.ts",
+    "utils/migrateRoomUnderfloorHeating.ts",
+    "utils/normalizeHotWaterForm.ts",
+    "utils/normalizeWaterHeaterForm.ts",
+    "utils/roomEnvelopeFields.ts",
+    "utils/ufhPresetCardsForUi.ts"
+  ],
+  "utils/normalizeHotWaterForm.ts": [
+    "types/hotWater.ts",
+    "utils/hotWaterFormDefaults.ts",
+    "utils/jsonGuards.ts"
+  ],
+  "utils/normalizeWaterHeaterForm.ts": [
+    "types/heatingMatching.ts",
+    "types/waterHeater.ts",
+    "utils/jsonGuards.ts",
+    "utils/waterHeaterFormDefaults.ts"
+  ],
+  "utils/objectMetaForCalcPayload.ts": [
+    "../../shared/waterHeaterFormContract.d.ts",
+    "types/envelope.ts",
+    "types/waterHeater.ts"
+  ],
+  "utils/parsers/parseBoilerFromReport.ts": [
+    "types/heatingMatching.ts",
+    "utils/boilerProposalParse.ts",
+    "utils/jsonGuards.ts"
+  ],
+  "utils/parsers/parseCommercialBomFromReport.ts": [
+    "utils/jsonGuards.ts"
+  ],
+  "utils/parsers/parseHotWaterFromReport.ts": [
+    "types/hotWaterReport.ts",
+    "utils/jsonGuards.ts"
+  ],
+  "utils/parsers/parseHydraulicsFromReport.ts": [
+    "types/hydraulics.ts",
+    "utils/jsonGuards.ts",
+    "utils/parsers/parseHydraulicsProposalFromReport.ts"
+  ],
+  "utils/parsers/parseHydraulicsProposalFromReport.ts": [
+    "types/hydraulics.ts"
+  ],
+  "utils/parsers/parseIndirectWaterHeaterMatchingFromReport.ts": [
+    "utils/jsonGuards.ts"
+  ],
+  "utils/parsers/parseProjectImportFile.ts": [
+    "types/calcApi.ts",
+    "types/projectExport.ts",
+    "types/projectsApi.ts",
+    "types/surveyDraft.ts",
+    "utils/jsonGuards.ts",
+    "utils/parsers/parseSurveyDraft.ts"
+  ],
+  "utils/parsers/parseRadiatorsMatchingFromReport.ts": [
+    "utils/jsonGuards.ts"
+  ],
+  "utils/parsers/parseSharePath.ts": [],
+  "utils/parsers/parseSurveyDraft.ts": [
+    "utils/migrateSurveyDraft.ts"
+  ],
+  "utils/parsers/parseUnderfloorHeatingFromReport.ts": [
+    "types/calcApi.ts",
+    "types/ufhDistribution.ts",
+    "types/underfloorHeating.ts",
+    "utils/jsonGuards.ts"
+  ],
+  "utils/parsers/parseUniboxesMatchingFromReport.ts": [
+    "utils/jsonGuards.ts"
+  ],
+  "utils/parsers/parseWaterHeaterMatchingFromReport.ts": [
+    "utils/jsonGuards.ts"
+  ],
+  "utils/pendingProjectNavigation.ts": [],
+  "utils/presetLabel.ts": [
+    "types/envelope.ts"
+  ],
+  "utils/projectBundleTransfer.ts": [
+    "query/queryKeys.ts",
+    "services/fetchProjectExportBundle.ts",
+    "services/projectsApi.ts",
+    "types/calcApi.ts",
+    "types/projectExport.ts",
+    "types/projectsApi.ts",
+    "types/surveyDraft.ts",
+    "utils/fileDownload.ts",
+    "utils/parsers/parseProjectImportFile.ts",
+    "utils/parsers/parseSurveyDraft.ts"
+  ],
+  "utils/radiatorsSkip.ts": [
+    "types/ufhModePreset.ts",
+    "utils/parsers/parseRadiatorsMatchingFromReport.ts"
+  ],
+  "utils/roomEnvelopeFields.ts": [
+    "types/rooms.ts",
+    "utils/apartmentStackBoundaries.ts",
+    "utils/compatTelemetry.ts",
+    "utils/roomExteriorLayout.ts"
+  ],
+  "utils/roomExteriorLayout.ts": [
+    "types/envelope.ts",
+    "types/rooms.ts",
+    "utils/roomEnvelopeFields.ts"
+  ],
+  "utils/roomWindowDefaults.ts": [
+    "data/fallbackEnvelopePresets.ts",
+    "types/rooms.ts"
+  ],
+  "utils/staticAppShellTransition.ts": [],
+  "utils/stripMongoExportFields.ts": [
+    "utils/jsonGuards.ts"
+  ],
+  "utils/sumHydraulicsPipeLengthsByRole.ts": [
+    "types/hydraulics.ts"
+  ],
+  "utils/surveyCalcInputKey.ts": [
+    "types/envelope.ts",
+    "types/heatingThermalRegime.ts",
+    "types/hotWater.ts",
+    "types/hydraulics.ts",
+    "types/radiatorConnection.ts",
+    "types/radiatorEmitterPreference.ts",
+    "types/rooms.ts",
+    "types/ufhDistribution.ts",
+    "types/ufhModePreset.ts",
+    "types/waterHeater.ts",
+    "utils/objectMetaForCalcPayload.ts"
+  ],
+  "utils/surveyShare.ts": [
+    "types/calcApi.ts",
+    "types/surveyDraft.ts",
+    "utils/calculators/heatLoss.ts",
+    "utils/format.ts",
+    "utils/jsonGuards.ts",
+    "utils/parsers/parseSurveyDraft.ts"
+  ],
+  "utils/ufhHydraulicsPumps.ts": [
+    "types/hydraulics.ts"
+  ],
+  "utils/ufhPresetCardsForUi.ts": [
+    "data/fallbackUfhModePresets.ts",
+    "types/ufhModePreset.ts"
+  ],
+  "utils/ufhWarningDisplay.ts": [],
+  "utils/underfloorPresetLabel.ts": [
+    "types/underfloorHeating.ts"
+  ],
+  "utils/validateWaterHeaterForm.ts": [
+    "types/envelope.ts",
+    "types/heatingMatching.ts",
+    "types/hotWater.ts",
+    "types/waterHeater.ts",
+    "utils/countThermalFixtures.ts"
+  ],
+  "utils/waterHeaterFormDefaults.ts": [
+    "types/heatingMatching.ts",
+    "types/waterHeater.ts"
+  ],
+  "utils/waterHeaterSchemeOptions.ts": [
+    "types/envelope.ts",
+    "types/heatingMatching.ts",
+    "types/hotWater.ts",
+    "types/rooms.ts",
+    "utils/normalizeHotWaterForm.ts"
+  ],
+  "utils/wiringSystemTypeLabels.ts": [
+    "surveySession/wiringLayoutV3.ts"
+  ],
+  "vite-env.d.ts": []
+}

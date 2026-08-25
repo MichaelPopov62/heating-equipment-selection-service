@@ -1,0 +1,38 @@
+### CMD: npm run typecheck --prefix shared
+
+> typecheck
+> tsc -p tsconfig.json --noEmit --pretty
+
+npm run typecheck --prefix shared  0.51s user 0.07s system 80% cpu 0.726 total
+
+### CMD: npm run typecheck --prefix backend
+
+> heating-equipment-selection-service@1.0.0 typecheck
+> tsc -p tsconfig.json --noEmit --pretty
+
+npm run typecheck --prefix backend  3.94s user 0.16s system 185% cpu 2.206 total
+
+### CMD: npm run lint --prefix backend
+
+> heating-equipment-selection-service@1.0.0 lint
+> eslint "src/**/*.js" "scripts/**/*.js"
+
+npm run lint --prefix backend  1.12s user 0.12s system 163% cpu 0.757 total
+
+### CMD: npm run typecheck --prefix frontend
+
+> frontend@1.0.0 typecheck
+> tsc -b --pretty
+
+npm run typecheck --prefix frontend  4.30s user 0.17s system 203% cpu 2.194 total
+
+### CMD: npm run lint --prefix frontend
+
+> frontend@1.0.0 lint
+> eslint .
+
+npm run lint --prefix frontend  13.76s user 0.54s system 187% cpu 7.628 total
+
+### CMD: node scripts/verifyNoTypeBypass.mjs
+verifyNoTypeBypass: OK
+node scripts/verifyNoTypeBypass.mjs  0.08s user 0.04s system 110% cpu 0.113 total

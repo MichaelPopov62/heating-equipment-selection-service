@@ -1,0 +1,44 @@
+### CMD: npm run verify --prefix backend (полная цепочка backend verify-скриптов)
+OK — public без ownerId после pro
+OK — snapshot free без contact
+
+verify:project-share — все проверки пройдены
+
+> heating-equipment-selection-service@1.0.0 verify:project-pdf
+> node scripts/verifyProjectPdf.js
+
+OK — includeTechnical=1
+OK — includeTechnical=true
+OK — includeTechnical=0
+OK — filename sanitization
+OK — HTML бренд
+OK — HTML заголовок
+OK — HTML основная позиция
+OK — HTML карточка Економічний
+OK — HTML карточка Ефективний
+OK — HTML итог
+OK — без technical по умолчанию
+OK — PDF pro contact email
+OK — PDF publisher-contact block
+OK — с technical
+OK — technical тепловтрати
+OK — без commercial → PDF_COMMERCIAL_REQUIRED
+Error: Не вдалося сформувати PDF: Failed to launch the browser process:  Code: null
+
+stderr:
+dlopen /Users/dmytropopov/.cache/puppeteer/chrome/mac_arm-140.0.7339.82/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/../Frameworks/Google Chrome for Testing Framework.framework/Versions/140.0.7339.82/Google Chrome for Testing Framework: dlopen(/Users/dmytropopov/.cache/puppeteer/chrome/mac_arm-140.0.7339.82/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/../Frameworks/Google Chrome for Testing Framework.framework/Versions/140.0.7339.82/Google Chrome for Testing Framework, 0x0105): tried: '/Users/dmytropopov/.cache/puppeteer/chrome/mac_arm-140.0.7339.82/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/../Frameworks/Google Chrome for Testing Framework.framework/Versions/140.0.7339.82/Google Chrome for Testing Framework' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/dmytropopov/.cache/puppeteer/chrome/mac_arm-140.0.7339.82/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/../Frameworks/Google Chrome for Testing Framework.framework/Versions/140.0.7339.82/Google Chrome for Testing Framework' (no such file), '/Users/dmytropopov/.cache/puppeteer/chrome/mac_arm-140.0.7339.82/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/../Frameworks/Google Chrome for Testing Framework.framework/Versions/140.0.7339.82/Google Chrome for Testing Framework' (no such file).
+
+TROUBLESHOOTING: https://pptr.dev/troubleshooting
+
+    at renderPdfFromHtml (file:///Users/dmytropopov/Documents/projects/heating-equipment-selection-service/backend/src/projects/renderPdfFromHtml.js:111:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async file:///Users/dmytropopov/Documents/projects/heating-equipment-selection-service/backend/scripts/verifyProjectPdf.js:127:15 {
+  statusCode: 503,
+  code: 'PDF_RENDER_FAILED'
+}
+FAIL — PDF render error: PDF_RENDER_FAILED
+
+verify:project-pdf FAILED (1)
+npm run verify --prefix backend 2>&1  9.87s user 1.63s system 117% cpu 9.787 total
+tail -40  0.00s user 0.00s system 0% cpu 9.786 total
+EXIT=0

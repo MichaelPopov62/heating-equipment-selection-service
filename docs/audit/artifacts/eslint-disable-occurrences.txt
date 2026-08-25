@@ -1,0 +1,2 @@
+frontend/src/components/RoomsForm/RoomsForm.tsx:65:    /* eslint-disable react-hooks/set-state-in-effect -- сброс открытой комнаты при её удалении */
+frontend/src/hooks/useRoomsOrchestration.ts:57:    // eslint-disable-next-line react-hooks/exhaustive-deps -- не привязываем к setRooms: иначе цикл dispatch

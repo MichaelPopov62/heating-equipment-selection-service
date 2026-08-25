@@ -1,0 +1,1845 @@
+{
+  "duplicates": [
+    {
+      "firstFile": {
+        "end": 39,
+        "endLoc": {
+          "column": 1,
+          "line": 39,
+          "position": 1123
+        },
+        "name": "api/adminFeedbackRoutes.js",
+        "start": 21,
+        "startLoc": {
+          "column": 40,
+          "line": 21,
+          "position": 711
+        }
+      },
+      "format": "javascript",
+      "fragment": "const SSE_HEARTBEAT_INTERVAL_MS = 25_000;\n\n/**\n * @param {import('express').Request} req\n * @returns {{ requestId: string } | null}\n */\nfunction reqLogMeta(req) {\n  return req.requestId ? { requestId: req.requestId } : null;\n}\n\n/**\n * @param {unknown} value\n * @returns {string}\n */\nfunction asRouteParam(value) {\n  if (typeof value === 'string') return value;\n  if (Array.isArray(value) && typeof value[0] === 'string') return value[0];\n  return '';\n}",
+      "lines": 19,
+      "secondFile": {
+        "end": 35,
+        "endLoc": {
+          "column": 1,
+          "line": 35,
+          "position": 1261
+        },
+        "name": "api/adminRoutes.js",
+        "start": 17,
+        "startLoc": {
+          "column": 68,
+          "line": 17,
+          "position": 849
+        }
+      },
+      "tokens": 66
+    },
+    {
+      "firstFile": {
+        "end": 46,
+        "endLoc": {
+          "column": 8,
+          "line": 46,
+          "position": 1280
+        },
+        "name": "api/adminFeedbackRoutes.js",
+        "start": 27,
+        "startLoc": {
+          "column": 0,
+          "line": 27,
+          "position": 807
+        }
+      },
+      "format": "javascript",
+      "fragment": "function reqLogMeta(req) {\n  return req.requestId ? { requestId: req.requestId } : null;\n}\n\n/**\n * @param {unknown} value\n * @returns {string}\n */\nfunction asRouteParam(value) {\n  if (typeof value === 'string') return value;\n  if (Array.isArray(value) && typeof value[0] === 'string') return value[0];\n  return '';\n}\n\n/**\n * @param {import('express').Response<import('../types/shared-types.js').ErrorEnvelope>} res\n * @param {string} message\n * @returns {void}\n */\nfunction respondValidationError(res, message) {",
+      "lines": 20,
+      "secondFile": {
+        "end": 116,
+        "endLoc": {
+          "column": 8,
+          "line": 116,
+          "position": 4072
+        },
+        "name": "api/projectsRoutes.js",
+        "start": 95,
+        "startLoc": {
+          "column": 0,
+          "line": 95,
+          "position": 3541
+        }
+      },
+      "tokens": 66
+    },
+    {
+      "firstFile": {
+        "end": 109,
+        "endLoc": {
+          "column": 1,
+          "line": 109,
+          "position": 3979
+        },
+        "name": "api/projectsRoutes.js",
+        "start": 87,
+        "startLoc": {
+          "column": 0,
+          "line": 87,
+          "position": 3364
+        }
+      },
+      "format": "javascript",
+      "fragment": "}\n\n/**\n * Мета для logger с optional requestId (exactOptionalPropertyTypes).\n *\n * @param {import('express').Request} req\n * @returns {{ requestId: string } | null}\n */\nfunction reqLogMeta(req) {\n  return req.requestId ? { requestId: req.requestId } : null;\n}\n\n/**\n * Параметр маршрута Express → строка (checkJs: params может быть string | string[]).\n *\n * @param {unknown} value\n * @returns {string}\n */\nfunction asRouteParam(value) {\n  if (typeof value === 'string') return value;\n  if (Array.isArray(value) && typeof value[0] === 'string') return value[0];\n  return '';\n}",
+      "lines": 23,
+      "secondFile": {
+        "end": 48,
+        "endLoc": {
+          "column": 1,
+          "line": 48,
+          "position": 1587
+        },
+        "name": "api/publicSharesRoutes.js",
+        "start": 30,
+        "startLoc": {
+          "column": 0,
+          "line": 30,
+          "position": 1175
+        }
+      },
+      "tokens": 66
+    },
+    {
+      "firstFile": {
+        "end": 346,
+        "endLoc": {
+          "column": 11,
+          "line": 346,
+          "position": 12636
+        },
+        "name": "api/projectsRoutes.js",
+        "start": 331,
+        "startLoc": {
+          "column": 12,
+          "line": 331,
+          "position": 11977
+        }
+      },
+      "format": "javascript",
+      "fragment": "  router.put('/api/v1/projects/:id', projectsWriteRateLimiter, async (req, res, next) => {\n    try {\n      const ownerId = ownerIdFromRequest(req);\n      const oid = parseObjectIdParam(asRouteParam(req.params.id));\n      if (!oid) {\n        sendErrorEnvelope(res, { statusCode: 400, message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR });\n        return;\n      }\n\n      const existing = await findAccessibleProjectLean(oid, ownerId, req);\n      if (!existing) {\n        sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });\n        return;\n      }\n\n      const patch = validateProjectUpdateBody(req.body);",
+      "lines": 16,
+      "secondFile": {
+        "end": 402,
+        "endLoc": {
+          "column": 11,
+          "line": 402,
+          "position": 14850
+        },
+        "name": "api/projectsRoutes.js",
+        "start": 387,
+        "startLoc": {
+          "column": 15,
+          "line": 387,
+          "position": 14191
+        }
+      },
+      "tokens": 114
+    },
+    {
+      "firstFile": {
+        "end": 705,
+        "endLoc": {
+          "column": 4,
+          "line": 705,
+          "position": 25971
+        },
+        "name": "api/projectsRoutes.js",
+        "start": 690,
+        "startLoc": {
+          "column": 31,
+          "line": 690,
+          "position": 25560
+        }
+      },
+      "format": "javascript",
+      "fragment": "          projectId: String(oid),\n          includeTechnical,\n          bytes: pdf.bytes,\n          ms: Date.now() - started,\n        });\n\n        res.status(200);\n        res.setHeader('Content-Type', 'application/pdf');\n        res.setHeader('Content-Disposition', pdf.contentDisposition);\n        res.setHeader('Content-Length', String(pdf.bytes));\n        res.send(pdf.buffer);\n      } catch (err) {\n        next(err);\n      }\n    },\n  );",
+      "lines": 16,
+      "secondFile": {
+        "end": 166,
+        "endLoc": {
+          "column": 4,
+          "line": 166,
+          "position": 5689
+        },
+        "name": "api/publicSharesRoutes.js",
+        "start": 151,
+        "startLoc": {
+          "column": 39,
+          "line": 151,
+          "position": 5278
+        }
+      },
+      "tokens": 89
+    },
+    {
+      "firstFile": {
+        "end": 732,
+        "endLoc": {
+          "column": 13,
+          "line": 732,
+          "position": 27089
+        },
+        "name": "api/projectsRoutes.js",
+        "start": 714,
+        "startLoc": {
+          "column": 13,
+          "line": 714,
+          "position": 26388
+        }
+      },
+      "format": "javascript",
+      "fragment": "  router.post(\n    '/api/v1/projects/:id/share',\n    projectsWriteRateLimiter,\n    async (req, res, next) => {\n      try {\n        const ownerId = ownerIdFromRequest(req);\n        const oid = parseObjectIdParam(asRouteParam(req.params.id));\n        if (!oid) {\n          sendErrorEnvelope(res, { statusCode: 400, message: 'Некоректний id проєкту', code: ERROR_CODES.VALIDATION_ERROR });\n          return;\n        }\n\n        const project = await findAccessibleProjectDoc(oid, ownerId, req);\n        if (!project) {\n          sendErrorEnvelope(res, { statusCode: 404, message: 'Проєкт не знайдено', code: ERROR_CODES.PROJECT_NOT_FOUND });\n          return;\n        }\n\n        const body = req.body && typeof req.body === 'object' ? req.body : {};",
+      "lines": 19,
+      "secondFile": {
+        "end": 850,
+        "endLoc": {
+          "column": 13,
+          "line": 850,
+          "position": 31836
+        },
+        "name": "api/projectsRoutes.js",
+        "start": 832,
+        "startLoc": {
+          "column": 15,
+          "line": 832,
+          "position": 31135
+        }
+      },
+      "tokens": 114
+    },
+    {
+      "firstFile": {
+        "end": 85,
+        "endLoc": {
+          "column": 9,
+          "line": 85,
+          "position": 2906
+        },
+        "name": "api/publicSharesRoutes.js",
+        "start": 62,
+        "startLoc": {
+          "column": 39,
+          "line": 62,
+          "position": 2001
+        }
+      },
+      "format": "javascript",
+      "fragment": "    '/api/v1/public/shares/:shareToken',\n    mongoMiddleware,\n    publicShareReadRateLimiter,\n    async (req, res, next) => {\n      try {\n        const token = normalizeShareTokenParam(asRouteParam(req.params.shareToken));\n        if (!token) {\n          sendErrorEnvelope(res, { statusCode: 404, message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND' });\n          return;\n        }\n\n        const doc = await Project.findOne({ shareToken: token })\n          .select({\n            shareToken: 1,\n            shareSnapshot: 1,\n            sharePublishedAt: 1,\n          })\n          .lean();\n\n        const snapshot = doc && isPlainObject(doc.shareSnapshot) ? doc.shareSnapshot : null;\n        if (!doc || !snapshot || typeof snapshot.clientName !== 'string') {\n          sendErrorEnvelope(res, { statusCode: 404, message: 'Посилання не знайдено', code: 'SHARE_NOT_FOUND' });\n          return;\n        }",
+      "lines": 24,
+      "secondFile": {
+        "end": 136,
+        "endLoc": {
+          "column": 9,
+          "line": 136,
+          "position": 4589
+        },
+        "name": "api/publicSharesRoutes.js",
+        "start": 113,
+        "startLoc": {
+          "column": 43,
+          "line": 113,
+          "position": 3684
+        }
+      },
+      "tokens": 153
+    },
+    {
+      "firstFile": {
+        "end": 1004,
+        "endLoc": {
+          "column": 8,
+          "line": 1004,
+          "position": 36191
+        },
+        "name": "catalog/validateCatalog.js",
+        "start": 986,
+        "startLoc": {
+          "column": 13,
+          "line": 986,
+          "position": 35886
+        }
+      },
+      "format": "javascript",
+      "fragment": "    max: 2000,\n  });\n  dim.height = toFiniteNumber(dim.height, {\n    field: `${ctx}.dimensions.height`,\n    min: 50,\n    max: 1000,\n  });\n  dim.depth = toFiniteNumber(dim.depth, {\n    field: `${ctx}.dimensions.depth`,\n    min: 20,\n    max: 500,\n  });\n}\n\n/**\n * @param {unknown} item\n * @param {number} idx\n */\nfunction validateManifold(item, idx) {",
+      "lines": 19,
+      "secondFile": {
+        "end": 1120,
+        "endLoc": {
+          "column": 8,
+          "line": 1120,
+          "position": 39903
+        },
+        "name": "catalog/validateCatalog.js",
+        "start": 1102,
+        "startLoc": {
+          "column": 13,
+          "line": 1102,
+          "position": 39598
+        }
+      },
+      "tokens": 62
+    },
+    {
+      "firstFile": {
+        "end": 1034,
+        "endLoc": {
+          "column": 7,
+          "line": 1034,
+          "position": 37035
+        },
+        "name": "catalog/validateCatalog.js",
+        "start": 1007,
+        "startLoc": {
+          "column": 48,
+          "line": 1007,
+          "position": 36334
+        }
+      },
+      "format": "javascript",
+      "fragment": "    throw new Error(`Каталог: manifold[${idx}] должен быть объектом.`);\n  }\n\n  delete item.kind;\n  delete item.catalogKey;\n\n  item.model = sanitizeTrimAngleBrackets(item.model);\n  if (!item.model) {\n    throw new Error(`Каталог: model обязателен (${ctx}).`);\n  }\n\n  item.brand = sanitizeTrimAngleBrackets(item.brand);\n  if (!item.brand) {\n    throw new Error(`Каталог: brand обязателен (${ctx}).`);\n  }\n\n  item.article = sanitizeTrimAngleBrackets(item.article);\n  if (!item.article) {\n    throw new Error(`Каталог: article обязателен (${ctx}).`);\n  }\n\n  item.price = toFiniteNumber(item.price, {\n    field: `${ctx}.price`,\n    min: 1,\n    max: 1_000_000_000,\n  });\n\n  item.outletsCount = toFiniteInteger(item.outletsCount, {",
+      "lines": 28,
+      "secondFile": {
+        "end": 1150,
+        "endLoc": {
+          "column": 7,
+          "line": 1150,
+          "position": 40765
+        },
+        "name": "catalog/validateCatalog.js",
+        "start": 1123,
+        "startLoc": {
+          "column": 54,
+          "line": 1123,
+          "position": 40064
+        }
+      },
+      "tokens": 132
+    },
+    {
+      "firstFile": {
+        "end": 122,
+        "endLoc": {
+          "column": 6,
+          "line": 122,
+          "position": 4541
+        },
+        "name": "dhw/types.d.ts",
+        "start": 90,
+        "startLoc": {
+          "column": 3,
+          "line": 90,
+          "position": 3432
+        }
+      },
+      "format": "typescript",
+      "fragment": "  };\n  maxUfhLoopLengthM: number;\n  /** Коэффициент укладки L = S/a × factor (классика 1.1 — повороты/подводы). */\n  ufhLoopLengthLayoutFactor: number;\n  ufhLoopDeltaTK: number;\n  ufhLoopVelocityMinMps: number;\n  ufhLoopVelocityMaxMps: number;\n  maxUfhLoopPressureDropKPa: number;\n  ufhLoopMinNominalDiameterMm: number;\n  ufhParasiticDownTriggerWm2: number;\n  ufhParasiticDownToUpRatio: number;\n  ufhLoopPipeResizeEnabled: boolean;\n  ufhLoopPressureUtilizationForResize: number;\n  roughnessMmByMaterial: Record<string, number>;\n  localLossZeta: {\n    elbow90: number;\n    teeBranch: number;\n    teePass: number;\n    teeBranchTakeoff: number;\n    mixingNode: number;\n    collector: number;\n  };\n  pumpHeadMarginPercent: number;\n  pumpDutyQMaxUtilizationPercent: number;\n  pumpMinHeadAtDutyM: number;\n  pumpMaxHeadMarginPercent: number;\n  pumpMinHeadAtQMaxM: number;\n  primaryFlowMarginPercent: number;\n  balancingValveKPaPerTurn: number;\n}\n\n/** Алиас для потребителей (report/hydraulics), совпадает с HydraulicsApplianceRulesDoc. */\nexport type HydraulicsApplianceRules = HydraulicsApplianceRulesDoc;",
+      "lines": 33,
+      "secondFile": {
+        "end": 96,
+        "endLoc": {
+          "column": 6,
+          "line": 96,
+          "position": 3144
+        },
+        "name": "hydraulics/types.d.ts",
+        "start": 65,
+        "startLoc": {
+          "column": 44,
+          "line": 65,
+          "position": 2191
+        }
+      },
+      "tokens": 113
+    },
+    {
+      "firstFile": {
+        "end": 225,
+        "endLoc": {
+          "column": 9,
+          "line": 225,
+          "position": 7287
+        },
+        "name": "hydraulics/buildGraph.js",
+        "start": 209,
+        "startLoc": {
+          "column": 31,
+          "line": 209,
+          "position": 6815
+        }
+      },
+      "format": "javascript",
+      "fragment": "              from: collectorId,\n              to: loopNodeId,\n              lengthM: loop.loopLengthM,\n              fluid: 'heating',\n              designFlowM3PerHour: loop.flowRateM3PerHour,\n              supplyC: room.circuitSupplyC,\n              returnC: room.circuitReturnC,\n              segmentRole: 'ufh_loop',\n              ...(loop.catalogPipeId\n                ? { preferredCatalogPipeId: loop.catalogPipeId }\n                : {}),\n            });\n          }\n        }\n      }\n\n      for (const room of uniboxRooms) {",
+      "lines": 17,
+      "secondFile": {
+        "end": 250,
+        "endLoc": {
+          "column": 3,
+          "line": 250,
+          "position": 8175
+        },
+        "name": "hydraulics/buildGraph.js",
+        "start": 235,
+        "startLoc": {
+          "column": 31,
+          "line": 235,
+          "position": 7738
+        }
+      },
+      "tokens": 61
+    },
+    {
+      "firstFile": {
+        "end": 76,
+        "endLoc": {
+          "column": 8,
+          "line": 76,
+          "position": 2646
+        },
+        "name": "hydraulics/buildHydraulicsProposal.js",
+        "start": 60,
+        "startLoc": {
+          "column": 0,
+          "line": 60,
+          "position": 2125
+        }
+      },
+      "format": "javascript",
+      "fragment": "function findBoilerInCatalog(boilers, catalogBoilerId) {\n  if (!catalogBoilerId || !boilers) return null;\n  const all = [\n    ...(boilers.doubleCircuit ?? []),\n    ...(boilers.singleCircuit ?? []),\n  ];\n  return all.find((b) => {\n    const id = /** @type {{ id?: string }} */ (b).id;\n    return id === catalogBoilerId || b.model === catalogBoilerId;\n  }) ?? null;\n}\n\n/**\n * @param {import('./types.js').HydraulicsPipeSegmentProposal[]} segments\n * @returns {import('./types.js').HydraulicsPipeProposalLine[]}\n */\nfunction aggregatePipeLinesFromSegments(segments) {",
+      "lines": 17,
+      "secondFile": {
+        "end": 36,
+        "endLoc": {
+          "column": 8,
+          "line": 36,
+          "position": 1229
+        },
+        "name": "hydraulics/resolveSystemPumps.js",
+        "start": 20,
+        "startLoc": {
+          "column": 0,
+          "line": 20,
+          "position": 756
+        }
+      },
+      "tokens": 82
+    },
+    {
+      "firstFile": {
+        "end": 55,
+        "endLoc": {
+          "column": 8,
+          "line": 55,
+          "position": 1899
+        },
+        "name": "hydraulics/buildSnapshots.js",
+        "start": 35,
+        "startLoc": {
+          "column": 2,
+          "line": 35,
+          "position": 1388
+        }
+      },
+      "format": "javascript",
+      "fragment": "  };\n}\n\n/**\n * @param {import('../types/shared-types.js').BuildingInput | undefined | null} building\n * @returns {Map<string, number>}\n */\nfunction roomFloorById(building) {\n  /** @type {Map<string, number>} */\n  const map = new Map();\n  for (const room of building?.rooms ?? []) {\n    if (room?.id) map.set(room.id, Number(room.floor) || 1);\n  }\n  return map;\n}\n\n/**\n * @param {import('../types/shared-types.js').HydraulicsSurveyInput | undefined | null} hydraulics\n * @returns {Map<string, number>}\n */\nfunction radiatorBranchOverrideByRoomId(hydraulics) {",
+      "lines": 21,
+      "secondFile": {
+        "end": 320,
+        "endLoc": {
+          "column": 8,
+          "line": 320,
+          "position": 11876
+        },
+        "name": "matching/manifold.js",
+        "start": 299,
+        "startLoc": {
+          "column": 40,
+          "line": 299,
+          "position": 11342
+        }
+      },
+      "tokens": 60
+    },
+    {
+      "firstFile": {
+        "end": 65,
+        "endLoc": {
+          "column": 67,
+          "line": 65,
+          "position": 2316
+        },
+        "name": "hydraulics/pickPipe.js",
+        "start": 48,
+        "startLoc": {
+          "column": 23,
+          "line": 48,
+          "position": 1718
+        }
+      },
+      "format": "javascript",
+      "fragment": "  let pool = [...pipes];\n\n  if (materialPreference) {\n    const pref = materialPreference.toLowerCase();\n    const filtered = pool.filter((p) => {\n      const m = String(p.material ?? '').toLowerCase();\n      if (pref === 'pex') return m.includes('pex');\n      if (pref === 'metal_plastic') {\n        return m.includes('metal') || m.includes('pex-al') || m.includes('ал');\n      }\n      if (pref === 'steel') return m.includes('steel') || m.includes('сталь');\n      return true;\n    });\n    if (filtered.length) pool = filtered;\n  }\n\n  pool.sort(\n    (a, b) => pipeInternalDiameterMm(a) - pipeInternalDiameterMm(b),",
+      "lines": 18,
+      "secondFile": {
+        "end": 123,
+        "endLoc": {
+          "column": 75,
+          "line": 123,
+          "position": 4277
+        },
+        "name": "logic/ufhLoopHydraulics.js",
+        "start": 107,
+        "startLoc": {
+          "column": 69,
+          "line": 107,
+          "position": 3684
+        }
+      },
+      "tokens": 144
+    },
+    {
+      "firstFile": {
+        "end": 234,
+        "endLoc": {
+          "column": 8,
+          "line": 234,
+          "position": 7254
+        },
+        "name": "hydraulics/pickPipe.js",
+        "start": 219,
+        "startLoc": {
+          "column": 43,
+          "line": 219,
+          "position": 6825
+        }
+      },
+      "format": "javascript",
+      "fragment": "    flowM3PerHour: edge.designFlowM3PerHour,\n    lengthM: edge.lengthM,\n    internalDiameterMm: internalMm,\n    roughnessMm: roughness,\n    localZeta,\n  });\n\n  return {\n    edgeId: edge.id,\n    catalogPipeId: chosen.id,\n    velocityMps: hyd.velocityMps,\n    pressureDropKPa: hyd.pressureDropKPa,\n    internalDiameterMm: internalMm,\n    ...(velocityLimitExceeded ? { velocityLimitExceeded: true } : {}),\n    ...(velocityBelowMin ? { velocityBelowMin: true } : {}),\n    ...(guard.mainTransitGuardApplied",
+      "lines": 16,
+      "secondFile": {
+        "end": 143,
+        "endLoc": {
+          "column": 8,
+          "line": 143,
+          "position": 4302
+        },
+        "name": "hydraulics/pickTrunkChain.js",
+        "start": 128,
+        "startLoc": {
+          "column": 23,
+          "line": 128,
+          "position": 3873
+        }
+      },
+      "tokens": 80
+    },
+    {
+      "firstFile": {
+        "end": 520,
+        "endLoc": {
+          "column": 1,
+          "line": 520,
+          "position": 15330
+        },
+        "name": "hydraulics/types.d.ts",
+        "start": 501,
+        "startLoc": {
+          "column": 82,
+          "line": 501,
+          "position": 14853
+        }
+      },
+      "format": "typescript",
+      "fragment": "  segmentRole: 'main' | 'trunk' | 'branch' | 'ufh_collector_transit' | 'ufh_loop' | 'dhw';\n  lengthM: number;\n  catalogPipeId: string;\n  brand: string;\n  model: string;\n  material: string;\n  outerDiameterMm: number;\n  wallThicknessMm: number;\n  internalDiameterMm: number;\n  velocityMps: number;\n  pressureDropKPa: number;\n  pricePerMeter: number;\n  linePrice: number;\n  velocityLimitExceeded?: boolean;\n  velocityBelowMin?: boolean;\n  isMainLine?: boolean;\n  mainTransitGuardApplied?: boolean;\n  catalogPoolExhausted?: boolean;\n  groupedRoomIds?: string[];\n}",
+      "lines": 20,
+      "secondFile": {
+        "end": 62,
+        "endLoc": {
+          "column": 1,
+          "line": 62,
+          "position": 1626
+        },
+        "name": "types/hydraulics.ts",
+        "start": 43,
+        "startLoc": {
+          "column": 82,
+          "line": 43,
+          "position": 1149
+        }
+      },
+      "tokens": 84
+    },
+    {
+      "firstFile": {
+        "end": 542,
+        "endLoc": {
+          "column": 6,
+          "line": 542,
+          "position": 15819
+        },
+        "name": "hydraulics/types.d.ts",
+        "start": 526,
+        "startLoc": {
+          "column": 34,
+          "line": 526,
+          "position": 15479
+        }
+      },
+      "format": "typescript",
+      "fragment": "  pumpSource: HydraulicsPumpSource;\n  catalogPumpId?: string;\n  catalogBoilerId?: string;\n  brand: string;\n  model: string;\n  segment?: 'premium' | 'medium' | 'budget';\n  price: number;\n  modeName: string;\n  headAtDesignM: number;\n  headRequiredM: number;\n  designFlowM3PerHour: number;\n  headMarginPercent: number;\n  connectionNominalMm?: number;\n  note?: string;\n}\n\nexport interface HydraulicsProposalReport {",
+      "lines": 17,
+      "secondFile": {
+        "end": 82,
+        "endLoc": {
+          "column": 2,
+          "line": 82,
+          "position": 2125
+        },
+        "name": "types/hydraulics.ts",
+        "start": 68,
+        "startLoc": {
+          "column": 42,
+          "line": 68,
+          "position": 1792
+        }
+      },
+      "tokens": 63
+    },
+    {
+      "firstFile": {
+        "end": 48,
+        "endLoc": {
+          "column": 19,
+          "line": 48,
+          "position": 1220
+        },
+        "name": "logic/ufhLoopHydraulics.types.d.ts",
+        "start": 32,
+        "startLoc": {
+          "column": 41,
+          "line": 32,
+          "position": 729
+        }
+      },
+      "format": "typescript",
+      "fragment": "export interface UfhLoopHydraulicsResult {\n  loopId: string;\n  loopLengthM: number;\n  pipeSpacingMm: number;\n  heatLoadWatts: number;\n  deltaTK: number;\n  flowRateM3PerHour: number;\n  massFlowKgPerSec: number;\n  elbowCount: number;\n  localZeta: number;\n  catalogPipeId: string | null;\n  /** Ø до оптимизации (минимальный из каталога). */\n  initialCatalogPipeId: string | null;\n  internalDiameterMm: number | null;\n  velocityMps: number | null;\n  pressureDropKPa: number | null;\n  pipeResizeAction: UfhLoopPipeResizeAction;",
+      "lines": 17,
+      "secondFile": {
+        "end": 693,
+        "endLoc": {
+          "column": 23,
+          "line": 693,
+          "position": 24742
+        },
+        "name": "types/shared-types.d.ts",
+        "start": 678,
+        "startLoc": {
+          "column": 17,
+          "line": 678,
+          "position": 24279
+        }
+      },
+      "tokens": 69
+    },
+    {
+      "firstFile": {
+        "end": 32,
+        "endLoc": {
+          "column": 8,
+          "line": 32,
+          "position": 1240
+        },
+        "name": "projects/serializeProject.js",
+        "start": 14,
+        "startLoc": {
+          "column": 22,
+          "line": 14,
+          "position": 754
+        }
+      },
+      "format": "javascript",
+      "fragment": "function toPlainRecord(doc) {\n  if (\n    doc &&\n    typeof doc === 'object' &&\n    'toObject' in doc &&\n    typeof /** @type {{ toObject?: () => unknown }} */ (doc).toObject === 'function'\n  ) {\n    const plain = /** @type {{ toObject: () => unknown }} */ (doc).toObject();\n    return isPlainObject(plain) ? plain : {};\n  }\n  if (isPlainObject(doc)) return doc;\n  return /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (doc));\n}\n\n/**\n * @param {unknown} value\n * @returns {string}\n */\nfunction formatTimestamp(value) {",
+      "lines": 19,
+      "secondFile": {
+        "end": 29,
+        "endLoc": {
+          "column": 6,
+          "line": 29,
+          "position": 1048
+        },
+        "name": "projects/serializeShare.js",
+        "start": 11,
+        "startLoc": {
+          "column": 27,
+          "line": 11,
+          "position": 398
+        }
+      },
+      "tokens": 68
+    },
+    {
+      "firstFile": {
+        "end": 1312,
+        "endLoc": {
+          "column": 6,
+          "line": 1312,
+          "position": 49966
+        },
+        "name": "types/shared-types.d.ts",
+        "start": 1296,
+        "startLoc": {
+          "column": 32,
+          "line": 1296,
+          "position": 49614
+        }
+      },
+      "format": "typescript",
+      "fragment": "  objectType: BuildingObjectType;\n  equipmentTypeLabel: string;\n  brand: string;\n  model: string;\n  qty: number;\n  qtyUnit: FinancialBomQtyUnit;\n  unitPriceUah: number | null;\n  lineTotalUah: number | null;\n  scopePath: string[];\n  categoryId: FinancialBomCategoryId;\n  catalogId?: string;\n  source: string;\n  note?: string;\n}\n\n/** Підсумки report.commercial.totals. */\nexport interface CommercialBomTotals {",
+      "lines": 17,
+      "secondFile": {
+        "end": 32,
+        "endLoc": {
+          "column": 2,
+          "line": 32,
+          "position": 860
+        },
+        "name": "utils/parsers/parseCommercialBomFromReport.ts",
+        "start": 19,
+        "startLoc": {
+          "column": 35,
+          "line": 19,
+          "position": 565
+        }
+      },
+      "tokens": 58
+    },
+    {
+      "firstFile": {
+        "end": 1629,
+        "endLoc": {
+          "column": 1,
+          "line": 1629,
+          "position": 59424
+        },
+        "name": "types/shared-types.d.ts",
+        "start": 1614,
+        "startLoc": {
+          "column": 36,
+          "line": 1614,
+          "position": 59015
+        }
+      },
+      "format": "typescript",
+      "fragment": "export interface PublicSharePayload {\n  shareToken: string;\n  schemaVersion: 1;\n  clientName: string;\n  label?: string;\n  objectType?: 'house' | 'apartment';\n  publishedAt: string;\n  reportGeneratedAt?: string;\n  catalogSource?: 'file' | 'mongo';\n  temps?: unknown;\n  commercial: unknown;\n  matching: Record<string, unknown>;\n  calculations: Record<string, unknown>;\n  warnings?: string[];\n  publisherPresentation?: SharePublisherPresentation;\n}",
+      "lines": 16,
+      "secondFile": {
+        "end": 77,
+        "endLoc": {
+          "column": 1,
+          "line": 77,
+          "position": 1922
+        },
+        "name": "types/projectsApi.ts",
+        "start": 62,
+        "startLoc": {
+          "column": 33,
+          "line": 62,
+          "position": 1513
+        }
+      },
+      "tokens": 81
+    },
+    {
+      "firstFile": {
+        "end": 25,
+        "endLoc": {
+          "column": 1,
+          "line": 25,
+          "position": 368
+        },
+        "name": "components/AppErrorBoundary/AppErrorBoundary.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 0,
+          "line": 1,
+          "position": 0
+        }
+      },
+      "format": "css",
+      "fragment": ".root {\n  min-height: 100svh;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  gap: 16px;\n  padding: 24px;\n  text-align: center;\n}\n\n.title {\n  margin: 0;\n  font: 700 20px/1.3 var(--heading);\n  color: var(--text-h);\n}\n\n.message {\n  margin: 0;\n  max-width: 420px;\n  font: 400 14px/1.5 var(--sans);\n  color: var(--text);\n}\n\n.button {",
+      "lines": 25,
+      "secondFile": {
+        "end": 25,
+        "endLoc": {
+          "column": 1,
+          "line": 25,
+          "position": 368
+        },
+        "name": "components/BootstrapErrorScreen/BootstrapErrorScreen.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 0,
+          "line": 1,
+          "position": 0
+        }
+      },
+      "tokens": 121
+    },
+    {
+      "firstFile": {
+        "end": 75,
+        "endLoc": {
+          "column": 1,
+          "line": 75,
+          "position": 1419
+        },
+        "name": "components/BoilerReport/BoilerReportDialog.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 78,
+          "line": 1,
+          "position": 78
+        }
+      },
+      "format": "css",
+      "fragment": "/* Призначення: модалка звіту підбору котла. */\n\n.backdrop {\n  position: fixed;\n  inset: 0;\n  z-index: 100;\n  background: color-mix(in srgb, #000 45%, transparent);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 16px;\n}\n\n.dialog {\n  width: min(920px, 100%);\n  max-height: min(88vh, 860px);\n  overflow: auto;\n  background: var(--surface);\n  border: 1px solid var(--border);\n  border-radius: 14px;\n  box-shadow: var(--shadow);\n  padding: 16px 18px;\n}\n\n.header {\n  display: flex;\n  align-items: flex-start;\n  justify-content: space-between;\n  gap: 12px;\n  margin-bottom: 12px;\n}\n\n.title {\n  margin: 0;\n  font-size: 17px;\n  color: var(--text-h);\n}\n\n.closeIconButton {\n  flex-shrink: 0;\n  border: 1px solid var(--border);\n  background: var(--surface-2);\n  border-radius: 8px;\n  padding: 6px 10px;\n  cursor: pointer;\n  font: inherit;\n  color: var(--text-h);\n}\n\n.closeIconButton:hover {\n  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));\n}\n\n.closeButton {\n  margin-top: 14px;\n  width: 100%;\n  border: 1px solid var(--border);\n  background: var(--surface-2);\n  border-radius: 10px;\n  padding: 10px 12px;\n  cursor: pointer;\n  font: inherit;\n  color: var(--text-h);\n}\n\n.closeButton:hover {\n  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));\n}\n\n.empty {\n  margin: 0;\n  font-size: 13px;\n  color: var(--text);\n  opacity: 0.85;\n}",
+      "lines": 75,
+      "secondFile": {
+        "end": 75,
+        "endLoc": {
+          "column": 1,
+          "line": 75,
+          "position": 1414
+        },
+        "name": "components/HydraulicsReport/HydraulicsReportDialog.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 73,
+          "line": 1,
+          "position": 73
+        }
+      },
+      "tokens": 433
+    },
+    {
+      "firstFile": {
+        "end": 27,
+        "endLoc": {
+          "column": 14,
+          "line": 27,
+          "position": 557
+        },
+        "name": "components/BoilerReport/BoilerReportDialog.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 78,
+          "line": 1,
+          "position": 78
+        }
+      },
+      "format": "css",
+      "fragment": "/* Призначення: модалка звіту підбору котла. */\n\n.backdrop {\n  position: fixed;\n  inset: 0;\n  z-index: 100;\n  background: color-mix(in srgb, #000 45%, transparent);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 16px;\n}\n\n.dialog {\n  width: min(920px, 100%);\n  max-height: min(88vh, 860px);\n  overflow: auto;\n  background: var(--surface);\n  border: 1px solid var(--border);\n  border-radius: 14px;\n  box-shadow: var(--shadow);\n  padding: 16px 18px;\n}\n\n.header {\n  display: flex;\n  align-items: flex-start;",
+      "lines": 27,
+      "secondFile": {
+        "end": 27,
+        "endLoc": {
+          "column": 6,
+          "line": 27,
+          "position": 642
+        },
+        "name": "components/ProjectsDialog/ProjectsDialog.module.css",
+        "start": 2,
+        "startLoc": {
+          "column": 101,
+          "line": 2,
+          "position": 170
+        }
+      },
+      "tokens": 148
+    },
+    {
+      "firstFile": {
+        "end": 75,
+        "endLoc": {
+          "column": 1,
+          "line": 75,
+          "position": 1419
+        },
+        "name": "components/BoilerReport/BoilerReportDialog.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 78,
+          "line": 1,
+          "position": 78
+        }
+      },
+      "format": "css",
+      "fragment": "/* Призначення: модалка звіту підбору котла. */\n\n.backdrop {\n  position: fixed;\n  inset: 0;\n  z-index: 100;\n  background: color-mix(in srgb, #000 45%, transparent);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 16px;\n}\n\n.dialog {\n  width: min(920px, 100%);\n  max-height: min(88vh, 860px);\n  overflow: auto;\n  background: var(--surface);\n  border: 1px solid var(--border);\n  border-radius: 14px;\n  box-shadow: var(--shadow);\n  padding: 16px 18px;\n}\n\n.header {\n  display: flex;\n  align-items: flex-start;\n  justify-content: space-between;\n  gap: 12px;\n  margin-bottom: 12px;\n}\n\n.title {\n  margin: 0;\n  font-size: 17px;\n  color: var(--text-h);\n}\n\n.closeIconButton {\n  flex-shrink: 0;\n  border: 1px solid var(--border);\n  background: var(--surface-2);\n  border-radius: 8px;\n  padding: 6px 10px;\n  cursor: pointer;\n  font: inherit;\n  color: var(--text-h);\n}\n\n.closeIconButton:hover {\n  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));\n}\n\n.closeButton {\n  margin-top: 14px;\n  width: 100%;\n  border: 1px solid var(--border);\n  background: var(--surface-2);\n  border-radius: 10px;\n  padding: 10px 12px;\n  cursor: pointer;\n  font: inherit;\n  color: var(--text-h);\n}\n\n.closeButton:hover {\n  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));\n}\n\n.empty {\n  margin: 0;\n  font-size: 13px;\n  color: var(--text);\n  opacity: 0.85;\n}",
+      "lines": 75,
+      "secondFile": {
+        "end": 75,
+        "endLoc": {
+          "column": 1,
+          "line": 75,
+          "position": 1429
+        },
+        "name": "components/RadiatorsReport/RadiatorsReportDialog.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 88,
+          "line": 1,
+          "position": 88
+        }
+      },
+      "tokens": 433
+    },
+    {
+      "firstFile": {
+        "end": 75,
+        "endLoc": {
+          "column": 1,
+          "line": 75,
+          "position": 1419
+        },
+        "name": "components/BoilerReport/BoilerReportDialog.module.css",
+        "start": 15,
+        "startLoc": {
+          "column": 16,
+          "line": 15,
+          "position": 313
+        }
+      },
+      "format": "css",
+      "fragment": "  width: min(920px, 100%);\n  max-height: min(88vh, 860px);\n  overflow: auto;\n  background: var(--surface);\n  border: 1px solid var(--border);\n  border-radius: 14px;\n  box-shadow: var(--shadow);\n  padding: 16px 18px;\n}\n\n.header {\n  display: flex;\n  align-items: flex-start;\n  justify-content: space-between;\n  gap: 12px;\n  margin-bottom: 12px;\n}\n\n.title {\n  margin: 0;\n  font-size: 17px;\n  color: var(--text-h);\n}\n\n.closeIconButton {\n  flex-shrink: 0;\n  border: 1px solid var(--border);\n  background: var(--surface-2);\n  border-radius: 8px;\n  padding: 6px 10px;\n  cursor: pointer;\n  font: inherit;\n  color: var(--text-h);\n}\n\n.closeIconButton:hover {\n  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));\n}\n\n.closeButton {\n  margin-top: 14px;\n  width: 100%;\n  border: 1px solid var(--border);\n  background: var(--surface-2);\n  border-radius: 10px;\n  padding: 10px 12px;\n  cursor: pointer;\n  font: inherit;\n  color: var(--text-h);\n}\n\n.closeButton:hover {\n  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));\n}\n\n.empty {\n  margin: 0;\n  font-size: 13px;\n  color: var(--text);\n  opacity: 0.85;\n}",
+      "lines": 61,
+      "secondFile": {
+        "end": 75,
+        "endLoc": {
+          "column": 1,
+          "line": 75,
+          "position": 1415
+        },
+        "name": "components/HotWaterReport/HotWaterReportDialog.module.css",
+        "start": 15,
+        "startLoc": {
+          "column": 16,
+          "line": 15,
+          "position": 309
+        }
+      },
+      "tokens": 366
+    },
+    {
+      "firstFile": {
+        "end": 39,
+        "endLoc": {
+          "column": 18,
+          "line": 39,
+          "position": 729
+        },
+        "name": "components/BoilerReport/BoilerReportDialog.module.css",
+        "start": 16,
+        "startLoc": {
+          "column": 27,
+          "line": 16,
+          "position": 351
+        }
+      },
+      "format": "css",
+      "fragment": "  max-height: min(88vh, 860px);\n  overflow: auto;\n  background: var(--surface);\n  border: 1px solid var(--border);\n  border-radius: 14px;\n  box-shadow: var(--shadow);\n  padding: 16px 18px;\n}\n\n.header {\n  display: flex;\n  align-items: flex-start;\n  justify-content: space-between;\n  gap: 12px;\n  margin-bottom: 12px;\n}\n\n.title {\n  margin: 0;\n  font-size: 17px;\n  color: var(--text-h);\n}\n\n.closeIconButton {",
+      "lines": 24,
+      "secondFile": {
+        "end": 39,
+        "endLoc": {
+          "column": 18,
+          "line": 39,
+          "position": 751
+        },
+        "name": "components/UnderfloorHeatingReport/UfhWarningResolutionDialog.module.css",
+        "start": 16,
+        "startLoc": {
+          "column": 27,
+          "line": 16,
+          "position": 373
+        }
+      },
+      "tokens": 119
+    },
+    {
+      "firstFile": {
+        "end": 16,
+        "endLoc": {
+          "column": 1,
+          "line": 16,
+          "position": 292
+        },
+        "name": "components/BoilerReport/BoilerSummaryTable.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 85,
+          "line": 1,
+          "position": 85
+        }
+      },
+      "format": "css",
+      "fragment": "/* Призначення: компактна таблиця котла у блоці «Итог» / RecommendationsBlock. */\n\n.wrap {\n  margin-top: 4px;\n}\n\n.title {\n  margin: 0 0 8px;\n  font-size: 15px;\n  color: var(--text-h);\n}\n\n.hint {\n  composes: hint from global;\n  margin-bottom: 8px;\n}",
+      "lines": 16,
+      "secondFile": {
+        "end": 16,
+        "endLoc": {
+          "column": 1,
+          "line": 16,
+          "position": 285
+        },
+        "name": "components/HotWaterReport/HotWaterSummaryTable.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 81,
+          "line": 1,
+          "position": 81
+        }
+      },
+      "tokens": 90
+    },
+    {
+      "firstFile": {
+        "end": 52,
+        "endLoc": {
+          "column": 1,
+          "line": 52,
+          "position": 837
+        },
+        "name": "components/BoilerReport/BoilerSummaryTable.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 71,
+          "line": 1,
+          "position": 71
+        }
+      },
+      "format": "css",
+      "fragment": "/* Призначення: компактна таблиця котла у блоці «Итог» / RecommendationsBlock. */\n\n.wrap {\n  margin-top: 4px;\n}\n\n.title {\n  margin: 0 0 8px;\n  font-size: 15px;\n  color: var(--text-h);\n}\n\n.hint {\n  composes: hint from global;\n  margin-bottom: 8px;\n}\n\n.attention {\n  margin: 8px 0 0;\n  padding: 8px 10px;\n  font-size: 13px;\n  line-height: 1.35;\n  color: hsl(61, 88%, 52%);\n  font-weight: bold;\n  background: #6d7791;\n  border: 1px solid #fcd34d;\n  border-radius: 6px;\n}\n\n.tableWrap {\n  overflow-x: auto;\n}\n\n.table {\n  width: 100%;\n  border-collapse: collapse;\n  font-size: 13px;\n}\n\n.table th,\n.table td {\n  border: 1px solid var(--border);\n  padding: 6px 8px;\n  text-align: left;\n  vertical-align: top;\n}\n\n.table th {\n  background: var(--surface-2);\n  color: var(--text-h);\n  font-weight: 600;\n}",
+      "lines": 52,
+      "secondFile": {
+        "end": 52,
+        "endLoc": {
+          "column": 1,
+          "line": 52,
+          "position": 847
+        },
+        "name": "components/RadiatorsReport/RadiatorsSummaryTable.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 81,
+          "line": 1,
+          "position": 81
+        }
+      },
+      "tokens": 274
+    },
+    {
+      "firstFile": {
+        "end": 51,
+        "endLoc": {
+          "column": 19,
+          "line": 51,
+          "position": 835
+        },
+        "name": "components/BoilerReport/BoilerSummaryTable.module.css",
+        "start": 27,
+        "startLoc": {
+          "column": 20,
+          "line": 27,
+          "position": 508
+        }
+      },
+      "format": "css",
+      "fragment": "  border-radius: 6px;\n}\n\n.tableWrap {\n  overflow-x: auto;\n}\n\n.table {\n  width: 100%;\n  border-collapse: collapse;\n  font-size: 13px;\n}\n\n.table th,\n.table td {\n  border: 1px solid var(--border);\n  padding: 6px 8px;\n  text-align: left;\n  vertical-align: top;\n}\n\n.table th {\n  background: var(--surface-2);\n  color: var(--text-h);\n  font-weight: 600;",
+      "lines": 25,
+      "secondFile": {
+        "end": 40,
+        "endLoc": {
+          "column": 19,
+          "line": 40,
+          "position": 618
+        },
+        "name": "components/FinancialSummary/FinancialSummaryTable.module.css",
+        "start": 16,
+        "startLoc": {
+          "column": 22,
+          "line": 16,
+          "position": 291
+        }
+      },
+      "tokens": 106
+    },
+    {
+      "firstFile": {
+        "end": 52,
+        "endLoc": {
+          "column": 1,
+          "line": 52,
+          "position": 837
+        },
+        "name": "components/BoilerReport/BoilerSummaryTable.module.css",
+        "start": 27,
+        "startLoc": {
+          "column": 20,
+          "line": 27,
+          "position": 508
+        }
+      },
+      "format": "css",
+      "fragment": "  border-radius: 6px;\n}\n\n.tableWrap {\n  overflow-x: auto;\n}\n\n.table {\n  width: 100%;\n  border-collapse: collapse;\n  font-size: 13px;\n}\n\n.table th,\n.table td {\n  border: 1px solid var(--border);\n  padding: 6px 8px;\n  text-align: left;\n  vertical-align: top;\n}\n\n.table th {\n  background: var(--surface-2);\n  color: var(--text-h);\n  font-weight: 600;\n}",
+      "lines": 26,
+      "secondFile": {
+        "end": 41,
+        "endLoc": {
+          "column": 1,
+          "line": 41,
+          "position": 659
+        },
+        "name": "components/HeatLossReport/HeatLossSummaryTable.module.css",
+        "start": 16,
+        "startLoc": {
+          "column": 18,
+          "line": 16,
+          "position": 330
+        }
+      },
+      "tokens": 107
+    },
+    {
+      "firstFile": {
+        "end": 132,
+        "endLoc": {
+          "column": 60,
+          "line": 132,
+          "position": 5374
+        },
+        "name": "components/BoilerSurveyForm/BoilerSurveyForm.tsx",
+        "start": 115,
+        "startLoc": {
+          "column": 10,
+          "line": 115,
+          "position": 4775
+        }
+      },
+      "format": "tsx",
+      "fragment": "          </button>\n          {onBackToResults != null && (\n            <button\n              type=\"button\"\n              className={reportActionsStyles.backButton}\n              onClick={onBackToResults}\n            >\n              Назад до результатів\n            </button>\n          )}\n        </div>\n        {calcLoading && (\n          <p className={`${styles.hint} ${styles.hintMt8}`} role=\"status\">\n            Оновлення розрахунку…\n          </p>\n        )}\n        {!canOpenReport && !calcLoading && (\n          <p className={`${styles.hint} ${styles.hintMt8}`}>",
+      "lines": 18,
+      "secondFile": {
+        "end": 326,
+        "endLoc": {
+          "column": 60,
+          "line": 326,
+          "position": 12116
+        },
+        "name": "components/HotWaterForm/HotWaterForm.tsx",
+        "start": 309,
+        "startLoc": {
+          "column": 10,
+          "line": 309,
+          "position": 11517
+        }
+      },
+      "tokens": 97
+    },
+    {
+      "firstFile": {
+        "end": 132,
+        "endLoc": {
+          "column": 60,
+          "line": 132,
+          "position": 5374
+        },
+        "name": "components/BoilerSurveyForm/BoilerSurveyForm.tsx",
+        "start": 115,
+        "startLoc": {
+          "column": 10,
+          "line": 115,
+          "position": 4775
+        }
+      },
+      "format": "tsx",
+      "fragment": "          </button>\n          {onBackToResults != null && (\n            <button\n              type=\"button\"\n              className={reportActionsStyles.backButton}\n              onClick={onBackToResults}\n            >\n              Назад до результатів\n            </button>\n          )}\n        </div>\n        {calcLoading && (\n          <p className={`${styles.hint} ${styles.hintMt8}`} role=\"status\">\n            Оновлення розрахунку…\n          </p>\n        )}\n        {!canOpenReport && !calcLoading && (\n          <p className={`${styles.hint} ${styles.hintMt8}`}>",
+      "lines": 18,
+      "secondFile": {
+        "end": 274,
+        "endLoc": {
+          "column": 60,
+          "line": 274,
+          "position": 10838
+        },
+        "name": "components/HydraulicsSection/HydraulicsSection.tsx",
+        "start": 257,
+        "startLoc": {
+          "column": 10,
+          "line": 257,
+          "position": 10239
+        }
+      },
+      "tokens": 97
+    },
+    {
+      "firstFile": {
+        "end": 132,
+        "endLoc": {
+          "column": 60,
+          "line": 132,
+          "position": 5374
+        },
+        "name": "components/BoilerSurveyForm/BoilerSurveyForm.tsx",
+        "start": 115,
+        "startLoc": {
+          "column": 10,
+          "line": 115,
+          "position": 4775
+        }
+      },
+      "format": "tsx",
+      "fragment": "          </button>\n          {onBackToResults != null && (\n            <button\n              type=\"button\"\n              className={reportActionsStyles.backButton}\n              onClick={onBackToResults}\n            >\n              Назад до результатів\n            </button>\n          )}\n        </div>\n        {calcLoading && (\n          <p className={`${styles.hint} ${styles.hintMt8}`} role=\"status\">\n            Оновлення розрахунку…\n          </p>\n        )}\n        {!canOpenReport && !calcLoading && (\n          <p className={`${styles.hint} ${styles.hintMt8}`}>",
+      "lines": 18,
+      "secondFile": {
+        "end": 160,
+        "endLoc": {
+          "column": 60,
+          "line": 160,
+          "position": 5933
+        },
+        "name": "components/RadiatorsSurveyForm/RadiatorsSurveyForm.tsx",
+        "start": 143,
+        "startLoc": {
+          "column": 10,
+          "line": 143,
+          "position": 5334
+        }
+      },
+      "tokens": 97
+    },
+    {
+      "firstFile": {
+        "end": 24,
+        "endLoc": {
+          "column": 1,
+          "line": 24,
+          "position": 421
+        },
+        "name": "components/HotWaterForm/HotWaterForm.module.css",
+        "start": 6,
+        "startLoc": {
+          "column": 11,
+          "line": 6,
+          "position": 245
+        }
+      },
+      "format": "css",
+      "fragment": "  gap: 16px;\n}\n\n.title {\n  margin: 0;\n  font: 700 16px/1.2 var(--sans);\n  color: var(--text-h);\n}\n\n.hint {\n  composes: hint from global;\n  margin: 0;\n}\n\n.hintMt8 {\n  margin-top: 8px;\n}\n\n.row {",
+      "lines": 19,
+      "secondFile": {
+        "end": 26,
+        "endLoc": {
+          "column": 1,
+          "line": 26,
+          "position": 463
+        },
+        "name": "components/WaterHeaterForm/WaterHeaterForm.module.css",
+        "start": 8,
+        "startLoc": {
+          "column": 45,
+          "line": 8,
+          "position": 287
+        }
+      },
+      "tokens": 61
+    },
+    {
+      "firstFile": {
+        "end": 86,
+        "endLoc": {
+          "column": 1,
+          "line": 86,
+          "position": 1361
+        },
+        "name": "components/HotWaterForm/HotWaterForm.module.css",
+        "start": 71,
+        "startLoc": {
+          "column": 17,
+          "line": 71,
+          "position": 1106
+        }
+      },
+      "format": "css",
+      "fragment": "  cursor: pointer;\n}\n\n.label {\n  font: 600 12px/1.2 var(--sans);\n  color: var(--text-h);\n}\n\n.control {\n  border: 1px solid var(--border);\n  border-radius: 12px;\n  padding: 10px 12px;\n  background: var(--surface-2);\n  color: var(--text);\n  font: 500 13px/1.2 var(--sans);\n}",
+      "lines": 16,
+      "secondFile": {
+        "end": 30,
+        "endLoc": {
+          "column": 1,
+          "line": 30,
+          "position": 628
+        },
+        "name": "components/ObjectMetaForm/ObjectMetaForm.module.css",
+        "start": 15,
+        "startLoc": {
+          "column": 14,
+          "line": 15,
+          "position": 373
+        }
+      },
+      "tokens": 95
+    },
+    {
+      "firstFile": {
+        "end": 32,
+        "endLoc": {
+          "column": 1,
+          "line": 32,
+          "position": 491
+        },
+        "name": "components/HotWaterReport/HotWaterReportView.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 121,
+          "line": 1,
+          "position": 121
+        }
+      },
+      "format": "css",
+      "fragment": "/* Назначение: Стили полного отчёта ГВС (модалка шага «Горячая вода»). */\n\n.hint {\n  composes: hint from global;\n}\n\n.dl {\n  display: grid;\n  grid-template-columns: minmax(8rem, 42%) 1fr;\n  gap: 4px 12px;\n  margin: 0;\n  font-size: 13px;\n}\n\n.dl dt {\n  margin: 0;\n  color: var(--text);\n  opacity: 0.9;\n}\n\n.dl dd {\n  margin: 0;\n  color: var(--text-h);\n}\n\n.sectionTitle {\n  margin: 14px 0 8px;\n  font-size: 14px;\n  color: var(--text-h);\n}\n\n.totalLabel {",
+      "lines": 32,
+      "secondFile": {
+        "end": 31,
+        "endLoc": {
+          "column": 1,
+          "line": 31,
+          "position": 501
+        },
+        "name": "components/RadiatorsReport/RadiatorsReportView.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 132,
+          "line": 1,
+          "position": 132
+        }
+      },
+      "tokens": 131
+    },
+    {
+      "firstFile": {
+        "end": 52,
+        "endLoc": {
+          "column": 1,
+          "line": 52,
+          "position": 830
+        },
+        "name": "components/HotWaterReport/HotWaterSummaryTable.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 67,
+          "line": 1,
+          "position": 67
+        }
+      },
+      "format": "css",
+      "fragment": "/* Назначение: Компактная таблица ГВС в блоке «Итог» / RecommendationsBlock. */\n\n.wrap {\n  margin-top: 4px;\n}\n\n.title {\n  margin: 0 0 8px;\n  font-size: 15px;\n  color: var(--text-h);\n}\n\n.hint {\n  composes: hint from global;\n  margin: 8px 0 0;\n}\n\n.attention {\n  margin: 8px 0 0;\n  padding: 8px 10px;\n  font-size: 13px;\n  line-height: 1.35;\n  color: hsl(61, 88%, 52%);\n  font-weight: bold;\n  background: #6d7791;\n  border: 1px solid #fcd34d;\n  border-radius: 6px;\n}\n\n.tableWrap {\n  overflow-x: auto;\n}\n\n.table {\n  width: 100%;\n  border-collapse: collapse;\n  font-size: 13px;\n}\n\n.table th,\n.table td {\n  border: 1px solid var(--border);\n  padding: 6px 8px;\n  text-align: left;\n  vertical-align: top;\n}\n\n.table th {\n  background: var(--surface-2);\n  color: var(--text-h);\n  font-weight: 600;\n}",
+      "lines": 52,
+      "secondFile": {
+        "end": 52,
+        "endLoc": {
+          "column": 1,
+          "line": 52,
+          "position": 831
+        },
+        "name": "components/UnderfloorHeatingReport/UnderfloorHeatingSummaryTable.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 65,
+          "line": 1,
+          "position": 65
+        }
+      },
+      "tokens": 274
+    },
+    {
+      "firstFile": {
+        "end": 52,
+        "endLoc": {
+          "column": 1,
+          "line": 52,
+          "position": 877
+        },
+        "name": "components/Hydraulics/HydraulicsPumpCard.module.css",
+        "start": 36,
+        "startLoc": {
+          "column": 11,
+          "line": 36,
+          "position": 694
+        }
+      },
+      "format": "css",
+      "fragment": "  margin: 0;\n}\n\n.valueStrong {\n  font-weight: 600;\n  color: var(--text-h);\n}\n\n.unit {\n  font-size: 0.92em;\n  color: var(--text-m);\n}\n\n.hintInline {\n  font-size: 0.92em;\n  color: var(--text-m);\n}",
+      "lines": 17,
+      "secondFile": {
+        "end": 118,
+        "endLoc": {
+          "column": 1,
+          "line": 118,
+          "position": 1831
+        },
+        "name": "components/HydraulicsReport/HydraulicsReportView.module.css",
+        "start": 102,
+        "startLoc": {
+          "column": 22,
+          "line": 102,
+          "position": 1648
+        }
+      },
+      "tokens": 67
+    },
+    {
+      "firstFile": {
+        "end": 36,
+        "endLoc": {
+          "column": 1,
+          "line": 36,
+          "position": 644
+        },
+        "name": "components/HydraulicsReport/HydraulicsProposalTable.module.css",
+        "start": 19,
+        "startLoc": {
+          "column": 13,
+          "line": 19,
+          "position": 323
+        }
+      },
+      "format": "css",
+      "fragment": "  width: 100%;\n  border-collapse: collapse;\n  font: 13px/1.35 var(--sans);\n}\n\n.table th,\n.table td {\n  border: 1px solid var(--border);\n  padding: 6px 8px;\n  text-align: left;\n  vertical-align: top;\n  overflow-wrap: anywhere;\n}\n\n.table th {\n  background: color-mix(in srgb, var(--surface) 85%, var(--accent-bg));\n  font-weight: 600;\n}",
+      "lines": 18,
+      "secondFile": {
+        "end": 40,
+        "endLoc": {
+          "column": 1,
+          "line": 40,
+          "position": 864
+        },
+        "name": "components/RadiatorProposalLineTable/RadiatorProposalLineTable.module.css",
+        "start": 23,
+        "startLoc": {
+          "column": 21,
+          "line": 23,
+          "position": 543
+        }
+      },
+      "tokens": 106
+    },
+    {
+      "firstFile": {
+        "end": 38,
+        "endLoc": {
+          "column": 1,
+          "line": 38,
+          "position": 647
+        },
+        "name": "components/HydraulicsReport/HydraulicsProposalTable.module.css",
+        "start": 21,
+        "startLoc": {
+          "column": 12,
+          "line": 21,
+          "position": 366
+        }
+      },
+      "format": "css",
+      "fragment": "  font: 13px/1.35 var(--sans);\n}\n\n.table th,\n.table td {\n  border: 1px solid var(--border);\n  padding: 6px 8px;\n  text-align: left;\n  vertical-align: top;\n  overflow-wrap: anywhere;\n}\n\n.table th {\n  background: color-mix(in srgb, var(--surface) 85%, var(--accent-bg));\n  font-weight: 600;\n}\n\n.empty {",
+      "lines": 18,
+      "secondFile": {
+        "end": 42,
+        "endLoc": {
+          "column": 2,
+          "line": 42,
+          "position": 868
+        },
+        "name": "components/RadiatorProposalLineTable/RadiatorProposalLineTable.module.css",
+        "start": 25,
+        "startLoc": {
+          "column": 12,
+          "line": 25,
+          "position": 586
+        }
+      },
+      "tokens": 95
+    },
+    {
+      "firstFile": {
+        "end": 58,
+        "endLoc": {
+          "column": 21,
+          "line": 58,
+          "position": 1183
+        },
+        "name": "components/ModalDialog/ModalDialog.tsx",
+        "start": 41,
+        "startLoc": {
+          "column": 14,
+          "line": 41,
+          "position": 819
+        }
+      },
+      "format": "tsx",
+      "fragment": "      document.removeEventListener('keydown', onKeyDown);\n    };\n  }, [open, onClose]);\n\n  if (!open) return null;\n\n  return (\n    <div\n      className={styles.backdrop}\n      role=\"presentation\"\n      onClick={(e) => {\n        if (e.target === e.currentTarget) onClose();\n      }}\n    >\n      <div\n        ref={dialogRef}\n        className={styles.dialog}\n        role=\"dialog\"",
+      "lines": 18,
+      "secondFile": {
+        "end": 51,
+        "endLoc": {
+          "column": 24,
+          "line": 51,
+          "position": 1479
+        },
+        "name": "components/UnderfloorHeatingReport/UfhWarningResolutionDialog.tsx",
+        "start": 33,
+        "startLoc": {
+          "column": 12,
+          "line": 33,
+          "position": 1088
+        }
+      },
+      "tokens": 84
+    },
+    {
+      "firstFile": {
+        "end": 83,
+        "endLoc": {
+          "column": 29,
+          "line": 83,
+          "position": 1475
+        },
+        "name": "components/ProjectTransferDialog/ProjectTransferDialog.module.css",
+        "start": 2,
+        "startLoc": {
+          "column": 104,
+          "line": 2,
+          "position": 108
+        }
+      },
+      "format": "css",
+      "fragment": " * Назначение: стили модалки переноса проєктів (import/export JSON).\n */\n\n.backdrop {\n  position: fixed;\n  inset: 0;\n  z-index: 100;\n  background: color-mix(in srgb, #000 45%, transparent);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 16px;\n}\n\n.dialog {\n  width: min(520px, 100%);\n  max-height: min(80vh, 640px);\n  overflow: auto;\n  background: var(--surface);\n  border: 1px solid var(--border);\n  border-radius: 14px;\n  box-shadow: var(--shadow);\n  padding: 16px 18px;\n}\n\n.title {\n  margin: 0 0 12px;\n  font: 700 17px/1.3 var(--heading);\n  color: var(--text-h);\n}\n\n.section {\n  margin-bottom: 16px;\n}\n\n.sectionTitle {\n  margin: 0 0 6px;\n  font: 600 14px/1.3 var(--sans);\n  color: var(--text-h);\n}\n\n.sectionHint {\n  margin: 0 0 10px;\n  font: 500 13px/1.45 var(--sans);\n  color: var(--text);\n}\n\n.primaryAction {\n  border: 1px solid var(--accent-border);\n  border-radius: 10px;\n  padding: 10px 14px;\n  background: var(--accent);\n  color: #fff;\n  font: 600 13px/1.2 var(--sans);\n  cursor: pointer;\n}\n\n.primaryAction:hover:not(:disabled) {\n  filter: brightness(1.05);\n}\n\n.primaryAction:disabled {\n  opacity: 0.65;\n  cursor: wait;\n}\n\n.list {\n  list-style: none;\n  margin: 0;\n  padding: 0;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n.itemButton {\n  width: 100%;\n  text-align: left;\n  padding: 10px 12px;\n  border-radius: 10px;\n  border: 1px solid var(--border);\n  background: var(--surface-2);",
+      "lines": 82,
+      "secondFile": {
+        "end": 75,
+        "endLoc": {
+          "column": 1,
+          "line": 75,
+          "position": 1457
+        },
+        "name": "components/WaterHeaterReport/WaterHeaterReportDialog.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 115,
+          "line": 1,
+          "position": 115
+        }
+      },
+      "tokens": 434
+    },
+    {
+      "firstFile": {
+        "end": 89,
+        "endLoc": {
+          "column": 17,
+          "line": 89,
+          "position": 1558
+        },
+        "name": "components/ProjectTransferDialog/ProjectTransferDialog.module.css",
+        "start": 65,
+        "startLoc": {
+          "column": 14,
+          "line": 65,
+          "position": 1199
+        }
+      },
+      "format": "css",
+      "fragment": "  cursor: wait;\n}\n\n.list {\n  list-style: none;\n  margin: 0;\n  padding: 0;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n.itemButton {\n  width: 100%;\n  text-align: left;\n  padding: 10px 12px;\n  border-radius: 10px;\n  border: 1px solid var(--border);\n  background: var(--surface-2);\n  cursor: pointer;\n  color: var(--text-h);\n  font: inherit;\n}\n\n.itemButton:hover:not(:disabled) {",
+      "lines": 25,
+      "secondFile": {
+        "end": 58,
+        "endLoc": {
+          "column": 17,
+          "line": 58,
+          "position": 1097
+        },
+        "name": "components/ProjectsDialog/ProjectsDialog.module.css",
+        "start": 34,
+        "startLoc": {
+          "column": 17,
+          "line": 34,
+          "position": 738
+        }
+      },
+      "tokens": 110
+    },
+    {
+      "firstFile": {
+        "end": 53,
+        "endLoc": {
+          "column": 24,
+          "line": 53,
+          "position": 1402
+        },
+        "name": "components/ProjectTransferDialog/ProjectTransferDialog.tsx",
+        "start": 38,
+        "startLoc": {
+          "column": 29,
+          "line": 38,
+          "position": 1082
+        }
+      },
+      "format": "tsx",
+      "fragment": "}: ProjectTransferDialogProps) {\n  if (!open) return null;\n\n  return (\n    <div\n      className={styles.backdrop}\n      role=\"presentation\"\n      onClick={(e) => {\n        if (e.target === e.currentTarget) onClose();\n      }}\n    >\n      <div\n        className={styles.dialog}\n        role=\"dialog\"\n        aria-modal=\"true\"\n        aria-labelledby=\"project-transfer-dialog-title\"",
+      "lines": 16,
+      "secondFile": {
+        "end": 48,
+        "endLoc": {
+          "column": 24,
+          "line": 48,
+          "position": 1239
+        },
+        "name": "components/ProjectsDialog/ProjectsDialog.tsx",
+        "start": 33,
+        "startLoc": {
+          "column": 22,
+          "line": 33,
+          "position": 919
+        }
+      },
+      "tokens": 67
+    },
+    {
+      "firstFile": {
+        "end": 75,
+        "endLoc": {
+          "column": 1,
+          "line": 75,
+          "position": 1429
+        },
+        "name": "components/RadiatorsReport/RadiatorsReportDialog.module.css",
+        "start": 1,
+        "startLoc": {
+          "column": 86,
+          "line": 1,
+          "position": 86
+        }
+      },
+      "format": "css",
+      "fragment": "/* Призначення: модалка звіту підбору радіаторів. */\n\n.backdrop {\n  position: fixed;\n  inset: 0;\n  z-index: 100;\n  background: color-mix(in srgb, #000 45%, transparent);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 16px;\n}\n\n.dialog {\n  width: min(920px, 100%);\n  max-height: min(88vh, 860px);\n  overflow: auto;\n  background: var(--surface);\n  border: 1px solid var(--border);\n  border-radius: 14px;\n  box-shadow: var(--shadow);\n  padding: 16px 18px;\n}\n\n.header {\n  display: flex;\n  align-items: flex-start;\n  justify-content: space-between;\n  gap: 12px;\n  margin-bottom: 12px;\n}\n\n.title {\n  margin: 0;\n  font-size: 17px;\n  color: var(--text-h);\n}\n\n.closeIconButton {\n  flex-shrink: 0;\n  border: 1px solid var(--border);\n  background: var(--surface-2);\n  border-radius: 8px;\n  padding: 6px 10px;\n  cursor: pointer;\n  font: inherit;\n  color: var(--text-h);\n}\n\n.closeIconButton:hover {\n  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));\n}\n\n.closeButton {\n  margin-top: 14px;\n  width: 100%;\n  border: 1px solid var(--border);\n  background: var(--surface-2);\n  border-radius: 10px;\n  padding: 10px 12px;\n  cursor: pointer;\n  font: inherit;\n  color: var(--text-h);\n}\n\n.closeButton:hover {\n  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));\n}\n\n.empty {\n  margin: 0;\n  font-size: 13px;\n  color: var(--text);\n  opacity: 0.85;\n}",
+      "lines": 75,
+      "secondFile": {
+        "end": 76,
+        "endLoc": {
+          "column": 1,
+          "line": 76,
+          "position": 1513
+        },
+        "name": "components/UnderfloorHeatingReport/UnderfloorHeatingReportDialog.module.css",
+        "start": 2,
+        "startLoc": {
+          "column": 96,
+          "line": 2,
+          "position": 170
+        }
+      },
+      "tokens": 434
+    },
+    {
+      "firstFile": {
+        "end": 69,
+        "endLoc": {
+          "column": 10,
+          "line": 69,
+          "position": 2558
+        },
+        "name": "surveySession/createDefaultSurveyDraft.ts",
+        "start": 51,
+        "startLoc": {
+          "column": 6,
+          "line": 51,
+          "position": 2103
+        }
+      },
+      "format": "typescript",
+      "fragment": "    ]),\n  );\n\n  return createInitialDraftSnapshot({\n    objectMeta: {\n      objectType: 'house',\n      apartmentStackPosition: 'middle_floor',\n      floors: 1,\n      roomsCount: 1,\n      externalWalls: {\n        presetId: 'wall_gas_concrete_d500',\n        thicknessMm: 300,\n        facadeSystem: 'none',\n      },\n      roofPresetId: 'roof_concrete_insulated_flat',\n      boilerPlacementZone: 'kitchen',\n      ventilationReserveMode: 'natural',\n    },\n    rooms: initialRooms,",
+      "lines": 19,
+      "secondFile": {
+        "end": 42,
+        "endLoc": {
+          "column": 10,
+          "line": 42,
+          "position": 1674
+        },
+        "name": "surveySession/createEmptySurveySessionState.ts",
+        "start": 24,
+        "startLoc": {
+          "column": 11,
+          "line": 24,
+          "position": 1219
+        }
+      },
+      "tokens": 59
+    },
+    {
+      "firstFile": {
+        "end": 56,
+        "endLoc": {
+          "column": 1,
+          "line": 56,
+          "position": 2808
+        },
+        "name": "types/surveyDraft.ts",
+        "start": 28,
+        "startLoc": {
+          "column": 20,
+          "line": 28,
+          "position": 1397
+        }
+      },
+      "format": "typescript",
+      "fragment": "  projectId?: string;\n  currentStep: SurveyCurrentStep;\n  objectMeta: ObjectMetaValue;\n  rooms: RoomFormValue[];\n  temps: { insideC: number; outsideC: number; bathroomAirTempC?: number };\n  hotWaterForm: HotWaterFormValue;\n  waterHeaterForm: WaterHeaterFormValue;\n  waterUnderfloorHeating: boolean;\n  underfloorDistributionPreset: UfhDistributionPreset;\n  /** Шаг «Котёл»: график подачи/обратки (пресет под тип котла). */\n  thermalRegimePreset: HeatingThermalRegimePreset;\n  /**\n   * Шаг «Радиаторы»: подводка side (боковая) | bottom (нижняя).\n   * В calc → heatingSystem.radiatorConnection.\n   */\n  radiatorConnection: RadiatorConnection;\n  /**\n   * Шаг «Радиаторы»: глобальный тип приборов auto | sectional | panel.\n   * В calc → heatingSystem.radiatorEmitterPreference.\n   */\n  radiatorEmitterPreference: RadiatorEmitterPreference;\n  ufhPresetId?: UfhModePresetId | null;\n  /** Шаг «Гидравлика» (ΔT расхода, длина магистрали, материал). */\n  hydraulicsForm?: HydraulicsFormValue;\n  /** Layout разводки v3 (ветки; auto = серверный buildGraph). */\n  wiringLayoutV3?: WiringLayoutV3;\n  /** Последний отчёт (в ссылку URL не кладём — слишком большой). */\n  lastCalcReport?: CalcReportJson | null;\n};",
+      "lines": 29,
+      "secondFile": {
+        "end": 43,
+        "endLoc": {
+          "column": 1,
+          "line": 43,
+          "position": 1964
+        },
+        "name": "utils/buildSurveyDraft.ts",
+        "start": 27,
+        "startLoc": {
+          "column": 27,
+          "line": 27,
+          "position": 1323
+        }
+      },
+      "tokens": 85
+    },
+    {
+      "firstFile": {
+        "end": 75,
+        "endLoc": {
+          "column": 34,
+          "line": 75,
+          "position": 1788
+        },
+        "name": "utils/parsers/parseCommercialBomFromReport.ts",
+        "start": 59,
+        "startLoc": {
+          "column": 2,
+          "line": 59,
+          "position": 1495
+        }
+      },
+      "format": "typescript",
+      "fragment": "]);\n\n/**\n * @param {unknown} v\n * @returns {number}\n */\nfunction num(v: unknown, fallback = 0): number {\n  const n = Number(v);\n  return Number.isFinite(n) ? n : fallback;\n}\n\n/**\n * @param {unknown} v\n * @returns {string}\n */\nfunction str(v: unknown): string {\n  return typeof v === 'string' ? v.trim() : '';",
+      "lines": 17,
+      "secondFile": {
+        "end": 23,
+        "endLoc": {
+          "column": 34,
+          "line": 23,
+          "position": 762
+        },
+        "name": "utils/parsers/parseHydraulicsProposalFromReport.ts",
+        "start": 15,
+        "startLoc": {
+          "column": 79,
+          "line": 15,
+          "position": 571
+        }
+      },
+      "tokens": 53
+    }
+  ],
+  "statistics": {
+    "detectionDate": "2026-08-23T20:20:11.925Z",
+    "formats": {
+      "css": {
+        "clones": 20,
+        "duplicatedLines": 740,
+        "duplicatedTokens": 4004,
+        "lines": 6525,
+        "newClones": 0,
+        "newDuplicatedLines": 0,
+        "percentage": 11.340996168582375,
+        "percentageTokens": 9.794520547945206,
+        "sources": 72,
+        "tokens": 40880
+      },
+      "javascript": {
+        "clones": 15,
+        "duplicatedLines": 277,
+        "duplicatedTokens": 1357,
+        "lines": 31430,
+        "newClones": 0,
+        "newDuplicatedLines": 0,
+        "percentage": 0.8813235762010818,
+        "percentageTokens": 1.0148374166143168,
+        "sources": 199,
+        "tokens": 133716
+      },
+      "json": {
+        "clones": 0,
+        "duplicatedLines": 0,
+        "duplicatedTokens": 0,
+        "lines": 60,
+        "newClones": 0,
+        "newDuplicatedLines": 0,
+        "percentage": 0.0,
+        "percentageTokens": 0.0,
+        "sources": 2,
+        "tokens": 198
+      },
+      "tsx": {
+        "clones": 5,
+        "duplicatedLines": 83,
+        "duplicatedTokens": 442,
+        "lines": 13748,
+        "newClones": 0,
+        "newDuplicatedLines": 0,
+        "percentage": 0.6037241780622635,
+        "percentageTokens": 0.5926601322087988,
+        "sources": 99,
+        "tokens": 74579
+      },
+      "typescript": {
+        "clones": 9,
+        "duplicatedLines": 176,
+        "duplicatedTokens": 665,
+        "lines": 18463,
+        "newClones": 0,
+        "newDuplicatedLines": 0,
+        "percentage": 0.9532578670855224,
+        "percentageTokens": 0.8196014148908635,
+        "sources": 190,
+        "tokens": 81137
+      }
+    },
+    "total": {
+      "clones": 49,
+      "duplicatedLines": 1276,
+      "duplicatedTokens": 6468,
+      "lines": 70226,
+      "newClones": 0,
+      "newDuplicatedLines": 0,
+      "percentage": 1.8169908580867484,
+      "percentageTokens": 1.956975583189616,
+      "sources": 562,
+      "tokens": 330510
+    }
+  }
+}

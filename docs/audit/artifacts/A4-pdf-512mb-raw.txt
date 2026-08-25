@@ -1,0 +1,30 @@
+#7 3.517   run `npm fund` for details
+#7 3.518 npm notice
+#7 3.518 npm notice New major version of npm available! 10.8.2 -> 12.0.2
+#7 3.518 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+#7 3.518 npm notice To update run: npm install -g npm@12.0.2
+#7 3.518 npm notice
+#7 DONE 3.6s
+
+#8 exporting to image
+#8 exporting layers
+#8 exporting layers 10.5s done
+#8 exporting manifest sha256:c70c4989c09836a7be1034c220c08158e2eacf29e444b9da89f4837e6af3e437 done
+#8 exporting config sha256:6e34cdf7e58f19571a8581cda5e5e98cde8f6ed7df36dfb6688aa6cec0123a7e done
+#8 exporting attestation manifest sha256:16fcf3993f24f86756e1c266b86ee780b834bb76e48da67a3a07d58fa9d71801 done
+#8 exporting manifest list sha256:147473062ffd8eb10578ef254316f908b69bf1e4b9c7e0095e7a23f4feee76aa done
+#8 naming to docker.io/library/heatcalc-a4-pdf:latest done
+#8 unpacking to docker.io/library/heatcalc-a4-pdf:latest
+#8 unpacking to docker.io/library/heatcalc-a4-pdf:latest 2.5s done
+#8 DONE 13.1s
+# cgroup memory.max = 512 МБ
+# память cgroup до запуска Chromium: 25 МБ
+
+## Последовательные рендеры (по одному)
+| # | launch мс | всего мс | PDF КБ | память cgroup во время, МБ |
+|---|---|---|---|---|
+| 1 | 162 | 2271 | 417 | 264 |
+| 2 | 116 | 2083 | 417 | 268 |
+| 3 | 121 | 2182 | 417 | 269 |
+
+# ПИК памяти cgroup: 275 МБ из 512 МБ доступных

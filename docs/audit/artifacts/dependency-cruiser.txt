@@ -1,0 +1,229 @@
+### dependency-cruiser 18.2.0, ruleset = dependency-cruiser/configs/recommended-strict, typescript 6.0.3
+### CMD: depcruise --config <recommended-strict + exclude node_modules, tsPreCompilationDeps:true> --output-type err-long backend/src
+
+  error no-orphans: backend/src/projects/migrateLegacyProjectOwnerId.js
+    This is an orphan module - it's likely not used (anymore?). Either use it
+    or remove it. If it's logical this module is an orphan (i.e. it's a config
+    file), add an exception for it in your dependency-cruiser configuration. By
+    default this rule does not scrutinize dotfiles (e.g. .eslintrc.js),
+    TypeScript declaration files (.d.ts/ .d.cts/ .d.mts), tsconfig.json and
+    some of the babel and webpack configs.
+
+  error no-circular: backend/src/hydraulics/types.d.ts → 
+      backend/src/types/shared-types.d.ts →
+      backend/src/hydraulics/types.d.ts
+    This dependency is part of a circular relationship. You might want to
+    revise your solution (i.e. use dependency inversion, make sure the modules
+    have a single responsibility)
+
+  error no-circular: backend/src/catalog/types.d.ts → 
+      backend/src/types/boiler-types.d.ts →
+      backend/src/catalog/types.d.ts
+    This dependency is part of a circular relationship. You might want to
+    revise your solution (i.e. use dependency inversion, make sure the modules
+    have a single responsibility)
+
+
+x 3 dependency violations (3 errors, 0 warnings). 241 modules, 555 dependencies cruised.
+
+EXIT=3
+
+### CMD: depcruise --config <...> --ts-config frontend/tsconfig.app.json --output-type err-long frontend/src
+
+  ERROR: error TS5083: Cannot read file '/Users/dmytropopov/Documents/projects/heating-equipment-selection-service/frontend/tsconfig.strict-base.json'.
+error TS18003: No inputs were found in config file 'frontend/tsconfig.app.json'. Specified 'include' paths were '["src","../shared/**/*.d.ts","../shared/**/*.ts"]' and 'exclude' paths were '[]'.
+
+EXIT=1
+
+### CMD: depcruise --config <...> --output-type err-long shared
+
+  error no-orphans: shared/ufhTerminalControl.js
+    This is an orphan module - it's likely not used (anymore?). Either use it
+    or remove it. If it's logical this module is an orphan (i.e. it's a config
+    file), add an exception for it in your dependency-cruiser configuration. By
+    default this rule does not scrutinize dotfiles (e.g. .eslintrc.js),
+    TypeScript declaration files (.d.ts/ .d.cts/ .d.mts), tsconfig.json and
+    some of the babel and webpack configs.
+
+  error no-orphans: shared/ufhModePresetIds.js
+    This is an orphan module - it's likely not used (anymore?). Either use it
+    or remove it. If it's logical this module is an orphan (i.e. it's a config
+    file), add an exception for it in your dependency-cruiser configuration. By
+    default this rule does not scrutinize dotfiles (e.g. .eslintrc.js),
+    TypeScript declaration files (.d.ts/ .d.cts/ .d.mts), tsconfig.json and
+    some of the babel and webpack configs.
+
+  error no-orphans: shared/ufhDistributionPresets.js
+    This is an orphan module - it's likely not used (anymore?). Either use it
+    or remove it. If it's logical this module is an orphan (i.e. it's a config
+    file), add an exception for it in your dependency-cruiser configuration. By
+    default this rule does not scrutinize dotfiles (e.g. .eslintrc.js),
+    TypeScript declaration files (.d.ts/ .d.cts/ .d.mts), tsconfig.json and
+    some of the babel and webpack configs.
+
+  error no-orphans: shared/ufhCircuitPresets.js
+    This is an orphan module - it's likely not used (anymore?). Either use it
+    or remove it. If it's logical this module is an orphan (i.e. it's a config
+    file), add an exception for it in your dependency-cruiser configuration. By
+    default this rule does not scrutinize dotfiles (e.g. .eslintrc.js),
+    TypeScript declaration files (.d.ts/ .d.cts/ .d.mts), tsconfig.json and
+    some of the babel and webpack configs.
+
+  error no-orphans: shared/surveyMutationKinds.ts
+    This is an orphan module - it's likely not used (anymore?). Either use it
+    or remove it. If it's logical this module is an orphan (i.e. it's a config
+    file), add an exception for it in your dependency-cruiser configuration. By
+    default this rule does not scrutinize dotfiles (e.g. .eslintrc.js),
+    TypeScript declaration files (.d.ts/ .d.cts/ .d.mts), tsconfig.json and
+    some of the babel and webpack configs.
+
+  error no-orphans: shared/roomTypeNormalization.js
+    This is an orphan module - it's likely not used (anymore?). Either use it
+    or remove it. If it's logical this module is an orphan (i.e. it's a config
+    file), add an exception for it in your dependency-cruiser configuration. By
+    default this rule does not scrutinize dotfiles (e.g. .eslintrc.js),
+    TypeScript declaration files (.d.ts/ .d.cts/ .d.mts), tsconfig.json and
+    some of the babel and webpack configs.
+
+  error no-orphans: shared/roomDesignAirTemp.js
+    This is an orphan module - it's likely not used (anymore?). Either use it
+    or remove it. If it's logical this module is an orphan (i.e. it's a config
+    file), add an exception for it in your dependency-cruiser configuration. By
+    default this rule does not scrutinize dotfiles (e.g. .eslintrc.js),
+    TypeScript declaration files (.d.ts/ .d.cts/ .d.mts), tsconfig.json and
+    some of the babel and webpack configs.
+
+  error no-orphans: shared/radiatorEmitterPreference.js
+    This is an orphan module - it's likely not used (anymore?). Either use it
+    or remove it. If it's logical this module is an orphan (i.e. it's a config
+    file), add an exception for it in your dependency-cruiser configuration. By
+    default this rule does not scrutinize dotfiles (e.g. .eslintrc.js),
+    TypeScript declaration files (.d.ts/ .d.cts/ .d.mts), tsconfig.json and
+    some of the babel and webpack configs.
+
+  error no-orphans: shared/radiatorConnection.js
+    This is an orphan module - it's likely not used (anymore?). Either use it
+    or remove it. If it's logical this module is an orphan (i.e. it's a config
+    file), add an exception for it in your dependency-cruiser configuration. By
+    default this rule does not scrutinize dotfiles (e.g. .eslintrc.js),
+    TypeScript declaration files (.d.ts/ .d.cts/ .d.mts), tsconfig.json and
+    some of the babel and webpack configs.
+
+
+x 9 dependency violations (9 errors, 0 warnings). 25 modules, 5 dependencies cruised.
+
+EXIT=9
+
+### RETRY frontend: CMD (cwd=frontend): depcruise --config <recommended-strict> --ts-config tsconfig.app.json --output-type err-long src
+
+  error not-to-unresolvable: src/SurveyAppRoot.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/StartAppRoot.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/seo/JsonLdBoundary.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/routing/SurveyAppShell.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/routing/AppRouter.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/pages/SignUpPage/SignUpPage.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/pages/ProjectsPage/ProjectsPage.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/pages/LoginPage/LoginPage.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/pages/AdminFeedbackPage/AdminFeedbackPage.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/components/StaticPageLayout/StaticPageLayout.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/components/Footer/FooterLinkGroup.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/components/Footer/Footer.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/components/CookieConsentBanner/CookieConsentBanner.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/components/AccountBar/AccountBar.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/auth/useAuthRedirectAfterClerk.ts → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/auth/ProtectedRoute.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/auth/ClerkProviderWithRouter.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/auth/ClerkLazyRoot.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/auth/AdminRoute.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error not-to-unresolvable: src/App.tsx → react-router
+    This module depends on a module that cannot be found ('resolved to disk').
+    If it's an npm module: add it to your package.json. In all other cases you
+    likely already know what to do.
+
+  error no-circular: src/utils/roomEnvelopeFields.ts → 
+      src/utils/roomExteriorLayout.ts →
+      src/utils/roomEnvelopeFields.ts
+    This dependency is part of a circular relationship. You might want to
+    revise your solution (i.e. use dependency inversion, make sure the modules
+    have a single responsibility)
+
+
+x 21 dependency violations (21 errors, 0 warnings). 373 modules, 1119 dependencies cruised.
+
+EXIT=21

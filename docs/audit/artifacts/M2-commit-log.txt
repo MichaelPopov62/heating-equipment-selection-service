@@ -1,0 +1,136 @@
+8f6a35d|2026-08-23|test(e2e): регрессионный набор персон с оракулом на уровне сети
+f6baff0|2026-08-23|test(frontend): data-testid и машиночитаемые маркеры состояния результата
+e788b12|2026-08-23|docs(qa): аудит готовности продукта — 23 дефекта, план тестирования, отчёт
+c754f78|2026-08-13|Merge branch 'main' into staging
+75ac0e0|2026-08-13| add changed frontend/src/components/DevToolsDock/DevToolsDock.module.css
+9079b02|2026-08-13|Merge branch 'main' into staging
+c540e25|2026-08-13| add changed frontend/src/components/DevPanel/DevPanel.module.css   frontend/src/components/DevToolsDock/DevToolsDock.module.css
+0ff956b|2026-08-13|Merge branch 'main' into staging
+3313ed4|2026-08-13| add changed  frontend/src/components/DevToolsDock/DevToolsDock.module.css
+e1d3d56|2026-08-13|Merge branch 'main' into staging
+67af022|2026-08-13| add changed DevPanel.module.css DevToolsDock.module.css
+94f9c2b|2026-08-13|Merge branch 'main' into staging
+e50f7f6|2026-08-13| add changed  frontend/src/components/DevToolsDock/DevToolsDock.module.css
+f7c4bfd|2026-08-13|Merge branch 'main' into staging
+c431cf9|2026-08-13| add changed frontend/src/components/DevToolsDock/DevToolsDock.module.css
+e707978|2026-08-11|Merge branch 'main' into staging
+0549c39|2026-08-11| add changed  README.md  backend/README.md scripts/verifyBackendDocs.mjs
+fb29353|2026-08-11|Merge branch 'main' into staging
+5bb647a|2026-08-11| add changed README.md components/schemas/SubscriptionTier.yaml  docs/auth.md  docs/project-structure.md scripts/verifyAuthDocs.mjs scripts/verifyBackendDocs.mjs
+6bad0ab|2026-08-11|Merge branch 'main' into staging
+6c35bc8|2026-08-11| add changed docs  docs/auth.md         modified:   docs/project-structure.md         modified:   docs/start-state.md         modified:   scripts/verifyAuthDocs.mjs         modified:   scripts/verifyBackendDocs.mjs
+171fed4|2026-08-11|add made changes in the header. Removed the crooked header.frontend/index.html frontend/scripts/verifySeoStatic.mjs
+efe402e|2026-08-11|add made changes in the header. Removed the crooked header.frontend/index.html frontend/scripts/verifySeoStatic.mjs
+fb611d5|2026-08-11| add checked the correspondence of the domain instructions of the project code. Made corrections
+01834e1|2026-08-11|add changed file verifyBackendDocs.mjs. verifyDeployDocs.mjs
+a0b1b9f|2026-08-10| add changed  docs/deploy/README.md. scripts/verifyDeployDocs.mjs
+1ff2614|2026-08-10| add  README.md. docs/project-structure.md.scripts/verifyBackendDocs.mjs
+aa05172|2026-08-10| add changed dock backenda
+cc9e29b|2026-08-10| add changed backend/src/api/errorCodes.js. backend/src/feedback/feedbackEventHub.js. backend/src/index.js.openapi.yaml
+85de35f|2026-08-10| fix(backend): add geocode/PDF queue timeouts and unhandledRejection logging
+deb4325|2026-08-10| prescribed by micro-duplication (Nice-to-Have) backend/src/api/sendErrorEnvelope.js
+e4cf212|2026-08-10| add changed backend/src/auth/optionalAuth.js backend/src/auth/optionalAuth.js        modified:   backend/src/feedback/feedbackEventHub.js         modified:   backend/src/feedback/feedbackEventHub.js
+f7055de|2026-08-10|chore(backend): SSOT roles/tiers, canonicalize VALIDATION_ERROR, name catalog watt limits
+860219c|2026-08-10| add changing the configurable Meteostat timeout
+66e6f6a|2026-08-10| add removed the dead code
+3b893a4|2026-08-09| deployment error correction
+57875ac|2026-08-09| creating a separate deployment folder in the documentation
+1d9e2d5|2026-08-09| add prescribed the conditions for the appearance of the developer button
+3ba6750|2026-08-09| added the section  Agreements on naming and distribution of responsibility.
+5c27d36|2026-08-09| add type verification vne type and entry into the documentation
+7c52cd6|2026-08-09|  Added a whitelist to the documentation and a verify script for colocation helpers
+7f74d87|2026-08-09| add added the Hydraulics component
+602c862|2026-08-09| add grouped parsers in one parsers file
+ee07367|2026-08-09| add eliminated drift
+6a94f39|2026-08-09|docs: update plan, project structure and state
+4e16f60|2026-08-09| add fixed the structure of frontend folders, removed empty folders, dead code
+48c3709|2026-08-09| add made architectural and stylistic improvements
+1494ecd|2026-08-09| add changed  App.module.css
+9c77ce1|2026-08-08| add boosted the Performance value
+f1dd946|2026-08-08| add raised the value of Performance added Agentic Browsing
+139404e|2026-08-07| add fixed 3 ESLint errors
+3280c45|2026-08-07| Implemented basic JSON-LD micromarkup in index.html for primary indexing of the site by crawlers without JS
+82e5f12|2026-08-07|fix: verify:frontend-me после lazy Clerk (ClerkAuthProviderInner)
+0576756|2026-08-07|fix: ESLint set-state-in-effect у ClerkLazyRoot (sessionStorage sticky)
+da79454|2026-08-07| add optimized loading of the CLERK frontend App.tsx auth verifyFrontendAuth.mjs verifyStartState.mjs
+d5799d8|2026-08-07|fix(seo): обновить sitemap.xml и index.html
+eba8e4d|2026-08-07|fix(seo): валидный robots.txt без Allow, Disallow в блоках User-agent
+8668cc8|2026-08-07|seo: robots.txt и sitemap.xml с генерацией из VITE_SITE_URL
+b65a99c|2026-08-07|perf: static LCP shell в index.html до загрузки React
+d9b0ff0|2026-08-07|perf: отложить загрузку preset-справочников до режима survey
+469debd|2026-08-07|perf+seo: lazy chunks, bootstrap без задержки, SEO meta и critical CSS
+8bdc687|2026-08-07|perf: lazy AppSurveyContent, ProjectsDialog и DevPanel
+e11d70c|2026-08-07|perf: убрать искусственную задержку bootstrap 200 ms
+f7e8165|2026-08-07|perf: inline critical CSS для раннего FCP
+411d05d|2026-08-07| add changed env example
+55f7916|2026-08-07|SEO: уточнить title — дім та квартира
+931904d|2026-08-06|trigger CI run
+76fa87f|2026-08-06| add changed routes.js about  404 error
+5991292|2026-08-06| add changed routes.js
+db35b15|2026-08-06|Revert "Add legacy API path aliases for /api/health and /api/projects."
+940aabe|2026-08-06|Add legacy API path aliases for /api/health and /api/projects.
+2304de1|2026-08-06| add changed index.js
+f14032d|2026-08-04| add changed did button logic
+d9c1e1e|2026-08-04| add worked on the DEV button
+675c8fd|2026-08-04| add changed project
+dca5ae1|2026-08-04| add creation of a single administrator for any environment.
+2751d25|2026-08-04| add synchronization of the master project and the test project
+f2083fd|2026-08-03| fix code
+6d146ad|2026-08-03| add changed env
+cdbda69|2026-08-03|fix(export): remove mongoose system fields from calculations export payload
+6c0abf8|2026-08-01| add changed index.js
+f9a6652|2026-08-01| add changed repo dockerfile docker-compose  push.dockerignore
+edf2f98|2026-07-31| add push Smoke-script
+089c979|2026-07-31| add changed vercel.json frontend
+528d1b8|2026-07-31| add changed push vercel.json on frontend
+5cde164|2026-07-30|chore: trigger staging deploy
+7bf197f|2026-07-30|fix: vercel.json for Root Directory frontend
+c125d57|2026-07-30|fix: Vercel SPA build output directory
+2acbcd4|2026-07-30| add preparation for deployment to Vercel
+f569580|2026-07-30| add changed doc
+dd2c07c|2026-07-29| add admin feedback system with SSE real-time notifications
+54ba052|2026-07-29| add checked the service documentation
+a19da53|2026-07-29| I checked the code
+e7d6e19|2026-07-27| add translated the site into Ukrainian
+15768c4|2026-07-26| add changed css
+04f9a0f|2026-07-24| add worked on authentication and authorization
+1a8c295|2026-07-23| add changed code.chore: add .gitignore for backendsetting up environment variables on the frontend
+f244ddd|2026-07-23| add implementation of user authentication
+572d26f|2026-07-22| add worked on the footer
+42038c0|2026-07-21| add changes in the architecture
+ea81bd8|2026-07-19| add architecture change
+540a863|2026-07-18| add worked on the architecture.
+3a3fffc|2026-07-17| add invalid character and correction in verifyPumpDuty
+30d5c20|2026-07-17| add architecture change
+ddb9a61|2026-07-16| add changing the architecture of the service
+7482279|2026-07-15| add error correction
+d13262d|2026-07-15| add refactoring Architecture
+79af5b9|2026-07-14| add changed fuzz
+4a850a4|2026-07-14| add fix(ci): build перед verify:survey-session (нужен dist)
+8b7e624|2026-07-14| fix(ci): axios в backend и typecheck fuzz-calc для verify
+f112cfe|2026-07-14| add full refactoring of type safety (production)
+c3379a4|2026-07-13| add worked on refactoring the selection process for radiators and Uniboxes
+278a1c9|2026-07-12|add writing a Unibox filtering function
+7e55670|2026-07-12| add brought uniboxes into the code
+c0f2140|2026-07-11| add changed code integration of collectors
+1b9393e|2026-07-09| add changed products
+ff1bd53|2026-07-08| add refactoring backend
+ed7e25a|2026-07-08|add  refactoring frontend
+37517fd|2026-07-07| add changed code
+15fffc8|2026-07-02| Миграция frontend на React Query: query/, удаление legacy loaders
+4b7cf44|2026-06-30|Новые модули: guard труб, Ф5 Тамбур, verify-скрипты
+521ffb1|2026-06-30|сообщение
+ec48425|2026-06-30| add changed code
+8acfa17|2026-06-30|fix(hydraulics): подбор труб на микроветках радиаторов и группировка в коллектор
+10b031a|2026-06-29| add changed code
+0db3336|2026-06-28| add changed code
+9a655ce|2026-06-26| add changed code
+465bf34|2026-06-26| add changed code
+18d96e6|2026-06-25| add changed code
+3e053b4|2026-06-25| changed fiele
+51dd2cb|2026-06-20| add changed code
+c4c64c6|2026-06-18|refactor: implement CalcRuntimeContext & align radiator verification with V3 contract
+b931d51|2026-06-18| changed fail .env.example Plan.md README.md
+fdab7f7|2026-06-18|Hide Cursor settings
+0a8ecb0|2026-06-16| chore: add vercel deployment configuration
+34a4886|2026-06-16|Initial commit: full-stack architecture with strict catalog SSOT contracts

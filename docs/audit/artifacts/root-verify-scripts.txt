@@ -1,0 +1,31 @@
+### CMD: node scripts/verifyNoTypeBypass.mjs
+verifyNoTypeBypass: OK
+EXIT=0
+
+### CMD: node scripts/verifyAuthDocs.mjs
+verify:auth-docs OK
+EXIT=0
+
+### CMD: node scripts/verifyDeployDocs.mjs
+verify:deploy-docs OK
+EXIT=0
+
+### CMD: node scripts/verifyBackendDocs.mjs
+    at readRepo (file:///Users/dmytropopov/Documents/projects/heating-equipment-selection-service/scripts/verifyBackendDocs.mjs:60:10)
+    at file:///Users/dmytropopov/Documents/projects/heating-equipment-selection-service/scripts/verifyBackendDocs.mjs:195:21
+    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)
+    at async node:internal/modules/esm/loader:650:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/dmytropopov/Documents/projects/heating-equipment-selection-service/.cursorrules'
+}
+
+Node.js v26.7.0
+EXIT=0
+
+### CMD: node scripts/verifyLanguagePolicy.mjs
+verifyLanguagePolicy: OK
+EXIT=0
+

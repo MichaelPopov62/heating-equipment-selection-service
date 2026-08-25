@@ -1,0 +1,38 @@
+# Реальный вес клона (git clone --mirror + git gc --aggressive --prune=now)
+# Инструмент: git 2.x, локальный mirror-клон, 2026-08-23
+
+$ git count-objects -vH   # ДО gc, рабочая копия автора
+count: 146            # loose-объекты (незапакованный последний коммит e788b12)
+size: 11.43 MiB
+in-pack: 4326
+size-pack: 2.86 MiB
+# .git на диске = 15 MB — 11.43 MiB из них это loose-объекты ux-screens
+
+$ git count-objects -vH   # ПОСЛЕ gc в mirror-клоне
+in-pack: 4472
+packs: 1
+size-pack: 11.83 MiB   # <-- столько скачает второй разработчик
+
+# Вклад групп в упакованный размер (objectsize:disk, все ветки):
+ux-screens (jpg)       n=72     raw=11669.96 KB   в паке= 7862.34 KB   (65%)
+код+конфиг             n=2579   raw=17966.05 KB   в паке= 1397.74 KB   (12%)
+heatcalc-audit.html    n=1      raw= 2086.96 KB   в паке= 1188.62 KB   (10%)
+docs (md/yaml)         n=276    raw= 5090.54 KB   в паке= 1006.12 KB   ( 8%)
+lighthouse-*.json      n=9      raw= 4586.86 KB   в паке=  265.22 KB   ( 2%)
+package-lock.json      n=19     raw= 1771.12 KB   в паке=   74.02 KB   ( 1%)
+trees+commits          n=4472                     в паке=   30.00 KB
+
+# Вывод: без ux-screens и heatcalc-audit.html клон был бы ~2.6 MB вместо 11.8 MB.
+# 11.8 MB в абсолюте — пренебрежимо (один npm ci тянет >100 MB).
+
+# ВАЖНО: ux-screens и heatcalc-audit.html есть ТОЛЬКО в локальной ветке
+# qa/audit-and-persona-suite (коммит e788b12), на GitHub их ЕЩЁ НЕТ:
+$ git ls-remote --heads origin
+75ac0e0  refs/heads/main
+c754f78  refs/heads/staging
+$ git branch -r --contains e788b12
+(пусто)
+$ git ls-tree -r --name-only origin/main | grep -c ux-screens
+0
+$ git ls-tree -r --name-only origin/main | grep -c lighthouse
+9

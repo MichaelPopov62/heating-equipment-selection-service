@@ -1,0 +1,231 @@
+### CMD: npx -y ts-prune -p frontend/tsconfig.app.json
+shared/heatingThermalRegimePresets.d.ts:10 - HEATING_THERMAL_REGIME_PRESETS
+shared/heatingThermalRegimePresets.d.ts:28 - HEATING_THERMAL_REGIME_PRESET_ENUM
+shared/heatingThermalRegimePresets.d.ts:30 - DEPRECATED_HEATING_THERMAL_REGIME_PRESETS
+shared/heatingThermalRegimePresets.d.ts:32 - HEATING_THERMAL_REGIME_UI_OPTIONS
+shared/heatingThermalRegimeRecommendations.d.ts:12 - allowedThermalRegimePresetsForScheme
+shared/heatingThermalRegimeRecommendations.d.ts:7 - SURVEY_THERMAL_REGIME_PRESET_IDS
+shared/heatingThermalRegimeRecommendations.d.ts:27 - HeatingThermalRegimePreset (used in module)
+shared/roomDesignAirTemp.d.ts:19 - resolveDesignRoomAirTempC
+shared/roomDesignAirTemp.d.ts:25 - isSmallZoneRoomType
+shared/roomDesignAirTemp.d.ts:6 - BATHROOM_ROOM_TYPE
+shared/roomDesignAirTemp.d.ts:8 - BATHROOM_DESIGN_AIR_TEMP_FLOOR_C
+shared/roomDesignAirTemp.d.ts:10 - SMALL_ZONE_ROOM_TYPES
+shared/roomDesignAirTemp.d.ts:12 - DesignRoomAirTempSource (used in module)
+shared/roomDesignAirTemp.d.ts:14 - DesignRoomAirTempResolved (used in module)
+shared/roomTypeNormalization.d.ts:9 - ROOM_TYPE_SYNONYMS
+shared/surveyMutationKinds.ts:6 - SURVEY_MUTATION_KINDS (used in module)
+shared/surveyMutationKinds.ts:23 - SurveyMutationKind
+shared/ufhCircuitPresets.d.ts:23 - isUfhCircuitPresetId
+shared/ufhCircuitPresets.d.ts:27 - getUfhCircuitPresetById
+shared/ufhCircuitPresets.d.ts:31 - resolveUfhCircuitPresetForFinishMaterialId
+shared/ufhCircuitPresets.d.ts:6 - UfhCircuitPresetId (used in module)
+shared/ufhCircuitPresets.d.ts:8 - UfhCircuitPresetConfig (used in module)
+shared/ufhCircuitPresets.d.ts:17 - UFH_CIRCUIT_PRESET_IDS
+shared/ufhCircuitPresets.d.ts:19 - UFH_CIRCUIT_PRESETS
+shared/ufhDistributionPresets.d.ts:33 - resolveAutoUfhDistributionPreset
+shared/ufhDistributionPresets.d.ts:37 - resolveUfhDistributionPreset
+shared/ufhDistributionPresets.d.ts:6 - UfhDistributionAutoRules (used in module)
+shared/ufhDistributionPresets.d.ts:11 - UfhDistributionResolveCtx (used in module)
+shared/ufhDistributionPresets.d.ts:18 - UFH_DISTRIBUTION_PRESET_IDS
+shared/ufhModePresetIds.d.ts:14 - isUfhModePresetId
+shared/ufhModePresetIds.d.ts:18 - ufhModePresetIsMixedRadiators
+shared/ufhModePresetIds.d.ts:6 - UfhModePresetIdShared (used in module)
+shared/ufhModePresetIds.d.ts:8 - UFH_MODE_PRESET_IDS
+shared/ufhModePresetIds.d.ts:10 - UFH_PRESET_ONLY
+shared/ufhModePresetIds.d.ts:12 - UFH_PRESET_MIXED_RADIATORS
+shared/ufhTerminalControl.d.ts:9 - isUfhTerminalControl
+shared/ufhTerminalControl.d.ts:13 - resolveUfhTerminalControl
+shared/ufhTerminalControl.d.ts:5 - UfhTerminalControl (used in module)
+shared/ufhTerminalControl.d.ts:7 - UFH_TERMINAL_CONTROL_MAX_AREA_SQM
+shared/waterHeaterFormContract.d.ts:7 - WaterHeaterFormContractValue (used in module)
+frontend/src/App.tsx:35 - default
+frontend/src/StartAppRoot.tsx:22 - StartAppRootProps (used in module)
+frontend/src/auth/AdminRoute.tsx:12 - AdminRouteProps (used in module)
+frontend/src/auth/authConfig.ts:35 - DEFAULT_CLERK_JWT_TEMPLATE (used in module)
+frontend/src/auth/AuthProvider.tsx:24 - AuthProviderProps (used in module)
+frontend/src/auth/ClerkLazyRoot.tsx:27 - ClerkLazyRootProps (used in module)
+frontend/src/auth/ProtectedRoute.tsx:10 - ProtectedRouteProps (used in module)
+frontend/src/auth/PublicAuthProviderInner.tsx:10 - PublicAuthProviderInnerProps (used in module)
+frontend/src/auth/useAuthMeCacheSync.ts:10 - AuthMeCacheSync (used in module)
+frontend/src/constants/footerNav.ts:9 - FooterInternalLink (used in module)
+frontend/src/constants/footerNav.ts:15 - FooterExternalLink (used in module)
+frontend/src/constants/footerNav.ts:21 - FooterMailtoLink (used in module)
+frontend/src/constants/footerNav.ts:27 - FooterActionLink (used in module)
+frontend/src/constants/footerNav.ts:33 - FooterModalLink (used in module)
+frontend/src/constants/footerNav.ts:46 - FooterLinkGroup (used in module)
+frontend/src/constants/siteEnv.ts:6 - PRODUCTION_SITE_ORIGIN (used in module)
+frontend/src/constants/surveySteps.ts:43 - SURVEY_STEPS (used in module)
+frontend/src/hooks/useAdminFeedbackStream.ts:15 - UseAdminFeedbackStreamResult (used in module)
+frontend/src/hooks/useDevPanelAccess.ts:15 - UseDevPanelAccessResult (used in module)
+frontend/src/hooks/useProjectBundleTransfer.ts:26 - ProjectBundleFileMode (used in module)
+frontend/src/hooks/useProjectBundleTransfer.ts:28 - UseProjectBundleTransferParams (used in module)
+frontend/src/hooks/useProjectBundleTransfer.ts:36 - UseProjectBundleTransferResult (used in module)
+frontend/src/hooks/useSurveyBootstrap.ts:49 - UseSurveyBootstrapParams (used in module)
+frontend/src/hooks/useSurveyDraftPersistence.ts:16 - UseSurveyDraftPersistenceParams (used in module)
+frontend/src/hooks/useSurveyProject.ts:31 - UseSurveyProjectParams (used in module)
+frontend/src/query/QueryProvider.tsx:10 - QueryProviderProps (used in module)
+frontend/src/query/useReferenceData.ts:9 - UseReferenceDataOptions (used in module)
+frontend/src/query/useReferenceData.ts:14 - UseReferenceDataResult (used in module)
+frontend/src/query/useSurveyCalc.ts:15 - SURVEY_CALC_DEBOUNCE_MS (used in module)
+frontend/src/query/useSurveyCalc.ts:19 - UseSurveyCalcParams (used in module)
+frontend/src/routing/SurveyAppShell.tsx:17 - SurveyAppShellProps (used in module)
+frontend/src/seo/jsonLdSchemas.ts:17 - buildOrganizationSchema (used in module)
+frontend/src/seo/jsonLdSchemas.ts:32 - buildWebSiteSchema (used in module)
+frontend/src/seo/jsonLdSchemas.ts:47 - buildWebApplicationSchema (used in module)
+frontend/src/seo/jsonLdSchemas.ts:69 - buildFaqPageSchema (used in module)
+frontend/src/seo/jsonLdSchemas.ts:89 - buildHomeJsonLdSchemas (used in module)
+frontend/src/services/adminFeedbackStream.ts:11 - AdminFeedbackStreamOptions (used in module)
+frontend/src/services/calc.ts:11 - CALC_BACKEND_HINT (used in module)
+frontend/src/services/catalog.ts:25 - CatalogBoilerCircuitPool
+frontend/src/services/catalog.ts:30 - CatalogManifoldDimensions
+frontend/src/services/catalog.ts:32 - CatalogUniboxItem (used in module)
+frontend/src/services/catalog.ts:34 - CatalogWaterHeaterVariant
+frontend/src/services/catalog.ts:35 - ManifoldApplication
+frontend/src/services/catalog.ts:36 - UniboxType
+frontend/src/services/catalogTypes.ts:59 - UniboxConnectionThread (used in module)
+frontend/src/services/catalogTypes.ts:60 - UniboxConnectionFit (used in module)
+frontend/src/services/feedbackApi.ts:8 - FeedbackType (used in module)
+frontend/src/services/feedbackApi.ts:10 - FeedbackPayload (used in module)
+frontend/src/services/feedbackApi.ts:20 - FeedbackOkResponse (used in module)
+frontend/src/services/fetchProjectExportBundle.ts:28 - FetchProjectExportBundleParams (used in module)
+frontend/src/services/parseCatalogManifolds.ts:40 - parseCatalogManifoldItem (used in module)
+frontend/src/services/parseCatalogManifolds.ts:105 - parseCatalogBoilerManifoldItem (used in module)
+frontend/src/services/parseCatalogUniboxes.ts:48 - parseCatalogUniboxItem (used in module)
+frontend/src/services/parsePublicShare.ts:12 - parseSharePublisherPresentation (used in module)
+frontend/src/services/parsePublicShare.ts:39 - parsePublicSharePayload (used in module)
+frontend/src/services/projectsAuthToken.ts:8 - ProjectsAuthTokenGetter (used in module)
+frontend/src/services/surveyDraftStorage.ts:9 - SURVEY_DRAFT_STORAGE_KEY (used in module)
+frontend/src/shell/AppChromeProvider.tsx:10 - AppChromeProviderProps (used in module)
+frontend/src/surveySession/resolveAppBootstrap.ts:8 - BootstrapResolution (used in module)
+frontend/src/surveySession/SurveySessionProvider.tsx:36 - SurveySessionContextValue (used in module)
+frontend/src/surveySession/SurveySessionProvider.tsx:38 - SurveySessionProviderProps (used in module)
+frontend/src/surveySession/wiringLayoutV3.ts:34 - DEFAULT_WIRING_LAYOUT (used in module)
+frontend/src/types/heatingThermalRegime.ts:9 - defaultThermalRegimePresetForObjectType
+frontend/src/types/heatingThermalRegime.ts:10 - defaultThermalRegimePresetForMatchingScheme
+frontend/src/types/heatingThermalRegime.ts:11 - isLowTemperatureThermalRegimePreset
+frontend/src/types/hydraulics.ts:5 - HydraulicsPipeMaterialPreference (used in module)
+frontend/src/types/radiatorConnection.ts:10 - RADIATOR_CONNECTION_ENUM
+frontend/src/types/radiatorConnection.ts:14 - radiatorConnectionLabel
+frontend/src/types/radiatorEmitterPreference.ts:8 - RadiatorEmitterKind
+frontend/src/types/radiatorEmitterPreference.ts:13 - RADIATOR_EMITTER_PREFERENCE_ENUM
+frontend/src/types/radiatorEmitterPreference.ts:16 - isRadiatorEmitterKind
+frontend/src/types/radiatorEmitterPreference.ts:18 - radiatorEmitterPreferenceLabel
+frontend/src/types/recommendationsBlock.ts:40 - AutomationHint (used in module)
+frontend/src/types/rooms.ts:50 - RoomUnderfloorHeatingFormValue (used in module)
+frontend/src/types/ufhModePreset.ts:9 - UfhModePresetUi (used in module)
+frontend/src/types/underfloorHeating.ts:13 - UfhCircuitPresetId (used in module)
+frontend/src/types/underfloorHeating.ts:55 - UfhPipeSpacingResolution (used in module)
+frontend/src/utils/apartmentStackBoundaries.ts:9 - PRESET_FLOOR_INTERSTORY_APARTMENT (used in module)
+frontend/src/utils/apartmentStackBoundaries.ts:10 - PRESET_CEILING_INTERSTORY_APARTMENT (used in module)
+frontend/src/utils/apartmentStackBoundaries.ts:11 - PRESET_FLOOR_APT_OVER_COLD_BELOW (used in module)
+frontend/src/utils/apartmentStackBoundaries.ts:12 - PRESET_CEILING_APT_UNDER_ATTIC (used in module)
+frontend/src/utils/buildProjectExportBundle.ts:51 - BuildProjectExportBundleFromPartsParams (used in module)
+frontend/src/utils/hotWaterEquipmentParticipation.ts:18 - HotWaterEquipmentKind (used in module)
+frontend/src/utils/hotWaterFormDefaults.ts:19 - satisfies (used in module)
+frontend/src/utils/hotWaterFormDefaults.ts:19 - ReadonlyArray (used in module)
+frontend/src/utils/projectBundleTransfer.ts:102 - confirmLargeProjectExport (used in module)
+frontend/src/utils/radiatorsSkip.ts:9 - RADIATORS_SKIPPED_UFH_ONLY (used in module)
+frontend/src/utils/roomExteriorLayout.ts:11 - INTERNAL_CORRIDOR_WALL_CONSTRUCTION (used in module)
+frontend/src/utils/roomExteriorLayout.ts:15 - ExternalWallFieldConfig (used in module)
+frontend/src/utils/roomExteriorLayout.ts:149 - WallEnvelopeEntry (used in module)
+frontend/src/utils/staticAppShellTransition.ts:2 - STATIC_APP_SHELL_ID (used in module)
+frontend/src/utils/staticAppShellTransition.ts:5 - STATIC_SHELL_FADE_MS (used in module)
+frontend/src/utils/sumHydraulicsPipeLengthsByRole.ts:8 - HydraulicsPipeLengthByRole (used in module)
+frontend/src/utils/surveyShare.ts:57 - surveyDraftForUrlShare (used in module)
+frontend/src/utils/ufhHydraulicsPumps.ts:15 - isUfhZonePump (used in module)
+frontend/src/utils/ufhPresetCardsForUi.ts:9 - PRIMARY_UFH_MODE_PRESET_IDS (used in module)
+frontend/src/utils/ufhWarningDisplay.ts:101 - isUfhParasiticDownWarning (used in module)
+frontend/src/utils/ufhWarningDisplay.ts:110 - isUfhMixingNodeWarning (used in module)
+frontend/src/utils/ufhWarningDisplay.ts:119 - isUfhSurfacePresetOverrideWarning (used in module)
+frontend/src/utils/ufhWarningDisplay.ts:128 - isUfhCoverageLowWarning (used in module)
+frontend/src/utils/ufhWarningDisplay.ts:17 - UFH_WARN_SURFACE_PRESET_OVERRIDE_CODE (used in module)
+frontend/src/utils/ufhWarningDisplay.ts:19 - UFH_WARN_SURFACE_PRESET_OVERRIDE_UFH_ONLY_CODE (used in module)
+frontend/src/utils/ufhWarningDisplay.ts:21 - UFH_WARN_COVERAGE_LOW_CODE (used in module)
+frontend/src/utils/validateWaterHeaterForm.ts:15 - WaterHeaterFormValidation (used in module)
+frontend/src/utils/wiringSystemTypeLabels.ts:8 - WiringSystemTypeOption (used in module)
+frontend/src/components/AccountBar/AccountBar.tsx:17 - AccountBarProps (used in module)
+frontend/src/components/AppBootstrapSkeleton/AppBootstrapSkeleton.tsx:11 - AppBootstrapSkeletonProps (used in module)
+frontend/src/components/AppErrorBoundary/AppErrorBoundary.tsx:9 - AppErrorBoundaryProps (used in module)
+frontend/src/components/BoilerProposalCard/BoilerProposalCard.tsx:19 - BoilerProposalPowerBreakdownView (used in module)
+frontend/src/components/BoilerProposalCard/BoilerProposalCard.tsx:24 - EquipmentBundlePriceBreakdownView (used in module)
+frontend/src/components/BoilerProposalCard/BoilerProposalCard.tsx:30 - EquipmentBundleCompanionView (used in module)
+frontend/src/components/BoilerReport/BoilerReportDialog.tsx:14 - BoilerReportDialogProps (used in module)
+frontend/src/components/BoilerReport/BoilerReportView.tsx:13 - BoilerReportViewProps (used in module)
+frontend/src/components/BoilerReport/BoilerSummaryTable.tsx:16 - BoilerSummaryTableProps (used in module)
+frontend/src/components/BoilerSurveyForm/BoilerSurveyForm.tsx:19 - BoilerSurveyFormProps (used in module)
+frontend/src/components/BootstrapErrorScreen/BootstrapErrorScreen.tsx:7 - BootstrapErrorScreenProps (used in module)
+frontend/src/components/ClerkAuthLoadingFallback/ClerkAuthLoadingFallback.tsx:9 - ClerkAuthLoadingFallbackProps (used in module)
+frontend/src/components/ClerkAuthWidget/ClerkAuthWidget.tsx:10 - ClerkAuthWidgetProps (used in module)
+frontend/src/components/ContactModal/ContactModal.tsx:12 - ContactModalProps (used in module)
+frontend/src/components/DevToolsDock/DevToolsDock.tsx:10 - DevToolsDockProps (used in module)
+frontend/src/components/FinancialSummary/FinancialSummaryTable.tsx:9 - FinancialSummaryTableProps (used in module)
+frontend/src/components/Footer/Footer.tsx:22 - FooterProps (used in module)
+frontend/src/components/Footer/FooterLinkGroup.tsx:15 - FooterLinkGroupProps (used in module)
+frontend/src/components/Footer/FooterLinkGroup.tsx:115 - FooterContactsProps (used in module)
+frontend/src/components/HeatLossReport/HeatLossSummaryTable.tsx:11 - HeatLossSummaryTableProps (used in module)
+frontend/src/components/HotWaterReport/HotWaterFixturesSummaryTable.tsx:13 - HotWaterFixturesSummaryTableProps (used in module)
+frontend/src/components/HotWaterReport/HotWaterFixturesTable.tsx:11 - HotWaterFixturesTableProps (used in module)
+frontend/src/components/HotWaterReport/HotWaterReportDialog.tsx:16 - HotWaterReportDialogProps (used in module)
+frontend/src/components/HotWaterReport/HotWaterReportView.tsx:20 - HotWaterReportViewProps (used in module)
+frontend/src/components/HotWaterReport/HotWaterSummaryTable.tsx:20 - HotWaterSummaryTableProps (used in module)
+frontend/src/components/HydraulicsReport/HydraulicsProposalTable.tsx:11 - HydraulicsProposalTableProps (used in module)
+frontend/src/components/HydraulicsReport/HydraulicsReportDialog.tsx:13 - HydraulicsReportDialogProps (used in module)
+frontend/src/components/HydraulicsReport/HydraulicsReportView.tsx:22 - HydraulicsReportViewProps (used in module)
+frontend/src/components/HydraulicsReport/HydraulicsSummaryTable.tsx:15 - HydraulicsSummaryTableProps (used in module)
+frontend/src/components/Logo/Logo.tsx:10 - LogoProps (used in module)
+frontend/src/components/ModalDialog/ModalDialog.tsx:9 - ModalDialogProps (used in module)
+frontend/src/components/ProjectTransferDialog/ProjectTransferDialog.tsx:10 - ProjectTransferDialogProps (used in module)
+frontend/src/components/PublisherContactBlock/PublisherContactBlock.tsx:9 - PublisherContactBlockProps (used in module)
+frontend/src/components/RadiatorsReport/RadiatorsReportDialog.tsx:13 - RadiatorsReportDialogProps (used in module)
+frontend/src/components/RadiatorsReport/RadiatorsReportView.tsx:13 - RadiatorsReportViewProps (used in module)
+frontend/src/components/RadiatorsReport/RadiatorsSummaryTable.tsx:16 - RadiatorsSummaryTableProps (used in module)
+frontend/src/components/RadiatorsSurveyForm/RadiatorsSurveyForm.tsx:24 - RadiatorsSurveyFormProps (used in module)
+frontend/src/components/ReportBugModal/ReportBugModal.tsx:12 - ReportBugModalProps (used in module)
+frontend/src/components/RoomsForm/RoomAccordionItem.tsx:90 - RoomAccordionItem
+frontend/src/components/ShareLinkToast/ShareLinkToast.tsx:12 - ShareLinkToastProps (used in module)
+frontend/src/components/Spinner/Spinner.tsx:8 - SpinnerProps (used in module)
+frontend/src/components/StartScreen/StartScreen.tsx:12 - StartScreenProps (used in module)
+frontend/src/components/StaticPageLayout/StaticPageLayout.tsx:13 - StaticPageLayoutProps (used in module)
+frontend/src/components/SubscriptionTierBadge/SubscriptionTierBadge.tsx:9 - SubscriptionTierBadgeProps (used in module)
+frontend/src/components/SurveyNavigation/SurveyStepLink.tsx:12 - SurveyStepLinkProps (used in module)
+frontend/src/components/UnderfloorHeatingReport/UfhWarningResolutionDialog.tsx:12 - UfhWarningResolutionDialogProps (used in module)
+frontend/src/components/UnderfloorHeatingReport/UnderfloorHeatingReportDialog.tsx:18 - UnderfloorHeatingReportDialogProps (used in module)
+frontend/src/components/UnderfloorHeatingReport/UnderfloorHeatingReportView.tsx:40 - UnderfloorHeatingReportViewProps (used in module)
+frontend/src/components/UnderfloorHeatingReport/UnderfloorHeatingSummaryTable.tsx:19 - UnderfloorHeatingSummaryTableProps (used in module)
+frontend/src/components/WaterHeaterReport/WaterHeaterReportDialog.tsx:14 - WaterHeaterReportDialogProps (used in module)
+frontend/src/components/WaterHeaterReport/WaterHeaterReportView.tsx:10 - WaterHeaterReportViewProps (used in module)
+frontend/src/query/mutations/useAdminFeedbackStatusMutation.ts:11 - UpdateAdminFeedbackStatusParams (used in module)
+frontend/src/query/mutations/useProjectMutations.ts:21 - SaveProjectParams (used in module)
+frontend/src/query/mutations/useProjectMutations.ts:30 - SaveProjectResult (used in module)
+frontend/src/query/mutations/useProjectMutations.ts:35 - LoadProjectParams (used in module)
+frontend/src/query/mutations/useProjectMutations.ts:39 - LoadProjectResult (used in module)
+frontend/src/query/mutations/useProjectMutations.ts:46 - LoadCalculationParams (used in module)
+frontend/src/query/queries/useAdminFeedbackQuery.ts:17 - AdminFeedbackFilters (used in module)
+frontend/src/query/queries/useAdminFeedbackQuery.ts:22 - UseAdminFeedbackQueryResult (used in module)
+frontend/src/query/queries/useCatalogEquipmentQuery.ts:16 - UseCatalogEquipmentQueryResult (used in module)
+frontend/src/query/queries/useEnvelopePresetsQuery.ts:12 - UseEnvelopePresetsQueryOptions (used in module)
+frontend/src/query/queries/useEnvelopePresetsQuery.ts:17 - UseEnvelopePresetsQueryResult (used in module)
+frontend/src/query/queries/useMeQuery.ts:14 - UseMeQueryResult (used in module)
+frontend/src/query/queries/useProjectCalculationsQuery.ts:11 - UseProjectCalculationsQueryParams (used in module)
+frontend/src/query/queries/useProjectCalculationsQuery.ts:17 - UseProjectCalculationsQueryResult (used in module)
+frontend/src/query/queries/useProjectsListQuery.ts:11 - UseProjectsListQueryParams (used in module)
+frontend/src/query/queries/useProjectsListQuery.ts:16 - UseProjectsListQueryResult (used in module)
+frontend/src/query/queries/useUfhModePresetsQuery.ts:14 - UseUfhModePresetsQueryOptions (used in module)
+frontend/src/query/queries/useUfhModePresetsQuery.ts:19 - UseUfhModePresetsQueryResult (used in module)
+frontend/src/query/queries/useUnderfloorHeatingPresetsQuery.ts:15 - UseUnderfloorHeatingPresetsQueryOptions (used in module)
+frontend/src/query/queries/useUnderfloorHeatingPresetsQuery.ts:20 - UseUnderfloorHeatingPresetsQueryResult (used in module)
+frontend/src/utils/calculators/heatLoss.ts:6 - HEAT_LOSS_RESERVE_FACTOR (used in module)
+frontend/src/utils/parsers/parseBoilerFromReport.ts:16 - ParsedBoilerSummary (used in module)
+frontend/src/utils/parsers/parseCommercialBomFromReport.ts:7 - FinancialBomLineKind (used in module)
+frontend/src/utils/parsers/parseCommercialBomFromReport.ts:8 - FinancialBomQtyUnit (used in module)
+frontend/src/utils/parsers/parseCommercialBomFromReport.ts:9 - FinancialBomCategoryId (used in module)
+frontend/src/utils/parsers/parseProjectImportFile.ts:13 - ParsedProjectImportFile (used in module)
+frontend/src/utils/parsers/parseRadiatorsMatchingFromReport.ts:12 - RadiatorDisplayKind (used in module)
+frontend/src/utils/parsers/parseRadiatorsMatchingFromReport.ts:14 - RadiatorsEmittersSummaryView (used in module)
+frontend/src/utils/parsers/parseRadiatorsMatchingFromReport.ts:24 - RadiatorsByRoomRow (used in module)
+frontend/src/utils/parsers/parseUniboxesMatchingFromReport.ts:8 - ParsedUniboxConnection (used in module)
+frontend/src/utils/parsers/parseUniboxesMatchingFromReport.ts:13 - ParsedUniboxSelected (used in module)
+frontend/src/utils/parsers/parseUniboxesMatchingFromReport.ts:25 - ParsedUniboxLoopDemand (used in module)
+frontend/src/utils/parsers/parseUniboxesMatchingFromReport.ts:37 - ParsedUniboxLoopRow (used in module)
+EXIT=0

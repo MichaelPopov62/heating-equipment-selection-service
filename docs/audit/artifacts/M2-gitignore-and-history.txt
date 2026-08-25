@@ -1,0 +1,86 @@
+# .gitignore: обратная проблема (git check-ignore -v), 2026-08-23
+IGNORED  frontend/.env.local            <- frontend/.gitignore:14:*.local
+IGNORED  frontend/.env.production.local <- frontend/.gitignore:14:*.local
+IGNORED  .claude/settings.local.json    <- ~/.config/git/ignore (ГЛОБАЛЬНЫЙ, не репо!)
+NOT-IGN  frontend/.env.production   <-- дыра
+NOT-IGN  backend/.env.production    <-- дыра
+NOT-IGN  backend/.env.staging       <-- дыра
+NOT-IGN  .env.local                 <-- дыра (корень)
+NOT-IGN  .env.production            <-- дыра (корень)
+NOT-IGN  frontend/lighthouse-x.json <-- дыра (9 таких уже в git)
+NOT-IGN  backend/node               <-- дыра (уже в git, пустой)
+NOT-IGN  backend/tsconfig.tsbuildinfo
+NOT-IGN  playwright-report/index.html
+NOT-IGN  test-results/x.png
+NOT-IGN  frontend/stats.html
+
+# .gitignore глотает нужное:
+.gitignore:9   .cursorrules  -> файла нет ни в git, ни на диске;
+               scripts/verifyBackendDocs.mjs:195 читает его readFileSync -> ENOENT
+.gitignore:11  *.log         -> глотает 12 console-логов QA:
+               docs/qa/research/ux-screens/u4/u4-console-all.log (на диске 6.3k, НЕ в git)
+               на них ссылается docs/qa/research/U4-ux-adversarial.md:9 и :415
+               в git 76 файлов ux-screens, на диске 88 -> разница = 12 .log
+.gitignore:40  e2e/package-lock.json -> e2e/package.json в git, лок-файла нет
+
+# Доказательство поломки корневого verify:
+$ node scripts/verifyNoTypeBypass.mjs   ; exit=0
+$ node scripts/verifyAuthDocs.mjs       ; exit=0
+$ node scripts/verifyDeployDocs.mjs     ; exit=0
+$ node scripts/verifyBackendDocs.mjs    ; exit=1
+  Error: ENOENT: no such file or directory, open '.../.cursorrules'
+      at readRepo (scripts/verifyBackendDocs.mjs:60:10)
+      at scripts/verifyBackendDocs.mjs:195:21
+$ node scripts/verifyLanguagePolicy.mjs ; exit=0
+=> `npm run verify` в корне НЕ ДОХОДИТ до конца ни у кого.
+
+# Восстановление .cursorrules из истории НЕ спасёт:
+blob 528454d (коммит 34a4886, 53115 байт, удалён в fdab7f7 "Hide Cursor settings")
+проверка assert'ов verifyBackendDocs.mjs:198-202 против этого blob:
+  OK   /api/v1/presets/underfloor-heating/modes
+  OK   underfloor_heating_presets
+  FAIL uniboxes
+  FAIL ufhPresetsSource
+  FAIL schemaVersion: 5
+=> актуальная версия .cursorrules потеряна безвозвратно.
+
+# Качество коммитов (136 коммитов, 16.06.2026 -> 23.08.2026)
+conventional commits (feat|fix|docs|...):  20  (14.7%)
+«add ...» без смысла:                      83  (61.0%)
+прочее (merge, «fix code», «сообщение»):   33  (24.3%)
+Авторы: MichaelPopov62 <romantikzizni@gmail.com> 133; Dmytro Popov <dmytropopov@mac.home> 3
+
+# Размер коммитов: распределение по числу файлов
+1-2 файла:   39
+3-5:         21
+6-15:        19
+16-50:       29
+50+:         18   <-- 13% коммитов трогают >50 файлов
+
+# Топ-6 по строкам (added+deleted)
+58419  f1dd946  2026-08-08  add raised the value of Performance added Agentic Brow  (lighthouse)
+42125  34a4886  2026-06-16  Initial commit
+30074  9c77ce1  2026-08-08  add boosted the Performance value                       (lighthouse)
+22313  e788b12  2026-08-23  docs(qa): аудит готовности продукта
+ 7577  f112cfe  2026-07-14  add full refactoring of type safety (production)
+ 7423  42038c0  2026-07-21  add changes in the architecture
+=> 2 из 3 крупнейших коммитов истории — это закоммиченные отчёты lighthouse.
+
+# Топ-6 по числу файлов
+345  34a4886  Initial commit
+228  f112cfe  add full refactoring of type safety (production)
+190  e7d6e19  add translated the site into Ukrainian
+102  e788b12  docs(qa): аудит готовности продукта
+ 92  c3379a4  add worked on refactoring the selection process for radiators
+ 90  42038c0  add changes in the architecture
+
+# Рост (все ветки)
+2026-06: 16 коммитов, +65755/-3922 строк, дерево 345 -> 493 файлов
+2026-07: 38 коммитов, +57807/-13672
+2026-08: 82 коммита,  +122438/-4157, дерево 889 -> 1033 файла
+Соотношение удалений к добавлениям в августе: 3.4% (в июле 23.6%)
+
+# Ветки
+origin/main    0 позади / 3 впереди -> HEAD (qa/audit-and-persona-suite, НЕ запушена)
+origin/main    0 позади / 10 впереди -> origin/staging (9 из 10 — merge-коммиты)
+тегов: 0, релизов: 0

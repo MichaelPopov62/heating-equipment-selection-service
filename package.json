@@ -26,7 +26,13 @@
     "vercel-build": "npm run build --prefix frontend && node scripts/vercelPrepareOutput.mjs",
     "verify": "npm run verify:type-bypass && npm run verify:auth-docs && npm run verify:deploy-docs && npm run verify:backend-docs && npm run verify:language-policy && npm run verify:shared && npm run verify:backend && npm run verify:frontend",
     "seed": "npm run seed --prefix backend",
-    "verify:seed-catalog": "npm run verify:seed-catalog --prefix backend"
+    "verify:seed-catalog": "npm run verify:seed-catalog --prefix backend",
+    "e2e:install": "npm --prefix e2e install && npm --prefix e2e run install:browsers",
+    "e2e:personas": "npm --prefix e2e run personas",
+    "e2e:personas:prod": "cd e2e && TARGET=prod npx playwright test specs/personas.spec.ts",
+    "e2e:regressions": "npm --prefix e2e run regressions",
+    "e2e": "npm --prefix e2e test",
+    "e2e:report": "npm --prefix e2e run report"
   },
   "devDependencies": {
     "tsx": "^4.22.4"
