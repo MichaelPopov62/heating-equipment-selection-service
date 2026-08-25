@@ -1,0 +1,127 @@
+=== violations by rule ===
+{
+ "max-lines-per-function": 156,
+ "complexity": 235,
+ "max-statements": 28,
+ "max-depth": 4,
+ "max-params": 8,
+ "react-hooks/set-state-in-effect": 2,
+ "react-hooks/exhaustive-deps": 1
+}
+=== TOP 40 complexity ===
+1	cx=256	backend/src/report/buildReport.js:206	Async function 'buildReport' has a complexity of 256. Maximum allowed is 10.
+2	cx=195	backend/src/matching/internal/pickRadiatorsCore.js:226	Function 'pickRadiators' has a complexity of 195. Maximum allowed is 10.
+3	cx=148	backend/src/matching/boiler.js:443	Function 'pickBoiler' has a complexity of 148. Maximum allowed is 10.
+4	cx=84	backend/src/hydraulics/buildSnapshots.js:129	Function 'buildHydraulicsSnapshots' has a complexity of 84. Maximum allowed is 10.
+5	cx=84	backend/src/matching/index.js:85	Function 'matchEquipment' has a complexity of 84. Maximum allowed is 10.
+6	cx=83	backend/src/logic/warmFloorCalc.js:38	Function 'calculateUnderfloorHeating' has a complexity of 83. Maximum allowed is 10.
+7	cx=74	frontend/src/utils/buildTechnicalPrintHtml.ts:116	Function 'buildTechnicalPrintHtml' has a complexity of 74. Maximum allowed is 10.
+8	cx=72	frontend/src/utils/boilerProposalParse.ts:10	Function 'parseBoilerProposalPayload' has a complexity of 72. Maximum allowed is 10.
+9	cx=70	frontend/src/components/RoomsForm/RoomAccordionItem.tsx:90	Function 'RoomAccordionItem' has a complexity of 70. Maximum allowed is 10.
+10	cx=55	backend/src/hydraulics/buildHydraulicsProposal.js:175	Function 'buildHydraulicsProposal' has a complexity of 55. Maximum allowed is 10.
+11	cx=51	backend/src/catalog/validateCatalog.js:54	Function 'normalizeBoilerFromExtendedFormats' has a complexity of 51. Maximum allowed is 10.
+12	cx=50	frontend/src/utils/parsers/parseUnderfloorHeatingFromReport.ts:183	Function 'parseRoomRow' has a complexity of 50. Maximum allowed is 10.
+13	cx=48	frontend/src/components/UnderfloorHeatingReport/UnderfloorHeatingReportView.tsx:58	Function 'UnderfloorHeatingReportView' has a complexity of 48. Maximum allowed is 10.
+14	cx=47	backend/src/logic/heatlossByRooms.js:103	Arrow function has a complexity of 47. Maximum allowed is 10.
+15	cx=47	backend/src/projects/buildTechnicalPdfHtml.js:81	Function 'buildTechnicalPdfHtml' has a complexity of 47. Maximum allowed is 10.
+16	cx=46	backend/src/catalog/validateCatalog.js:1258	Function 'validateUnibox' has a complexity of 46. Maximum allowed is 10.
+17	cx=45	backend/src/hydraulics/buildGraph.js:43	Function 'buildHydraulicsGraph' has a complexity of 45. Maximum allowed is 10.
+18	cx=45	frontend/src/components/HydraulicsReport/HydraulicsSummaryTable.tsx:22	Function 'HydraulicsSummaryTable' has a complexity of 45. Maximum allowed is 10.
+19	cx=45	frontend/src/components/RecommendationsBlock/RecommendationsBlock.tsx:51	Function 'RecommendationsBlock' has a complexity of 45. Maximum allowed is 10.
+20	cx=44	backend/src/matching/warmFloor.js:124	Function 'applyUnderfloorHeatingRecommendations' has a complexity of 44. Maximum allowed is 10.
+21	cx=44	frontend/src/components/ObjectMetaForm/ObjectMetaForm.tsx:45	Function 'ObjectMetaForm' has a complexity of 44. Maximum allowed is 10.
+22	cx=43	backend/src/logic/hotWater.js:31	Function 'calculateHotWaterDemand' has a complexity of 43. Maximum allowed is 10.
+23	cx=41	backend/src/hydraulics/crossValidatePipelineInput.js:12	Function 'crossValidateHydraulicsPipelineInput' has a complexity of 41. Maximum allowed is 10.
+24	cx=40	backend/src/catalog/validateCatalog.js:204	Function 'validateBoiler' has a complexity of 40. Maximum allowed is 10.
+25	cx=40	backend/src/matching/internal/sizeForcedRoomEmitter.js:69	Function 'sizeForcedSectional' has a complexity of 40. Maximum allowed is 10.
+26	cx=38	backend/src/catalog/validateCatalog.js:151	Function 'normalizeRadiatorFromExtendedFormats' has a complexity of 38. Maximum allowed is 10.
+27	cx=37	backend/src/api/validate.js:260	Function 'validateAndNormalizeInput' has a complexity of 37. Maximum allowed is 10.
+28	cx=36	backend/src/projects/extractCalculationSummary.js:26	Function 'extractCalculationSummary' has a complexity of 36. Maximum allowed is 10.
+29	cx=36	frontend/src/utils/parsers/parseRadiatorsMatchingFromReport.ts:250	Function 'parseRadiatorsMatchingFromReport' has a complexity of 36. Maximum allowed is 10.
+30	cx=35	backend/src/recommendations/validateRecommendations.js:12	Function 'validateAndNormalizeRecommendationsBundle' has a complexity of 35. Maximum allowed is 10.
+31	cx=35	backend/src/report/buildReport.js:60	Function 'applyHydraulicsPipeRecommendations' has a complexity of 35. Maximum allowed is 10.
+32	cx=35	frontend/src/services/parseCatalogUniboxes.ts:48	Function 'parseCatalogUniboxItem' has a complexity of 35. Maximum allowed is 10.
+33	cx=34	backend/src/hydraulics/resolveCirculationFlows.js:71	Function 'resolveCirculationFlows' has a complexity of 34. Maximum allowed is 10.
+34	cx=34	backend/src/hydraulics/resolveSystemPumps.js:62	Function 'resolvePumpForZone' has a complexity of 34. Maximum allowed is 10.
+35	cx=34	backend/src/logic/externalWallsValidate.js:20	Function 'assertExternalWalls' has a complexity of 34. Maximum allowed is 10.
+36	cx=33	backend/src/api/validate.js:387	Function 'normalizeUnderfloorHeatingBeforeValidate' has a complexity of 33. Maximum allowed is 10.
+37	cx=33	backend/src/matching/boiler.js:326	Function 'buildProposalObject' has a complexity of 33. Maximum allowed is 10.
+38	cx=33	backend/src/matching/internal/sizeForcedRoomEmitter.js:224	Function 'sizeForcedPanel' has a complexity of 33. Maximum allowed is 10.
+39	cx=33	frontend/src/components/Header/Header.tsx:47	Function 'Header' has a complexity of 33. Maximum allowed is 10.
+40	cx=32	backend/src/matching/internal/summarizeRadiatorEmitters.js:71	Function 'buildRadiatorRoomEmitterDiffs' has a complexity of 32. Maximum allowed is 10.
+=== TOP 40 function length ===
+1	lines=907	frontend/src/components/RoomsForm/RoomAccordionItem.tsx:90	Function 'RoomAccordionItem' has too many lines (907). Maximum allowed is 60.
+2	lines=657	backend/src/matching/boiler.js:443	Function 'pickBoiler' has too many lines (657). Maximum allowed is 60.
+3	lines=641	backend/src/matching/internal/pickRadiatorsCore.js:226	Function 'pickRadiators' has too many lines (641). Maximum allowed is 60.
+4	lines=621	frontend/src/AppSurveyContent.tsx:90	Function 'AppSurveyContent' has too many lines (621). Maximum allowed is 60.
+5	lines=581	backend/src/api/projectsRoutes.js:125	Function 'createProjectsRouter' has too many lines (581). Maximum allowed is 60.
+6	lines=506	backend/src/report/buildReport.js:206	Async function 'buildReport' has too many lines (506). Maximum allowed is 60.
+7	lines=475	frontend/src/components/ObjectMetaForm/ObjectMetaForm.tsx:45	Function 'ObjectMetaForm' has too many lines (475). Maximum allowed is 60.
+8	lines=473	frontend/src/components/UnderfloorHeatingReport/UnderfloorHeatingReportView.tsx:58	Function 'UnderfloorHeatingReportView' has too many lines (473). Maximum allowed is 60.
+9	lines=464	backend/src/dhw/validateAppliances.js:17	Function 'validateAndNormalizeApplianceDoc' has too many lines (464). Maximum allowed is 60.
+10	lines=461	frontend/src/hooks/useSurveyProject.ts:55	Function 'useSurveyProject' has too many lines (461). Maximum allowed is 60.
+11	lines=408	frontend/src/components/CatalogEquipmentReference/CatalogEquipmentReference.tsx:88	Function 'CatalogEquipmentReference' has too many lines (408). Maximum allowed is 60.
+12	lines=322	backend/src/logic/warmFloorCalc.js:38	Function 'calculateUnderfloorHeating' has too many lines (322). Maximum allowed is 60.
+13	lines=300	frontend/src/components/HotWaterForm/HotWaterForm.tsx:29	Function 'HotWaterForm' has too many lines (300). Maximum allowed is 60.
+14	lines=270	frontend/src/SurveyAppRoot.tsx:61	Function 'SurveyAppRoot' has too many lines (270). Maximum allowed is 60.
+15	lines=230	frontend/src/services/buildCalcRequestPayload.ts:31	Function 'buildCalcRequestPayload' has too many lines (230). Maximum allowed is 60.
+16	lines=228	frontend/src/components/HydraulicsSection/HydraulicsSection.tsx:56	Function 'HydraulicsSection' has too many lines (228). Maximum allowed is 60.
+17	lines=226	frontend/src/utils/buildTechnicalPrintHtml.ts:116	Function 'buildTechnicalPrintHtml' has too many lines (226). Maximum allowed is 60.
+18	lines=225	frontend/src/components/Header/Header.tsx:47	Function 'Header' has too many lines (225). Maximum allowed is 60.
+19	lines=220	backend/src/hydraulics/buildGraph.js:43	Function 'buildHydraulicsGraph' has too many lines (220). Maximum allowed is 60.
+20	lines=220	backend/src/hydraulics/resolveCirculationFlows.js:71	Function 'resolveCirculationFlows' has too many lines (220). Maximum allowed is 60.
+21	lines=220	frontend/src/components/RecommendationsBlock/RecommendationsBlock.tsx:51	Function 'RecommendationsBlock' has too many lines (220). Maximum allowed is 60.
+22	lines=218	frontend/src/hooks/useRoomsOrchestration.ts:26	Function 'useRoomsOrchestration' has too many lines (218). Maximum allowed is 60.
+23	lines=211	backend/src/hydraulics/buildSnapshots.js:129	Function 'buildHydraulicsSnapshots' has too many lines (211). Maximum allowed is 60.
+24	lines=211	backend/src/logic/heatlossByRooms.js:65	Function 'calculateHeatLossForBuilding' has too many lines (211). Maximum allowed is 60.
+25	lines=209	backend/src/catalog/validateCatalog.js:1258	Function 'validateUnibox' has too many lines (209). Maximum allowed is 60.
+26	lines=203	backend/src/matching/index.js:85	Function 'matchEquipment' has too many lines (203). Maximum allowed is 60.
+27	lines=198	frontend/src/components/HotWaterReport/HotWaterReportView.tsx:30	Function 'HotWaterReportView' has too many lines (198). Maximum allowed is 60.
+28	lines=197	backend/src/dhw/validateWaterNorms.js:47	Function 'validateAndNormalizeWaterNorms' has too many lines (197). Maximum allowed is 60.
+29	lines=183	frontend/src/pages/ProjectsPage/ProjectsPage.tsx:35	Function 'ProjectsPage' has too many lines (183). Maximum allowed is 60.
+30	lines=180	backend/src/matching/warmFloor.js:124	Function 'applyUnderfloorHeatingRecommendations' has too many lines (180). Maximum allowed is 60.
+31	lines=175	frontend/src/utils/migrateSurveyDraft.ts:48	Function 'migrateSurveyDraft' has too many lines (175). Maximum allowed is 60.
+32	lines=169	backend/src/logic/hotWater.js:31	Function 'calculateHotWaterDemand' has too many lines (169). Maximum allowed is 60.
+33	lines=164	frontend/src/components/BoilerProposalCard/BoilerProposalCard.tsx:80	Function 'BoilerProposalCard' has too many lines (164). Maximum allowed is 60.
+34	lines=157	frontend/src/components/WaterHeaterForm/WaterHeaterForm.tsx:35	Function 'WaterHeaterForm' has too many lines (157). Maximum allowed is 60.
+35	lines=155	backend/src/logic/ufhLoopHydraulics.js:686	Function 'resolveUfhRoomLoopsHydraulics' has too many lines (155). Maximum allowed is 60.
+36	lines=155	frontend/src/components/HydraulicsReport/HydraulicsReportView.tsx:237	Function 'ProposalContent' has too many lines (155). Maximum allowed is 60.
+37	lines=152	frontend/src/components/SharePresentationPage/SharePresentationPage.tsx:31	Function 'SharePresentationPage' has too many lines (152). Maximum allowed is 60.
+38	lines=150	frontend/src/utils/boilerProposalParse.ts:10	Function 'parseBoilerProposalPayload' has too many lines (150). Maximum allowed is 60.
+39	lines=149	frontend/src/components/DevPanel/DevPanel.tsx:33	Function 'DevPanel' has too many lines (149). Maximum allowed is 60.
+40	lines=147	frontend/src/components/RadiatorsReport/RadiatorsReportView.tsx:20	Function 'RadiatorsReportView' has too many lines (147). Maximum allowed is 60.
+=== TOP 20 statements ===
+1	stmts=176	backend/src/matching/internal/pickRadiatorsCore.js:226
+2	stmts=166	backend/src/matching/boiler.js:443
+3	stmts=129	backend/src/report/buildReport.js:206
+4	stmts=107	frontend/src/utils/buildTechnicalPrintHtml.ts:116
+5	stmts=103	backend/src/logic/warmFloorCalc.js:38
+6	stmts=99	backend/src/catalog/validateCatalog.js:1258
+7	stmts=70	backend/src/hydraulics/buildGraph.js:43
+8	stmts=67	backend/src/projects/buildTechnicalPdfHtml.js:81
+9	stmts=65	backend/src/dhw/validateAppliances.js:17
+10	stmts=64	backend/src/hydraulics/resolveCirculationFlows.js:71
+11	stmts=62	backend/src/catalog/validateCatalog.js:204
+12	stmts=61	backend/src/logic/hotWater.js:31
+13	stmts=56	backend/src/matching/index.js:85
+14	stmts=55	backend/src/api/validate.js:260
+15	stmts=54	backend/src/dhw/validateWaterNorms.js:47
+16	stmts=54	backend/src/hydraulics/buildSnapshots.js:129
+17	stmts=51	backend/src/recommendations/validateRecommendations.js:12
+18	stmts=50	frontend/src/utils/boilerProposalParse.ts:10
+19	stmts=47	backend/src/api/projectsRoutes.js:717
+20	stmts=47	backend/src/climate/snipClimate.js:267
+=== max-depth violations ===
+backend/src/auth/mapJwtPayload.js:24	Blocks are nested too deeply (5). Maximum allowed is 4.
+backend/src/hydraulics/pickPipe.js:369	Blocks are nested too deeply (5). Maximum allowed is 4.
+backend/src/recommendations/validateRecommendations.js:69	Blocks are nested too deeply (5). Maximum allowed is 4.
+backend/src/recommendations/validateRecommendations.js:77	Blocks are nested too deeply (5). Maximum allowed is 4.
+=== max-params violations ===
+backend/src/matching/boiler.js:157	Function 'pickSingleOrCascadeProposal' has too many parameters (5). Maximum allowed is 4.
+backend/src/matching/boiler.js:231	Function 'buildHotWaterScenarioRecommendations' has too many parameters (7). Maximum allowed is 4.
+backend/src/matching/boiler.js:326	Function 'buildProposalObject' has too many parameters (6). Maximum allowed is 4.
+backend/src/matching/internal/exploreRoomEmitterKind.js:147	Function 'sizeSectionalThermal' has too many parameters (5). Maximum allowed is 4.
+backend/src/matching/radiatorSizingHelpers.js:121	Function 'pickPanelSkuForRoom' has too many parameters (5). Maximum allowed is 4.
+backend/src/matching/warmFloor.js:109	Function 'pushUfhRecommendation' has too many parameters (6). Maximum allowed is 4.
+backend/src/recommendations/recommendationResolver.js:60	Function 'pushRecommendation' has too many parameters (5). Maximum allowed is 4.
+backend/src/report/buildFinancialBom.js:471	Function 'pushPipeLine' has too many parameters (7). Maximum allowed is 4.

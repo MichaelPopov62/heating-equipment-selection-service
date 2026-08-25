@@ -1,0 +1,102 @@
+
+===== backend/src: модулей=234, рёбер=528, средний fan-out=2.26 =====
+-- ТОП-15 по fan-in (кто чаще всего импортируется) --
+  31	utils/logger.js
+  23	utils/math.js
+  17	utils/isPlainObject.js
+  12	api/sendErrorEnvelope.js
+  11	../../shared/heatingMatchingSchemes.js
+  11	auth/projectsAuthConfig.js
+  10	api/errorCodes.js
+  10	models/Product.js
+  10	models/productSchemas.js
+  10	models/public.js
+  9	hydraulics/thermalLoadToFlow.js
+  9	utils/createAppError.js
+  7	auth/authorizationPolicy.js
+  7	recommendations/recommendationResolver.js
+  7	utils/mongoReferenceConnection.js
+-- ТОП-15 по fan-out (кто больше всего импортирует) --
+  27	api/projectsRoutes.js
+  20	api/validate.js
+  20	report/buildReport.js
+  18	matching/internal/pickRadiatorsCore.js
+  16	logic/warmFloorCalc.js
+  15	api/routes.js
+  12	api/adminRoutes.js
+  11	matching/boiler.js
+  11	matching/index.js
+  10	api/publicSharesRoutes.js
+  9	api/feedbackRoutes.js
+  9	projects/validateProjectImportBody.js
+  8	catalog/loadCatalog.js
+  8	catalog/validateCatalog.js
+  8	logic/heatlossByRooms.js
+
+===== frontend/src: модулей=372, рёбер=1075, средний fan-out=2.89 =====
+-- ТОП-15 по fan-in (кто чаще всего импортируется) --
+  33	types/envelope.ts
+  27	utils/jsonGuards.ts
+  26	types/hydraulics.ts
+  22	types/rooms.ts
+  19	routing/paths.ts
+  19	types/underfloorHeating.ts
+  18	types/calcApi.ts
+  18	types/hotWater.ts
+  18	types/surveyDraft.ts
+  17	surveySession/types.ts
+  17	utils/format.ts
+  15	query/queryKeys.ts
+  15	types/heatingMatching.ts
+  15	types/projectsApi.ts
+  14	types/ufhModePreset.ts
+-- ТОП-15 по fan-out (кто больше всего импортирует) --
+  34	AppSurveyContent.tsx
+  22	SurveyAppRoot.tsx
+  21	components/RecommendationsBlock/RecommendationsBlock.tsx
+  20	utils/migrateSurveyDraft.ts
+  16	hooks/useCalcReport.ts
+  16	routing/AppRouter.tsx
+  15	services/buildCalcRequestPayload.ts
+  14	hooks/useSurveyProject.ts
+  14	utils/buildSurveyDraft.ts
+  14	utils/buildTechnicalPrintHtml.ts
+  13	StartAppRoot.tsx
+  13	components/RoomsForm/RoomAccordionItem.tsx
+  13	components/WaterHeaterForm/WaterHeaterForm.tsx
+  13	surveySession/types.ts
+  13	types/recommendationsBlock.ts
+
+===== shared: модулей=25, рёбер=5, средний fan-out=0.20 =====
+-- ТОП-15 по fan-in (кто чаще всего импортируется) --
+  2	heatingMatchingSchemes.js
+  1	heatingMatchingSchemes.d.ts
+  1	heatingThermalRegimePresets.d.ts
+  1	heatingThermalRegimeRecommendations.js
+  0	heatingThermalRegimePresets.js
+  0	heatingThermalRegimeRecommendations.d.ts
+  0	radiatorConnection.d.ts
+  0	radiatorConnection.js
+  0	radiatorEmitterPreference.d.ts
+  0	radiatorEmitterPreference.js
+  0	roomDesignAirTemp.d.ts
+  0	roomDesignAirTemp.js
+  0	roomTypeNormalization.d.ts
+  0	roomTypeNormalization.js
+  0	surveyMutationKinds.ts
+-- ТОП-15 по fan-out (кто больше всего импортирует) --
+  1	heatingThermalRegimePresets.js
+  1	heatingThermalRegimeRecommendations.d.ts
+  1	heatingThermalRegimeRecommendations.js
+  1	waterHeaterFormContract.d.ts
+  1	waterHeaterFormContract.js
+  0	heatingMatchingSchemes.d.ts
+  0	heatingMatchingSchemes.js
+  0	heatingThermalRegimePresets.d.ts
+  0	radiatorConnection.d.ts
+  0	radiatorConnection.js
+  0	radiatorEmitterPreference.d.ts
+  0	radiatorEmitterPreference.js
+  0	roomDesignAirTemp.d.ts
+  0	roomDesignAirTemp.js
+  0	roomTypeNormalization.d.ts

@@ -1,0 +1,22 @@
+# executable: /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+# chrome-процессов ДО: 1
+# свободная физпамять ДО: 1829 МБ
+
+# launch: 441 мс
+# chrome-процессов ВО ВРЕМЯ: 10
+| pid | RSS МБ | процесс |
+|---|---|---|
+| 45006 | 208 | /Applications/Google Chrome.app/Contents/MacOS/Google Chrome |
+| 45016 | 171 | /Applications/Google Chrome.app/Contents/Frameworks/Google C |
+| 45017 | 142 | /Applications/Google Chrome.app/Contents/Frameworks/Google C |
+| 45012 | 134 | /Applications/Google Chrome.app/Contents/Frameworks/Google C |
+| 45018 | 115 | /Applications/Google Chrome.app/Contents/Frameworks/Google C |
+| 45019 | 96 | /Applications/Google Chrome.app/Contents/Frameworks/Google C |
+| 45013 | 96 | /Applications/Google Chrome.app/Contents/Frameworks/Google C |
+| 45014 | 79 | /Applications/Google Chrome.app/Contents/Frameworks/Google C |
+| 45008 | 10 | /Applications/Google Chrome.app/Contents/Frameworks/Google C |
+| 1993 | 8 | /Applications/Visual Studio Code.app/Contents/Frameworks/Ele |
+
+# (1) сумма ps RSS всех chrome-процессов: 1059 МБ (ЗАВЫШЕНО: общие страницы считаются многократно)
+# (2) дельта свободной физпамяти системы: 560 МБ — реальная цена одного headless Chromium
+# свободная физпамять ПОСЛЕ close(): 1761 МБ, chrome-процессов 1

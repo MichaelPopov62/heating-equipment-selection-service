@@ -1,0 +1,13 @@
+shared/heatingMatchingSchemes.js  backend=13  frontend/e2e=1
+shared/heatingThermalRegimePresets.js  backend=1  frontend/e2e=1
+shared/heatingThermalRegimeRecommendations.js  backend=1  frontend/e2e=1
+shared/radiatorConnection.js  backend=3  frontend/e2e=1
+shared/radiatorEmitterPreference.js  backend=3  frontend/e2e=1
+shared/roomDesignAirTemp.js  backend=5  frontend/e2e=0
+shared/roomTypeNormalization.js  backend=3  frontend/e2e=2
+shared/surveyMutationKinds.ts  backend=0  frontend/e2e=0
+shared/ufhCircuitPresets.js  backend=2  frontend/e2e=0
+shared/ufhDistributionPresets.js  backend=3  frontend/e2e=2
+shared/ufhModePresetIds.js  backend=6  frontend/e2e=0
+shared/ufhTerminalControl.js  backend=1  frontend/e2e=0
+shared/waterHeaterFormContract.js  backend=1  frontend/e2e=2

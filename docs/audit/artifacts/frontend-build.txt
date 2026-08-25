@@ -1,0 +1,73 @@
+### CMD: npm run build --prefix frontend
+
+> frontend@1.0.0 prebuild
+> node scripts/generateSeoStatic.mjs
+
+generateSeoStatic: https://heatcalc-mp62.vercel.app
+  → /Users/dmytropopov/Documents/projects/heating-equipment-selection-service/frontend/public/robots.txt
+  → /Users/dmytropopov/Documents/projects/heating-equipment-selection-service/frontend/public/sitemap.xml
+  → /Users/dmytropopov/Documents/projects/heating-equipment-selection-service/frontend/public/llms.txt
+
+> frontend@1.0.0 build
+> npm run typecheck && vite build
+
+
+> frontend@1.0.0 typecheck
+> tsc -b --pretty
+
+vite v8.2.0 building client environment for production...
+[2Ktransforming...✓ 6688 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                         8.00 kB │ gzip:  2.60 kB
+dist/assets/ClerkProviderWithRouter-Bi0QZjx8.css        0.16 kB │ gzip:  0.13 kB
+dist/assets/StaticPageLayout-D_pHLqu8.css               1.04 kB │ gzip:  0.42 kB
+dist/assets/ProjectsDialog-B2newYdd.css                 1.19 kB │ gzip:  0.56 kB
+dist/assets/FinancialSummaryTable-Dr5NATOA.css          1.31 kB │ gzip:  0.48 kB
+dist/assets/DevPanel-BDnYewVD.css                       1.45 kB │ gzip:  0.66 kB
+dist/assets/useAuthRedirectAfterClerk-qiMQM05J.css      1.74 kB │ gzip:  0.72 kB
+dist/assets/SharePresentationPage-CY9pnRfG.css          2.80 kB │ gzip:  1.04 kB
+dist/assets/ProjectsPage-DL6MCu1z.css                   3.66 kB │ gzip:  1.04 kB
+dist/assets/AdminFeedbackPage-6V04Vu-q.css              4.49 kB │ gzip:  1.43 kB
+dist/assets/index-xeYZRkug.css                         29.29 kB │ gzip:  5.98 kB
+dist/assets/AppSurveyContent-DC9dKxgo.css              43.64 kB │ gzip:  7.21 kB
+dist/assets/authContext-DekPL9nO.js                     0.14 kB │ gzip:  0.14 kB
+dist/assets/useAuth-C32NQU_5.js                         0.27 kB │ gzip:  0.22 kB
+dist/assets/FaqPage-C3Y9ISJg.js                         0.41 kB │ gzip:  0.27 kB
+dist/assets/DocsPage-DqtEpnWh.js                        0.45 kB │ gzip:  0.28 kB
+dist/assets/LegalPage-BcGJy-gh.js                       0.47 kB │ gzip:  0.29 kB
+dist/assets/downloadBlobFile-edIvCj2A.js                0.48 kB │ gzip:  0.35 kB
+dist/assets/apiUrl-COBrBCry.js                          0.48 kB │ gzip:  0.27 kB
+dist/assets/rolldown-runtime-CbXtAM7H.js                0.58 kB │ gzip:  0.36 kB
+dist/assets/projectsAuthToken-TbWmMQYL.js               0.59 kB │ gzip:  0.34 kB
+dist/assets/authConfig-DVBMvXva.js                      0.78 kB │ gzip:  0.39 kB
+dist/assets/SignUpPage-CUXa9Uir.js                      0.86 kB │ gzip:  0.46 kB
+dist/assets/StaticPageLayout-BE2zJzHo.js                1.05 kB │ gzip:  0.53 kB
+dist/assets/ClerkAuthProviderInner-SoqIk4YW.js          1.24 kB │ gzip:  0.73 kB
+dist/assets/useAuthRedirectAfterClerk-Clobv4By.js       1.31 kB │ gzip:  0.68 kB
+dist/assets/LoginPage-oyKcOVY8.js                       1.68 kB │ gzip:  0.78 kB
+dist/assets/parseCommercialBomFromReport-ByU3qmo0.js    1.75 kB │ gzip:  0.87 kB
+dist/assets/ProjectsDialog-BGmMAAuk.js                  2.66 kB │ gzip:  1.11 kB
+dist/assets/DevPanel-BnJBUQQB.js                        3.11 kB │ gzip:  1.30 kB
+dist/assets/ProjectsPage-BWSK7Jq5.js                    7.48 kB │ gzip:  2.61 kB
+dist/assets/ClerkProviderWithRouter-DZnbYfAS.js         7.61 kB │ gzip:  2.65 kB
+dist/assets/AdminFeedbackPage-B3TeoiMx.js              11.47 kB │ gzip:  4.04 kB
+dist/assets/useProjectsListQuery-P3h44NvD.js           13.78 kB │ gzip:  4.46 kB
+dist/assets/SharePresentationPage-BwwfmSVg.js          15.43 kB │ gzip:  5.63 kB
+dist/assets/SurveyAppRoot-DL3PI29n.js                  16.18 kB │ gzip:  5.61 kB
+dist/assets/query-9RKx2Yf_.js                          30.57 kB │ gzip:  9.42 kB
+dist/assets/FinancialSummaryTable-DHGVUAsC.js          30.70 kB │ gzip:  9.03 kB
+dist/assets/router-DU5KwnJ3.js                         37.22 kB │ gzip: 13.46 kB
+dist/assets/index-BQOdm0vg.js                         119.57 kB │ gzip: 36.46 kB
+dist/assets/clerk-CLsCNl1d.js                         171.39 kB │ gzip: 44.76 kB
+dist/assets/react-dom-Q8isyREZ.js                     178.24 kB │ gzip: 56.31 kB
+dist/assets/AppSurveyContent-CWBOL8H0.js              218.97 kB │ gzip: 50.11 kB
+
+✓ built in 638ms
+
+> frontend@1.0.0 postbuild
+> node scripts/prepareVercelBuildOutput.mjs
+
+prepareVercelBuildOutput: /Users/dmytropopov/Documents/projects/heating-equipment-selection-service/frontend/dist → /Users/dmytropopov/Documents/projects/heating-equipment-selection-service/frontend/build
+npm run build --prefix frontend 2>&1  5.44s user 0.72s system 187% cpu 3.280 total
+EXIT=0

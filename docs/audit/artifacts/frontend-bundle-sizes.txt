@@ -1,0 +1,55 @@
+файл	raw	gzip	brotli
+assets/AppSurveyContent-CWBOL8H0.js	218973	49645	40335
+assets/react-dom-Q8isyREZ.js	178244	55528	48260
+assets/clerk-CLsCNl1d.js	171392	44376	39045
+assets/index-BQOdm0vg.js	119570	36025	30487
+assets/AppSurveyContent-DC9dKxgo.css	43646	7143	6181
+assets/router-DU5KwnJ3.js	37228	13352	12011
+assets/FinancialSummaryTable-DHGVUAsC.js	30706	8893	7990
+assets/query-9RKx2Yf_.js	30573	9328	8496
+assets/index-xeYZRkug.css	29290	5928	5260
+assets/SurveyAppRoot-DL3PI29n.js	16182	5557	4945
+assets/SharePresentationPage-BwwfmSVg.js	15435	5579	4885
+assets/useProjectsListQuery-P3h44NvD.js	13780	4414	3854
+assets/AdminFeedbackPage-B3TeoiMx.js	11475	4009	3588
+index.html	8003	2564	2091
+assets/ClerkProviderWithRouter-DZnbYfAS.js	7618	2623	2186
+assets/ProjectsPage-BWSK7Jq5.js	7483	2564	2246
+assets/AdminFeedbackPage-6V04Vu-q.css	4499	1427	1197
+assets/ProjectsPage-DL6MCu1z.css	3661	1048	846
+assets/DevPanel-BnJBUQQB.js	3114	1278	1085
+assets/SharePresentationPage-CY9pnRfG.css	2808	1040	866
+assets/ProjectsDialog-BGmMAAuk.js	2667	1091	924
+assets/parseCommercialBomFromReport-ByU3qmo0.js	1757	865	782
+assets/useAuthRedirectAfterClerk-qiMQM05J.css	1748	720	571
+assets/LoginPage-oyKcOVY8.js	1680	775	717
+assets/DevPanel-BDnYewVD.css	1456	664	549
+assets/useAuthRedirectAfterClerk-Clobv4By.js	1315	680	604
+assets/FinancialSummaryTable-Dr5NATOA.css	1313	482	390
+assets/ClerkAuthProviderInner-SoqIk4YW.js	1246	726	654
+assets/ProjectsDialog-B2newYdd.css	1194	564	438
+assets/StaticPageLayout-BE2zJzHo.js	1050	529	454
+assets/StaticPageLayout-D_pHLqu8.css	1040	426	325
+assets/SignUpPage-CUXa9Uir.js	869	462	411
+assets/authConfig-DVBMvXva.js	783	393	355
+assets/projectsAuthToken-TbWmMQYL.js	594	340	294
+assets/rolldown-runtime-CbXtAM7H.js	589	368	326
+assets/apiUrl-COBrBCry.js	482	274	239
+assets/downloadBlobFile-edIvCj2A.js	480	344	274
+assets/LegalPage-BcGJy-gh.js	472	293	240
+assets/DocsPage-DqtEpnWh.js	453	281	233
+assets/FaqPage-C3Y9ISJg.js	416	273	221
+assets/useAuth-C32NQU_5.js	277	221	175
+assets/ClerkProviderWithRouter-Bi0QZjx8.css	166	136	104
+assets/authContext-DekPL9nO.js	145	140	114
+
+ИТОГО JS:	raw=877048	gzip=251226	brotli=216430
+ИТОГО CSS:	raw=90821	gzip=19578	brotli=16727
+ИТОГО JS+CSS:	raw=967869	gzip=270804	brotli=233157
+
+Стартовый (entry) набор — index/react-dom/rolldown-runtime:
+  assets/react-dom-Q8isyREZ.js	raw=178244	gzip=55528	brotli=48260
+  assets/index-BQOdm0vg.js	raw=119570	gzip=36025	brotli=30487
+  assets/index-xeYZRkug.css	raw=29290	gzip=5928	brotli=5260
+  assets/rolldown-runtime-CbXtAM7H.js	raw=589	gzip=368	brotli=326
+  СУММА: raw=327693 gzip=97849 brotli=84333

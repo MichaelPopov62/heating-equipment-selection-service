@@ -1,0 +1,66 @@
+### CMD: npm run verify --prefix backend  (первый прогон, без PDF_BROWSER_EXECUTABLE)
+OK — HTML заголовок
+OK — HTML основная позиция
+OK — HTML карточка Економічний
+OK — HTML карточка Ефективний
+OK — HTML итог
+OK — без technical по умолчанию
+OK — PDF pro contact email
+OK — PDF publisher-contact block
+OK — с technical
+OK — technical тепловтрати
+OK — без commercial → PDF_COMMERCIAL_REQUIRED
+Error: Не вдалося сформувати PDF: Failed to launch the browser process:  Code: null
+
+stderr:
+dlopen /Users/dmytropopov/.cache/puppeteer/chrome/mac_arm-140.0.7339.82/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/../Frameworks/Google Chrome for Testing Framework.framework/Versions/140.0.7339.82/Google Chrome for Testing Framework: dlopen(/Users/dmytropopov/.cache/puppeteer/chrome/mac_arm-140.0.7339.82/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/../Frameworks/Google Chrome for Testing Framework.framework/Versions/140.0.7339.82/Google Chrome for Testing Framework, 0x0105): tried: '/Users/dmytropopov/.cache/puppeteer/chrome/mac_arm-140.0.7339.82/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/../Frameworks/Google Chrome for Testing Framework.framework/Versions/140.0.7339.82/Google Chrome for Testing Framework' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/dmytropopov/.cache/puppeteer/chrome/mac_arm-140.0.7339.82/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/../Frameworks/Google Chrome for Testing Framework.framework/Versions/140.0.7339.82/Google Chrome for Testing Framework' (no such file), '/Users/dmytropopov/.cache/puppeteer/chrome/mac_arm-140.0.7339.82/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/../Frameworks/Google Chrome for Testing Framework.framework/Versions/140.0.7339.82/Google Chrome for Testing Framework' (no such file).
+
+TROUBLESHOOTING: https://pptr.dev/troubleshooting
+
+    at renderPdfFromHtml (file:///Users/dmytropopov/Documents/projects/heating-equipment-selection-service/backend/src/projects/renderPdfFromHtml.js:111:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async file:///Users/dmytropopov/Documents/projects/heating-equipment-selection-service/backend/scripts/verifyProjectPdf.js:127:15 {
+  statusCode: 503,
+  code: 'PDF_RENDER_FAILED'
+}
+FAIL — PDF render error: PDF_RENDER_FAILED
+
+verify:project-pdf FAILED (1)
+npm run verify --prefix backend 2>&1  9.87s user 1.63s system 117% cpu 9.787 total
+tail -40  0.00s user 0.00s system 0% cpu 9.786 total
+EXIT=0
+
+===========================================================
+### CMD: PDF_BROWSER_EXECUTABLE='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' npm run verify --prefix backend
+}
+[INFO] [2026-08-23T20:31:22.250Z] matching.unibox.start { catalogCount: 1, loopDemands: 1, surveyInsideC: 20 }
+[INFO] [2026-08-23T20:31:22.250Z] matching.unibox.done {
+  byLoop: 1,
+  selected: 1,
+  warnings: 0,
+  airSamples: [
+    {
+      roomId: 'r1',
+      roomType: 'гостиная',
+      roomAirTempC: 20,
+      roomAirTempSource: 'survey',
+      selectedId: 'UB-BAL'
+    }
+  ]
+}
+verify:unibox-matching OK
+
+> heating-equipment-selection-service@1.0.0 verify:room-design-air-temp
+> node scripts/verifyRoomDesignAirTemp.js
+
+verify:room-design-air-temp OK
+
+> heating-equipment-selection-service@1.0.0 verify:financial-bom
+> node scripts/verifyFinancialBom.js
+
+OK: collapse identical pipe lines
+OK: buildFinancialBom rates, main line, mixing note, collapse
+OK: empty matching → no works lines
+verify:financial-bom OK
+npm run verify --prefix backend 2>&1  12.86s user 2.78s system 105% cpu 14.818 total
+tail -30  0.00s user 0.00s system 0% cpu 14.818 total

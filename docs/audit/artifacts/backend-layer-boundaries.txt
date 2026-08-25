@@ -1,0 +1,77 @@
+Домены с public.js-барьером: api, catalog, hydraulics, matching, models, reference, report
+
+Кросс-доменные импорты В ОБХОД public.js: 36
+
+### . -> api  (1)
+   index.js  →  api/errorCodes.js
+
+### api -> reference  (1)
+   api/validate.js  →  reference/assertCalcRuntimeContext.js
+
+### auth -> api  (3)
+   auth/authErrors.js  →  api/sendErrorEnvelope.js
+   auth/requireAuth.js  →  api/sendErrorEnvelope.js
+   auth/requireRole.js  →  api/sendErrorEnvelope.js
+
+### dhw -> models  (2)
+   dhw/loadAppliances.js  →  models/Appliance.js
+   dhw/loadWaterNorms.js  →  models/WaterNorms.js
+
+### dhw -> reference  (2)
+   dhw/loadAppliances.js  →  reference/loadReferenceCollection.js
+   dhw/loadWaterNorms.js  →  reference/loadReferenceCollection.js
+
+### logic -> catalog  (1)
+   logic/ufhLoopHydraulics.types.d.ts  →  catalog/types.d.ts
+
+### logic -> hydraulics  (6)
+   logic/ufhHydraulicsCircuit.js  →  hydraulics/thermalLoadToFlow.js
+   logic/ufhLoopGeometry.js  →  hydraulics/thermalLoadToFlow.js
+   logic/ufhLoopHydraulics.js  →  hydraulics/pickPipe.js
+   logic/ufhLoopHydraulics.js  →  hydraulics/pipeHydraulics.js
+   logic/ufhLoopHydraulics.js  →  hydraulics/thermalLoadToFlow.js
+   logic/ufhLoopHydraulics.types.d.ts  →  hydraulics/types.d.ts
+
+### matching -> catalog  (3)
+   matching/boiler.js  →  catalog/matchingSortPools.js
+   matching/waterHeater.js  →  catalog/comparators.js
+   matching/waterHeater.js  →  catalog/matchingSortPools.js
+
+### matching -> hydraulics  (2)
+   matching/internal/pickRadiatorsCore.js  →  hydraulics/resolveFlowDeltaTK.js
+   matching/internal/pickRadiatorsCore.js  →  hydraulics/thermalLoadToFlow.js
+
+### matching -> reference  (2)
+   matching/boiler.js  →  reference/assertCalcRuntimeContext.js
+   matching/index.js  →  reference/assertCalcRuntimeContext.js
+
+### projects -> api  (4)
+   projects/projectAccess.js  →  api/errorCodes.js
+   projects/validateProjectBody.js  →  api/errorCodes.js
+   projects/validateProjectImportBody.js  →  api/errorCodes.js
+   projects/validateProjectSurveyShape.js  →  api/errorCodes.js
+
+### recommendations -> models  (1)
+   recommendations/loadRecommendations.js  →  models/Recommendation.js
+
+### recommendations -> reference  (1)
+   recommendations/loadRecommendations.js  →  reference/loadReferenceCollection.js
+
+### report -> matching  (1)
+   report/buildReport.js  →  matching/warmFloor.js
+
+### report -> reference  (1)
+   report/buildReport.js  →  reference/assertCalcRuntimeContext.js
+
+### types -> catalog  (2)
+   types/boiler-types.d.ts  →  catalog/types.d.ts
+   types/shared-types.d.ts  →  catalog/types.d.ts
+
+### types -> hydraulics  (1)
+   types/shared-types.d.ts  →  hydraulics/types.d.ts
+
+### ufh -> models  (1)
+   ufh/loadUnderfloorHeatingPresets.js  →  models/UnderfloorHeatingPreset.js
+
+### ufh -> reference  (1)
+   ufh/loadUnderfloorHeatingPresets.js  →  reference/loadReferenceCollection.js

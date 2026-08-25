@@ -1,0 +1,56 @@
+### CMD: npx -y madge --orphans --extensions js,ts,tsx backend/src
+- Finding files
+Processed 234 files (313ms) 
+
+index.js
+logic/ufhLoopHydraulics.types.d.ts
+models/Boiler.js
+models/BoilerManifold.js
+models/IndirectWaterHeater.js
+models/Manifold.js
+models/Pipe.js
+models/Pump.js
+models/Radiator.js
+models/Unibox.js
+models/WaterHeater.js
+projects/migrateLegacyProjectOwnerId.js
+types/express-augment.d.ts
+
+EXIT=0
+
+### CMD: npx -y madge --orphans --extensions ts,tsx frontend/src
+- Finding files
+Processed 372 files (435ms) (1 warning)
+
+main.tsx
+vite-env.d.ts
+
+EXIT=0
+
+### CMD: npx -y madge --orphans --extensions js,ts shared
+- Finding files
+Processed 25 files (180ms) 
+
+heatingThermalRegimePresets.js
+heatingThermalRegimeRecommendations.d.ts
+radiatorConnection.d.ts
+radiatorConnection.js
+radiatorEmitterPreference.d.ts
+radiatorEmitterPreference.js
+roomDesignAirTemp.d.ts
+roomDesignAirTemp.js
+roomTypeNormalization.d.ts
+roomTypeNormalization.js
+surveyMutationKinds.ts
+ufhCircuitPresets.d.ts
+ufhCircuitPresets.js
+ufhDistributionPresets.d.ts
+ufhDistributionPresets.js
+ufhModePresetIds.d.ts
+ufhModePresetIds.js
+ufhTerminalControl.d.ts
+ufhTerminalControl.js
+waterHeaterFormContract.d.ts
+waterHeaterFormContract.js
+
+EXIT=0

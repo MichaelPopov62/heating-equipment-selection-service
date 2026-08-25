@@ -1,0 +1,20 @@
+#8 exporting to image
+#8 exporting layers done
+#8 exporting manifest sha256:c70c4989c09836a7be1034c220c08158e2eacf29e444b9da89f4837e6af3e437 done
+#8 exporting config sha256:6e34cdf7e58f19571a8581cda5e5e98cde8f6ed7df36dfb6688aa6cec0123a7e done
+#8 exporting attestation manifest sha256:936aee123bdecb5b43c814841694188c84a0a30c1496c0a1c57690ce44f30e58 done
+#8 exporting manifest list sha256:93386ff388fdba1b9f2b12958141f7efac604102980e074e46f2bc5dd0384d1a done
+#8 naming to docker.io/library/heatcalc-a4-pdf:latest done
+#8 unpacking to docker.io/library/heatcalc-a4-pdf:latest done
+#8 DONE 0.0s
+# cgroup memory.max = 512 МБ
+# память cgroup до запуска Chromium: 25 МБ
+
+## 2 параллельных рендеров (без семафора — как если бы PDF_MAX_CONCURRENT=2)
+| # | итог | всего мс |
+|---|---|---|
+| 1 | OK 417 КБ | 2260 |
+| 2 | OK 417 КБ | 2238 |
+# успешно 2/2
+
+# ПИК памяти cgroup: 509 МБ из 512 МБ доступных

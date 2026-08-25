@@ -1,0 +1,80 @@
+=== Распределение файлов по числу строк (только git-tracked .js/.mjs/.ts/.tsx/.css) ===
+пакет	всего	>1000	500-1000	200-499	<200	сумма строк	медиана	макс
+backend/src	222	4	9	39	170	34435	83	1703
+backend/scripts	68	0	6	14	48	13311	154	728
+frontend/src	365	1	5	26	333	35818	65	1030
+frontend/scripts	12	0	0	0	12	1233	106	173
+shared	25	0	0	0	25	1147	34	118
+e2e	7	0	0	3	4	1372	190	366
+scripts (root)	6	0	0	2	4	1115	179	493
+components (openapi)	0
+docs	0
+
+=== ТОП-40 файлов по строкам ===
+1	1703	backend/src/types/shared-types.d.ts
+2	1569	backend/src/catalog/validateCatalog.js
+3	1165	backend/src/matching/boiler.js
+4	1030	frontend/src/components/RoomsForm/RoomAccordionItem.tsx
+5	1003	backend/src/logic/ufhLoopHydraulics.js
+6	950	backend/src/matching/internal/pickRadiatorsCore.js
+7	881	backend/src/api/projectsRoutes.js
+8	786	backend/src/api/validate.js
+9	772	backend/src/report/buildReport.js
+10	763	frontend/src/AppSurveyContent.tsx
+11	728	backend/scripts/verifyUniboxMatching.js
+12	726	backend/src/report/buildFinancialBom.js
+13	712	backend/scripts/verifyHydraulicsPipeline.js
+14	673	backend/scripts/verifyUfhPresets.js
+15	653	backend/scripts/fuzz-calc.ts
+16	612	backend/scripts/verifyManifoldMatching.js
+17	595	backend/src/hydraulics/types.d.ts
+18	565	backend/scripts/verifyRadiatorSections.js
+19	562	backend/src/matching/manifold.js
+20	560	backend/src/dhw/validateAppliances.js
+21	560	frontend/src/components/UnderfloorHeatingReport/UnderfloorHeatingReportView.tsx
+22	550	frontend/src/hooks/useSurveyProject.ts
+23	538	frontend/src/components/ObjectMetaForm/ObjectMetaForm.tsx
+24	509	frontend/src/components/CatalogEquipmentReference/CatalogEquipmentReference.tsx
+25	508	backend/src/matching/unibox.js
+26	493	scripts/verifyBackendDocs.mjs
+27	486	frontend/src/components/Header/Header.module.css
+28	481	backend/src/matching/internal/sizeForcedRoomEmitter.js
+29	479	backend/scripts/seed.js
+30	463	frontend/src/components/HydraulicsReport/HydraulicsReportView.tsx
+31	430	backend/src/logic/envelopePresets.js
+32	403	backend/scripts/verifyFinancialBom.js
+33	402	backend/scripts/verifyRadiatorEmitterKind.js
+34	400	backend/src/hydraulics/pickPipe.js
+35	398	backend/src/logic/warmFloorCalc.js
+36	388	backend/src/matching/warmFloor.js
+37	385	frontend/src/utils/parsers/parseUnderfloorHeatingFromReport.ts
+38	381	backend/scripts/verifyBuiltinBoilerPump.js
+39	373	backend/src/catalog/loadCatalog.js
+40	370	backend/src/hydraulics/buildSnapshots.js
+
+=== Файлы >500 строк по пакетам (полный список) ===
+1703	backend/src/types/shared-types.d.ts
+1569	backend/src/catalog/validateCatalog.js
+1165	backend/src/matching/boiler.js
+1030	frontend/src/components/RoomsForm/RoomAccordionItem.tsx
+1003	backend/src/logic/ufhLoopHydraulics.js
+950	backend/src/matching/internal/pickRadiatorsCore.js
+881	backend/src/api/projectsRoutes.js
+786	backend/src/api/validate.js
+772	backend/src/report/buildReport.js
+763	frontend/src/AppSurveyContent.tsx
+728	backend/scripts/verifyUniboxMatching.js
+726	backend/src/report/buildFinancialBom.js
+712	backend/scripts/verifyHydraulicsPipeline.js
+673	backend/scripts/verifyUfhPresets.js
+653	backend/scripts/fuzz-calc.ts
+612	backend/scripts/verifyManifoldMatching.js
+595	backend/src/hydraulics/types.d.ts
+565	backend/scripts/verifyRadiatorSections.js
+562	backend/src/matching/manifold.js
+560	backend/src/dhw/validateAppliances.js
+560	frontend/src/components/UnderfloorHeatingReport/UnderfloorHeatingReportView.tsx
+550	frontend/src/hooks/useSurveyProject.ts
+538	frontend/src/components/ObjectMetaForm/ObjectMetaForm.tsx
+509	frontend/src/components/CatalogEquipmentReference/CatalogEquipmentReference.tsx
+508	backend/src/matching/unibox.js
